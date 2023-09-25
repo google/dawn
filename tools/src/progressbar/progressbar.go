@@ -79,7 +79,7 @@ type ProgressBar struct {
 // New returns a new ProgressBar that streams output to out.
 // Call ProgressBar.Stop() once finished.
 func New(out io.Writer, cfg *Config) *ProgressBar {
-	p := &ProgressBar{out: out, c: make(chan Status)}
+	p := &ProgressBar{out: out, c: make(chan Status, 64)}
 	if cfg != nil {
 		p.Config = *cfg
 	} else {

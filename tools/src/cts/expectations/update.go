@@ -17,12 +17,15 @@ package expectations
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"strings"
-	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/progressbar"
+	"github.com/mattn/go-isatty"
 )
 
 // Update performs an incremental update on the expectations using the provided
@@ -65,12 +68,19 @@ func (c *Content) Update(results result.List, testlist []query.Query) (Diagnosti
 	// This ensures that skipped results are not included in reduced trees.
 	results = c.appendConsumedResultsForSkippedTests(results, testlist, variants)
 
+	var pb *progressbar.ProgressBar
+	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stderr.Fd()) {
+		pb = progressbar.New(os.Stdout, nil)
+		defer pb.Stop()
+	}
+
 	u := updater{
 		in:       *c,
 		out:      Content{},
 		qt:       newQueryTree(results),
 		variants: variants,
 		tagSets:  tagSets,
+		pb:       pb,
 	}
 
 	if err := u.preserveRetryOnFailures(); err != nil {
@@ -92,8 +102,9 @@ type updater struct {
 	out      Content   // newly built expectations Content
 	qt       queryTree // the query tree
 	variants []container.Set[string]
-	diags    []Diagnostic  // diagnostics raised during update
-	tagSets  []result.Tags // reverse-ordered tag-sets of 'in'
+	diags    []Diagnostic             // diagnostics raised during update
+	tagSets  []result.Tags            // reverse-ordered tag-sets of 'in'
+	pb       *progressbar.ProgressBar // Progress bar, may be nil
 }
 
 // Returns 'results' with additional 'consumed' results for tests that have
@@ -189,6 +200,8 @@ type queryTree struct {
 
 // newQueryTree builds the queryTree from the list of results.
 func newQueryTree(results result.List) queryTree {
+	log.Println("building query tree...")
+
 	// Build a map of query to result indices
 	queryToIndices := map[query.Query][]int{}
 	for i, r := range results {
@@ -302,23 +315,72 @@ func (u *updater) preserveRetryOnFailures() error {
 	return nil
 }
 
+type Progress struct {
+	totalExpectations  int
+	currentExpectation int
+}
+
 // build is the updater top-level function.
 // build first appends to u.out all chunks from 'u.in' with expectations updated
 // using the new results, and then appends any new expectations to u.out.
 func (u *updater) build() error {
-	// Update all the existing chunks
-	for _, in := range u.in.Chunks {
-		out := u.chunk(in)
+	progress := Progress{}
 
-		// If all chunk had expectations, but now they've gone, remove the chunk
-		if len(in.Expectations) > 0 && len(out.Expectations) == 0 {
-			continue
+	immutableTokens := []string{
+		"KEEP",
+		"BEGIN TAG HEADER",
+		"Last rolled",
+	}
+
+	// Bin the chunks into those that contain any of the strings in
+	// immutableTokens in the comments and those that do not have these strings.
+	immutableChunks, mutableChunks := []Chunk{}, []Chunk{}
+	for _, chunk := range u.in.Chunks {
+		// Does the chunk comment contain 'KEEP' or 'BEGIN TAG HEADER' ?
+		keep := false
+
+	comments:
+		for _, l := range chunk.Comments {
+			for _, s := range immutableTokens {
+				if strings.Contains(l, s) {
+					keep = true
+					break comments
+				}
+			}
 		}
-		if out.IsBlankLine() {
-			u.out.MaybeAddBlankLine()
-			continue
+
+		if keep {
+			immutableChunks = append(immutableChunks, chunk)
+		} else {
+			mutableChunks = append(mutableChunks, chunk)
 		}
-		u.out.Chunks = append(u.out.Chunks, out)
+
+		progress.totalExpectations += len(chunk.Expectations)
+	}
+
+	log.Println("updating expectation chunks...")
+
+	// Update all the existing chunks in two passes - those that are immutable
+	// then those that are mutable. We do this because the former can't be
+	// altered and may declare expectations that may collide with later
+	// expectations.
+	for _, group := range []struct {
+		chunks      []Chunk
+		isImmutable bool
+	}{
+		{immutableChunks, true},
+		{mutableChunks, false},
+	} {
+		for _, in := range group.chunks {
+			out := u.chunk(in, group.isImmutable, &progress)
+
+			// If all chunk had expectations, but now they've gone, remove the chunk
+			if len(in.Expectations) > 0 && len(out.Expectations) == 0 {
+				continue
+			}
+
+			u.out.Chunks = append(u.out.Chunks, out)
+		}
 	}
 
 	// Emit new expectations (flaky, failing)
@@ -330,25 +392,18 @@ func (u *updater) build() error {
 }
 
 // chunk returns a new Chunk, based on 'in', with the expectations updated.
-func (u *updater) chunk(in Chunk) Chunk {
+// isImmutable is true if the chunk is labelled with 'KEEP' and can't be changed.
+func (u *updater) chunk(in Chunk, isImmutable bool, progress *Progress) Chunk {
 	if len(in.Expectations) == 0 {
 		return in // Just a comment / blank line
 	}
 
 	// Skip over any untriaged failures / flake chunks.
 	// We'll just rebuild them at the end.
-	if len(in.Comments) > 0 {
-		switch in.Comments[0] {
-		case newFailuresComment, newFlakesComment:
+	for _, line := range in.Comments {
+		if strings.HasPrefix(line, newFailuresComment) ||
+			strings.HasPrefix(line, newFlakesComment) {
 			return Chunk{}
-		}
-	}
-
-	keep := false // Does the chunk comment contain 'KEEP' ?
-	for _, l := range in.Comments {
-		if strings.Contains(l, "KEEP") {
-			keep = true
-			break
 		}
 	}
 
@@ -358,7 +413,14 @@ func (u *updater) chunk(in Chunk) Chunk {
 
 	// Build the new chunk's expectations
 	for _, exIn := range in.Expectations {
-		exOut := u.expectation(exIn, keep)
+		if u.pb != nil {
+			u.pb.Update(progressbar.Status{Total: progress.totalExpectations, Segments: []progressbar.Segment{
+				{Count: 1 + progress.currentExpectation},
+			}})
+			progress.currentExpectation++
+		}
+
+		exOut := u.expectation(exIn, isImmutable)
 		out.Expectations = append(out.Expectations, exOut...)
 	}
 
@@ -369,7 +431,7 @@ func (u *updater) chunk(in Chunk) Chunk {
 
 // expectation returns a new list of Expectations, based on the Expectation 'in',
 // using the new result data.
-func (u *updater) expectation(in Expectation, keep bool) []Expectation {
+func (u *updater) expectation(in Expectation, immutable bool) []Expectation {
 	// noResults is a helper for returning when the expectation has no test
 	// results.
 	noResults := func() []Expectation {
@@ -404,30 +466,13 @@ func (u *updater) expectation(in Expectation, keep bool) []Expectation {
 	// expectationsForRoot()
 	defer u.qt.markAsConsumed(q, in.Tags, in.Line)
 
-	if keep { // Expectation chunk was marked with 'KEEP'
+	if immutable { // Expectation chunk was marked with 'KEEP'
 		// Add a diagnostic if all tests of the expectation were 'Pass'
 		if s := results.Statuses(); len(s) == 1 && s.One() == result.Pass {
-			if ex := container.NewSet(in.Status...); len(ex) == 1 && ex.One() == string(result.Slow) {
-				// Expectation was 'Slow'. Give feedback on actual time taken.
-				var longest, average time.Duration
-				for _, r := range results {
-					if r.Duration > longest {
-						longest = r.Duration
-					}
-					average += r.Duration
-				}
-				if c := len(results); c > 1 {
-					average /= time.Duration(c)
-					u.diag(Note, in.Line, "longest test took %v (average %v)", longest, average)
-				} else {
-					u.diag(Note, in.Line, "test took %v", longest)
-				}
+			if c := len(results); c > 1 {
+				u.diag(Note, in.Line, "all %d tests now pass", len(results))
 			} else {
-				if c := len(results); c > 1 {
-					u.diag(Note, in.Line, "all %d tests now pass", len(results))
-				} else {
-					u.diag(Note, in.Line, "test now passes")
-				}
+				u.diag(Note, in.Line, "test now passes")
 			}
 		}
 		return []Expectation{in}
@@ -446,8 +491,15 @@ func (u *updater) addNewExpectations() error {
 	// • Take all the reduced-tree leaf nodes, and add these to 'roots'.
 	// Once we've collected all the roots, we'll use these to build the
 	// expectations across the reduced set of tags.
+	log.Println("determining new expectation roots...")
 	roots := query.Tree[bool]{}
-	for _, variant := range u.variants {
+	for i, variant := range u.variants {
+		if u.pb != nil {
+			u.pb.Update(progressbar.Status{Total: len(u.variants), Segments: []progressbar.Segment{
+				{Count: 1 + i},
+			}})
+		}
+
 		// Build a tree from the results matching the given variant.
 		tree, err := u.qt.results.FilterByVariant(variant).StatusTree()
 		if err != nil {
@@ -463,8 +515,15 @@ func (u *updater) addNewExpectations() error {
 	}
 
 	// Build all the expectations for each of the roots.
+	log.Println("building new expectations...")
+	rootsList := roots.List()
 	expectations := []Expectation{}
-	for _, root := range roots.List() {
+	for i, root := range rootsList {
+		if u.pb != nil {
+			u.pb.Update(progressbar.Status{Total: len(rootsList), Segments: []progressbar.Segment{
+				{Count: 1 + i},
+			}})
+		}
 		expectations = append(expectations, u.expectationsForRoot(
 			root.Query,            // Root query
 			0,                     // Line number
@@ -492,9 +551,12 @@ func (u *updater) addNewExpectations() error {
 		{failures, newFailuresComment},
 	} {
 		if len(group.results) > 0 {
-			u.out.MaybeAddBlankLine()
 			u.out.Chunks = append(u.out.Chunks, Chunk{
-				Comments:     []string{group.comment},
+				Comments: []string{
+					"################################################################################",
+					group.comment,
+					"################################################################################",
+				},
 				Expectations: group.results,
 			})
 		}
@@ -627,9 +689,9 @@ func (u *updater) cleanupTags(results result.List) result.List {
 // tree nodes with the same status.
 // treeReducer will collapse trees nodes if any of the following are true:
 //   - All child nodes have the same status
-//   - More than 75% of the child nodes have a non-pass status, and none of the
+//   - More than 50% of the child nodes have a non-pass status, and none of the
 //     children are consumed.
-//   - There are more than 20 child nodes with a non-pass status, and none of the
+//   - There are more than 10 child nodes with a non-pass status, and none of the
 //     children are consumed.
 func treeReducer(statuses []result.Status) *result.Status {
 	counts := map[result.Status]int{}
@@ -646,8 +708,8 @@ func treeReducer(statuses []result.Status) *result.Status {
 	highestNonPassStatus := result.Failure
 	for s, n := range counts {
 		if s != result.Pass {
-			if percent := (100 * n) / len(statuses); percent > 75 {
-				// Over 75% of all the children are of non-pass status s.
+			if percent := (100 * n) / len(statuses); percent > 50 {
+				// Over 50% of all the children are of non-pass status s.
 				return &s
 			}
 			if n > highestNonPassCount {
@@ -657,8 +719,8 @@ func treeReducer(statuses []result.Status) *result.Status {
 		}
 	}
 
-	if highestNonPassCount > 20 {
-		// Over 20 child node failed.
+	if highestNonPassCount > 10 {
+		// Over 10 child node failed.
 		return &highestNonPassStatus
 	}
 

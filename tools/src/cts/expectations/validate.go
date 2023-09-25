@@ -21,21 +21,9 @@ package expectations
 import (
 	"fmt"
 
-	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"github.com/google/go-cmp/cmp"
 )
-
-func (c Content) tagsCollide(a, b container.Set[string]) bool {
-	for _, set := range c.Tags.Sets {
-		aSet := a.Intersection(set.Tags)
-		bSet := b.Intersection(set.Tags)
-		if len(aSet) != 0 && len(bSet) != 0 && len(aSet.Intersection(bSet)) == 0 {
-			return false
-		}
-	}
-	return true
-}
 
 // Validate checks that the expectations do not contain errors
 func (c Content) Validate() Diagnostics {
@@ -60,7 +48,7 @@ func (c Content) Validate() Diagnostics {
 					})
 				}
 			}
-			glob, err := tree.Glob(query.Parse(ex.Query))
+			_, err := tree.Glob(query.Parse(ex.Query))
 			if err != nil {
 				out = append(out, Diagnostic{
 					Severity: Error,
@@ -68,18 +56,6 @@ func (c Content) Validate() Diagnostics {
 					Message:  err.Error(),
 				})
 				continue
-			}
-			for _, qd := range glob {
-				expectations := qd.Data
-				for _, other := range expectations {
-					if other.Line != ex.Line && c.tagsCollide(ex.Tags, other.Tags) {
-						out = append(out, Diagnostic{
-							Severity: Error,
-							Line:     ex.Line,
-							Message:  fmt.Sprintf("expectation collides with expectation on line %v", other.Line),
-						})
-					}
-				}
 			}
 		}
 	}

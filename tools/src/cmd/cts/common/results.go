@@ -126,7 +126,6 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 
 	// Obtain the patchset's results, kicking a build if there are no results
 	// already available.
-	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
 	builds, err := GetOrStartBuildsAndWait(ctx, cfg, *ps, bb, "", false)
 	if err != nil {
 		return nil, err
@@ -157,11 +156,13 @@ func CacheResults(
 		dir := fileutils.ExpandHome(cacheDir)
 		path := filepath.Join(dir, strconv.Itoa(ps.Change), fmt.Sprintf("ps-%v.txt", ps.Patchset))
 		if _, err := os.Stat(path); err == nil {
+			log.Printf("loading cached results from cl %v ps %v...", ps.Change, ps.Patchset)
 			return result.Load(path)
 		}
 		cachePath = path
 	}
 
+	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
 	results, err := GetResults(ctx, cfg, rdb, builds)
 	if err != nil {
 		return nil, err
@@ -239,10 +240,6 @@ func GetResults(
 						return err
 					}
 				}
-			}
-
-			if status == result.Pass && duration > cfg.Test.SlowThreshold {
-				status = result.Slow
 			}
 
 			results = append(results, result.Result{

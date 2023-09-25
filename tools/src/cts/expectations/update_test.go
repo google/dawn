@@ -287,11 +287,15 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 			},
 			updated: `# A comment
 
+################################################################################
 # New flakes. Please triage:
+################################################################################
 crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=5;* [ RetryOnFailure ]
 crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=6;* [ RetryOnFailure ]
 
+################################################################################
 # New failures. Please triage:
+################################################################################
 crbug.com/dawn/0000 suite:dir_a,dir_b:test_a:* [ Failure ]
 crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_b:* [ Slow ]
 crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=4;* [ Failure ]
@@ -328,7 +332,9 @@ crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=4;* [ Failure ]
 				},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
+################################################################################
 crbug.com/dawn/0000 [ gpu-a ] a:* [ Failure ]
 crbug.com/dawn/0000 [ gpu-b ] a:* [ Failure ]
 crbug.com/dawn/0000 [ os-a ] a:* [ Failure ]
@@ -356,154 +362,152 @@ crbug.com/dawn/0000 [ os-b ] a:* [ Failure ]
 				},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
+################################################################################
 crbug.com/dawn/0000 [ gpu-b os-c ] a:* [ Failure ]
 crbug.com/dawn/0000 [ gpu-c os-b ] a:* [ Failure ]
 `,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			name:         "merge when over 75% of children fail",
+			name:         "merge when 50% or more children fail",
 			expectations: ``,
-			results: result.List{
-				result.Result{Query: Q("a:b,c:t0:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t1:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t2:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t3:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t4:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t5:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t6:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t7:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t8:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t9:*"), Status: result.Failure},
+			results: result.List{ // 4 pass, 6 fail (50%)
+				result.Result{Query: Q("a:b,c:0:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:1:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:2:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:3:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:4:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:5:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:6:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:7:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:8:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:9:*"), Status: result.Pass},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
+################################################################################
 crbug.com/dawn/0000 a:* [ Failure ]
 `,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			name:         "don't merge when under 75% of children fail",
+			name:         "don't merge when 50% or fewer children fail",
 			expectations: ``,
-			results: result.List{
-				result.Result{Query: Q("a:b,c:t0:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t1:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t2:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t3:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t4:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t5:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t6:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t7:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t8:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t9:*"), Status: result.Failure},
+			results: result.List{ // 5 pass, 5 fail (50%)
+				result.Result{Query: Q("a:b,c:0:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:1:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:2:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:3:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:4:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:5:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:6:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:7:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:8:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:9:*"), Status: result.Pass},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
-crbug.com/dawn/0000 a:b,c:t0:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t2:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t3:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t5:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t6:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t8:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t9:* [ Failure ]
+################################################################################
+crbug.com/dawn/0000 a:b,c:0:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:2:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:5:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:6:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:8:* [ Failure ]
 `,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			name:         "merge when over 20 children fail",
+			name:         "merge when more than 10 children fail",
 			expectations: ``,
-			results: result.List{ // 21 failures, 70% fail
-				result.Result{Query: Q("a:b,c:t00:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t01:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t02:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t03:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t04:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t05:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t06:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t07:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t08:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t09:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t10:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t11:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t12:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t13:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t14:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t15:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t16:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t17:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t18:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t19:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t20:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t21:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t22:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t23:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t24:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t25:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t26:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t27:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t28:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t29:*"), Status: result.Failure},
+			results: result.List{ // 19 pass, 11 fail (37%)
+				result.Result{Query: Q("a:b,c:00:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:01:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:02:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:03:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:04:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:05:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:06:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:07:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:08:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:09:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:10:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:11:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:12:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:13:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:14:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:15:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:16:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:17:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:18:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:19:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:20:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:21:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:22:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:23:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:24:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:25:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:26:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:27:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:28:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:29:*"), Status: result.Failure},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
+################################################################################
 crbug.com/dawn/0000 a:* [ Failure ]
 `,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			name:         "dont merge when under 21 children fail",
+			name:         "don't merge when 10 or fewer children fail",
 			expectations: ``,
-			results: result.List{ // 20 failures, 66% fail
-				result.Result{Query: Q("a:b,c:t00:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t01:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t02:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t03:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t04:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t05:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t06:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t07:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t08:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t09:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t10:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t11:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t12:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t13:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t14:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t15:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t16:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t17:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t18:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t19:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t20:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t21:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t22:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t23:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t24:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t25:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t26:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t27:*"), Status: result.Pass},
-				result.Result{Query: Q("a:b,c:t28:*"), Status: result.Failure},
-				result.Result{Query: Q("a:b,c:t29:*"), Status: result.Failure},
+			results: result.List{ // 20 pass, 10 fail (33%)
+				result.Result{Query: Q("a:b,c:00:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:01:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:02:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:03:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:04:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:05:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:06:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:07:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:08:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:09:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:10:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:11:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:12:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:13:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:14:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:15:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:16:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:17:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:18:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:19:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:20:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:21:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:22:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:23:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:24:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:25:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:26:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:27:*"), Status: result.Pass},
+				result.Result{Query: Q("a:b,c:28:*"), Status: result.Failure},
+				result.Result{Query: Q("a:b,c:29:*"), Status: result.Failure},
 			},
 			updated: `
+################################################################################
 # New failures. Please triage:
-crbug.com/dawn/0000 a:b,c:t00:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t02:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t04:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t05:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t06:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t08:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t09:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t10:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t13:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t15:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t16:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t18:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t19:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t20:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t22:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t23:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t25:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t26:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t28:* [ Failure ]
-crbug.com/dawn/0000 a:b,c:t29:* [ Failure ]
+################################################################################
+crbug.com/dawn/0000 a:b,c:00:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:05:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:08:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:13:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:15:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:20:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:23:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:26:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:28:* [ Failure ]
+crbug.com/dawn/0000 a:b,c:29:* [ Failure ]
 `,
 		},
 	} {

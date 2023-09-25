@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -79,31 +80,37 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 
 	// Fetch the results
+	log.Println("fetching results...")
 	results, err := c.flags.results.GetResults(ctx, cfg, auth)
 	if err != nil {
 		return err
 	}
 
 	// Merge to remove duplicates
+	log.Println("removing duplicate results...")
 	results = result.Merge(results)
 
 	// Load the expectations file
+	log.Println("loading expectations...")
 	ex, err := expectations.Load(c.flags.expectations)
 	if err != nil {
 		return err
 	}
 
+	log.Println("loading test list...")
 	testlist, err := loadTestList(common.DefaultTestListPath())
 	if err != nil {
 		return err
 	}
 
+	log.Println("validating...")
 	if diag := ex.Validate(); diag.NumErrors() > 0 {
 		diag.Print(os.Stdout, c.flags.expectations)
 		return fmt.Errorf("validation failed")
 	}
 
 	// Update the expectations file with the results
+	log.Println("updating expectations...")
 	diag, err := ex.Update(results, testlist)
 	if err != nil {
 		return err

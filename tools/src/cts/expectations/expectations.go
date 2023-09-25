@@ -21,7 +21,6 @@ package expectations
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -86,7 +85,7 @@ type Expectations []Expectation
 
 // Load loads the expectation file at 'path', returning a Content.
 func Load(path string) (Content, error) {
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return Content{}, err
 	}
@@ -122,27 +121,13 @@ func (c Content) Empty() bool {
 	return len(c.Chunks) == 0
 }
 
-// EndsInBlankLine returns true if the Content ends with a blank line
-func (c Content) EndsInBlankLine() bool {
-	return !c.Empty() && c.Chunks[len(c.Chunks)-1].IsBlankLine()
-}
-
-// MaybeAddBlankLine appends a new blank line to the content, if the content
-// does not already end in a blank line.
-func (c *Content) MaybeAddBlankLine() {
-	if !c.Empty() && !c.EndsInBlankLine() {
-		c.Chunks = append(c.Chunks, Chunk{})
-	}
-}
-
 // Write writes the Content, in textual form, to the writer w.
 func (c Content) Write(w io.Writer) error {
-	for _, chunk := range c.Chunks {
-		if len(chunk.Comments) == 0 && len(chunk.Expectations) == 0 {
+	for i, chunk := range c.Chunks {
+		if i > 0 {
 			if _, err := fmt.Fprintln(w); err != nil {
 				return err
 			}
-			continue
 		}
 		for _, comment := range chunk.Comments {
 			if _, err := fmt.Fprintln(w, comment); err != nil {
@@ -180,11 +165,6 @@ func (c Content) String() string {
 // IsCommentOnly returns true if the Chunk contains comments and no expectations.
 func (c Chunk) IsCommentOnly() bool {
 	return len(c.Comments) > 0 && len(c.Expectations) == 0
-}
-
-// IsBlankLine returns true if the Chunk has no comments or expectations.
-func (c Chunk) IsBlankLine() bool {
-	return len(c.Comments) == 0 && len(c.Expectations) == 0
 }
 
 // Clone returns a deep-copy of the Chunk

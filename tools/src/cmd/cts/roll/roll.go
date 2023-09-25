@@ -77,7 +77,8 @@ type rollerFlags struct {
 	rebuild             bool // Rebuild the expectations file from scratch
 	preserve            bool // If false, abandon past roll changes
 	sendToGardener      bool // If true, automatically send to the gardener for review
-	parentSwarmingRunId string
+	parentSwarmingRunID string
+	maxAttempts         int
 }
 
 type cmd struct {
@@ -105,7 +106,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
-	flag.StringVar(&c.flags.parentSwarmingRunId, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
+	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
+	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil
 }
 
@@ -169,7 +171,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		flags:               c.flags,
 		auth:                auth,
 		bb:                  bb,
-		parentSwarmingRunId: c.flags.parentSwarmingRunId,
+		parentSwarmingRunID: c.flags.parentSwarmingRunID,
 		rdb:                 rdb,
 		git:                 git,
 		gerrit:              gerrit,
@@ -185,7 +187,7 @@ type roller struct {
 	flags               rollerFlags
 	auth                auth.Options
 	bb                  *buildbucket.Buildbucket
-	parentSwarmingRunId string
+	parentSwarmingRunID string
 	rdb                 *resultsdb.ResultsDB
 	git                 *git.Git
 	gerrit              *gerrit.Gerrit
@@ -237,16 +239,13 @@ func (r *roller) roll(ctx context.Context) error {
 		return fmt.Errorf("failed to load expectations: %v", err)
 	}
 
-	// If the user requested a full rebuild of the expecations, strip out
+	// If the user requested a full rebuild of the expectations, strip out
 	// everything but comment chunks.
 	if r.flags.rebuild {
 		rebuilt := ex.Clone()
 		rebuilt.Chunks = rebuilt.Chunks[:0]
 		for _, c := range ex.Chunks {
-			switch {
-			case c.IsBlankLine():
-				rebuilt.MaybeAddBlankLine()
-			case c.IsCommentOnly():
+			if c.IsCommentOnly() {
 				rebuilt.Chunks = append(rebuilt.Chunks, c)
 			}
 		}
@@ -333,12 +332,11 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 
 	// Begin main roll loop
-	const maxAttempts = 3
 	results := result.List{}
 	for attempt := 0; ; attempt++ {
 		// Kick builds
 		log.Printf("building (attempt %v)...\n", attempt)
-		builds, err := common.GetOrStartBuildsAndWait(ctx, r.cfg, ps, r.bb, r.parentSwarmingRunId, false)
+		builds, err := common.GetOrStartBuildsAndWait(ctx, r.cfg, ps, r.bb, r.parentSwarmingRunID, false)
 		if err != nil {
 			return err
 		}
@@ -397,7 +395,7 @@ func (r *roller) roll(ctx context.Context) error {
 			return fmt.Errorf("failed to update change '%v': %v", changeID, err)
 		}
 
-		if attempt >= maxAttempts {
+		if attempt >= r.flags.maxAttempts {
 			err := fmt.Errorf("CTS failed after %v attempts.\nGiving up", attempt)
 			r.gerrit.Comment(ps, err.Error(), nil)
 			return err
@@ -417,10 +415,10 @@ func (r *roller) roll(ctx context.Context) error {
 			return err
 		}
 
-		type StructuredJsonResponse struct {
+		type StructuredJSONResponse struct {
 			Emails []string
 		}
-		var jsonRes StructuredJsonResponse
+		var jsonRes StructuredJSONResponse
 		if err := json.Unmarshal(jsonResponse, &jsonRes); err != nil {
 			return err
 		}

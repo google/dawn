@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"github.com/tidwall/jsonc"
@@ -33,8 +32,6 @@ type Config struct {
 	Test struct {
 		// The ResultDB string prefix for CTS tests.
 		Prefixes []string
-		// The time threshold used to classify tests as slow.
-		SlowThreshold time.Duration
 	}
 	// Gerrit holds configuration for Dawn's Gerrit server.
 	Gerrit struct {

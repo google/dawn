@@ -73,7 +73,6 @@ func Parse(path, body string) (Content, error) {
 		if i > 0 {
 			switch {
 			case
-				lastLineType == blank && lineType != blank,             // blank -> !blank
 				lastLineType != blank && lineType == blank,             // !blank -> blank
 				lastLineType == expectation && lineType != expectation: // expectation -> comment
 				flush()
