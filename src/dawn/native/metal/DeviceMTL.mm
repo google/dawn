@@ -379,7 +379,6 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
-    GetQueue()->Destroy();
     mMtlDevice = nullptr;
     mMockBlitMtlBuffer = nullptr;
 }
