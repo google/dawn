@@ -37,6 +37,7 @@ cc_library(
     "robustness.cc",
     "shader_io.cc",
     "std140.cc",
+    "zero_init_workgroup_memory.cc",
   ],
   hdrs = [
     "add_empty_entry_point.h",
@@ -50,6 +51,7 @@ cc_library(
     "robustness.h",
     "shader_io.h",
     "std140.h",
+    "zero_init_workgroup_memory.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -92,6 +94,7 @@ cc_library(
     "multiplanar_external_texture_test.cc",
     "robustness_test.cc",
     "std140_test.cc",
+    "zero_init_workgroup_memory_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

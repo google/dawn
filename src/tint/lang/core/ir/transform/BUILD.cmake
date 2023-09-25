@@ -48,6 +48,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/shader_io.h
   lang/core/ir/transform/std140.cc
   lang/core/ir/transform/std140.h
+  lang/core/ir/transform/zero_init_workgroup_memory.cc
+  lang/core/ir/transform/zero_init_workgroup_memory.h
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform lib
@@ -90,6 +92,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/multiplanar_external_texture_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/std140_test.cc
+  lang/core/ir/transform/zero_init_workgroup_memory_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform_test test
