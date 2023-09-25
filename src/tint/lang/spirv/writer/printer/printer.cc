@@ -150,11 +150,11 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
 
 }  // namespace
 
-Printer::Printer(core::ir::Module* module, bool zero_init_workgroup_mem)
-    : ir_(module), b_(*module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
+Printer::Printer(core::ir::Module& module, bool zero_init_workgroup_mem)
+    : ir_(module), b_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 Result<std::vector<uint32_t>> Printer::Generate() {
-    auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
+    auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "SPIR-V writer");
     if (!valid) {
         return valid.Failure();
     }
@@ -168,19 +168,19 @@ Result<std::vector<uint32_t>> Printer::Generate() {
     // TODO(crbug.com/tint/1906): Emit extensions.
 
     // Emit module-scope declarations.
-    if (ir_->root_block) {
-        EmitRootBlock(ir_->root_block);
+    if (ir_.root_block) {
+        EmitRootBlock(ir_.root_block);
     }
 
     // Emit functions.
-    for (auto* func : ir_->functions) {
+    for (auto* func : ir_.functions) {
         EmitFunction(func);
     }
 
     // Serialize the module into binary SPIR-V.
     BinaryWriter writer;
     writer.WriteHeader(module_.IdBound(), kWriterVersion);
-    writer.WriteModule(&module_);
+    writer.WriteModule(module_);
     return std::move(writer.Result());
 }
 
@@ -240,7 +240,7 @@ uint32_t Printer::Constant(core::ir::Constant* constant) {
     auto id = Constant(constant->Value());
 
     // Set the name for the SPIR-V result ID if provided in the module.
-    if (auto name = ir_->NameOf(constant)) {
+    if (auto name = ir_.NameOf(constant)) {
         module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
     }
 
@@ -324,7 +324,7 @@ uint32_t Printer::Undef(const core::type::Type* type) {
 }
 
 uint32_t Printer::Type(const core::type::Type* ty) {
-    ty = DedupType(ty, ir_->Types());
+    ty = DedupType(ty, ir_.Types());
     return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
         Switch(
@@ -526,7 +526,7 @@ void Printer::EmitFunction(core::ir::Function* func) {
     auto id = Value(func);
 
     // Emit the function name.
-    module_.PushDebug(spv::Op::OpName, {id, Operand(ir_->NameOf(func).Name())});
+    module_.PushDebug(spv::Op::OpName, {id, Operand(ir_.NameOf(func).Name())});
 
     // Emit OpEntryPoint and OpExecutionMode declarations if needed.
     if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
@@ -545,7 +545,7 @@ void Printer::EmitFunction(core::ir::Function* func) {
         auto param_id = Value(param);
         params.push_back(Instruction(spv::Op::OpFunctionParameter, {param_type_id, param_id}));
         function_type.param_type_ids.Push(param_type_id);
-        if (auto name = ir_->NameOf(param)) {
+        if (auto name = ir_.NameOf(param)) {
             module_.PushDebug(spv::Op::OpName, {param_id, Operand(name.Name())});
         }
     }
@@ -603,11 +603,11 @@ void Printer::EmitEntryPoint(core::ir::Function* func, uint32_t id) {
             return;
     }
 
-    OperandList operands = {U32Operand(stage), id, ir_->NameOf(func).Name()};
+    OperandList operands = {U32Operand(stage), id, ir_.NameOf(func).Name()};
 
     // Add the list of all referenced shader IO variables.
-    if (ir_->root_block) {
-        for (auto* global : *ir_->root_block) {
+    if (ir_.root_block) {
+        for (auto* global : *ir_.root_block) {
             auto* var = global->As<core::ir::Var>();
             if (!var) {
                 continue;
@@ -725,7 +725,7 @@ void Printer::EmitBlockInstructions(core::ir::Block* block) {
 
         // Set the name for the SPIR-V result ID if provided in the module.
         if (inst->Result() && !inst->Is<core::ir::Var>()) {
-            if (auto name = ir_->NameOf(inst)) {
+            if (auto name = ir_.NameOf(inst)) {
                 module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
             }
         }
@@ -1425,13 +1425,13 @@ void Printer::EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* builtin) {
         case core::BuiltinFn::kSubgroupBallot:
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
             op = spv::Op::OpGroupNonUniformBallot;
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
-            operands.push_back(Constant(ir_->constant_values.Get(true)));
+            operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+            operands.push_back(Constant(ir_.constant_values.Get(true)));
             break;
         case core::BuiltinFn::kSubgroupBroadcast:
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
             op = spv::Op::OpGroupNonUniformBroadcast;
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
+            operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
             break;
         case core::BuiltinFn::kTan:
             glsl_ext_inst(GLSLstd450Tan);
@@ -1606,7 +1606,7 @@ void Printer::EmitLoad(core::ir::Load* load) {
 void Printer::EmitLoadVectorElement(core::ir::LoadVectorElement* load) {
     auto* vec_ptr_ty = load->From()->Type()->As<core::type::Pointer>();
     auto* el_ty = load->Result()->Type();
-    auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
+    auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
     auto el_ptr_id = module_.NextId();
     current_function_.push_inst(
         spv::Op::OpAccessChain,
@@ -1725,7 +1725,7 @@ void Printer::EmitStore(core::ir::Store* store) {
 void Printer::EmitStoreVectorElement(core::ir::StoreVectorElement* store) {
     auto* vec_ptr_ty = store->To()->Type()->As<core::type::Pointer>();
     auto* el_ty = store->Value()->Type();
-    auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
+    auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
     auto el_ptr_id = module_.NextId();
     current_function_.push_inst(
         spv::Op::OpAccessChain,
@@ -1897,7 +1897,7 @@ void Printer::EmitVar(core::ir::Var* var) {
     }
 
     // Set the name if present.
-    if (auto name = ir_->NameOf(var)) {
+    if (auto name = ir_.NameOf(var)) {
         module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
     }
 }

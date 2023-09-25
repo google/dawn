@@ -31,7 +31,7 @@ namespace tint::spirv::writer::raise {
 /// SPIR-V intrinsics or polyfills.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> HandleMatrixArithmetic(core::ir::Module* module);
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

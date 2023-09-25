@@ -3055,7 +3055,7 @@ bool Builder::GenerateControlBarrierBuiltin(const sem::BuiltinFn* builtin) {
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::ImageMemory);
     } else {
-        TINT_ICE() << "unexpected barrier builtin type " << core::str(builtin->Fn());
+        TINT_ICE() << "unexpected barrier builtin type " << builtin->Fn();
         return false;
     }
 

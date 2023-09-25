@@ -60,7 +60,7 @@ struct RobustnessConfig {
 /// @param module the module to transform
 /// @param config the robustness configuration
 /// @returns success or failure
-Result<SuccessType> Robustness(Module* module, const RobustnessConfig& config);
+Result<SuccessType> Robustness(Module& module, const RobustnessConfig& config);
 
 }  // namespace tint::core::ir::transform
 

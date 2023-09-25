@@ -39,7 +39,7 @@ struct BinaryPolyfillConfig {
 /// @param module the module to transform
 /// @param config the polyfill configuration
 /// @returns success or failure
-Result<SuccessType> BinaryPolyfill(Module* module, const BinaryPolyfillConfig& config);
+Result<SuccessType> BinaryPolyfill(Module& module, const BinaryPolyfillConfig& config);
 
 }  // namespace tint::core::ir::transform
 

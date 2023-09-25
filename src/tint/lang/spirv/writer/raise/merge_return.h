@@ -31,7 +31,7 @@ namespace tint::spirv::writer::raise {
 /// at the end of the function.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> MergeReturn(core::ir::Module* module);
+Result<SuccessType> MergeReturn(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

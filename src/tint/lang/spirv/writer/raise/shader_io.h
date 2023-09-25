@@ -40,7 +40,7 @@ struct ShaderIOConfig {
 /// @param module the module to transform
 /// @param config the configuration
 /// @returns success or failure
-Result<SuccessType> ShaderIO(core::ir::Module* module, const ShaderIOConfig& config);
+Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
 
 }  // namespace tint::spirv::writer::raise
 

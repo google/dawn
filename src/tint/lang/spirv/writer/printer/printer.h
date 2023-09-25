@@ -81,7 +81,7 @@ class Printer {
     /// @param module the Tint IR module to generate
     /// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
     ///                                   storage class with OpConstantNull
-    Printer(core::ir::Module* module, bool zero_init_workgroup_memory);
+    Printer(core::ir::Module& module, bool zero_init_workgroup_memory);
 
     /// @returns the generated SPIR-V binary on success, or failure
     tint::Result<std::vector<uint32_t>> Generate();
@@ -279,7 +279,7 @@ class Printer {
     /// @returns the label ID
     uint32_t GetTerminatorBlockLabel(core::ir::Terminator* t);
 
-    core::ir::Module* ir_;
+    core::ir::Module& ir_;
     core::ir::Builder b_;
     writer::Module module_;
     BinaryWriter writer_;

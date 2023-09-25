@@ -36,7 +36,7 @@ class BinaryWriter {
     /// Writes the given module data into a binary. Note, this does not emit the SPIR-V header. You
     /// **must** call WriteHeader() before WriteModule() if you want the SPIR-V to be emitted.
     /// @param module the module to assemble from
-    void WriteModule(const Module* module);
+    void WriteModule(const Module& module);
 
     /// Writes the given instruction into the binary.
     /// @param inst the instruction to assemble

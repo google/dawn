@@ -33,7 +33,7 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param options the external texture options
 /// @returns success or failure
-Result<SuccessType> MultiplanarExternalTexture(Module* module,
+Result<SuccessType> MultiplanarExternalTexture(Module& module,
                                                const ExternalTextureOptions& options);
 
 }  // namespace tint::core::ir::transform

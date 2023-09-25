@@ -58,7 +58,7 @@ std::string Disassemble(const std::vector<uint32_t>& data, uint32_t options /* =
 std::string DumpModule(Module& module) {
     BinaryWriter writer;
     writer.WriteHeader(module.IdBound());
-    writer.WriteModule(&module);
+    writer.WriteModule(module);
     return Disassemble(writer.Result());
 }
 

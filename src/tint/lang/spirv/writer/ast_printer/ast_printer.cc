@@ -190,7 +190,7 @@ bool ASTPrinter::Generate() {
     if (builder_.Build()) {
         auto& module = builder_.Module();
         writer_.WriteHeader(module.IdBound());
-        writer_.WriteModule(&module);
+        writer_.WriteModule(module);
         return true;
     }
     return false;

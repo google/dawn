@@ -37,13 +37,13 @@ struct State {
     const RobustnessConfig& config;
 
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// Process the module.
     void Process() {
@@ -52,7 +52,7 @@ struct State {
         Vector<ir::LoadVectorElement*, 64> vector_loads;
         Vector<ir::StoreVectorElement*, 64> vector_stores;
         Vector<ir::CoreBuiltinCall*, 64> texture_calls;
-        for (auto* inst : ir->instructions.Objects()) {
+        for (auto* inst : ir.instructions.Objects()) {
             if (inst->Alive()) {
                 tint::Switch(
                     inst,  //
@@ -335,8 +335,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Robustness(Module* ir, const RobustnessConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "Robustness transform");
+Result<SuccessType> Robustness(Module& ir, const RobustnessConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "Robustness transform");
     if (!result) {
         return result;
     }

@@ -31,7 +31,7 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param options the remapping options
 /// @returns success or failure
-Result<SuccessType> BindingRemapper(Module* module, const BindingRemapperOptions& options);
+Result<SuccessType> BindingRemapper(Module& module, const BindingRemapperOptions& options);
 
 }  // namespace tint::core::ir::transform
 

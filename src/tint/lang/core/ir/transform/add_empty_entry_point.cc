@@ -24,25 +24,25 @@ namespace tint::core::ir::transform {
 
 namespace {
 
-void Run(ir::Module* ir) {
-    for (auto* func : ir->functions) {
+void Run(ir::Module& ir) {
+    for (auto* func : ir.functions) {
         if (func->Stage() != Function::PipelineStage::kUndefined) {
             return;
         }
     }
 
-    ir::Builder builder(*ir);
-    auto* ep = builder.Function("unused_entry_point", ir->Types().void_(),
+    ir::Builder builder{ir};
+    auto* ep = builder.Function("unused_entry_point", ir.Types().void_(),
                                 Function::PipelineStage::kCompute, std::array{1u, 1u, 1u});
     ep->Block()->Append(builder.Return(ep));
 }
 
 }  // namespace
 
-Result<SuccessType> AddEmptyEntryPoint(Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "AddEmptyEntryPoint transform");
+Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "AddEmptyEntryPoint transform");
     if (!result) {
-        return result;
+        return result.Failure();
     }
 
     Run(ir);

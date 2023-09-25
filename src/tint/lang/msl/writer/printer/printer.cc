@@ -63,12 +63,12 @@ namespace tint::msl::writer {
     TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
                          << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
 
-Printer::Printer(core::ir::Module* module) : ir_(module) {}
+Printer::Printer(core::ir::Module& module) : ir_(module) {}
 
 Printer::~Printer() = default;
 
 tint::Result<SuccessType> Printer::Generate() {
-    auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "MSL writer");
+    auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "MSL writer");
     if (!valid) {
         return std::move(valid.Failure());
     }
@@ -80,12 +80,12 @@ tint::Result<SuccessType> Printer::Generate() {
     }
 
     // Emit module-scope declarations.
-    if (ir_->root_block) {
-        EmitBlockInstructions(ir_->root_block);
+    if (ir_.root_block) {
+        EmitBlockInstructions(ir_.root_block);
     }
 
     // Emit functions.
-    for (auto* func : ir_->functions) {
+    for (auto* func : ir_.functions) {
         EmitFunction(func);
     }
 
@@ -135,7 +135,7 @@ void Printer::EmitFunction(core::ir::Function* func) {
         // TODO(dsinclair): Handle return type attributes
 
         EmitType(out, func->ReturnType());
-        out << " " << ir_->NameOf(func).Name() << "() {";
+        out << " " << ir_.NameOf(func).Name() << "() {";
 
         // TODO(dsinclair): Emit Function parameters
     }
@@ -252,7 +252,7 @@ void Printer::EmitVar(core::ir::Var* v) {
             return;
     }
 
-    auto name = ir_->NameOf(v);
+    auto name = ir_.NameOf(v);
 
     EmitType(out, ptr->UnwrapPtr());
     out << " " << name.Name();
@@ -276,11 +276,11 @@ void Printer::EmitLet(core::ir::Let* l) {
 void Printer::EmitIf(core::ir::If* if_) {
     // Emit any nodes that need to be used as PHI nodes
     for (auto* phi : if_->Results()) {
-        if (!ir_->NameOf(phi).IsValid()) {
-            ir_->SetName(phi, ir_->symbols.New());
+        if (!ir_.NameOf(phi).IsValid()) {
+            ir_.SetName(phi, ir_.symbols.New());
         }
 
-        auto name = ir_->NameOf(phi);
+        auto name = ir_.NameOf(phi);
 
         auto out = Line();
         EmitType(out, phi->Type());
@@ -313,7 +313,7 @@ void Printer::EmitExitIf(core::ir::ExitIf* e) {
         auto* phi = results[i];
         auto* val = args[i];
 
-        Line() << ir_->NameOf(phi).Name() << " = " << Expr(val) << ";";
+        Line() << ir_.NameOf(phi).Name() << " = " << Expr(val) << ";";
     }
 }
 
@@ -531,7 +531,7 @@ void Printer::EmitStructType(const core::type::Struct* str) {
         std::string name;
         do {
             name = UniqueIdentifier("tint_pad");
-        } while (str->FindMember(ir_->symbols.Get(name)));
+        } while (str->FindMember(ir_.symbols.Get(name)));
 
         auto out = Line(&str_buf);
         add_byte_offset_comment(out, msl_offset);
@@ -743,7 +743,7 @@ std::string Printer::StructName(const core::type::Struct* s) {
 }
 
 std::string Printer::UniqueIdentifier(const std::string& prefix /* = "" */) {
-    return ir_->symbols.New(prefix).Name();
+    return ir_.symbols.New(prefix).Name();
 }
 
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
@@ -825,12 +825,12 @@ void Printer::Bind(core::ir::Value* value, const std::string& expr, PtrKind ptr_
             return;
         }
     } else {
-        auto mod_name = ir_->NameOf(value);
+        auto mod_name = ir_.NameOf(value);
         if (value->Usages().IsEmpty() && !mod_name.IsValid()) {
             // Drop phonies.
         } else {
             if (mod_name.Name().empty()) {
-                mod_name = ir_->symbols.New("v");
+                mod_name = ir_.symbols.New("v");
             }
 
             auto out = Line();
@@ -879,7 +879,7 @@ void Printer::MarkInlinable(core::ir::Block* block) {
         auto* result = inst->Result();
         // Only values with a single usage can be inlined.
         // Named values are not inlined, as we want to emit the name for a let.
-        if (result->Usages().Count() == 1 && !ir_->NameOf(result).IsValid()) {
+        if (result->Usages().Count() == 1 && !ir_.NameOf(result).IsValid()) {
             if (sequenced) {
                 // The value comes from a sequenced instruction.  Don't inline.
             } else {

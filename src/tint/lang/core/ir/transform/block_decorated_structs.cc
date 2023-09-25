@@ -28,16 +28,16 @@ namespace tint::core::ir::transform {
 
 namespace {
 
-void Run(Module* ir) {
-    Builder builder(*ir);
+void Run(Module& ir) {
+    Builder builder{ir};
 
-    if (!ir->root_block) {
+    if (!ir.root_block) {
         return;
     }
 
     // Loop over module-scope declarations, looking for storage or uniform buffers.
     Vector<Var*, 8> buffer_variables;
-    for (auto inst : *ir->root_block) {
+    for (auto inst : *ir.root_block) {
         auto* var = inst->As<Var>();
         if (!var) {
             continue;
@@ -67,8 +67,8 @@ void Run(Module* ir) {
         } else {
             // The original struct might be used in other places, so create a new block-decorated
             // struct that wraps the original struct.
-            members.Push(ir->Types().Get<core::type::StructMember>(
-                /* name */ ir->symbols.New(),
+            members.Push(ir.Types().Get<core::type::StructMember>(
+                /* name */ ir.symbols.New(),
                 /* type */ store_ty,
                 /* index */ 0u,
                 /* offset */ 0u,
@@ -79,8 +79,8 @@ void Run(Module* ir) {
         }
 
         // Create the block-decorated struct.
-        auto* block_struct = ir->Types().Get<core::type::Struct>(
-            /* name */ ir->symbols.New(),
+        auto* block_struct = ir.Types().Get<core::type::Struct>(
+            /* name */ ir.symbols.New(),
             /* members */ members,
             /* align */ store_ty->Align(),
             /* size */ tint::RoundUp(store_ty->Align(), store_ty->Size()),
@@ -89,7 +89,7 @@ void Run(Module* ir) {
 
         // Replace the old variable declaration with one that uses the block-decorated struct type.
         auto* new_var =
-            builder.Var(ir->Types().ptr(ptr->AddressSpace(), block_struct, ptr->Access()));
+            builder.Var(ir.Types().ptr(ptr->AddressSpace(), block_struct, ptr->Access()));
         if (var->BindingPoint()) {
             new_var->SetBindingPoint(var->BindingPoint()->group, var->BindingPoint()->binding);
         }
@@ -111,8 +111,8 @@ void Run(Module* ir) {
 
 }  // namespace
 
-Result<SuccessType> BlockDecoratedStructs(Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "BlockDecoratedStructs transform");
+Result<SuccessType> BlockDecoratedStructs(Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "BlockDecoratedStructs transform");
     if (!result) {
         return result;
     }

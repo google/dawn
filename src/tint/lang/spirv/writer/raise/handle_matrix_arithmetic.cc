@@ -31,13 +31,13 @@ namespace tint::spirv::writer::raise {
 
 namespace {
 
-void Run(core::ir::Module* ir) {
-    core::ir::Builder b(*ir);
+void Run(core::ir::Module& ir) {
+    core::ir::Builder b{ir};
 
     // Find the instructions that need to be modified.
     Vector<core::ir::Binary*, 4> binary_worklist;
     Vector<core::ir::Convert*, 4> convert_worklist;
-    for (auto* inst : ir->instructions.Objects()) {
+    for (auto* inst : ir.instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
         }
@@ -64,8 +64,8 @@ void Run(core::ir::Module* ir) {
 
         // Helper to replace the instruction with a new one.
         auto replace = [&](core::ir::Instruction* inst) {
-            if (auto name = ir->NameOf(binary)) {
-                ir->SetName(inst->Result(), name);
+            if (auto name = ir.NameOf(binary)) {
+                ir.SetName(inst->Result(), name);
             }
             binary->Result()->ReplaceAllUsesWith(inst->Result());
             binary->ReplaceWith(inst);
@@ -142,8 +142,8 @@ void Run(core::ir::Module* ir) {
 
         // Reconstruct the result matrix from the converted columns.
         auto* construct = b.Construct(out_mat, std::move(args));
-        if (auto name = ir->NameOf(convert)) {
-            ir->SetName(construct->Result(), name);
+        if (auto name = ir.NameOf(convert)) {
+            ir.SetName(construct->Result(), name);
         }
         convert->Result()->ReplaceAllUsesWith(construct->Result());
         convert->ReplaceWith(construct);
@@ -153,8 +153,8 @@ void Run(core::ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType> HandleMatrixArithmetic(core::ir::Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "HandleMatrixArithmetic transform");
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "HandleMatrixArithmetic transform");
     if (!result) {
         return result.Failure();
     }

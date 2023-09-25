@@ -31,7 +31,7 @@ namespace tint::core::ir::transform {
 /// existing store type in a new structure if necessary.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> BlockDecoratedStructs(Module* module);
+Result<SuccessType> BlockDecoratedStructs(Module& module);
 
 }  // namespace tint::core::ir::transform
 

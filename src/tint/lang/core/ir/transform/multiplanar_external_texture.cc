@@ -35,16 +35,16 @@ struct State {
     const ExternalTextureOptions& options;
 
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The symbol table.
-    SymbolTable& sym{ir->symbols};
+    SymbolTable& sym{ir.symbols};
 
     /// The gamma transfer parameters structure.
     const core::type::Struct* gamma_transfer_params_struct = nullptr;
@@ -64,9 +64,9 @@ struct State {
     /// Process the module.
     void Process() {
         // Find module-scope variables that need to be replaced.
-        if (ir->root_block) {
+        if (ir.root_block) {
             Vector<Instruction*, 4> to_remove;
-            for (auto inst : *ir->root_block) {
+            for (auto inst : *ir.root_block) {
                 auto* var = inst->As<Var>();
                 if (!var) {
                     continue;
@@ -83,7 +83,7 @@ struct State {
         }
 
         // Find function parameters that need to be replaced.
-        for (auto* func : ir->functions) {
+        for (auto* func : ir.functions) {
             for (uint32_t index = 0; index < func->Params().Length(); index++) {
                 auto* param = func->Params()[index];
                 if (param->Type()->Is<core::type::ExternalTexture>()) {
@@ -101,7 +101,7 @@ struct State {
     /// Replace an external texture variable declaration.
     /// @param old_var the variable declaration to replace
     void ReplaceVar(Var* old_var) {
-        auto name = ir->NameOf(old_var);
+        auto name = ir.NameOf(old_var);
         auto bp = old_var->BindingPoint();
         auto itr = options.bindings_map.find(bp.value());
         TINT_ASSERT_OR_RETURN(itr != options.bindings_map.end());
@@ -112,7 +112,7 @@ struct State {
         plane_0->SetBindingPoint(bp->group, bp->binding);
         plane_0->InsertBefore(old_var);
         if (name) {
-            ir->SetName(plane_0, name.Name() + "_plane0");
+            ir.SetName(plane_0, name.Name() + "_plane0");
         }
 
         // Create a sampled texture for the second plane.
@@ -121,7 +121,7 @@ struct State {
                                  new_binding_points.plane_1.binding);
         plane_1->InsertBefore(old_var);
         if (name) {
-            ir->SetName(plane_1, name.Name() + "_plane1");
+            ir.SetName(plane_1, name.Name() + "_plane1");
         }
 
         // Create a uniform buffer for the external texture parameters.
@@ -130,7 +130,7 @@ struct State {
                                                  new_binding_points.params.binding);
         external_texture_params->InsertBefore(old_var);
         if (name) {
-            ir->SetName(external_texture_params, name.Name() + "_params");
+            ir.SetName(external_texture_params, name.Name() + "_params");
         }
 
         // Replace all uses of the old variable with the new ones.
@@ -143,24 +143,24 @@ struct State {
     /// @param old_param the function parameter to replace
     /// @param index the index of the function parameter
     void ReplaceParameter(Function* func, FunctionParam* old_param, uint32_t index) {
-        auto name = ir->NameOf(old_param);
+        auto name = ir.NameOf(old_param);
 
         // Create a sampled texture for the first plane.
         auto* plane_0 = b.FunctionParam(SampledTexture());
         if (name) {
-            ir->SetName(plane_0, name.Name() + "_plane0");
+            ir.SetName(plane_0, name.Name() + "_plane0");
         }
 
         // Create a sampled texture for the second plane.
         auto* plane_1 = b.FunctionParam(SampledTexture());
         if (name) {
-            ir->SetName(plane_1, name.Name() + "_plane1");
+            ir.SetName(plane_1, name.Name() + "_plane1");
         }
 
         // Create the external texture parameters struct.
         auto* external_texture_params = b.FunctionParam(ExternalTextureParams());
         if (name) {
-            ir->SetName(external_texture_params, name.Name() + "_params");
+            ir.SetName(external_texture_params, name.Name() + "_params");
         }
 
         Vector<FunctionParam*, 4> new_params;
@@ -568,8 +568,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> MultiplanarExternalTexture(Module* ir, const ExternalTextureOptions& options) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "MultiplanarExternalTexture transform");
+Result<SuccessType> MultiplanarExternalTexture(Module& ir, const ExternalTextureOptions& options) {
+    auto result = ValidateAndDumpIfNeeded(ir, "MultiplanarExternalTexture transform");
     if (!result) {
         return result;
     }

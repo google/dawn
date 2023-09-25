@@ -47,7 +47,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     core::ir::Value* frag_depth_clamp_args = nullptr;
 
     /// Constructor
-    StateImpl(core::ir::Module* mod, core::ir::Function* f, const ShaderIOConfig& cfg)
+    StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& cfg)
         : ShaderIOBackendState(mod, f), config(cfg) {}
 
     /// Destructor
@@ -66,7 +66,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                   const char* name_suffix) {
         for (auto io : entries) {
             StringStream name;
-            name << ir->NameOf(func).Name();
+            name << ir.NameOf(func).Name();
 
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
@@ -168,10 +168,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             }
 
             // Declare the struct.
-            auto* str = ty.Struct(ir->symbols.Register("FragDepthClampArgs"),
+            auto* str = ty.Struct(ir.symbols.Register("FragDepthClampArgs"),
                                   {
-                                      {ir->symbols.Register("min"), ty.f32()},
-                                      {ir->symbols.Register("max"), ty.f32()},
+                                      {ir.symbols.Register("min"), ty.f32()},
+                                      {ir.symbols.Register("max"), ty.f32()},
                                   });
             str->SetStructFlag(core::type::kBlock);
 
@@ -195,13 +195,13 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType> ShaderIO(core::ir::Module* ir, const ShaderIOConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "ShaderIO transform");
+Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "ShaderIO transform");
     if (!result) {
         return result;
     }
 
-    core::ir::transform::RunShaderIOBase(ir, [&](core::ir::Module* mod, core::ir::Function* func) {
+    core::ir::transform::RunShaderIOBase(ir, [&](core::ir::Module& mod, core::ir::Function* func) {
         return std::make_unique<StateImpl>(mod, func, config);
     });
 

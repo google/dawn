@@ -33,16 +33,16 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The symbol table.
-    SymbolTable& sym{ir->symbols};
+    SymbolTable& sym{ir.symbols};
 
     /// Map from original type to a new type with decomposed matrices.
     Hashmap<const core::type::Type*, const core::type::Type*, 4> rewritten_types{};
@@ -55,13 +55,13 @@ struct State {
 
     /// Process the module.
     void Process() {
-        if (!ir->root_block) {
+        if (!ir.root_block) {
             return;
         }
 
         // Find uniform buffers that contain matrices that need to be decomposed.
         Vector<Var*, 8> buffer_variables;
-        for (auto inst : *ir->root_block) {
+        for (auto inst : *ir.root_block) {
             auto* var = inst->As<Var>();
             if (!var || !var->Alive()) {
                 continue;
@@ -83,8 +83,8 @@ struct State {
             auto* store_type = var->Result()->Type()->As<core::type::Pointer>()->StoreType();
             auto* new_var = b.Var(ty.ptr(uniform, RewriteType(store_type)));
             new_var->SetBindingPoint(bp->group, bp->binding);
-            if (auto name = ir->NameOf(var)) {
-                ir->SetName(new_var->Result(), name);
+            if (auto name = ir.NameOf(var)) {
+                ir.SetName(new_var->Result(), name);
             }
 
             // Replace every instruction that uses the original variable.
@@ -329,8 +329,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Std140(Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "Std140 transform");
+Result<SuccessType> Std140(Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "Std140 transform");
     if (!result) {
         return result;
     }

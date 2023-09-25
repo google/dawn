@@ -32,20 +32,20 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// Process the module.
     void Process() {
         // Find module-scope variables that need to be replaced.
-        if (ir->root_block) {
+        if (ir.root_block) {
             Vector<Instruction*, 4> to_remove;
-            for (auto inst : *ir->root_block) {
+            for (auto inst : *ir.root_block) {
                 auto* var = inst->As<Var>();
                 if (!var) {
                     continue;
@@ -67,7 +67,7 @@ struct State {
         }
 
         // Find function parameters that need to be replaced.
-        for (auto* func : ir->functions) {
+        for (auto* func : ir.functions) {
             for (uint32_t index = 0; index < func->Params().Length(); index++) {
                 auto* param = func->Params()[index];
                 auto* storage_texture = param->Type()->As<core::type::StorageTexture>();
@@ -90,8 +90,8 @@ struct State {
         auto bp = old_var->BindingPoint();
         new_var->SetBindingPoint(bp->group, bp->binding);
         new_var->InsertBefore(old_var);
-        if (auto name = ir->NameOf(old_var)) {
-            ir->SetName(new_var, name.NameView());
+        if (auto name = ir.NameOf(old_var)) {
+            ir.SetName(new_var, name.NameView());
         }
 
         // Replace all uses of the old variable with the new one.
@@ -111,8 +111,8 @@ struct State {
         auto* rgba8 = ty.Get<core::type::StorageTexture>(
             bgra8->dim(), core::TexelFormat::kRgba8Unorm, bgra8->access(), bgra8->type());
         auto* new_param = b.FunctionParam(rgba8);
-        if (auto name = ir->NameOf(old_param)) {
-            ir->SetName(new_param, name.NameView());
+        if (auto name = ir.NameOf(old_param)) {
+            ir.SetName(new_param, name.NameView());
         }
 
         Vector<FunctionParam*, 4> new_params = func->Params();
@@ -170,8 +170,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> Bgra8UnormPolyfill(Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "Bgra8UnormPolyfill transform");
+Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "Bgra8UnormPolyfill transform");
     if (!result) {
         return result;
     }

@@ -44,7 +44,7 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(core::ir::Module* module);
+    explicit Printer(core::ir::Module& module);
     ~Printer() override;
 
     /// @returns success or failure
@@ -162,7 +162,7 @@ class Printer : public tint::TextGenerator {
     /// Map of builtin structure to unique generated name
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
-    core::ir::Module* const ir_;
+    core::ir::Module& ir_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;

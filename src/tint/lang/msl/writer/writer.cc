@@ -41,13 +41,13 @@ Result<Output> Generate(const Program& program, const Options& options) {
         auto ir = converted.Move();
 
         // Raise the IR to the MSL dialect.
-        auto raised = raise::Raise(&ir);
+        auto raised = raise::Raise(ir);
         if (!raised) {
             return raised.Failure();
         }
 
         // Generate the MSL code.
-        auto impl = std::make_unique<Printer>(&ir);
+        auto impl = std::make_unique<Printer>(ir);
         auto result = impl->Generate();
         if (!result) {
             return result.Failure();

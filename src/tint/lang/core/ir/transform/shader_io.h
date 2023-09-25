@@ -28,7 +28,7 @@ struct ShaderIOBackendState {
     /// Constructor
     /// @param mod the IR module
     /// @param f the entry point function
-    ShaderIOBackendState(Module* mod, Function* f) : ir(mod), func(f) {}
+    ShaderIOBackendState(Module& mod, Function* f) : ir(mod), func(f) {}
 
     /// Destructor
     virtual ~ShaderIOBackendState();
@@ -82,13 +82,13 @@ struct ShaderIOBackendState {
 
   protected:
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The original entry point function.
     Function* func = nullptr;
@@ -101,11 +101,11 @@ struct ShaderIOBackendState {
 };
 
 /// The signature for a function that creates a backend state object.
-using MakeBackendStateFunc = std::unique_ptr<ShaderIOBackendState>(Module*, Function*);
+using MakeBackendStateFunc = std::unique_ptr<ShaderIOBackendState>(Module&, Function*);
 
 /// @param module the module to transform
 /// @param make_backend_state a function that creates a backend state object
-void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_backend_state);
+void RunShaderIOBase(Module& module, std::function<MakeBackendStateFunc> make_backend_state);
 
 }  // namespace tint::core::ir::transform
 

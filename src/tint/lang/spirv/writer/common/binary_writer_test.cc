@@ -38,7 +38,7 @@ TEST_F(SpirvWriterBinaryWriterTest, Float) {
 
     m.PushAnnot(spv::Op::OpKill, {Operand(2.4f)});
     BinaryWriter bw;
-    bw.WriteModule(&m);
+    bw.WriteModule(m);
 
     auto res = bw.Result();
     ASSERT_EQ(res.size(), 2u);
@@ -52,7 +52,7 @@ TEST_F(SpirvWriterBinaryWriterTest, Int) {
 
     m.PushAnnot(spv::Op::OpKill, {Operand(2u)});
     BinaryWriter bw;
-    bw.WriteModule(&m);
+    bw.WriteModule(m);
 
     auto res = bw.Result();
     ASSERT_EQ(res.size(), 2u);
@@ -64,7 +64,7 @@ TEST_F(SpirvWriterBinaryWriterTest, String) {
 
     m.PushAnnot(spv::Op::OpKill, {Operand("my_string")});
     BinaryWriter bw;
-    bw.WriteModule(&m);
+    bw.WriteModule(m);
 
     auto res = bw.Result();
     ASSERT_EQ(res.size(), 4u);
@@ -89,7 +89,7 @@ TEST_F(SpirvWriterBinaryWriterTest, String_Multiple4Length) {
 
     m.PushAnnot(spv::Op::OpKill, {Operand("mystring")});
     BinaryWriter bw;
-    bw.WriteModule(&m);
+    bw.WriteModule(m);
 
     auto res = bw.Result();
     ASSERT_EQ(res.size(), 4u);

@@ -75,23 +75,19 @@ core::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
     /// The set of struct members that need to have their IO attributes stripped.
-    Hashset<const core::type::StructMember*, 8> members_to_strip;
+    Hashset<const core::type::StructMember*, 8> members_to_strip{};
 
     /// The entry point currently being processed.
     Function* func = nullptr;
 
     /// The backend state object for the current entry point.
-    std::unique_ptr<ShaderIOBackendState> backend;
-
-    /// Constructor
-    /// @param mod the module
-    explicit State(Module* mod) : ir(mod) {}
+    std::unique_ptr<ShaderIOBackendState> backend{};
 
     /// Process an entry point.
     /// @param f the original entry point function
@@ -109,7 +105,7 @@ struct State {
         std::optional<uint32_t> vertex_point_size_index;
         if (func->Stage() == Function::PipelineStage::kVertex && backend->NeedsVertexPointSize()) {
             vertex_point_size_index =
-                backend->AddOutput(ir->symbols.New("vertex_point_size"), ty.f32(),
+                backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
                                    {{}, {}, {BuiltinValue::kPointSize}, {}, false});
         }
 
@@ -118,10 +114,10 @@ struct State {
 
         // Rename the old function and remove its pipeline stage and workgroup size, as we will be
         // wrapping it with a new entry point.
-        auto name = ir->NameOf(func).Name();
+        auto name = ir.NameOf(func).Name();
         auto stage = func->Stage();
         auto wgsize = func->WorkgroupSize();
-        ir->SetName(func, name + "_inner");
+        ir.SetName(func, name + "_inner");
         func->SetStage(Function::PipelineStage::kUndefined);
         func->ClearWorkgroupSize();
 
@@ -156,7 +152,7 @@ struct State {
                         func->Stage() != Function::PipelineStage::kFragment) {
                         attributes.interpolation = {};
                     }
-                    backend->AddInput(ir->symbols.Register(name), member->Type(), attributes);
+                    backend->AddInput(ir.symbols.Register(name), member->Type(), attributes);
                     members_to_strip.Add(member);
                 }
             } else {
@@ -175,7 +171,7 @@ struct State {
                 attributes.invariant = param->Invariant();
                 param->SetInvariant(false);
 
-                auto name = ir->NameOf(param);
+                auto name = ir.NameOf(param);
                 backend->AddInput(name, param->Type(), std::move(attributes));
             }
         }
@@ -194,7 +190,7 @@ struct State {
                 if (attributes.interpolation && func->Stage() != Function::PipelineStage::kVertex) {
                     attributes.interpolation = {};
                 }
-                backend->AddOutput(ir->symbols.Register(name), member->Type(), attributes);
+                backend->AddOutput(ir.symbols.Register(name), member->Type(), attributes);
                 members_to_strip.Add(member);
             }
         } else {
@@ -213,7 +209,7 @@ struct State {
             attributes.invariant = func->ReturnInvariant();
             func->SetReturnInvariant(false);
 
-            backend->AddOutput(ir->symbols.New(), func->ReturnType(), std::move(attributes));
+            backend->AddOutput(ir.symbols.New(), func->ReturnType(), std::move(attributes));
         }
     }
 
@@ -265,9 +261,9 @@ struct State {
 
 }  // namespace
 
-void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_backend_state) {
-    State state(module);
-    for (auto* func : module->functions) {
+void RunShaderIOBase(Module& module, std::function<MakeBackendStateFunc> make_backend_state) {
+    State state{module};
+    for (auto* func : module.functions) {
         // Only process entry points.
         if (func->Stage() == Function::PipelineStage::kUndefined) {
             continue;

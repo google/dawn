@@ -33,16 +33,16 @@ struct State {
     const BinaryPolyfillConfig& config;
 
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The symbol table.
-    SymbolTable& sym{ir->symbols};
+    SymbolTable& sym{ir.symbols};
 
     /// Map from integer type to its divide helper function.
     Hashmap<const type::Type*, Function*, 4> int_div_helpers{};
@@ -54,7 +54,7 @@ struct State {
     void Process() {
         // Find the binary instructions that need to be polyfilled.
         Vector<ir::Binary*, 64> worklist;
-        for (auto* inst : ir->instructions.Objects()) {
+        for (auto* inst : ir.instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
@@ -98,8 +98,8 @@ struct State {
 
             if (replacement != binary->Result()) {
                 // Replace the old binary instruction result with the new value.
-                if (auto name = ir->NameOf(binary->Result())) {
-                    ir->SetName(replacement, name);
+                if (auto name = ir.NameOf(binary->Result())) {
+                    ir.SetName(replacement, name);
                 }
                 binary->Result()->ReplaceAllUsesWith(replacement);
                 binary->Destroy();
@@ -232,8 +232,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BinaryPolyfill(Module* ir, const BinaryPolyfillConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "BinaryPolyfill transform");
+Result<SuccessType> BinaryPolyfill(Module& ir, const BinaryPolyfillConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform");
     if (!result) {
         return result;
     }

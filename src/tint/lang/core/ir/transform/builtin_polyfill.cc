@@ -34,22 +34,22 @@ struct State {
     const BuiltinPolyfillConfig& config;
 
     /// The IR module.
-    Module* ir = nullptr;
+    Module& ir;
 
     /// The IR builder.
-    Builder b{*ir};
+    Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The symbol table.
-    SymbolTable& sym{ir->symbols};
+    SymbolTable& sym{ir.symbols};
 
     /// Process the module.
     void Process() {
         // Find the builtin call instructions that may need to be polyfilled.
         Vector<ir::CoreBuiltinCall*, 4> worklist;
-        for (auto* inst : ir->instructions.Objects()) {
+        for (auto* inst : ir.instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
@@ -124,8 +124,8 @@ struct State {
             TINT_ASSERT_OR_RETURN(replacement);
 
             // Replace the old builtin call result with the new value.
-            if (auto name = ir->NameOf(builtin->Result())) {
-                ir->SetName(replacement, name);
+            if (auto name = ir.NameOf(builtin->Result())) {
+                ir.SetName(replacement, name);
             }
             builtin->Result()->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
@@ -457,8 +457,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(Module* ir, const BuiltinPolyfillConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfill transform");
+Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
     if (!result) {
         return result;
     }

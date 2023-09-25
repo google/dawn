@@ -33,13 +33,13 @@ namespace {
 /// PIMPL state for the transform, for a single function.
 struct State {
     /// The IR module.
-    core::ir::Module* ir = nullptr;
+    core::ir::Module& ir;
 
     /// The IR builder.
-    core::ir::Builder b{*ir};
+    core::ir::Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// The "has not returned" flag.
     core::ir::Var* continue_execution = nullptr;
@@ -53,11 +53,7 @@ struct State {
     core::ir::Return* fn_return = nullptr;
 
     /// A set of control instructions that transitively hold a return instruction
-    Hashset<core::ir::ControlInstruction*, 8> holds_return_;
-
-    /// Constructor
-    /// @param mod the module
-    explicit State(core::ir::Module* mod) : ir(mod) {}
+    Hashset<core::ir::ControlInstruction*, 8> holds_return_{};
 
     /// Process the function.
     /// @param fn the function to process
@@ -290,14 +286,14 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> MergeReturn(core::ir::Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "MergeReturn transform");
+Result<SuccessType> MergeReturn(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "MergeReturn transform");
     if (!result) {
         return result;
     }
 
     // Process each function.
-    for (auto* fn : ir->functions) {
+    for (auto* fn : ir.functions) {
         State{ir}.Process(fn);
     }
 

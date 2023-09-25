@@ -30,7 +30,7 @@ namespace tint::msl::raise {
 /// Raise a core IR module to the MSL dialect of the IR.
 /// @param mod the core IR module to raise to MSL dialect
 /// @returns success or failure
-Result<SuccessType> Raise(core::ir::Module* mod);
+Result<SuccessType> Raise(core::ir::Module& mod);
 
 }  // namespace tint::msl::raise
 

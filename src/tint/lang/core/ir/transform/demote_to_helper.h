@@ -34,7 +34,7 @@ namespace tint::core::ir::transform {
 /// buffers and textures.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> DemoteToHelper(Module* module);
+Result<SuccessType> DemoteToHelper(Module& module);
 
 }  // namespace tint::core::ir::transform
 

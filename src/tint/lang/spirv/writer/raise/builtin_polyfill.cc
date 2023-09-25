@@ -44,19 +44,19 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
-    core::ir::Module* ir = nullptr;
+    core::ir::Module& ir;
 
     /// The IR builder.
-    core::ir::Builder b{*ir};
+    core::ir::Builder b{ir};
 
     /// The type manager.
-    core::type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir.Types()};
 
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
         Vector<core::ir::CoreBuiltinCall*, 4> worklist;
-        for (auto* inst : ir->instructions.Objects()) {
+        for (auto* inst : ir.instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
@@ -160,8 +160,8 @@ struct State {
             TINT_ASSERT_OR_RETURN(replacement);
 
             // Replace the old builtin result with the new value.
-            if (auto name = ir->NameOf(builtin->Result())) {
-                ir->SetName(replacement, name);
+            if (auto name = ir.NameOf(builtin->Result())) {
+                ir.SetName(replacement, name);
             }
             builtin->Result()->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
@@ -172,7 +172,7 @@ struct State {
     /// @param value the literal value
     /// @returns the literal operand
     LiteralOperand* Literal(u32 value) {
-        return ir->values.Create<LiteralOperand>(b.ConstantValue(value));
+        return ir.values.Create<LiteralOperand>(b.ConstantValue(value));
     }
 
     /// Handle an `arrayLength()` builtin.
@@ -255,7 +255,7 @@ struct State {
 
                 // Construct the atomicCompareExchange result structure.
                 call = b.Construct(
-                    core::type::CreateAtomicCompareExchangeResult(ty, ir->symbols, int_ty),
+                    core::type::CreateAtomicCompareExchangeResult(ty, ir.symbols, int_ty),
                     Vector{original, compare->Result()});
                 break;
             }
@@ -851,8 +851,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfill transform");
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
     if (!result) {
         return result.Failure();
     }

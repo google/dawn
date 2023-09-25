@@ -30,7 +30,7 @@ namespace tint::core::ir::transform {
 /// GLSL's std140 layout rules.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> Std140(Module* module);
+Result<SuccessType> Std140(Module& module);
 
 }  // namespace tint::core::ir::transform
 

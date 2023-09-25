@@ -111,12 +111,12 @@ std::optional<AccessToReplace> ShouldReplace(core::ir::Access* access) {
     return result;
 }
 
-void Run(core::ir::Module* ir) {
-    core::ir::Builder builder(*ir);
+void Run(core::ir::Module& ir) {
+    core::ir::Builder builder(ir);
 
     // Find the access instructions that need replacing.
     Vector<AccessToReplace, 4> worklist;
-    for (auto* inst : ir->instructions.Objects()) {
+    for (auto* inst : ir.instructions.Objects()) {
         if (auto* access = inst->As<core::ir::Access>()) {
             if (auto to_replace = ShouldReplace(access)) {
                 worklist.Push(to_replace.value());
@@ -146,7 +146,7 @@ void Run(core::ir::Module* ir) {
 
         // Declare a local variable and copy the source object to it.
         auto* local = object_to_local.GetOrCreate(source_object, [&] {
-            auto* decl = builder.Var(ir->Types().ptr(
+            auto* decl = builder.Var(ir.Types().ptr(
                 core::AddressSpace::kFunction, source_object->Type(), core::Access::kReadWrite));
             decl->SetInitializer(source_object);
             decl->InsertBefore(access);
@@ -170,7 +170,7 @@ void Run(core::ir::Module* ir) {
         }
 
         core::ir::Instruction* new_access = builder.Access(
-            ir->Types().ptr(core::AddressSpace::kFunction, access_type, core::Access::kReadWrite),
+            ir.Types().ptr(core::AddressSpace::kFunction, access_type, core::Access::kReadWrite),
             local, indices);
         new_access->InsertBefore(access);
 
@@ -189,8 +189,8 @@ void Run(core::ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType> VarForDynamicIndex(core::ir::Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "VarForDynamicIndex transform");
+Result<SuccessType> VarForDynamicIndex(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "VarForDynamicIndex transform");
     if (!result) {
         return result;
     }

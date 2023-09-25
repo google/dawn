@@ -52,19 +52,19 @@ Result<Output> Generate(const Program& program, const Options& options) {
         auto ir = converted.Move();
 
         // Apply transforms as required by writer options.
-        auto remapper = core::ir::transform::BindingRemapper(&ir, options.binding_remapper_options);
+        auto remapper = core::ir::transform::BindingRemapper(ir, options.binding_remapper_options);
         if (!remapper) {
             return remapper.Failure();
         }
 
         // Raise the IR to the SPIR-V dialect.
-        auto raised = raise::Raise(&ir, options);
+        auto raised = raise::Raise(ir, options);
         if (!raised) {
             return std::move(raised.Failure());
         }
 
         // Generate the SPIR-V code.
-        auto impl = std::make_unique<Printer>(&ir, zero_initialize_workgroup_memory);
+        auto impl = std::make_unique<Printer>(ir, zero_initialize_workgroup_memory);
         auto spirv = impl->Generate();
         if (!spirv) {
             return std::move(spirv.Failure());

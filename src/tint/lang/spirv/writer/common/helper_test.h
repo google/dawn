@@ -76,7 +76,7 @@ auto& operator<<(STREAM& out, TestElementType type) {
 template <typename BASE>
 class SpirvWriterTestHelperBase : public BASE {
   public:
-    SpirvWriterTestHelperBase() : writer_(&mod, false) {}
+    SpirvWriterTestHelperBase() : writer_(mod, false) {}
 
     /// The test module.
     core::ir::Module mod;
@@ -103,7 +103,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @param options the optional writer options to use when raising the IR
     /// @returns true if generation and validation succeeded
     bool Generate(Printer& writer, Options options = {}) {
-        auto raised = raise::Raise(&mod, options);
+        auto raised = raise::Raise(mod, options);
         if (!raised) {
             err_ = raised.Failure().reason.str();
             return false;

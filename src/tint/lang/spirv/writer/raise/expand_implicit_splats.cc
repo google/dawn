@@ -28,14 +28,14 @@ namespace tint::spirv::writer::raise {
 
 namespace {
 
-void Run(core::ir::Module* ir) {
-    core::ir::Builder b(*ir);
+void Run(core::ir::Module& ir) {
+    core::ir::Builder b{ir};
 
     // Find the instructions that use implicit splats and either modify them in place or record them
     // to be replaced in a second pass.
     Vector<core::ir::Binary*, 4> binary_worklist;
     Vector<core::ir::CoreBuiltinCall*, 4> builtin_worklist;
-    for (auto* inst : ir->instructions.Objects()) {
+    for (auto* inst : ir.instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
         }
@@ -99,8 +99,8 @@ void Run(core::ir::Module* ir) {
                 vts->AppendArg(binary->LHS());
                 vts->AppendArg(binary->RHS());
             }
-            if (auto name = ir->NameOf(binary)) {
-                ir->SetName(vts->Result(), name);
+            if (auto name = ir.NameOf(binary)) {
+                ir.SetName(vts->Result(), name);
             }
             binary->Result()->ReplaceAllUsesWith(vts->Result());
             binary->ReplaceWith(vts);
@@ -131,8 +131,8 @@ void Run(core::ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType> ExpandImplicitSplats(core::ir::Module* ir) {
-    auto result = ValidateAndDumpIfNeeded(*ir, "ExpandImplicitSplats transform");
+Result<SuccessType> ExpandImplicitSplats(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "ExpandImplicitSplats transform");
     if (!result) {
         return result.Failure();
     }

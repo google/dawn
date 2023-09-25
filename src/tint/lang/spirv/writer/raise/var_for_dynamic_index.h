@@ -33,7 +33,7 @@ namespace tint::spirv::writer::raise {
 /// composite.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> VarForDynamicIndex(core::ir::Module* module);
+Result<SuccessType> VarForDynamicIndex(core::ir::Module& module);
 
 }  // namespace tint::spirv::writer::raise
 

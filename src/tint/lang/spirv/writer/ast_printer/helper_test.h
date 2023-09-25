@@ -101,7 +101,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     void Validate(Builder& b) {
         BinaryWriter writer;
         writer.WriteHeader(b.Module().IdBound());
-        writer.WriteModule(&b.Module());
+        writer.WriteModule(b.Module());
         auto binary = writer.Result();
 
         std::string spv_errors;
