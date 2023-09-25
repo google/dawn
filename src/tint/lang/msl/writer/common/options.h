@@ -38,6 +38,16 @@ struct Options {
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
+
+    /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
+    /// for all vertex shaders in the module.
+    bool emit_vertex_point_size = false;
+
+    /// Set to `true` to generate MSL via the Tint IR instead of from the AST.
+    bool use_tint_ir = false;
+
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
     uint32_t buffer_size_ubo_index = 30;
@@ -46,39 +56,30 @@ struct Options {
     /// Defaults to 0xFFFFFFFF.
     uint32_t fixed_sample_mask = 0xFFFFFFFF;
 
-    /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
-    /// for all vertex shaders in the module.
-    bool emit_vertex_point_size = false;
-
-    /// Set to `true` to disable workgroup memory zero initialization
-    bool disable_workgroup_init = false;
-
     /// Options used for dealing with pixel local storage
     PixelLocalOptions pixel_local_options = {};
-
-    /// Options used in the binding mappings for external textures
-    ExternalTextureOptions external_texture_options = {};
 
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
+    /// Options used in the binding mappings for external textures
+    ExternalTextureOptions external_texture_options = {};
+
     /// Options used in the bindings remapper
     BindingRemapperOptions binding_remapper_options = {};
 
-    /// Set to `true` to generate MSL via the Tint IR instead of from the AST.
-    bool use_tint_ir = false;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
+                 disable_workgroup_init,
+                 emit_vertex_point_size,
+                 use_tint_ir,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
-                 emit_vertex_point_size,
-                 disable_workgroup_init,
-                 external_texture_options,
+                 pixel_local_options,
                  array_length_from_uniform,
-                 binding_remapper_options,
-                 use_tint_ir);
+                 external_texture_options,
+                 binding_remapper_options);
 };
 
 }  // namespace tint::msl::writer

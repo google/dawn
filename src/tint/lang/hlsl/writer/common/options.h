@@ -42,25 +42,8 @@ struct Options {
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
-    /// The binding point to use for information passed via root constants.
-    std::optional<BindingPoint> root_constant_binding_point;
-
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
-
-    /// Options used in the binding mappings for external textures
-    ExternalTextureOptions external_texture_options = {};
-
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// from which to load buffer sizes.
-    ArrayLengthFromUniformOptions array_length_from_uniform = {};
-
-    /// Options used in the bindings remapper
-    BindingRemapperOptions binding_remapper_options = {};
-
-    /// Interstage locations actually used as inputs in the next stage of the pipeline.
-    /// This is potentially used for truncating unused interstage outputs at current shader stage.
-    std::bitset<16> interstage_locations;
 
     /// Set to `true` to run the TruncateInterstageVariables transform.
     bool truncate_interstage_variables = false;
@@ -68,19 +51,36 @@ struct Options {
     /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
     bool polyfill_reflect_vec2_f32 = false;
 
+    /// Options used to specify a mapping of binding points to indices into a UBO
+    /// from which to load buffer sizes.
+    ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
+    /// Interstage locations actually used as inputs in the next stage of the pipeline.
+    /// This is potentially used for truncating unused interstage outputs at current shader stage.
+    std::bitset<16> interstage_locations;
+
+    /// The binding point to use for information passed via root constants.
+    std::optional<BindingPoint> root_constant_binding_point;
+
+    /// Options used in the binding mappings for external textures
+    ExternalTextureOptions external_texture_options = {};
+
+    /// Options used in the bindings remapper
+    BindingRemapperOptions binding_remapper_options = {};
+
     /// The binding points that will be ignored in the rebustness transform.
     std::vector<BindingPoint> binding_points_ignored_in_robustness_transform;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
-                 root_constant_binding_point,
                  disable_workgroup_init,
-                 external_texture_options,
-                 array_length_from_uniform,
-                 binding_remapper_options,
-                 interstage_locations,
                  truncate_interstage_variables,
                  polyfill_reflect_vec2_f32,
+                 array_length_from_uniform,
+                 interstage_locations,
+                 root_constant_binding_point,
+                 external_texture_options,
+                 binding_remapper_options,
                  binding_points_ignored_in_robustness_transform);
 };
 

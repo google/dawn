@@ -41,18 +41,21 @@ struct Options {
     /// Copy constructor
     Options(const Options&);
 
+    /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
+    bool disable_robustness = false;
+
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
+
+    /// The GLSL version to emit
+    Version version;
+
     /// A map of SamplerTexturePair to combined sampler names for the
     /// CombineSamplers transform
     BindingMap binding_map;
 
     /// The binding point to use for placeholder samplers.
     BindingPoint placeholder_binding_point;
-
-    /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
-    bool disable_robustness = false;
-
-    /// Set to `true` to disable workgroup memory zero initialization
-    bool disable_workgroup_init = false;
 
     /// Options used in the bindings remapper
     BindingRemapperOptions binding_remapper_options = {};
@@ -65,18 +68,15 @@ struct Options {
     /// textureQueryLevels/textureSamples directly.
     std::optional<TextureBuiltinsFromUniformOptions> texture_builtins_from_uniform = std::nullopt;
 
-    /// The GLSL version to emit
-    Version version;
-
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(binding_map,
-                 placeholder_binding_point,
-                 disable_robustness,
+    TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
+                 version,
+                 binding_map,
+                 placeholder_binding_point,
                  binding_remapper_options,
                  external_texture_options,
-                 texture_builtins_from_uniform,
-                 version);
+                 texture_builtins_from_uniform);
 };
 
 }  // namespace tint::glsl::writer
