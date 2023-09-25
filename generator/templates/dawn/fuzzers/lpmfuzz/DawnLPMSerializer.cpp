@@ -91,7 +91,9 @@ namespace dawn::wire {
     if (objectStores[ObjectType::{{ member.handle_type.name.CamelCase() }}].Size() < DawnLPMFuzzer::k{{ member.handle_type.name.CamelCase() }}Limit) {
         {{ out }} = objectStores[ObjectType::{{ member.handle_type.name.CamelCase() }}].ReserveHandle();
     } else {
-        {{ out }} = {0, 0};
+        // Return failure in this case to guide the fuzzer away from generating too many
+        // objects of this type
+        return WireResult::FatalError;
     }
 {%- endmacro %}
 
