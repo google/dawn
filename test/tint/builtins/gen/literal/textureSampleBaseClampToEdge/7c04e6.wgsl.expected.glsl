@@ -58,12 +58,12 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 }
 
 
-vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
+vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
   vec2 modifiedCoords = (params.coordTransformationMatrix * vec3(coord, 1.0f));
-  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_smp, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(modifiedCoords, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_smp, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -80,8 +80,6 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   return color;
 }
 
-uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
@@ -93,7 +91,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
   prevent_dce.inner = res;
 }
 
@@ -171,12 +169,12 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 }
 
 
-vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
+vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
   vec2 modifiedCoords = (params.coordTransformationMatrix * vec3(coord, 1.0f));
-  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_smp, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(modifiedCoords, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_smp, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -193,8 +191,6 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   return color;
 }
 
-uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
@@ -206,7 +202,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
   prevent_dce.inner = res;
 }
 
@@ -278,12 +274,12 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 }
 
 
-vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
+vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
   vec2 modifiedCoords = (params.coordTransformationMatrix * vec3(coord, 1.0f));
-  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_smp, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(modifiedCoords, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_smp, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -300,8 +296,6 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   return color;
 }
 
-uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 val) {
@@ -313,7 +307,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), conv_ExternalTextureParams(ext_tex_params.inner));
   prevent_dce.inner = res;
 }
 

@@ -58,12 +58,26 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
 
 using BindingMap = std::unordered_map<tint::BindingPoint, tint::BindingPoint>;
 
+opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info,
+                                               tint::inspector::SamplerTexturePair pair,
+                                               tint::BindingPoint placeholderBindingPoint) {
+    info->emplace_back();
+    opengl::CombinedSampler* combinedSampler = &info->back();
+    combinedSampler->usePlaceholderSampler = pair.sampler_binding_point == placeholderBindingPoint;
+    combinedSampler->samplerLocation.group = BindGroupIndex(pair.sampler_binding_point.group);
+    combinedSampler->samplerLocation.binding = BindingNumber(pair.sampler_binding_point.binding);
+    combinedSampler->textureLocation.group = BindGroupIndex(pair.texture_binding_point.group);
+    combinedSampler->textureLocation.binding = BindingNumber(pair.texture_binding_point.binding);
+    return combinedSampler;
+}
+
 #define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
     X(const tint::Program*, inputProgram)                                                        \
     X(std::string, entryPointName)                                                               \
     X(SingleShaderStage, stage)                                                                  \
     X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
     X(BindingMap, glBindings)                                                                    \
+    X(BindingMap, externalTextureExpansionMap)                                                   \
     X(tint::TextureBuiltinsFromUniformOptions, textureBuiltinsFromUniform)                       \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
@@ -164,16 +178,17 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     // variables to the 1D space.
     const BindingInfoArray& moduleBindingInfo =
         GetEntryPoint(programmableStage.entryPoint).bindings;
-    std::unordered_map<BindingPoint, BindingPoint> glBindings;
+    BindingMap glBindings;
+    BindingMap externalTextureExpansionMap;
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        uint32_t groupAsInt = static_cast<uint32_t>(group);
         const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
         const auto& indices = layout->GetBindingIndexInfo()[group];
         const auto& groupBindingInfo = moduleBindingInfo[group];
         for (const auto& [bindingNumber, bindingInfo] : groupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
             GLuint shaderIndex = indices[bindingIndex];
-            BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
-                                         static_cast<uint32_t>(bindingNumber)};
+            BindingPoint srcBindingPoint{groupAsInt, static_cast<uint32_t>(bindingNumber)};
             BindingPoint dstBindingPoint{0, shaderIndex};
             if (srcBindingPoint != dstBindingPoint) {
                 glBindings.emplace(srcBindingPoint, dstBindingPoint);
@@ -183,12 +198,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         for (const auto& [_, expansion] : bgl->GetExternalTextureBindingExpansionMap()) {
             uint32_t plane1Slot = indices[bgl->GetBindingIndex(expansion.plane1)];
             uint32_t paramsSlot = indices[bgl->GetBindingIndex(expansion.params)];
-            glBindings.emplace(
-                BindingPoint{static_cast<uint32_t>(group), static_cast<uint32_t>(expansion.plane1)},
-                BindingPoint{0u, plane1Slot});
-            glBindings.emplace(
-                BindingPoint{static_cast<uint32_t>(group), static_cast<uint32_t>(expansion.params)},
-                BindingPoint{0u, paramsSlot});
+            BindingPoint plane0{groupAsInt, static_cast<uint32_t>(expansion.plane0)};
+            BindingPoint plane1{groupAsInt, static_cast<uint32_t>(expansion.plane1)};
+            BindingPoint params{groupAsInt, static_cast<uint32_t>(expansion.params)};
+            glBindings.emplace(plane1, BindingPoint{0u, plane1Slot});
+            glBindings.emplace(params, BindingPoint{0u, paramsSlot});
+            externalTextureExpansionMap[plane0] = plane1;
         }
     }
 
@@ -213,6 +228,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.entryPointName = programmableStage.entryPoint;
     req.externalTextureOptions = BuildExternalTextureTransformBindings(layout);
     req.glBindings = std::move(glBindings);
+    req.externalTextureExpansionMap = std::move(externalTextureExpansionMap);
     req.textureBuiltinsFromUniform = std::move(textureBuiltinsFromUniform);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -277,21 +293,26 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             auto uses = inspector.GetSamplerTextureUses(r.entryPointName, placeholderBindingPoint);
             CombinedSamplerInfo combinedSamplerInfo;
             for (const auto& use : uses) {
-                combinedSamplerInfo.emplace_back();
+                CombinedSampler* info =
+                    AppendCombinedSampler(&combinedSamplerInfo, use, placeholderBindingPoint);
 
-                CombinedSampler* info = &combinedSamplerInfo.back();
-                if (use.sampler_binding_point == placeholderBindingPoint) {
-                    info->usePlaceholderSampler = true;
+                if (info->usePlaceholderSampler) {
                     needsPlaceholderSampler = true;
                     tintOptions.placeholder_binding_point = placeholderBindingPoint;
-                } else {
-                    info->usePlaceholderSampler = false;
                 }
-                info->samplerLocation.group = BindGroupIndex(use.sampler_binding_point.group);
-                info->samplerLocation.binding = BindingNumber(use.sampler_binding_point.binding);
-                info->textureLocation.group = BindGroupIndex(use.texture_binding_point.group);
-                info->textureLocation.binding = BindingNumber(use.texture_binding_point.binding);
                 tintOptions.binding_map[use] = info->GetName();
+
+                // If the texture has an associated plane1 texture (ie., it's an external texture),
+                // append a new combined sampler with the same sampler and the plane1 texture.
+                BindingMap::iterator plane1Texture =
+                    r.externalTextureExpansionMap.find(use.texture_binding_point);
+                if (plane1Texture != r.externalTextureExpansionMap.end()) {
+                    tint::inspector::SamplerTexturePair plane1Use{use.sampler_binding_point,
+                                                                  plane1Texture->second};
+                    CombinedSampler* plane1Info = AppendCombinedSampler(
+                        &combinedSamplerInfo, plane1Use, placeholderBindingPoint);
+                    tintOptions.binding_map[plane1Use] = plane1Info->GetName();
+                }
             }
 
             tintOptions.binding_remapper_options.binding_points = std::move(r.glBindings);

@@ -794,14 +794,12 @@ fn main() -> vec4<f32> {
 }
 )";
     auto* expect = R"(
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var fred : texture_2d<f32>;
-
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var barney : texture_2d<f32>;
 
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
 
 fn main() -> vec4<f32> {
-  return (textureLoad(fred, vec2<i32>(), 0) + textureSample(barney, placeholder_sampler, vec2<f32>()));
+  return (textureLoad(barney, vec2<i32>(), 0) + textureSample(barney, placeholder_sampler, vec2<f32>()));
 }
 )";
 

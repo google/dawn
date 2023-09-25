@@ -1,14 +1,13 @@
 #version 310 es
 
 
-vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
+vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_s, vec2 coord) {
+  vec2 dims = vec2(uvec2(textureSize(t_s, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);
 }
 
-uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
@@ -16,7 +15,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_arg_1, arg_2);
   prevent_dce.inner = res;
 }
 
@@ -37,14 +36,13 @@ void main() {
 precision highp float;
 
 
-vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
+vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_s, vec2 coord) {
+  vec2 dims = vec2(uvec2(textureSize(t_s, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);
 }
 
-uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
@@ -52,7 +50,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_arg_1, arg_2);
   prevent_dce.inner = res;
 }
 
@@ -67,14 +65,13 @@ void main() {
 #version 310 es
 
 
-vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
+vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_s, vec2 coord) {
+  vec2 dims = vec2(uvec2(textureSize(t_s, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);
 }
 
-uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
@@ -82,7 +79,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureSampleBaseClampToEdge_9ca02c() {
   vec2 arg_2 = vec2(1.0f);
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, arg_2);
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_arg_1, arg_2);
   prevent_dce.inner = res;
 }
 

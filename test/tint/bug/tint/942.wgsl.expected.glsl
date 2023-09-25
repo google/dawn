@@ -28,7 +28,6 @@ uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
 
-uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
 
 void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
@@ -41,7 +40,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
   }
   barrier();
   uint filterOffset = tint_div((params.inner.filterDim - 1u), 2u);
-  uvec2 dims = uvec2(textureSize(inputTex_1, 0));
+  uvec2 dims = uvec2(textureSize(inputTex_samp, 0));
   uvec2 baseIndex = (((WorkGroupID.xy * uvec2(params.inner.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u))) - uvec2(filterOffset, 0u));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
