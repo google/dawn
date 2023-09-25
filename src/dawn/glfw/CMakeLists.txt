@@ -16,7 +16,10 @@ if(DAWN_USE_GLFW)
 
 add_library(dawn_glfw STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_glfw)
-target_sources(dawn_glfw PRIVATE
+target_sources(dawn_glfw
+  INTERFACE
+    "${DAWN_INCLUDE_DIR}/webgpu/webgpu_glfw.h"
+  PRIVATE
     "utils.cpp"
 )
 target_link_libraries(dawn_glfw

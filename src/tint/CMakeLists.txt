@@ -347,6 +347,12 @@ function(tint_add_target TARGET KIND)
 
   if(${KIND} STREQUAL lib)
     add_library(${TARGET} STATIC EXCLUDE_FROM_ALL)
+    if (TINT_ENABLE_INSTALL)
+      install(TARGETS ${TARGET}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      )
+    endif()
     tint_default_compile_options(${TARGET})
 
     if(TINT_BUILD_FUZZERS)
@@ -355,6 +361,12 @@ function(tint_add_target TARGET KIND)
       set(FUZZ_TARGET "${TARGET}${TINT_FUZZ_SUFFIX}")
       add_library(${FUZZ_TARGET} STATIC EXCLUDE_FROM_ALL)
       target_sources(${FUZZ_TARGET} PRIVATE ${SOURCES})
+      if (TINT_ENABLE_INSTALL)
+        install(TARGETS ${FUZZ_TARGET}
+                LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                )
+      endif()
       tint_default_compile_options(${FUZZ_TARGET})
     endif()
   elseif(${KIND} STREQUAL cmd)
@@ -587,3 +599,17 @@ endif(TINT_BUILD_TESTS)
 # Target aliases
 ################################################################################
 add_library(libtint ALIAS tint_api)
+
+if (TINT_ENABLE_INSTALL)
+  # We need to recurse all folders and include all headers because tint.h includes most headers from src/tint
+  file(GLOB TINT_HEADERS "${DAWN_INCLUDE_DIR}/tint/*.h")
+
+  install(FILES ${TINT_HEADERS}  DESTINATION  ${CMAKE_INSTALL_INCLUDEDIR}/tint/)
+
+  file(GLOB_RECURSE TINT_SRC_HEADERS RELATIVE ${CMAKE_SOURCE_DIR}/src/tint/ "*.h")
+
+  foreach(TINT_HEADER_FILE ${TINT_SRC_HEADERS})
+      get_filename_component(TINT_HEADER_DIR ${TINT_HEADER_FILE} DIRECTORY)
+      install(FILES ${CMAKE_SOURCE_DIR}/src/tint/${TINT_HEADER_FILE}  DESTINATION  ${CMAKE_INSTALL_INCLUDEDIR}/src/tint/${TINT_HEADER_DIR})
+  endforeach ()
+endif()

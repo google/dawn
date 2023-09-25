@@ -21,8 +21,10 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_sources(dawn_platform PRIVATE
+  PUBLIC
     "${DAWN_INCLUDE_DIR}/dawn/platform/DawnPlatform.h"
     "${DAWN_INCLUDE_DIR}/dawn/platform/dawn_platform_export.h"
+  PRIVATE
     "DawnPlatform.cpp"
     "WorkerThread.cpp"
     "WorkerThread.h"
@@ -33,3 +35,5 @@ target_sources(dawn_platform PRIVATE
     "tracing/TraceEvent.h"
 )
 target_link_libraries(dawn_platform PUBLIC dawn_headers PRIVATE dawn_internal_config dawn_common)
+
+install_if_enabled(dawn_platform)

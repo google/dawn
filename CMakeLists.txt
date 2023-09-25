@@ -76,6 +76,45 @@ function (set_if_not_defined name value description)
     endif()
 endfunction()
 
+function (install_if_enabled target)
+    if(NOT DAWN_ENABLE_INSTALL)
+        return()
+    endif()
+
+    install(TARGETS ${target}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+
+    get_target_property(targetHeaders ${target} INTERFACE_SOURCES)
+    if (NOT targetHeaders)
+        return()
+    endif()
+
+    foreach(headerFile ${targetHeaders})
+        # Starting from CMake 3.20 there is the cmake_path command that could simplify this code.
+        # Compute the install subdirectory for the header by stripping out the path to
+        # the include / gen/include directory...
+        string(FIND "${headerFile}" "${DAWN_INCLUDE_DIR}" foundIndex)
+        if (foundIndex EQUAL 0)
+            string(LENGTH "${DAWN_INCLUDE_DIR}/" lengthToRemove)
+        endif()
+        string(FIND "${headerFile}" "${DAWN_BUILD_GEN_DIR}/include/" foundIndex)
+        if (foundIndex EQUAL 0)
+            string(LENGTH "${DAWN_BUILD_GEN_DIR}/include/" lengthToRemove)
+        endif()
+        string(SUBSTRING "${headerFile}" "${lengthToRemove}" -1 headerRelDir)
+
+        # ... then remove everything after the last /
+        string(FIND "${headerRelDir}" "/" foundIndex REVERSE)
+        string(SUBSTRING "${headerRelDir}" 0 ${foundIndex} headerRelDir)
+
+        install(FILES "${headerFile}" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${headerRelDir})
+    endforeach()
+endfunction()
+
+
 # Default values for the backend-enabling options
 set(ENABLE_D3D11 OFF)
 set(ENABLE_D3D12 OFF)
@@ -121,6 +160,7 @@ if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
 endif()
 
 option_if_not_defined(DAWN_ENABLE_ASAN "Enable address sanitizer" OFF)
+option_if_not_defined(DAWN_ENABLE_INSTALL "Enable install step for Dawn libraries" OFF)
 option_if_not_defined(DAWN_ENABLE_TSAN "Enable thread sanitizer" OFF)
 option_if_not_defined(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option_if_not_defined(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
@@ -155,6 +195,7 @@ else()
   set(TINT_DEFAULT_GLSL OFF)
 endif()
 
+option_if_not_defined(TINT_ENABLE_INSTALL "Enable install step for Tint libraries" OFF)
 option_if_not_defined(TINT_BUILD_CMD_TOOLS "Build the Tint command line tools" ON)
 option_if_not_defined(TINT_BUILD_DOCS "Build documentation" ON)
 option_if_not_defined(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)

@@ -92,6 +92,8 @@ function(DawnGenerator)
         COMMENT "Dawn: Generating files for ${G_PRINT_NAME}."
     )
 
+    set_source_files_properties(${OUTPUTS} PROPERTIES GENERATED TRUE)
+
     # Return the list of outputs.
     set(${G_RESULT_VARIABLE} ${OUTPUTS} PARENT_SCOPE)
 endfunction()

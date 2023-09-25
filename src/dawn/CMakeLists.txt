@@ -73,8 +73,13 @@ DawnJSONGenerator(
 # because the file doesn't exist on disk.
 add_library(dawn_headers STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_headers)
-target_sources(dawn_headers PRIVATE ${DAWN_HEADERS_GEN_SOURCES})
+target_sources(dawn_headers INTERFACE
+    "${DAWN_INCLUDE_DIR}/webgpu/webgpu.h"
+    PRIVATE
+    ${DAWN_HEADERS_GEN_SOURCES}
+)
 target_link_libraries(dawn_headers INTERFACE dawn_public_config)
+install_if_enabled(dawn_headers)
 
 ###############################################################################
 # Dawn C++ headers
@@ -90,12 +95,14 @@ DawnJSONGenerator(
 # dawn_headers above.
 add_library(dawncpp_headers STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawncpp_headers)
-target_sources(dawncpp_headers PRIVATE
+target_sources(dawncpp_headers INTERFACE
+    "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp.h"
     "${DAWN_INCLUDE_DIR}/dawn/EnumClassBitmasks.h"
+    PRIVATE
     ${DAWNCPP_HEADERS_GEN_SOURCES}
 )
 target_link_libraries(dawncpp_headers INTERFACE dawn_headers)
-
+install_if_enabled(dawncpp_headers)
 ###############################################################################
 # Dawn C++ wrapper
 ###############################################################################
@@ -113,6 +120,8 @@ target_link_libraries(dawncpp PUBLIC dawncpp_headers)
 
 add_library(webgpu_cpp ALIAS dawncpp)
 
+install_if_enabled(dawncpp)
+
 ###############################################################################
 # libdawn_proc
 ###############################################################################
@@ -129,8 +138,16 @@ target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
 endif()
-target_sources(dawn_proc PRIVATE ${DAWNPROC_GEN_SOURCES})
+target_sources(dawn_proc
+  INTERFACE
+    "${DAWN_INCLUDE_DIR}/dawn/dawn_thread_dispatch_proc.h"
+    "${DAWN_INCLUDE_DIR}/dawn/dawn_proc.h"
+  PRIVATE
+    ${DAWNPROC_GEN_SOURCES}
+)
 target_link_libraries(dawn_proc PUBLIC dawn_headers)
+
+install_if_enabled(dawn_proc)
 
 ###############################################################################
 # Other generated files (upstream header, emscripten header, emscripten bits)
