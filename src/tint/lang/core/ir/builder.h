@@ -655,6 +655,15 @@ class Builder {
     ir::Discard* Discard();
 
     /// Creates a user function call instruction
+    /// @param func the function to call
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename... ARGS>
+    ir::UserCall* Call(ir::Function* func, ARGS&&... args) {
+        return Call(func->ReturnType(), func, std::forward<ARGS>(args)...);
+    }
+
+    /// Creates a user function call instruction
     /// @param type the return type of the call
     /// @param func the function to call
     /// @param args the call arguments
@@ -688,6 +697,15 @@ class Builder {
                                                     Values(std::forward<ARGS>(args)...)));
     }
 
+    /// Creates a value conversion instruction to the template type T
+    /// @param val the value to be converted
+    /// @returns the instruction
+    template <typename T, typename VAL>
+    ir::Convert* Convert(VAL&& val) {
+        auto* type = ir.Types().Get<T>();
+        return Convert(type, std::forward<VAL>(val));
+    }
+
     /// Creates a value conversion instruction
     /// @param to the type converted to
     /// @param val the value to be converted
@@ -696,6 +714,15 @@ class Builder {
     ir::Convert* Convert(const core::type::Type* to, VAL&& val) {
         return Append(ir.instructions.Create<ir::Convert>(InstructionResult(to),
                                                           Value(std::forward<VAL>(val))));
+    }
+
+    /// Creates a value constructor instruction to the template type T
+    /// @param args the arguments to the constructor
+    /// @returns the instruction
+    template <typename T, typename... ARGS>
+    ir::Construct* Construct(ARGS&&... args) {
+        auto* type = ir.Types().Get<T>();
+        return Construct(type, std::forward<ARGS>(args)...);
     }
 
     /// Creates a value constructor instruction
@@ -767,6 +794,25 @@ class Builder {
     /// @param type the var type
     /// @returns the instruction
     ir::Var* Var(std::string_view name, const core::type::Pointer* type);
+
+    /// Creates a new `var` declaration with a name and initializer value
+    /// @param name the var name
+    /// @param init the var initializer
+    /// @returns the instruction
+    template <core::AddressSpace SPACE = core::AddressSpace::kFunction,
+              core::Access ACCESS = core::Access::kReadWrite,
+              typename VALUE = void>
+    ir::Var* Var(std::string_view name, VALUE&& init) {
+        auto* val = Value(std::forward<VALUE>(init));
+        if (TINT_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        auto* var = Var(name, ir.Types().ptr(SPACE, val->Type(), ACCESS));
+        var->SetInitializer(val);
+        ir.SetName(var->Result(), name);
+        return var;
+    }
 
     /// Creates a new `let` declaration
     /// @param name the let name

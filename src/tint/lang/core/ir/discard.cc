@@ -21,7 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Discard);
 
 namespace tint::core::ir {
 
-Discard::Discard() = default;
+Discard::Discard() {
+    flags_.Add(Flag::kSequenced);
+}
 
 Discard::~Discard() = default;
 

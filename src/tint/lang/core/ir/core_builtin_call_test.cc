@@ -48,7 +48,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(nullptr, core::BuiltinFn::kAbs);
+            b.Call(static_cast<type::Type*>(nullptr), core::BuiltinFn::kAbs);
         },
         "");
 }

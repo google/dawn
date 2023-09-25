@@ -735,9 +735,8 @@ fn a(v : i32) -> i32 {
 }
 
 fn f() -> f32 {
-  let v_1 = array<mat3x4<f32>, 5u>();
-  let v_2 = a(2i);
-  return v_1[a(1i)][v_2][a(3i)];
+  let v_1 = a(2i);
+  return array<mat3x4<f32>, 5u>()[a(1i)][v_1][a(3i)];
 }
 )");
 }
@@ -763,9 +762,8 @@ fn a(v : i32) -> i32 {
 }
 
 fn f() -> f32 {
-  let v_1 = array<mat3x4<f32>, 5u>();
-  let v_2 = a(3i);
-  return v_1[a(1i)][a(2i)][v_2];
+  let v_1 = a(3i);
+  return array<mat3x4<f32>, 5u>()[a(1i)][a(2i)][v_1];
 }
 )");
 }
@@ -791,10 +789,9 @@ fn a(v : i32) -> i32 {
 }
 
 fn f() -> f32 {
-  let v_1 = array<mat3x4<f32>, 5u>();
-  let v_2 = a(3i);
-  let v_3 = a(2i);
-  return v_1[a(1i)][v_3][v_2];
+  let v_1 = a(3i);
+  let v_2 = a(2i);
+  return array<mat3x4<f32>, 5u>()[a(1i)][v_2][v_1];
 }
 )");
 }

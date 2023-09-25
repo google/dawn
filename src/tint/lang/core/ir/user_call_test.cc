@@ -51,7 +51,7 @@ TEST_F(IR_UserCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(nullptr, b.Function("myfunc", mod.Types().void_()));
+            b.Call(static_cast<type::Type*>(nullptr), b.Function("myfunc", mod.Types().void_()));
         },
         "");
 }

@@ -388,6 +388,377 @@ fn f(a : i32, b : u32) -> i32 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Type Construct
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, TypeConstruct_i32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<i32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : i32 = i32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_u32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<u32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_f32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<f32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : f32 = f32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_bool) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<bool>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : bool = bool(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_struct) {
+    auto* S = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.New("a"), ty.i32()},
+                                                  {mod.symbols.New("b"), ty.u32()},
+                                                  {mod.symbols.New("c"), ty.f32()},
+                                              });
+
+    auto* fn = b.Function("f", ty.void_());
+    auto* x = b.FunctionParam("x", ty.i32());
+    auto* y = b.FunctionParam("y", ty.u32());
+    auto* z = b.FunctionParam("z", ty.f32());
+    fn->SetParams({x, y, z});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct(S, x, y, z));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+struct S {
+  a : i32,
+  b : u32,
+  c : f32,
+}
+
+fn f(x : i32, y : u32, z : f32) {
+  var v : S = S(x, y, z);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_array) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<array<i32, 3u>>(i, i, i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : array<i32, 3u> = array<i32, 3u>(i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_vec3i_Splat) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<vec3<i32>>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : vec3<i32> = vec3<i32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_vec3i_Scalars) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<vec3<i32>>(i, i, i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : vec3<i32> = vec3<i32>(i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_mat2x3f_Scalars) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.f32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Construct<mat2x3<f32>>(i, i, i, i, i, i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : f32) {
+  var v : mat2x3<f32> = mat2x3<f32>(i, i, i, i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_mat2x3f_Columns) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.f32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        auto* col_0 = b.Construct<vec3<f32>>(i, i, i);
+        auto* col_1 = b.Construct<vec3<f32>>(i, i, i);
+        b.Var("v", b.Construct<mat2x3<f32>>(col_0, col_1));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : f32) {
+  var v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(i, i, i), vec3<f32>(i, i, i));
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConstruct_Inlining) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i0 = b.FunctionParam("i0", ty.i32());
+    auto* i1 = b.FunctionParam("i1", ty.i32());
+    auto* i2 = b.FunctionParam("i2", ty.i32());
+    auto* i3 = b.FunctionParam("i3", ty.i32());
+    auto* i4 = b.FunctionParam("i4", ty.i32());
+    auto* i5 = b.FunctionParam("i5", ty.i32());
+    fn->SetParams({i0, i1, i2, i3, i4, i5});
+
+    b.Append(fn->Block(), [&] {
+        auto* f3 = b.Construct<f32>(i3);
+        auto* f4 = b.Construct<f32>(i4);
+        auto* f5 = b.Construct<f32>(i5);
+        auto* f0 = b.Construct<f32>(i0);
+        auto* f2 = b.Construct<f32>(i2);
+        auto* f1 = b.Construct<f32>(i1);
+        b.Var("v", b.Construct<mat2x3<f32>>(f0, f1, f2, f3, f4, f5));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i0 : i32, i1 : i32, i2 : i32, i3 : i32, i4 : i32, i5 : i32) {
+  var v : mat2x3<f32> = mat2x3<f32>(f32(i0), f32(i1), f32(i2), f32(i3), f32(i4), f32(i5));
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Type Convert
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, TypeConvert_i32_to_u32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.i32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<u32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : i32) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_u32_to_f32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.u32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<f32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : u32) {
+  var v : f32 = f32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_f32_to_i32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.f32());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<i32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : f32) {
+  var v : i32 = i32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_bool_to_u32) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.bool_());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<u32>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : bool) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_vec3i_to_vec3u) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.vec3<i32>());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<vec3<u32>>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : vec3<i32>) {
+  var v : vec3<u32> = vec3<u32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_vec3u_to_vec3f) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.vec3<u32>());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<vec3<f32>>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(i : vec3<u32>) {
+  var v : vec3<f32> = vec3<f32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_mat2x3f_to_mat2x3h) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* i = b.FunctionParam("i", ty.mat2x3<f32>());
+    fn->SetParams({i});
+
+    b.Append(fn->Block(), [&] {
+        b.Var("v", b.Convert<mat2x3<f16>>(i));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+enable f16;
+
+fn f(i : mat2x3<f32>) {
+  var v : mat2x3<f16> = mat2x3<f16>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, TypeConvert_Inlining) {
+    auto* fn_g = b.Function("g", ty.void_());
+    fn_g->SetParams({
+        b.FunctionParam("a", ty.i32()),
+        b.FunctionParam("b", ty.u32()),
+        b.FunctionParam("c", ty.f32()),
+    });
+    b.Append(fn_g->Block(), [&] { b.Return(fn_g); });
+
+    auto* fn_f = b.Function("f", ty.void_());
+    auto* v = b.FunctionParam("v", ty.i32());
+    fn_f->SetParams({v});
+    b.Append(fn_f->Block(), [&] {
+        auto* u = b.Convert<u32>(v);
+        auto* f = b.Convert<f32>(v);
+        auto* i = b.Convert<i32>(v);
+        b.Call(fn_g, i, u, f);
+        b.Return(fn_f);
+    });
+
+    EXPECT_WGSL(R"(
+fn g(a : i32, b : u32, c : f32) {
+}
+
+fn f(v : i32) {
+  g(i32(v), u32(v), f32(v));
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Short-circuiting binary ops
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, ShortCircuit_And_Param_2) {
