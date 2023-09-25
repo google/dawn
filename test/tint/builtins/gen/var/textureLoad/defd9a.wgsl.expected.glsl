@@ -9,7 +9,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_defd9a() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -43,7 +43,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_defd9a() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -71,7 +71,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_defd9a() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 

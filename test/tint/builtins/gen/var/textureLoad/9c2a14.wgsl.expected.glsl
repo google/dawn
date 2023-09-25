@@ -2,14 +2,14 @@ SKIP: FAILED
 
 #version 310 es
 
-layout(rg32f) uniform highp image2D arg_0;
+layout(rg32f) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_9c2a14() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -36,14 +36,14 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision highp float;
 
-layout(rg32f) uniform highp image2D arg_0;
+layout(rg32f) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_9c2a14() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -64,14 +64,14 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 
-layout(rg32f) uniform highp image2D arg_0;
+layout(rg32f) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_9c2a14() {
   ivec2 arg_1 = ivec2(1);
-  vec4 res = texelFetch(arg_0, arg_1);
+  vec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 

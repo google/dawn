@@ -8,7 +8,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureLoad_8c6176() {
-  uvec4 res = texelFetch(arg_0, ivec2(uvec2(1u)));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u)));
   prevent_dce.inner = res;
 }
 
@@ -41,7 +41,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureLoad_8c6176() {
-  uvec4 res = texelFetch(arg_0, ivec2(uvec2(1u)));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u)));
   prevent_dce.inner = res;
 }
 
@@ -68,7 +68,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureLoad_8c6176() {
-  uvec4 res = texelFetch(arg_0, ivec2(uvec2(1u)));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u)));
   prevent_dce.inner = res;
 }
 

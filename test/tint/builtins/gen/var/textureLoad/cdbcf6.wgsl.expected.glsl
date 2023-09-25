@@ -10,7 +10,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_cdbcf6() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 res = texelFetch(arg_0, ivec3(uvec3(arg_1, arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(uvec3(arg_1, arg_2)));
   prevent_dce.inner = res;
 }
 
@@ -28,10 +28,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:11: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:11: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:11: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 
@@ -46,7 +45,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_cdbcf6() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 res = texelFetch(arg_0, ivec3(uvec3(arg_1, arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(uvec3(arg_1, arg_2)));
   prevent_dce.inner = res;
 }
 
@@ -59,10 +58,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:12: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:12: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:12: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:12: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 
@@ -76,7 +74,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_cdbcf6() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  vec4 res = texelFetch(arg_0, ivec3(uvec3(arg_1, arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(uvec3(arg_1, arg_2)));
   prevent_dce.inner = res;
 }
 
@@ -90,10 +88,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:11: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:11: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:11: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 
