@@ -79,4 +79,16 @@ std::unique_ptr<dawn::platform::WorkerTaskPool> Platform::CreateWorkerTaskPool()
     return std::make_unique<AsyncWorkerThreadPool>();
 }
 
+bool Platform::IsFeatureEnabled(Features feature) {
+    switch (feature) {
+        case Features::kWebGPUUseDXC:
+#ifdef DAWN_USE_BUILT_DXC
+            return true;
+#else
+            return false;
+#endif
+    }
+    return false;
+}
+
 }  // namespace dawn::platform

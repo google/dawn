@@ -26,6 +26,7 @@
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native::d3d12 {
 
@@ -489,7 +490,10 @@ void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) co
     if (GetDeviceInfo().shaderModel <= 60) {
         adapterToggles->ForceSet(Toggle::UseDXC, false);
     }
-    adapterToggles->Default(Toggle::UseDXC, true);
+
+    bool useDxc =
+        GetInstance()->GetPlatform()->IsFeatureEnabled(dawn::platform::Features::kWebGPUUseDXC);
+    adapterToggles->Default(Toggle::UseDXC, useDxc);
 #else
     // Default to using FXC
     if (!GetBackend()->IsDXCAvailable()) {
