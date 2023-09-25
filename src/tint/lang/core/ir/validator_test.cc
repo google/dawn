@@ -70,6 +70,39 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
+    auto* var = b.Var(ty.ptr<private_, i32>());
+    mod.root_block = b.RootBlock();
+    mod.root_block->Append(var);
+
+    auto* f = b.Function("f", ty.void_());
+    f->Block()->Append(b.Return(f));
+    var->SetBlock(f->Block());
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:2:38 error: var: instruction in root block does not have root block as parent
+  %1:ptr<private, i32, read_write> = var
+                                     ^^^
+
+:1:1 note: In block
+%b1 = block {  # root
+^^^^^^^^^^^
+
+note: # Disassembly
+%b1 = block {  # root
+  %1:ptr<private, i32, read_write> = var
+}
+
+%f = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -106,6 +139,38 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
+    auto* f = b.Function("f", ty.void_());
+    auto* g = b.Function("g", ty.void_());
+    mod.functions.Pop();  // Remove g
+
+    b.Append(f->Block(), [&] {
+        b.Call(g);
+        b.Return(f);
+    });
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:3:20 error: call: call target is not part of the module
+    %2:void = call %g
+                   ^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%f = func():void -> %b1 {
+  %b1 = block {
+    %2:void = call %g
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 
@@ -119,6 +184,48 @@ TEST_F(IR_ValidatorTest, Block_NoTerminator) {
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
+    auto* var = b.Var(ty.ptr<function, i32>());
+
+    auto* f = b.Function("f", ty.void_());
+    f->Block()->Append(var);
+    f->Block()->Append(b.Return(f));
+
+    auto* g = b.Function("g", ty.void_());
+    g->Block()->Append(b.Return(g));
+
+    var->SetBlock(g->Block());
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:3:41 error: var: block instruction does not have same block as parent
+    %2:ptr<function, i32, read_write> = var
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%f = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, i32, read_write> = var
+    ret
+  }
+}
+%g = func():void -> %b2 {
+  %b2 = block {
+    ret
   }
 }
 )");
@@ -1030,8 +1137,7 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(),
-              R"(:3:46 error: var: instruction has operand which is not alive
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: instruction operand 0 is not alive
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 
@@ -1062,7 +1168,7 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: instruction operand missing usage
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: instruction operand 0 missing usage
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 

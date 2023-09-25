@@ -413,6 +413,7 @@ void Disassembler::EmitValue(Value* val) {
         [&](ir::InstructionResult* rv) { out_ << "%" << IdOf(rv); },
         [&](ir::BlockParam* p) { out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName(); },
         [&](ir::FunctionParam* p) { out_ << "%" << IdOf(p); },
+        [&](ir::Function* f) { out_ << "%" << IdOf(f); },
         [&](Default) {
             if (val == nullptr) {
                 out_ << "undef";
@@ -461,7 +462,8 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitValueWithType(uc);
             out_ << " = ";
             EmitInstructionName(uc);
-            out_ << " %" << IdOf(uc->Target());
+            out_ << " ";
+            EmitOperand(uc, UserCall::kFunctionOperandOffset);
             if (!uc->Args().IsEmpty()) {
                 out_ << ", ";
             }
