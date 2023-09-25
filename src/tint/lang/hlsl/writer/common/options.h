@@ -17,6 +17,7 @@
 
 #include <bitset>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include "src/tint/api/common/binding_point.h"
@@ -71,6 +72,9 @@ struct Options {
     /// The binding points that will be ignored in the rebustness transform.
     std::vector<BindingPoint> binding_points_ignored_in_robustness_transform;
 
+    /// AccessControls is a map of old binding point to new access control
+    std::unordered_map<BindingPoint, core::Access> access_controls;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
@@ -81,7 +85,8 @@ struct Options {
                  root_constant_binding_point,
                  external_texture_options,
                  binding_remapper_options,
-                 binding_points_ignored_in_robustness_transform);
+                 binding_points_ignored_in_robustness_transform,
+                 access_controls);
 };
 
 }  // namespace tint::hlsl::writer

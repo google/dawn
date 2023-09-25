@@ -15,6 +15,7 @@
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "dawn/common/Assert.h"
@@ -125,6 +126,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     // different types.
     bindingRemapper.allow_collisions = true;
 
+    std::unordered_map<BindingPoint, tint::core::Access> accessControls;
+
     tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
                                           layout->GetDynamicStorageBufferLengthsShaderRegister()};
@@ -158,8 +161,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                       wgpu::BufferBindingType::Storage ||
                   bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
             if (forceStorageBufferAsUAV) {
-                bindingRemapper.access_controls.emplace(srcBindingPoint,
-                                                        tint::core::Access::kReadWrite);
+                accessControls.emplace(srcBindingPoint, tint::core::Access::kReadWrite);
             }
 
             // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be
@@ -228,6 +230,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.numWorkgroupsShaderRegister = layout->GetNumWorkgroupsShaderRegister();
     req.hlsl.numWorkgroupsRegisterSpace = layout->GetNumWorkgroupsRegisterSpace();
     req.hlsl.bindingRemapper = std::move(bindingRemapper);
+    req.hlsl.accessControls = std::move(accessControls);
     req.hlsl.externalTextureOptions = BuildExternalTextureTransformBindings(layout);
     req.hlsl.arrayLengthFromUniform = std::move(arrayLengthFromUniform);
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);

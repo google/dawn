@@ -217,8 +217,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     // BindingRemapper must come after MultiplanarExternalTexture
     manager.Add<ast::transform::BindingRemapper>();
     data.Add<ast::transform::BindingRemapper::Remappings>(
-        options.binding_remapper_options.binding_points,
-        options.binding_remapper_options.access_controls,
+        options.binding_remapper_options.binding_points, options.access_controls,
         options.binding_remapper_options.allow_collisions);
 
     {  // Builtin polyfills

@@ -18,6 +18,7 @@
 #include <d3dcompiler.h>
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "dawn/native/CacheRequest.h"
@@ -43,6 +44,8 @@ namespace dawn::native::d3d {
 
 enum class Compiler { FXC, DXC };
 
+using AccessControl = std::unordered_map<tint::BindingPoint, tint::core::Access>;
+
 #define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
     X(const tint::Program*, inputProgram)                                                        \
     X(std::string_view, entryPointName)                                                          \
@@ -64,6 +67,7 @@ enum class Compiler { FXC, DXC };
     X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
     X(tint::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                               \
     X(tint::BindingRemapperOptions, bindingRemapper)                                             \
+    X(AccessControl, accessControls)                                                             \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                           \
     X(LimitsForCompilationRequest, limits)                                                       \

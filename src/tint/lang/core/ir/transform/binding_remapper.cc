@@ -29,9 +29,6 @@ namespace tint::core::ir::transform {
 namespace {
 
 Result<SuccessType> Run(ir::Module& ir, const BindingRemapperOptions& options) {
-    if (!options.access_controls.empty()) {
-        return Failure{"remapping access controls is currently unsupported"};
-    }
     if (options.binding_points.empty()) {
         return Success;
     }

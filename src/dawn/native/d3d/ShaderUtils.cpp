@@ -226,6 +226,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     options.disable_robustness = !r.isRobustnessEnabled;
     options.disable_workgroup_init = r.disableWorkgroupInit;
     options.binding_remapper_options = r.bindingRemapper;
+    options.access_controls = r.accessControls;
     options.external_texture_options = r.externalTextureOptions;
 
     if (r.usesNumWorkgroups) {
