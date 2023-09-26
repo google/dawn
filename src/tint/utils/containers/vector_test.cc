@@ -238,6 +238,69 @@ TEST(TintVectorTest, Erase_Back) {
     EXPECT_EQ(vec[0], "one");
 }
 
+TEST(TintVectorTest, EraseIf_Front) {
+    Vector<std::string, 3> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    EXPECT_EQ(vec.Length(), 4u);
+
+    vec.EraseIf([](const std::string& el) { return el == "one"; });
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec[0], "two");
+    EXPECT_EQ(vec[1], "three");
+    EXPECT_EQ(vec[2], "four");
+
+    vec.EraseIf([](const std::string& el) { return el == "two"; });
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec[0], "three");
+    EXPECT_EQ(vec[1], "four");
+
+    vec.EraseIf([](const std::string&) { return true; });
+    EXPECT_EQ(vec.Length(), 0u);
+}
+
+TEST(TintVectorTest, EraseIf_Mid) {
+    Vector<std::string, 5> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    vec.Push("five");
+    EXPECT_EQ(vec.Length(), 5u);
+
+    vec.EraseIf([](const std::string& el) { return el[0] == 't'; });
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "four");
+    EXPECT_EQ(vec[2], "five");
+
+    vec.EraseIf([](const std::string& el) { return el == "four"; });
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "five");
+}
+
+TEST(TintVectorTest, EraseIf_Back) {
+    Vector<std::string, 3> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    EXPECT_EQ(vec.Length(), 4u);
+
+    vec.EraseIf([](const std::string& el) { return el == "four"; });
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "two");
+    EXPECT_EQ(vec[2], "three");
+
+    vec.EraseIf([](const std::string& el) { return el[0] == 't'; });
+    EXPECT_EQ(vec.Length(), 1u);
+    EXPECT_EQ(vec[0], "one");
+}
+
 TEST(TintVectorTest, InferTN_1CString) {
     auto vec = Vector{"one"};
     static_assert(std::is_same_v<decltype(vec)::value_type, const char*>);
