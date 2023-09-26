@@ -1436,14 +1436,92 @@ INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Builtin_3arg,
     testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kClamp, "NClamp"},
-                    BuiltinTestCase{kI32, core::BuiltinFn::kClamp, "SClamp"},
-                    BuiltinTestCase{kU32, core::BuiltinFn::kClamp, "UClamp"},
                     BuiltinTestCase{kF32, core::BuiltinFn::kFma, "Fma"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kFma, "Fma"},
                     BuiltinTestCase{kF32, core::BuiltinFn::kMix, "Mix"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kMix, "Mix"},
                     BuiltinTestCase{kF32, core::BuiltinFn::kSmoothstep, "SmoothStep"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kSmoothstep, "SmoothStep"}));
+
+TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_I32) {
+    auto* value = b.FunctionParam("value", ty.i32());
+    auto* low = b.FunctionParam("low", ty.i32());
+    auto* high = b.FunctionParam("high", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kClamp, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpExtInst %int %9 SMax %value %low
+     %result = OpExtInst %int %9 SMin %8 %high
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_U32) {
+    auto* value = b.FunctionParam("value", ty.u32());
+    auto* low = b.FunctionParam("low", ty.u32());
+    auto* high = b.FunctionParam("high", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::BuiltinFn::kClamp, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpExtInst %uint %9 UMax %value %low
+     %result = OpExtInst %uint %9 UMin %8 %high
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Clamp_Vector_I32) {
+    auto* value = b.FunctionParam("value", ty.vec4<i32>());
+    auto* low = b.FunctionParam("low", ty.vec4<i32>());
+    auto* high = b.FunctionParam("high", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<i32>(), core::BuiltinFn::kClamp, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %9 = OpExtInst %v4int %10 SMax %value %low
+     %result = OpExtInst %v4int %10 SMin %9 %high
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Clamp_Vector_U32) {
+    auto* value = b.FunctionParam("value", ty.vec2<u32>());
+    auto* low = b.FunctionParam("low", ty.vec2<u32>());
+    auto* high = b.FunctionParam("high", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kClamp, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %9 = OpExtInst %v2uint %10 UMax %value %low
+     %result = OpExtInst %v2uint %10 UMin %9 %high
+)");
+}
 
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     auto* arg = b.FunctionParam("arg", ty.i32());

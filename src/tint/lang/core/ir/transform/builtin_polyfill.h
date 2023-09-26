@@ -38,6 +38,8 @@ enum class BuiltinPolyfillLevel {
 
 /// The set of polyfills that should be applied.
 struct BuiltinPolyfillConfig {
+    /// Should `clamp()` be polyfilled for integer values?
+    bool clamp_int = false;
     /// Should `countLeadingZeros()` be polyfilled?
     bool count_leading_zeros = false;
     /// Should `countTrailingZeros()` be polyfilled?

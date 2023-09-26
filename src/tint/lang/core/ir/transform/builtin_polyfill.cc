@@ -55,6 +55,12 @@ struct State {
             }
             if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case core::BuiltinFn::kClamp:
+                        if (config.clamp_int &&
+                            builtin->Result()->Type()->is_integer_scalar_or_vector()) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     case core::BuiltinFn::kCountLeadingZeros:
                         if (config.count_leading_zeros) {
                             worklist.Push(builtin);
@@ -110,6 +116,9 @@ struct State {
         for (auto* builtin : worklist) {
             ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
+                case core::BuiltinFn::kClamp:
+                    replacement = ClampInt(builtin);
+                    break;
                 case core::BuiltinFn::kCountLeadingZeros:
                     replacement = CountLeadingZeros(builtin);
                     break;
@@ -173,6 +182,24 @@ struct State {
             return b.Splat(MatchWidth(element->Type(), match), element, vec->Width());
         }
         return element;
+    }
+
+    /// Polyfill a `clamp()` builtin call for integers.
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* ClampInt(ir::CoreBuiltinCall* call) {
+        auto* type = call->Result()->Type();
+        auto* e = call->Args()[0];
+        auto* low = call->Args()[1];
+        auto* high = call->Args()[2];
+
+        Value* result = nullptr;
+        b.InsertBefore(call, [&] {
+            auto* max = b.Call(type, core::BuiltinFn::kMax, e, low);
+            auto* min = b.Call(type, core::BuiltinFn::kMin, max, high);
+            result = min->Result();
+        });
+        return result;
     }
 
     /// Polyfill a `countLeadingZeros()` builtin call.

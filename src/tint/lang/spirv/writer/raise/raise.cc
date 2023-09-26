@@ -50,6 +50,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
 
     core::ir::transform::BuiltinPolyfillConfig core_polyfills;
+    core_polyfills.clamp_int = true;
     core_polyfills.count_leading_zeros = true;
     core_polyfills.count_trailing_zeros = true;
     core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
