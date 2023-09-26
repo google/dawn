@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
+#include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
@@ -43,6 +44,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result;               \
         }                                \
     } while (false)
+
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, options.binding_remapper_options);
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;

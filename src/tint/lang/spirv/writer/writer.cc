@@ -17,7 +17,6 @@
 #include <memory>
 #include <utility>
 
-#include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/raise/raise.h"
@@ -55,12 +54,6 @@ Result<Output> Generate(const Program& program, const Options& options) {
         // Lower from WGSL-dialect to core-dialect
         if (auto res = wgsl::reader::Lower(ir); !res) {
             return res.Failure();
-        }
-
-        // Apply transforms as required by writer options.
-        auto remapper = core::ir::transform::BindingRemapper(ir, options.binding_remapper_options);
-        if (!remapper) {
-            return remapper.Failure();
         }
 
         // Raise from core-dialect to SPIR-V-dialect.
