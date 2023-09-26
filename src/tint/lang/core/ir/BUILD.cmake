@@ -113,6 +113,7 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/terminate_invocation.h
   lang/core/ir/terminator.cc
   lang/core/ir/terminator.h
+  lang/core/ir/traverse.h
   lang/core/ir/unary.cc
   lang/core/ir/unary.h
   lang/core/ir/unreachable.cc
@@ -189,6 +190,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/switch_test.cc
   lang/core/ir/swizzle_test.cc
   lang/core/ir/terminate_invocation_test.cc
+  lang/core/ir/traverse_test.cc
   lang/core/ir/unary_test.cc
   lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
