@@ -32,9 +32,6 @@
 namespace tint::diag {
 class List;
 }  // namespace tint::diag
-namespace tint::type {
-class Manager;
-}  // namespace tint::type
 
 namespace tint::core::intrinsic {
 

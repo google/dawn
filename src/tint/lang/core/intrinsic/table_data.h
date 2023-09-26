@@ -26,9 +26,6 @@
 #include "src/tint/utils/containers/slice.h"
 
 /// Forward declaration
-namespace tint::type {
-class Manager;
-}  // namespace tint::type
 namespace tint::core::intrinsic {
 struct TableData;
 }  // namespace tint::core::intrinsic

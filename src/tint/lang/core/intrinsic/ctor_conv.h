@@ -52,7 +52,8 @@ enum class CtorConv : uint8_t {
     kNone,
 };
 
-/// @returns the name of the type.
+/// @returns the name of the enumerator
+/// @param i the CtorConv enumerator
 const char* str(CtorConv i);
 
 /// @param n the width of the vector
