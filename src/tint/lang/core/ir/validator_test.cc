@@ -34,7 +34,6 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_ValidatorTest = IRTestHelper;
 
 TEST_F(IR_ValidatorTest, RootBlock_Var) {
-    mod.root_block = b.RootBlock();
     mod.root_block->Append(b.Var(ty.ptr<private_, i32>()));
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().reason.str();
@@ -44,7 +43,6 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
     auto* l = b.Loop();
     l->Body()->Append(b.Continue(l));
 
-    mod.root_block = b.RootBlock();
     mod.root_block->Append(l);
 
     auto res = ir::Validate(mod);
@@ -72,7 +70,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
     auto* var = b.Var(ty.ptr<private_, i32>());
-    mod.root_block = b.RootBlock();
     mod.root_block->Append(var);
 
     auto* f = b.Function("f", ty.void_());
@@ -891,7 +888,7 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
     auto* v = mod.instructions.Create<ir::Var>(nullptr);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);

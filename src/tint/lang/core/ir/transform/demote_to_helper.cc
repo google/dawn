@@ -68,7 +68,7 @@ struct State {
         // Create a boolean variable that can be used to check whether the shader has discarded.
         continue_execution = b.Var("continue_execution", ty.ptr<private_, bool>());
         continue_execution->SetInitializer(b.Constant(true));
-        b.RootBlock()->Append(continue_execution);
+        ir.root_block->Append(continue_execution);
 
         // Process each entry point function that contains a discard.
         for (auto* ep : to_process) {

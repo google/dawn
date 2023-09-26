@@ -47,7 +47,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, NoRootBlock) {
 TEST_F(IR_MultiplanarExternalTextureTest, DeclWithNoUses) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {  //
@@ -111,7 +111,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, LoadWithNoUses) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -180,7 +180,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, TextureDimensions) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec2<u32>());
     b.Append(func->Block(), [&] {
@@ -253,7 +253,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
@@ -397,7 +397,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
@@ -542,7 +542,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* sampler = b.FunctionParam("sampler", ty.sampler());
@@ -700,7 +700,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* foo = b.Function("foo", ty.vec4<f32>());
     {
@@ -885,7 +885,7 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* foo = b.Function("foo", ty.vec4<f32>());
     {
@@ -1102,15 +1102,15 @@ tint_ExternalTextureParams = struct @align(16) {
 TEST_F(IR_MultiplanarExternalTextureTest, MultipleTextures) {
     auto* var_a = b.Var("texture_a", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var_a->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var_a);
+    mod.root_block->Append(var_a);
 
     auto* var_b = b.Var("texture_b", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var_b->SetBindingPoint(2, 2);
-    b.RootBlock()->Append(var_b);
+    mod.root_block->Append(var_b);
 
     auto* var_c = b.Var("texture_c", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var_c->SetBindingPoint(3, 2);
-    b.RootBlock()->Append(var_c);
+    mod.root_block->Append(var_c);
 
     auto* foo = b.Function("foo", ty.void_());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());

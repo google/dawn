@@ -64,7 +64,7 @@ struct State {
     /// Process the module.
     void Process() {
         // Find module-scope variables that need to be replaced.
-        if (ir.root_block) {
+        if (!ir.root_block->IsEmpty()) {
             Vector<Instruction*, 4> to_remove;
             for (auto inst : *ir.root_block) {
                 auto* var = inst->As<Var>();

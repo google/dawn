@@ -37,7 +37,7 @@ class IR_ZeroInitWorkgroupMemoryTest : public TransformTest {
 
     Var* MakeVar(const char* name, const type::Type* store_type) {
         auto* var = b.Var(name, ty.ptr(workgroup, store_type));
-        b.RootBlock()->Append(var);
+        mod.root_block->Append(var);
         return var;
     }
 };

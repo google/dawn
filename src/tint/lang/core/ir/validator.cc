@@ -402,10 +402,6 @@ void Validator::CheckOperandsNotNull(ir::Instruction* inst,
 }
 
 void Validator::CheckRootBlock(Block* blk) {
-    if (!blk) {
-        return;
-    }
-
     TINT_SCOPED_ASSIGNMENT(current_block_, blk);
 
     for (auto* inst : *blk) {

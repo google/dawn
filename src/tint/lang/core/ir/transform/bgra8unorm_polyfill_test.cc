@@ -52,7 +52,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
@@ -125,7 +125,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
@@ -219,7 +219,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* bar = b.Function("bar", ty.void_());
     {
@@ -303,9 +303,9 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextur
     var_a->SetBindingPoint(1, 2);
     var_b->SetBindingPoint(1, 3);
     var_c->SetBindingPoint(1, 4);
-    b.RootBlock()->Append(var_a);
-    b.RootBlock()->Append(var_b);
-    b.RootBlock()->Append(var_c);
+    mod.root_block->Append(var_a);
+    mod.root_block->Append(var_b);
+    mod.root_block->Append(var_c);
 
     auto* bar = b.Function("bar", ty.void_());
     {
@@ -405,7 +405,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
 
     auto* var_a = b.Var("texture", ty.ptr(handle, texture_ty));
     var_a->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var_a);
+    mod.root_block->Append(var_a);
 
     auto* bar = b.Function("bar", ty.void_());
     {
@@ -506,7 +506,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
@@ -561,7 +561,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec2<u32>());
     b.Append(func->Block(), [&] {
@@ -612,7 +612,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
@@ -666,7 +666,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
 
     auto* var = b.Var("texture", ty.ptr(handle, texture_ty));
     var->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_());
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());

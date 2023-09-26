@@ -56,10 +56,8 @@ struct State {
         RegisterModuleScopeDecls();
 
         // Process the module-scope variable declarations
-        if (ir->root_block) {
-            for (auto* inst : *ir->root_block) {
-                Process(inst);
-            }
+        for (auto* inst : *ir->root_block) {
+            Process(inst);
         }
 
         // Process the functions
@@ -101,12 +99,10 @@ struct State {
         }
 
         // Declare all the module-scope vars
-        if (ir->root_block) {
-            for (auto* inst : *ir->root_block) {
-                for (auto* result : inst->Results()) {
-                    if (auto symbol = ir->NameOf(result)) {
-                        Declare(scopes.Front(), result, symbol.NameView());
-                    }
+        for (auto* inst : *ir->root_block) {
+            for (auto* result : inst->Results()) {
+                if (auto symbol = ir->NameOf(result)) {
+                    Declare(scopes.Front(), result, symbol.NameView());
                 }
             }
         }

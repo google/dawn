@@ -31,7 +31,7 @@ namespace {
 void Run(Module& ir) {
     Builder builder{ir};
 
-    if (!ir.root_block) {
+    if (ir.root_block->IsEmpty()) {
         return;
     }
 

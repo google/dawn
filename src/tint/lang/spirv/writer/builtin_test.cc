@@ -1828,7 +1828,7 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueU32) {
 TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     auto* var = b.Var("var", ty.ptr(storage, ty.runtime_array(ty.i32())));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
@@ -1852,7 +1852,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
                                                      });
     auto* var = b.Var("var", ty.ptr(storage, str));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {

@@ -690,7 +690,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                  },
                              });
 
-    auto* buffer = b.RootBlock()->Append(b.Var(ty.ptr(storage, str_ty, read)));
+    auto* buffer = mod.root_block->Append(b.Var(ty.ptr(storage, str_ty, read)));
 
     auto* ep = b.Function("vert", str_ty);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);

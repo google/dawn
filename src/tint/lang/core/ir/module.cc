@@ -20,7 +20,7 @@
 
 namespace tint::core::ir {
 
-Module::Module() = default;
+Module::Module() : root_block(blocks.Create<ir::Block>()) {}
 
 Module::Module(Module&&) = default;
 

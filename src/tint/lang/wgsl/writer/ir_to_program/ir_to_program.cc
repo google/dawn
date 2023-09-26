@@ -112,9 +112,8 @@ class State {
             return Program{resolver::Resolve(b)};
         }
 
-        if (mod.root_block) {
-            RootBlock(mod.root_block);
-        }
+        RootBlock(mod.root_block);
+
         // TODO(crbug.com/tint/1902): Emit user-declared types
         for (auto* fn : mod.functions) {
             Fn(fn);

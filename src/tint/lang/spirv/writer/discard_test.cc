@@ -23,7 +23,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 TEST_F(SpirvWriterTest, Discard) {
     auto* buffer = b.Var("buffer", ty.ptr<storage, i32>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);

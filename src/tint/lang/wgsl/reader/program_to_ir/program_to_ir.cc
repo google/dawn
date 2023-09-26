@@ -232,7 +232,7 @@ class Impl {
                 [&](const ast::Variable* var) {
                     // Setup the current block to be the root block for the module. The builder
                     // will handle creating it if it doesn't exist already.
-                    TINT_SCOPED_ASSIGNMENT(current_block_, builder_.RootBlock());
+                    TINT_SCOPED_ASSIGNMENT(current_block_, mod.root_block);
                     EmitVariable(var);
                 },
                 [&](const ast::Function* func) { EmitFunction(func); },

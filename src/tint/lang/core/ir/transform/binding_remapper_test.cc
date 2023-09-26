@@ -29,7 +29,7 @@ using IR_BindingRemapperTest = TransformTest;
 TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -50,7 +50,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
 TEST_F(IR_BindingRemapperTest, NoModify_RemappingDifferentBindingPoint) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -72,7 +72,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_RemappingDifferentBindingPoint) {
 TEST_F(IR_BindingRemapperTest, RemappingGroup) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -99,7 +99,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroup) {
 TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -126,7 +126,7 @@ TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
 TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -153,10 +153,10 @@ TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
 TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
     auto* buffer_a = b.Var("buffer_a", ty.ptr<uniform, i32>());
     buffer_a->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(buffer_a);
+    mod.root_block->Append(buffer_a);
     auto* buffer_b = b.Var("buffer_b", ty.ptr<uniform, i32>());
     buffer_b->SetBindingPoint(3, 4);
-    b.RootBlock()->Append(buffer_b);
+    mod.root_block->Append(buffer_b);
 
     auto* src = R"(
 %b1 = block {  # root
@@ -186,10 +186,10 @@ TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
 TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
     auto* buffer_a = b.Var("buffer_a", ty.ptr<uniform, i32>());
     buffer_a->SetBindingPoint(1, 2);
-    b.RootBlock()->Append(buffer_a);
+    mod.root_block->Append(buffer_a);
     auto* buffer_b = b.Var("buffer_b", ty.ptr<uniform, i32>());
     buffer_b->SetBindingPoint(3, 4);
-    b.RootBlock()->Append(buffer_b);
+    mod.root_block->Append(buffer_b);
 
     auto* ep = b.Function("main", mod.Types().void_(), Function::PipelineStage::kFragment);
     b.Append(ep->Block(), [&] {

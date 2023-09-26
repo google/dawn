@@ -55,7 +55,7 @@ struct State {
 
     /// Process the module.
     void Process() {
-        if (!ir.root_block) {
+        if (ir.root_block->IsEmpty()) {
             return;
         }
 

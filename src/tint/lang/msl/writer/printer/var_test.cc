@@ -237,7 +237,7 @@ void foo() {
 // TODO(dsinclair): Requires ModuleScopeVarToEntryPointParam transform
 TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
     core::ir::Var* v = nullptr;
-    b.Append(b.RootBlock(), [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>()); });
+    b.Append(mod.root_block, [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>()); });
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -263,7 +263,8 @@ void foo() {
 
 TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
     core::ir::Var* v = nullptr;
-    b.Append(b.RootBlock(), [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
+    b.Append(mod.root_block,
+             [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {

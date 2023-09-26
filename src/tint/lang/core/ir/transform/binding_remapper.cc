@@ -32,7 +32,7 @@ Result<SuccessType> Run(ir::Module& ir, const BindingRemapperOptions& options) {
     if (options.binding_points.empty()) {
         return Success;
     }
-    if (!ir.root_block) {
+    if (ir.root_block->IsEmpty()) {
         return Success;
     }
 

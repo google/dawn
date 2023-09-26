@@ -49,7 +49,7 @@ TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
 TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     auto* buffer = b.Var(ty.ptr<uniform, i32>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.i32());
 
@@ -83,7 +83,7 @@ tint_symbol_1 = struct @align(4), @block {
 TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     auto* buffer = b.Var(ty.ptr<storage, i32>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Store(buffer, 42_i));
@@ -114,7 +114,7 @@ tint_symbol_1 = struct @align(4), @block {
 
 TEST_F(IR_BlockDecoratedStructsTest, Scalar_PushConstant) {
     auto* buffer = b.Var(ty.ptr<push_constant, i32>());
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {  //
@@ -147,7 +147,7 @@ tint_symbol_1 = struct @align(4), @block {
 TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     auto* buffer = b.Var(ty.ptr<storage, array<i32>>());
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
 
@@ -190,7 +190,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
 
     auto* buffer = b.Var(ty.ptr(storage, structure, core::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* i32_ptr = ty.ptr<storage, i32>();
 
@@ -243,10 +243,10 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
 
     auto* buffer = b.Var(ty.ptr(storage, structure, core::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* private_var = b.Var(ty.ptr<private_, read_write>(structure));
-    b.RootBlock()->Append(private_var);
+    mod.root_block->Append(private_var);
 
     auto* func = b.Function("foo", ty.void_());
     auto* load = func->Block()->Append(b.Load(private_var));
@@ -290,7 +290,7 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     buffer_a->SetBindingPoint(0, 0);
     buffer_b->SetBindingPoint(0, 1);
     buffer_c->SetBindingPoint(0, 2);
-    auto* root = b.RootBlock();
+    auto* root = mod.root_block;
     root->Append(buffer_a);
     root->Append(buffer_b);
     root->Append(buffer_c);

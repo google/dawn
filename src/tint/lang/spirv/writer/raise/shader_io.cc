@@ -96,7 +96,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 io.attributes.interpolation,
                 io.attributes.invariant,
             });
-            b.RootBlock()->Append(var);
+            ir.root_block->Append(var);
             vars.Push(var);
         }
     }
@@ -158,7 +158,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Create the clamp args struct and variable.
         if (!frag_depth_clamp_args) {
             // Check that there are no push constants in the module already.
-            for (auto* inst : *b.RootBlock()) {
+            for (auto* inst : *ir.root_block) {
                 if (auto* var = inst->As<core::ir::Var>()) {
                     auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
                     if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
@@ -177,7 +177,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
             // Declare the variable.
             auto* var = b.Var("tint_frag_depth_clamp_args", ty.ptr(push_constant, str));
-            b.RootBlock()->Append(var);
+            ir.root_block->Append(var);
             frag_depth_clamp_args = var->Result();
         }
 

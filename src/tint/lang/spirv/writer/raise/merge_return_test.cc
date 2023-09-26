@@ -497,7 +497,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_BothSidesReturn) {
 
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.void_());
@@ -573,7 +573,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements) {
 // to make sure that creation order doesn't matter.
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.void_());
@@ -647,7 +647,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDiffer
 
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
     auto* condA = b.FunctionParam("condA", ty.bool_());
@@ -793,7 +793,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested) {
 
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
     auto* condA = b.FunctionParam("condA", ty.bool_());
@@ -914,7 +914,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_TrivialMerge) {
 
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
     auto* condA = b.FunctionParam("condA", ty.bool_());
@@ -1213,7 +1213,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Loop_UnconditionalReturnInBody) {
 
 TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
@@ -1327,7 +1327,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody) {
 
 TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
@@ -1432,7 +1432,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerg
 
 TEST_F(SpirvWriter_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
@@ -1610,7 +1610,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_UnconditionalReturnInCase) {
 
 TEST_F(SpirvWriter_MergeReturnTest, Switch_ConditionalReturnInBody) {
     auto* global = b.Var(ty.ptr<private_, i32>());
-    b.RootBlock()->Append(global);
+    mod.root_block->Append(global);
 
     auto* cond = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());

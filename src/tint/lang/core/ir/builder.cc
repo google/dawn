@@ -30,13 +30,6 @@ Builder::Builder(Module& mod, ir::Block* block)
 
 Builder::~Builder() = default;
 
-ir::Block* Builder::RootBlock() {
-    if (!ir.root_block) {
-        ir.root_block = Block();
-    }
-    return ir.root_block;
-}
-
 Block* Builder::Block() {
     return ir.blocks.Create<ir::Block>();
 }

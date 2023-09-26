@@ -56,7 +56,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x3) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
@@ -100,7 +100,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x4) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
@@ -144,7 +144,7 @@ TEST_F(IR_Std140Test, NoModify_Mat3x2_StorageBuffer) {
 
     auto* buffer = b.Var("buffer", ty.ptr(storage, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
@@ -190,7 +190,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x2_InsideArray) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
@@ -233,7 +233,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadMatrix) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat);
     b.Append(func->Block(), [&] {
@@ -304,7 +304,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadColumn) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", mat->ColumnType());
     b.Append(func->Block(), [&] {
@@ -376,7 +376,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadElement) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.f32());
     b.Append(func->Block(), [&] {
@@ -449,7 +449,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadStruct) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", structure);
     b.Append(func->Block(), [&] {
@@ -527,7 +527,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadArrayOfStruct) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", outer);
     b.Append(func->Block(), [&] {
@@ -647,7 +647,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadNestedStruct) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", inner);
     b.Append(func->Block(), [&] {
@@ -738,7 +738,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadStruct_WithUnmodifedNestedStruct) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", outer);
     b.Append(func->Block(), [&] {
@@ -832,7 +832,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -1002,7 +1002,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions_ViaLets) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -1177,7 +1177,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions_DynamicIndices) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     auto* arr_idx = b.FunctionParam("arr_idx", ty.i32());
@@ -1351,7 +1351,7 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -1452,7 +1452,7 @@ TEST_F(IR_Std140Test, F16) {
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(buffer);
+    mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {

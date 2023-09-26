@@ -42,7 +42,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength) {
                                                         });
     auto* var = b.Var("var", ty.ptr(storage, str_ty));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
@@ -106,7 +106,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength_ViaLet_BeforeAccess) {
                                                         });
     auto* var = b.Var("var", ty.ptr(storage, str_ty));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
@@ -176,7 +176,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength_ViaLet_AfterAccess) {
                                                         });
     auto* var = b.Var("var", ty.ptr(storage, str_ty));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
@@ -240,7 +240,7 @@ Buffer = struct @align(4) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Storage) {
     auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.i32())));
     var->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(var);
+    mod.root_block->Append(var);
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -284,7 +284,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Storage) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -328,7 +328,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAnd) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -372,7 +372,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAnd) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* cmp = b.FunctionParam("cmp", ty.i32());
     auto* val = b.FunctionParam("val", ty.i32());
@@ -433,7 +433,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicExchange) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -477,7 +477,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicExchange) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicLoad) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* func = b.Function("foo", ty.i32());
 
@@ -519,7 +519,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicLoad) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_I32) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -563,7 +563,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_I32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_U32) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
     auto* func = b.Function("foo", ty.u32());
@@ -607,7 +607,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_U32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_I32) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -651,7 +651,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_I32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_U32) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
     auto* func = b.Function("foo", ty.u32());
@@ -695,7 +695,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_U32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicOr) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -739,7 +739,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicOr) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -783,7 +783,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -827,7 +827,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicXor) {
-    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+    auto* var = mod.root_block->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
     auto* func = b.Function("foo", ty.i32());

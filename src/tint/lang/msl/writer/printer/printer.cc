@@ -80,9 +80,7 @@ tint::Result<SuccessType> Printer::Generate() {
     }
 
     // Emit module-scope declarations.
-    if (ir_.root_block) {
-        EmitBlockInstructions(ir_.root_block);
-    }
+    EmitBlockInstructions(ir_.root_block);
 
     // Emit functions.
     for (auto* func : ir_.functions) {

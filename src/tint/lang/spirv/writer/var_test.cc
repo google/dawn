@@ -102,7 +102,7 @@ TEST_F(SpirvWriterTest, FunctionVar_Store) {
 }
 
 TEST_F(SpirvWriterTest, PrivateVar_NoInit) {
-    b.RootBlock()->Append(b.Var("v", ty.ptr<private_, i32>()));
+    mod.root_block->Append(b.Var("v", ty.ptr<private_, i32>()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private");
@@ -111,7 +111,7 @@ TEST_F(SpirvWriterTest, PrivateVar_NoInit) {
 TEST_F(SpirvWriterTest, PrivateVar_WithInit) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private %int_42");
@@ -120,7 +120,7 @@ TEST_F(SpirvWriterTest, PrivateVar_WithInit) {
 TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
@@ -139,14 +139,14 @@ TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar) {
-    b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
+    mod.root_block->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup");
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
-    auto* v = b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
+    auto* v = mod.root_block->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
@@ -166,7 +166,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
-    b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
+    mod.root_block->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     // Create a writer with the zero_init_workgroup_memory flag set to `true`.
     Printer gen(mod, true);
@@ -178,7 +178,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
 TEST_F(SpirvWriterTest, StorageVar_ReadOnly) {
     auto* v = b.Var("v", ty.ptr<storage, i32, read>());
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -197,7 +197,7 @@ TEST_F(SpirvWriterTest, StorageVar_ReadOnly) {
 TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
     auto* v = b.Var("v", ty.ptr<storage, i32, read_write>());
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
@@ -223,7 +223,7 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
     auto* v = b.Var("v", ty.ptr<storage, i32, write>());
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
@@ -248,7 +248,7 @@ TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
 TEST_F(SpirvWriterTest, UniformVar) {
     auto* v = b.Var("v", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -266,7 +266,7 @@ TEST_F(SpirvWriterTest, UniformVar) {
 TEST_F(SpirvWriterTest, UniformVar_Load) {
     auto* v = b.Var("v", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
@@ -285,7 +285,7 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
 
 TEST_F(SpirvWriterTest, PushConstantVar) {
     auto* v = b.Var("v", ty.ptr<push_constant, i32>());
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -300,7 +300,7 @@ TEST_F(SpirvWriterTest, PushConstantVar) {
 
 TEST_F(SpirvWriterTest, PushConstantVar_Load) {
     auto* v = b.Var("v", ty.ptr<push_constant, i32>());
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
@@ -320,7 +320,7 @@ TEST_F(SpirvWriterTest, PushConstantVar_Load) {
 TEST_F(SpirvWriterTest, SamplerVar) {
     auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler(), core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -337,7 +337,7 @@ TEST_F(SpirvWriterTest, SamplerVar) {
 TEST_F(SpirvWriterTest, SamplerVar_Load) {
     auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler(), core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -356,7 +356,7 @@ TEST_F(SpirvWriterTest, TextureVar) {
                     ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
                     core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -376,7 +376,7 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
                     ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
                     core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -397,7 +397,7 @@ TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
                                     core::type::StorageTexture::SubtypeFor(format, ty)),
                                 core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -420,7 +420,7 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
                                     core::type::StorageTexture::SubtypeFor(format, ty)),
                                 core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
@@ -442,7 +442,7 @@ TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
                                     core::type::StorageTexture::SubtypeFor(format, ty)),
                                 core::Access::kRead));
     v->SetBindingPoint(0, 0);
-    b.RootBlock()->Append(v);
+    mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(

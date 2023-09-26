@@ -168,9 +168,7 @@ Result<std::vector<uint32_t>> Printer::Generate() {
     // TODO(crbug.com/tint/1906): Emit extensions.
 
     // Emit module-scope declarations.
-    if (ir_.root_block) {
-        EmitRootBlock(ir_.root_block);
-    }
+    EmitRootBlock(ir_.root_block);
 
     // Emit functions.
     for (auto* func : ir_.functions) {
@@ -606,41 +604,39 @@ void Printer::EmitEntryPoint(core::ir::Function* func, uint32_t id) {
     OperandList operands = {U32Operand(stage), id, ir_.NameOf(func).Name()};
 
     // Add the list of all referenced shader IO variables.
-    if (ir_.root_block) {
-        for (auto* global : *ir_.root_block) {
-            auto* var = global->As<core::ir::Var>();
-            if (!var) {
-                continue;
-            }
+    for (auto* global : *ir_.root_block) {
+        auto* var = global->As<core::ir::Var>();
+        if (!var) {
+            continue;
+        }
 
-            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            if (!(ptr->AddressSpace() == core::AddressSpace::kIn ||
-                  ptr->AddressSpace() == core::AddressSpace::kOut)) {
-                continue;
-            }
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+        if (!(ptr->AddressSpace() == core::AddressSpace::kIn ||
+              ptr->AddressSpace() == core::AddressSpace::kOut)) {
+            continue;
+        }
 
-            // Determine if this IO variable is used by the entry point.
-            bool used = false;
-            for (const auto& use : var->Result()->Usages()) {
-                auto* block = use.instruction->Block();
-                while (block->Parent()) {
-                    block = block->Parent()->Block();
-                }
-                if (block == func->Block()) {
-                    used = true;
-                    break;
-                }
+        // Determine if this IO variable is used by the entry point.
+        bool used = false;
+        for (const auto& use : var->Result()->Usages()) {
+            auto* block = use.instruction->Block();
+            while (block->Parent()) {
+                block = block->Parent()->Block();
             }
-            if (!used) {
-                continue;
+            if (block == func->Block()) {
+                used = true;
+                break;
             }
-            operands.push_back(Value(var));
+        }
+        if (!used) {
+            continue;
+        }
+        operands.push_back(Value(var));
 
-            // Add the `DepthReplacing` execution mode if `frag_depth` is used.
-            if (var->Attributes().builtin == core::BuiltinValue::kFragDepth) {
-                module_.PushExecutionMode(spv::Op::OpExecutionMode,
-                                          {id, U32Operand(SpvExecutionModeDepthReplacing)});
-            }
+        // Add the `DepthReplacing` execution mode if `frag_depth` is used.
+        if (var->Attributes().builtin == core::BuiltinValue::kFragDepth) {
+            module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                      {id, U32Operand(SpvExecutionModeDepthReplacing)});
         }
     }
 

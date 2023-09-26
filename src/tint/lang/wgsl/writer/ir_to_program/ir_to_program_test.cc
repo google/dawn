@@ -2746,7 +2746,7 @@ TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
     //   }
     // }
 
-    b.Append(b.RootBlock(), [&] {
+    b.Append(mod.root_block, [&] {
         auto* i = b.Var(ty.ptr<storage, u32, read_write>());
         i->SetBindingPoint(0, 0);
 

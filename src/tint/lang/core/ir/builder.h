@@ -996,10 +996,6 @@ class Builder {
     /// @returns the instruction
     ir::Unreachable* Unreachable();
 
-    /// Retrieves the root block for the module, creating if necessary
-    /// @returns the root block
-    ir::Block* RootBlock();
-
     /// Creates a new runtime value
     /// @param type the return type
     /// @returns the value

@@ -28,7 +28,7 @@ namespace tint::wgsl::reader {
 namespace {
 
 core::ir::Value* GlobalVarInitializer(core::ir::Module& m) {
-    if (m.root_block->Length() == 0u) {
+    if (m.root_block->IsEmpty()) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
     }

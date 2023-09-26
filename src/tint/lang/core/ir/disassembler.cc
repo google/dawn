@@ -152,7 +152,7 @@ std::string Disassembler::Disassemble() {
         }
     }
 
-    if (mod_.root_block) {
+    if (!mod_.root_block->IsEmpty()) {
         EmitBlock(mod_.root_block, "root");
         EmitLine();
     }
