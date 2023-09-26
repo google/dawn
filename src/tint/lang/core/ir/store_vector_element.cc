@@ -32,10 +32,10 @@ StoreVectorElement::StoreVectorElement(ir::Value* to, ir::Value* index, ir::Valu
 StoreVectorElement::~StoreVectorElement() = default;
 
 StoreVectorElement* StoreVectorElement::Clone(CloneContext& ctx) {
-    auto* new_to = ctx.Clone(To());
-    auto* new_idx = ctx.Clone(Index());
-    auto* new_val = ctx.Clone(Value());
-    return ctx.ir.instructions.Create<StoreVectorElement>(new_to, new_idx, new_val);
+    auto* to = ctx.Remap(To());
+    auto* idx = ctx.Remap(Index());
+    auto* val = ctx.Remap(Value());
+    return ctx.ir.instructions.Create<StoreVectorElement>(to, idx, val);
 }
 
 }  // namespace tint::core::ir

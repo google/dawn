@@ -29,9 +29,9 @@ Bitcast::Bitcast(InstructionResult* result, Value* val) {
 Bitcast::~Bitcast() = default;
 
 Bitcast* Bitcast::Clone(CloneContext& ctx) {
-    auto* new_res = ctx.Clone(Result());
-    auto* new_val = ctx.Clone(Val());
-    return ctx.ir.instructions.Create<Bitcast>(new_res, new_val);
+    auto* new_result = ctx.Clone(Result());
+    auto* val = ctx.Remap(Val());
+    return ctx.ir.instructions.Create<Bitcast>(new_result, val);
 }
 
 }  // namespace tint::core::ir

@@ -31,8 +31,8 @@ Let::~Let() = default;
 
 Let* Let::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_val = ctx.Clone(Value());
-    auto* new_let = ctx.ir.instructions.Create<Let>(new_result, new_val);
+    auto* val = ctx.Remap(Value());
+    auto* new_let = ctx.ir.instructions.Create<Let>(new_result, val);
 
     auto name = ctx.ir.NameOf(this);
     ctx.ir.SetName(new_let, name.Name());

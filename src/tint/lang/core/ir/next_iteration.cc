@@ -41,8 +41,8 @@ NextIteration::~NextIteration() = default;
 
 NextIteration* NextIteration::Clone(CloneContext& ctx) {
     auto* new_loop = ctx.Clone(loop_);
-    auto new_args = ctx.Clone<NextIteration::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<NextIteration>(new_loop, new_args);
+    auto args = ctx.Remap<NextIteration::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<NextIteration>(new_loop, args);
 }
 
 }  // namespace tint::core::ir

@@ -34,9 +34,9 @@ ExitLoop::ExitLoop(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */) {
 ExitLoop::~ExitLoop() = default;
 
 ExitLoop* ExitLoop::Clone(CloneContext& ctx) {
-    auto* new_loop = ctx.Clone(Loop());
-    auto new_args = ctx.Clone<ExitLoop::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<ExitLoop>(new_loop, new_args);
+    auto* loop = ctx.Remap(Loop());
+    auto args = ctx.Remap<ExitLoop::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitLoop>(loop, args);
 }
 
 void ExitLoop::SetLoop(ir::Loop* l) {

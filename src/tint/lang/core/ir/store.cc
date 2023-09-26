@@ -31,9 +31,9 @@ Store::Store(Value* to, Value* from) {
 Store::~Store() = default;
 
 Store* Store::Clone(CloneContext& ctx) {
-    auto* new_to = ctx.Clone(To());
-    auto* new_from = ctx.Clone(From());
-    return ctx.ir.instructions.Create<Store>(new_to, new_from);
+    auto* to = ctx.Remap(To());
+    auto* from = ctx.Remap(From());
+    return ctx.ir.instructions.Create<Store>(to, from);
 }
 
 }  // namespace tint::core::ir

@@ -33,9 +33,9 @@ LoadVectorElement::~LoadVectorElement() = default;
 
 LoadVectorElement* LoadVectorElement::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_from = ctx.Clone(From());
-    auto* new_index = ctx.Clone(Index());
-    return ctx.ir.instructions.Create<LoadVectorElement>(new_result, new_from, new_index);
+    auto* from = ctx.Remap(From());
+    auto* index = ctx.Remap(Index());
+    return ctx.ir.instructions.Create<LoadVectorElement>(new_result, from, index);
 }
 
 }  // namespace tint::core::ir

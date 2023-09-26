@@ -31,9 +31,9 @@ Binary::~Binary() = default;
 
 Binary* Binary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_lhs = ctx.Clone(LHS());
-    auto* new_rhs = ctx.Clone(RHS());
-    return ctx.ir.instructions.Create<Binary>(new_result, kind_, new_lhs, new_rhs);
+    auto* lhs = ctx.Remap(LHS());
+    auto* rhs = ctx.Remap(RHS());
+    return ctx.ir.instructions.Create<Binary>(new_result, kind_, lhs, rhs);
 }
 
 std::string_view ToString(enum Binary::Kind kind) {

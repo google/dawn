@@ -36,9 +36,11 @@ Return::Return(Function* func, ir::Value* arg) {
 Return::~Return() = default;
 
 Return* Return::Clone(CloneContext& ctx) {
-    auto* new_func = ctx.Clone(Func());
-    auto new_val = Value() ? ctx.Clone(Value()) : nullptr;
-    return ctx.ir.instructions.Create<Return>(new_func, new_val);
+    auto* fn = ctx.Remap(Func());
+    if (auto* val = Value()) {
+        return ctx.ir.instructions.Create<Return>(fn, ctx.Remap(val));
+    }
+    return ctx.ir.instructions.Create<Return>(fn);
 }
 
 Function* Return::Func() const {

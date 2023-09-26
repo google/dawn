@@ -37,8 +37,8 @@ void Switch::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
 }
 
 Switch* Switch::Clone(CloneContext& ctx) {
-    auto* new_cond = ctx.Clone(Condition());
-    auto* new_switch = ctx.ir.instructions.Create<Switch>(new_cond);
+    auto* cond = ctx.Remap(Condition());
+    auto* new_switch = ctx.ir.instructions.Create<Switch>(cond);
     ctx.Replace(this, new_switch);
 
     new_switch->cases_.Reserve(cases_.Length());

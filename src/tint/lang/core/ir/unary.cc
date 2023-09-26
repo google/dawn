@@ -30,8 +30,8 @@ Unary::~Unary() = default;
 
 Unary* Unary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_val = ctx.Clone(Val());
-    return ctx.ir.instructions.Create<Unary>(new_result, kind_, new_val);
+    auto* val = ctx.Remap(Val());
+    return ctx.ir.instructions.Create<Unary>(new_result, kind_, val);
 }
 
 }  // namespace tint::core::ir

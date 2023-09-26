@@ -33,9 +33,9 @@ ExitSwitch::ExitSwitch(ir::Switch* sw, VectorRef<Value*> args /* = tint::Empty *
 ExitSwitch::~ExitSwitch() = default;
 
 ExitSwitch* ExitSwitch::Clone(CloneContext& ctx) {
-    auto* new_switch = ctx.Clone(Switch());
-    auto new_args = ctx.Clone<ExitSwitch::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<ExitSwitch>(new_switch, new_args);
+    auto* switch_ = ctx.Remap(Switch());
+    auto args = ctx.Remap<ExitSwitch::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitSwitch>(switch_, args);
 }
 
 void ExitSwitch::SetSwitch(ir::Switch* s) {

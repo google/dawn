@@ -41,10 +41,10 @@ BreakIf::BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args) : loo
 BreakIf::~BreakIf() = default;
 
 BreakIf* BreakIf::Clone(CloneContext& ctx) {
-    auto* new_loop = ctx.Clone(loop_);
-    auto* new_cond = ctx.Clone(Condition());
-    auto new_args = ctx.Clone<BreakIf::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<BreakIf>(new_cond, new_loop, new_args);
+    auto* loop = ctx.Remap(loop_);
+    auto* cond = ctx.Remap(Condition());
+    auto args = ctx.Remap<BreakIf::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<BreakIf>(cond, loop, args);
 }
 
 }  // namespace tint::core::ir

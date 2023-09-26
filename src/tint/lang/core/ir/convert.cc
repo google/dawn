@@ -32,8 +32,8 @@ Convert::~Convert() = default;
 
 Convert* Convert::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_val = ctx.Clone(Args()[0]);
-    return ctx.ir.instructions.Create<Convert>(new_result, new_val);
+    auto* val = ctx.Remap(Args()[0]);
+    return ctx.ir.instructions.Create<Convert>(new_result, val);
 }
 
 }  // namespace tint::core::ir

@@ -40,10 +40,10 @@ Continue::Continue(ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
 Continue::~Continue() = default;
 
 Continue* Continue::Clone(CloneContext& ctx) {
-    auto* new_loop = ctx.Clone(Loop());
-    auto new_args = ctx.Clone<Continue::kDefaultNumOperands>(Args());
+    auto* loop = ctx.Remap(Loop());
+    auto args = ctx.Remap<Continue::kDefaultNumOperands>(Args());
 
-    return ctx.ir.instructions.Create<Continue>(new_loop, new_args);
+    return ctx.ir.instructions.Create<Continue>(loop, args);
 }
 
 }  // namespace tint::core::ir

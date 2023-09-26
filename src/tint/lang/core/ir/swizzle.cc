@@ -41,8 +41,8 @@ Swizzle::~Swizzle() = default;
 
 Swizzle* Swizzle::Clone(CloneContext& ctx) {
     auto* result = ctx.Clone(Result());
-    auto* new_obj = ctx.Clone(Object());
-    return ctx.ir.instructions.Create<Swizzle>(result, new_obj, indices_);
+    auto* obj = ctx.Remap(Object());
+    return ctx.ir.instructions.Create<Swizzle>(result, obj, indices_);
 }
 
 }  // namespace tint::core::ir

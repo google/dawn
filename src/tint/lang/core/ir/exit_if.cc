@@ -33,9 +33,9 @@ ExitIf::ExitIf(ir::If* i, VectorRef<Value*> args) {
 ExitIf::~ExitIf() = default;
 
 ExitIf* ExitIf::Clone(CloneContext& ctx) {
-    auto* new_if = ctx.Clone(If());
-    auto new_args = ctx.Clone<ExitIf::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<ExitIf>(new_if, new_args);
+    auto* if_ = ctx.Remap(If());
+    auto args = ctx.Remap<ExitIf::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitIf>(if_, args);
 }
 
 void ExitIf::SetIf(ir::If* i) {

@@ -32,8 +32,8 @@ Construct::~Construct() = default;
 
 Construct* Construct::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto new_args = ctx.Clone<Construct::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<Construct>(new_result, new_args);
+    auto args = ctx.Remap<Construct::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<Construct>(new_result, args);
 }
 
 }  // namespace tint::core::ir

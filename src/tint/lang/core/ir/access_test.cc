@@ -76,7 +76,7 @@ TEST_F(IR_AccessTest, Clone) {
     EXPECT_EQ(type, new_a->Result()->Type());
 
     EXPECT_NE(nullptr, new_a->Object());
-    EXPECT_NE(a->Object(), new_a->Object());
+    EXPECT_EQ(a->Object(), new_a->Object());
 
     auto indices = new_a->Indices();
     EXPECT_EQ(2u, indices.Length());

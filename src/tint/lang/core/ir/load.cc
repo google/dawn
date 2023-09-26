@@ -37,8 +37,8 @@ Load::~Load() = default;
 
 Load* Load::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
-    auto* new_from = ctx.Clone(From());
-    return ctx.ir.instructions.Create<Load>(new_result, new_from);
+    auto* from = ctx.Remap(From());
+    return ctx.ir.instructions.Create<Load>(new_result, from);
 }
 
 }  // namespace tint::core::ir
