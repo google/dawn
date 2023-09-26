@@ -1121,8 +1121,20 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::BuiltinFn::kSampledImage:
             op = spv::Op::OpSampledImage;
             break;
+        case spirv::BuiltinFn::kSdot:
+            module_.PushExtension("SPV_KHR_integer_dot_product");
+            module_.PushCapability(SpvCapabilityDotProductKHR);
+            module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            op = spv::Op::OpSDot;
+            break;
         case spirv::BuiltinFn::kSelect:
             op = spv::Op::OpSelect;
+            break;
+        case spirv::BuiltinFn::kUdot:
+            module_.PushExtension("SPV_KHR_integer_dot_product");
+            module_.PushCapability(SpvCapabilityDotProductKHR);
+            module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            op = spv::Op::OpUDot;
             break;
         case spirv::BuiltinFn::kVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;

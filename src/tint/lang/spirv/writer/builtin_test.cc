@@ -1985,5 +1985,98 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
     EXPECT_INST("%result = OpArrayLength %uint %1 2");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// DP4A builtins
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(SpirvWriterTest, Builtin_Dot4I8Packed) {
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* arg2 = b.FunctionParam("arg2", ty.u32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1, arg2});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpCapability DotProduct
+               OpCapability DotProductInput4x8BitPacked
+               OpExtension "SPV_KHR_integer_dot_product"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+
+               ; Debug Information
+               OpName %foo "foo"  ; id %1
+               OpName %arg1 "arg1"  ; id %4
+               OpName %arg2 "arg2"  ; id %5
+               OpName %result "result"  ; id %8
+               OpName %unused_entry_point "unused_entry_point"  ; id %9
+
+               ; Types, variables and constants
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+          %6 = OpTypeFunction %int %uint %uint
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %int None %6
+       %arg1 = OpFunctionParameter %uint
+       %arg2 = OpFunctionParameter %uint
+          %7 = OpLabel
+     %result = OpSDot %int %arg1 %arg2 PackedVectorFormat4x8Bit
+               OpReturnValue %result
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Dot4U8Packed) {
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* arg2 = b.FunctionParam("arg2", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg1, arg2});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::BuiltinFn::kDot4U8Packed, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpCapability DotProduct
+               OpCapability DotProductInput4x8BitPacked
+               OpExtension "SPV_KHR_integer_dot_product"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+
+               ; Debug Information
+               OpName %foo "foo"  ; id %1
+               OpName %arg1 "arg1"  ; id %3
+               OpName %arg2 "arg2"  ; id %4
+               OpName %result "result"  ; id %7
+               OpName %unused_entry_point "unused_entry_point"  ; id %8
+
+               ; Types, variables and constants
+       %uint = OpTypeInt 32 0
+          %5 = OpTypeFunction %uint %uint %uint
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %uint None %5
+       %arg1 = OpFunctionParameter %uint
+       %arg2 = OpFunctionParameter %uint
+          %6 = OpLabel
+     %result = OpUDot %uint %arg1 %arg2 PackedVectorFormat4x8Bit
+               OpReturnValue %result
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

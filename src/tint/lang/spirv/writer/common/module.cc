@@ -88,14 +88,15 @@ void Module::Iterate(std::function<void(const Instruction&)> cb) const {
 }
 
 void Module::PushCapability(uint32_t cap) {
-    if (capability_set_.count(cap) == 0) {
-        capability_set_.insert(cap);
+    if (capability_set_.Add(cap)) {
         capabilities_.push_back(Instruction{spv::Op::OpCapability, {Operand(cap)}});
     }
 }
 
 void Module::PushExtension(const char* extension) {
-    extensions_.push_back(Instruction{spv::Op::OpExtension, {Operand(extension)}});
+    if (extension_set_.Add(extension)) {
+        extensions_.push_back(Instruction{spv::Op::OpExtension, {Operand(extension)}});
+    }
 }
 
 }  // namespace tint::spirv::writer

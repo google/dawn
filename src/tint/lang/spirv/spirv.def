@@ -296,3 +296,8 @@ fn select<N: num, T: scalar>(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn vector_times_matrix<T: f32_f16, N: num, M: num>(vec<N, T>, mat<M, N, T>) -> vec<M, T>
 fn vector_times_scalar<T: f32_f16, N: num>(vec<N, T>, T) -> vec<N, T>
 
+////////////////////////////////////////////////////////////////////////////////
+// SPV_KHR_integer_dot_product instructions
+////////////////////////////////////////////////////////////////////////////////
+fn sdot(u32, u32, u32) -> i32
+fn udot(u32, u32, u32) -> u32

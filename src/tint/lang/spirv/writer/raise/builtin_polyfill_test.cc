@@ -995,6 +995,76 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec4u) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4I8Packed) {
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* arg2 = b.FunctionParam("arg2", ty.u32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1, arg2});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, arg1, arg2);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg1:u32, %arg2:u32):i32 -> %b1 {
+  %b1 = block {
+    %4:i32 = dot4I8Packed %arg1, %arg2
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg1:u32, %arg2:u32):i32 -> %b1 {
+  %b1 = block {
+    %4:i32 = spirv.sdot %arg1, %arg2, 0u
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4U8Packed) {
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* arg2 = b.FunctionParam("arg2", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg1, arg2});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::BuiltinFn::kDot4U8Packed, arg1, arg2);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg1:u32, %arg2:u32):u32 -> %b1 {
+  %b1 = block {
+    %4:u32 = dot4U8Packed %arg1, %arg2
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg1:u32, %arg2:u32):u32 -> %b1 {
+  %b1 = block {
+    %4:u32 = spirv.udot %arg1, %arg2, 0u
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
     auto* argt = b.FunctionParam("argt", ty.i32());

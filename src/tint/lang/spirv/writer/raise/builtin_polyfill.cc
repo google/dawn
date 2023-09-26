@@ -75,6 +75,8 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kDot:
+                    case core::BuiltinFn::kDot4I8Packed:
+                    case core::BuiltinFn::kDot4U8Packed:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
@@ -123,6 +125,10 @@ struct State {
                     break;
                 case core::BuiltinFn::kDot:
                     replacement = Dot(builtin);
+                    break;
+                case core::BuiltinFn::kDot4I8Packed:
+                case core::BuiltinFn::kDot4U8Packed:
+                    replacement = DotPacked4x8(builtin);
                     break;
                 case core::BuiltinFn::kSelect:
                     replacement = Select(builtin);
@@ -338,6 +344,23 @@ struct State {
         auto args = Vector<core::ir::Value*, 4>(builtin->Args());
         auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result()->Type(),
                                                     spirv::BuiltinFn::kDot, std::move(args));
+        call->InsertBefore(builtin);
+        return call->Result();
+    }
+
+    /// Handle a `dot4{I,U}8Packed()` builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    core::ir::Value* DotPacked4x8(core::ir::CoreBuiltinCall* builtin) {
+        // Replace the builtin call with a call to the spirv.{s,u}dot intrinsic.
+        auto* type = builtin->Result()->Type();
+        auto is_signed = builtin->Func() == core::BuiltinFn::kDot4I8Packed;
+        auto inst = is_signed ? spirv::BuiltinFn::kSdot : spirv::BuiltinFn::kUdot;
+
+        auto args = Vector<core::ir::Value*, 3>(builtin->Args());
+        args.Push(Literal(u32(SpvPackedVectorFormatPackedVectorFormat4x8Bit)));
+
+        auto* call = b.Call<spirv::ir::BuiltinCall>(type, inst, std::move(args));
         call->InsertBefore(builtin);
         return call->Result();
     }

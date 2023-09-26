@@ -17,11 +17,11 @@
 
 #include <cstdint>
 #include <functional>
-#include <unordered_set>
 #include <vector>
 
 #include "src/tint/lang/spirv/writer/common/function.h"
 #include "src/tint/lang/spirv/writer/common/instruction.h"
+#include "src/tint/utils/containers/hashset.h"
 
 namespace tint::spirv::writer {
 
@@ -153,7 +153,8 @@ class Module {
     InstructionList types_;
     InstructionList annotations_;
     std::vector<Function> functions_;
-    std::unordered_set<uint32_t> capability_set_;
+    Hashset<uint32_t, 8> capability_set_;
+    Hashset<const char*, 8> extension_set_;
 };
 
 }  // namespace tint::spirv::writer

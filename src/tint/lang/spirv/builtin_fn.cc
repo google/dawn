@@ -95,6 +95,10 @@ const char* str(BuiltinFn i) {
             return "vector_times_matrix";
         case BuiltinFn::kVectorTimesScalar:
             return "vector_times_scalar";
+        case BuiltinFn::kSdot:
+            return "sdot";
+        case BuiltinFn::kUdot:
+            return "udot";
     }
     return "<unknown>";
 }
