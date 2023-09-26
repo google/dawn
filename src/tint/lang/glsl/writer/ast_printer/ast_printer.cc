@@ -246,7 +246,7 @@ SanitizedResult Sanitize(const Program& in,
     data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_remapper_options.binding_points,
         std::unordered_map<BindingPoint, core::Access>{},
-        options.binding_remapper_options.allow_collisions);
+        /* allow_collisions */ true);
     manager.Add<ast::transform::BindingRemapper>();
 
     manager.Add<ast::transform::PromoteInitializersToLet>();

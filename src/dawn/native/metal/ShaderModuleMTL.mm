@@ -117,7 +117,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     using BindingPoint = tint::BindingPoint;
 
     tint::BindingRemapperOptions bindingRemapper;
-    bindingRemapper.allow_collisions = true;
 
     tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {0, kBufferLengthBufferSlot};

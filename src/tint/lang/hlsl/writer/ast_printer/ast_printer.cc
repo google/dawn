@@ -216,9 +216,13 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // BindingRemapper must come after MultiplanarExternalTexture
     manager.Add<ast::transform::BindingRemapper>();
+
+    // D3D11 and 12 registers like `t3` and `c3` have the same bindingOffset number in
+    // the remapping but should not be considered a collision because they have
+    // different types.
     data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_remapper_options.binding_points, options.access_controls,
-        options.binding_remapper_options.allow_collisions);
+        /* allow_collisions */ true);
 
     {  // Builtin polyfills
         ast::transform::BuiltinPolyfill::Builtins polyfills;

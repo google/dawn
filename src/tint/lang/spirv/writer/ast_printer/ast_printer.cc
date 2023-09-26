@@ -98,8 +98,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     manager.Add<ast::transform::BindingRemapper>();
     data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_remapper_options.binding_points,
-        std::unordered_map<BindingPoint, core::Access>{},
-        options.binding_remapper_options.allow_collisions);
+        std::unordered_map<BindingPoint, core::Access>{}, /* allow_collisions */ false);
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
     data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(

@@ -121,11 +121,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     using tint::BindingPoint;
 
     tint::BindingRemapperOptions bindingRemapper;
-    // D3D12 registers like `t3` and `c3` have the same bindingOffset number in
-    // the remapping but should not be considered a collision because they have
-    // different types.
-    bindingRemapper.allow_collisions = true;
-
     std::unordered_map<BindingPoint, tint::core::Access> accessControls;
 
     tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;

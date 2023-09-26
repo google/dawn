@@ -105,10 +105,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }
 
     tint::BindingRemapperOptions bindingRemapper;
-    // D3D11 registers like `t3` and `c3` have the same bindingOffset number in
-    // the remapping but should not be considered a collision because they have
-    // different types.
-    bindingRemapper.allow_collisions = true;
 
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
 
