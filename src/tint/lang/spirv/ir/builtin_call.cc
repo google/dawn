@@ -28,6 +28,7 @@ BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
                          BuiltinFn func,
                          VectorRef<core::ir::Value*> arguments)
     : Base(result, arguments), func_(func) {
+    flags_.Add(Flag::kSequenced);
     TINT_ASSERT(func != BuiltinFn::kNone);
 }
 
