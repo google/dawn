@@ -83,6 +83,7 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast:test",
     "//src/tint/lang/wgsl/helpers",
+    "//src/tint/lang/wgsl/intrinsic",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/reader/lower",

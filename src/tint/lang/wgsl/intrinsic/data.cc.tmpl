@@ -14,22 +14,21 @@ See:
 
 {{- Import "src/tint/utils/templates/intrinsic_table_data.tmpl.inc" -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/spirv/spirv.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 
 #include <limits>
 #include <string>
 
-#include "src/tint/lang/core/intrinsic/data/type_matchers.h"
-#include "src/tint/lang/spirv/intrinsic/data/type_matchers.h"
-#include "src/tint/lang/spirv/intrinsic/data/data.h"
+#include "src/tint/lang/core/intrinsic/type_matchers.h"
+#include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::intrinsic::data {
+namespace tint::wgsl::intrinsic {
 
-using namespace tint::core::intrinsic::data;  // NOLINT(build/namespaces)
+using namespace tint::core::intrinsic;  // NOLINT(build/namespaces)
 
 {{ Eval "Data"
   "Intrinsics" $I
-  "Name"       "kData" -}}
+  "Name"       "Dialect::kData" -}}
 
-}  // namespace tint::spirv::intrinsic::data
+}  // namespace tint::wgsl::intrinsic

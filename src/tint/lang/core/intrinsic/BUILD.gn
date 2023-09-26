@@ -33,9 +33,12 @@ libtint_source_set("intrinsic") {
   sources = [
     "ctor_conv.cc",
     "ctor_conv.h",
+    "data.cc",
+    "dialect.h",
     "table.cc",
     "table.h",
     "table_data.h",
+    "type_matchers.h",
   ]
   deps = [
     "${tint_src_dir}/lang/core",
@@ -65,11 +68,11 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",
-      "${tint_src_dir}/lang/core/intrinsic/data",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/intrinsic",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/resolver:unittests",

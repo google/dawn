@@ -21,8 +21,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/core/intrinsic/data/BUILD.cmake)
-
 ################################################################################
 # Target:    tint_lang_core_intrinsic
 # Kind:      lib
@@ -30,9 +28,12 @@ include(lang/core/intrinsic/data/BUILD.cmake)
 tint_add_target(tint_lang_core_intrinsic lib
   lang/core/intrinsic/ctor_conv.cc
   lang/core/intrinsic/ctor_conv.h
+  lang/core/intrinsic/data.cc
+  lang/core/intrinsic/dialect.h
   lang/core/intrinsic/table.cc
   lang/core/intrinsic/table.h
   lang/core/intrinsic/table_data.h
+  lang/core/intrinsic/type_matchers.h
 )
 
 tint_target_add_dependencies(tint_lang_core_intrinsic lib
@@ -66,11 +67,11 @@ tint_target_add_dependencies(tint_lang_core_intrinsic_test test
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
-  tint_lang_core_intrinsic_data
   tint_lang_core_type
   tint_lang_core_type_test
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_intrinsic
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_resolver_test

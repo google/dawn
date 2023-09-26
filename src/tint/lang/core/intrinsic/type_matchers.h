@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_INTRINSIC_DATA_TYPE_MATCHERS_H_
-#define SRC_TINT_LANG_CORE_INTRINSIC_DATA_TYPE_MATCHERS_H_
+#ifndef SRC_TINT_LANG_CORE_INTRINSIC_TYPE_MATCHERS_H_
+#define SRC_TINT_LANG_CORE_INTRINSIC_TYPE_MATCHERS_H_
 
 #include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
@@ -40,7 +40,9 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 
-namespace tint::core::intrinsic::data {
+//! @cond Doxygen_Suppress
+
+namespace tint::core::intrinsic {
 
 inline bool MatchBool(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::Bool>();
@@ -588,6 +590,8 @@ inline const type::Struct* BuildAtomicCompareExchangeResult(intrinsic::MatchStat
     return type::CreateAtomicCompareExchangeResult(state.types, state.symbols, ty);
 }
 
-}  // namespace tint::core::intrinsic::data
+}  // namespace tint::core::intrinsic
 
-#endif  // SRC_TINT_LANG_CORE_INTRINSIC_DATA_TYPE_MATCHERS_H_
+//! @endcond
+
+#endif  // SRC_TINT_LANG_CORE_INTRINSIC_TYPE_MATCHERS_H_

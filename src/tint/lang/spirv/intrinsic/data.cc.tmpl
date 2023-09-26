@@ -14,19 +14,22 @@ See:
 
 {{- Import "src/tint/utils/templates/intrinsic_table_data.tmpl.inc" -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/spirv/spirv.def" -}}
 
 #include <limits>
 #include <string>
 
-#include "src/tint/lang/core/intrinsic/data/data.h"
-#include "src/tint/lang/core/intrinsic/data/type_matchers.h"
+#include "src/tint/lang/core/intrinsic/type_matchers.h"
+#include "src/tint/lang/spirv/intrinsic/dialect.h"
+#include "src/tint/lang/spirv/intrinsic/type_matchers.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::core::intrinsic::data {
+namespace tint::spirv::intrinsic {
+
+using namespace tint::core::intrinsic;  // NOLINT(build/namespaces)
 
 {{ Eval "Data"
   "Intrinsics" $I
-  "Name"       "kData" -}}
+  "Name"       "Dialect::kData" -}}
 
-}  // namespace tint::core::intrinsic::data
+}  // namespace tint::spirv::intrinsic

@@ -38,7 +38,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ir lib
   tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
-  tint_lang_wgsl_intrinsic_data
+  tint_lang_wgsl_intrinsic
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

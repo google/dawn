@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
-#include "src/tint/lang/wgsl/intrinsic/data/data.h"
+#include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::wgsl::ir {
@@ -50,7 +50,7 @@ class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     std::string FriendlyName() override { return std::string("wgsl.") + str(fn_); }
 
     /// @returns the table data to validate this builtin
-    const core::intrinsic::TableData& TableData() override { return intrinsic::data::kData; }
+    const core::intrinsic::TableData& TableData() override { return intrinsic::Dialect::kData; }
 
   private:
     BuiltinFn fn_;

@@ -82,6 +82,7 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers_test test
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_test
   tint_lang_wgsl_helpers
+  tint_lang_wgsl_intrinsic
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
   tint_lang_wgsl_reader_lower

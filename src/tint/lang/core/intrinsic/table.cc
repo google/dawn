@@ -98,7 +98,7 @@ static inline void SortCandidates(Candidates& candidates) {
 /// @returns the matched intrinsic
 Result<Overload> MatchIntrinsic(Context& context,
                                 const IntrinsicInfo& intrinsic,
-                                const char* intrinsic_name,
+                                std::string_view intrinsic_name,
                                 VectorRef<const core::type::Type*> args,
                                 EvaluationStage earliest_eval_stage,
                                 TemplateState templates,
@@ -131,7 +131,7 @@ Candidate ScoreOverload(Context& context,
 /// @returns the resolved Candidate.
 Candidate ResolveCandidate(Context& context,
                            Candidates&& candidates,
-                           const char* intrinsic_name,
+                           std::string_view intrinsic_name,
                            VectorRef<const core::type::Type*> args,
                            TemplateState templates);
 
@@ -152,24 +152,24 @@ MatchState Match(Context& context,
 void PrintOverload(StringStream& ss,
                    Context& context,
                    const OverloadInfo& overload,
-                   const char* intrinsic_name);
+                   std::string_view intrinsic_name);
 
 // Prints the list of candidates for emitting diagnostics
 void PrintCandidates(StringStream& ss,
                      Context& context,
                      VectorRef<Candidate> candidates,
-                     const char* intrinsic_name);
+                     std::string_view intrinsic_name);
 
 /// Raises an error when no overload is a clear winner of overload resolution
 void ErrAmbiguousOverload(Context& context,
-                          const char* intrinsic_name,
+                          std::string_view intrinsic_name,
                           VectorRef<const core::type::Type*> args,
                           TemplateState templates,
                           VectorRef<Candidate> candidates);
 
 /// @return a string representing a call to a builtin with the given argument
 /// types.
-std::string CallSignature(const char* intrinsic_name,
+std::string CallSignature(std::string_view intrinsic_name,
                           VectorRef<const core::type::Type*> args,
                           const core::type::Type* template_arg = nullptr) {
     StringStream ss;
@@ -195,7 +195,7 @@ std::string CallSignature(const char* intrinsic_name,
 
 Result<Overload> MatchIntrinsic(Context& context,
                                 const IntrinsicInfo& intrinsic,
-                                const char* intrinsic_name,
+                                std::string_view intrinsic_name,
                                 VectorRef<const core::type::Type*> args,
                                 EvaluationStage earliest_eval_stage,
                                 TemplateState templates,
@@ -377,7 +377,7 @@ Candidate ScoreOverload(Context& context,
 
 Candidate ResolveCandidate(Context& context,
                            Candidates&& candidates,
-                           const char* intrinsic_name,
+                           std::string_view intrinsic_name,
                            VectorRef<const core::type::Type*> args,
                            TemplateState templates) {
     Vector<uint32_t, kNumFixedParams> best_ranks;
@@ -455,7 +455,7 @@ MatchState Match(Context& context,
 void PrintOverload(StringStream& ss,
                    Context& context,
                    const OverloadInfo& overload,
-                   const char* intrinsic_name) {
+                   std::string_view intrinsic_name) {
     TemplateState templates;
 
     // TODO(crbug.com/tint/1730): Use input evaluation stage to output only relevant overloads.
@@ -536,7 +536,7 @@ void PrintOverload(StringStream& ss,
 void PrintCandidates(StringStream& ss,
                      Context& context,
                      VectorRef<Candidate> candidates,
-                     const char* intrinsic_name) {
+                     std::string_view intrinsic_name) {
     for (auto& candidate : candidates) {
         ss << "  ";
         PrintOverload(ss, context, *candidate.overload, intrinsic_name);
@@ -545,7 +545,7 @@ void PrintCandidates(StringStream& ss,
 }
 
 void ErrAmbiguousOverload(Context& context,
-                          const char* intrinsic_name,
+                          std::string_view intrinsic_name,
                           VectorRef<const core::type::Type*> args,
                           TemplateState templates,
                           VectorRef<Candidate> candidates) {
@@ -584,7 +584,7 @@ void ErrAmbiguousOverload(Context& context,
 }  // namespace
 
 Result<Overload> LookupFn(Context& context,
-                          const char* intrinsic_name,
+                          std::string_view intrinsic_name,
                           size_t function_id,
                           VectorRef<const core::type::Type*> args,
                           EvaluationStage earliest_eval_stage,
@@ -613,7 +613,7 @@ Result<Overload> LookupUnary(Context& context,
                              EvaluationStage earliest_eval_stage,
                              const Source& source) {
     const IntrinsicInfo* intrinsic_info = nullptr;
-    const char* intrinsic_name = nullptr;
+    std::string_view intrinsic_name;
     switch (op) {
         case core::UnaryOp::kComplement:
             intrinsic_info = &context.data.unary_complement;
@@ -660,7 +660,7 @@ Result<Overload> LookupBinary(Context& context,
                               const Source& source,
                               bool is_compound) {
     const IntrinsicInfo* intrinsic_info = nullptr;
-    const char* intrinsic_name = nullptr;
+    std::string_view intrinsic_name;
     switch (op) {
         case core::BinaryOp::kAnd:
             intrinsic_info = &context.data.binary_and;
@@ -757,7 +757,7 @@ Result<Overload> LookupBinary(Context& context,
 }
 
 Result<Overload> LookupCtorConv(Context& context,
-                                const char* type_name,
+                                std::string_view type_name,
                                 size_t type_id,
                                 const core::type::Type* template_arg,
                                 VectorRef<const core::type::Type*> args,

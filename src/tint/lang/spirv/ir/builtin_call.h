@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
-#include "src/tint/lang/spirv/intrinsic/data/data.h"
+#include "src/tint/lang/spirv/intrinsic/dialect.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::spirv::ir {
@@ -50,7 +50,9 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     std::string FriendlyName() override { return std::string("spirv.") + str(func_); }
 
     /// @returns the table data to validate this builtin
-    const core::intrinsic::TableData& TableData() override { return spirv::intrinsic::data::kData; }
+    const core::intrinsic::TableData& TableData() override {
+        return spirv::intrinsic::Dialect::kData;
+    }
 
   private:
     BuiltinFn func_;

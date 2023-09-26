@@ -21,8 +21,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/wgsl/intrinsic/data/BUILD.cmake)
-
 ################################################################################
 # Target:    tint_lang_wgsl_intrinsic
 # Kind:      lib
@@ -30,8 +28,26 @@ include(lang/wgsl/intrinsic/data/BUILD.cmake)
 tint_add_target(tint_lang_wgsl_intrinsic lib
   lang/wgsl/intrinsic/ctor_conv.cc
   lang/wgsl/intrinsic/ctor_conv.h
+  lang/wgsl/intrinsic/data.cc
+  lang/wgsl/intrinsic/dialect.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_intrinsic lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_type
+  tint_lang_wgsl
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
   tint_utils_traits
 )

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_INTRINSIC_DATA_TYPE_MATCHERS_H_
-#define SRC_TINT_LANG_SPIRV_INTRINSIC_DATA_TYPE_MATCHERS_H_
+#ifndef SRC_TINT_LANG_SPIRV_INTRINSIC_TYPE_MATCHERS_H_
+#define SRC_TINT_LANG_SPIRV_INTRINSIC_TYPE_MATCHERS_H_
 
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/array.h"
@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 
-namespace tint::spirv::intrinsic::data {
+namespace tint::spirv::intrinsic {
 
 inline bool MatchStructWithRuntimeArray(core::intrinsic::MatchState&, const core::type::Type* ty) {
     if (auto* str = ty->As<core::type::Struct>()) {
@@ -62,6 +62,6 @@ inline const core::type::Type* BuildSampledImage(core::intrinsic::MatchState& st
     return state.types.Get<type::SampledImage>(T);
 }
 
-}  // namespace tint::spirv::intrinsic::data
+}  // namespace tint::spirv::intrinsic
 
-#endif  // SRC_TINT_LANG_SPIRV_INTRINSIC_DATA_TYPE_MATCHERS_H_
+#endif  // SRC_TINT_LANG_SPIRV_INTRINSIC_TYPE_MATCHERS_H_

@@ -27,12 +27,15 @@ cc_library(
   name = "intrinsic",
   srcs = [
     "ctor_conv.cc",
+    "data.cc",
     "table.cc",
   ],
   hdrs = [
     "ctor_conv.h",
+    "dialect.h",
     "table.h",
     "table_data.h",
+    "type_matchers.h",
   ],
   deps = [
     "//src/tint/lang/core",
@@ -65,11 +68,11 @@ cc_library(
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/intrinsic/data",
     "//src/tint/lang/core/type",
     "//src/tint/lang/core/type:test",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
+    "//src/tint/lang/wgsl/intrinsic",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/resolver:test",

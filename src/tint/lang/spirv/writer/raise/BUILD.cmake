@@ -50,12 +50,11 @@ tint_target_add_dependencies(tint_lang_spirv_writer_raise lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
-  tint_lang_core_intrinsic_data
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_type
   tint_lang_spirv
-  tint_lang_spirv_intrinsic_data
+  tint_lang_spirv_intrinsic
   tint_lang_spirv_ir
   tint_lang_spirv_type
   tint_utils_containers
@@ -106,7 +105,6 @@ tint_target_add_dependencies(tint_lang_spirv_writer_raise_test test
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
-  tint_lang_core_intrinsic_data
   tint_lang_core_ir
   tint_lang_core_ir_transform_test
   tint_lang_core_type

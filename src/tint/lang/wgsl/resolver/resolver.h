@@ -27,6 +27,7 @@
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
@@ -612,7 +613,7 @@ class Resolver {
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
     core::constant::Eval const_eval_;
-    core::intrinsic::Context intrinsic_context_;
+    core::intrinsic::Table<wgsl::intrinsic::Dialect> intrinsic_table_;
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;

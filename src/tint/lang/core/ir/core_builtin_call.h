@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/tint/lang/core/builtin_fn.h"
-#include "src/tint/lang/core/intrinsic/data/data.h"
+#include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -50,7 +50,9 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     std::string FriendlyName() override { return core::str(func_); }
 
     /// @returns the table data to validate this builtin
-    const core::intrinsic::TableData& TableData() override { return core::intrinsic::data::kData; }
+    const core::intrinsic::TableData& TableData() override {
+        return core::intrinsic::Dialect::kData;
+    }
 
   private:
     core::BuiltinFn func_;
