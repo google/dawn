@@ -213,7 +213,7 @@ This command is then possible to run in your debugger of choice.
 ### System requirements
 
 - Python 3.6 or newer
-- [Meson](https://golang.org/dl/)
+- [Meson](https://mesonbuild.com/Quick-guide.html)
 - llvm-dev
 
 These can be pre-built versions from apt-get, etc.
