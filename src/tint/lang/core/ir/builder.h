@@ -796,6 +796,8 @@ class Builder {
     ir::Var* Var(std::string_view name, const core::type::Pointer* type);
 
     /// Creates a new `var` declaration with a name and initializer value
+    /// @tparam SPACE the var's address space
+    /// @tparam ACCESS the var's access mode
     /// @param name the var name
     /// @param init the var initializer
     /// @returns the instruction
@@ -812,6 +814,27 @@ class Builder {
         var->SetInitializer(val);
         ir.SetName(var->Result(), name);
         return var;
+    }
+
+    /// Creates a new `var` declaration
+    /// @tparam SPACE the var's address space
+    /// @tparam T the storage pointer's element type
+    /// @tparam ACCESS the var's access mode
+    /// @returns the instruction
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    ir::Var* Var() {
+        return Var(ir.Types().ptr<SPACE, T, ACCESS>());
+    }
+
+    /// Creates a new `var` declaration with a name
+    /// @tparam SPACE the var's address space
+    /// @tparam T the storage pointer's element type
+    /// @tparam ACCESS the var's access mode
+    /// @param name the var name
+    /// @returns the instruction
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    ir::Var* Var(std::string_view name) {
+        return Var(ir.Types().ptr<SPACE, T, ACCESS>(), name);
     }
 
     /// Creates a new `let` declaration

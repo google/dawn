@@ -201,6 +201,10 @@ class State {
             auto ty = Type(param->Type());
             auto name = NameFor(param);
             Bind(param, name, PtrKind::kPtr);
+
+            if (ParamRequiresFullPtrParameters(param->Type())) {
+                Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+            }
             return b.Param(name, ty);
         });
 
@@ -571,6 +575,12 @@ class State {
         tint::Switch(
             call,  //
             [&](core::ir::UserCall* c) {
+                for (auto* arg : call->Args()) {
+                    if (ArgRequiresFullPtrParameters(arg)) {
+                        Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+                        break;
+                    }
+                }
                 auto* expr = b.Call(NameFor(c->Target()), std::move(args));
                 if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
                     Append(b.CallStmt(expr));
@@ -1159,6 +1169,44 @@ class State {
             default:
                 return false;
         }
+    }
+
+    /// @returns true if a parameter of the type @p ty requires the
+    /// kChromiumExperimentalFullPtrParameters extension to be enabled.
+    bool ParamRequiresFullPtrParameters(const core::type::Type* ty) {
+        if (auto* ptr = ty->As<core::type::Pointer>()) {
+            switch (ptr->AddressSpace()) {
+                case core::AddressSpace::kUniform:
+                case core::AddressSpace::kStorage:
+                case core::AddressSpace::kWorkgroup:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        return false;
+    }
+
+    /// @returns true if the argument @p arg requires the kChromiumExperimentalFullPtrParameters
+    /// extension to be enabled.
+    bool ArgRequiresFullPtrParameters(core::ir::Value* arg) {
+        if (!arg->Type()->Is<core::type::Pointer>()) {
+            return false;
+        }
+
+        auto res = arg->As<core::ir::InstructionResult>();
+        while (res) {
+            auto* inst = res->Source();
+            if (inst->Is<core::ir::Access>()) {
+                return true;  // Passing pointer into sub-object
+            }
+            if (auto* let = inst->As<core::ir::Let>()) {
+                res = let->Value()->As<core::ir::InstructionResult>();
+            } else {
+                break;
+            }
+        }
+        return false;
     }
 };
 
