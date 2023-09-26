@@ -22,3 +22,16 @@
 ################################################################################
 
 include(lang/wgsl/intrinsic/data/BUILD.cmake)
+
+################################################################################
+# Target:    tint_lang_wgsl_intrinsic
+# Kind:      lib
+################################################################################
+tint_add_target(tint_lang_wgsl_intrinsic lib
+  lang/wgsl/intrinsic/ctor_conv.cc
+  lang/wgsl/intrinsic/ctor_conv.h
+)
+
+tint_target_add_dependencies(tint_lang_wgsl_intrinsic lib
+  tint_utils_traits
+)

@@ -23,4 +23,18 @@
 
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+cc_library(
+  name = "intrinsic",
+  srcs = [
+    "ctor_conv.cc",
+  ],
+  hdrs = [
+    "ctor_conv.h",
+  ],
+  deps = [
+    "//src/tint/utils/traits",
+  ],
+  copts = COPTS,
+  visibility = ["//visibility:public"],
+)
 

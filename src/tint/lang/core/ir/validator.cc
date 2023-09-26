@@ -547,8 +547,8 @@ void Validator::CheckBuiltinCall(BuiltinCall* call) {
     auto args = Transform<8>(call->Args(), [&](ir::Value* v) { return v->Type(); });
     intrinsic::Context context{call->TableData(), mod_.Types(), mod_.symbols, diagnostics_};
 
-    auto result = core::intrinsic::Lookup(context, call->FriendlyName().c_str(), call->FuncId(),
-                                          args, core::EvaluationStage::kRuntime, Source{});
+    auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
+                                            args, core::EvaluationStage::kRuntime, Source{});
     if (result) {
         if (result->return_type != call->Result()->Type()) {
             AddError(call, InstError(call, "call result type does not match builtin return type"));

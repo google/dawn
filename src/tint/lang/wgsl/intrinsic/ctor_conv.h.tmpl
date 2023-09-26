@@ -11,16 +11,16 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 
-#ifndef SRC_TINT_LANG_CORE_INTRINSIC_CTOR_CONV_H_
-#define SRC_TINT_LANG_CORE_INTRINSIC_CTOR_CONV_H_
+#ifndef SRC_TINT_LANG_WGSL_INTRINSIC_CTOR_CONV_H_
+#define SRC_TINT_LANG_WGSL_INTRINSIC_CTOR_CONV_H_
 
 #include <cstdint>
 
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::core::intrinsic {
+namespace tint::wgsl::intrinsic {
 
 /// CtorConv is an enumerator of types that have a constructor or converter overload
 /// declared in the intrinsic table.
@@ -31,8 +31,7 @@ enum class CtorConv : uint8_t {
     kNone,
 };
 
-/// @returns the name of the enumerator
-/// @param i the CtorConv enumerator
+/// @returns the name of the type.
 const char* str(CtorConv i);
 
 /// Prints the CtorConv @p c to @p o
@@ -85,6 +84,6 @@ inline CtorConv MatrixCtorConv(uint32_t c, uint32_t r) {
     return CtorConv::kNone;
 }
 
-}  // namespace tint::core::intrinsic
+}  // namespace tint::wgsl::intrinsic
 
-#endif  // SRC_TINT_LANG_CORE_INTRINSIC_CTOR_CONV_H_
+#endif  // SRC_TINT_LANG_WGSL_INTRINSIC_CTOR_CONV_H_

@@ -26,6 +26,8 @@
 
 #include <cstdint>
 
+#include "src/tint/utils/traits/traits.h"
+
 namespace tint::core::intrinsic {
 
 /// CtorConv is an enumerator of types that have a constructor or converter overload
@@ -55,6 +57,15 @@ enum class CtorConv : uint8_t {
 /// @returns the name of the enumerator
 /// @param i the CtorConv enumerator
 const char* str(CtorConv i);
+
+/// Prints the CtorConv @p c to @p o
+/// @param o the stream to write to
+/// @param c the CtorConv
+/// @return the stream so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, CtorConv c) {
+    return o << str(c);
+}
 
 /// @param n the width of the vector
 /// @return the CtorConv for a vector of width `n`
