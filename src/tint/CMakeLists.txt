@@ -81,6 +81,11 @@ function(tint_default_compile_options TARGET)
     )
 
     if(COMPILER_IS_CLANG)
+      if(IS_DEBUG_BUILD)
+        target_compile_options(${TARGET} PRIVATE
+          -fstandalone-debug
+        )
+      endif()
       target_compile_options(${TARGET} PRIVATE
         ${COMMON_CLANG_OPTIONS}
       )
