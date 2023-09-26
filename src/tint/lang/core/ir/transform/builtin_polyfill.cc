@@ -80,6 +80,11 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kInsertBits:
+                        if (config.insert_bits != BuiltinPolyfillLevel::kNone) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     case core::BuiltinFn::kSaturate:
                         if (config.saturate) {
                             worklist.Push(builtin);
@@ -119,6 +124,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kFirstTrailingBit:
                     replacement = FirstTrailingBit(builtin);
+                    break;
+                case core::BuiltinFn::kInsertBits:
+                    replacement = InsertBits(builtin);
                     break;
                 case core::BuiltinFn::kSaturate:
                     replacement = Saturate(builtin);
@@ -444,6 +452,36 @@ struct State {
             }
         });
         return result;
+    }
+
+    /// Polyfill an `insertBits()` builtin call.
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* InsertBits(ir::CoreBuiltinCall* call) {
+        auto* offset = call->Args()[2];
+        auto* count = call->Args()[3];
+
+        switch (config.insert_bits) {
+            case BuiltinPolyfillLevel::kClampOrRangeCheck: {
+                b.InsertBefore(call, [&] {
+                    // Replace:
+                    //    insertBits(e, offset, count)
+                    // With:
+                    //    let o = min(offset, 32);
+                    //    let c = min(count, w - o);
+                    //    insertBits(e, o, c);
+                    auto* o = b.Call(ty.u32(), core::BuiltinFn::kMin, offset, 32_u);
+                    auto* c = b.Call(ty.u32(), core::BuiltinFn::kMin, count,
+                                     b.Subtract(ty.u32(), 32_u, o));
+                    call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 2, o->Result());
+                    call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 3, c->Result());
+                });
+                return call->Result();
+            }
+            default:
+                TINT_UNIMPLEMENTED() << "insertBits polyfill level";
+        }
+        return nullptr;
     }
 
     /// Polyfill a `saturate()` builtin call.

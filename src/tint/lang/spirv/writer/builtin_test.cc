@@ -1548,7 +1548,12 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldInsert %int %arg %newbits %offset %count");
+    EXPECT_INST(R"(
+         %10 = OpExtInst %uint %11 UMin %offset %uint_32
+         %13 = OpISub %uint %uint_32 %10
+         %14 = OpExtInst %uint %11 UMin %count %13
+     %result = OpBitFieldInsert %int %arg %newbits %10 %14
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
@@ -1566,7 +1571,12 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldInsert %uint %arg %newbits %offset %count");
+    EXPECT_INST(R"(
+          %9 = OpExtInst %uint %10 UMin %offset %uint_32
+         %12 = OpISub %uint %uint_32 %9
+         %13 = OpExtInst %uint %10 UMin %count %12
+     %result = OpBitFieldInsert %uint %arg %newbits %9 %13
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
@@ -1585,7 +1595,12 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldInsert %v4int %arg %newbits %offset %count");
+    EXPECT_INST(R"(
+         %11 = OpExtInst %uint %12 UMin %offset %uint_32
+         %14 = OpISub %uint %uint_32 %11
+         %15 = OpExtInst %uint %12 UMin %count %14
+     %result = OpBitFieldInsert %v4int %arg %newbits %11 %15
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
@@ -1604,7 +1619,12 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldInsert %v2uint %arg %newbits %offset %count");
+    EXPECT_INST(R"(
+         %10 = OpExtInst %uint %11 UMin %offset %uint_32
+         %13 = OpISub %uint %uint_32 %10
+         %14 = OpExtInst %uint %11 UMin %count %13
+     %result = OpBitFieldInsert %v2uint %arg %newbits %10 %14
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_FaceForward_F32) {

@@ -48,6 +48,8 @@ struct BuiltinPolyfillConfig {
     bool first_leading_bit = false;
     /// Should `firstTrailingBit()` be polyfilled?
     bool first_trailing_bit = false;
+    /// How should `insertBits()` be polyfilled?
+    BuiltinPolyfillLevel insert_bits = BuiltinPolyfillLevel::kNone;
     /// Should `saturate()` be polyfilled?
     bool saturate = false;
     /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?

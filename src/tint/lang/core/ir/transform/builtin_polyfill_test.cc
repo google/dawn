@@ -1200,6 +1200,148 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, InsertBits_NoPolyfill) {
+    Build(core::BuiltinFn::kInsertBits, ty.u32(), Vector{ty.u32(), ty.u32(), ty.u32(), ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32, %arg_1:u32, %arg_2:u32, %arg_3:u32):u32 -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %result:u32 = insertBits %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.insert_bits = BuiltinPolyfillLevel::kNone;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_U32) {
+    Build(core::BuiltinFn::kInsertBits, ty.u32(), Vector{ty.u32(), ty.u32(), ty.u32(), ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32, %arg_1:u32, %arg_2:u32, %arg_3:u32):u32 -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %result:u32 = insertBits %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:u32, %arg_1:u32, %arg_2:u32, %arg_3:u32):u32 -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %6:u32 = min %arg_2, 32u
+    %7:u32 = sub 32u, %6
+    %8:u32 = min %arg_3, %7
+    %result:u32 = insertBits %arg, %arg_1, %6, %8
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.insert_bits = BuiltinPolyfillLevel::kClampOrRangeCheck;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_I32) {
+    Build(core::BuiltinFn::kInsertBits, ty.i32(), Vector{ty.i32(), ty.i32(), ty.u32(), ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:i32, %arg_1:i32, %arg_2:u32, %arg_3:u32):i32 -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %result:i32 = insertBits %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:i32, %arg_1:i32, %arg_2:u32, %arg_3:u32):i32 -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %6:u32 = min %arg_2, 32u
+    %7:u32 = sub 32u, %6
+    %8:u32 = min %arg_3, %7
+    %result:i32 = insertBits %arg, %arg_1, %6, %8
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.insert_bits = BuiltinPolyfillLevel::kClampOrRangeCheck;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_Vec2U32) {
+    Build(core::BuiltinFn::kInsertBits, ty.vec2<u32>(),
+          Vector{ty.vec2<u32>(), ty.vec2<u32>(), ty.u32(), ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:vec2<u32>, %arg_1:vec2<u32>, %arg_2:u32, %arg_3:u32):vec2<u32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %result:vec2<u32> = insertBits %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<u32>, %arg_1:vec2<u32>, %arg_2:u32, %arg_3:u32):vec2<u32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %6:u32 = min %arg_2, 32u
+    %7:u32 = sub 32u, %6
+    %8:u32 = min %arg_3, %7
+    %result:vec2<u32> = insertBits %arg, %arg_1, %6, %8
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.insert_bits = BuiltinPolyfillLevel::kClampOrRangeCheck;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, InsertBits_ClampArgs_Vec4I32) {
+    Build(core::BuiltinFn::kInsertBits, ty.vec4<i32>(),
+          Vector{ty.vec4<i32>(), ty.vec4<i32>(), ty.u32(), ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:vec4<i32>, %arg_1:vec4<i32>, %arg_2:u32, %arg_3:u32):vec4<i32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %result:vec4<i32> = insertBits %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<i32>, %arg_1:vec4<i32>, %arg_2:u32, %arg_3:u32):vec4<i32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  %b1 = block {
+    %6:u32 = min %arg_2, 32u
+    %7:u32 = sub 32u, %6
+    %8:u32 = min %arg_3, %7
+    %result:vec4<i32> = insertBits %arg, %arg_1, %6, %8
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.insert_bits = BuiltinPolyfillLevel::kClampOrRangeCheck;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
     auto* texture_ty =
         ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
