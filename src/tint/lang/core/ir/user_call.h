@@ -45,12 +45,16 @@ class UserCall final : public Castable<UserCall, Call> {
     /// @returns the call arguments
     tint::Slice<Value*> Args() override { return operands_.Slice().Offset(kArgsOperandOffset); }
 
+    /// Replaces the call arguments to @p arguments
+    /// @param arguments the new call arguments
+    void SetArgs(VectorRef<Value*> arguments);
+
     /// @returns the called function
     Function* Target() { return operands_[kFunctionOperandOffset]->As<ir::Function>(); }
 
     /// Sets called function
     /// @param target the new target of the call
-    void SetTarget(Function* target) { operands_[kFunctionOperandOffset] = target; }
+    void SetTarget(Function* target) { SetOperand(kFunctionOperandOffset, target); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "call"; }

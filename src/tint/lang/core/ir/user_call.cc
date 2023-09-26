@@ -39,4 +39,11 @@ UserCall* UserCall::Clone(CloneContext& ctx) {
     return ctx.ir.instructions.Create<UserCall>(new_result, target, args);
 }
 
+void UserCall::SetArgs(VectorRef<Value*> arguments) {
+    auto* fn = Target();
+    ClearOperands();
+    AddOperand(UserCall::kFunctionOperandOffset, fn);
+    AddOperands(UserCall::kArgsOperandOffset, std::move(arguments));
+}
+
 }  // namespace tint::core::ir

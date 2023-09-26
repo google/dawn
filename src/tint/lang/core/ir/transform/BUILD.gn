@@ -45,6 +45,8 @@ libtint_source_set("transform") {
     "builtin_polyfill.h",
     "demote_to_helper.cc",
     "demote_to_helper.h",
+    "direct_variable_access.cc",
+    "direct_variable_access.h",
     "multiplanar_external_texture.cc",
     "multiplanar_external_texture.h",
     "robustness.cc",
@@ -90,6 +92,7 @@ if (tint_build_unittests) {
       "block_decorated_structs_test.cc",
       "builtin_polyfill_test.cc",
       "demote_to_helper_test.cc",
+      "direct_variable_access_test.cc",
       "helper_test.h",
       "multiplanar_external_texture_test.cc",
       "robustness_test.cc",
@@ -106,6 +109,14 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/ir/transform",
       "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/wgsl",
+      "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/reader",
+      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer",
+      "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -120,5 +131,9 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+      sources += [ "direct_variable_access_wgsl_test.cc" ]
+    }
   }
 }

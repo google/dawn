@@ -834,7 +834,7 @@ class Builder {
     /// @returns the instruction
     template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
     ir::Var* Var(std::string_view name) {
-        return Var(ir.Types().ptr<SPACE, T, ACCESS>(), name);
+        return Var(name, ir.Types().ptr<SPACE, T, ACCESS>());
     }
 
     /// Creates a new `let` declaration

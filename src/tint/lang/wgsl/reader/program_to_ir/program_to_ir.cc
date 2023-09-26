@@ -1428,7 +1428,9 @@ tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     Impl b(program);
     auto r = b.Build();
     if (!r) {
-        return r.Failure();
+        diag::List err = std::move(r.Failure().reason);
+        err.add_note(diag::System::IR, "AST:\n" + Program::printer(program), Source{});
+        return Failure{err};
     }
 
     return r.Move();
