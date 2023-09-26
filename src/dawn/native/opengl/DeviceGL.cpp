@@ -287,10 +287,9 @@ MaybeError Device::ValidateTextureCanBeWrapped(const TextureDescriptor* descript
     DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
                     descriptor->sampleCount);
 
-    DAWN_INVALID_IF(descriptor->usage &
-                        (wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding),
-                    "Texture usage (%s) cannot have %s or %s.", descriptor->usage,
-                    wgpu::TextureUsage::TextureBinding, wgpu::TextureUsage::StorageBinding);
+    DAWN_INVALID_IF(descriptor->usage & wgpu::TextureUsage::StorageBinding,
+                    "Texture usage (%s) cannot have %s.", descriptor->usage,
+                    wgpu::TextureUsage::StorageBinding);
 
     return {};
 }
@@ -327,7 +326,10 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
 
     // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
     // in the passed-in TextureDescriptor.
-    return new Texture(this, textureDescriptor, tex);
+    auto result = new Texture(this, textureDescriptor, tex);
+    result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
+                                               result->GetAllSubresources());
+    return result;
 }
 
 TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
@@ -361,7 +363,10 @@ TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescripto
         return nullptr;
     }
 
-    return new Texture(this, textureDescriptor, texture);
+    auto result = new Texture(this, textureDescriptor, texture);
+    result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
+                                               result->GetAllSubresources());
+    return result;
 }
 
 MaybeError Device::TickImpl() {

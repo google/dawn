@@ -123,8 +123,7 @@ class EGLImageTestBase : public DawnTest {
                                   GLenum internalFormat,
                                   GLenum format,
                                   GLenum type,
-                                  void* data,
-                                  size_t size) {
+                                  void* data) {
         native::opengl::Device* openglDevice =
             native::opengl::ToBackend(native::FromAPI(device.Get()));
         const native::opengl::OpenGLFunctions& gl = openglDevice->GetGL();
@@ -141,10 +140,13 @@ class EGLImageTestBase : public DawnTest {
 
         return ScopedEGLImage(egl.DestroyImage, gl.DeleteTextures, dpy, eglImage, tex);
     }
-    wgpu::Texture WrapEGLImage(const wgpu::TextureDescriptor* descriptor, EGLImage eglImage) {
+    wgpu::Texture WrapEGLImage(const wgpu::TextureDescriptor* descriptor,
+                               EGLImage eglImage,
+                               bool isInitialized = false) {
         native::opengl::ExternalImageDescriptorEGLImage externDesc;
         externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
         externDesc.image = eglImage;
+        externDesc.isInitialized = isInitialized;
         WGPUTexture texture = native::opengl::WrapExternalEGLImage(device.Get(), &externDesc);
         return wgpu::Texture::Acquire(texture);
     }
@@ -165,7 +167,7 @@ class EGLImageValidationTests : public EGLImageTestBase {
     }
 
     ScopedEGLImage CreateDefaultEGLImage() {
-        return CreateEGLImage(10, 10, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, 0);
+        return CreateEGLImage(10, 10, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
 
   protected:
@@ -221,17 +223,10 @@ TEST_P(EGLImageValidationTests, InvalidTextureDimension) {
 // Test an error occurs if the texture usage is not RenderAttachment
 TEST_P(EGLImageValidationTests, InvalidTextureUsage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    descriptor.usage = wgpu::TextureUsage::TextureBinding;
-
-    ScopedEGLImage image = CreateDefaultEGLImage();
-    wgpu::Texture texture;
-    ASSERT_DEVICE_ERROR(texture = WrapEGLImage(&descriptor, image.getImage()));
-
-    ASSERT_EQ(texture.Get(), nullptr);
     descriptor.usage = wgpu::TextureUsage::StorageBinding;
 
-    ASSERT_DEVICE_ERROR(texture = WrapEGLImage(&descriptor, image.getImage()));
-
+    ScopedEGLImage image = CreateDefaultEGLImage();
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage()));
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
@@ -344,12 +339,92 @@ class EGLImageUsageTests : public EGLImageTestBase {
         gl.DeleteFramebuffers(1, &fbo);
         ASSERT_EQ(0, memcmp(result.data(), data, dataSize));
     }
+
+    template <class T>
+    void DoSampleTest(EGLImage image, wgpu::TextureFormat format, T* data) {
+        // Get a texture view for the GL texture.
+        wgpu::TextureDescriptor textureDescriptor;
+
+        textureDescriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.format = format;
+
+        wgpu::Texture wrappedTexture = WrapEGLImage(&textureDescriptor, image, true);
+
+        ASSERT_NE(wrappedTexture, nullptr);
+
+        // Create a color attachment texture.
+        wgpu::TextureDescriptor attachmentDescriptor;
+        attachmentDescriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+        attachmentDescriptor.size = {1, 1, 1};
+        attachmentDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::Texture attachment = device.CreateTexture(&attachmentDescriptor);
+
+        utils::ComboRenderPassDescriptor renderPassDescriptor({attachment.CreateView()}, {});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-3.0, -1.0),
+                    vec2f( 3.0, -1.0),
+                    vec2f( 0.0,  2.0));
+
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var myTexture : texture_2d<f32>;
+            @group(0) @binding(1) var mySampler : sampler;
+            struct FragmentOut {
+               @location(0) color : vec4<f32>
+            }
+            @fragment
+            fn main(@builtin(position) FragCoord : vec4f) -> FragmentOut {
+                var output : FragmentOut;
+                output.color = textureSample(myTexture, mySampler, FragCoord.xy);
+                return output;
+            })");
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        auto renderPipeline = device.CreateRenderPipeline(&descriptor);
+        auto sampler = device.CreateSampler();
+        auto bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                              {
+                                                  {0, wrappedTexture.CreateView()},
+                                                  {1, sampler},
+                                              });
+
+        // Execute commands to sample the wrapped texture
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        pass.SetPipeline(renderPipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(6, 1, 0, 0);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check that the source texture contains the expected data
+        EXPECT_TEXTURE_EQ(data, wrappedTexture, {0, 0}, {1, 1});
+
+        // Check that the expected data was sampled from the wrapped texture into the attachment.
+        EXPECT_TEXTURE_EQ(data, attachment, {0, 0}, {1, 1});
+    }
 };
 
 // Test clearing a R8 EGLImage
 TEST_P(EGLImageUsageTests, ClearR8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     uint8_t data = 0x01;
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::R8Unorm, GL_RED,
@@ -359,7 +434,7 @@ TEST_P(EGLImageUsageTests, ClearR8EGLImage) {
 // Test clearing a RG8 EGLImage
 TEST_P(EGLImageUsageTests, ClearRG8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr);
 
     uint16_t data = 0x0201;
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::RG8Unorm, GL_RG,
@@ -369,11 +444,38 @@ TEST_P(EGLImageUsageTests, ClearRG8EGLImage) {
 // Test clearing an RGBA8 EGLImage
 TEST_P(EGLImageUsageTests, ClearRGBA8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     uint32_t data = 0x04030201;
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::RGBA8Unorm,
                 GL_RGBA, GL_UNSIGNED_BYTE, &data, sizeof(data));
+}
+
+// Test sampling an imported R8 GL texture
+TEST_P(EGLImageUsageTests, SampleR8EGLImage) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    uint8_t data = 0x42;
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
+}
+
+// Test sampling an imported RG8 GL texture
+TEST_P(EGLImageUsageTests, SampleRG8EGLImage) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    uint16_t data = 0x4221;
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
+}
+
+// Test sampling an imported RGBA8 GL texture
+TEST_P(EGLImageUsageTests, SampleRGBA8EGLImage) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    uint32_t data = 0x48844221;
+    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
 }
 
 DAWN_INSTANTIATE_TEST(EGLImageValidationTests, OpenGLESBackend());

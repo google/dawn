@@ -82,8 +82,7 @@ class GLTextureTestBase : public DawnTest {
                                     GLenum internalFormat,
                                     GLenum format,
                                     GLenum type,
-                                    void* data,
-                                    size_t size) {
+                                    void* data) {
         const native::opengl::OpenGLFunctions& gl = mSecondDeviceGL->GetGL();
         GLuint tex;
         gl.GenTextures(1, &tex);
@@ -92,9 +91,12 @@ class GLTextureTestBase : public DawnTest {
 
         return ScopedGLTexture(gl.DeleteTextures, tex);
     }
-    wgpu::Texture WrapGLTexture(const wgpu::TextureDescriptor* descriptor, GLuint texture) {
+    wgpu::Texture WrapGLTexture(const wgpu::TextureDescriptor* descriptor,
+                                GLuint texture,
+                                bool isInitialized = false) {
         native::opengl::ExternalImageDescriptorGLTexture externDesc;
         externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
+        externDesc.isInitialized = isInitialized;
         externDesc.texture = texture;
         return wgpu::Texture::Acquire(
             native::opengl::WrapExternalGLTexture(device.Get(), &externDesc));
@@ -119,7 +121,7 @@ class GLTextureValidationTests : public GLTextureTestBase {
     }
 
     ScopedGLTexture CreateDefaultGLTexture() {
-        return CreateGLTexture(10, 10, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, 0);
+        return CreateGLTexture(10, 10, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
 
   protected:
@@ -182,18 +184,12 @@ TEST_P(GLTextureValidationTests, InvalidTextureDimension) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
-// Test an error occurs if the texture usage is not RenderAttachment
+// Test an error occurs if the texture usage contains StorageBinding.
 TEST_P(GLTextureValidationTests, InvalidTextureUsage) {
-    descriptor.usage = wgpu::TextureUsage::TextureBinding;
-
-    ScopedGLTexture glTexture = CreateDefaultGLTexture();
-    wgpu::Texture texture;
-    ASSERT_DEVICE_ERROR(texture = WrapGLTexture(&descriptor, glTexture.Get()));
-
-    ASSERT_EQ(texture.Get(), nullptr);
     descriptor.usage = wgpu::TextureUsage::StorageBinding;
 
-    ASSERT_DEVICE_ERROR(texture = WrapGLTexture(&descriptor, glTexture.Get()));
+    ScopedGLTexture glTexture = CreateDefaultGLTexture();
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapGLTexture(&descriptor, glTexture.Get()));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -299,11 +295,91 @@ class GLTextureUsageTests : public GLTextureTestBase {
         gl.DeleteFramebuffers(1, &fbo);
         ASSERT_EQ(0, memcmp(result.data(), data, dataSize));
     }
+
+    template <class T>
+    void DoSampleTest(GLuint texture, wgpu::TextureFormat format, T* data) {
+        // Get a texture view for the GL texture.
+        wgpu::TextureDescriptor textureDescriptor;
+
+        textureDescriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.format = format;
+
+        wgpu::Texture wrappedTexture = WrapGLTexture(&textureDescriptor, texture, true);
+
+        ASSERT_NE(wrappedTexture, nullptr);
+
+        // Create a color attachment texture.
+        wgpu::TextureDescriptor attachmentDescriptor;
+        attachmentDescriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+        attachmentDescriptor.size = {1, 1, 1};
+        attachmentDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::Texture attachment = device.CreateTexture(&attachmentDescriptor);
+
+        utils::ComboRenderPassDescriptor renderPassDescriptor({attachment.CreateView()}, {});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-3.0, -1.0),
+                    vec2f( 3.0, -1.0),
+                    vec2f( 0.0,  2.0));
+
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var myTexture : texture_2d<f32>;
+            @group(0) @binding(1) var mySampler : sampler;
+            struct FragmentOut {
+               @location(0) color : vec4<f32>
+            }
+            @fragment
+            fn main(@builtin(position) FragCoord : vec4f) -> FragmentOut {
+                var output : FragmentOut;
+                output.color = textureSample(myTexture, mySampler, FragCoord.xy);
+                return output;
+            })");
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        auto renderPipeline = device.CreateRenderPipeline(&descriptor);
+        auto sampler = device.CreateSampler();
+        auto bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                              {
+                                                  {0, wrappedTexture.CreateView()},
+                                                  {1, sampler},
+                                              });
+
+        // Execute commands to sample the wrapped texture
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        pass.SetPipeline(renderPipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(6, 1, 0, 0);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check that the source texture contains the expected data
+        EXPECT_TEXTURE_EQ(data, wrappedTexture, {0, 0}, {1, 1});
+
+        // Check that the expected data was sampled from the wrapped texture into the attachment.
+        EXPECT_TEXTURE_EQ(data, attachment, {0, 0}, {1, 1});
+    }
 };
 
 // Test clearing a R8 GL texture
 TEST_P(GLTextureUsageTests, ClearR8GLTexture) {
-    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     uint8_t data = 0x01;
     DoClearTest(glTexture.Get(), wgpu::TextureFormat::R8Unorm, GL_RED, GL_UNSIGNED_BYTE, &data,
@@ -312,7 +388,7 @@ TEST_P(GLTextureUsageTests, ClearR8GLTexture) {
 
 // Test clearing a RG8 GL texture
 TEST_P(GLTextureUsageTests, ClearRG8GLTexture) {
-    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr);
 
     uint16_t data = 0x0201;
     DoClearTest(glTexture.Get(), wgpu::TextureFormat::RG8Unorm, GL_RG, GL_UNSIGNED_BYTE, &data,
@@ -321,12 +397,35 @@ TEST_P(GLTextureUsageTests, ClearRG8GLTexture) {
 
 // Test clearing an RGBA8 GL texture
 TEST_P(GLTextureUsageTests, ClearRGBA8GLTexture) {
-    ScopedGLTexture glTexture =
-        CreateGLTexture(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr, 0);
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     uint32_t data = 0x04030201;
     DoClearTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, GL_RGBA, GL_UNSIGNED_BYTE, &data,
                 sizeof(data));
+}
+
+// Test sampling an imported R8 GL texture
+TEST_P(GLTextureUsageTests, SampleR8GLTexture) {
+    uint8_t data = 0x42;
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, &data);
+}
+
+// Test sampling an imported RG8 GL texture
+TEST_P(GLTextureUsageTests, SampleRG8GLTexture) {
+    uint16_t data = 0x4221;
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, &data);
+}
+
+// Test sampling an imported RGBA8 GL texture
+TEST_P(GLTextureUsageTests, SampleRGBA8GLTexture) {
+    uint32_t data = 0x48844221;
+    ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+
+    DoSampleTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, &data);
 }
 
 DAWN_INSTANTIATE_TEST(GLTextureValidationTests, OpenGLESBackend());
