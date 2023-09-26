@@ -1459,7 +1459,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldSExtract %int %arg %offset %count");
+    EXPECT_INST(R"(
+          %9 = OpExtInst %uint %10 UMin %offset %uint_32
+         %12 = OpISub %uint %uint_32 %9
+         %13 = OpExtInst %uint %10 UMin %count %12
+     %result = OpBitFieldSExtract %int %arg %9 %13
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
@@ -1476,7 +1481,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldUExtract %uint %arg %offset %count");
+    EXPECT_INST(R"(
+          %8 = OpExtInst %uint %9 UMin %offset %uint_32
+         %11 = OpISub %uint %uint_32 %8
+         %12 = OpExtInst %uint %9 UMin %count %11
+     %result = OpBitFieldUExtract %uint %arg %8 %12
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
@@ -1493,7 +1503,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldSExtract %v4int %arg %offset %count");
+    EXPECT_INST(R"(
+         %10 = OpExtInst %uint %11 UMin %offset %uint_32
+         %13 = OpISub %uint %uint_32 %10
+         %14 = OpExtInst %uint %11 UMin %count %13
+     %result = OpBitFieldSExtract %v4int %arg %10 %14
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
@@ -1510,7 +1525,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpBitFieldUExtract %v2uint %arg %offset %count");
+    EXPECT_INST(R"(
+          %9 = OpExtInst %uint %10 UMin %offset %uint_32
+         %12 = OpISub %uint %uint_32 %9
+         %13 = OpExtInst %uint %10 UMin %count %12
+     %result = OpBitFieldUExtract %v2uint %arg %9 %13
+)");
 }
 
 TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {

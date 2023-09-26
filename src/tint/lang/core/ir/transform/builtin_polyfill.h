@@ -26,12 +26,24 @@ class Module;
 
 namespace tint::core::ir::transform {
 
+/// Enumerator of polyfill levels.
+enum class BuiltinPolyfillLevel {
+    /// No polyfill needed, supported by the backend.
+    kNone,
+    /// Clamp or range check the parameters.
+    kClampOrRangeCheck,
+    /// Polyfill the entire function.
+    kFull,
+};
+
 /// The set of polyfills that should be applied.
 struct BuiltinPolyfillConfig {
     /// Should `countLeadingZeros()` be polyfilled?
     bool count_leading_zeros = false;
     /// Should `countTrailingZeros()` be polyfilled?
     bool count_trailing_zeros = false;
+    /// How should `extractBits()` be polyfilled?
+    BuiltinPolyfillLevel extract_bits = BuiltinPolyfillLevel::kNone;
     /// Should `firstLeadingBit()` be polyfilled?
     bool first_leading_bit = false;
     /// Should `firstTrailingBit()` be polyfilled?
