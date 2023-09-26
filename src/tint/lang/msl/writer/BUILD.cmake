@@ -51,6 +51,7 @@ tint_target_add_dependencies(tint_lang_msl_writer lib
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
+  tint_lang_wgsl_reader_lower
   tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_sem
   tint_utils_containers

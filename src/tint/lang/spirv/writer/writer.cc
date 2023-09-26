@@ -21,6 +21,7 @@
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/raise/raise.h"
+#include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
 // Included by 'ast_printer.h', included again here for './tools/run gen' track the dependency.
@@ -51,16 +52,20 @@ Result<Output> Generate(const Program& program, const Options& options) {
 
         auto ir = converted.Move();
 
+        // Lower from WGSL-dialect to core-dialect
+        if (auto res = wgsl::reader::Lower(ir); !res) {
+            return res.Failure();
+        }
+
         // Apply transforms as required by writer options.
         auto remapper = core::ir::transform::BindingRemapper(ir, options.binding_remapper_options);
         if (!remapper) {
             return remapper.Failure();
         }
 
-        // Raise the IR to the SPIR-V dialect.
-        auto raised = raise::Raise(ir, options);
-        if (!raised) {
-            return std::move(raised.Failure());
+        // Raise from core-dialect to SPIR-V-dialect.
+        if (auto res = raise::Raise(ir, options); !res) {
+            return std::move(res.Failure());
         }
 
         // Generate the SPIR-V code.

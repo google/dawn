@@ -44,6 +44,7 @@ cc_library(
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
+    "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",

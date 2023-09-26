@@ -20,6 +20,7 @@
 #include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
+#include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
 namespace tint::msl::writer {
@@ -40,10 +41,14 @@ Result<Output> Generate(const Program& program, const Options& options) {
 
         auto ir = converted.Move();
 
-        // Raise the IR to the MSL dialect.
-        auto raised = raise::Raise(ir);
-        if (!raised) {
-            return raised.Failure();
+        // Lower from WGSL-dialect to core-dialect
+        if (auto res = wgsl::reader::Lower(ir); !res) {
+            return res.Failure();
+        }
+
+        // Raise from core-dialect to MSL-dialect.
+        if (auto res = raise::Raise(ir); !res) {
+            return res.Failure();
         }
 
         // Generate the MSL code.

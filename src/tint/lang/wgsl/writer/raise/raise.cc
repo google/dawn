@@ -21,7 +21,7 @@
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 
-namespace tint::wgsl::writer::raise {
+namespace tint::wgsl::writer {
 namespace {
 
 wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
@@ -166,4 +166,4 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
     return Success;
 }
 
-}  // namespace tint::wgsl::writer::raise
+}  // namespace tint::wgsl::writer

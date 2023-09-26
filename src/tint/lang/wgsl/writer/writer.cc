@@ -56,7 +56,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
 
 Result<Output> WgslFromIR(core::ir::Module& module) {
     // core-dialect -> WGSL-dialect
-    if (auto res = raise::Raise(module); !res) {
+    if (auto res = Raise(module); !res) {
         return res.Failure();
     }
 
