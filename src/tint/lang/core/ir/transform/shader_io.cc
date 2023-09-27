@@ -263,7 +263,10 @@ struct State {
 
 void RunShaderIOBase(Module& module, std::function<MakeBackendStateFunc> make_backend_state) {
     State state{module};
-    for (auto* func : module.functions) {
+
+    // Take a copy of the function list since the transform will add new functions to the module.
+    auto functions = module.functions;
+    for (auto* func : functions) {
         // Only process entry points.
         if (func->Stage() == Function::PipelineStage::kUndefined) {
             continue;
