@@ -546,6 +546,15 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "buffer map callback info": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "buffer map callback"},
+            {"name": "userdata", "type": "void *"}
+	]
+    },
     "buffer map async status": {
         "category": "enum",
         "emscripten_no_enum_table": true,

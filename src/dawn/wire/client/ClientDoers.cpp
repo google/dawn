@@ -76,7 +76,7 @@ bool Client::DoDevicePopErrorScopeCallback(Device* device,
 }
 
 bool Client::DoBufferMapAsyncCallback(Buffer* buffer,
-                                      uint64_t requestSerial,
+                                      WGPUFuture future,
                                       uint32_t status,
                                       uint64_t readDataUpdateInfoLength,
                                       const uint8_t* readDataUpdateInfo) {
@@ -84,18 +84,17 @@ bool Client::DoBufferMapAsyncCallback(Buffer* buffer,
     if (buffer == nullptr) {
         return true;
     }
-    return buffer->OnMapAsyncCallback(requestSerial, status, readDataUpdateInfoLength,
-                                      readDataUpdateInfo);
+    return buffer->OnMapAsyncCallback(future, status, readDataUpdateInfoLength, readDataUpdateInfo);
 }
 
 bool Client::DoQueueWorkDoneCallback(Queue* queue,
-                                     uint64_t requestSerial,
+                                     WGPUFuture future,
                                      WGPUQueueWorkDoneStatus status) {
     // The queue might have been deleted or recreated so this isn't an error.
     if (queue == nullptr) {
         return true;
     }
-    return queue->OnWorkDoneCallback(requestSerial, status);
+    return queue->OnWorkDoneCallback(future, status);
 }
 
 bool Client::DoDeviceCreateComputePipelineAsyncCallback(Device* device,

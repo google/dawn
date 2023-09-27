@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <map>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -26,18 +27,17 @@ namespace dawn::wire::client {
 
 EventManager::EventManager(Client* client) : mClient(client) {}
 
-std::pair<FutureID, bool> EventManager::TrackEvent(WGPUCallbackMode mode,
-                                                   EventCallback&& callback) {
+std::pair<FutureID, bool> EventManager::TrackEvent(TrackedEvent* event) {
     FutureID futureID = mNextFutureID++;
+    std::unique_ptr<TrackedEvent> ptr(event);
 
     if (mClient->IsDisconnected()) {
-        callback(EventCompletionType::Shutdown);
+        std::move(ptr)->Complete(EventCompletionType::Shutdown);
         return {futureID, false};
     }
 
     mTrackedEvents.Use([&](auto trackedEvents) {
-        auto [it, inserted] =
-            trackedEvents->emplace(futureID, TrackedEvent(mode, std::move(callback)));
+        auto [it, inserted] = trackedEvents->emplace(futureID, std::move(ptr));
         DAWN_ASSERT(inserted);
     });
 
@@ -47,7 +47,7 @@ std::pair<FutureID, bool> EventManager::TrackEvent(WGPUCallbackMode mode,
 void EventManager::ShutDown() {
     // Call any outstanding callbacks before destruction.
     while (true) {
-        std::map<FutureID, TrackedEvent> movedEvents;
+        std::map<FutureID, std::unique_ptr<TrackedEvent>> movedEvents;
         mTrackedEvents.Use([&](auto trackedEvents) { movedEvents = std::move(*trackedEvents); });
 
         if (movedEvents.empty()) {
@@ -56,55 +56,61 @@ void EventManager::ShutDown() {
 
         // Ordering guaranteed because we are using a sorted map.
         for (auto& [futureID, trackedEvent] : movedEvents) {
-            // Event should be already marked Ready since events are actually driven by
-            // RequestTrackers (at the time of this writing), which all shut down before this.
-            DAWN_ASSERT(trackedEvent.mReady);
-            trackedEvent.mCallback(EventCompletionType::Shutdown);
-            trackedEvent.mCallback = nullptr;
+            std::move(trackedEvent)->Complete(EventCompletionType::Shutdown);
         }
     }
 }
 
-void EventManager::SetFutureReady(FutureID futureID) {
+void EventManager::SetFutureReady(FutureID futureID, std::function<void(TrackedEvent&)>&& ready) {
     DAWN_ASSERT(futureID > 0);
+    // If the client was already disconnected, then all the callbacks should already have fired so
+    // we don't need to fire the callback anymore.
+    if (mClient->IsDisconnected()) {
+        return;
+    }
+
+    std::optional<std::unique_ptr<TrackedEvent>> event;
     mTrackedEvents.Use([&](auto trackedEvents) {
-        TrackedEvent& trackedEvent = trackedEvents->at(futureID);  // Asserts futureID is in the map
-        trackedEvent.mReady = true;
+        std::unique_ptr<TrackedEvent>& trackedEvent =
+            trackedEvents->at(futureID);  // Asserts futureID is in the map
+        trackedEvent->mReady = true;
+        if (ready) {
+            ready(*trackedEvent);
+        }
+
+        // If the event can be spontaneously completed, do so now.
+        if (trackedEvent->mMode == WGPUCallbackMode_AllowSpontaneous) {
+            event = std::move(trackedEvent);
+            trackedEvents->erase(futureID);
+        }
     });
-    // TODO(crbug.com/dawn/2059): Handle spontaneous completions.
+
+    // Handle spontaneous completions.
+    if (event.has_value()) {
+        std::move(*event)->Complete(EventCompletionType::Ready);
+    }
 }
 
 void EventManager::ProcessPollEvents() {
     // Since events are already stored in an ordered map, this list must already be ordered.
-    std::vector<TrackedEvent> eventsToCompleteNow;
-
-    // TODO(crbug.com/dawn/2060): EventManager shouldn't bother to track ProcessEvents-type events
-    // until they've completed. We can queue them up when they're received on the wire. (Before that
-    // point, the RequestTracker tracks them. If/when we merge this with RequestTracker, then we'll
-    // track both here but still don't need to queue them for ProcessEvents until they complete.)
+    std::vector<std::unique_ptr<TrackedEvent>> eventsToCompleteNow;
     mTrackedEvents.Use([&](auto trackedEvents) {
         for (auto it = trackedEvents->begin(); it != trackedEvents->end();) {
-            TrackedEvent& event = it->second;
-            bool shouldRemove = (event.mMode == WGPUCallbackMode_AllowProcessEvents ||
-                                 event.mMode == WGPUCallbackMode_AllowSpontaneous) &&
-                                event.mReady;
+            std::unique_ptr<TrackedEvent>& event = it->second;
+            bool shouldRemove = (event->mMode == WGPUCallbackMode_AllowProcessEvents ||
+                                 event->mMode == WGPUCallbackMode_AllowSpontaneous) &&
+                                event->mReady;
             if (!shouldRemove) {
                 ++it;
                 continue;
             }
-
-            // mCallback may still be null if it's stale (was already spontaneously completed).
-            if (event.mCallback) {
-                eventsToCompleteNow.emplace_back(std::move(event));
-            }
+            eventsToCompleteNow.emplace_back(std::move(event));
             it = trackedEvents->erase(it);
         }
     });
 
-    for (TrackedEvent& event : eventsToCompleteNow) {
-        DAWN_ASSERT(event.mReady && event.mCallback);
-        event.mCallback(EventCompletionType::Ready);
-        event.mCallback = nullptr;
+    for (std::unique_ptr<TrackedEvent>& event : eventsToCompleteNow) {
+        std::move(event)->Complete(EventCompletionType::Ready);
     }
 }
 
@@ -124,7 +130,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
 
     // Since the user can specify the FutureIDs in any order, we need to use another ordered map
     // here to ensure that the result is ordered for JS event ordering.
-    std::map<FutureID, TrackedEvent> eventsToCompleteNow;
+    std::map<FutureID, std::unique_ptr<TrackedEvent>> eventsToCompleteNow;
     bool anyCompleted = false;
     const FutureID firstInvalidFutureID = mNextFutureID;
     mTrackedEvents.Use([&](auto trackedEvents) {
@@ -139,38 +145,35 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
                 continue;
             }
 
-            TrackedEvent& event = it->second;
+            std::unique_ptr<TrackedEvent>& event = it->second;
             // Early update .completed, in prep to complete the callback if ready.
-            infos[i].completed = event.mReady;
-            if (event.mReady) {
+            infos[i].completed = event->mReady;
+            if (event->mReady) {
                 anyCompleted = true;
-                if (event.mCallback) {
-                    eventsToCompleteNow.emplace(it->first, std::move(event));
-                }
+                eventsToCompleteNow.emplace(it->first, std::move(event));
                 trackedEvents->erase(it);
             }
         }
     });
 
-    // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
     for (auto& [_, event] : eventsToCompleteNow) {
-        DAWN_ASSERT(event.mReady && event.mCallback);
         // .completed has already been set to true (before the callback, per API contract).
-        event.mCallback(EventCompletionType::Ready);
-        event.mCallback = nullptr;
+        std::move(event)->Complete(EventCompletionType::Ready);
     }
 
     return anyCompleted ? WGPUWaitStatus_Success : WGPUWaitStatus_TimedOut;
 }
 
-// EventManager::TrackedEvent
+// TrackedEvent
 
-EventManager::TrackedEvent::TrackedEvent(WGPUCallbackMode mode, EventCallback&& callback)
-    : mMode(mode), mCallback(callback) {}
+TrackedEvent::TrackedEvent(WGPUCallbackMode mode, void* userdata)
+    : mMode(mode), mUserdata(userdata) {}
 
-EventManager::TrackedEvent::~TrackedEvent() {
-    // Make sure we're not dropping a callback on the floor.
-    DAWN_ASSERT(!mCallback);
+TrackedEvent::~TrackedEvent() = default;
+
+void TrackedEvent::Complete(EventCompletionType type) {
+    DAWN_ASSERT(type == EventCompletionType::Shutdown || mReady);
+    CompleteImpl(type);
 }
 
 }  // namespace dawn::wire::client

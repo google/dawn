@@ -52,7 +52,7 @@ WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
 }
 
 WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
-                                    uint64_t requestSerial,
+                                    WGPUFuture future,
                                     WGPUMapModeFlags mode,
                                     uint64_t offset64,
                                     uint64_t size64) {
@@ -61,7 +61,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
     userdata->buffer = buffer.AsHandle();
     userdata->bufferObj = buffer->handle;
-    userdata->requestSerial = requestSerial;
+    userdata->future = future;
     userdata->mode = mode;
 
     // Make sure that the deserialized offset and size are no larger than
@@ -211,7 +211,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
 
     ReturnBufferMapAsyncCallbackCmd cmd;
     cmd.buffer = data->buffer;
-    cmd.requestSerial = data->requestSerial;
+    cmd.future = data->future;
     cmd.status = status;
     cmd.readDataUpdateInfoLength = 0;
     cmd.readDataUpdateInfo = nullptr;

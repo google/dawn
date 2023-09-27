@@ -47,11 +47,3 @@ TEST_F(QueueOnSubmittedWorkDoneValidationTests, CallBeforeSubmits) {
 
     WaitForAllOperations(device);
 }
-
-// Test that OnSubmittedWorkDone is an error if signalValue isn't 0.
-TEST_F(QueueOnSubmittedWorkDoneValidationTests, SignaledValueNotZeroIsInvalid) {
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Error, this)).Times(1);
-    ASSERT_DEVICE_ERROR(device.GetQueue().OnSubmittedWorkDone(1u, ToMockQueueWorkDone, this));
-
-    WaitForAllOperations(device);
-}

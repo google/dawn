@@ -20,7 +20,7 @@
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "future", "type": "future" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "uint64_t"},
             { "name": "size", "type": "uint64_t"}
@@ -64,7 +64,7 @@
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
             { "name": "signal value", "type": "uint64_t" },
-            { "name": "request serial", "type": "uint64_t" }
+            { "name": "future", "type": "future" }
         ],
         "queue write buffer": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
@@ -101,7 +101,7 @@
     "return commands": {
         "buffer map async callback": [
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "uint32_t" },
             { "name": "read data update info length", "type": "uint64_t" },
             { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
@@ -141,7 +141,7 @@
         ],
         "queue work done callback": [
             { "name": "queue", "type": "ObjectHandle", "handle_type": "queue" },
-            { "name": "request serial", "type": "uint64_t" },
+	    { "name": "future", "type": "future" },
             { "name": "status", "type": "queue work done status" }
         ],
         "shader module get compilation info callback": [
@@ -188,6 +188,7 @@
             "AdapterEnumerateFeatures",
             "AdapterRequestDevice",
             "BufferMapAsync",
+            "BufferMapAsyncF",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
             "BufferGetMapState",

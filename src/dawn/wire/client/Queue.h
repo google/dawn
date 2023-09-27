@@ -28,7 +28,7 @@ class Queue final : public ObjectBase {
     using ObjectBase::ObjectBase;
     ~Queue() override;
 
-    bool OnWorkDoneCallback(uint64_t requestSerial, WGPUQueueWorkDoneStatus status);
+    bool OnWorkDoneCallback(WGPUFuture future, WGPUQueueWorkDoneStatus status);
 
     // Dawn API
     void OnSubmittedWorkDone(uint64_t signalValue,
@@ -41,16 +41,6 @@ class Queue final : public ObjectBase {
                       size_t dataSize,
                       const WGPUTextureDataLayout* dataLayout,
                       const WGPUExtent3D* writeSize);
-
-  private:
-    void CancelCallbacksForDisconnect() override;
-    void ClearAllCallbacks(WGPUQueueWorkDoneStatus status);
-
-    struct OnWorkDoneData {
-        WGPUQueueWorkDoneCallback callback = nullptr;
-        void* userdata = nullptr;
-    };
-    RequestTracker<OnWorkDoneData> mOnWorkDoneRequests;
 };
 
 }  // namespace dawn::wire::client

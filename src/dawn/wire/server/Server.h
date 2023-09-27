@@ -92,7 +92,7 @@ struct MapUserdata : CallbackUserdata {
 
     ObjectHandle buffer;
     WGPUBuffer bufferObj;
-    uint64_t requestSerial;
+    WGPUFuture future;
     uint64_t offset;
     uint64_t size;
     WGPUMapModeFlags mode;
@@ -116,7 +116,7 @@ struct QueueWorkDoneUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle queue;
-    uint64_t requestSerial;
+    WGPUFuture future;
 };
 
 struct CreatePipelineAsyncUserData : CallbackUserdata {
