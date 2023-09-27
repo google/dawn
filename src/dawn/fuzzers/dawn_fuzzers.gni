@@ -15,5 +15,5 @@
 # Build flag for dawn lpm fuzzers
 
 declare_args() {
-  is_dawn_lpm_fuzzer = false
+  is_dawn_lpm_fuzzer = is_linux
 }

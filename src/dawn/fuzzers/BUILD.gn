@@ -145,6 +145,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
   # Generate the `.pb.h` and `.pb.cc` files
   proto_library("dawn_lpm_proto") {
     proto_in_dir = "$root_out_dir/gen"
+    proto_out_dir = "//"
     sources = get_target_outputs(":dawn_lpmfuzz_proto")
     sources += get_target_outputs(":copy_dawn_custom_lpm")
 
