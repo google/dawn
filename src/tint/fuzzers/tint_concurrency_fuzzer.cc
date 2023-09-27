@@ -27,6 +27,7 @@
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
+#include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/math/hash.h"
 
@@ -45,6 +46,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     auto program = tint::wgsl::reader::Parse(file.get());
     if (!program.IsValid()) {
         return 0;
+    }
+
+    if (program.Sem().Module()->Extensions().Contains(
+            tint::wgsl::Extension::kChromiumExperimentalPixelLocal)) {
+        return 0;  // Not supported
     }
 
     program = tint::fuzzers::ApplySubstituteOverrides(std::move(program));
