@@ -487,6 +487,9 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             if (v->Attributes().location.has_value()) {
                 out_ << " @location(" << v->Attributes().location.value() << ")";
             }
+            if (v->Attributes().index.has_value()) {
+                out_ << " @index(" << v->Attributes().index.value() << ")";
+            }
             if (v->Attributes().interpolation.has_value()) {
                 auto& interp = v->Attributes().interpolation.value();
                 out_ << " @interpolate(" << interp.type;

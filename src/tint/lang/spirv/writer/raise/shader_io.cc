@@ -83,6 +83,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 }
             } else {
                 name << "_loc" << io.attributes.location.value();
+                if (io.attributes.index.has_value()) {
+                    name << "_idx" << io.attributes.index.value();
+                }
             }
             name << name_suffix;
 

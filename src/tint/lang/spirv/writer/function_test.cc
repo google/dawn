@@ -346,25 +346,26 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc0_Output %main_loc0_Output_0)");
+    EXPECT_INST(
+        R"(OpEntryPoint Fragment %main "main" %main_loc0_idx0_Output %main_loc0_idx1_Output)");
     EXPECT_INST(R"(
-               OpDecorate %main_loc0_Output Location 0
-               OpDecorate %main_loc0_Output Index 0
-               OpDecorate %main_loc0_Output_0 Location 0
-               OpDecorate %main_loc0_Output_0 Index 1
+               OpDecorate %main_loc0_idx0_Output Location 0
+               OpDecorate %main_loc0_idx0_Output Index 0
+               OpDecorate %main_loc0_idx1_Output Location 0
+               OpDecorate %main_loc0_idx1_Output Index 1
     )");
     EXPECT_INST(R"(
-%main_loc0_Output = OpVariable %_ptr_Output_float Output
-%main_loc0_Output_0 = OpVariable %_ptr_Output_float Output
+%main_loc0_idx0_Output = OpVariable %_ptr_Output_float Output
+%main_loc0_idx1_Output = OpVariable %_ptr_Output_float Output
     )");
     EXPECT_INST(R"(
        %main = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpFunctionCall %Outputs %main_inner
          %17 = OpCompositeExtract %float %16 0
-               OpStore %main_loc0_Output %17
+               OpStore %main_loc0_idx0_Output %17
          %18 = OpCompositeExtract %float %16 1
-               OpStore %main_loc0_Output_0 %18
+               OpStore %main_loc0_idx1_Output %18
                OpReturn
                OpFunctionEnd
 )");

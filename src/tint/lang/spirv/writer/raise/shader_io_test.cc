@@ -547,6 +547,78 @@ Outputs = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
+    auto* str_ty = ty.Struct(mod.symbols.New("Output"), {
+                                                            {
+                                                                mod.symbols.New("color1"),
+                                                                ty.f32(),
+                                                                {0u, 0u, {}, {}, false},
+                                                            },
+                                                            {
+                                                                mod.symbols.New("color2"),
+                                                                ty.f32(),
+                                                                {0u, 1u, {}, {}, false},
+                                                            },
+                                                        });
+
+    auto* ep = b.Function("foo", str_ty);
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(str_ty, 0.25_f, 0.75_f));
+    });
+
+    auto* src = R"(
+Output = struct @align(4) {
+  color1:f32 @offset(0), @location(0)
+  color2:f32 @offset(4), @location(0)
+}
+
+%foo = @fragment func():Output -> %b1 {
+  %b1 = block {
+    %2:Output = construct 0.25f, 0.75f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Output = struct @align(4) {
+  color1:f32 @offset(0)
+  color2:f32 @offset(4)
+}
+
+%b1 = block {  # root
+  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var @location(0) @index(0)
+  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @index(1)
+}
+
+%foo_inner = func():Output -> %b2 {
+  %b2 = block {
+    %4:Output = construct 0.25f, 0.75f
+    ret %4
+  }
+}
+%foo = @fragment func():void -> %b3 {
+  %b3 = block {
+    %6:Output = call %foo_inner
+    %7:f32 = access %6, 0u
+    store %foo_loc0_idx0_Output, %7
+    %8:f32 = access %6, 1u
+    store %foo_loc0_idx1_Output, %8
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty = ty.Struct(mod.symbols.New("Interface"),
