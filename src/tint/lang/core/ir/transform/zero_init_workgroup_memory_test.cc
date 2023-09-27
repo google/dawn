@@ -466,19 +466,19 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfI32) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 3u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 4u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:ptr<workgroup, i32, read_write> = access %wgvar, %4:u32
+        %6:ptr<workgroup, i32, read_write> = access %wgvar, %idx:u32
         store %6, 0i
         continue %b5
       }
       %b5 = block {  # continuing
-        %7:u32 = add %4:u32, 66u
+        %7:u32 = add %idx:u32, 66u
         next_iteration %b4 %7
       }
     }
@@ -528,21 +528,21 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 34u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 35u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %4:u32, 5u
-        %7:u32 = div %4:u32, 5u
+        %6:u32 = mod %idx:u32, 5u
+        %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, u32, read_write> = access %wgvar, %7, %6
         store %8, 0u
         continue %b5
       }
       %b5 = block {  # continuing
-        %9:u32 = add %4:u32, 66u
+        %9:u32 = add %idx:u32, 66u
         next_iteration %b4 %9
       }
     }
@@ -592,23 +592,23 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 104u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 105u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %4:u32, 7u
-        %7:u32 = div %4:u32, 7u
+        %6:u32 = mod %idx:u32, 7u
+        %7:u32 = div %idx:u32, 7u
         %8:u32 = mod %7, 5u
-        %9:u32 = div %4:u32, 35u
+        %9:u32 = div %idx:u32, 35u
         %10:ptr<workgroup, i32, read_write> = access %wgvar, %9, %8, %6
         store %10, 0i
         continue %b5
       }
       %b5 = block {  # continuing
-        %11:u32 = add %4:u32, 1u
+        %11:u32 = add %idx:u32, 1u
         next_iteration %b4 %11
       }
     }
@@ -658,21 +658,21 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 14u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 15u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %4:u32, 5u
-        %7:u32 = div %4:u32, 5u
+        %6:u32 = mod %idx:u32, 5u
+        %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, %6, 0u
         store %8, 0i
         continue %b5
       }
       %b5 = block {  # continuing
-        %9:u32 = add %4:u32, 1u
+        %9:u32 = add %idx:u32, 1u
         next_iteration %b4 %9
       }
     }
@@ -722,21 +722,21 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 14u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 15u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %4:u32, 3u
-        %7:u32 = div %4:u32, 3u
+        %6:u32 = mod %idx:u32, 3u
+        %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, 0u, %6
         store %8, 0i
         continue %b5
       }
       %b5 = block {  # continuing
-        %9:u32 = add %4:u32, 1u
+        %9:u32 = add %idx:u32, 1u
         next_iteration %b4 %9
       }
     }
@@ -786,21 +786,21 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 14u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 15u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %4:u32, 3u
-        %7:u32 = div %4:u32, 3u
+        %6:u32 = mod %idx:u32, 3u
+        %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %7, %6
         store %8, 0i
         continue %b5
       }
       %b5 = block {  # continuing
-        %9:u32 = add %4:u32, 1u
+        %9:u32 = add %idx:u32, 1u
         next_iteration %b4 %9
       }
     }
@@ -1165,21 +1165,21 @@ Outer = struct @align(4) {
       %b3 = block {  # initializer
         next_iteration %b4 %tint_local_index
       }
-      %b4 = block (%4:u32) {  # body
-        %5:bool = gt %4:u32, 6u
+      %b4 = block (%idx:u32) {  # body
+        %5:bool = gte %idx:u32, 7u
         if %5 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %6:ptr<workgroup, f32, read_write> = access %wgvar, %4:u32, 0u
+        %6:ptr<workgroup, f32, read_write> = access %wgvar, %idx:u32, 0u
         store %6, 0.0f
-        %7:ptr<workgroup, bool, read_write> = access %wgvar, %4:u32, 2u
+        %7:ptr<workgroup, bool, read_write> = access %wgvar, %idx:u32, 2u
         store %7, false
         continue %b5
       }
       %b5 = block {  # continuing
-        %8:u32 = add %4:u32, 42u
+        %8:u32 = add %idx:u32, 42u
         next_iteration %b4 %8
       }
     }
@@ -1187,25 +1187,25 @@ Outer = struct @align(4) {
       %b7 = block {  # initializer
         next_iteration %b8 %tint_local_index
       }
-      %b8 = block (%9:u32) {  # body
-        %10:bool = gt %9:u32, 90u
+      %b8 = block (%idx_1:u32) {  # body
+        %10:bool = gte %idx_1:u32, 91u
         if %10 [t: %b10] {  # if_2
           %b10 = block {  # true
             exit_loop  # loop_2
           }
         }
-        %11:u32 = mod %9:u32, 13u
-        %12:u32 = div %9:u32, 13u
+        %11:u32 = mod %idx_1:u32, 13u
+        %12:u32 = div %idx_1:u32, 13u
         %13:ptr<workgroup, i32, read_write> = access %wgvar, %12, 1u, %11, 0u
         store %13, 0i
-        %14:u32 = mod %9:u32, 13u
-        %15:u32 = div %9:u32, 13u
+        %14:u32 = mod %idx_1:u32, 13u
+        %15:u32 = div %idx_1:u32, 13u
         %16:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %15, 1u, %14, 1u
         %17:void = atomicStore %16, 0u
         continue %b9
       }
       %b9 = block {  # continuing
-        %18:u32 = add %9:u32, 42u
+        %18:u32 = add %idx_1:u32, 42u
         next_iteration %b8 %18
       }
     }
@@ -1272,19 +1272,19 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
       %b4 = block {  # initializer
         next_iteration %b5 %tint_local_index
       }
-      %b5 = block (%7:u32) {  # body
-        %8:bool = gt %7:u32, 3u
+      %b5 = block (%idx:u32) {  # body
+        %8:bool = gte %idx:u32, 4u
         if %8 [t: %b7] {  # if_2
           %b7 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %9:ptr<workgroup, i32, read_write> = access %var_b, %7:u32
+        %9:ptr<workgroup, i32, read_write> = access %var_b, %idx:u32
         store %9, 0i
         continue %b6
       }
       %b6 = block {  # continuing
-        %10:u32 = add %7:u32, 66u
+        %10:u32 = add %idx:u32, 66u
         next_iteration %b5 %10
       }
     }
@@ -1292,21 +1292,21 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
       %b8 = block {  # initializer
         next_iteration %b9 %tint_local_index
       }
-      %b9 = block (%11:u32) {  # body
-        %12:bool = gt %11:u32, 34u
+      %b9 = block (%idx_1:u32) {  # body
+        %12:bool = gte %idx_1:u32, 35u
         if %12 [t: %b11] {  # if_3
           %b11 = block {  # true
             exit_loop  # loop_2
           }
         }
-        %13:u32 = mod %11:u32, 5u
-        %14:u32 = div %11:u32, 5u
+        %13:u32 = mod %idx_1:u32, 5u
+        %14:u32 = div %idx_1:u32, 5u
         %15:ptr<workgroup, u32, read_write> = access %var_c, %14, %13
         store %15, 0u
         continue %b10
       }
       %b10 = block {  # continuing
-        %16:u32 = add %11:u32, 66u
+        %16:u32 = add %idx_1:u32, 66u
         next_iteration %b9 %16
       }
     }
@@ -1381,23 +1381,23 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
       %b4 = block {  # initializer
         next_iteration %b5 %tint_local_index
       }
-      %b5 = block (%8:u32) {  # body
-        %9:bool = gt %8:u32, 41u
+      %b5 = block (%idx:u32) {  # body
+        %9:bool = gte %idx:u32, 42u
         if %9 [t: %b7] {  # if_2
           %b7 = block {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<workgroup, i32, read_write> = access %var_c, %8:u32
+        %10:ptr<workgroup, i32, read_write> = access %var_c, %idx:u32
         store %10, 0i
-        %11:u32 = mod %8:u32, 6u
-        %12:u32 = div %8:u32, 6u
+        %11:u32 = mod %idx:u32, 6u
+        %12:u32 = div %idx:u32, 6u
         %13:ptr<workgroup, u32, read_write> = access %var_d, %12, %11
         store %13, 0u
         continue %b6
       }
       %b6 = block {  # continuing
-        %14:u32 = add %8:u32, 66u
+        %14:u32 = add %idx:u32, 66u
         next_iteration %b5 %14
       }
     }

@@ -156,7 +156,11 @@ struct State {
                     });
                 } else {
                     // Use a loop for arrayed stores.
-                    GenerateZeroingLoop(local_index, count, wgsize, *element_stores);
+                    b.LoopRange(ty, local_index, u32(count), u32(wgsize), [&](Value* index) {
+                        for (auto& store : *element_stores) {
+                            GenerateStore(store, count, index);
+                        }
+                    });
                 }
             }
             b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
@@ -326,46 +330,6 @@ struct State {
             auto* zero = b.Constant(ir.constant_values.Zero(store.store_type));
             b.Store(to, zero);
         }
-    }
-
-    /// Generate a loop for a list of stores with the same iteration count.
-    /// @param local_index the local invocation index
-    /// @param total_count the number of iterations needed to store to all elements
-    /// @param wgsize the linearized workgroup size
-    /// @param stores the list of store descriptors
-    void GenerateZeroingLoop(Value* local_index,
-                             uint32_t total_count,
-                             uint32_t wgsize,
-                             const StoreList& stores) {
-        // The loop is equivalent to:
-        //   for (var idx = local_index; idx < linear_iteration_count; idx += wgsize) {
-        //     <store to elements at `idx`>
-        //   }
-        auto* loop = b.Loop();
-        auto* index = b.BlockParam(ty.u32());
-        loop->Body()->SetParams({index});
-        b.Append(loop->Initializer(), [&] {  //
-            b.NextIteration(loop, local_index);
-        });
-        b.Append(loop->Body(), [&] {
-            // Exit the loop when the iteration count has been exceeded.
-            auto* gt_max = b.GreaterThan(ty.bool_(), index, u32(total_count - 1u));
-            auto* ifelse = b.If(gt_max);
-            b.Append(ifelse->True(), [&] {  //
-                b.ExitLoop(loop);
-            });
-
-            // Insert all of the store instructions.
-            for (auto& store : stores) {
-                GenerateStore(store, total_count, index);
-            }
-
-            b.Continue(loop);
-        });
-        b.Append(loop->Continuing(), [&] {  //
-            // Increment the loop index by linearized workgroup size.
-            b.NextIteration(loop, b.Add(ty.u32(), index, u32(wgsize)));
-        });
     }
 
     /// Check if a type can be efficiently zeroed with a single store. Returns `false` if there are
