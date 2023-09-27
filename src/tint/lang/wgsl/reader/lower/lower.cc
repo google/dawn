@@ -161,6 +161,8 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
             auto* replacement = mod.instructions.Create<core::ir::CoreBuiltinCall>(
                 call->Result(), Convert(call->Func()), std::move(args));
             call->ReplaceWith(replacement);
+            call->ClearResults();
+            call->Destroy();
         }
     }
     return Success;

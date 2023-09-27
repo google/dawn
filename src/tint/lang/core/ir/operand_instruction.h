@@ -75,6 +75,9 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
         operands_.Clear();
     }
 
+    /// Removes all results from the instruction.
+    void ClearResults() { results_.Clear(); }
+
     /// @returns the operands of the instruction
     VectorRef<ir::Value*> Operands() override { return operands_; }
 
