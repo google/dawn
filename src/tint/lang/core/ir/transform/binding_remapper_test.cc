@@ -41,8 +41,8 @@ TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
 
     auto* expect = src;
 
-    BindingRemapperOptions options;
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -62,9 +62,9 @@ TEST_F(IR_BindingRemapperTest, NoModify_RemappingDifferentBindingPoint) {
 
     auto* expect = src;
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{0u, 1u}] = tint::BindingPoint{1u, 0u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{0u, 1u}] = tint::BindingPoint{1u, 0u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -89,9 +89,9 @@ TEST_F(IR_BindingRemapperTest, RemappingGroup) {
 
 )";
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 2u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 2u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -116,9 +116,9 @@ TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
 
 )";
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{1u, 3u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{1u, 3u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -143,9 +143,9 @@ TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
 
 )";
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 4u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 4u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -175,10 +175,10 @@ TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
 
 )";
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 4u};
-    options.binding_points[tint::BindingPoint{3u, 4u}] = tint::BindingPoint{1u, 2u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{3u, 4u};
+    binding_points[tint::BindingPoint{3u, 4u}] = tint::BindingPoint{1u, 2u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }
@@ -229,10 +229,10 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
 }
 )";
 
-    BindingRemapperOptions options;
-    options.binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{0u, 1u};
-    options.binding_points[tint::BindingPoint{3u, 4u}] = tint::BindingPoint{0u, 1u};
-    Run(BindingRemapper, options);
+    std::unordered_map<tint::BindingPoint, tint::BindingPoint> binding_points;
+    binding_points[tint::BindingPoint{1u, 2u}] = tint::BindingPoint{0u, 1u};
+    binding_points[tint::BindingPoint{3u, 4u}] = tint::BindingPoint{0u, 1u};
+    Run(BindingRemapper, binding_points);
 
     EXPECT_EQ(expect, str());
 }

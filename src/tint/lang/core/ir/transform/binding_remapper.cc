@@ -28,8 +28,9 @@ namespace tint::core::ir::transform {
 
 namespace {
 
-Result<SuccessType> Run(ir::Module& ir, const BindingRemapperOptions& options) {
-    if (options.binding_points.empty()) {
+Result<SuccessType> Run(ir::Module& ir,
+                        const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
+    if (binding_points.empty()) {
         return Success;
     }
     if (ir.root_block->IsEmpty()) {
@@ -49,8 +50,8 @@ Result<SuccessType> Run(ir::Module& ir, const BindingRemapperOptions& options) {
         }
 
         // Replace group and binding index if requested.
-        auto to = options.binding_points.find(bp.value());
-        if (to != options.binding_points.end()) {
+        auto to = binding_points.find(bp.value());
+        if (to != binding_points.end()) {
             var->SetBindingPoint(to->second.group, to->second.binding);
         }
     }
@@ -60,13 +61,15 @@ Result<SuccessType> Run(ir::Module& ir, const BindingRemapperOptions& options) {
 
 }  // namespace
 
-Result<SuccessType> BindingRemapper(Module& ir, const BindingRemapperOptions& options) {
+Result<SuccessType> BindingRemapper(
+    Module& ir,
+    const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
     auto result = ValidateAndDumpIfNeeded(ir, "BindingRemapper transform");
     if (!result) {
         return result;
     }
 
-    return Run(ir, options);
+    return Run(ir, binding_points);
 }
 
 }  // namespace tint::core::ir::transform

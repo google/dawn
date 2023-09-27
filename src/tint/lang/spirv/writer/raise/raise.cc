@@ -45,7 +45,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }                                \
     } while (false)
 
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, options.binding_remapper_options);
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module,
+                  options.binding_remapper_options.binding_points);
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;
