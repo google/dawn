@@ -498,30 +498,6 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
     return {};
 }
 
-MaybeError ValidateTimestampLocationOnRenderPass(
-    wgpu::RenderPassTimestampLocation location,
-    const std::unordered_set<wgpu::RenderPassTimestampLocation>& writtenLocations) {
-    DAWN_TRY(ValidateRenderPassTimestampLocation(location));
-
-    DAWN_INVALID_IF(writtenLocations.find(location) != writtenLocations.end(),
-                    "There are two same RenderPassTimestampLocation %u in a render pass.",
-                    location);
-
-    return {};
-}
-
-MaybeError ValidateTimestampLocationOnComputePass(
-    wgpu::ComputePassTimestampLocation location,
-    const std::unordered_set<wgpu::ComputePassTimestampLocation>& writtenLocations) {
-    DAWN_TRY(ValidateComputePassTimestampLocation(location));
-
-    DAWN_INVALID_IF(writtenLocations.find(location) != writtenLocations.end(),
-                    "There are two same ComputePassTimestampLocation %u in a compute pass.",
-                    location);
-
-    return {};
-}
-
 MaybeError ValidateRenderPassPLS(DeviceBase* device,
                                  const RenderPassPixelLocalStorage* pls,
                                  uint32_t* width,
@@ -613,42 +589,14 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                         descriptor->occlusionQuerySet->GetQueryType(), wgpu::QueryType::Occlusion);
     }
 
-    if (descriptor->timestampWriteCount > 0) {
-        DAWN_ASSERT(descriptor->timestampWrites != nullptr);
-
-        // Record the query set and query index used on render passes for validating query
-        // index overwrite. The TrackQueryAvailability of
-        // RenderPassResourceUsageTracker is not used here because the timestampWrites are
-        // not validated and encoded one by one, but encoded together after passing the
-        // validation.
-        QueryAvailabilityMap usedQueries;
-        // TODO(https://crbug.com/dawn/1452):
-        // 1. Add an enum that's TimestampLocationMask and has bit values.
-        // 2. Add a function with a switch that converts from one to the other.
-        // 3. type alias the ityp::bitset for that to call it TimestampLocationSet.
-        // 4. Use it here.
-        std::unordered_set<wgpu::RenderPassTimestampLocation> writtenLocations;
-        for (uint32_t i = 0; i < descriptor->timestampWriteCount; ++i) {
-            QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
-            DAWN_ASSERT(querySet != nullptr);
-            uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
-            DAWN_TRY_CONTEXT(ValidateTimestampQuery(device, querySet, queryIndex),
-                             "validating querySet and queryIndex of timestampWrites[%u].", i);
-            DAWN_TRY_CONTEXT(ValidateTimestampLocationOnRenderPass(
-                                 descriptor->timestampWrites[i].location, writtenLocations),
-                             "validating location of timestampWrites[%u].", i);
-            writtenLocations.insert(descriptor->timestampWrites[i].location);
-
-            auto checkIt = usedQueries.find(querySet);
-            DAWN_INVALID_IF(checkIt != usedQueries.end() && checkIt->second[queryIndex],
-                            "Query index %u of %s is written to twice in a render pass.",
-                            queryIndex, querySet);
-
-            // Gets the iterator for that querySet or create a new vector of bool set to
-            // false if the querySet wasn't registered.
-            auto addIt = usedQueries.emplace(querySet, querySet->GetQueryCount()).first;
-            addIt->second[queryIndex] = true;
-        }
+    if (descriptor->timestampWrites != nullptr) {
+        QuerySetBase* querySet = descriptor->timestampWrites->querySet;
+        DAWN_ASSERT(querySet != nullptr);
+        uint32_t beginningOfPassWriteIndex = descriptor->timestampWrites->beginningOfPassWriteIndex;
+        uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
+        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, querySet, beginningOfPassWriteIndex,
+                                                     endOfPassWriteIndex),
+                         "validating timestampWrites.");
     }
 
     // Validation for any pixel local storage.
@@ -686,39 +634,14 @@ MaybeError ValidateComputePassDescriptor(const DeviceBase* device,
         return {};
     }
 
-    if (descriptor->timestampWriteCount > 0) {
-        DAWN_ASSERT(descriptor->timestampWrites != nullptr);
-
-        // Record the query set and query index used on compute passes for validating query
-        // index overwrite.
-        QueryAvailabilityMap usedQueries;
-        // TODO(https://crbug.com/dawn/1452):
-        // 1. Add an enum that's TimestampLocationMask and has bit values.
-        // 2. Add a function with a switch that converts from one to the other.
-        // 3. type alias the ityp::bitset for that to call it TimestampLocationSet.
-        // 4. Use it here.
-        std::unordered_set<wgpu::ComputePassTimestampLocation> writtenLocations;
-        for (uint32_t i = 0; i < descriptor->timestampWriteCount; ++i) {
-            QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
-            DAWN_ASSERT(querySet != nullptr);
-            uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
-            DAWN_TRY_CONTEXT(ValidateTimestampQuery(device, querySet, queryIndex),
-                             "validating querySet and queryIndex of timestampWrites[%u].", i);
-            DAWN_TRY_CONTEXT(ValidateTimestampLocationOnComputePass(
-                                 descriptor->timestampWrites[i].location, writtenLocations),
-                             "validating location of timestampWrites[%u].", i);
-            writtenLocations.insert(descriptor->timestampWrites[i].location);
-
-            auto checkIt = usedQueries.find(querySet);
-            DAWN_INVALID_IF(checkIt != usedQueries.end() && checkIt->second[queryIndex],
-                            "Query index %u of %s is written to twice in a compute pass.",
-                            queryIndex, querySet);
-
-            // Gets the iterator for that querySet or create a new vector of bool set to
-            // false if the querySet wasn't registered.
-            auto addIt = usedQueries.emplace(querySet, querySet->GetQueryCount()).first;
-            addIt->second[queryIndex] = true;
-        }
+    if (descriptor->timestampWrites != nullptr) {
+        QuerySetBase* querySet = descriptor->timestampWrites->querySet;
+        DAWN_ASSERT(querySet != nullptr);
+        uint32_t beginningOfPassWriteIndex = descriptor->timestampWrites->beginningOfPassWriteIndex;
+        uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
+        DAWN_TRY_CONTEXT(ValidatePassTimestampWrites(device, querySet, beginningOfPassWriteIndex,
+                                                     endOfPassWriteIndex),
+                         "validating timestampWrites.");
     }
 
     return {};
@@ -1016,24 +939,23 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
             // Record timestamp writes at the beginning and end of compute pass. The timestamp write
             // at the end also be needed in BeginComputePassCmd because it's required by compute
             // pass descriptor when beginning compute pass on Metal.
-            for (uint32_t i = 0; i < descriptor->timestampWriteCount; i++) {
-                QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
-                uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+            if (descriptor->timestampWrites != nullptr) {
+                QuerySetBase* querySet = descriptor->timestampWrites->querySet;
+                uint32_t beginningOfPassWriteIndex =
+                    descriptor->timestampWrites->beginningOfPassWriteIndex;
+                uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
 
-                switch (descriptor->timestampWrites[i].location) {
-                    case wgpu::ComputePassTimestampLocation::Beginning:
-                        cmd->beginTimestamp.querySet = querySet;
-                        cmd->beginTimestamp.queryIndex = queryIndex;
-                        break;
-                    case wgpu::ComputePassTimestampLocation::End:
-                        cmd->endTimestamp.querySet = querySet;
-                        cmd->endTimestamp.queryIndex = queryIndex;
-                        break;
+                if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+                    cmd->beginTimestamp.querySet = querySet;
+                    cmd->beginTimestamp.queryIndex = beginningOfPassWriteIndex;
+                    TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
                 }
-
-                TrackQueryAvailability(querySet, queryIndex);
+                if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+                    cmd->endTimestamp.querySet = querySet;
+                    cmd->endTimestamp.queryIndex = endOfPassWriteIndex;
+                    TrackQueryAvailability(querySet, endOfPassWriteIndex);
+                }
             }
-
             return {};
         },
         "encoding %s.BeginComputePass(%s).", this, descriptor);
@@ -1218,25 +1140,28 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             // Record timestamp writes at the beginning and end of render pass. The timestamp write
             // at the end also be needed in BeginComputePassCmd because it's required by render pass
             // descriptor when beginning render pass on Metal.
-            for (uint32_t i = 0; i < descriptor->timestampWriteCount; i++) {
-                QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
-                uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+            if (descriptor->timestampWrites != nullptr) {
+                QuerySetBase* querySet = descriptor->timestampWrites->querySet;
+                uint32_t beginningOfPassWriteIndex =
+                    descriptor->timestampWrites->beginningOfPassWriteIndex;
+                uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
 
-                switch (descriptor->timestampWrites[i].location) {
-                    case wgpu::RenderPassTimestampLocation::Beginning:
-                        cmd->beginTimestamp.querySet = querySet;
-                        cmd->beginTimestamp.queryIndex = queryIndex;
-                        break;
-                    case wgpu::RenderPassTimestampLocation::End:
-                        cmd->endTimestamp.querySet = querySet;
-                        cmd->endTimestamp.queryIndex = queryIndex;
-                        break;
+                if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+                    cmd->beginTimestamp.querySet = querySet;
+                    cmd->beginTimestamp.queryIndex = beginningOfPassWriteIndex;
+                    TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
+                    // Track the query availability with true on render pass again for rewrite
+                    // validation and query reset on Vulkan
+                    usageTracker.TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
                 }
-
-                TrackQueryAvailability(querySet, queryIndex);
-                // Track the query availability with true on render pass again for rewrite
-                // validation and query reset on Vulkan
-                usageTracker.TrackQueryAvailability(querySet, queryIndex);
+                if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+                    cmd->endTimestamp.querySet = querySet;
+                    cmd->endTimestamp.queryIndex = endOfPassWriteIndex;
+                    TrackQueryAvailability(querySet, endOfPassWriteIndex);
+                    // Track the query availability with true on render pass again for rewrite
+                    // validation and query reset on Vulkan
+                    usageTracker.TrackQueryAvailability(querySet, endOfPassWriteIndex);
+                }
             }
 
             const RenderPassPixelLocalStorage* pls = nullptr;

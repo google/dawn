@@ -151,14 +151,11 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
                                            const wgpu::QuerySet& querySet) {
         switch (GetParam().mFeatureName) {
             case wgpu::FeatureName::TimestampQuery: {
-                std::vector<wgpu::ComputePassTimestampWrite> timestampWrites;
-                timestampWrites.push_back(
-                    {querySet, 0, wgpu::ComputePassTimestampLocation::Beginning});
-                timestampWrites.push_back({querySet, 1, wgpu::ComputePassTimestampLocation::End});
+                wgpu::ComputePassTimestampWrites timestampWrites = {
+                    .querySet = querySet, .beginningOfPassWriteIndex = 0, .endOfPassWriteIndex = 1};
 
                 wgpu::ComputePassDescriptor descriptor;
-                descriptor.timestampWriteCount = timestampWrites.size();
-                descriptor.timestampWrites = timestampWrites.data();
+                descriptor.timestampWrites = &timestampWrites;
 
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&descriptor);
                 pass.SetPipeline(CreateComputePipeline());
@@ -187,13 +184,9 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
 
         switch (GetParam().mFeatureName) {
             case wgpu::FeatureName::TimestampQuery: {
-                std::vector<wgpu::RenderPassTimestampWrite> timestampWrites;
-                timestampWrites.push_back(
-                    {querySet, 0, wgpu::RenderPassTimestampLocation::Beginning});
-                timestampWrites.push_back({querySet, 1, wgpu::RenderPassTimestampLocation::End});
-
-                renderPass.renderPassInfo.timestampWriteCount = timestampWrites.size();
-                renderPass.renderPassInfo.timestampWrites = timestampWrites.data();
+                wgpu::RenderPassTimestampWrites timestampWrites = {
+                    .querySet = querySet, .beginningOfPassWriteIndex = 0, .endOfPassWriteIndex = 1};
+                renderPass.renderPassInfo.timestampWrites = &timestampWrites;
 
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.SetPipeline(CreateRenderPipeline());

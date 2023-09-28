@@ -100,6 +100,40 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
     return {};
 }
 
+MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
+                                       const QuerySetBase* querySet,
+                                       uint32_t beginningOfPassWriteIndex,
+                                       uint32_t endOfPassWriteIndex) {
+    DAWN_TRY(device->ValidateObject(querySet));
+
+    DAWN_INVALID_IF(!device->HasFeature(Feature::TimestampQuery),
+                    "Timestamp queries used without the timestamp-query feature enabled.");
+
+    DAWN_INVALID_IF(querySet->GetQueryType() != wgpu::QueryType::Timestamp,
+                    "The type of %s is not %s.", querySet, wgpu::QueryType::Timestamp);
+
+    if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        DAWN_INVALID_IF(beginningOfPassWriteIndex >= querySet->GetQueryCount(),
+                        "beginningOfPassWriteIndex (%u) exceeds the number of queries (%u) in %s.",
+                        beginningOfPassWriteIndex, querySet->GetQueryCount(), querySet);
+    }
+    if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        DAWN_INVALID_IF(endOfPassWriteIndex >= querySet->GetQueryCount(),
+                        "endOfPassWriteIndex (%u) exceeds the number of queries (%u) in %s.",
+                        beginningOfPassWriteIndex, querySet->GetQueryCount(), querySet);
+    }
+
+    DAWN_INVALID_IF(beginningOfPassWriteIndex == wgpu::kQuerySetIndexUndefined &&
+                        endOfPassWriteIndex == wgpu::kQuerySetIndexUndefined,
+                    "Both beginningOfPassWriteIndex and endOfPassWriteIndex are undefined.");
+
+    DAWN_INVALID_IF(beginningOfPassWriteIndex == endOfPassWriteIndex,
+                    "beginningOfPassWriteIndex (%u) is equal to endOfPassWriteIndex (%u).",
+                    beginningOfPassWriteIndex, endOfPassWriteIndex);
+
+    return {};
+}
+
 MaybeError ValidateWriteBuffer(const DeviceBase* device,
                                const BufferBase* buffer,
                                uint64_t bufferOffset,

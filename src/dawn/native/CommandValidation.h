@@ -40,6 +40,11 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
                                   uint32_t queryIndex,
                                   Feature requiredFeature = Feature::TimestampQuery);
 
+MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
+                                       const QuerySetBase* querySet,
+                                       uint32_t beginningOfPassWriteIndex,
+                                       uint32_t endOfPassWriteIndex);
+
 MaybeError ValidateWriteBuffer(const DeviceBase* device,
                                const BufferBase* buffer,
                                uint64_t bufferOffset,
