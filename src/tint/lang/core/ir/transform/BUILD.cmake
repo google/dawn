@@ -44,6 +44,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/direct_variable_access.h
   lang/core/ir/transform/multiplanar_external_texture.cc
   lang/core/ir/transform/multiplanar_external_texture.h
+  lang/core/ir/transform/preserve_padding.cc
+  lang/core/ir/transform/preserve_padding.h
   lang/core/ir/transform/robustness.cc
   lang/core/ir/transform/robustness.h
   lang/core/ir/transform/shader_io.cc
@@ -92,6 +94,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/direct_variable_access_test.cc
   lang/core/ir/transform/helper_test.h
   lang/core/ir/transform/multiplanar_external_texture_test.cc
+  lang/core/ir/transform/preserve_padding_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/std140_test.cc
   lang/core/ir/transform/zero_init_workgroup_memory_test.cc

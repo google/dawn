@@ -23,7 +23,9 @@
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
+#include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
@@ -82,6 +84,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         !options.use_zero_initialize_workgroup_memory_extension) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
+
+    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
+
+    core::ir::transform::DirectVariableAccessOptions dva_options;
+    dva_options.transform_function = true;
+    dva_options.transform_private = true;
+    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_options);
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
