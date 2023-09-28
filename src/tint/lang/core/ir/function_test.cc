@@ -111,7 +111,8 @@ TEST_F(IR_FunctionTest, Clone) {
     EXPECT_EQ(new_param1, new_f->Params()[0]);
     EXPECT_EQ(new_param2, new_f->Params()[1]);
 
-    EXPECT_EQ(new_f, mod.functions.Back());
+    // Cloned functions are not automatically added to the module.
+    EXPECT_EQ(mod.functions.Length(), 1u);
 }
 
 TEST_F(IR_FunctionTest, CloneWithExits) {

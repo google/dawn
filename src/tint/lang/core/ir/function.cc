@@ -46,7 +46,6 @@ Function* Function::Clone(CloneContext& ctx) {
     block_->CloneInto(ctx, new_func->block_);
 
     ctx.ir.SetName(new_func, ctx.ir.NameOf(this).Name());
-    ctx.ir.functions.Push(new_func);
     return new_func;
 }
 
