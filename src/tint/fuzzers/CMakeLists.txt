@@ -15,8 +15,6 @@
 function(add_tint_fuzzer NAME)
   add_executable(${NAME}
     ${NAME}.cc
-    apply_substitute_overrides.cc
-    apply_substitute_overrides.h
     cli.cc
     cli.h
     data_builder.h

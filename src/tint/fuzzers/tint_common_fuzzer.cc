@@ -31,9 +31,9 @@
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -237,7 +237,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     }
 
     // Run SubstituteOverride if required
-    program = ApplySubstituteOverrides(std::move(program));
+    program = tint::wgsl::ApplySubstituteOverrides(std::move(program));
     if (!program.IsValid()) {
         return 0;
     }

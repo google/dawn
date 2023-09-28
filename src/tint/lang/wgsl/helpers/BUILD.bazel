@@ -27,11 +27,13 @@ cc_library(
   name = "helpers",
   srcs = [
     "append_vector.cc",
+    "apply_substitute_overrides.cc",
     "check_supported_extensions.cc",
     "flatten_bindings.cc",
   ],
   hdrs = [
     "append_vector.h",
+    "apply_substitute_overrides.h",
     "check_supported_extensions.h",
     "flatten_bindings.h",
   ],

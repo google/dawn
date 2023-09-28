@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/fuzzers/apply_substitute_overrides.h"
+#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 
 #include <memory>
 #include <utility>
@@ -22,7 +22,7 @@
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::fuzzers {
+namespace tint::wgsl {
 
 Program ApplySubstituteOverrides(Program&& program) {
     ast::transform::SubstituteOverride::Config cfg;
@@ -50,4 +50,4 @@ Program ApplySubstituteOverrides(Program&& program) {
     return mgr.Run(program, override_data, outputs);
 }
 
-}  // namespace tint::fuzzers
+}  // namespace tint::wgsl

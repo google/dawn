@@ -19,11 +19,11 @@
 
 #include <thread>
 
-#include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/spirv/writer/writer.h"
+#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;  // Not supported
     }
 
-    program = tint::fuzzers::ApplySubstituteOverrides(std::move(program));
+    program = tint::wgsl::ApplySubstituteOverrides(std::move(program));
     if (!program.IsValid()) {
         return 0;
     }

@@ -33,6 +33,8 @@ libtint_source_set("helpers") {
   sources = [
     "append_vector.cc",
     "append_vector.h",
+    "apply_substitute_overrides.cc",
+    "apply_substitute_overrides.h",
     "check_supported_extensions.cc",
     "check_supported_extensions.h",
     "flatten_bindings.cc",

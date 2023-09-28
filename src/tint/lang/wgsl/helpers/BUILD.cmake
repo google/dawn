@@ -28,6 +28,8 @@
 tint_add_target(tint_lang_wgsl_helpers lib
   lang/wgsl/helpers/append_vector.cc
   lang/wgsl/helpers/append_vector.h
+  lang/wgsl/helpers/apply_substitute_overrides.cc
+  lang/wgsl/helpers/apply_substitute_overrides.h
   lang/wgsl/helpers/check_supported_extensions.cc
   lang/wgsl/helpers/check_supported_extensions.h
   lang/wgsl/helpers/flatten_bindings.cc

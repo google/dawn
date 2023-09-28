@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
-#define SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#ifndef SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#define SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
 
 // Forward declarations
 namespace tint {
 class Program;
 }
 
-namespace tint::fuzzers {
+namespace tint::wgsl {
 
 /// @returns a new program with all overrides subsituted with const variables
 /// @param program the input program
 Program ApplySubstituteOverrides(Program&& program);
 
-}  // namespace tint::fuzzers
+}  // namespace tint::wgsl
 
-#endif  // SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#endif  // SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
