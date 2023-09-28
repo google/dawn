@@ -316,15 +316,6 @@ if (build_with_chromium) {
     }
   }
 
-  if (tint_build_wgsl_reader && tint_build_hlsl_writer &&
-      tint_build_msl_writer && tint_build_spv_writer &&
-      tint_build_wgsl_writer) {
-    executable("tint_black_box_fuzz_target") {
-      sources = [ "tint_black_box_fuzz_target.cc" ]
-      deps = [ ":tint_fuzzer_common_src" ]
-    }
-  }
-
   group("fuzzers") {
     testonly = true
     deps = []
@@ -364,11 +355,6 @@ if (build_with_chromium) {
         ":tint_regex_msl_writer_fuzzer",
         ":tint_wgsl_reader_msl_writer_fuzzer",
       ]
-    }
-    if (tint_build_wgsl_reader && tint_build_hlsl_writer &&
-        tint_build_msl_writer && tint_build_spv_writer &&
-        tint_build_wgsl_writer) {
-      deps += [ ":tint_black_box_fuzz_target" ]
     }
   }
 } else {
