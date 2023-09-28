@@ -96,7 +96,7 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/protobufs/tint_ast_fuzze
 
 # Add static library target.
 add_library(libtint_ast_fuzzer STATIC ${LIBTINT_AST_FUZZER_SOURCES})
-target_link_libraries(libtint_ast_fuzzer protobuf::libprotobuf libtint)
+target_link_libraries(libtint_ast_fuzzer protobuf::libprotobuf tint_api_sanitize_fuzzer)
 tint_default_compile_options(libtint_ast_fuzzer)
 target_include_directories(libtint_ast_fuzzer PRIVATE ${CMAKE_BINARY_DIR})
 target_compile_options(libtint_ast_fuzzer PRIVATE
