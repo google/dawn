@@ -169,6 +169,7 @@ uint32_t VertexFormatSize(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Float32:
         case wgpu::VertexFormat::Uint32:
         case wgpu::VertexFormat::Sint32:
+        case wgpu::VertexFormat::Unorm10_10_10_2:
             return 4;
         case wgpu::VertexFormat::Uint16x4:
         case wgpu::VertexFormat::Sint16x4:

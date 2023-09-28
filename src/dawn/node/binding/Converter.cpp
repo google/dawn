@@ -1196,6 +1196,9 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
         case interop::GPUVertexFormat::kSint32X4:
             out = wgpu::VertexFormat::Sint32x4;
             return true;
+        case interop::GPUVertexFormat::kUnorm1010102:
+            out = wgpu::VertexFormat::Unorm10_10_10_2;
+            return true;
         default:
             break;
     }

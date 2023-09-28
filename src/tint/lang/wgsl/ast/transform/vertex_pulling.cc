@@ -126,6 +126,8 @@ StringStream& operator<<(StringStream& out, VertexFormat format) {
             return out << "sint32x3";
         case VertexFormat::kSint32x4:
             return out << "sint32x4";
+        case VertexFormat::kUnorm10_10_10_2:
+            return out << "unorm10-10-10-2";
     }
     return out << "<unknown>";
 }
@@ -223,6 +225,7 @@ VertexFormatType VertexFormatTypeOf(VertexFormat format) {
         case VertexFormat::kSnorm16x4:
         case VertexFormat::kFloat16x4:
         case VertexFormat::kFloat32x4:
+        case VertexFormat::kUnorm10_10_10_2:
             return {VertexDataType::kFloat, 4};
     }
     return {VertexDataType::kInvalid, 0};
@@ -667,6 +670,15 @@ struct VertexPulling::State {
             case VertexFormat::kFloat16x4:
                 return b.Call<vec4<f32>>(b.Call("unpack2x16float", load_u32()),
                                          b.Call("unpack2x16float", load_next_u32()));
+            case VertexFormat::kUnorm10_10_10_2:
+                auto* u32s = b.Call<vec4<u32>>(load_u32());
+                // shr = u32s >> vec4u(0, 10, 20, 30);
+                auto* shr = b.Shr(u32s, b.Call<vec4<u32>>(0_u, 10_u, 20_u, 30_u));
+                // mask = shr & vec4u(0x3FF, 0x3FF, 0x3FF, 0x3);
+                auto* mask = b.And(shr, b.Call<vec4<u32>>(0x3FF_u, 0x3FF_u, 0x3FF_u, 0x3_u));
+                // return vec4f(mask) / vec4f(1023, 1023, 1023, 3);
+                return b.Div(b.Call<vec4<f32>>(mask),
+                             b.Call<vec4<f32>>(1023_f, 1023_f, 1023_f, 3_f));
         }
 
         TINT_UNREACHABLE() << "format " << static_cast<int>(format);

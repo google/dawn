@@ -27,36 +27,37 @@ namespace tint::ast::transform {
 
 /// Describes the format of data in a vertex buffer
 enum class VertexFormat {
-    kUint8x2,    // uint8x2
-    kUint8x4,    // uint8x4
-    kSint8x2,    // sint8x2
-    kSint8x4,    // sint8x4
-    kUnorm8x2,   // unorm8x2
-    kUnorm8x4,   // unorm8x4
-    kSnorm8x2,   // snorm8x2
-    kSnorm8x4,   // snorm8x4
-    kUint16x2,   // uint16x2
-    kUint16x4,   // uint16x4
-    kSint16x2,   // sint16x2
-    kSint16x4,   // sint16x4
-    kUnorm16x2,  // unorm16x2
-    kUnorm16x4,  // unorm16x4
-    kSnorm16x2,  // snorm16x2
-    kSnorm16x4,  // snorm16x4
-    kFloat16x2,  // float16x2
-    kFloat16x4,  // float16x4
-    kFloat32,    // float32
-    kFloat32x2,  // float32x2
-    kFloat32x3,  // float32x3
-    kFloat32x4,  // float32x4
-    kUint32,     // uint32
-    kUint32x2,   // uint32x2
-    kUint32x3,   // uint32x3
-    kUint32x4,   // uint32x4
-    kSint32,     // sint32
-    kSint32x2,   // sint32x2
-    kSint32x3,   // sint32x3
-    kSint32x4,   // sint32x4
+    kUint8x2,          // uint8x2
+    kUint8x4,          // uint8x4
+    kSint8x2,          // sint8x2
+    kSint8x4,          // sint8x4
+    kUnorm8x2,         // unorm8x2
+    kUnorm8x4,         // unorm8x4
+    kSnorm8x2,         // snorm8x2
+    kSnorm8x4,         // snorm8x4
+    kUint16x2,         // uint16x2
+    kUint16x4,         // uint16x4
+    kSint16x2,         // sint16x2
+    kSint16x4,         // sint16x4
+    kUnorm16x2,        // unorm16x2
+    kUnorm16x4,        // unorm16x4
+    kSnorm16x2,        // snorm16x2
+    kSnorm16x4,        // snorm16x4
+    kFloat16x2,        // float16x2
+    kFloat16x4,        // float16x4
+    kFloat32,          // float32
+    kFloat32x2,        // float32x2
+    kFloat32x3,        // float32x3
+    kFloat32x4,        // float32x4
+    kUint32,           // uint32
+    kUint32x2,         // uint32x2
+    kUint32x3,         // uint32x3
+    kUint32x4,         // uint32x4
+    kSint32,           // sint32
+    kSint32x2,         // sint32x2
+    kSint32x3,         // sint32x3
+    kSint32x4,         // sint32x4
+    kUnorm10_10_10_2,  // unorm10-10-10-2
 
     kLastEntry = kSint32x4,
 };
