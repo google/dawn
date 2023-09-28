@@ -1,5 +1,11 @@
 # Fuzzing Dawn
 
+## Building
+
+To enable building of the fuzzers, add `use_libfuzzer = true` to `args.gn`.
+
+The fuzzers can be built using the `fuzzers` target (e.g. `ninja fuzzers`)
+
 ## `dawn_wire_server_and_frontend_fuzzer`
 
 The `dawn_wire_server_and_frontend_fuzzer` sets up Dawn using the Null backend, and passes inputs to the wire server. This fuzzes the `dawn_wire` deserialization, as well as Dawn's frontend validation.

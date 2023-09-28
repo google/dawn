@@ -15,14 +15,21 @@
 import("scripts/dawn_overrides_with_defaults.gni")
 import("scripts/tint_overrides_with_defaults.gni")
 
-group("all") {
+group("fuzzers") {
   testonly = true
   deps = [
     "src/dawn/fuzzers",
+    "src/tint/fuzzers",
+  ]
+}
+
+group("all") {
+  testonly = true
+  deps = [
+    ":fuzzers",
     "src/dawn/native:webgpu_dawn",
     "src/dawn/tests",
     "src/tint/api",
-    "src/tint/fuzzers",
   ]
   if (tint_build_unittests) {
     deps += [ "src/tint/cmd/test" ]

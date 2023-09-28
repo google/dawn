@@ -116,7 +116,11 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@166db27fd0d53afc0c716b1ae9c15725e380871f',
+    'url': '{chromium_git}/chromium/src/testing@48d3bd9693702764fdf9cf8f2d13dfe3fcb5bb3e',
+    'condition': 'dawn_standalone',
+  },
+  'third_party/libFuzzer/src': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git' + '@' + '26cc39e59b2bf5cbc20486296248a842c536878d',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {

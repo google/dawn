@@ -26,6 +26,10 @@
 	path = testing
 	url = https://chromium.googlesource.com/chromium/src/testing
 	gclient-condition = dawn_standalone
+[submodule "third_party/libFuzzer/src"]
+	path = third_party/libFuzzer/src
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git
+	gclient-condition = dawn_standalone
 [submodule "third_party/googletest"]
 	path = third_party/googletest
 	url = https://chromium.googlesource.com/external/github.com/google/googletest
