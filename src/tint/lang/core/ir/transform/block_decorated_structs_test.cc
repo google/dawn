@@ -205,18 +205,13 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
     });
 
     auto* expect = R"(
-MyStruct = struct @align(4) {
-  i:i32 @offset(0)
-  arr:array<i32> @offset(4)
-}
-
-tint_symbol = struct @align(4), @block {
+MyStruct = struct @align(4), @block {
   i:i32 @offset(0)
   arr:array<i32> @offset(4)
 }
 
 %b1 = block {  # root
-  %1:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
@@ -226,6 +221,51 @@ tint_symbol = struct @align(4), @block {
     %5:ptr<storage, i32, read_write> = access %1, 1u, 3u
     store %5, %4
     ret
+  }
+}
+)";
+
+    Run(BlockDecoratedStructs);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct_ArrayLengthViaLets) {
+    auto* structure =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("i"), ty.i32()},
+                                                   {mod.symbols.New("arr"), ty.array<i32>()},
+                                               });
+
+    auto* buffer = b.Var(ty.ptr(storage, structure, core::Access::kReadWrite));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* let_root = b.Let("root", buffer->Result());
+        auto* let_arr = b.Let("arr", b.Access(ty.ptr(storage, ty.array<i32>()), let_root, 1_u));
+        auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, let_arr);
+        b.Return(func, length);
+    });
+
+    auto* expect = R"(
+MyStruct = struct @align(4), @block {
+  i:i32 @offset(0)
+  arr:array<i32> @offset(4)
+}
+
+%b1 = block {  # root
+  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %root:ptr<storage, MyStruct, read_write> = let %1
+    %4:ptr<storage, array<i32>, read_write> = access %root, 1u
+    %arr:ptr<storage, array<i32>, read_write> = let %4
+    %6:u32 = arrayLength %arr
+    ret %6
   }
 }
 )";

@@ -1981,8 +1981,8 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%1 = OpVariable %_ptr_StorageBuffer_tint_symbol StorageBuffer");
-    EXPECT_INST("%result = OpArrayLength %uint %1 2");
+    EXPECT_INST("%var = OpVariable %_ptr_StorageBuffer_Buffer StorageBuffer");
+    EXPECT_INST("%result = OpArrayLength %uint %var 2");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
