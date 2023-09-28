@@ -346,7 +346,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
         wgpu::TextureDescriptor textureDescriptor;
 
         textureDescriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
-        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.size = {2, 1, 1};
         textureDescriptor.format = format;
 
         wgpu::Texture wrappedTexture = WrapEGLImage(&textureDescriptor, image, true);
@@ -454,28 +454,28 @@ TEST_P(EGLImageUsageTests, ClearRGBA8EGLImage) {
 // Test sampling an imported R8 GL texture
 TEST_P(EGLImageUsageTests, SampleR8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    uint8_t data = 0x42;
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, &data);
+    uint8_t data[2] = {0x42, 0x42};
+    ScopedEGLImage eglImage = CreateEGLImage(2, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, data);
 
-    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::R8Unorm, data);
 }
 
 // Test sampling an imported RG8 GL texture
 TEST_P(EGLImageUsageTests, SampleRG8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    uint16_t data = 0x4221;
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, &data);
+    uint16_t data[2] = {0x4221, 0x4221};
+    ScopedEGLImage eglImage = CreateEGLImage(2, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, data);
 
-    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RG8Unorm, data);
 }
 
 // Test sampling an imported RGBA8 GL texture
 TEST_P(EGLImageUsageTests, SampleRGBA8EGLImage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    uint32_t data = 0x48844221;
-    ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+    uint32_t data[2] = {0x48844221, 0x48844221};
+    ScopedEGLImage eglImage = CreateEGLImage(2, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, &data);
+    DoSampleTest(eglImage.getImage(), wgpu::TextureFormat::RGBA8Unorm, data);
 }
 
 DAWN_INSTANTIATE_TEST(EGLImageValidationTests, OpenGLESBackend());

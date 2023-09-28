@@ -309,6 +309,7 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
     gl.GenTextures(1, &tex);
     gl.BindTexture(GL_TEXTURE_2D, tex);
     gl.EGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     GLint width, height;
     gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
