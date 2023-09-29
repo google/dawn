@@ -867,19 +867,6 @@ crbug.com/tint/0000 [ dawn-no-backend-validation nvidia-0x2184 webgpu-dxc-enable
 crbug.com/tint/0000 [ android-r dawn-backend-validation ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="override";type="f32" [ RetryOnFailure ]
 
 ################################################################################
-# Failures for timestamps queries captured at the beginning and end of passes.
-# It is temporary while we disable them in Blink to change the Dawn API.
-# KEEP
-################################################################################
-crbug.com/dawn/1800 webgpu:api,validation,encoding,beginComputePass:timestampWrites,invalid_query_set:querySetState="invalid" [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_index: [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_set_type:queryType="occlusion" [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,encoding,beginComputePass:timestamp_query_set,device_mismatch: [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,encoding,beginRenderPass:timestamp_query_set,device_mismatch: [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrite,query_index: [ Failure ]
-crbug.com/dawn/1800 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrites,query_set_type:queryType="occlusion" [ Failure ]
-
-################################################################################
 # Manually added failures to facilitate roll. Please triage:
 ################################################################################
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:* [ RetryOnFailure ]
