@@ -34,6 +34,7 @@ cc_library(
     "defer.h",
     "foreach.h",
     "scoped_assignment.h",
+    "static_init.h",
   ],
   deps = [
   ],
@@ -46,6 +47,7 @@ cc_library(
   srcs = [
     "defer_test.cc",
     "scoped_assignment_test.cc",
+    "static_init_test.cc",
   ],
   deps = [
     "//src/tint/utils/macros",

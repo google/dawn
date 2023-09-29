@@ -37,6 +37,7 @@ libtint_source_set("macros") {
     "foreach.h",
     "macros.cc",
     "scoped_assignment.h",
+    "static_init.h",
   ]
   deps = []
 }
@@ -46,6 +47,7 @@ if (tint_build_unittests) {
     sources = [
       "defer_test.cc",
       "scoped_assignment_test.cc",
+      "static_init_test.cc",
     ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
