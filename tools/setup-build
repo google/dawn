@@ -137,7 +137,11 @@ case $BUILD_SYSTEM in
         show_usage "invalid build architecture '$BUILD_ARCH'"
       ;;
     esac
-    generate "gn" "gen" "out/active" "--args=$GN_ARGS"
+    if [ -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]; then
+      generate "gn" "gen" "out/active" # keep existing args
+    else
+      generate "gn" "gen" "out/active" "--args=$GN_ARGS"
+    fi
   ;;
   "cmake")
     CMAKE_FLAGS=()
