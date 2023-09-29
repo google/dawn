@@ -14,6 +14,7 @@
 
 #include "dawn/native/BlitTextureToBuffer.h"
 
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -35,31 +36,6 @@ namespace {
 
 constexpr uint32_t kWorkgroupSizeX = 8;
 constexpr uint32_t kWorkgroupSizeY = 8;
-
-// Helper to join constexpr std::string_view
-template <std::string_view const&... Strs>
-struct ConcatStringViewsImpl {
-    // Join all strings into a single std::array of chars
-    static constexpr auto impl() noexcept {
-        constexpr std::size_t len = (Strs.size() + ... + 0);
-        std::array<char, len + 1> a{};
-        auto append = [i = 0, &a](auto const& s) mutable {
-            for (auto c : s) {
-                a[i++] = c;
-            }
-        };
-        (append(Strs), ...);
-        a[len] = 0;
-        return a;
-    }
-    // Give the joined string static storage
-    static constexpr auto arr = impl();
-    // View as a std::string_view
-    static constexpr std::string_view value{arr.data(), arr.size() - 1};
-};
-// Helper to get the value out
-template <std::string_view const&... Strs>
-static constexpr auto ConcatStringViews = ConcatStringViewsImpl<Strs...>::value;
 
 constexpr std::string_view kFloatTexture1D = R"(
 fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
@@ -332,57 +308,6 @@ constexpr std::string_view kLoadDepth32Float = R"(
 }
 )";
 
-constexpr std::string_view kBlitR8Snorm1D =
-    ConcatStringViews<kFloatTexture1D, kCommon, kPackR8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRG8Snorm1D =
-    ConcatStringViews<kFloatTexture1D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRGBA8Snorm1D =
-    ConcatStringViews<kFloatTexture1D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitR8Snorm2D =
-    ConcatStringViews<kFloatTexture2D, kCommon, kPackR8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRG8Snorm2D =
-    ConcatStringViews<kFloatTexture2D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRGBA8Snorm2D =
-    ConcatStringViews<kFloatTexture2D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitR8Snorm2DArray =
-    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackR8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRG8Snorm2DArray =
-    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackRG8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRGBA8Snorm2DArray =
-    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitR8Snorm3D =
-    ConcatStringViews<kFloatTexture3D, kCommon, kPackR8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRG8Snorm3D =
-    ConcatStringViews<kFloatTexture3D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRGBA8Snorm3D =
-    ConcatStringViews<kFloatTexture3D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitBGRA8Unorm1D =
-    ConcatStringViews<kFloatTexture1D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitBGRA8Unorm2D =
-    ConcatStringViews<kFloatTexture2D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitBGRA8Unorm2DArray =
-    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitBGRA8Unorm3D =
-    ConcatStringViews<kFloatTexture3D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitStencil8 =
-    ConcatStringViews<kStencilTexture, kCommon, kPackStencil8ToU32, kCommonEnd>;
-constexpr std::string_view kBlitStencil8Array =
-    ConcatStringViews<kStencilTextureArray, kCommon, kPackStencil8ToU32, kCommonEnd>;
-
-constexpr std::string_view kBlitDepth16Unorm =
-    ConcatStringViews<kDepthTexture, kCommon, kPackDepth16UnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitDepth16UnormArray =
-    ConcatStringViews<kDepthTextureArray, kCommon, kPackDepth16UnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitDepth32Float =
-    ConcatStringViews<kDepth32FloatTexture, kCommon, kLoadDepth32Float>;
-constexpr std::string_view kBlitDepth32FloatArray =
-    ConcatStringViews<kDepth32FloatTextureArray, kCommon, kLoadDepth32Float>;
-
 ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     DeviceBase* device,
     const TextureCopy& src,
@@ -401,139 +326,130 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     shaderModuleDesc.nextInChain = &wgslDesc;
 
     wgpu::TextureSampleType textureSampleType;
+    std::string shader;
+
+    auto AppendFloatTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e1D:
+                shader += kFloatTexture1D;
+                break;
+            case wgpu::TextureViewDimension::e2D:
+                shader += kFloatTexture2D;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kFloatTexture2DArray;
+                break;
+            case wgpu::TextureViewDimension::e3D:
+                shader += kFloatTexture3D;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+    auto AppendDepthTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e2D:
+                shader += kDepthTexture;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kDepthTextureArray;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+    auto AppendDepth32FloatTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e2D:
+                shader += kDepth32FloatTexture;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kDepth32FloatTextureArray;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+    auto AppendStencilTextureHead = [&]() {
+        switch (viewDimension) {
+            case wgpu::TextureViewDimension::e2D:
+                shader += kStencilTexture;
+                break;
+            case wgpu::TextureViewDimension::e2DArray:
+                shader += kStencilTextureArray;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+
     switch (format.format) {
         case wgpu::TextureFormat::R8Snorm:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e1D:
-                    wgslDesc.code = kBlitR8Snorm1D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitR8Snorm2D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitR8Snorm2DArray.data();
-                    break;
-                case wgpu::TextureViewDimension::e3D:
-                    wgslDesc.code = kBlitR8Snorm3D.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendFloatTextureHead();
+            shader += kCommon;
+            shader += kPackR8SnormToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RG8Snorm:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e1D:
-                    wgslDesc.code = kBlitRG8Snorm1D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitRG8Snorm2D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitRG8Snorm2DArray.data();
-                    break;
-                case wgpu::TextureViewDimension::e3D:
-                    wgslDesc.code = kBlitRG8Snorm3D.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendFloatTextureHead();
+            shader += kCommon;
+            shader += kPackRG8SnormToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RGBA8Snorm:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e1D:
-                    wgslDesc.code = kBlitRGBA8Snorm1D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitRGBA8Snorm2D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitRGBA8Snorm2DArray.data();
-                    break;
-                case wgpu::TextureViewDimension::e3D:
-                    wgslDesc.code = kBlitRGBA8Snorm3D.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendFloatTextureHead();
+            shader += kCommon;
+            shader += kPackRGBA8SnormToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::BGRA8Unorm:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e1D:
-                    wgslDesc.code = kBlitBGRA8Unorm1D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitBGRA8Unorm2D.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitBGRA8Unorm2DArray.data();
-                    break;
-                case wgpu::TextureViewDimension::e3D:
-                    wgslDesc.code = kBlitBGRA8Unorm3D.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendFloatTextureHead();
+            shader += kCommon;
+            shader += kPackBGRA8UnormToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::Depth16Unorm:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitDepth16Unorm.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitDepth16UnormArray.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendDepthTextureHead();
+            shader += kCommon;
+            shader += kPackDepth16UnormToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Depth32Float:
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitDepth32Float.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitDepth32FloatArray.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendDepth32FloatTextureHead();
+            shader += kCommon;
+            shader += kLoadDepth32Float;
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
-            switch (viewDimension) {
-                case wgpu::TextureViewDimension::e2D:
-                    wgslDesc.code = kBlitStencil8.data();
-                    break;
-                case wgpu::TextureViewDimension::e2DArray:
-                    wgslDesc.code = kBlitStencil8Array.data();
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
+            AppendStencilTextureHead();
+            shader += kCommon;
+            shader += kPackStencil8ToU32;
+            shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
         case wgpu::TextureFormat::Depth32FloatStencil8: {
             // Depth32FloatStencil8 is not supported on OpenGL/OpenGLES where the blit path is
             // enabled by default. But could be hit if the blit path toggle is manually set on other
             // backends.
-            DAWN_ASSERT(viewDimension == wgpu::TextureViewDimension::e2D ||
-                        viewDimension == wgpu::TextureViewDimension::e2DArray);
-            bool is2DArray = viewDimension == wgpu::TextureViewDimension::e2DArray;
             switch (src.aspect) {
                 case Aspect::Depth:
-                    wgslDesc.code =
-                        is2DArray ? kBlitDepth32FloatArray.data() : kBlitDepth32Float.data();
+                    AppendDepth32FloatTextureHead();
+                    shader += kCommon;
+                    shader += kLoadDepth32Float;
                     textureSampleType = wgpu::TextureSampleType::Depth;
                     break;
                 case Aspect::Stencil:
-                    wgslDesc.code = is2DArray ? kBlitStencil8Array.data() : kBlitStencil8.data();
+                    AppendStencilTextureHead();
+                    shader += kCommon;
+                    shader += kPackStencil8ToU32;
+                    shader += kCommonEnd;
                     textureSampleType = wgpu::TextureSampleType::Uint;
                     break;
                 default:
@@ -543,6 +459,8 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
         default:
             DAWN_UNREACHABLE();
     }
+
+    wgslDesc.code = shader.c_str();
 
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
