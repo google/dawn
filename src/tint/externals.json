@@ -8,6 +8,11 @@
             "absl/**"
         ],
     },
+    "google-benchmark": {
+        "IncludePatterns": [
+            "benchmark/benchmark.h"
+        ]
+    },
     "metal": {
         "IncludePatterns": [
             "Metal/Metal.h"

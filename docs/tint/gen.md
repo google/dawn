@@ -31,19 +31,23 @@ There are 6 kinds of build target:
   production code.
 * `bench_cmd` are benchmark executables.
 
-The build generator uses a file naming convention to classify each source file to a single target kind:
+The build generator uses a file naming convention based on the file name before the extension to classify each source file to a single target kind.
 
-* Source files with a `_test` suffix before the file extension are classed as
-  `test` library targets. Example: `parser_test.cc`.
-* Source files with a `_bench` suffix before the file extension are classed as
-  `bench` library targets. Example: `writer_bench.cc`.
-* Source files with the name `main.cc` are classed as executable targets.
-  These typically exist under `src/tint/cmd`. Example: `cmd/tint/main.cc`.
-* Source files with the name `main_test.cc` are classed as test executable targets.
-  These typically exist under `src/tint/cmd`. Example: `cmd/test/main_test.cc`.
-* Source files with the name `main_bench.cc` are classed as benchmark executable targets.
-  These typically exist under `src/tint/cmd`. Example: `cmd/benchmark/main_bench.cc`.
-* All other files are considered `lib` targets. Example: `parser.cc`.
+* Source files named `test` or with a `_test` suffix are classed as `test` library targets. \
+  Example: `parser_test.cc`.
+* Source files named `bench` or with a `_bench` suffix are classed as `bench` library targets. \
+  Example: `writer_bench.cc`.
+* Source files with the name `main` are classed as executable targets.
+  These typically exist under `src/tint/cmd`. \
+  Example: `cmd/tint/main.cc`.
+* Source files with the name `main_test` are classed as test executable targets.
+  These typically exist under `src/tint/cmd`. \
+  Example: `cmd/test/main_test.cc`.
+* Source files with the name `main_bench` are classed as benchmark executable targets.
+  These typically exist under `src/tint/cmd`. \
+  Example: `cmd/benchmark/main_bench.cc`.
+* All other files are considered `lib` targets. \
+  Example: `parser.cc`.
 
 Each source directory can have at most one `lib`, `test`, `test_main`, `bench`, `bench_main` or `cmd`
 target.

@@ -25,7 +25,7 @@ import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-if (tint_build_unittests) {
+if (tint_build_unittests || tint_build_benchmarks) {
   import("//testing/test.gni")
 }
 if (tint_build_spv_writer) {

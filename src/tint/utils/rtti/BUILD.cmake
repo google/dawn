@@ -74,3 +74,7 @@ tint_target_add_dependencies(tint_utils_rtti_bench bench
   tint_utils_rtti
   tint_utils_traits
 )
+
+tint_target_add_external_dependencies(tint_utils_rtti_bench bench
+  "google-benchmark"
+)

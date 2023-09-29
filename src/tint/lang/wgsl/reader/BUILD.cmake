@@ -73,7 +73,7 @@ tint_add_target(tint_lang_wgsl_reader_bench bench
 
 tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_api_common
-  tint_cmd_bench
+  tint_cmd_bench_bench
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
@@ -96,4 +96,8 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl_reader_bench bench
+  "google-benchmark"
 )

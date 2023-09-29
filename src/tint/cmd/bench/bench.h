@@ -21,15 +21,11 @@
 
 #include "benchmark/benchmark.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/concat.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::bench {
-
-/// Error indicates an operation did not complete successfully.
-struct Error {
-    /// The error message.
-    std::string msg;
-};
 
 /// ProgramAndFile holds a Program and a Source::File.
 struct ProgramAndFile {
@@ -39,18 +35,23 @@ struct ProgramAndFile {
     std::unique_ptr<Source::File> file;
 };
 
+/// Initializes the internal state for benchmarking.
+/// Must be called once by the benchmark executable entry point.
+/// @returns true on success, false of failure
+bool Initialize();
+
 /// LoadInputFile attempts to load a benchmark input file with the given file
 /// name. Accepts files with the .wgsl and .spv extension.
 /// SPIR-V files are automatically converted to WGSL.
 /// @param name the file name
-/// @returns either the loaded Source::File or an Error
-std::variant<Source::File, Error> LoadInputFile(std::string name);
+/// @returns the loaded Source::File
+Result<Source::File> LoadInputFile(std::string name);
 
 /// LoadInputFile attempts to load a benchmark input program with the given file
 /// name.
 /// @param name the file name
-/// @returns either the loaded Program or an Error
-std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
+/// @returns the loaded Program
+Result<ProgramAndFile> LoadProgram(std::string name);
 
 // If TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER is defined, include that to
 // declare the TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS() and TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS()
@@ -64,7 +65,7 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 #endif
 
 /// Declares a benchmark with the given function and WGSL file name
-#define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME);
+#define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME)
 
 /// Declares a set of benchmarks for the given function using a list of WGSL files.
 #define TINT_BENCHMARK_WGSL_PROGRAMS(FUNC)                                   \
@@ -83,7 +84,8 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 /// Declares a set of benchmarks for the given function using a list of WGSL and SPIR-V files.
 #define TINT_BENCHMARK_PROGRAMS(FUNC)  \
     TINT_BENCHMARK_WGSL_PROGRAMS(FUNC) \
-    TINT_BENCHMARK_SPV_PROGRAMS(FUNC)
+    TINT_BENCHMARK_SPV_PROGRAMS(FUNC)  \
+    TINT_REQUIRE_SEMICOLON
 
 }  // namespace tint::bench
 

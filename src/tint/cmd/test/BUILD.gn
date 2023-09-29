@@ -25,11 +25,12 @@ import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-if (tint_build_unittests) {
+if (tint_build_unittests || tint_build_benchmarks) {
   import("//testing/test.gni")
 }
 if (tint_build_unittests) {
-  test("test") {
+  test("test_cmd") {
+    testonly = true
     output_name = "tint_unittests"
     sources = [ "main_test.cc" ]
     deps = [
@@ -116,7 +117,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/spirv/writer/raise:unittests",
       ]
     }
-    testonly = true
     configs += [ "${tint_src_dir}:tint_unittests_config" ]
 
     if (build_with_chromium) {

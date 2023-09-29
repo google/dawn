@@ -116,6 +116,7 @@ cc_library(
 )
 cc_library(
   name = "bench",
+  alwayslink = True,
   srcs = [
     "access_bench.cc",
     "address_space_bench.cc",
@@ -129,6 +130,7 @@ cc_library(
   deps = [
     "//src/tint/lang/core",
     "//src/tint/utils/traits",
+    "@benchmark",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

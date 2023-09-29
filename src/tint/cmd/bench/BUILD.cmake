@@ -22,37 +22,6 @@
 ################################################################################
 
 ################################################################################
-# Target:    tint_cmd_bench
-# Kind:      lib
-################################################################################
-tint_add_target(tint_cmd_bench lib
-  cmd/bench/bench.h
-  cmd/bench/benchmark.cc
-)
-
-tint_target_add_dependencies(tint_cmd_bench lib
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_id
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_result
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-  tint_utils_traits
-)
-
-################################################################################
 # Target:    tint_cmd_bench_bench_cmd
 # Kind:      bench_cmd
 ################################################################################
@@ -61,21 +30,16 @@ tint_add_target(tint_cmd_bench_bench_cmd bench_cmd
 )
 
 tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
-  tint_api_common
-  tint_cmd_bench
+  tint_cmd_bench_bench
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_core_bench
-  tint_lang_spirv_reader_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader
   tint_lang_wgsl_reader_bench
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_lang_wgsl_writer_bench
   tint_lang_wgsl_bench
   tint_utils_containers
@@ -85,13 +49,16 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_rtti_bench
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+  "google-benchmark"
 )
 
 if(TINT_BUILD_GLSL_WRITER)
@@ -112,12 +79,6 @@ if(TINT_BUILD_MSL_WRITER)
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if(TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
-    tint_lang_spirv_reader
-  )
-endif(TINT_BUILD_SPV_READER)
-
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_spirv_writer_bench
@@ -125,3 +86,50 @@ if(TINT_BUILD_SPV_WRITER)
 endif(TINT_BUILD_SPV_WRITER)
 
 tint_target_set_output_name(tint_cmd_bench_bench_cmd bench_cmd "tint_benchmark")
+
+################################################################################
+# Target:    tint_cmd_bench_bench
+# Kind:      bench
+################################################################################
+tint_add_target(tint_cmd_bench_bench bench
+  cmd/bench/bench.cc
+  cmd/bench/bench.h
+)
+
+tint_target_add_dependencies(tint_cmd_bench_bench bench
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_type
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_bench_bench bench
+  "google-benchmark"
+)
+
+if(TINT_BUILD_SPV_READER)
+  tint_target_add_dependencies(tint_cmd_bench_bench bench
+    tint_lang_spirv_reader
+  )
+endif(TINT_BUILD_SPV_READER)

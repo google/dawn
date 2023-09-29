@@ -86,6 +86,11 @@ declare_args() {
   if (!defined(tint_build_unittests)) {
     tint_build_unittests = true
   }
+
+  # Build benchmarks
+  if (!defined(tint_build_benchmarks)) {
+    tint_build_benchmarks = true
+  }
 }
 
 declare_args() {

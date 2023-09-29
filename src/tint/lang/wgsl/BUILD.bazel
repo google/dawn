@@ -102,6 +102,7 @@ cc_library(
 )
 cc_library(
   name = "bench",
+  alwayslink = True,
   srcs = [
     "diagnostic_rule_bench.cc",
     "diagnostic_severity_bench.cc",
@@ -118,6 +119,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "@benchmark",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

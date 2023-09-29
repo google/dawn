@@ -24,11 +24,11 @@ namespace {
 
 void GenerateGLSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
-    if (auto err = std::get_if<bench::Error>(&res)) {
-        state.SkipWithError(err->msg.c_str());
+    if (!res) {
+        state.SkipWithError(res.Failure().reason.str());
         return;
     }
-    auto& program = std::get<bench::ProgramAndFile>(res).program;
+    auto& program = res->program;
     std::vector<std::string> entry_points;
     for (auto& fn : program.AST().Functions()) {
         if (fn->IsEntryPoint()) {
@@ -38,9 +38,9 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
 
     for (auto _ : state) {
         for (auto& ep : entry_points) {
-            auto res = Generate(program, {}, ep);
-            if (!res) {
-                state.SkipWithError(res.Failure().reason.str());
+            auto gen_res = Generate(program, {}, ep);
+            if (!gen_res) {
+                state.SkipWithError(gen_res.Failure().reason.str());
             }
         }
     }

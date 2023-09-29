@@ -175,13 +175,6 @@ endfunction()
 
 function(tint_bench_compile_options TARGET)
   tint_core_compile_options(${TARGET})
-  set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
-  target_link_libraries(${TARGET} PRIVATE benchmark::benchmark)
-  if(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER)
-    target_compile_definitions(${TARGET} PRIVATE
-      "TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER=\"${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}\""
-    )
-  endif()
 endfunction()
 
 function(tint_fuzz_compile_options TARGET)
@@ -456,6 +449,14 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE
         glslang-default-resource-limits
       )
+    elseif(${DEPENDENCY} STREQUAL "google-benchmark")
+      set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
+      target_link_libraries(${TARGET} PRIVATE benchmark::benchmark)
+      if(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER)
+        target_compile_definitions(${TARGET} PRIVATE
+          "TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER=\"${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}\""
+        )
+      endif()
     elseif(${DEPENDENCY} STREQUAL "gtest")
       target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
       target_link_libraries(${TARGET} PRIVATE gmock)

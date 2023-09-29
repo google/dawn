@@ -61,6 +61,7 @@ cc_library(
 )
 cc_library(
   name = "bench",
+  alwayslink = True,
   srcs = [
     "switch_bench.cc",
   ],
@@ -70,6 +71,7 @@ cc_library(
     "//src/tint/utils/memory",
     "//src/tint/utils/rtti",
     "//src/tint/utils/traits",
+    "@benchmark",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

@@ -24,11 +24,11 @@ namespace {
 
 void GenerateMSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
-    if (auto err = std::get_if<bench::Error>(&res)) {
-        state.SkipWithError(err->msg.c_str());
+    if (!res) {
+        state.SkipWithError(res.Failure().reason.str());
         return;
     }
-    auto& program = std::get<bench::ProgramAndFile>(res).program;
+    auto& program = res->program;
 
     tint::msl::writer::Options gen_options = {};
     gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
@@ -61,9 +61,9 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
         }
     }
     for (auto _ : state) {
-        auto res = Generate(program, gen_options);
-        if (!res) {
-            state.SkipWithError(res.Failure().reason.str());
+        auto gen_res = Generate(program, gen_options);
+        if (!gen_res) {
+            state.SkipWithError(gen_res.Failure().reason.str());
         }
     }
 }

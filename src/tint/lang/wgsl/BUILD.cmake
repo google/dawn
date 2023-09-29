@@ -134,3 +134,7 @@ tint_target_add_dependencies(tint_lang_wgsl_bench bench
   tint_utils_text
   tint_utils_traits
 )
+
+tint_target_add_external_dependencies(tint_lang_wgsl_bench bench
+  "google-benchmark"
+)

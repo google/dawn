@@ -32,7 +32,7 @@ group("all") {
     "src/tint/api",
   ]
   if (tint_build_unittests) {
-    deps += [ "src/tint/cmd/test" ]
+    deps += [ "src/tint/cmd/test:test_cmd" ]
   }
   if (dawn_standalone) {
     deps += [

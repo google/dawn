@@ -14,7 +14,9 @@
 
 package build
 
-import "strings"
+import (
+	"strings"
+)
 
 // TargetKind is an enumerator of target kinds
 type TargetKind string
@@ -57,6 +59,9 @@ func (k TargetKind) IsBenchCmd() bool { return k == targetBenchCmd }
 // IsTestOrTestCmd returns true if the TargetKind is 'test' or 'test_cmd'
 func (k TargetKind) IsTestOrTestCmd() bool { return k.IsTest() || k.IsTestCmd() }
 
+// IsBenchOrBenchCmd returns true if the TargetKind is 'bench' or 'bench_cmd'
+func (k TargetKind) IsBenchOrBenchCmd() bool { return k.IsBench() || k.IsBenchCmd() }
+
 // All the target kinds
 var AllTargetKinds = []TargetKind{
 	targetLib,
@@ -69,21 +74,43 @@ var AllTargetKinds = []TargetKind{
 
 // targetKindFromFilename returns the target kind my pattern matching the filename
 func targetKindFromFilename(filename string) TargetKind {
+	noExt, ext := filename, ""
+	if i := strings.LastIndex(filename, "."); i >= 0 {
+		noExt = filename[:i]
+		ext = filename[i+1:]
+	}
+
+	if ext != "cc" && ext != "mm" && ext != "h" {
+		return targetInvalid
+	}
+
 	switch {
 	case filename == "main_test.cc":
 		return targetTestCmd
 	case filename == "main_bench.cc":
 		return targetBenchCmd
-	case strings.HasSuffix(filename, "_test.cc"), strings.HasSuffix(filename, "_test.h"):
+	case strings.HasSuffix(noExt, "_test"):
 		return targetTest
-	case strings.HasSuffix(filename, "_bench.cc"), strings.HasSuffix(filename, "_bench.h"):
+	case noExt == "bench" || strings.HasSuffix(noExt, "_bench"):
 		return targetBench
-	case filename == "main.cc":
+	case noExt == "main" || strings.HasSuffix(noExt, "_main"):
 		return targetCmd
-	case strings.HasSuffix(filename, ".cc"),
-		strings.HasSuffix(filename, ".mm"),
-		strings.HasSuffix(filename, ".h"):
+	default:
 		return targetLib
 	}
-	return targetInvalid
+}
+
+// isValidDependency returns true iff its valid for a target of kind 'from' to
+// depend on a target with kind 'to'.
+func isValidDependency(from, to TargetKind) bool {
+	switch from {
+	case targetLib, targetCmd:
+		return to == targetLib
+	case targetTest, targetTestCmd:
+		return to == targetLib || to == targetTest
+	case targetBench, targetBenchCmd:
+		return to == targetLib || to == targetBench
+	default:
+		return false
+	}
 }

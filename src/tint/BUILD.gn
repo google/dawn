@@ -194,6 +194,16 @@ if (tint_build_unittests) {
   }
 }
 
+if (tint_build_benchmarks) {
+  group("google_benchmark") {
+    testonly = true
+    public_deps = [
+      "//third_party/google_benchmark",
+      "//third_party/google_benchmark:benchmark_main",
+    ]
+  }
+}
+
 group("abseil") {
   # When build_with_chromium=true we need to include "//third_party/abseil-cpp:absl" while
   # it's beneficial to be more specific with standalone Dawn, especially when it comes to
@@ -215,6 +225,6 @@ source_set("winsock") {
 if (tint_build_unittests) {
   group("tint_unittests") {
     testonly = true
-    public_deps = [ "${tint_src_dir}/cmd/test" ]
+    public_deps = [ "${tint_src_dir}/cmd/test:test_cmd" ]
   }
 }

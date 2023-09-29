@@ -25,7 +25,7 @@ import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-if (tint_build_unittests) {
+if (tint_build_unittests || tint_build_benchmarks) {
   import("//testing/test.gni")
 }
 
@@ -51,6 +51,20 @@ if (tint_build_unittests) {
     ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/traits",
+    ]
+  }
+}
+if (tint_build_benchmarks) {
+  tint_unittests_source_set("bench") {
+    testonly = true
+    sources = [ "switch_bench.cc" ]
+    deps = [
+      "${tint_src_dir}:google_benchmark",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",

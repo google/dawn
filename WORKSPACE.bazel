@@ -28,6 +28,11 @@ local_repository(
 )
 
 local_repository(
+    name = "benchmark",
+    path = "third_party/google_benchmark/src",
+)
+
+local_repository(
     name = "gtest",
     path = "third_party/googletest",
 )

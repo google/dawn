@@ -12,134 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <filesystem>
-#include <iostream>
-#include <utility>
-#include <vector>
-
 #include "src/tint/cmd/bench/bench.h"
-#include "src/tint/lang/spirv/reader/reader.h"
-#include "src/tint/lang/wgsl/reader/reader.h"
-#include "src/tint/lang/wgsl/writer/writer.h"
-#include "src/tint/utils/text/string.h"
-#include "src/tint/utils/text/string_stream.h"
-
-namespace tint::bench {
-namespace {
-
-std::filesystem::path kInputFileDir;
-
-/// Copies the content from the file named `input_file` to `buffer`,
-/// assuming each element in the file is of type `T`.  If any error occurs,
-/// writes error messages to the standard error stream and returns false.
-/// Assumes the size of a `T` object is divisible by its required alignment.
-/// @returns true if we successfully read the file.
-template <typename T>
-std::variant<std::vector<T>, Error> ReadFile(const std::string& input_file) {
-    FILE* file = nullptr;
-#if defined(_MSC_VER)
-    fopen_s(&file, input_file.c_str(), "rb");
-#else
-    file = fopen(input_file.c_str(), "rb");
-#endif
-    if (!file) {
-        return Error{"Failed to open " + input_file};
-    }
-
-    fseek(file, 0, SEEK_END);
-    const auto file_size = static_cast<size_t>(ftell(file));
-    if (0 != (file_size % sizeof(T))) {
-        StringStream err;
-        err << "File " << input_file
-            << " does not contain an integral number of objects: " << file_size
-            << " bytes in the file, require " << sizeof(T) << " bytes per object";
-        fclose(file);
-        return Error{err.str()};
-    }
-    fseek(file, 0, SEEK_SET);
-
-    std::vector<T> buffer;
-    buffer.resize(file_size / sizeof(T));
-
-    size_t bytes_read = fread(buffer.data(), 1, file_size, file);
-    fclose(file);
-    if (bytes_read != file_size) {
-        return Error{"Failed to read " + input_file};
-    }
-
-    return buffer;
-}
-
-bool FindBenchmarkInputDir() {
-    // Attempt to find the benchmark input files by searching up from the current
-    // working directory.
-    auto path = std::filesystem::current_path();
-    while (std::filesystem::is_directory(path)) {
-        auto test = path / "test" / "tint" / "benchmark";
-        if (std::filesystem::is_directory(test)) {
-            kInputFileDir = test;
-            return true;
-        }
-        auto parent = path.parent_path();
-        if (path == parent) {
-            break;
-        }
-        path = parent;
-    }
-    return false;
-}
-
-}  // namespace
-
-std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
-    auto path = std::filesystem::path(name).is_absolute() ? name : (kInputFileDir / name).string();
-    if (tint::HasSuffix(path, ".wgsl")) {
-        auto data = ReadFile<uint8_t>(path);
-        if (auto* buf = std::get_if<std::vector<uint8_t>>(&data)) {
-            return tint::Source::File(path, std::string(buf->begin(), buf->end()));
-        }
-        return std::get<Error>(data);
-    }
-    if (tint::HasSuffix(path, ".spv")) {
-        auto spirv = ReadFile<uint32_t>(path);
-        if (auto* buf = std::get_if<std::vector<uint32_t>>(&spirv)) {
-            auto program = tint::spirv::reader::Read(*buf, {});
-            if (!program.IsValid()) {
-                return Error{program.Diagnostics().str()};
-            }
-            auto result = tint::wgsl::writer::Generate(program, {});
-            if (!result) {
-                return Error{result.Failure().reason.str()};
-            }
-            return tint::Source::File(path, result->wgsl);
-        }
-        return std::get<Error>(spirv);
-    }
-    return Error{"unsupported file extension: '" + name + "'"};
-}
-
-std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
-    auto res = bench::LoadInputFile(name);
-    if (auto err = std::get_if<bench::Error>(&res)) {
-        return *err;
-    }
-    auto file = std::make_unique<Source::File>(std::move(std::get<Source::File>(res)));
-    auto program = wgsl::reader::Parse(file.get());
-    if (program.Diagnostics().contains_errors()) {
-        return Error{program.Diagnostics().str()};
-    }
-    return ProgramAndFile{std::move(program), std::move(file)};
-}
-
-}  // namespace tint::bench
 
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
     if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
         return 1;
     }
-    if (!tint::bench::FindBenchmarkInputDir()) {
-        std::cerr << "failed to locate benchmark input files" << std::endl;
+    if (!tint::bench::Initialize()) {
         return 1;
     }
     benchmark::RunSpecifiedBenchmarks();

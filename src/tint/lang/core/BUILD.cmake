@@ -138,3 +138,7 @@ tint_target_add_dependencies(tint_lang_core_bench bench
   tint_lang_core
   tint_utils_traits
 )
+
+tint_target_add_external_dependencies(tint_lang_core_bench bench
+  "google-benchmark"
+)

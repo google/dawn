@@ -69,11 +69,12 @@ cc_library(
 )
 cc_library(
   name = "bench",
+  alwayslink = True,
   srcs = [
     "writer_bench.cc",
   ],
   deps = [
-    "//src/tint/cmd/bench",
+    "//src/tint/cmd/bench:bench",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",
@@ -95,6 +96,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "@benchmark",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
