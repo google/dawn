@@ -65,7 +65,6 @@ libtint_source_set("diagnostic") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "diagnostic_test.cc",
       "formatter_test.cc",

@@ -57,10 +57,8 @@ libtint_source_set("{{$.Directory.Name}}") {
 executable("{{$.Directory.Name}}") {
 {{- else if $.Kind.IsTest -}}
 tint_unittests_source_set("unittests") {
-  testonly = true
 {{- else if $.Kind.IsBench -}}
 tint_unittests_source_set("bench") {
-  testonly = true
 {{- else if $.Kind.IsTestCmd -}}
 test("test_cmd") {
   testonly = true

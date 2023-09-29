@@ -30,7 +30,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 }
 if (tint_build_benchmarks) {
   tint_unittests_source_set("bench") {
-    testonly = true
     sources = [
       "bench.cc",
       "bench.h",

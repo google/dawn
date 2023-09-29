@@ -72,7 +72,6 @@ if (tint_build_hlsl_writer) {
 if (tint_build_unittests) {
   if (tint_build_hlsl_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "array_accessor_test.cc",
         "assign_test.cc",

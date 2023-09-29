@@ -85,7 +85,6 @@ libtint_source_set("transform") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "add_empty_entry_point_test.cc",
       "bgra8unorm_polyfill_test.cc",

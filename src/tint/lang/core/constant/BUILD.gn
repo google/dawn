@@ -66,7 +66,6 @@ libtint_source_set("constant") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "composite_test.cc",
       "eval_binary_op_test.cc",

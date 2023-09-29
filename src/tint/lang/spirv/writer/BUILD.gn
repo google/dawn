@@ -84,7 +84,6 @@ if (tint_build_spv_writer) {
 if (tint_build_unittests) {
   if (tint_build_spv_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "access_test.cc",
         "atomic_builtin_test.cc",
@@ -156,7 +155,6 @@ if (tint_build_unittests) {
 if (tint_build_benchmarks) {
   if (tint_build_spv_writer) {
     tint_unittests_source_set("bench") {
-      testonly = true
       sources = [ "writer_bench.cc" ]
       deps = [
         "${tint_src_dir}:google_benchmark",

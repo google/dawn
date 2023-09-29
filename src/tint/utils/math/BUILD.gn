@@ -40,7 +40,6 @@ libtint_source_set("math") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "crc32_test.cc",
       "hash_test.cc",

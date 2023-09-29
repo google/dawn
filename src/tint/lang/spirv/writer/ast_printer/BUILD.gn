@@ -79,7 +79,6 @@ if (tint_build_spv_writer) {
 if (tint_build_unittests) {
   if (tint_build_spv_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "accessor_expression_test.cc",
         "assign_test.cc",

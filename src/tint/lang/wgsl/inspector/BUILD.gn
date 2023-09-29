@@ -66,7 +66,6 @@ libtint_source_set("inspector") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "inspector_builder_test.cc",
       "inspector_builder_test.h",

@@ -71,7 +71,6 @@ if (tint_build_glsl_writer) {
 if (tint_build_unittests) {
   if (tint_build_glsl_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "combine_samplers_test.cc",
         "pad_structs_test.cc",

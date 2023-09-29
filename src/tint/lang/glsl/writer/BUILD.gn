@@ -74,7 +74,6 @@ if (tint_build_glsl_writer) {
 if (tint_build_benchmarks) {
   if (tint_build_glsl_writer) {
     tint_unittests_source_set("bench") {
-      testonly = true
       sources = [ "writer_bench.cc" ]
       deps = [
         "${tint_src_dir}:google_benchmark",

@@ -63,7 +63,6 @@ libtint_source_set("program") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "clone_context_test.cc",
       "program_builder_test.cc",

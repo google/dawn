@@ -50,7 +50,6 @@ libtint_source_set("symbol") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "symbol_table_test.cc",
       "symbol_test.cc",

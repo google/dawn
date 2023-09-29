@@ -54,7 +54,6 @@ libtint_source_set("wgsl") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "diagnostic_rule_test.cc",
       "diagnostic_severity_test.cc",
@@ -101,7 +100,6 @@ if (tint_build_unittests) {
 }
 if (tint_build_benchmarks) {
   tint_unittests_source_set("bench") {
-    testonly = true
     sources = [
       "diagnostic_rule_bench.cc",
       "diagnostic_severity_bench.cc",

@@ -43,10 +43,15 @@ template("libtint_source_set") {
   }
 }
 
+###############################################################################
+# Unit tests
+###############################################################################
 template("tint_unittests_source_set") {
   if (tint_build_unittests) {
     source_set(target_name) {
       forward_variables_from(invoker, "*", [ "configs" ])
+
+      testonly = true
 
       if (defined(invoker.configs)) {
         configs += invoker.configs
@@ -58,8 +63,6 @@ template("tint_unittests_source_set") {
         configs -= [ "//build/config/compiler:chromium_code" ]
         configs += [ "//build/config/compiler:no_chromium_code" ]
       }
-
-      testonly = true
 
       if (!defined(invoker.deps)) {
         deps = []

@@ -65,7 +65,6 @@ libtint_source_set("reader") {
 }
 if (tint_build_benchmarks) {
   tint_unittests_source_set("bench") {
-    testonly = true
     sources = [ "reader_bench.cc" ]
     deps = [
       "${tint_src_dir}:google_benchmark",

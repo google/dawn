@@ -79,7 +79,6 @@ libtint_source_set("common") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [ "generate_external_texture_bindings_test.cc" ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",

@@ -124,7 +124,6 @@ libtint_source_set("transform") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "add_block_attribute_test.cc",
       "add_empty_entry_point_test.cc",

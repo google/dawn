@@ -64,7 +64,6 @@ libtint_source_set("program_to_ir") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "accessor_test.cc",
       "binary_test.cc",

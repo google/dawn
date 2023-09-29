@@ -72,7 +72,6 @@ libtint_source_set("resolver") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "address_space_layout_validation_test.cc",
       "address_space_validation_test.cc",

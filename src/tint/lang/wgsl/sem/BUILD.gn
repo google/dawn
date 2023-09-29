@@ -121,7 +121,6 @@ libtint_source_set("sem") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "builtin_fn_test.cc",
       "diagnostic_severity_test.cc",

@@ -43,7 +43,6 @@ libtint_source_set("macros") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "defer_test.cc",
       "scoped_assignment_test.cc",

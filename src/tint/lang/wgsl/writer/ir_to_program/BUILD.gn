@@ -67,7 +67,6 @@ libtint_source_set("ir_to_program") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "inlining_test.cc",
       "ir_to_program_test.cc",

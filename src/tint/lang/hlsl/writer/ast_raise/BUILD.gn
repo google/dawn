@@ -74,7 +74,6 @@ if (tint_build_hlsl_writer) {
 if (tint_build_unittests) {
   if (tint_build_hlsl_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "calculate_array_length_test.cc",
         "decompose_memory_access_test.cc",

@@ -70,7 +70,6 @@ libtint_source_set("writer") {
 }
 if (tint_build_benchmarks) {
   tint_unittests_source_set("bench") {
-    testonly = true
     sources = [ "writer_bench.cc" ]
     deps = [
       "${tint_src_dir}:google_benchmark",

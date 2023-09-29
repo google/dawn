@@ -211,7 +211,6 @@ libtint_source_set("ast") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "alias_test.cc",
       "assignment_statement_test.cc",

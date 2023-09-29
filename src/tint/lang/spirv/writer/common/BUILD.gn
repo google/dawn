@@ -66,7 +66,6 @@ if (tint_build_spv_writer) {
 if (tint_build_unittests) {
   if (tint_build_spv_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "binary_writer_test.cc",
         "helper_test.h",

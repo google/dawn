@@ -69,7 +69,6 @@ libtint_source_set("parser") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "additive_expression_test.cc",
       "argument_expression_list_test.cc",

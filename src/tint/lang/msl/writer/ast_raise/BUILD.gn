@@ -70,7 +70,6 @@ if (tint_build_msl_writer) {
 if (tint_build_unittests) {
   if (tint_build_msl_writer) {
     tint_unittests_source_set("unittests") {
-      testonly = true
       sources = [
         "module_scope_var_to_entry_point_param_test.cc",
         "packed_vec3_test.cc",

@@ -76,7 +76,6 @@ libtint_source_set("core") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "access_test.cc",
       "address_space_test.cc",
@@ -116,7 +115,6 @@ if (tint_build_unittests) {
 }
 if (tint_build_benchmarks) {
   tint_unittests_source_set("bench") {
-    testonly = true
     sources = [
       "access_bench.cc",
       "address_space_bench.cc",

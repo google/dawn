@@ -58,7 +58,6 @@ libtint_source_set("containers") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "bitset_test.cc",
       "enum_set_test.cc",

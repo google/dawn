@@ -119,7 +119,6 @@ libtint_source_set("type") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "array_test.cc",
       "atomic_test.cc",

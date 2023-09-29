@@ -40,7 +40,6 @@ libtint_source_set("memory") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    testonly = true
     sources = [
       "bitcast_test.cc",
       "block_allocator_test.cc",
