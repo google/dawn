@@ -102,13 +102,18 @@ bool Initialize() {
 Result<Source::File> LoadInputFile(std::string name) {
     auto path = std::filesystem::path(name).is_absolute() ? name : (kInputFileDir / name).string();
     if (tint::HasSuffix(path, ".wgsl")) {
+#if TINT_BUILD_WGSL_READER
         auto data = ReadFile<uint8_t>(path);
         if (!data) {
             return data.Failure();
         }
         return tint::Source::File(path, std::string(data->begin(), data->end()));
+#else
+        return Failure{"cannot load " + path + " file as TINT_BUILD_WGSL_READER is not enabled"};
+#endif
     }
     if (tint::HasSuffix(path, ".spv")) {
+#if TINT_BUILD_SPV_READER
         auto spirv = ReadFile<uint32_t>(path);
         if (spirv) {
             auto program = tint::spirv::reader::Read(spirv.Get(), {});
@@ -122,6 +127,9 @@ Result<Source::File> LoadInputFile(std::string name) {
             return tint::Source::File(path, result->wgsl);
         }
         return spirv.Failure();
+#else
+        return Failure{"cannot load " + path + " as TINT_BUILD_SPV_READER is not enabled"};
+#endif
     }
     return Failure{"unsupported file extension: '" + name + "'"};
 }
