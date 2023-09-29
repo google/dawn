@@ -162,7 +162,17 @@ async function runCtsTest(queryString, use_worker) {
 
   const loader = new DefaultTestFileLoader();
   const filterQuery = parseQuery(queries[0]);
-  const testcases = await loader.loadCases(filterQuery);
+  const testcases = Array.from(await loader.loadCases(filterQuery));
+
+  if (testcases.length === 0) {
+    sendMessageInfraFailure('Did not find matching test');
+    return;
+  }
+  if (testcases.length !== 1) {
+    sendMessageInfraFailure('Found more than 1 test for given query');
+    return;
+  }
+  const testcase = testcases[0];
 
   const { compatibility, powerPreference } = options;
   globalTestConfig.compatibility = compatibility;
@@ -178,27 +188,25 @@ async function runCtsTest(queryString, use_worker) {
 
   const log = new Logger();
 
-  for (const testcase of testcases) {
-    const name = testcase.query.toString();
+  const name = testcase.query.toString();
 
-    const wpt_fn = async () => {
-      sendMessageTestStarted();
-      const [rec, res] = log.record(name);
+  const wpt_fn = async () => {
+    sendMessageTestStarted();
+    const [rec, res] = log.record(name);
 
-      beginHeartbeatScope();
-      if (worker) {
-        await worker.run(rec, name, expectations);
-      } else {
-        await testcase.run(rec, expectations);
-      }
-      endHeartbeatScope();
+    beginHeartbeatScope();
+    if (worker) {
+      await worker.run(rec, name, expectations);
+    } else {
+      await testcase.run(rec, expectations);
+    }
+    endHeartbeatScope();
 
-      sendMessageTestStatus(res.status, res.timems);
-      sendMessageTestLog(res.logs);
-      sendMessageTestFinished();
-    };
-    await wpt_fn();
-  }
+    sendMessageTestStatus(res.status, res.timems);
+    sendMessageTestLog(res.logs);
+    sendMessageTestFinished();
+  };
+  await wpt_fn();
 }
 
 function splitLogsForPayload(fullLogs) {
@@ -253,6 +261,13 @@ function sendMessageTestLog(logs) {
 
 function sendMessageTestFinished() {
   socket.send('{"type":"TEST_FINISHED"}');
+}
+
+function sendMessageInfraFailure(message) {
+  socket.send(JSON.stringify({
+      'type': 'INFRA_FAILURE',
+      'message': message,
+  }));
 }
 
 window.runCtsTest = runCtsTest;
