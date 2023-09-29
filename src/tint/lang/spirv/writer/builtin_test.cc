@@ -687,38 +687,38 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_Vec2U32) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_65535 %uint_65535");
     EXPECT_INST("%13 = OpConstantComposite %v2uint %uint_16 %uint_16");
-    EXPECT_INST("%15 = OpConstantComposite %v2uint %uint_0 %uint_0");
-    EXPECT_INST("%19 = OpConstantComposite %v2uint %uint_16777215 %uint_16777215");
-    EXPECT_INST("%22 = OpConstantComposite %v2uint %uint_8 %uint_8");
-    EXPECT_INST("%26 = OpConstantComposite %v2uint %uint_268435455 %uint_268435455");
-    EXPECT_INST("%29 = OpConstantComposite %v2uint %uint_4 %uint_4");
-    EXPECT_INST("%33 = OpConstantComposite %v2uint %uint_1073741823 %uint_1073741823");
-    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_2 %uint_2");
-    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2147483647 %uint_2147483647");
-    EXPECT_INST("%43 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%15 = OpConstantNull %v2uint");
+    EXPECT_INST("%18 = OpConstantComposite %v2uint %uint_16777215 %uint_16777215");
+    EXPECT_INST("%21 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%25 = OpConstantComposite %v2uint %uint_268435455 %uint_268435455");
+    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_1073741823 %uint_1073741823");
+    EXPECT_INST("%35 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%39 = OpConstantComposite %v2uint %uint_2147483647 %uint_2147483647");
+    EXPECT_INST("%42 = OpConstantComposite %v2uint %uint_1 %uint_1");
     EXPECT_INST(R"(
           %7 = OpULessThanEqual %v2bool %arg %8
          %12 = OpSelect %v2uint %7 %13 %15
-         %17 = OpShiftLeftLogical %v2uint %arg %12
-         %18 = OpULessThanEqual %v2bool %17 %19
-         %21 = OpSelect %v2uint %18 %22 %15
-         %24 = OpShiftLeftLogical %v2uint %17 %21
-         %25 = OpULessThanEqual %v2bool %24 %26
-         %28 = OpSelect %v2uint %25 %29 %15
-         %31 = OpShiftLeftLogical %v2uint %24 %28
-         %32 = OpULessThanEqual %v2bool %31 %33
-         %35 = OpSelect %v2uint %32 %36 %15
-         %38 = OpShiftLeftLogical %v2uint %31 %35
-         %39 = OpULessThanEqual %v2bool %38 %40
-         %42 = OpSelect %v2uint %39 %43 %15
-         %45 = OpIEqual %v2bool %38 %15
-         %46 = OpSelect %v2uint %45 %43 %15
-         %47 = OpBitwiseOr %v2uint %42 %46
-         %48 = OpBitwiseOr %v2uint %35 %47
-         %49 = OpBitwiseOr %v2uint %28 %48
-         %50 = OpBitwiseOr %v2uint %21 %49
-         %51 = OpBitwiseOr %v2uint %12 %50
-     %result = OpIAdd %v2uint %51 %46
+         %16 = OpShiftLeftLogical %v2uint %arg %12
+         %17 = OpULessThanEqual %v2bool %16 %18
+         %20 = OpSelect %v2uint %17 %21 %15
+         %23 = OpShiftLeftLogical %v2uint %16 %20
+         %24 = OpULessThanEqual %v2bool %23 %25
+         %27 = OpSelect %v2uint %24 %28 %15
+         %30 = OpShiftLeftLogical %v2uint %23 %27
+         %31 = OpULessThanEqual %v2bool %30 %32
+         %34 = OpSelect %v2uint %31 %35 %15
+         %37 = OpShiftLeftLogical %v2uint %30 %34
+         %38 = OpULessThanEqual %v2bool %37 %39
+         %41 = OpSelect %v2uint %38 %42 %15
+         %44 = OpIEqual %v2bool %37 %15
+         %45 = OpSelect %v2uint %44 %42 %15
+         %46 = OpBitwiseOr %v2uint %41 %45
+         %47 = OpBitwiseOr %v2uint %34 %46
+         %48 = OpBitwiseOr %v2uint %27 %47
+         %49 = OpBitwiseOr %v2uint %20 %48
+         %50 = OpBitwiseOr %v2uint %12 %49
+     %result = OpIAdd %v2uint %50 %45
 )");
 }
 
@@ -818,42 +818,42 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_Vec2U32) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_65535 %uint_65535");
-    EXPECT_INST("%11 = OpConstantComposite %v2uint %uint_0 %uint_0");
-    EXPECT_INST("%16 = OpConstantComposite %v2uint %uint_16 %uint_16");
-    EXPECT_INST("%20 = OpConstantComposite %v2uint %uint_255 %uint_255");
-    EXPECT_INST("%24 = OpConstantComposite %v2uint %uint_8 %uint_8");
-    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_15 %uint_15");
-    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_4 %uint_4");
-    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_3 %uint_3");
-    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2 %uint_2");
-    EXPECT_INST("%44 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%11 = OpConstantNull %v2uint");
+    EXPECT_INST("%15 = OpConstantComposite %v2uint %uint_16 %uint_16");
+    EXPECT_INST("%19 = OpConstantComposite %v2uint %uint_255 %uint_255");
+    EXPECT_INST("%23 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%27 = OpConstantComposite %v2uint %uint_15 %uint_15");
+    EXPECT_INST("%31 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%35 = OpConstantComposite %v2uint %uint_3 %uint_3");
+    EXPECT_INST("%39 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%43 = OpConstantComposite %v2uint %uint_1 %uint_1");
     EXPECT_INST(R"(
           %7 = OpBitwiseAnd %v2uint %arg %8
          %10 = OpIEqual %v2bool %7 %11
-         %15 = OpSelect %v2uint %10 %16 %11
-         %18 = OpShiftRightLogical %v2uint %arg %15
-         %19 = OpBitwiseAnd %v2uint %18 %20
-         %22 = OpIEqual %v2bool %19 %11
-         %23 = OpSelect %v2uint %22 %24 %11
-         %26 = OpShiftRightLogical %v2uint %18 %23
-         %27 = OpBitwiseAnd %v2uint %26 %28
-         %30 = OpIEqual %v2bool %27 %11
-         %31 = OpSelect %v2uint %30 %32 %11
-         %34 = OpShiftRightLogical %v2uint %26 %31
-         %35 = OpBitwiseAnd %v2uint %34 %36
-         %38 = OpIEqual %v2bool %35 %11
-         %39 = OpSelect %v2uint %38 %40 %11
-         %42 = OpShiftRightLogical %v2uint %34 %39
-         %43 = OpBitwiseAnd %v2uint %42 %44
-         %46 = OpIEqual %v2bool %43 %11
-         %47 = OpSelect %v2uint %46 %44 %11
-         %48 = OpIEqual %v2bool %42 %11
-         %49 = OpSelect %v2uint %48 %44 %11
-         %50 = OpBitwiseOr %v2uint %39 %47
-         %51 = OpBitwiseOr %v2uint %31 %50
-         %52 = OpBitwiseOr %v2uint %23 %51
-         %53 = OpBitwiseOr %v2uint %15 %52
-     %result = OpIAdd %v2uint %53 %49
+         %14 = OpSelect %v2uint %10 %15 %11
+         %17 = OpShiftRightLogical %v2uint %arg %14
+         %18 = OpBitwiseAnd %v2uint %17 %19
+         %21 = OpIEqual %v2bool %18 %11
+         %22 = OpSelect %v2uint %21 %23 %11
+         %25 = OpShiftRightLogical %v2uint %17 %22
+         %26 = OpBitwiseAnd %v2uint %25 %27
+         %29 = OpIEqual %v2bool %26 %11
+         %30 = OpSelect %v2uint %29 %31 %11
+         %33 = OpShiftRightLogical %v2uint %25 %30
+         %34 = OpBitwiseAnd %v2uint %33 %35
+         %37 = OpIEqual %v2bool %34 %11
+         %38 = OpSelect %v2uint %37 %39 %11
+         %41 = OpShiftRightLogical %v2uint %33 %38
+         %42 = OpBitwiseAnd %v2uint %41 %43
+         %45 = OpIEqual %v2bool %42 %11
+         %46 = OpSelect %v2uint %45 %43 %11
+         %47 = OpIEqual %v2bool %41 %11
+         %48 = OpSelect %v2uint %47 %43 %11
+         %49 = OpBitwiseOr %v2uint %38 %46
+         %50 = OpBitwiseOr %v2uint %30 %49
+         %51 = OpBitwiseOr %v2uint %22 %50
+         %52 = OpBitwiseOr %v2uint %14 %51
+     %result = OpIAdd %v2uint %52 %48
 )");
 }
 
@@ -954,42 +954,42 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_Vec2U32) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_4294901760 %uint_4294901760");
-    EXPECT_INST("%11 = OpConstantComposite %v2uint %uint_0 %uint_0");
-    EXPECT_INST("%16 = OpConstantComposite %v2uint %uint_16 %uint_16");
-    EXPECT_INST("%20 = OpConstantComposite %v2uint %uint_65280 %uint_65280");
-    EXPECT_INST("%24 = OpConstantComposite %v2uint %uint_8 %uint_8");
-    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_240 %uint_240");
-    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_4 %uint_4");
-    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_12 %uint_12");
-    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2 %uint_2");
-    EXPECT_INST("%46 = OpConstantComposite %v2uint %uint_1 %uint_1");
-    EXPECT_INST("%54 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+    EXPECT_INST("%11 = OpConstantNull %v2uint");
+    EXPECT_INST("%15 = OpConstantComposite %v2uint %uint_16 %uint_16");
+    EXPECT_INST("%19 = OpConstantComposite %v2uint %uint_65280 %uint_65280");
+    EXPECT_INST("%23 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%27 = OpConstantComposite %v2uint %uint_240 %uint_240");
+    EXPECT_INST("%31 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%35 = OpConstantComposite %v2uint %uint_12 %uint_12");
+    EXPECT_INST("%39 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%45 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%53 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
     EXPECT_INST(R"(
           %7 = OpBitwiseAnd %v2uint %arg %8
          %10 = OpIEqual %v2bool %7 %11
-         %15 = OpSelect %v2uint %10 %11 %16
-         %18 = OpShiftRightLogical %v2uint %arg %15
-         %19 = OpBitwiseAnd %v2uint %18 %20
-         %22 = OpIEqual %v2bool %19 %11
-         %23 = OpSelect %v2uint %22 %11 %24
-         %26 = OpShiftRightLogical %v2uint %18 %23
-         %27 = OpBitwiseAnd %v2uint %26 %28
-         %30 = OpIEqual %v2bool %27 %11
-         %31 = OpSelect %v2uint %30 %11 %32
-         %34 = OpShiftRightLogical %v2uint %26 %31
-         %35 = OpBitwiseAnd %v2uint %34 %36
-         %38 = OpIEqual %v2bool %35 %11
-         %39 = OpSelect %v2uint %38 %11 %40
-         %42 = OpShiftRightLogical %v2uint %34 %39
-         %43 = OpBitwiseAnd %v2uint %42 %40
-         %44 = OpIEqual %v2bool %43 %11
-         %45 = OpSelect %v2uint %44 %11 %46
-         %48 = OpBitwiseOr %v2uint %39 %45
-         %49 = OpBitwiseOr %v2uint %31 %48
-         %50 = OpBitwiseOr %v2uint %23 %49
-         %51 = OpBitwiseOr %v2uint %15 %50
-         %52 = OpIEqual %v2bool %42 %11
-     %result = OpSelect %v2uint %52 %54 %51
+         %14 = OpSelect %v2uint %10 %11 %15
+         %17 = OpShiftRightLogical %v2uint %arg %14
+         %18 = OpBitwiseAnd %v2uint %17 %19
+         %21 = OpIEqual %v2bool %18 %11
+         %22 = OpSelect %v2uint %21 %11 %23
+         %25 = OpShiftRightLogical %v2uint %17 %22
+         %26 = OpBitwiseAnd %v2uint %25 %27
+         %29 = OpIEqual %v2bool %26 %11
+         %30 = OpSelect %v2uint %29 %11 %31
+         %33 = OpShiftRightLogical %v2uint %25 %30
+         %34 = OpBitwiseAnd %v2uint %33 %35
+         %37 = OpIEqual %v2bool %34 %11
+         %38 = OpSelect %v2uint %37 %11 %39
+         %41 = OpShiftRightLogical %v2uint %33 %38
+         %42 = OpBitwiseAnd %v2uint %41 %39
+         %43 = OpIEqual %v2bool %42 %11
+         %44 = OpSelect %v2uint %43 %11 %45
+         %47 = OpBitwiseOr %v2uint %38 %44
+         %48 = OpBitwiseOr %v2uint %30 %47
+         %49 = OpBitwiseOr %v2uint %22 %48
+         %50 = OpBitwiseOr %v2uint %14 %49
+         %51 = OpIEqual %v2bool %41 %11
+     %result = OpSelect %v2uint %51 %53 %50
 )");
 }
 
@@ -1087,42 +1087,42 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_Vec2U32) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_65535 %uint_65535");
-    EXPECT_INST("%11 = OpConstantComposite %v2uint %uint_0 %uint_0");
-    EXPECT_INST("%16 = OpConstantComposite %v2uint %uint_16 %uint_16");
-    EXPECT_INST("%20 = OpConstantComposite %v2uint %uint_255 %uint_255");
-    EXPECT_INST("%24 = OpConstantComposite %v2uint %uint_8 %uint_8");
-    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_15 %uint_15");
-    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_4 %uint_4");
-    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_3 %uint_3");
-    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2 %uint_2");
-    EXPECT_INST("%44 = OpConstantComposite %v2uint %uint_1 %uint_1");
-    EXPECT_INST("%54 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+    EXPECT_INST("%11 = OpConstantNull %v2uint");
+    EXPECT_INST("%15 = OpConstantComposite %v2uint %uint_16 %uint_16");
+    EXPECT_INST("%19 = OpConstantComposite %v2uint %uint_255 %uint_255");
+    EXPECT_INST("%23 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%27 = OpConstantComposite %v2uint %uint_15 %uint_15");
+    EXPECT_INST("%31 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%35 = OpConstantComposite %v2uint %uint_3 %uint_3");
+    EXPECT_INST("%39 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%43 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%53 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
     EXPECT_INST(R"(
           %7 = OpBitwiseAnd %v2uint %arg %8
          %10 = OpIEqual %v2bool %7 %11
-         %15 = OpSelect %v2uint %10 %16 %11
-         %18 = OpShiftRightLogical %v2uint %arg %15
-         %19 = OpBitwiseAnd %v2uint %18 %20
-         %22 = OpIEqual %v2bool %19 %11
-         %23 = OpSelect %v2uint %22 %24 %11
-         %26 = OpShiftRightLogical %v2uint %18 %23
-         %27 = OpBitwiseAnd %v2uint %26 %28
-         %30 = OpIEqual %v2bool %27 %11
-         %31 = OpSelect %v2uint %30 %32 %11
-         %34 = OpShiftRightLogical %v2uint %26 %31
-         %35 = OpBitwiseAnd %v2uint %34 %36
-         %38 = OpIEqual %v2bool %35 %11
-         %39 = OpSelect %v2uint %38 %40 %11
-         %42 = OpShiftRightLogical %v2uint %34 %39
-         %43 = OpBitwiseAnd %v2uint %42 %44
-         %46 = OpIEqual %v2bool %43 %11
-         %47 = OpSelect %v2uint %46 %44 %11
-         %48 = OpBitwiseOr %v2uint %39 %47
-         %49 = OpBitwiseOr %v2uint %31 %48
-         %50 = OpBitwiseOr %v2uint %23 %49
-         %51 = OpBitwiseOr %v2uint %15 %50
-         %52 = OpIEqual %v2bool %42 %11
-     %result = OpSelect %v2uint %52 %54 %51
+         %14 = OpSelect %v2uint %10 %15 %11
+         %17 = OpShiftRightLogical %v2uint %arg %14
+         %18 = OpBitwiseAnd %v2uint %17 %19
+         %21 = OpIEqual %v2bool %18 %11
+         %22 = OpSelect %v2uint %21 %23 %11
+         %25 = OpShiftRightLogical %v2uint %17 %22
+         %26 = OpBitwiseAnd %v2uint %25 %27
+         %29 = OpIEqual %v2bool %26 %11
+         %30 = OpSelect %v2uint %29 %31 %11
+         %33 = OpShiftRightLogical %v2uint %25 %30
+         %34 = OpBitwiseAnd %v2uint %33 %35
+         %37 = OpIEqual %v2bool %34 %11
+         %38 = OpSelect %v2uint %37 %39 %11
+         %41 = OpShiftRightLogical %v2uint %33 %38
+         %42 = OpBitwiseAnd %v2uint %41 %43
+         %45 = OpIEqual %v2bool %42 %11
+         %46 = OpSelect %v2uint %45 %43 %11
+         %47 = OpBitwiseOr %v2uint %38 %46
+         %48 = OpBitwiseOr %v2uint %30 %47
+         %49 = OpBitwiseOr %v2uint %22 %48
+         %50 = OpBitwiseOr %v2uint %14 %49
+         %51 = OpIEqual %v2bool %41 %11
+     %result = OpSelect %v2uint %51 %53 %50
 )");
 }
 
@@ -1151,11 +1151,10 @@ TEST_F(SpirvWriterTest, Builtin_Saturate_Vec4h) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%9 = OpConstantNull %v4half");
     EXPECT_INST(
-        "%9 = OpConstantComposite %v4half %half_0x0p_0 %half_0x0p_0 %half_0x0p_0 %half_0x0p_0");
-    EXPECT_INST(
-        "%11 = OpConstantComposite %v4half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0 %half_0x1p_0");
-    EXPECT_INST("%result = OpExtInst %v4half %8 NClamp %arg %9 %11");
+        "%10 = OpConstantComposite %v4half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0 %half_0x1p_0");
+    EXPECT_INST("%result = OpExtInst %v4half %8 NClamp %arg %9 %10");
 }
 
 // Tests for builtins with the signature: T = func(T, T)

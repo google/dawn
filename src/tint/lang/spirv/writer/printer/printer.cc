@@ -247,8 +247,14 @@ uint32_t Printer::Constant(core::ir::Constant* constant) {
 
 uint32_t Printer::Constant(const core::constant::Value* constant) {
     return constants_.GetOrCreate(constant, [&] {
-        auto id = module_.NextId();
         auto* ty = constant->Type();
+
+        // Use OpConstantNull for zero-valued composite constants.
+        if (!ty->Is<core::type::Scalar>() && constant->AllZero()) {
+            return ConstantNull(ty);
+        }
+
+        auto id = module_.NextId();
         Switch(
             ty,  //
             [&](const core::type::Bool*) {

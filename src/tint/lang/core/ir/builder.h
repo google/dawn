@@ -356,6 +356,11 @@ class Builder {
             ir.constant_values.Composite(ty, Vector{ConstantValue(std::forward<ARGS>(values))...}));
     }
 
+    /// Creates a new zero-value ir::Constant
+    /// @param ty the constant type
+    /// @returns the new constant
+    ir::Constant* Zero(const core::type::Type* ty) { return Constant(ir.constant_values.Zero(ty)); }
+
     /// @param in the input value. One of: nullptr, ir::Value*, ir::Instruction* or a numeric value.
     /// @returns an ir::Value* from the given argument.
     template <typename T>

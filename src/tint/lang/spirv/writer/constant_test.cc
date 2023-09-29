@@ -148,6 +148,12 @@ TEST_F(SpirvWriterTest, Constant_Array_Array_I32) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Constant_Array_LargeAllZero) {
+    writer_.Constant(b.Zero(ty.array<i32, 65535>()));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpConstantNull %_arr_int_uint_65535");
+}
+
 TEST_F(SpirvWriterTest, Constant_Struct) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},
