@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
 #define SRC_TINT_LANG_WGSL_HELPERS_APPLY_SUBSTITUTE_OVERRIDES_H_
 
+#include <optional>
+
 // Forward declarations
 namespace tint {
 class Program;
@@ -22,9 +24,12 @@ class Program;
 
 namespace tint::wgsl {
 
-/// @returns a new program with all overrides subsituted with const variables
-/// @param program the input program
-Program ApplySubstituteOverrides(Program&& program);
+/// If needed, returns a new program with all `override` declarations substituted with `const`
+/// variables.
+/// @param program A valid program
+/// @return A new program with `override`s substituted, or std::nullopt if the program has no
+/// `override`s.
+std::optional<Program> ApplySubstituteOverrides(const Program& program);
 
 }  // namespace tint::wgsl
 

@@ -68,9 +68,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;
     }
 
-    src = tint::wgsl::ApplySubstituteOverrides(std::move(src));
-    if (!src.IsValid()) {
-        return 0;
+    if (auto transformed = tint::wgsl::ApplySubstituteOverrides(src)) {
+        src = std::move(*transformed);
+        if (!src.IsValid()) {
+            return 0;
+        }
     }
 
     auto ir = tint::wgsl::reader::ProgramToIR(src);

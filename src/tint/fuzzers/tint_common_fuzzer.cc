@@ -237,9 +237,11 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     }
 
     // Run SubstituteOverride if required
-    program = tint::wgsl::ApplySubstituteOverrides(std::move(program));
-    if (!program.IsValid()) {
-        return 0;
+    if (auto transformed = tint::wgsl::ApplySubstituteOverrides(program)) {
+        program = std::move(*transformed);
+        if (!program.IsValid()) {
+            return 0;
+        }
     }
 
     // For the generates which use MultiPlanar, make sure the configuration options are provided so

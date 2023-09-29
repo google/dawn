@@ -24,7 +24,7 @@
 
 namespace tint::wgsl {
 
-Program ApplySubstituteOverrides(Program&& program) {
+std::optional<Program> ApplySubstituteOverrides(const Program& program) {
     ast::transform::SubstituteOverride::Config cfg;
     inspector::Inspector inspector(program);
     auto default_values = inspector.GetOverrideDefaultValues();
@@ -37,7 +37,7 @@ Program ApplySubstituteOverrides(Program&& program) {
     }
 
     if (default_values.empty()) {
-        return std::move(program);
+        return std::nullopt;
     }
 
     ast::transform::DataMap override_data;
