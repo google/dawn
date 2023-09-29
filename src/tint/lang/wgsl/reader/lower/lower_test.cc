@@ -64,5 +64,51 @@ TEST_F(Wgslreader_LowerTest, BuiltinConversion) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
+    auto* wgvar = b.Var("wgvar", ty.ptr<workgroup, i32>());
+    mod.root_block->Append(wgvar);
+
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] {  //
+        auto* result = b.InstructionResult(ty.i32());
+        b.Append(b.ir.instructions.Create<wgsl::ir::BuiltinCall>(
+            result, wgsl::BuiltinFn::kWorkgroupUniformLoad, Vector{wgvar->Result()}));
+        b.Return(f, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %wgvar:ptr<workgroup, i32, read_write> = var
+}
+
+%f = func():i32 -> %b2 {
+  %b2 = block {
+    %3:i32 = wgsl.workgroupUniformLoad %wgvar
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %wgvar:ptr<workgroup, i32, read_write> = var
+}
+
+%f = func():i32 -> %b2 {
+  %b2 = block {
+    %3:void = workgroupBarrier
+    %4:i32 = load %wgvar
+    %5:void = workgroupBarrier
+    ret %4
+  }
+}
+)";
+
+    Run(Lower);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader::lower

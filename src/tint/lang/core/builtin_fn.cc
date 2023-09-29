@@ -284,9 +284,6 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "workgroupBarrier") {
         return BuiltinFn::kWorkgroupBarrier;
     }
-    if (name == "workgroupUniformLoad") {
-        return BuiltinFn::kWorkgroupUniformLoad;
-    }
     if (name == "textureBarrier") {
         return BuiltinFn::kTextureBarrier;
     }
@@ -556,8 +553,6 @@ const char* str(BuiltinFn i) {
             return "unpack4x8unorm";
         case BuiltinFn::kWorkgroupBarrier:
             return "workgroupBarrier";
-        case BuiltinFn::kWorkgroupUniformLoad:
-            return "workgroupUniformLoad";
         case BuiltinFn::kTextureBarrier:
             return "textureBarrier";
         case BuiltinFn::kTextureDimensions:
@@ -702,7 +697,6 @@ bool HasSideEffects(BuiltinFn f) {
         case BuiltinFn::kAtomicSub:
         case BuiltinFn::kAtomicXor:
         case BuiltinFn::kTextureStore:
-        case BuiltinFn::kWorkgroupUniformLoad:
             return true;
         default:
             break;

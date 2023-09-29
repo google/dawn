@@ -659,7 +659,6 @@ match workgroup
 @must_use @const fn unpack4x8snorm(u32) -> vec4<f32>
 @must_use @const fn unpack4x8unorm(u32) -> vec4<f32>
 @stage("compute") fn workgroupBarrier()
-@must_use @stage("compute") fn workgroupUniformLoad<T>(ptr<workgroup, T, read_write>) -> T
 
 @stage("compute") fn textureBarrier()
 @must_use fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> u32

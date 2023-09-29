@@ -3912,20 +3912,19 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, ArrayLength) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_DirectVariableAccessTest_BuiltinFn, WorkgroupUniformLoad) {
+TEST_F(IR_DirectVariableAccessTest_BuiltinFn, AtomicLoad) {
     Var* W = nullptr;
     b.Append(b.ir.root_block,
              [&] {  //
-                 W = b.Var<workgroup, f32>("W");
+                 W = b.Var("W", ty.ptr<workgroup>(ty.atomic<i32>()));
              });
 
-    auto* fn_load = b.Function("load", ty.f32());
-    auto* fn_load_p = b.FunctionParam("p", ty.ptr<workgroup, f32>());
+    auto* fn_load = b.Function("load", ty.i32());
+    auto* fn_load_p = b.FunctionParam("p", ty.ptr<workgroup>(ty.atomic<i32>()));
     fn_load->SetParams({fn_load_p});
     b.Append(fn_load->Block(),
              [&] {  //
-                 b.Return(fn_load,
-                          b.Call(ty.f32(), core::BuiltinFn::kWorkgroupUniformLoad, fn_load_p));
+                 b.Return(fn_load, b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, fn_load_p));
              });
 
     auto* fn_f = b.Function("b", ty.void_());
@@ -3936,18 +3935,18 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, WorkgroupUniformLoad) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %W:ptr<workgroup, f32, read_write> = var
+  %W:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
-%load = func(%p:ptr<workgroup, f32, read_write>):f32 -> %b2 {
+%load = func(%p:ptr<workgroup, atomic<i32>, read_write>):i32 -> %b2 {
   %b2 = block {
-    %4:f32 = workgroupUniformLoad %p
+    %4:i32 = atomicLoad %p
     ret %4
   }
 }
 %b = func():void -> %b3 {
   %b3 = block {
-    %6:f32 = call %load, %W
+    %6:i32 = call %load, %W
     ret
   }
 }
@@ -3957,19 +3956,19 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, WorkgroupUniformLoad) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %W:ptr<workgroup, f32, read_write> = var
+  %W:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
-%load_W = func():f32 -> %b2 {
+%load_W = func():i32 -> %b2 {
   %b2 = block {
-    %3:ptr<workgroup, f32, read_write> = access %W
-    %4:f32 = workgroupUniformLoad %3
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %W
+    %4:i32 = atomicLoad %3
     ret %4
   }
 }
 %b = func():void -> %b3 {
   %b3 = block {
-    %6:f32 = call %load_W
+    %6:i32 = call %load_W
     ret
   }
 }

@@ -121,7 +121,6 @@ bool HasSideEffects(BuiltinFn f) {
         case BuiltinFn::kAtomicSub:
         case BuiltinFn::kAtomicXor:
         case BuiltinFn::kTextureStore:
-        case BuiltinFn::kWorkgroupUniformLoad:
             return true;
         default:
             break;

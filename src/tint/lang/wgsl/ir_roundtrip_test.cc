@@ -313,10 +313,10 @@ fn f(a : i32, b : i32) {
 
 TEST_F(IRToProgramRoundtripTest, CoreBuiltinCall_PtrArg) {
     Test(R"(
-var<workgroup> v : bool;
+@group(0) @binding(0) var<storage, read> v : array<u32>;
 
-fn foo() -> bool {
-  return workgroupUniformLoad(&(v));
+fn foo() -> u32 {
+  return arrayLength(&(v));
 }
 )");
 }

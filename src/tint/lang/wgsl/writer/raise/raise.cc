@@ -116,7 +116,6 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kUnpack4X8Snorm)
         CASE(kUnpack4X8Unorm)
         CASE(kWorkgroupBarrier)
-        CASE(kWorkgroupUniformLoad)
         CASE(kTextureBarrier)
         CASE(kTextureDimensions)
         CASE(kTextureGather)
