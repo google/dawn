@@ -38,6 +38,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/block_decorated_structs.h
   lang/core/ir/transform/builtin_polyfill.cc
   lang/core/ir/transform/builtin_polyfill.h
+  lang/core/ir/transform/conversion_polyfill.cc
+  lang/core/ir/transform/conversion_polyfill.h
   lang/core/ir/transform/demote_to_helper.cc
   lang/core/ir/transform/demote_to_helper.h
   lang/core/ir/transform/direct_variable_access.cc
@@ -90,6 +92,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/binding_remapper_test.cc
   lang/core/ir/transform/block_decorated_structs_test.cc
   lang/core/ir/transform/builtin_polyfill_test.cc
+  lang/core/ir/transform/conversion_polyfill_test.cc
   lang/core/ir/transform/demote_to_helper_test.cc
   lang/core/ir/transform/direct_variable_access_test.cc
   lang/core/ir/transform/helper_test.h

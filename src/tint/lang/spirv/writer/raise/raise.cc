@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
+#include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -66,6 +67,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core_polyfills.saturate = true;
     core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
     RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+
+    core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
+    conversion_polyfills.ftoi = true;
+    RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config;

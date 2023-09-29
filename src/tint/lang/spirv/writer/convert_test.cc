@@ -80,14 +80,12 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              ConvertCase{kBool, kF16, "OpSelect", "half"},
 
                              // To i32.
-                             ConvertCase{kF32, kI32, "OpConvertFToS", "int"},
-                             ConvertCase{kF16, kI32, "OpConvertFToS", "int"},
+                             // Note: ftoi cases are polyfilled and tested separately.
                              ConvertCase{kU32, kI32, "OpBitcast", "int"},
                              ConvertCase{kBool, kI32, "OpSelect", "int"},
 
                              // To u32.
-                             ConvertCase{kF32, kU32, "OpConvertFToU", "uint"},
-                             ConvertCase{kF16, kU32, "OpConvertFToU", "uint"},
+                             // Note: ftoi cases are polyfilled and tested separately.
                              ConvertCase{kI32, kU32, "OpBitcast", "uint"},
                              ConvertCase{kBool, kU32, "OpSelect", "uint"},
 
@@ -137,6 +135,310 @@ TEST_F(SpirvWriterTest, Convert_Mat4x2_F32_to_F16) {
          %17 = OpCompositeExtract %v2float %arg 3
          %18 = OpFConvert %v2half %17
      %result = OpCompositeConstruct %mat4v2half %12 %14 %16 %18
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F32_to_I32) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({b.FunctionParam("arg", ty.f32())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.i32(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Function foo
+        %foo = OpFunction %int None %5
+        %arg = OpFunctionParameter %float
+          %6 = OpLabel
+     %result = OpFunctionCall %int %tint_f32_to_i32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_f32_to_i32
+%tint_f32_to_i32 = OpFunction %int None %5
+      %value = OpFunctionParameter %float
+         %10 = OpLabel
+         %11 = OpConvertFToS %int %value
+         %12 = OpFOrdGreaterThan %bool %value %float_n2_14748365e_09
+         %15 = OpSelect %int %12 %11 %int_n2147483648
+         %17 = OpFOrdLessThan %bool %value %float_2_14748352e_09
+         %19 = OpSelect %int %17 %15 %int_2147483647
+               OpReturnValue %19
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F32_to_U32) {
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({b.FunctionParam("arg", ty.f32())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.u32(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Function foo
+        %foo = OpFunction %uint None %5
+        %arg = OpFunctionParameter %float
+          %6 = OpLabel
+     %result = OpFunctionCall %uint %tint_f32_to_u32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_f32_to_u32
+%tint_f32_to_u32 = OpFunction %uint None %5
+      %value = OpFunctionParameter %float
+         %10 = OpLabel
+         %11 = OpConvertFToU %uint %value
+         %12 = OpFOrdGreaterThan %bool %value %float_0
+         %15 = OpSelect %uint %12 %11 %uint_0
+         %17 = OpFOrdLessThan %bool %value %float_4_29496704e_09
+         %19 = OpSelect %uint %17 %15 %uint_4294967295
+               OpReturnValue %19
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F16_to_I32) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({b.FunctionParam("arg", ty.f16())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.i32(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Function foo
+        %foo = OpFunction %int None %5
+        %arg = OpFunctionParameter %half
+          %6 = OpLabel
+     %result = OpFunctionCall %int %tint_f16_to_i32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_f16_to_i32
+%tint_f16_to_i32 = OpFunction %int None %5
+      %value = OpFunctionParameter %half
+         %10 = OpLabel
+         %11 = OpConvertFToS %int %value
+         %12 = OpFOrdGreaterThan %bool %value %half_n0x1_ffcp_15
+         %15 = OpSelect %int %12 %11 %int_n2147483648
+         %17 = OpFOrdLessThan %bool %value %half_0x1_ffcp_15
+         %19 = OpSelect %int %17 %15 %int_2147483647
+               OpReturnValue %19
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F16_to_U32) {
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({b.FunctionParam("arg", ty.f16())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.u32(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Function foo
+        %foo = OpFunction %uint None %5
+        %arg = OpFunctionParameter %half
+          %6 = OpLabel
+     %result = OpFunctionCall %uint %tint_f16_to_u32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_f16_to_u32
+%tint_f16_to_u32 = OpFunction %uint None %5
+      %value = OpFunctionParameter %half
+         %10 = OpLabel
+         %11 = OpConvertFToU %uint %value
+         %12 = OpFOrdGreaterThan %bool %value %half_0x0p_0
+         %15 = OpSelect %uint %12 %11 %uint_0
+         %17 = OpFOrdLessThan %bool %value %half_0x1_ffcp_15
+         %19 = OpSelect %uint %17 %15 %uint_4294967295
+               OpReturnValue %19
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F32_to_I32_Vec2) {
+    auto* func = b.Function("foo", ty.vec2<i32>());
+    func->SetParams({b.FunctionParam("arg", ty.vec2<f32>())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.vec2<i32>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+%float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
+         %15 = OpConstantComposite %v2float %float_n2_14748365e_09 %float_n2_14748365e_09
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%int_n2147483648 = OpConstant %int -2147483648
+         %20 = OpConstantComposite %v2int %int_n2147483648 %int_n2147483648
+%float_2_14748352e_09 = OpConstant %float 2.14748352e+09
+         %23 = OpConstantComposite %v2float %float_2_14748352e_09 %float_2_14748352e_09
+%int_2147483647 = OpConstant %int 2147483647
+         %26 = OpConstantComposite %v2int %int_2147483647 %int_2147483647
+       %void = OpTypeVoid
+         %30 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %v2int None %7
+        %arg = OpFunctionParameter %v2float
+          %8 = OpLabel
+     %result = OpFunctionCall %v2int %tint_v2f32_to_v2i32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_v2f32_to_v2i32
+%tint_v2f32_to_v2i32 = OpFunction %v2int None %7
+      %value = OpFunctionParameter %v2float
+         %12 = OpLabel
+         %13 = OpConvertFToS %v2int %value
+         %14 = OpFOrdGreaterThan %v2bool %value %15
+         %19 = OpSelect %v2int %14 %13 %20
+         %22 = OpFOrdLessThan %v2bool %value %23
+         %25 = OpSelect %v2int %22 %19 %26
+               OpReturnValue %25
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F32_to_U32_Vec3) {
+    auto* func = b.Function("foo", ty.vec3<u32>());
+    func->SetParams({b.FunctionParam("arg", ty.vec3<f32>())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.vec3<u32>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+%float_4_29496704e_09 = OpConstant %float 4.29496704e+09
+         %21 = OpConstantComposite %v3float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
+%uint_4294967295 = OpConstant %uint 4294967295
+         %24 = OpConstantComposite %v3uint %uint_4294967295 %uint_4294967295 %uint_4294967295
+       %void = OpTypeVoid
+         %28 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %v3uint None %7
+        %arg = OpFunctionParameter %v3float
+          %8 = OpLabel
+     %result = OpFunctionCall %v3uint %tint_v3f32_to_v3u32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_v3f32_to_v3u32
+%tint_v3f32_to_v3u32 = OpFunction %v3uint None %7
+      %value = OpFunctionParameter %v3float
+         %12 = OpLabel
+         %13 = OpConvertFToU %v3uint %value
+         %14 = OpFOrdGreaterThan %v3bool %value %15
+         %18 = OpSelect %v3uint %14 %13 %19
+         %20 = OpFOrdLessThan %v3bool %value %21
+         %23 = OpSelect %v3uint %20 %18 %24
+               OpReturnValue %23
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F16_to_I32_Vec2) {
+    auto* func = b.Function("foo", ty.vec2<i32>());
+    func->SetParams({b.FunctionParam("arg", ty.vec2<f16>())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.vec2<i32>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+%half_n0x1_ffcp_15 = OpConstant %half -0x1.ffcp+15
+         %15 = OpConstantComposite %v2half %half_n0x1_ffcp_15 %half_n0x1_ffcp_15
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%int_n2147483648 = OpConstant %int -2147483648
+         %20 = OpConstantComposite %v2int %int_n2147483648 %int_n2147483648
+%half_0x1_ffcp_15 = OpConstant %half 0x1.ffcp+15
+         %23 = OpConstantComposite %v2half %half_0x1_ffcp_15 %half_0x1_ffcp_15
+%int_2147483647 = OpConstant %int 2147483647
+         %26 = OpConstantComposite %v2int %int_2147483647 %int_2147483647
+       %void = OpTypeVoid
+         %30 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %v2int None %7
+        %arg = OpFunctionParameter %v2half
+          %8 = OpLabel
+     %result = OpFunctionCall %v2int %tint_v2f16_to_v2i32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_v2f16_to_v2i32
+%tint_v2f16_to_v2i32 = OpFunction %v2int None %7
+      %value = OpFunctionParameter %v2half
+         %12 = OpLabel
+         %13 = OpConvertFToS %v2int %value
+         %14 = OpFOrdGreaterThan %v2bool %value %15
+         %19 = OpSelect %v2int %14 %13 %20
+         %22 = OpFOrdLessThan %v2bool %value %23
+         %25 = OpSelect %v2int %22 %19 %26
+               OpReturnValue %25
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Convert_F16_to_U32_Vec4) {
+    auto* func = b.Function("foo", ty.vec4<u32>());
+    func->SetParams({b.FunctionParam("arg", ty.vec4<f16>())});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Convert(ty.vec4<u32>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+%half_0x1_ffcp_15 = OpConstant %half 0x1.ffcp+15
+         %21 = OpConstantComposite %v4half %half_0x1_ffcp_15 %half_0x1_ffcp_15 %half_0x1_ffcp_15 %half_0x1_ffcp_15
+%uint_4294967295 = OpConstant %uint 4294967295
+         %24 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
+       %void = OpTypeVoid
+         %28 = OpTypeFunction %void
+
+               ; Function foo
+        %foo = OpFunction %v4uint None %7
+        %arg = OpFunctionParameter %v4half
+          %8 = OpLabel
+     %result = OpFunctionCall %v4uint %tint_v4f16_to_v4u32 %arg
+               OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function tint_v4f16_to_v4u32
+%tint_v4f16_to_v4u32 = OpFunction %v4uint None %7
+      %value = OpFunctionParameter %v4half
+         %12 = OpLabel
+         %13 = OpConvertFToU %v4uint %value
+         %14 = OpFOrdGreaterThan %v4bool %value %15
+         %18 = OpSelect %v4uint %14 %13 %19
+         %20 = OpFOrdLessThan %v4bool %value %21
+         %23 = OpSelect %v4uint %20 %18 %24
+               OpReturnValue %23
+               OpFunctionEnd
 )");
 }
 
