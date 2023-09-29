@@ -146,6 +146,7 @@ func run() error {
 				"exclude": [
 					"**.expected.wgsl",
 					"**.expected.spvasm",
+					"**.expected.ir.spvasm",
 					"**.expected.msl",
 					"**.expected.fxc.hlsl",
 					"**.expected.dxc.hlsl",

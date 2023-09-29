@@ -202,6 +202,11 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         ${SRC_DIR}/test/tint/test-all.sh "${BUILD_DIR}/tint" --verbose
     hide_cmds
 
+    status "Testing test/tint/test-all.sh for SPIR-V IR backend"
+    show_cmds
+        ${SRC_DIR}/test/tint/test-all.sh "${BUILD_DIR}/tint" --verbose --format spvasm --use-ir
+    hide_cmds
+
     status "Checking _other.cc files also build"
     show_cmds
         cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS} -DTINT_BUILD_AS_OTHER_OS=ON
