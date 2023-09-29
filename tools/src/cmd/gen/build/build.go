@@ -307,6 +307,8 @@ func applyDirectoryConfigs(p *Project) error {
 			{cfg.TestCmd, targetTestCmd},
 			{cfg.Bench, targetBench},
 			{cfg.BenchCmd, targetBenchCmd},
+			{cfg.Fuzz, targetFuzz},
+			{cfg.FuzzCmd, targetFuzzCmd},
 			{cfg.Cmd, targetCmd},
 		} {
 			if tc.cfg == nil {

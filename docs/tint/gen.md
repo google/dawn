@@ -19,7 +19,7 @@ The bulk of the build generator logic is in the file: [`tools/src/cmd/gen/build/
 
 ### Targets
 
-There are 6 kinds of build target:
+There are 8 kinds of build target:
 
 * `cmd` targets are executables.
 * `lib` targets are libraries used in production code, and can also be used as
@@ -30,6 +30,9 @@ There are 6 kinds of build target:
 * `bench` targets are libraries used by Tint benchmarks. Must not be used by
   production code.
 * `bench_cmd` are benchmark executables.
+* `fuzz` targets are libraries used by Tint fuzzers. Must not be used by
+  production code.
+* `fuzz_cmd` are fuzzer executables.
 
 The build generator uses a file naming convention based on the file name before the extension to classify each source file to a single target kind.
 
@@ -37,14 +40,19 @@ The build generator uses a file naming convention based on the file name before 
   Example: `parser_test.cc`.
 * Source files named `bench` or with a `_bench` suffix are classed as `bench` library targets. \
   Example: `writer_bench.cc`.
+* Source files named `fuzz` or with a `_fuzz` suffix are classed as `fuzz` library targets. \
+  Example: `writer_fuzz.cc`.
 * Source files with the name `main` are classed as executable targets.
   These typically exist under `src/tint/cmd`. \
   Example: `cmd/tint/main.cc`.
 * Source files with the name `main_test` are classed as test executable targets.
-  These typically exist under `src/tint/cmd`. \
+  These typically exist under `src/tint/cmd/test`. \
   Example: `cmd/test/main_test.cc`.
 * Source files with the name `main_bench` are classed as benchmark executable targets.
-  These typically exist under `src/tint/cmd`. \
+  These typically exist under `src/tint/cmd/bench`. \
+  Example: `cmd/benchmark/main_bench.cc`.
+* Source files with the name `main_fuzz` are classed as fuzzer executable targets.
+  These typically exist under `src/tint/cmd/fuzz`. \
   Example: `cmd/benchmark/main_bench.cc`.
 * All other files are considered `lib` targets. \
   Example: `parser.cc`.

@@ -72,3 +72,43 @@ template("tint_unittests_source_set") {
     }
   }
 }
+
+###############################################################################
+# Fuzzers
+###############################################################################
+import("//testing/libfuzzer/fuzzer_test.gni")
+template("tint_fuzz_source_set") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+
+    testonly = true
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    configs += [ "${tint_src_dir}:tint_common_config" ]
+
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
+
+    if (!defined(invoker.public_configs)) {
+      public_configs = []
+    }
+
+    public_configs += [ "${tint_src_dir}:tint_public_config" ]
+  }
+}
+
+template("tint_fuzzer_test") {
+  fuzzer_test(target_name) {
+    forward_variables_from(invoker, "*")
+    exclude_main = false
+  }
+}

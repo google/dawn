@@ -41,6 +41,10 @@ type DirectoryConfig struct {
 	Bench *TargetConfig
 	// Configuration for the 'bench_cmd' target
 	BenchCmd *TargetConfig `json:"bench_cmd"`
+	// Configuration for the 'fuzz' target
+	Fuzz *TargetConfig
+	// Configuration for the 'fuzz_cmd' target
+	FuzzCmd *TargetConfig `json:"fuzz_cmd"`
 	// Configuration for the 'cmd' target
 	Cmd *TargetConfig
 }

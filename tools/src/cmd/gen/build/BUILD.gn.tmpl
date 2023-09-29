@@ -19,6 +19,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench_cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz_cmd")}}
 
 
 {{- /*
@@ -59,12 +61,16 @@ executable("{{$.Directory.Name}}") {
 tint_unittests_source_set("unittests") {
 {{- else if $.Kind.IsBench -}}
 tint_unittests_source_set("bench") {
+{{- else if $.Kind.IsFuzz -}}
+tint_fuzz_source_set("fuzz") {
 {{- else if $.Kind.IsTestCmd -}}
 test("test_cmd") {
   testonly = true
 {{- else if $.Kind.IsBenchCmd -}}
 test("bench_cmd") {
   testonly = true
+{{- else if $.Kind.IsFuzzCmd -}}
+tint_fuzzer_test("{{$.Directory.Name}}") {
 {{- else }}{{Error $.Kind}}
 {{- end  }}
 {{- if $.OutputName }}

@@ -3,8 +3,10 @@
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench_cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz")}}
 
 
 {{- /*
