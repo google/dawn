@@ -65,6 +65,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
   import("//third_party/protobuf/proto_library.gni")
   import("${dawn_root}/generator/dawn_generator.gni")
 
+  # Generate the fuzzer's serializer in `.cpp`
   dawn_json_lpm_generator("dawn_lpmfuzz_cpp") {
     target = "dawn_lpmfuzz_cpp"
     outputs = [
@@ -83,7 +84,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
     ]
   }
 
-  # Copy handwritten `.proto` files to build directory
+  # Copy handwritten `.proto` file to build directory
   copy("copy_dawn_custom_lpm") {
     sources = [ "${dawn_root}/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
     outputs = [ "$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
@@ -105,11 +106,11 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
     ]
   }
 
-  fuzzer_test("dawn_lpm_fuzzer_vulkan_backend") {
-    sources = get_target_outputs(":dawn_lpmfuzz_cpp")
-    sources += get_target_outputs(":dawn_lpm_proto_gen")
-
-    sources += [
+  # Compile dawnlpm fuzzer with extensive tint coverage
+  dawn_lpm_template("dawn_lpm_fuzzer_vulkan_backend_with_tint") {
+    defines = [ "DAWNLPM_FUZZ_TINT=1" ]
+    dawn_lpm_sources = get_target_outputs(":dawn_lpmfuzz_cpp")
+    dawn_lpm_sources += [
       "lpmfuzz/DawnLPMFuzzer.cpp",
       "lpmfuzz/DawnLPMFuzzer.h",
       "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
@@ -118,17 +119,20 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
       "lpmfuzz/DawnLPMSerializerCustom.cpp",
       "lpmfuzz/DawnLPMSerializerCustom.h",
     ]
+  }
 
-    deps = [
-      ":dawn_lpm_proto",
-      ":dawn_lpmfuzz_cpp",
-      "${dawn_root}/src/dawn:cpp",
-      "${dawn_root}/src/dawn:proc",
-      "${dawn_root}/src/dawn/common",
-      "${dawn_root}/src/dawn/native:static",
-      "${dawn_root}/src/dawn/utils",
-      "${dawn_root}/src/dawn/wire:static",
-      "//third_party/libprotobuf-mutator",
+  # Compile dawnlpm api fuzzer
+  dawn_lpm_template("dawn_lpm_fuzzer_vulkan_backend") {
+    defines = [ "DAWNLPM_FUZZ_TINT=0" ]
+    dawn_lpm_sources = get_target_outputs(":dawn_lpmfuzz_cpp")
+    dawn_lpm_sources += [
+      "lpmfuzz/DawnLPMFuzzer.cpp",
+      "lpmfuzz/DawnLPMFuzzer.h",
+      "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
+      "lpmfuzz/DawnLPMObjectStore.cpp",
+      "lpmfuzz/DawnLPMObjectStore.h",
+      "lpmfuzz/DawnLPMSerializerCustom.cpp",
+      "lpmfuzz/DawnLPMSerializerCustom.h",
     ]
   }
 }
