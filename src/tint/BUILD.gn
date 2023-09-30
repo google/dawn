@@ -197,10 +197,7 @@ if (tint_build_unittests) {
 if (tint_build_benchmarks) {
   group("google_benchmark") {
     testonly = true
-    public_deps = [
-      "//third_party/google_benchmark",
-      "//third_party/google_benchmark:benchmark_main",
-    ]
+    public_deps = [ "//third_party/google_benchmark" ]
   }
 }
 

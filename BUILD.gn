@@ -34,6 +34,9 @@ group("all") {
   if (tint_build_unittests) {
     deps += [ "src/tint/cmd/test:test_cmd" ]
   }
+  if (tint_build_benchmarks) {
+    deps += [ "src/tint/cmd/bench:bench_cmd" ]
+  }
   if (dawn_standalone) {
     deps += [
       "src/dawn/samples",
