@@ -40,7 +40,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     StorageTexture(TextureDimension dim,
                    core::TexelFormat format,
                    core::Access access,
-                   Type* subtype);
+                   const Type* subtype);
 
     /// Destructor
     ~StorageTexture() override;
@@ -50,7 +50,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the storage subtype
-    Type* type() const { return subtype_; }
+    const Type* type() const { return subtype_; }
 
     /// @returns the texel format
     core::TexelFormat texel_format() const { return texel_format_; }
@@ -74,7 +74,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
   private:
     core::TexelFormat const texel_format_;
     core::Access const access_;
-    Type* const subtype_;
+    const Type* const subtype_;
 };
 
 }  // namespace tint::core::type

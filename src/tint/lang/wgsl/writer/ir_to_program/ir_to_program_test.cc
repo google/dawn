@@ -16,6 +16,8 @@
 #include <string>
 
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program_test.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
@@ -3191,6 +3193,143 @@ fn y() {
   var v : mat3x3<f32>;
   let l = &(v[1i]);
   x(l);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// chromium_experimental_read_write_storage_texture
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalReadWriteStorageTexture_TextureBarrier) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
+            b.InstructionResult(ty.void_()), wgsl::BuiltinFn::kTextureBarrier, Empty));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_read_write_storage_texture;
+
+fn f() {
+  textureBarrier();
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalReadWriteStorageTexture_ReadOnlyStorageTexture) {
+    auto* T = b.Var("T", ty.ptr<handle>(ty.Get<core::type::StorageTexture>(
+                             core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
+                             core::Access::kRead, ty.f32())));
+    T->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(T);
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var T : texture_storage_2d<r32float, read>;
+)");
+}
+
+TEST_F(IRToProgramTest,
+       Enable_ChromiumExperimentalReadWriteStorageTexture_ReadWriteOnlyStorageTexture) {
+    auto* T = b.Var("T", ty.ptr<handle>(ty.Get<core::type::StorageTexture>(
+                             core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
+                             core::Access::kReadWrite, ty.f32())));
+    T->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(T);
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var T : texture_storage_2d<r32float, read_write>;
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// chromium_experimental_subgroups
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_SubgroupBallot) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
+            b.InstructionResult(ty.vec4<u32>()), wgsl::BuiltinFn::kSubgroupBallot, Empty));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_subgroups;
+
+fn f() {
+  _ = subgroupBallot();
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_SubgroupBroadcast) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* one = b.Value(1_u);
+        b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
+            b.InstructionResult(ty.u32()), wgsl::BuiltinFn::kSubgroupBroadcast, Vector{one, one}));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_subgroups;
+
+fn f() {
+  _ = subgroupBroadcast(1u, 1u);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_StructBuiltin_SubgroupInvocationId) {
+    core::type::Manager::StructMemberDesc member;
+    member.name = mod.symbols.New("a");
+    member.type = ty.u32();
+    member.attributes.builtin = core::BuiltinValue::kSubgroupInvocationId;
+
+    auto* S = ty.Struct(mod.symbols.New("S"), {member});
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({b.FunctionParam(S)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_subgroups;
+
+struct S {
+  @builtin(subgroup_invocation_id)
+  a : u32,
+}
+
+fn f(v : S) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_StructBuiltin_SubgroupSize) {
+    core::type::Manager::StructMemberDesc member;
+    member.name = mod.symbols.New("a");
+    member.type = ty.u32();
+    member.attributes.builtin = core::BuiltinValue::kSubgroupSize;
+
+    auto* S = ty.Struct(mod.symbols.New("S"), {member});
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({b.FunctionParam(S)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_subgroups;
+
+struct S {
+  @builtin(subgroup_size)
+  a : u32,
+}
+
+fn f(v : S) {
 }
 )");
 }

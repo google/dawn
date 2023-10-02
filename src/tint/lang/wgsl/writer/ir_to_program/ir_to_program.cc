@@ -596,6 +596,18 @@ class State {
                     disabled_derivative_uniformity_ = true;
                 }
 
+                switch (c->Func()) {
+                    case wgsl::BuiltinFn::kTextureBarrier:
+                        Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
+                        break;
+                    case wgsl::BuiltinFn::kSubgroupBallot:
+                    case wgsl::BuiltinFn::kSubgroupBroadcast:
+                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        break;
+                    default:
+                        break;
+                }
+
                 auto* expr = b.Call(c->Func(), std::move(args));
                 if (!call->HasResults() || call->Result()->Type()->Is<core::type::Void>()) {
                     Append(b.CallStmt(expr));
@@ -925,6 +937,9 @@ class State {
                 return b.ty.sampled_texture(t->dim(), el);
             },
             [&](const core::type::StorageTexture* t) {
+                if (t->access() == core::Access::kRead || t->access() == core::Access::kReadWrite) {
+                    Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
+                }
                 return b.ty.storage_texture(t->dim(), t->texel_format(), t->access());
             },
             [&](const core::type::Sampler* s) { return b.ty.sampler(s->kind()); },
@@ -968,6 +983,9 @@ class State {
                     ast_attrs.Push(b.Index(u32(*index)));
                 }
                 if (auto builtin = ir_attrs.builtin) {
+                    if (RequiresSubgroups(*builtin)) {
+                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                    }
                     ast_attrs.Push(b.Builtin(*builtin));
                 }
                 if (auto interpolation = ir_attrs.interpolation) {
@@ -1165,6 +1183,18 @@ class State {
             case wgsl::BuiltinFn::kTextureSample:
             case wgsl::BuiltinFn::kTextureSampleBias:
             case wgsl::BuiltinFn::kTextureSampleCompare:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// @returns true if the builtin value requires the kChromiumExperimentalSubgroups extension to
+    /// be enabled.
+    bool RequiresSubgroups(core::BuiltinValue builtin) {
+        switch (builtin) {
+            case core::BuiltinValue::kSubgroupInvocationId:
+            case core::BuiltinValue::kSubgroupSize:
                 return true;
             default:
                 return false;

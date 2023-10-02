@@ -160,6 +160,8 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
             auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
                 call->Result(), Convert(call->Func()), std::move(args));
             call->ReplaceWith(replacement);
+            call->ClearResults();
+            call->Destroy();
         }
     }
     return Success;
