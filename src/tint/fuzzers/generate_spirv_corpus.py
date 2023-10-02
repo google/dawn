@@ -62,7 +62,7 @@ def main():
     logged_errors = ""
 
     for in_file in list_spvasm_files(input_dir):
-        if in_file.endswith(".expected.spvasm"):
+        if ".expected." in in_file:
             continue
         out_file = os.path.splitext(
             corpus_dir + os.sep +
