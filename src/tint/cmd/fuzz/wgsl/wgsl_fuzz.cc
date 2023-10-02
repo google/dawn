@@ -28,7 +28,7 @@ Vector<ProgramFuzzer, 32> fuzzers;
 std::string_view currently_running;
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    std::cerr << "ICE while running fuzzer: '" << currently_running << "'";
+    std::cerr << "ICE while running fuzzer: '" << currently_running << "'" << std::endl;
     std::cerr << err.Error() << std::endl;
     __builtin_trap();
 }

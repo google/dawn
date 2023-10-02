@@ -31,8 +31,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 IRToProgramTest::Result IRToProgramTest::Run() {
     Result result;
 
-    tint::core::ir::Disassembler d{mod};
-    result.ir = d.Disassemble();
+    result.ir = tint::core::ir::Disassemble(mod);
 
     auto output_program = IRToProgram(mod);
     if (!output_program.IsValid()) {

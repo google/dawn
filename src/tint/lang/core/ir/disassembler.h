@@ -36,6 +36,10 @@ class Struct;
 
 namespace tint::core::ir {
 
+/// @returns the disassembly for the module @p mod
+/// @param mod the module to disassemble
+std::string Disassemble(Module& mod);
+
 /// Helper class to disassemble the IR
 class Disassembler {
   public:

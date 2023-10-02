@@ -82,13 +82,6 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         return Failure{"error: Tint not built with the WGSL reader"};
 #endif
     }
-
-    /// @param mod the module
-    /// @returns the disassembly string of the module
-    std::string Disassemble(core::ir::Module& mod) {
-        core::ir::Disassembler d(mod);
-        return d.Disassemble();
-    }
 };
 
 using IRProgramTest = IRProgramTestBase<testing::Test>;

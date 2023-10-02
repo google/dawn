@@ -74,6 +74,10 @@ class ScopedIndent {
 
 }  // namespace
 
+std::string Disassemble(Module& mod) {
+    return Disassembler{mod}.Disassemble();
+}
+
 Disassembler::Disassembler(Module& mod) : mod_(mod) {}
 
 Disassembler::~Disassembler() = default;

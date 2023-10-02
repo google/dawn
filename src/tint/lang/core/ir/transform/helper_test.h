@@ -49,10 +49,7 @@ class TransformTestBase : public BASE {
     }
 
     /// @returns the transformed module as a disassembled string
-    std::string str() {
-        ir::Disassembler dis(mod);
-        return "\n" + dis.Disassemble();
-    }
+    std::string str() { return "\n" + ir::Disassemble(mod); }
 
   protected:
     /// The test IR module.

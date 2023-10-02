@@ -34,8 +34,7 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
         auto ir_module = wgsl::reader::WgslToIR(&file);
         ASSERT_TRUE(ir_module) << ir_module;
 
-        tint::core::ir::Disassembler d{ir_module.Get()};
-        auto disassembly = d.Disassemble();
+        auto disassembly = tint::core::ir::Disassemble(ir_module.Get());
 
         auto output = wgsl::writer::WgslFromIR(ir_module.Get());
         if (!output) {

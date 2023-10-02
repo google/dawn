@@ -893,11 +893,10 @@ Result<SuccessType> Validate(Module& mod) {
 Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] Module& ir,
                                             [[maybe_unused]] const char* msg) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
-    Disassembler disasm(ir);
     std::cout << "=========================================================" << std::endl;
     std::cout << "== IR dump before " << msg << ":" << std::endl;
     std::cout << "=========================================================" << std::endl;
-    std::cout << disasm.Disassemble();
+    std::cout << Disassemble(ir);
 #endif
 
 #ifndef NDEBUG
