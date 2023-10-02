@@ -39,13 +39,6 @@ GPUCommandEncoder::GPUCommandEncoder(wgpu::Device device,
 interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRenderPass(
     Napi::Env env,
     interop::GPURenderPassDescriptor descriptor) {
-    if (descriptor.timestampWrites) {
-        // TODO(dawn:1800): Support once Dawn's interface is updated.
-        Napi::Error::New(env, "Timestamp writes aren't supported yet, see crbug.com/dawn/1800")
-            .ThrowAsJavaScriptException();
-        return {};
-    }
-
     Converter conv(env, device_);
 
     wgpu::RenderPassDescriptor desc{};
@@ -56,6 +49,7 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
         !conv(desc.depthStencilAttachment, descriptor.depthStencilAttachment) ||
         !conv(desc.label, descriptor.label) ||
         !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet) ||
+        !conv(desc.timestampWrites, descriptor.timestampWrites) ||
         !conv(maxDrawCountDesc.maxDrawCount, descriptor.maxDrawCount)) {
         return {};
     }
@@ -67,17 +61,11 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
 interop::Interface<interop::GPUComputePassEncoder> GPUCommandEncoder::beginComputePass(
     Napi::Env env,
     interop::GPUComputePassDescriptor descriptor) {
-    if (descriptor.timestampWrites) {
-        // TODO(dawn:1800): Support once Dawn's interface is updated.
-        Napi::Error::New(env, "Timestamp writes aren't supported yet, see crbug.com/dawn/1800")
-            .ThrowAsJavaScriptException();
-        return {};
-    }
-
     Converter conv(env, device_);
 
     wgpu::ComputePassDescriptor desc{};
-    if (!conv(desc.label, descriptor.label)) {
+    if (!conv(desc.label, descriptor.label) ||
+        !conv(desc.timestampWrites, descriptor.timestampWrites)) {
         return {};
     }
     return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(

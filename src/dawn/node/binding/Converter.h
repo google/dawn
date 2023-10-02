@@ -198,6 +198,12 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::RenderPassDepthStencilAttachment& out,
                                const interop::GPURenderPassDepthStencilAttachment& in);
 
+    [[nodiscard]] bool Convert(wgpu::RenderPassTimestampWrites& out,
+                               const interop::GPURenderPassTimestampWrites& in);
+
+    [[nodiscard]] bool Convert(wgpu::ComputePassTimestampWrites& out,
+                               const interop::GPUComputePassTimestampWrites& in);
+
     [[nodiscard]] bool Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in);
 
     [[nodiscard]] bool Convert(wgpu::StoreOp& out, const interop::GPUStoreOp& in);
