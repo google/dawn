@@ -77,6 +77,9 @@ template("tint_unittests_source_set") {
 # Fuzzers
 ###############################################################################
 import("//testing/libfuzzer/fuzzer_test.gni")
+fuzzer_corpus_wgsl_dir = "${root_gen_dir}/fuzzers/wgsl_corpus"
+fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_wgsl_dir}.stamp"
+
 template("tint_fuzz_source_set") {
   source_set(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -110,5 +113,17 @@ template("tint_fuzzer_test") {
   fuzzer_test(target_name) {
     forward_variables_from(invoker, "*")
     exclude_main = false
+
+    if (target_name == "wgsl") {
+      dict = "dictionary.txt"
+      libfuzzer_options = [
+        "only_ascii=1",  # TODO(bclayton): Remove this to fuzz unicode?
+        "max_len=10000",
+      ]
+      seed_corpus = fuzzer_corpus_wgsl_dir
+      seed_corpus_deps = [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
+    } else {
+      assert(false, "unsupported tint fuzzer target")
+    }
   }
 }

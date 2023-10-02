@@ -217,7 +217,21 @@ source_set("winsock") {
 }
 
 ###############################################################################
-# Aliases.
+# Fuzzers
+###############################################################################
+action("tint_generate_wgsl_corpus") {
+  script = "${tint_src_dir}/cmd/fuzz/wgsl/generate_wgsl_corpus.py"
+  sources = [ "${tint_src_dir}/cmd/fuzz/wgsl/generate_wgsl_corpus.py" ]
+  args = [
+    "--stamp=" + rebase_path(fuzzer_corpus_wgsl_stamp, root_build_dir),
+    rebase_path("${tint_root_dir}/test", root_build_dir),
+    rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
+  ]
+  outputs = [ fuzzer_corpus_wgsl_stamp ]
+}
+
+###############################################################################
+# Aliases
 ###############################################################################
 if (tint_build_unittests) {
   group("tint_unittests") {

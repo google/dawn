@@ -19,6 +19,7 @@ group("fuzzers") {
   testonly = true
   deps = [
     "src/dawn/fuzzers",
+    "src/tint/cmd/fuzz/wgsl",
     "src/tint/fuzzers",
   ]
 }

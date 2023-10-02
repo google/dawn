@@ -21,11 +21,4 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(cmd/bench/BUILD.cmake)
-include(cmd/common/BUILD.cmake)
-include(cmd/fuzz/BUILD.cmake)
-include(cmd/info/BUILD.cmake)
-include(cmd/loopy/BUILD.cmake)
-include(cmd/remote_compile/BUILD.cmake)
-include(cmd/test/BUILD.cmake)
-include(cmd/tint/BUILD.cmake)
+include(cmd/fuzz/wgsl/BUILD.cmake)
