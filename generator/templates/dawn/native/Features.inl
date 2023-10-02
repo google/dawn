@@ -59,7 +59,7 @@ static constexpr ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> Initiali
       for (size_t i = 0; i < kInfoCount; ++i) {
         if (kFeatureInfo[i].feature == Feature::{{as_cppEnum(enum.name)}}) {
           list[Feature::{{as_cppEnum(enum.name)}}] = {
-            "{{enum.name.snake_case()}}",
+            "{{enum.name.hyphen_case()}}",
             kFeatureInfo[i].info.description,
             kFeatureInfo[i].info.url,
             kFeatureInfo[i].info.featureState,
