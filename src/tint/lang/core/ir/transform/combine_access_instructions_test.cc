@@ -1,0 +1,874 @@
+// Copyright 2023 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/tint/lang/core/ir/transform/combine_access_instructions.h"
+
+#include <utility>
+
+#include "src/tint/lang/core/ir/transform/helper_test.h"
+
+namespace tint::core::ir::transform {
+namespace {
+
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+
+using IR_CombineAccessInstructionsTest = TransformTest;
+
+TEST_F(IR_CombineAccessInstructionsTest, NoModify_NoChaining) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_root = b.Access(ty.ptr(uniform, structure), buffer);
+        b.Load(access_root);
+
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        b.Load(access_arr);
+
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), buffer, 0_u, 1_u);
+        b.Load(access_mat);
+
+        auto* access_vec = b.Access(ty.ptr(uniform, vec), buffer, 0_u, 1_u, 2_u);
+        b.Load(access_vec);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, MyStruct, read_write> = access %buffer
+    %4:MyStruct = load %3
+    %5:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %6:array<mat3x3<f32>, 4> = load %5
+    %7:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %8:mat3x3<f32> = load %7
+    %9:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %10:vec3<f32> = load %9
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, SimpleChain) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+        auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 2_u);
+        b.Load(access_vec);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %6:vec3<f32> = load %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %4:vec3<f32> = load %3
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, NoIndices_Root) {
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_root = b.Access(ty.ptr(uniform, structure), buffer);
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), access_root, 0_u);
+        b.Load(access_arr);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, MyStruct, read_write> = access %buffer
+    %4:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
+    %5:array<mat3x3<f32>, 4> = load %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:array<mat3x3<f32>, 4> = load %3
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, NoIndices_Middle) {
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* access_copy = b.Access(ty.ptr(uniform, arr), access_arr);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_copy, 1_u);
+        b.Load(access_mat);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %3
+    %5:ptr<uniform, mat3x3<f32>, read_write> = access %4, 1u
+    %6:mat3x3<f32> = load %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %4:mat3x3<f32> = load %3
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, NoIndices_End) {
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+        auto* access_copy = b.Access(ty.ptr(uniform, mat), access_mat);
+        b.Load(access_copy);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %5:ptr<uniform, mat3x3<f32>, read_write> = access %4
+    %6:mat3x3<f32> = load %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %4:mat3x3<f32> = load %3
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, MutipleChains_FromRoot) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+
+        {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 2_u);
+            b.Load(access_vec);
+        }
+        {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 2_u);
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 0_u);
+            b.Load(access_vec);
+        }
+        {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 3_u);
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 1_u);
+            b.Load(access_vec);
+        }
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %6:vec3<f32> = load %5
+    %7:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
+    %8:ptr<uniform, vec3<f32>, read_write> = access %7, 0u
+    %9:vec3<f32> = load %8
+    %10:ptr<uniform, mat3x3<f32>, read_write> = access %3, 3u
+    %11:ptr<uniform, vec3<f32>, read_write> = access %10, 1u
+    %12:vec3<f32> = load %11
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %4:vec3<f32> = load %3
+    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 2u, 0u
+    %6:vec3<f32> = load %5
+    %7:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 3u, 1u
+    %8:vec3<f32> = load %7
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, MutipleChains_FromMiddle) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+
+        {
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 2_u);
+            b.Load(access_vec);
+        }
+        {
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 0_u);
+            b.Load(access_vec);
+        }
+        {
+            auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 1_u);
+            b.Load(access_vec);
+        }
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %6:vec3<f32> = load %5
+    %7:ptr<uniform, vec3<f32>, read_write> = access %4, 0u
+    %8:vec3<f32> = load %7
+    %9:ptr<uniform, vec3<f32>, read_write> = access %4, 1u
+    %10:vec3<f32> = load %9
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %4:vec3<f32> = load %3
+    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 0u
+    %6:vec3<f32> = load %5
+    %7:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 1u
+    %8:vec3<f32> = load %7
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, OtherUses_Root) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        b.Load(access_arr);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+        auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 2_u);
+        b.Load(access_vec);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:array<mat3x3<f32>, 4> = load %3
+    %5:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %6:ptr<uniform, vec3<f32>, read_write> = access %5, 2u
+    %7:vec3<f32> = load %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:array<mat3x3<f32>, 4> = load %3
+    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %6:vec3<f32> = load %5
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, OtherUses_Middle) {
+    auto* vec = ty.vec3<f32>();
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+        b.Load(access_mat);
+        auto* access_vec = b.Access(ty.ptr(uniform, vec), access_mat, 2_u);
+        b.Load(access_vec);
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %5:mat3x3<f32> = load %4
+    %6:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %7:vec3<f32> = load %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %4:mat3x3<f32> = load %3
+    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %6:vec3<f32> = load %5
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, AccessResultUsesAsAccessIndex) {
+    auto* func = b.Function("foo", ty.f32());
+    auto* indices = b.FunctionParam("indices", ty.array<u32, 4>());
+    auto* values = b.FunctionParam("values", ty.array<f32, 4>());
+    b.Append(func->Block(), [&] {
+        auto* access_index = b.Access(ty.u32(), indices, 1_u);
+        auto* access_value = b.Access(ty.f32(), values, access_index);
+        b.Return(func, access_value);
+    });
+
+    auto* src = R"(
+%foo = func():f32 -> %b1 {
+  %b1 = block {
+    %2:u32 = access %indices, 1u
+    %4:f32 = access %values, %2
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, UseInDifferentBlock_If) {
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* ifelse = b.If(true);
+        b.Append(ifelse->True(), [&] {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 1_u);
+            b.Load(access_mat);
+            b.ExitIf(ifelse);
+        });
+        b.Append(ifelse->False(), [&] {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 2_u);
+            b.Load(access_mat);
+            b.ExitIf(ifelse);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    if true [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+        %5:mat3x3<f32> = load %4
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %6:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
+        %7:mat3x3<f32> = load %6
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    if true [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+        %4:mat3x3<f32> = load %3
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %5:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 2u
+        %6:mat3x3<f32> = load %5
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_CombineAccessInstructionsTest, UseInDifferentBlock_Loop) {
+    auto* mat = ty.mat3x3<f32>();
+    auto* arr = ty.array(mat, 4);
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), arr},
+                                                             });
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* access_arr = b.Access(ty.ptr(uniform, arr), buffer, 0_u);
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 2_u);
+            b.Load(access_mat);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            auto* access_mat = b.Access(ty.ptr(uniform, mat), access_arr, 3_u);
+            b.Load(access_mat);
+            b.BreakIf(loop, true);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
+        %5:mat3x3<f32> = load %4
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %6:ptr<uniform, mat3x3<f32>, read_write> = access %3, 3u
+        %7:mat3x3<f32> = load %6
+        break_if true %b3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16) {
+  a:array<mat3x3<f32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 2u
+        %4:mat3x3<f32> = load %3
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %5:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 3u
+        %6:mat3x3<f32> = load %5
+        break_if true %b3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    Run(CombineAccessInstructions);
+
+    EXPECT_EQ(expect, str());
+}
+
+}  // namespace
+}  // namespace tint::core::ir::transform

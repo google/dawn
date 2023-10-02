@@ -22,11 +22,11 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
     auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr_val});
     b.Append(func->Block(), [&] {
         auto* result = b.Access(ty.i32(), arr_val, 1_u);
-        b.Return(func);
+        b.Return(func, result);
         mod.SetName(result, "result");
     });
 
@@ -35,11 +35,11 @@ TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_Array_Pointer_ConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* arr_var = b.Var("arr", ty.ptr<function, array<i32, 4>>());
         auto* result = b.Access(ty.ptr<function, i32>(), arr_var, 1_u);
-        b.Return(func);
+        b.Return(func, b.Load(result));
         mod.SetName(result, "result");
     });
 
@@ -49,31 +49,31 @@ TEST_F(SpirvWriterTest, Access_Array_Pointer_ConstantIndex) {
 
 TEST_F(SpirvWriterTest, Access_Array_Pointer_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({idx});
     b.Append(func->Block(), [&] {
         auto* arr_var = b.Var("arr", ty.ptr<function, array<i32, 4>>());
         auto* result = b.Access(ty.ptr<function, i32>(), arr_var, idx);
-        b.Return(func);
+        b.Return(func, b.Load(result));
         mod.SetName(result, "result");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-         %13 = OpBitcast %uint %idx
-         %14 = OpExtInst %uint %15 UMin %13 %uint_3
-     %result = OpAccessChain %_ptr_Function_int %arr %14
+         %12 = OpBitcast %uint %idx
+         %13 = OpExtInst %uint %14 UMin %12 %uint_3
+     %result = OpAccessChain %_ptr_Function_int %arr %13
 )");
 }
 
 TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
     auto* mat_val = b.FunctionParam("mat", ty.mat2x2(ty.f32()));
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({mat_val});
     b.Append(func->Block(), [&] {
         auto* result_vector = b.Access(ty.vec2(ty.f32()), mat_val, 1_u);
         auto* result_scalar = b.Access(ty.f32(), mat_val, 1_u, 0_u);
-        b.Return(func);
+        b.Return(func, b.Multiply(ty.vec2<f32>(), result_vector, result_scalar));
         mod.SetName(result_vector, "result_vector");
         mod.SetName(result_scalar, "result_scalar");
     });
@@ -127,11 +127,11 @@ TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
 
 TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
     auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({vec_val});
     b.Append(func->Block(), [&] {
         auto* result = b.Access(ty.i32(), vec_val, 1_u);
-        b.Return(func);
+        b.Return(func, result);
         mod.SetName(result, "result");
     });
 
@@ -142,82 +142,84 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
 TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
     auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
     auto* idx = b.FunctionParam("idx", ty.i32());
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({vec_val, idx});
     b.Append(func->Block(), [&] {
         auto* result = b.Access(ty.i32(), vec_val, idx);
-        b.Return(func);
+        b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-         %10 = OpBitcast %uint %idx
-         %11 = OpExtInst %uint %12 UMin %10 %uint_3
-     %result = OpVectorExtractDynamic %int %vec %11
+          %9 = OpBitcast %uint %idx
+         %10 = OpExtInst %uint %11 UMin %9 %uint_3
+     %result = OpVectorExtractDynamic %int %vec %10
 )");
 }
 
 TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
     auto* val = b.FunctionParam("arr", ty.array(ty.array(ty.vec4(ty.i32()), 4), 4));
     auto* idx = b.FunctionParam("idx", ty.i32());
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({val, idx});
     b.Append(func->Block(), [&] {
         auto* result = b.Access(ty.i32(), val, 1_u, 2_u, idx);
-        b.Return(func);
+        b.Return(func, result);
         mod.SetName(result, "result");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-         %13 = OpBitcast %uint %idx
-         %14 = OpExtInst %uint %15 UMin %13 %uint_3
-         %18 = OpCompositeExtract %v4int %arr 1 2
-     %result = OpVectorExtractDynamic %int %18 %14
+         %12 = OpBitcast %uint %idx
+         %13 = OpExtInst %uint %14 UMin %12 %uint_3
+         %17 = OpCompositeExtract %v4int %arr 1 2
+     %result = OpVectorExtractDynamic %int %17 %13
 )");
 }
 
 TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
+                                                   {mod.symbols.Register("a"), ty.i32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
     auto* str_val = b.FunctionParam("str", str);
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams({str_val});
     b.Append(func->Block(), [&] {
-        auto* result_a = b.Access(ty.f32(), str_val, 0_u);
+        auto* result_a = b.Access(ty.i32(), str_val, 0_u);
         auto* result_b = b.Access(ty.i32(), str_val, 1_u, 2_u);
-        b.Return(func);
+        b.Return(func, b.Add(ty.i32(), result_a, result_b));
         mod.SetName(result_a, "result_a");
         mod.SetName(result_b, "result_b");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result_a = OpCompositeExtract %float %str 0");
+    EXPECT_INST("%result_a = OpCompositeExtract %int %str 0");
     EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
 }
 
 TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.Register("a"), ty.f32()},
+                                                   {mod.symbols.Register("a"), ty.i32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.vec4<i32>());
     b.Append(func->Block(), [&] {
         auto* str_var = b.Var("str", ty.ptr(function, str, read_write));
-        auto* result_a = b.Access(ty.ptr<function, f32>(), str_var, 0_u);
+        auto* result_a = b.Access(ty.ptr<function, i32>(), str_var, 0_u);
         auto* result_b = b.Access(ty.ptr<function, vec4<i32>>(), str_var, 1_u);
-        b.Return(func);
+        auto* val_a = b.Load(result_a);
+        auto* val_b = b.Load(result_b);
+        b.Return(func, b.Add(ty.vec4<i32>(), val_a, val_b));
         mod.SetName(result_a, "result_a");
         mod.SetName(result_b, "result_b");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_float %str %uint_0");
+    EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_int %str %uint_0");
     EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_v4int %str %uint_1");
 }
 

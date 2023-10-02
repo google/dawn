@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
+#include "src/tint/lang/core/ir/transform/combine_access_instructions.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
@@ -90,6 +91,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
+    // PreservePadding must come before DirectVariableAccess.
     RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
 
     core::ir::transform::DirectVariableAccessOptions dva_options;
@@ -100,6 +102,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
+
+    // CombineAccessInstructions must come after DirectVariableAccess and BlockDecoratedStructs.
+    // We run this transform as some Qualcomm drivers struggle with partial access chains that
+    // produce pointers to matrices.
+    RUN_TRANSFORM(core::ir::transform::CombineAccessInstructions, module);
+
     RUN_TRANSFORM(BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
     RUN_TRANSFORM(ExpandImplicitSplats, module);

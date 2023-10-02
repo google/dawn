@@ -117,7 +117,7 @@ void Run(core::ir::Module& ir) {
     // Find the access instructions that need replacing.
     Vector<AccessToReplace, 4> worklist;
     for (auto* inst : ir.instructions.Objects()) {
-        if (auto* access = inst->As<core::ir::Access>()) {
+        if (auto* access = inst->As<core::ir::Access>(); access && access->Alive()) {
             if (auto to_replace = ShouldReplace(access)) {
                 worklist.Push(to_replace.value());
             }
