@@ -487,7 +487,7 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
     if (src.texture == dst.texture) {
         switch (src.texture->GetDimension()) {
             case wgpu::TextureDimension::e1D:
-                DAWN_ASSERT(src.mipLevel == 0 && src.origin.z == 0 && dst.origin.z == 0);
+                DAWN_ASSERT(src.mipLevel == 0);
                 return DAWN_VALIDATION_ERROR("Copy is from %s to itself.", src.texture);
 
             case wgpu::TextureDimension::e2D:
