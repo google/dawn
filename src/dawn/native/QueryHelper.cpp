@@ -35,8 +35,9 @@ namespace {
 static_assert(offsetof(dawn::native::TimestampParams, first) == 0);
 static_assert(offsetof(dawn::native::TimestampParams, count) == 4);
 static_assert(offsetof(dawn::native::TimestampParams, offset) == 8);
-static_assert(offsetof(dawn::native::TimestampParams, multiplier) == 12);
-static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 16);
+static_assert(offsetof(dawn::native::TimestampParams, quantizationMask) == 12);
+static_assert(offsetof(dawn::native::TimestampParams, multiplier) == 16);
+static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 20);
 
 static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
@@ -56,6 +57,7 @@ static const char sConvertTimestampsToNanoseconds[] = R"(
                 first  : u32,
                 count  : u32,
                 offset : u32,
+                quantization_mask : u32,
                 multiplier : u32,
                 right_shift  : u32,
             }
@@ -111,7 +113,9 @@ static const char sConvertTimestampsToNanoseconds[] = R"(
                     chunks[i] = low | high;
                 }
 
-                timestamps.t[index].low = chunks[0] | (chunks[1] << 16u);
+                // Apply quantization mask.
+                var low = chunks[0] | (chunks[1] << 16u);
+                timestamps.t[index].low = low & params.quantization_mask;
                 timestamps.t[index].high = chunks[2] | (chunks[3] << 16u);
             }
         )";
@@ -158,8 +162,12 @@ ResultOrError<ComputePipelineBase*> GetOrCreateTimestampComputePipeline(DeviceBa
 
 }  // anonymous namespace
 
-TimestampParams::TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period)
-    : first(first), count(count), offset(offset) {
+TimestampParams::TimestampParams(uint32_t first,
+                                 uint32_t count,
+                                 uint32_t offset,
+                                 uint32_t quantizationMask,
+                                 float period)
+    : first(first), count(count), offset(offset), quantizationMask(quantizationMask) {
     // The overall conversion happening, if p is the period, m the multiplier, s the shift, is::
     //
     //   m = round(p * 2^s)

@@ -67,6 +67,7 @@ enum class Toggle {
     FxcOptimizations,
     RecordDetailedTimingInTraceEvents,
     DisableTimestampQueryConversion,
+    TimestampQuantization,
     ClearBufferBeforeResolveQueries,
     VulkanUseZeroInitializeWorkgroupMemoryExtension,
     D3D12SplitBufferTextureCopyForRowsPerImagePaddings,

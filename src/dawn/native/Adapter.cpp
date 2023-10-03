@@ -191,6 +191,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     deviceToggles.InheritFrom(mTogglesState);
     // Default toggles for all backend
     deviceToggles.Default(Toggle::LazyClearResourceOnFirstUse, true);
+    deviceToggles.Default(Toggle::TimestampQuantization, true);
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(&deviceToggles);
