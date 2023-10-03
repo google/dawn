@@ -144,9 +144,14 @@ MaybeError ValidateAttachmentArrayLayersAndLevelCount(const TextureViewBase* att
 MaybeError ValidateOrSetAttachmentSize(const TextureViewBase* attachment,
                                        uint32_t* width,
                                        uint32_t* height) {
-    const Extent3D& attachmentSize =
-        attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-            attachment->GetBaseMipLevel());
+    Extent3D attachmentSize = attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+        attachment->GetBaseMipLevel());
+    // TODO(dawn:2099): TextureBase::GetWidth/Height should take an Aspect parameter and perform the
+    // necessary computation instead.
+    if (attachment->GetTexture()->GetFormat().IsMultiPlanar()) {
+        attachmentSize = attachment->GetTexture()->GetFormat().GetAspectSize(
+            attachment->GetAspects(), attachmentSize);
+    }
 
     if (*width == 0) {
         DAWN_ASSERT(*height == 0);
@@ -341,8 +346,11 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
                               usageValidationMode));
 
+    // Plane0 and Plane1 aspects for multiplanar texture views should be allowed as color
+    // attachments.
+    Aspect kRenderableAspects = Aspect::Color | Aspect::Plane0 | Aspect::Plane1;
     DAWN_INVALID_IF(
-        !(attachment->GetAspects() & Aspect::Color) || !attachment->GetFormat().isRenderable,
+        !(attachment->GetAspects() & kRenderableAspects) || !attachment->GetFormat().isRenderable,
         "The color attachment %s format (%s) is not color renderable.", attachment,
         attachment->GetFormat().format);
 

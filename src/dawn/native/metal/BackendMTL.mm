@@ -524,6 +524,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         if (@available(macOS 10.11, iOS 11.0, *)) {
             EnableFeature(Feature::DawnMultiPlanarFormats);
             EnableFeature(Feature::MultiPlanarFormatP010);
+            EnableFeature(Feature::MultiPlanarRenderTargets);
         }
 
         if (@available(macOS 11.0, iOS 10.0, *)) {

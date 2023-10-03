@@ -359,6 +359,7 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(
     if (ConsumedError(ValidateIOSurfaceCanBeWrapped(this, textureDescriptor, ioSurface))) {
         return nullptr;
     }
+    // TODO(dawn:1337): Allow creating uninitialized texture for rendering.
     if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&
         !descriptor->isInitialized) {
         bool consumed = ConsumedError(DAWN_VALIDATION_ERROR(

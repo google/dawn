@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
@@ -914,7 +915,8 @@ TEST_P(VideoViewsValidationTests, SamplingMultiPlanarTexture) {
 
 // Tests creating a texture with a multi-plane format.
 TEST_P(VideoViewsValidationTests, RenderAttachmentInvalid) {
-    // multi-planar formats are NOT allowed to be renderable.
+    // multi-planar formats are NOT allowed to be renderable by default and require
+    // Feature::MultiPlanarRenderTargets.
     ASSERT_DEVICE_ERROR(auto platformTexture = mBackend->CreateVideoTextureForTest(
                             GetFormat(), wgpu::TextureUsage::RenderAttachment,
                             /*isCheckerboard*/ true,
@@ -963,6 +965,242 @@ TEST_P(VideoViewsValidationTests, WriteTexturePlaneAspectsFails) {
     ASSERT_DEVICE_ERROR(queue.WriteTexture(&imageCopyTexture, placeholderData.data(),
                                            placeholderData.size(), &textureDataLayout, &writeSize));
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
+}
+
+class VideoViewsRenderTargetTests : public VideoViewsValidationTests {
+  protected:
+    void SetUp() override {
+        VideoViewsValidationTests::SetUp();
+
+        DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
+
+        DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::MultiPlanarRenderTargets));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = VideoViewsTests::GetRequiredFeatures();
+        if (SupportsFeatures({wgpu::FeatureName::MultiPlanarRenderTargets})) {
+            requiredFeatures.push_back(wgpu::FeatureName::MultiPlanarRenderTargets);
+        }
+        return requiredFeatures;
+    }
+
+    // Tests for rendering to a multiplanar video texture through its views. It creates R/RG source
+    // textures with data which are then read into luma and chroma texture views. Since multiplanar
+    // textures don't support copy operations yet, the test renders from the luma/chroma texture
+    // views into another R/RG textures which are then compared with for rendered data.
+    template <typename T>
+    void RenderToMultiplanarVideoTexture() {
+        // Create plane texture initialized with data.
+        auto CreatePlaneTexWithData = [this](int planeIndex) -> wgpu::Texture {
+            auto kChannelSizeInBytes =
+                GetFormat() == wgpu::TextureFormat::R8BG8Biplanar420Unorm ? 1 : 2;
+            auto kSubsampleFactor = planeIndex == kYUVLumaPlaneIndex ? 1 : 2;
+            wgpu::Extent3D size = {kYUVImageDataWidthInTexels / kSubsampleFactor,
+                                   kYUVImageDataHeightInTexels / kSubsampleFactor, 1};
+
+            // Create source texture with plane format
+            wgpu::TextureDescriptor planeTextureDesc;
+            planeTextureDesc.size = size;
+            planeTextureDesc.format = GetPlaneFormat(planeIndex);
+            planeTextureDesc.usage =
+                wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
+            wgpu::Texture planeTexture = device.CreateTexture(&planeTextureDesc);
+
+            // Copy plane (Y/UV) data to the plane source texture.
+            std::vector<T> planeSrcData = GetTestTextureDataWithPlaneIndex<T>(
+                planeIndex, kTextureBytesPerRowAlignment / kChannelSizeInBytes,
+                kYUVImageDataHeightInTexels / kSubsampleFactor, false);
+            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(planeTexture);
+            wgpu::TextureDataLayout textureDataLayout =
+                utils::CreateTextureDataLayout(0, kTextureBytesPerRowAlignment);
+            wgpu::Queue queue = device.GetQueue();
+            queue.WriteTexture(&imageCopyTexture, planeSrcData.data(),
+                               planeSrcData.size() * kChannelSizeInBytes, &textureDataLayout,
+                               &size);
+
+            return planeTexture;
+        };
+
+        // Create source texture with plane 0 format i.e. R8/R16Unorm.
+        wgpu::Texture plane0Texture = CreatePlaneTexWithData(kYUVLumaPlaneIndex);
+        ASSERT_NE(plane0Texture.Get(), nullptr);
+        // Create source texture with plane 1 format i.e. RG8/RG16Unorm.
+        wgpu::Texture plane1Texture = CreatePlaneTexWithData(kYUVChromaPlaneIndex);
+        ASSERT_NE(plane1Texture.Get(), nullptr);
+
+        // TODO(dawn:1337): Allow creating uninitialized texture for rendering.
+        // Create a video texture to be rendered into with multiplanar format.
+        auto destVideoTexture = mBackend->CreateVideoTextureForTest(
+            GetFormat(), wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+            /*isCheckerboard*/ false,
+            /*initialized*/ true);
+        ASSERT_NE(destVideoTexture.get(), nullptr);
+        if (!destVideoTexture->CanWrapAsWGPUTexture()) {
+            mBackend->DestroyVideoTextureForTest(std::move(destVideoTexture));
+            GTEST_SKIP() << "Skipped because not supported.";
+        }
+        auto destVideoWGPUTexture = destVideoTexture->wgpuTexture;
+
+        // Perform plane operations for texting by creating render passes and comparing textures.
+        auto PerformPlaneOperations = [this](int planeIndex, wgpu::Texture destVideoWGPUTexture,
+                                             wgpu::Texture planeTextureWithData) {
+            auto kSubsampleFactor = planeIndex == kYUVLumaPlaneIndex ? 1 : 2;
+
+            utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+            renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
+            renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                @group(0) @binding(0) var sampler0 : sampler;
+                @group(0) @binding(1) var texture : texture_2d<f32>;
+
+                @fragment
+                fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
+                    return textureSample(texture, sampler0, texCoord);
+                })");
+            renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+            renderPipelineDescriptor.cTargets[0].format = GetPlaneFormat(planeIndex);
+            wgpu::RenderPipeline renderPipeline =
+                device.CreateRenderPipeline(&renderPipelineDescriptor);
+            wgpu::Sampler sampler = device.CreateSampler();
+
+            // Create plane texture view from the multiplanar video texture.
+            wgpu::TextureViewDescriptor planeViewDesc;
+            planeViewDesc.format = GetPlaneFormat(planeIndex);
+            planeViewDesc.aspect = (planeIndex == kYUVLumaPlaneIndex)
+                                       ? wgpu::TextureAspect::Plane0Only
+                                       : wgpu::TextureAspect::Plane1Only;
+            wgpu::TextureView planeTextureView = destVideoWGPUTexture.CreateView(&planeViewDesc);
+
+            // Render pass operations for reading the source data from planeTexture view into
+            // planeTextureView created from the multiplanar video texture.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            utils::ComboRenderPassDescriptor renderPass({planeTextureView});
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.SetPipeline(renderPipeline);
+            pass.SetBindGroup(
+                0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                        {{0, sampler}, {1, planeTextureWithData.CreateView()}}));
+            pass.Draw(6);
+            pass.End();
+
+            // Another render pass for reading the planeTextureView into a texture of the plane's
+            // format (i.e. R8/R16Unorm for Y and RG8/RG16Unorm for UV). This is needed as
+            // multiplanar textures do not support copy operations.
+            utils::BasicRenderPass basicRenderPass = utils::CreateBasicRenderPass(
+                device, kYUVImageDataWidthInTexels / kSubsampleFactor,
+                kYUVImageDataHeightInTexels / kSubsampleFactor, GetPlaneFormat(planeIndex));
+            wgpu::RenderPassEncoder secondPass =
+                encoder.BeginRenderPass(&basicRenderPass.renderPassInfo);
+            secondPass.SetPipeline(renderPipeline);
+            secondPass.SetBindGroup(
+                0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                        {{0, sampler}, {1, planeTextureView}}));
+            secondPass.Draw(6);
+            secondPass.End();
+
+            // Submit all commands for the encoder.
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+
+            std::vector<T> expectedData = GetTestTextureDataWithPlaneIndex<T>(
+                planeIndex, kYUVImageDataWidthInTexels,
+                kYUVImageDataHeightInTexels / kSubsampleFactor, false);
+            EXPECT_TEXTURE_EQ(expectedData.data(), basicRenderPass.color, {0, 0},
+                              {kYUVImageDataWidthInTexels / kSubsampleFactor,
+                               kYUVImageDataHeightInTexels / kSubsampleFactor},
+                              GetPlaneFormat(planeIndex));
+        };
+
+        // Perform operations for the Y plane.
+        PerformPlaneOperations(kYUVLumaPlaneIndex, destVideoWGPUTexture, plane0Texture);
+        // Perform operations for the UV plane.
+        PerformPlaneOperations(kYUVChromaPlaneIndex, destVideoWGPUTexture, plane1Texture);
+
+        mBackend->DestroyVideoTextureForTest(std::move(destVideoTexture));
+    }
+};
+
+// Tests creating a texture with a multi-plane format.
+TEST_P(VideoViewsRenderTargetTests, RenderAttachmentValid) {
+    // multi-planar formats should be allowed to be renderable with
+    // Feature::MultiPlanarRenderTargets.
+    auto platformTexture =
+        mBackend->CreateVideoTextureForTest(GetFormat(), wgpu::TextureUsage::RenderAttachment,
+                                            /*isCheckerboard*/ true,
+                                            /*initialized*/ true);
+
+    ASSERT_NE(platformTexture.get(), nullptr);
+    if (!platformTexture->CanWrapAsWGPUTexture()) {
+        mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
+        GTEST_SKIP() << "Skipped because not supported.";
+    }
+
+    mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
+}
+
+// Tests validating attachment sizes with a multi-plane format.
+TEST_P(VideoViewsRenderTargetTests, RenderAttachmentSizeValidation) {
+    auto platformTexture =
+        mBackend->CreateVideoTextureForTest(GetFormat(), wgpu::TextureUsage::RenderAttachment,
+                                            /*isCheckerboard*/ true,
+                                            /*initialized*/ true);
+
+    ASSERT_NE(platformTexture.get(), nullptr);
+    if (!platformTexture->CanWrapAsWGPUTexture()) {
+        mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
+        GTEST_SKIP() << "Skipped because not supported.";
+    }
+
+    // Create luma texture view from the video texture.
+    wgpu::TextureViewDescriptor lumaViewDesc;
+    lumaViewDesc.format = GetPlaneFormat(0);
+    lumaViewDesc.aspect = wgpu::TextureAspect::Plane0Only;
+    wgpu::TextureView lumaTextureView = platformTexture->wgpuTexture.CreateView(&lumaViewDesc);
+
+    // Create chroma texture view from the video texture.
+    wgpu::TextureViewDescriptor chromaViewDesc;
+    chromaViewDesc.format = GetPlaneFormat(1);
+    chromaViewDesc.aspect = wgpu::TextureAspect::Plane1Only;
+    wgpu::TextureView chromaTextureView = platformTexture->wgpuTexture.CreateView(&chromaViewDesc);
+
+    // Create an RGBA texture with same size as chroma texture view.
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+    desc.size = {kYUVImageDataWidthInTexels / 2, kYUVImageDataHeightInTexels / 2, 1};
+    wgpu::Texture rgbaTexture = device.CreateTexture(&desc);
+
+    {
+        // Render pass operations passing color attachments of same size (control case).
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass({chromaTextureView, rgbaTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+        encoder.Finish();
+    }
+
+    {
+        // Render pass operations passing color attachments of different sizes (error case).
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass({chromaTextureView, lumaTextureView});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
+}
+
+// Tests for rendering to a multiplanar video texture through its views.
+TEST_P(VideoViewsRenderTargetTests, RenderToMultiplanarVideoTexture) {
+    if (GetFormat() == wgpu::TextureFormat::R8BG8Biplanar420Unorm) {
+        RenderToMultiplanarVideoTexture<uint8_t>();
+    } else if (GetFormat() == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
+        RenderToMultiplanarVideoTexture<uint16_t>();
+    } else {
+        DAWN_UNREACHABLE();
+    }
 }
 
 class VideoViewsExtendedUsagesTests : public VideoViewsTestsBase {
@@ -1199,6 +1437,9 @@ DAWN_INSTANTIATE_TEST_B(VideoViewsTests,
                         VideoViewsTestBackend::Backends(),
                         VideoViewsTestBackend::Formats());
 DAWN_INSTANTIATE_TEST_B(VideoViewsValidationTests,
+                        VideoViewsTestBackend::Backends(),
+                        VideoViewsTestBackend::Formats());
+DAWN_INSTANTIATE_TEST_B(VideoViewsRenderTargetTests,
                         VideoViewsTestBackend::Backends(),
                         VideoViewsTestBackend::Formats());
 
