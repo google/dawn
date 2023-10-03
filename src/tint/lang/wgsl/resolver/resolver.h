@@ -145,6 +145,72 @@ class Resolver {
     /// @returns the resolved type from an expression, or nullptr on error
     core::type::Type* Type(const ast::Expression* ast);
 
+    /// @returns a new abstract-float
+    core::type::AbstractFloat* AF();
+
+    /// @returns a new f32
+    core::type::F32* F32();
+
+    /// @returns a new i32
+    core::type::I32* I32();
+
+    /// @returns a new u32
+    core::type::U32* U32();
+
+    /// @returns a new f16, if the f16 extension is enabled, otherwise nullptr
+    core::type::F16* F16(const ast::Identifier* ident);
+
+    /// @returns a vector with the element type @p el of width @p n resolved from the identifier @p
+    /// ident.
+    core::type::Vector* Vec(const ast::Identifier* ident, core::type::Type* el, uint32_t n);
+
+    /// @returns a vector of width @p n resolved from the templated identifier @p ident.
+    core::type::Vector* VecT(const ast::Identifier* ident, uint32_t n);
+
+    /// @returns a matrix with the element type @p el of dimensions @p num_columns x @p num_rows
+    /// resolved from the identifier @p ident.
+    core::type::Matrix* Mat(const ast::Identifier* ident,
+                            core::type::Type* el,
+                            uint32_t num_columns,
+                            uint32_t num_rows);
+
+    /// @returns a matrix of dimensions @p num_columns x @p num_rows resolved from the templated
+    /// identifier @p ident.
+    core::type::Matrix* MatT(const ast::Identifier* ident, uint32_t num_columns, uint32_t num_rows);
+
+    /// @returns an array resolved from the templated identifier @p ident.
+    core::type::Array* Array(const ast::Identifier* ident);
+
+    /// @returns an atomic resolved from the templated identifier @p ident.
+    core::type::Atomic* Atomic(const ast::Identifier* ident);
+
+    /// @returns a pointer resolved from the templated identifier @p ident.
+    core::type::Pointer* Ptr(const ast::Identifier* ident);
+
+    /// @returns a sampled texture resolved from the templated identifier @p ident with the
+    /// dimensions @p dim.
+    core::type::SampledTexture* SampledTexture(const ast::Identifier* ident,
+                                               core::type::TextureDimension dim);
+
+    /// @returns a multisampled texture resolved from the templated identifier @p ident with the
+    /// dimensions @p dim.
+    core::type::MultisampledTexture* MultisampledTexture(const ast::Identifier* ident,
+                                                         core::type::TextureDimension dim);
+
+    /// @returns a storage texture resolved from the templated identifier @p ident with the
+    /// dimensions @p dim.
+    core::type::StorageTexture* StorageTexture(const ast::Identifier* ident,
+                                               core::type::TextureDimension dim);
+
+    /// @returns a packed vec3 resolved from the templated identifier @p ident.
+    core::type::Vector* PackedVec3T(const ast::Identifier* ident);
+
+    /// @returns @p ident cast to an ast::TemplatedIdentifier, if the identifier is templated and
+    /// the number of templated arguments are between @p min_args and @p max_args.
+    const ast::TemplatedIdentifier* TemplatedIdentifier(const ast::Identifier* ident,
+                                                        size_t min_args,
+                                                        size_t max_args = /* use min */ 0);
+
     /// @returns the call of Expression() cast to a
     /// sem::BuiltinEnumExpression<core::AddressSpace>. If the sem::Expression is not a
     /// sem::BuiltinEnumExpression<core::AddressSpace>, then an error diagnostic is raised and

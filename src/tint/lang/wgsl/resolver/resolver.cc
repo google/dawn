@@ -2518,371 +2518,111 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
                                         const ast::Identifier* ident) {
     auto& b = *builder_;
-
     auto check_no_tmpl_args = [&](core::type::Type* ty) -> core::type::Type* {
         return TINT_LIKELY(CheckNotTemplated("type", ident)) ? ty : nullptr;
-    };
-    auto af = [&] { return b.create<core::type::AbstractFloat>(); };
-    auto f32 = [&] { return b.create<core::type::F32>(); };
-    auto i32 = [&] { return b.create<core::type::I32>(); };
-    auto u32 = [&] { return b.create<core::type::U32>(); };
-    auto f16 = [&] {
-        return validator_.CheckF16Enabled(ident->source) ? b.create<core::type::F16>() : nullptr;
-    };
-    auto templated_identifier =
-        [&](size_t min_args, size_t max_args = /* use min */ 0) -> const ast::TemplatedIdentifier* {
-        if (max_args == 0) {
-            max_args = min_args;
-        }
-        auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
-        if (!tmpl_ident) {
-            if (TINT_UNLIKELY(min_args != 0)) {
-                AddError("expected '<' for '" + ident->symbol.Name() + "'",
-                         Source{ident->source.range.end});
-            }
-            return nullptr;
-        }
-        if (min_args == max_args) {
-            if (TINT_UNLIKELY(tmpl_ident->arguments.Length() != min_args)) {
-                AddError("'" + ident->symbol.Name() + "' requires " + std::to_string(min_args) +
-                             " template arguments",
-                         ident->source);
-                return nullptr;
-            }
-        } else {
-            if (TINT_UNLIKELY(tmpl_ident->arguments.Length() < min_args)) {
-                AddError("'" + ident->symbol.Name() + "' requires at least " +
-                             std::to_string(min_args) + " template arguments",
-                         ident->source);
-                return nullptr;
-            }
-            if (TINT_UNLIKELY(tmpl_ident->arguments.Length() > max_args)) {
-                AddError("'" + ident->symbol.Name() + "' requires at most " +
-                             std::to_string(max_args) + " template arguments",
-                         ident->source);
-                return nullptr;
-            }
-        }
-        return tmpl_ident;
-    };
-    auto vec = [&](core::type::Type* el, uint32_t n) -> core::type::Vector* {
-        if (TINT_UNLIKELY(!el)) {
-            return nullptr;
-        }
-        if (TINT_UNLIKELY(!validator_.Vector(el, ident->source))) {
-            return nullptr;
-        }
-        return b.create<core::type::Vector>(el, n);
-    };
-    auto mat = [&](core::type::Type* el, uint32_t num_columns,
-                   uint32_t num_rows) -> core::type::Matrix* {
-        if (TINT_UNLIKELY(!el)) {
-            return nullptr;
-        }
-        if (TINT_UNLIKELY(!validator_.Matrix(el, ident->source))) {
-            return nullptr;
-        }
-        auto* column = vec(el, num_rows);
-        if (!column) {
-            return nullptr;
-        }
-        return b.create<core::type::Matrix>(column, num_columns);
-    };
-    auto vec_t = [&](uint32_t n) -> core::type::Vector* {
-        auto* tmpl_ident = templated_identifier(1);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-        auto* ty = Type(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!ty)) {
-            return nullptr;
-        }
-        return vec(const_cast<core::type::Type*>(ty), n);
-    };
-    auto mat_t = [&](uint32_t num_columns, uint32_t num_rows) -> core::type::Matrix* {
-        auto* tmpl_ident = templated_identifier(1);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-        auto* ty = Type(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!ty)) {
-            return nullptr;
-        }
-        return mat(const_cast<core::type::Type*>(ty), num_columns, num_rows);
-    };
-    auto array = [&]() -> core::type::Array* {
-        UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
-        TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
-
-        auto* tmpl_ident = templated_identifier(1, 2);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-        auto* ast_el_ty = tmpl_ident->arguments[0];
-        auto* ast_count = (tmpl_ident->arguments.Length() > 1) ? tmpl_ident->arguments[1] : nullptr;
-
-        auto* el_ty = Type(ast_el_ty);
-        if (!el_ty) {
-            return nullptr;
-        }
-
-        const core::type::ArrayCount* el_count =
-            ast_count ? ArrayCount(ast_count) : builder_->create<core::type::RuntimeArrayCount>();
-        if (!el_count) {
-            return nullptr;
-        }
-
-        // Look for explicit stride via @stride(n) attribute
-        uint32_t explicit_stride = 0;
-        if (!ArrayAttributes(tmpl_ident->attributes, el_ty, explicit_stride)) {
-            return nullptr;
-        }
-
-        auto* out = Array(tmpl_ident->source,                             //
-                          ast_el_ty->source,                              //
-                          ast_count ? ast_count->source : ident->source,  //
-                          el_ty, el_count, explicit_stride);
-        if (!out) {
-            return nullptr;
-        }
-
-        if (el_ty->Is<core::type::Atomic>()) {
-            atomic_composite_info_.Add(out, &ast_el_ty->source);
-        } else {
-            if (auto found = atomic_composite_info_.Get(el_ty)) {
-                atomic_composite_info_.Add(out, *found);
-            }
-        }
-
-        // Track the pipeline-overridable constants that are transitively referenced by this
-        // array type.
-        for (auto* var : transitively_referenced_overrides) {
-            builder_->Sem().AddTransitivelyReferencedOverride(out, var);
-        }
-        return out;
-    };
-    auto atomic = [&]() -> core::type::Atomic* {
-        auto* tmpl_ident = templated_identifier(1);  // atomic<type>
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-
-        auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!ty_expr)) {
-            return nullptr;
-        }
-        auto* ty = ty_expr->Type();
-
-        auto* out = builder_->create<core::type::Atomic>(ty);
-        if (!validator_.Atomic(tmpl_ident, out)) {
-            return nullptr;
-        }
-        return out;
-    };
-    auto ptr = [&]() -> core::type::Pointer* {
-        auto* tmpl_ident = templated_identifier(2, 3);  // ptr<address, type [, access]>
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-
-        auto* address_space_expr = AddressSpaceExpression(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!address_space_expr)) {
-            return nullptr;
-        }
-        auto address_space = address_space_expr->Value();
-
-        auto* store_ty_expr = TypeExpression(tmpl_ident->arguments[1]);
-        if (TINT_UNLIKELY(!store_ty_expr)) {
-            return nullptr;
-        }
-        auto* store_ty = const_cast<core::type::Type*>(store_ty_expr->Type());
-
-        auto access = DefaultAccessForAddressSpace(address_space);
-        if (tmpl_ident->arguments.Length() > 2) {
-            auto* access_expr = AccessExpression(tmpl_ident->arguments[2]);
-            if (TINT_UNLIKELY(!access_expr)) {
-                return nullptr;
-            }
-            access = access_expr->Value();
-        }
-
-        auto* out = b.create<core::type::Pointer>(address_space, store_ty, access);
-        if (!validator_.Pointer(tmpl_ident, out)) {
-            return nullptr;
-        }
-        if (!ApplyAddressSpaceUsageToType(address_space, store_ty,
-                                          store_ty_expr->Declaration()->source)) {
-            AddNote("while instantiating " + out->FriendlyName(), ident->source);
-            return nullptr;
-        }
-        return out;
-    };
-    auto sampled_texture = [&](core::type::TextureDimension dim) -> core::type::SampledTexture* {
-        auto* tmpl_ident = templated_identifier(1);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-
-        auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!ty_expr)) {
-            return nullptr;
-        }
-        auto* out = b.create<core::type::SampledTexture>(dim, ty_expr->Type());
-        return validator_.SampledTexture(out, ident->source) ? out : nullptr;
-    };
-    auto multisampled_texture =
-        [&](core::type::TextureDimension dim) -> core::type::MultisampledTexture* {
-        auto* tmpl_ident = templated_identifier(1);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-
-        auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!ty_expr)) {
-            return nullptr;
-        }
-        auto* out = b.create<core::type::MultisampledTexture>(dim, ty_expr->Type());
-        return validator_.MultisampledTexture(out, ident->source) ? out : nullptr;
-    };
-    auto storage_texture = [&](core::type::TextureDimension dim) -> core::type::StorageTexture* {
-        auto* tmpl_ident = templated_identifier(2);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-
-        auto* format = TexelFormatExpression(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!format)) {
-            return nullptr;
-        }
-        auto* access = AccessExpression(tmpl_ident->arguments[1]);
-        if (TINT_UNLIKELY(!access)) {
-            return nullptr;
-        }
-        auto* subtype = core::type::StorageTexture::SubtypeFor(format->Value(), builder_->Types());
-        auto* tex =
-            b.create<core::type::StorageTexture>(dim, format->Value(), access->Value(), subtype);
-        if (!validator_.StorageTexture(tex, ident->source)) {
-            return nullptr;
-        }
-        return tex;
-    };
-    auto packed_vec3_t = [&]() -> core::type::Vector* {
-        auto* tmpl_ident = templated_identifier(1);
-        if (TINT_UNLIKELY(!tmpl_ident)) {
-            return nullptr;
-        }
-        auto* el_ty = Type(tmpl_ident->arguments[0]);
-        if (TINT_UNLIKELY(!el_ty)) {
-            return nullptr;
-        }
-
-        if (TINT_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
-            return nullptr;
-        }
-        return b.create<core::type::Vector>(el_ty, 3u, true);
     };
 
     switch (builtin_ty) {
         case core::BuiltinType::kBool:
             return check_no_tmpl_args(b.create<core::type::Bool>());
         case core::BuiltinType::kI32:
-            return check_no_tmpl_args(i32());
+            return check_no_tmpl_args(I32());
         case core::BuiltinType::kU32:
-            return check_no_tmpl_args(u32());
+            return check_no_tmpl_args(U32());
         case core::BuiltinType::kF16:
-            return check_no_tmpl_args(f16());
+            return check_no_tmpl_args(F16(ident));
         case core::BuiltinType::kF32:
             return check_no_tmpl_args(b.create<core::type::F32>());
         case core::BuiltinType::kVec2:
-            return vec_t(2);
+            return VecT(ident, 2);
         case core::BuiltinType::kVec3:
-            return vec_t(3);
+            return VecT(ident, 3);
         case core::BuiltinType::kVec4:
-            return vec_t(4);
+            return VecT(ident, 4);
         case core::BuiltinType::kMat2X2:
-            return mat_t(2, 2);
+            return MatT(ident, 2, 2);
         case core::BuiltinType::kMat2X3:
-            return mat_t(2, 3);
+            return MatT(ident, 2, 3);
         case core::BuiltinType::kMat2X4:
-            return mat_t(2, 4);
+            return MatT(ident, 2, 4);
         case core::BuiltinType::kMat3X2:
-            return mat_t(3, 2);
+            return MatT(ident, 3, 2);
         case core::BuiltinType::kMat3X3:
-            return mat_t(3, 3);
+            return MatT(ident, 3, 3);
         case core::BuiltinType::kMat3X4:
-            return mat_t(3, 4);
+            return MatT(ident, 3, 4);
         case core::BuiltinType::kMat4X2:
-            return mat_t(4, 2);
+            return MatT(ident, 4, 2);
         case core::BuiltinType::kMat4X3:
-            return mat_t(4, 3);
+            return MatT(ident, 4, 3);
         case core::BuiltinType::kMat4X4:
-            return mat_t(4, 4);
+            return MatT(ident, 4, 4);
         case core::BuiltinType::kMat2X2F:
-            return check_no_tmpl_args(mat(f32(), 2u, 2u));
+            return check_no_tmpl_args(Mat(ident, F32(), 2u, 2u));
         case core::BuiltinType::kMat2X3F:
-            return check_no_tmpl_args(mat(f32(), 2u, 3u));
+            return check_no_tmpl_args(Mat(ident, F32(), 2u, 3u));
         case core::BuiltinType::kMat2X4F:
-            return check_no_tmpl_args(mat(f32(), 2u, 4u));
+            return check_no_tmpl_args(Mat(ident, F32(), 2u, 4u));
         case core::BuiltinType::kMat3X2F:
-            return check_no_tmpl_args(mat(f32(), 3u, 2u));
+            return check_no_tmpl_args(Mat(ident, F32(), 3u, 2u));
         case core::BuiltinType::kMat3X3F:
-            return check_no_tmpl_args(mat(f32(), 3u, 3u));
+            return check_no_tmpl_args(Mat(ident, F32(), 3u, 3u));
         case core::BuiltinType::kMat3X4F:
-            return check_no_tmpl_args(mat(f32(), 3u, 4u));
+            return check_no_tmpl_args(Mat(ident, F32(), 3u, 4u));
         case core::BuiltinType::kMat4X2F:
-            return check_no_tmpl_args(mat(f32(), 4u, 2u));
+            return check_no_tmpl_args(Mat(ident, F32(), 4u, 2u));
         case core::BuiltinType::kMat4X3F:
-            return check_no_tmpl_args(mat(f32(), 4u, 3u));
+            return check_no_tmpl_args(Mat(ident, F32(), 4u, 3u));
         case core::BuiltinType::kMat4X4F:
-            return check_no_tmpl_args(mat(f32(), 4u, 4u));
+            return check_no_tmpl_args(Mat(ident, F32(), 4u, 4u));
         case core::BuiltinType::kMat2X2H:
-            return check_no_tmpl_args(mat(f16(), 2u, 2u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 2u, 2u));
         case core::BuiltinType::kMat2X3H:
-            return check_no_tmpl_args(mat(f16(), 2u, 3u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 2u, 3u));
         case core::BuiltinType::kMat2X4H:
-            return check_no_tmpl_args(mat(f16(), 2u, 4u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 2u, 4u));
         case core::BuiltinType::kMat3X2H:
-            return check_no_tmpl_args(mat(f16(), 3u, 2u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 3u, 2u));
         case core::BuiltinType::kMat3X3H:
-            return check_no_tmpl_args(mat(f16(), 3u, 3u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 3u, 3u));
         case core::BuiltinType::kMat3X4H:
-            return check_no_tmpl_args(mat(f16(), 3u, 4u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 3u, 4u));
         case core::BuiltinType::kMat4X2H:
-            return check_no_tmpl_args(mat(f16(), 4u, 2u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 4u, 2u));
         case core::BuiltinType::kMat4X3H:
-            return check_no_tmpl_args(mat(f16(), 4u, 3u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 4u, 3u));
         case core::BuiltinType::kMat4X4H:
-            return check_no_tmpl_args(mat(f16(), 4u, 4u));
+            return check_no_tmpl_args(Mat(ident, F16(ident), 4u, 4u));
         case core::BuiltinType::kVec2F:
-            return check_no_tmpl_args(vec(f32(), 2u));
+            return check_no_tmpl_args(Vec(ident, F32(), 2u));
         case core::BuiltinType::kVec3F:
-            return check_no_tmpl_args(vec(f32(), 3u));
+            return check_no_tmpl_args(Vec(ident, F32(), 3u));
         case core::BuiltinType::kVec4F:
-            return check_no_tmpl_args(vec(f32(), 4u));
+            return check_no_tmpl_args(Vec(ident, F32(), 4u));
         case core::BuiltinType::kVec2H:
-            return check_no_tmpl_args(vec(f16(), 2u));
+            return check_no_tmpl_args(Vec(ident, F16(ident), 2u));
         case core::BuiltinType::kVec3H:
-            return check_no_tmpl_args(vec(f16(), 3u));
+            return check_no_tmpl_args(Vec(ident, F16(ident), 3u));
         case core::BuiltinType::kVec4H:
-            return check_no_tmpl_args(vec(f16(), 4u));
+            return check_no_tmpl_args(Vec(ident, F16(ident), 4u));
         case core::BuiltinType::kVec2I:
-            return check_no_tmpl_args(vec(i32(), 2u));
+            return check_no_tmpl_args(Vec(ident, I32(), 2u));
         case core::BuiltinType::kVec3I:
-            return check_no_tmpl_args(vec(i32(), 3u));
+            return check_no_tmpl_args(Vec(ident, I32(), 3u));
         case core::BuiltinType::kVec4I:
-            return check_no_tmpl_args(vec(i32(), 4u));
+            return check_no_tmpl_args(Vec(ident, I32(), 4u));
         case core::BuiltinType::kVec2U:
-            return check_no_tmpl_args(vec(u32(), 2u));
+            return check_no_tmpl_args(Vec(ident, U32(), 2u));
         case core::BuiltinType::kVec3U:
-            return check_no_tmpl_args(vec(u32(), 3u));
+            return check_no_tmpl_args(Vec(ident, U32(), 3u));
         case core::BuiltinType::kVec4U:
-            return check_no_tmpl_args(vec(u32(), 4u));
+            return check_no_tmpl_args(Vec(ident, U32(), 4u));
         case core::BuiltinType::kArray:
-            return array();
+            return Array(ident);
         case core::BuiltinType::kAtomic:
-            return atomic();
+            return Atomic(ident);
         case core::BuiltinType::kPtr:
-            return ptr();
+            return Ptr(ident);
         case core::BuiltinType::kSampler:
             return check_no_tmpl_args(
                 builder_->create<core::type::Sampler>(core::type::SamplerKind::kSampler));
@@ -2890,17 +2630,17 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(
                 builder_->create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler));
         case core::BuiltinType::kTexture1D:
-            return sampled_texture(core::type::TextureDimension::k1d);
+            return SampledTexture(ident, core::type::TextureDimension::k1d);
         case core::BuiltinType::kTexture2D:
-            return sampled_texture(core::type::TextureDimension::k2d);
+            return SampledTexture(ident, core::type::TextureDimension::k2d);
         case core::BuiltinType::kTexture2DArray:
-            return sampled_texture(core::type::TextureDimension::k2dArray);
+            return SampledTexture(ident, core::type::TextureDimension::k2dArray);
         case core::BuiltinType::kTexture3D:
-            return sampled_texture(core::type::TextureDimension::k3d);
+            return SampledTexture(ident, core::type::TextureDimension::k3d);
         case core::BuiltinType::kTextureCube:
-            return sampled_texture(core::type::TextureDimension::kCube);
+            return SampledTexture(ident, core::type::TextureDimension::kCube);
         case core::BuiltinType::kTextureCubeArray:
-            return sampled_texture(core::type::TextureDimension::kCubeArray);
+            return SampledTexture(ident, core::type::TextureDimension::kCubeArray);
         case core::BuiltinType::kTextureDepth2D:
             return check_no_tmpl_args(
                 builder_->create<core::type::DepthTexture>(core::type::TextureDimension::k2d));
@@ -2919,89 +2659,90 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
         case core::BuiltinType::kTextureExternal:
             return check_no_tmpl_args(builder_->create<core::type::ExternalTexture>());
         case core::BuiltinType::kTextureMultisampled2D:
-            return multisampled_texture(core::type::TextureDimension::k2d);
+            return MultisampledTexture(ident, core::type::TextureDimension::k2d);
         case core::BuiltinType::kTextureStorage1D:
-            return storage_texture(core::type::TextureDimension::k1d);
+            return StorageTexture(ident, core::type::TextureDimension::k1d);
         case core::BuiltinType::kTextureStorage2D:
-            return storage_texture(core::type::TextureDimension::k2d);
+            return StorageTexture(ident, core::type::TextureDimension::k2d);
         case core::BuiltinType::kTextureStorage2DArray:
-            return storage_texture(core::type::TextureDimension::k2dArray);
+            return StorageTexture(ident, core::type::TextureDimension::k2dArray);
         case core::BuiltinType::kTextureStorage3D:
-            return storage_texture(core::type::TextureDimension::k3d);
+            return StorageTexture(ident, core::type::TextureDimension::k3d);
         case core::BuiltinType::kPackedVec3:
-            return packed_vec3_t();
+            return PackedVec3T(ident);
         case core::BuiltinType::kAtomicCompareExchangeResultI32:
             return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
-                                                                 builder_->Symbols(), i32());
+                                                                 builder_->Symbols(), I32());
         case core::BuiltinType::kAtomicCompareExchangeResultU32:
             return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
-                                                                 builder_->Symbols(), u32());
+                                                                 builder_->Symbols(), U32());
         case core::BuiltinType::kFrexpResultAbstract:
-            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), AF());
         case core::BuiltinType::kFrexpResultF16:
-            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 F16(ident));
         case core::BuiltinType::kFrexpResultF32:
-            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), F32());
         case core::BuiltinType::kFrexpResultVec2Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(af(), 2));
+                                                 Vec(ident, AF(), 2));
         case core::BuiltinType::kFrexpResultVec2F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f16(), 2));
+                                                 Vec(ident, F16(ident), 2));
         case core::BuiltinType::kFrexpResultVec2F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f32(), 2));
+                                                 Vec(ident, F32(), 2));
         case core::BuiltinType::kFrexpResultVec3Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(af(), 3));
+                                                 Vec(ident, AF(), 3));
         case core::BuiltinType::kFrexpResultVec3F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f16(), 3));
+                                                 Vec(ident, F16(ident), 3));
         case core::BuiltinType::kFrexpResultVec3F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f32(), 3));
+                                                 Vec(ident, F32(), 3));
         case core::BuiltinType::kFrexpResultVec4Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(af(), 4));
+                                                 Vec(ident, AF(), 4));
         case core::BuiltinType::kFrexpResultVec4F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f16(), 4));
+                                                 Vec(ident, F16(ident), 4));
         case core::BuiltinType::kFrexpResultVec4F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
-                                                 vec(f32(), 4));
+                                                 Vec(ident, F32(), 4));
         case core::BuiltinType::kModfResultAbstract:
-            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), af());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), AF());
         case core::BuiltinType::kModfResultF16:
-            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), F16(ident));
         case core::BuiltinType::kModfResultF32:
-            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), F32());
         case core::BuiltinType::kModfResultVec2Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(af(), 2));
+                                                Vec(ident, AF(), 2));
         case core::BuiltinType::kModfResultVec2F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f16(), 2));
+                                                Vec(ident, F16(ident), 2));
         case core::BuiltinType::kModfResultVec2F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f32(), 2));
+                                                Vec(ident, F32(), 2));
         case core::BuiltinType::kModfResultVec3Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(af(), 3));
+                                                Vec(ident, AF(), 3));
         case core::BuiltinType::kModfResultVec3F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f16(), 3));
+                                                Vec(ident, F16(ident), 3));
         case core::BuiltinType::kModfResultVec3F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f32(), 3));
+                                                Vec(ident, F32(), 3));
         case core::BuiltinType::kModfResultVec4Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(af(), 4));
+                                                Vec(ident, AF(), 4));
         case core::BuiltinType::kModfResultVec4F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f16(), 4));
+                                                Vec(ident, F16(ident), 4));
         case core::BuiltinType::kModfResultVec4F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
-                                                vec(f32(), 4));
+                                                Vec(ident, F32(), 4));
         case core::BuiltinType::kUndefined:
             break;
     }
@@ -3011,6 +2752,298 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
     err << " unhandled builtin type '" << name << "'";
     AddICE(err.str(), ident->source);
     return nullptr;
+}
+
+core::type::AbstractFloat* Resolver::AF() {
+    return builder_->create<core::type::AbstractFloat>();
+}
+
+core::type::F32* Resolver::F32() {
+    return builder_->create<core::type::F32>();
+}
+
+core::type::I32* Resolver::I32() {
+    return builder_->create<core::type::I32>();
+}
+
+core::type::U32* Resolver::U32() {
+    return builder_->create<core::type::U32>();
+}
+
+core::type::F16* Resolver::F16(const ast::Identifier* ident) {
+    return validator_.CheckF16Enabled(ident->source) ? builder_->create<core::type::F16>()
+                                                     : nullptr;
+}
+
+core::type::Vector* Resolver::Vec(const ast::Identifier* ident, core::type::Type* el, uint32_t n) {
+    if (TINT_UNLIKELY(!el)) {
+        return nullptr;
+    }
+    if (TINT_UNLIKELY(!validator_.Vector(el, ident->source))) {
+        return nullptr;
+    }
+    return builder_->create<core::type::Vector>(el, n);
+}
+
+core::type::Vector* Resolver::VecT(const ast::Identifier* ident, uint32_t n) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+    auto* ty = Type(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty)) {
+        return nullptr;
+    }
+    return Vec(ident, const_cast<core::type::Type*>(ty), n);
+}
+
+core::type::Matrix* Resolver::Mat(const ast::Identifier* ident,
+                                  core::type::Type* el,
+                                  uint32_t num_columns,
+                                  uint32_t num_rows) {
+    if (TINT_UNLIKELY(!el)) {
+        return nullptr;
+    }
+    if (TINT_UNLIKELY(!validator_.Matrix(el, ident->source))) {
+        return nullptr;
+    }
+    auto* column = Vec(ident, el, num_rows);
+    if (!column) {
+        return nullptr;
+    }
+    return builder_->create<core::type::Matrix>(column, num_columns);
+}
+
+core::type::Matrix* Resolver::MatT(const ast::Identifier* ident,
+                                   uint32_t num_columns,
+                                   uint32_t num_rows) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+    auto* ty = Type(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty)) {
+        return nullptr;
+    }
+    return Mat(ident, const_cast<core::type::Type*>(ty), num_columns, num_rows);
+}
+
+core::type::Array* Resolver::Array(const ast::Identifier* ident) {
+    UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
+    TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
+
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1, 2);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+    auto* ast_el_ty = tmpl_ident->arguments[0];
+    auto* ast_count = (tmpl_ident->arguments.Length() > 1) ? tmpl_ident->arguments[1] : nullptr;
+
+    auto* el_ty = Type(ast_el_ty);
+    if (!el_ty) {
+        return nullptr;
+    }
+
+    const core::type::ArrayCount* el_count =
+        ast_count ? ArrayCount(ast_count) : builder_->create<core::type::RuntimeArrayCount>();
+    if (!el_count) {
+        return nullptr;
+    }
+
+    // Look for explicit stride via @stride(n) attribute
+    uint32_t explicit_stride = 0;
+    if (!ArrayAttributes(tmpl_ident->attributes, el_ty, explicit_stride)) {
+        return nullptr;
+    }
+
+    auto* out = Array(tmpl_ident->source,                             //
+                      ast_el_ty->source,                              //
+                      ast_count ? ast_count->source : ident->source,  //
+                      el_ty, el_count, explicit_stride);
+    if (!out) {
+        return nullptr;
+    }
+
+    if (el_ty->Is<core::type::Atomic>()) {
+        atomic_composite_info_.Add(out, &ast_el_ty->source);
+    } else {
+        if (auto found = atomic_composite_info_.Get(el_ty)) {
+            atomic_composite_info_.Add(out, *found);
+        }
+    }
+
+    // Track the pipeline-overridable constants that are transitively referenced by this
+    // array type.
+    for (auto* var : transitively_referenced_overrides) {
+        builder_->Sem().AddTransitivelyReferencedOverride(out, var);
+    }
+    return out;
+}
+
+core::type::Atomic* Resolver::Atomic(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);  // atomic<type>
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty_expr)) {
+        return nullptr;
+    }
+    auto* ty = ty_expr->Type();
+
+    auto* out = builder_->create<core::type::Atomic>(ty);
+    if (!validator_.Atomic(tmpl_ident, out)) {
+        return nullptr;
+    }
+    return out;
+}
+
+core::type::Pointer* Resolver::Ptr(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 2, 3);  // ptr<address, type [, access]>
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* address_space_expr = AddressSpaceExpression(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!address_space_expr)) {
+        return nullptr;
+    }
+    auto address_space = address_space_expr->Value();
+
+    auto* store_ty_expr = TypeExpression(tmpl_ident->arguments[1]);
+    if (TINT_UNLIKELY(!store_ty_expr)) {
+        return nullptr;
+    }
+    auto* store_ty = const_cast<core::type::Type*>(store_ty_expr->Type());
+
+    auto access = DefaultAccessForAddressSpace(address_space);
+    if (tmpl_ident->arguments.Length() > 2) {
+        auto* access_expr = AccessExpression(tmpl_ident->arguments[2]);
+        if (TINT_UNLIKELY(!access_expr)) {
+            return nullptr;
+        }
+        access = access_expr->Value();
+    }
+
+    auto* out = builder_->create<core::type::Pointer>(address_space, store_ty, access);
+    if (!validator_.Pointer(tmpl_ident, out)) {
+        return nullptr;
+    }
+    if (!ApplyAddressSpaceUsageToType(address_space, store_ty,
+                                      store_ty_expr->Declaration()->source)) {
+        AddNote("while instantiating " + out->FriendlyName(), ident->source);
+        return nullptr;
+    }
+    return out;
+}
+
+core::type::SampledTexture* Resolver::SampledTexture(const ast::Identifier* ident,
+                                                     core::type::TextureDimension dim) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty_expr)) {
+        return nullptr;
+    }
+    auto* out = builder_->create<core::type::SampledTexture>(dim, ty_expr->Type());
+    return validator_.SampledTexture(out, ident->source) ? out : nullptr;
+}
+
+core::type::MultisampledTexture* Resolver::MultisampledTexture(const ast::Identifier* ident,
+                                                               core::type::TextureDimension dim) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* ty_expr = TypeExpression(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty_expr)) {
+        return nullptr;
+    }
+    auto* out = builder_->create<core::type::MultisampledTexture>(dim, ty_expr->Type());
+    return validator_.MultisampledTexture(out, ident->source) ? out : nullptr;
+}
+
+core::type::StorageTexture* Resolver::StorageTexture(const ast::Identifier* ident,
+                                                     core::type::TextureDimension dim) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 2);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* format = TexelFormatExpression(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!format)) {
+        return nullptr;
+    }
+    auto* access = AccessExpression(tmpl_ident->arguments[1]);
+    if (TINT_UNLIKELY(!access)) {
+        return nullptr;
+    }
+    auto* subtype = core::type::StorageTexture::SubtypeFor(format->Value(), builder_->Types());
+    auto* tex = builder_->create<core::type::StorageTexture>(dim, format->Value(), access->Value(),
+                                                             subtype);
+    if (!validator_.StorageTexture(tex, ident->source)) {
+        return nullptr;
+    }
+    return tex;
+}
+
+core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+    auto* el_ty = Type(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!el_ty)) {
+        return nullptr;
+    }
+
+    if (TINT_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
+        return nullptr;
+    }
+    return builder_->create<core::type::Vector>(el_ty, 3u, true);
+}
+
+const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identifier* ident,
+                                                              size_t min_args,
+                                                              size_t max_args /* = use min 0 */) {
+    if (max_args == 0) {
+        max_args = min_args;
+    }
+    auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
+    if (!tmpl_ident) {
+        if (TINT_UNLIKELY(min_args != 0)) {
+            AddError("expected '<' for '" + ident->symbol.Name() + "'",
+                     Source{ident->source.range.end});
+        }
+        return nullptr;
+    }
+    if (min_args == max_args) {
+        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() != min_args)) {
+            AddError("'" + ident->symbol.Name() + "' requires " + std::to_string(min_args) +
+                         " template arguments",
+                     ident->source);
+            return nullptr;
+        }
+    } else {
+        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() < min_args)) {
+            AddError("'" + ident->symbol.Name() + "' requires at least " +
+                         std::to_string(min_args) + " template arguments",
+                     ident->source);
+            return nullptr;
+        }
+        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() > max_args)) {
+            AddError("'" + ident->symbol.Name() + "' requires at most " + std::to_string(max_args) +
+                         " template arguments",
+                     ident->source);
+            return nullptr;
+        }
+    }
+    return tmpl_ident;
 }
 
 size_t Resolver::NestDepth(const core::type::Type* ty) const {
