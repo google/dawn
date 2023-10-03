@@ -78,6 +78,12 @@ function(tint_default_compile_options TARGET)
     -Weverything
   )
 
+  if(COMPILER_IS_GNU)
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
+    # Despite the bug being closed, false-positives still seen in GCC-13.
+    target_compile_options(${TARGET} PRIVATE -Wno-maybe-uninitialized)
+  endif(COMPILER_IS_GNU)
+
   if(COMPILER_IS_LIKE_GNU)
     target_compile_options(${TARGET} PRIVATE
       -pedantic-errors
@@ -86,13 +92,9 @@ function(tint_default_compile_options TARGET)
 
     if(COMPILER_IS_CLANG)
       if(IS_DEBUG_BUILD)
-        target_compile_options(${TARGET} PRIVATE
-          -fstandalone-debug
-        )
+        target_compile_options(${TARGET} PRIVATE -fstandalone-debug)
       endif()
-      target_compile_options(${TARGET} PRIVATE
-        ${COMMON_CLANG_OPTIONS}
-      )
+      target_compile_options(${TARGET} PRIVATE ${COMMON_CLANG_OPTIONS})
     endif()
   endif(COMPILER_IS_LIKE_GNU)
 

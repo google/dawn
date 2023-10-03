@@ -1949,16 +1949,12 @@ uint32_t Builder::GenerateMatrixAddOrSub(uint32_t lhs_id,
     }
 
     // Create the result matrix from the added/subtracted column vectors
-    TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);  // GCC false-positive
-
     auto result_mat_id = result_op();
     ops.insert(ops.begin(), result_mat_id);
     ops.insert(ops.begin(), Operand(GenerateTypeIfNeeded(type)));
     if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
         return 0;
     }
-
-    TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);  // GCC false-positive
 
     return std::get<uint32_t>(result_mat_id);
 }

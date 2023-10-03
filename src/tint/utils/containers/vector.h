@@ -282,12 +282,10 @@ class Vector {
 
     /// Clears all elements from the vector, keeping the capacity the same.
     void Clear() {
-        TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);
         for (size_t i = 0; i < impl_.slice.len; i++) {
             impl_.slice.data[i].~T();
         }
         impl_.slice.len = 0;
-        TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);
     }
 
     /// Appends a new element to the vector.

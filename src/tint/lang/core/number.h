@@ -427,10 +427,6 @@ std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
 #endif
 #endif
 
-/// Disables the false-positive maybe-uninitialized compiler warnings
-/// @see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
-TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);
-
 /// @param a the LHS number
 /// @param b the RHS number
 /// @returns a + b, or an empty optional if the resulting value overflowed the AInt
@@ -660,9 +656,6 @@ inline std::optional<FloatingPointT> CheckedPow(FloatingPointT base, FloatingPoi
     }
     return result;
 }
-
-/// Re-enables the maybe-uninitialized compiler warnings
-TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);
 
 }  // namespace tint::core
 
