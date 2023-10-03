@@ -726,6 +726,11 @@ func (e env) buildTint() error {
 	if err := os.MkdirAll(e.buildDir, 0777); err != nil {
 		return fmt.Errorf("failed to create build directory at '%v':\n  %w", e.buildDir, err)
 	}
+
+	// Delete any existing tint benchmark executables to ensure we're not using a stale binary
+	os.Remove(filepath.Join(e.buildDir, "tint_benchmark"))
+	os.Remove(filepath.Join(e.buildDir, "tint-benchmark"))
+
 	if _, err := call(tools.cmake, e.buildDir, e.cfg.Timeouts.Build,
 		e.dawnDir,
 		"-GNinja",
@@ -745,7 +750,7 @@ func (e env) buildTint() error {
 		"-DTINT_BUILD_SPV_WRITER=1",
 		"-DTINT_BUILD_WGSL_WRITER=1",
 		"-DTINT_BUILD_BENCHMARKS=1",
-		"-DDAWN_BUILD_SAMPLES=0",
+		"-DDAWN_BUILD_CMD_TOOLS=0",
 	); err != nil {
 		return errFailedToBuild{fmt.Errorf("failed to generate dawn build config:\n  %w", err)}
 	}
@@ -811,7 +816,14 @@ func (e env) repeatedlyBenchmarkTint() (*bench.Run, error) {
 
 // benchmarkTint runs the tint benchmarks once, returning the results.
 func (e env) benchmarkTint() (*bench.Run, error) {
-	exe := filepath.Join(e.buildDir, "tint-benchmark")
+	exe := filepath.Join(e.buildDir, "tint_benchmark")
+	if _, err := os.Stat(exe); err != nil {
+		exe = filepath.Join(e.buildDir, "tint-benchmark")
+	}
+	if _, err := os.Stat(exe); err != nil {
+		return nil, fmt.Errorf("failed to find tint benchmark executable")
+	}
+
 	out, err := call(exe, e.buildDir, e.cfg.Timeouts.Benchmark,
 		"--benchmark_format=json",
 		"--benchmark_enable_random_interleaving=true",
