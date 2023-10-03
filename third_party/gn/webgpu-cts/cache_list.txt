@@ -1,9 +1,9 @@
 data/webgpu/shader/execution/case-cache/binary/af_addition.json
 data/webgpu/shader/execution/case-cache/binary/af_logical.json
 data/webgpu/shader/execution/case-cache/binary/af_matrix_addition.json
-data/webgpu/shader/execution/case-cache/abstractBinary/af_matrix_subtraction.json
-data/webgpu/shader/execution/case-cache/abstractBinary/af_multiplication.json
-data/webgpu/shader/execution/case-cache/abstractBinary/af_subtraction.json
+data/webgpu/shader/execution/case-cache/binary/af_matrix_subtraction.json
+data/webgpu/shader/execution/case-cache/binary/af_multiplication.json
+data/webgpu/shader/execution/case-cache/binary/af_subtraction.json
 data/webgpu/shader/execution/case-cache/binary/f16_addition.json
 data/webgpu/shader/execution/case-cache/binary/f16_logical.json
 data/webgpu/shader/execution/case-cache/binary/f16_division.json
@@ -92,6 +92,7 @@ data/webgpu/shader/execution/case-cache/unary/af_arithmetic.json
 data/webgpu/shader/execution/case-cache/unary/af_assignment.json
 data/webgpu/shader/execution/case-cache/unary/bool_conversion.json
 data/webgpu/shader/execution/case-cache/unary/f16_arithmetic.json
+data/webgpu/shader/execution/case-cache/unary/f16_conversion.json
 data/webgpu/shader/execution/case-cache/unary/f32_arithmetic.json
 data/webgpu/shader/execution/case-cache/unary/f32_conversion.json
 data/webgpu/shader/execution/case-cache/unary/i32_arithmetic.json
