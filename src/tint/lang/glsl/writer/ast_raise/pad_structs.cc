@@ -145,13 +145,13 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
 
         tint::Vector<const ast::Expression*, 8> new_args;
 
-        auto* arg = ast_call->args.begin();
+        auto arg = ast_call->args.begin();
         for (auto* member : new_struct->members) {
             if (padding_members.Contains(member)) {
                 new_args.Push(b.Expr(0_u));
             } else {
                 new_args.Push(ctx.Clone(*arg));
-                arg++;
+                ++arg;
             }
         }
         return b.Call(CreateASTTypeFor(ctx, str), new_args);

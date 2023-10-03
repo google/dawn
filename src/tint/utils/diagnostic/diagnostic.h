@@ -89,8 +89,8 @@ class Diagnostic {
 /// List is a container of Diagnostic messages.
 class List {
   public:
-    /// iterator is the type used for range based iteration.
-    using iterator = const Diagnostic*;
+    /// The iterator type for this List
+    using iterator = VectorIterator<const Diagnostic>;
 
     /// Constructs the list with no elements.
     List();

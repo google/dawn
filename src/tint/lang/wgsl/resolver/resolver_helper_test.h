@@ -141,14 +141,47 @@ using alias2 = alias<TO, 2>;
 template <typename TO>
 using alias3 = alias<TO, 3>;
 
-/// A scalar value
-using Scalar =
-    std::variant<core::i32, core::u32, core::f32, core::f16, core::AInt, core::AFloat, bool>;
+/// Scalar represents a scalar value
+struct Scalar {
+    /// The possible types of a scalar value.
+    using Value =
+        std::variant<core::i32, core::u32, core::f32, core::f16, core::AInt, core::AFloat, bool>;
 
-/// Returns current variant value in `s` cast to type `T`
+    /// Constructor
+    /// @param val the value used to construct this Scalar
+    template <typename T>
+    Scalar(T&& val) : value(std::forward<T>(val)) {}  // NOLINT
+
+    /// @returns the Value
+    operator Value&() { return value; }
+
+    /// Equality operator
+    /// @param other the other Scalar
+    /// @return true if this Scalar is equal to @p other
+    bool operator==(const Scalar& other) const { return value == other.value; }
+
+    /// Inequality operator
+    /// @param other the other Scalar
+    /// @return true if this Scalar is not equal to @p other
+    bool operator!=(const Scalar& other) const { return value != other.value; }
+
+    /// The scalar value
+    Value value;
+};
+
+/// @param out the stream to write to
+/// @param s the Scalar
+/// @returns @p out so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+STREAM& operator<<(STREAM& out, const Scalar& s) {
+    std::visit([&](auto&& v) { out << v; }, s.value);
+    return out;
+}
+
+/// @return  current variant value in @p s cast to type `T`
 template <typename T>
 T As(const Scalar& s) {
-    return std::visit([](auto&& v) { return static_cast<T>(v); }, s);
+    return std::visit([](auto&& v) { return static_cast<T>(v); }, s.value);
 }
 
 using ast_type_func_ptr = ast::Type (*)(ProgramBuilder& b);
@@ -199,7 +232,7 @@ struct DataType<bool> {
     /// @param args args of size 1 with the boolean value to init with
     /// @return a new AST expression of the bool type
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<bool>(args[0]));
+        return b.Expr(std::get<bool>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to bool.
@@ -232,7 +265,7 @@ struct DataType<core::i32> {
     /// @param args args of size 1 with the i32 value to init with
     /// @return a new AST i32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::i32>(args[0]));
+        return b.Expr(std::get<core::i32>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to i32.
@@ -265,7 +298,7 @@ struct DataType<core::u32> {
     /// @param args args of size 1 with the u32 value to init with
     /// @return a new AST u32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::u32>(args[0]));
+        return b.Expr(std::get<core::u32>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to u32.
@@ -298,7 +331,7 @@ struct DataType<core::f32> {
     /// @param args args of size 1 with the f32 value to init with
     /// @return a new AST f32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::f32>(args[0]));
+        return b.Expr(std::get<core::f32>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to f32.
@@ -331,7 +364,7 @@ struct DataType<core::f16> {
     /// @param args args of size 1 with the f16 value to init with
     /// @return a new AST f16 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::f16>(args[0]));
+        return b.Expr(std::get<core::f16>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to f16.
@@ -363,7 +396,7 @@ struct DataType<core::AFloat> {
     /// @param args args of size 1 with the abstract-float value to init with
     /// @return a new AST abstract-float literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::AFloat>(args[0]));
+        return b.Expr(std::get<core::AFloat>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to AFloat.
@@ -395,7 +428,7 @@ struct DataType<core::AInt> {
     /// @param args args of size 1 with the abstract-int value to init with
     /// @return a new AST abstract-int literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<core::AInt>(args[0]));
+        return b.Expr(std::get<core::AInt>(args[0].value));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to AInt.
@@ -773,7 +806,7 @@ struct Value {
     std::ostream& Print(std::ostream& o) const {
         o << type_name << "(";
         for (auto& a : args) {
-            std::visit([&](auto& v) { o << v; }, a);
+            o << a;
             if (&a != &args.Back()) {
                 o << ", ";
             }
@@ -806,7 +839,7 @@ constexpr bool IsValue = std::is_same_v<T, Value>;
 /// Creates a Value of DataType<T> from a scalar `v`
 template <typename T>
 Value Val(T v) {
-    static_assert(tint::traits::IsTypeIn<T, Scalar>, "v must be a Number of bool");
+    static_assert(tint::traits::IsTypeIn<T, Scalar::Value>, "v must be a Number of bool");
     return Value::Create<T>(Vector<Scalar, 1>{v});
 }
 

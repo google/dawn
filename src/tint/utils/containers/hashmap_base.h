@@ -228,7 +228,7 @@ class HashmapBase {
             if (current == end) {
                 return *this;
             }
-            current++;
+            ++current;
             SkipToNextValue();
             return *this;
         }
@@ -261,9 +261,11 @@ class HashmapBase {
 
         using SLOT = std::conditional_t<IS_CONST, const Slot, Slot>;
 
-        IteratorT(SLOT* c, SLOT* e, [[maybe_unused]] const HashmapBase& m)
-            : current(c),
-              end(e)
+        IteratorT(VectorIterator<SLOT> c,
+                  VectorIterator<SLOT> e,
+                  [[maybe_unused]] const HashmapBase& m)
+            : current(std::move(c)),
+              end(std::move(e))
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
               ,
               map(m),
@@ -276,12 +278,12 @@ class HashmapBase {
         /// Moves the iterator forward, stopping at the next slot that is not empty.
         void SkipToNextValue() {
             while (current != end && !current->entry.has_value()) {
-                current++;
+                ++current;
             }
         }
 
-        SLOT* current;  /// The slot the iterator is pointing to
-        SLOT* end;      /// One past the last slot in the map
+        VectorIterator<SLOT> current;  /// The slot the iterator is pointing to
+        VectorIterator<SLOT> end;      /// One past the last slot in the map
 
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
         const HashmapBase& map;     /// The hashmap that is being iterated over.
