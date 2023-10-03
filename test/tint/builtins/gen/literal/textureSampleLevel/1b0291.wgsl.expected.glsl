@@ -27,9 +27,10 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:10: 'textureLod' : no matching overloaded function found 
+ERROR: 0:10: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
+ERROR: 0:10: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+ERROR: 3 compilation errors.  No code generated.
 
 
 
@@ -56,9 +57,10 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:11: 'textureLod' : no matching overloaded function found 
+ERROR: 0:11: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
+ERROR: 0:11: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+ERROR: 3 compilation errors.  No code generated.
 
 
 
@@ -85,9 +87,10 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:10: 'textureLod' : no matching overloaded function found 
+ERROR: 0:10: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
+ERROR: 0:10: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+ERROR: 3 compilation errors.  No code generated.
 
 
 
