@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/core/ir/control_instruction.h"
 
+#include "src/tint/lang/core/ir/block.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ControlInstruction);
 
 namespace tint::core::ir {
@@ -30,6 +32,11 @@ void ControlInstruction::AddExit(Exit* exit) {
 
 void ControlInstruction::RemoveExit(Exit* exit) {
     exits_.Remove(exit);
+}
+
+void ControlInstruction::Destroy() {
+    Base::Destroy();
+    ForeachBlock([](ir::Block* blk) { blk->Destroy(); });
 }
 
 }  // namespace tint::core::ir

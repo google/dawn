@@ -184,6 +184,7 @@ void Run(core::ir::Module& ir) {
         // Replace all uses of the old access instruction with the loaded result.
         access->Result()->ReplaceAllUsesWith(load->Result());
         access->ReplaceWith(load);
+        access->Destroy();
     }
 }
 

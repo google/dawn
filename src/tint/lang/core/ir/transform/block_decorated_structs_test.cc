@@ -336,11 +336,12 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     root->Append(buffer_c);
 
     auto* func = b.Function("foo", ty.void_());
-    auto* block = func->Block();
-    auto* load_b = block->Append(b.Load(buffer_b));
-    auto* load_c = block->Append(b.Load(buffer_c));
-    block->Append(b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c)));
-    block->Append(b.Return(func));
+    b.Append(func->Block(), [&] {
+        auto* load_b = b.Load(buffer_b);
+        auto* load_c = b.Load(buffer_c);
+        b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c));
+        b.Return(func);
+    });
 
     auto* expect = R"(
 tint_symbol_1 = struct @align(4), @block {
@@ -367,8 +368,9 @@ tint_symbol_5 = struct @align(4), @block {
     %6:i32 = load %5
     %7:ptr<storage, i32, read_write> = access %3, 0u
     %8:i32 = load %7
-    %9:ptr<storage, i32, read_write> = access %1, 0u
-    store %9, %10
+    %9:i32 = add %6, %8
+    %10:ptr<storage, i32, read_write> = access %1, 0u
+    store %10, %9
     ret
   }
 }

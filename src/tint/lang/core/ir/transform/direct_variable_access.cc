@@ -571,6 +571,7 @@ struct State {
         ir.functions.Clear();
         for (auto* fn : input_fns) {
             if (auto info = need_forking.Get(fn)) {
+                fn->Destroy();
                 for (auto variant : (*info)->ordered_variants) {
                     ir.functions.Push(variant);
                 }

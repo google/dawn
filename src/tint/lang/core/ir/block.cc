@@ -186,4 +186,10 @@ void Block::Remove(Instruction* inst) {
     inst->next = nullptr;
 }
 
+void Block::Destroy() {
+    while (instructions_.first) {
+        instructions_.first->Destroy();
+    }
+}
+
 }  // namespace tint::core::ir

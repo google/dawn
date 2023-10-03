@@ -53,18 +53,6 @@ TEST_F(IR_ValueTest, Destroy) {
     EXPECT_FALSE(val->Alive());
 }
 
-TEST_F(IR_ValueTest, Destroy_HasUsage) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            auto* val = b.InstructionResult(mod.Types().i32());
-            b.Add(mod.Types().i32(), val, 1_i);
-            val->Destroy();
-        },
-        "");
-}
-
 TEST_F(IR_ValueTest, Destroy_HasSource) {
     EXPECT_FATAL_FAILURE(
         {

@@ -59,6 +59,11 @@ void Function::SetParams(std::initializer_list<FunctionParam*> params) {
     TINT_ASSERT(!params_.Any(IsNull));
 }
 
+void Function::Destroy() {
+    Base::Destroy();
+    block_->Destroy();
+}
+
 std::string_view ToString(Function::PipelineStage value) {
     switch (value) {
         case Function::PipelineStage::kVertex:

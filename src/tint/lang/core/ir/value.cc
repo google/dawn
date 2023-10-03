@@ -28,7 +28,6 @@ Value::~Value() = default;
 
 void Value::Destroy() {
     TINT_ASSERT(Alive());
-    TINT_ASSERT(Usages().Count() == 0);
     flags_.Add(Flag::kDead);
 }
 

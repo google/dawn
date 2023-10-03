@@ -140,6 +140,9 @@ class Function : public Castable<Function, Value> {
     /// @returns the function root block
     ir::Block* Block() { return block_; }
 
+    /// Destroys the function and all of its instructions.
+    void Destroy() override;
+
   private:
     PipelineStage pipeline_stage_;
     std::optional<std::array<uint32_t, 3>> workgroup_size_;

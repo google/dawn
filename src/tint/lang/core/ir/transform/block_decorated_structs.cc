@@ -85,6 +85,8 @@ void Run(Module& ir) {
             access->InsertBefore(use.instruction);
             return access->Result();
         });
+
+        var->Destroy();
     }
 }
 

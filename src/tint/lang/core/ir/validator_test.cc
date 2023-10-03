@@ -1183,6 +1183,29 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    auto* load = sb.Load(v);
+    sb.Return(f);
+
+    load->Remove();
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().reason.str(), R"(error: orphaned instruction: load
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
 

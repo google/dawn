@@ -142,6 +142,9 @@ class Block : public Castable<Block> {
     /// @param parent the parent instruction that owns this block
     void SetParent(ControlInstruction* parent) { parent_ = parent; }
 
+    /// Destroys the block and all of its instructions.
+    void Destroy();
+
   private:
     struct {
         Instruction* first = nullptr;

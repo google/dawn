@@ -132,7 +132,7 @@ struct State {
                 // Unreachable can become reachable once returns are turned into exits.
                 // As this is the terminator for the block, simply stop processing the
                 // instructions. A appropriate terminator will be created for this block below.
-                inst->Remove();
+                inst->Destroy();
                 break;
             }
 

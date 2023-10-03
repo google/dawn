@@ -77,6 +77,9 @@ class ControlInstruction : public Castable<ControlInstruction, OperandInstructio
     /// @param exit the exit instruction
     void RemoveExit(Exit* exit);
 
+    /// @copydoc Instruction::Destroy
+    void Destroy() override;
+
   protected:
     /// The flow control exits
     Hashset<Exit*, 2> exits_;
