@@ -18,7 +18,7 @@ import("../../../scripts/tint_overrides_with_defaults.gni")
 # Fuzzers - Libfuzzer based fuzzing targets for Chromium
 # To run the fuzzers outside of Chromium, use the CMake based builds.
 
-if (build_with_chromium) {
+if (tint_has_fuzzers) {
   import("//testing/libfuzzer/fuzzer_test.gni")
   import("../../../scripts/dawn_overrides_with_defaults.gni")
 
@@ -40,13 +40,15 @@ if (build_with_chromium) {
     "max_len=10000",
   ]
 
-  tint_ast_fuzzer_common_libfuzzer_options =
-      tint_fuzzer_common_libfuzzer_options + [
-        "cross_over=0",
-        "mutate_depth=1",
-        "tint_enable_all_mutations=false",
-        "tint_mutation_batch_size=5",
-      ]
+  if (build_with_chromium) {
+    tint_ast_fuzzer_common_libfuzzer_options =
+        tint_fuzzer_common_libfuzzer_options + [
+          "cross_over=0",
+          "mutate_depth=1",
+          "tint_enable_all_mutations=false",
+          "tint_mutation_batch_size=5",
+        ]
+  }
 
   tint_regex_fuzzer_common_libfuzzer_options =
       tint_fuzzer_common_libfuzzer_options + [
@@ -132,12 +134,14 @@ if (build_with_chromium) {
       seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
     }
 
-    fuzzer_test("tint_ast_wgsl_writer_fuzzer") {
-      sources = [ "tint_ast_fuzzer/tint_ast_wgsl_writer_fuzzer.cc" ]
-      deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
-      libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+    if (build_with_chromium) {
+      fuzzer_test("tint_ast_wgsl_writer_fuzzer") {
+        sources = [ "tint_ast_fuzzer/tint_ast_wgsl_writer_fuzzer.cc" ]
+        deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
+        libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
+        seed_corpus = fuzzer_corpus_wgsl_dir
+        seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+      }
     }
 
     fuzzer_test("tint_regex_wgsl_writer_fuzzer") {
@@ -168,12 +172,14 @@ if (build_with_chromium) {
       seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
     }
 
-    fuzzer_test("tint_ast_spv_writer_fuzzer") {
-      sources = [ "tint_ast_fuzzer/tint_ast_spv_writer_fuzzer.cc" ]
-      deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
-      libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+    if (build_with_chromium) {
+      fuzzer_test("tint_ast_spv_writer_fuzzer") {
+        sources = [ "tint_ast_fuzzer/tint_ast_spv_writer_fuzzer.cc" ]
+        deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
+        libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
+        seed_corpus = fuzzer_corpus_wgsl_dir
+        seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+      }
     }
 
     fuzzer_test("tint_binding_remapper_fuzzer") {
@@ -261,12 +267,14 @@ if (build_with_chromium) {
   }
 
   if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
-    fuzzer_test("tint_ast_hlsl_writer_fuzzer") {
-      sources = [ "tint_ast_fuzzer/tint_ast_hlsl_writer_fuzzer.cc" ]
-      deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
-      libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+    if (build_with_chromium) {
+      fuzzer_test("tint_ast_hlsl_writer_fuzzer") {
+        sources = [ "tint_ast_fuzzer/tint_ast_hlsl_writer_fuzzer.cc" ]
+        deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
+        libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
+        seed_corpus = fuzzer_corpus_wgsl_dir
+        seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+      }
     }
 
     fuzzer_test("tint_regex_hlsl_writer_fuzzer") {
@@ -288,12 +296,14 @@ if (build_with_chromium) {
   }
 
   if (tint_build_wgsl_reader && tint_build_msl_writer) {
-    fuzzer_test("tint_ast_msl_writer_fuzzer") {
-      sources = [ "tint_ast_fuzzer/tint_ast_msl_writer_fuzzer.cc" ]
-      deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
-      libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+    if (build_with_chromium) {
+      fuzzer_test("tint_ast_msl_writer_fuzzer") {
+        sources = [ "tint_ast_fuzzer/tint_ast_msl_writer_fuzzer.cc" ]
+        deps = [ "tint_ast_fuzzer:tint_ast_fuzzer" ]
+        libfuzzer_options = tint_ast_fuzzer_common_libfuzzer_options
+        seed_corpus = fuzzer_corpus_wgsl_dir
+        seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+      }
     }
 
     fuzzer_test("tint_regex_msl_writer_fuzzer") {
@@ -321,15 +331,16 @@ if (build_with_chromium) {
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
       deps += [
         ":tint_ast_clone_fuzzer",
-        ":tint_ast_wgsl_writer_fuzzer",
         ":tint_regex_wgsl_writer_fuzzer",
         ":tint_wgsl_reader_wgsl_writer_fuzzer",
       ]
+      if (build_with_chromium) {
+        deps += [ ":tint_ast_wgsl_writer_fuzzer" ]
+      }
     }
     if (tint_build_wgsl_reader && tint_build_spv_writer) {
       deps += [
         ":tint_all_transforms_fuzzer",
-        ":tint_ast_spv_writer_fuzzer",
         ":tint_binding_remapper_fuzzer",
         ":tint_first_index_offset_fuzzer",
         ":tint_regex_spv_writer_fuzzer",
@@ -339,20 +350,27 @@ if (build_with_chromium) {
         ":tint_vertex_pulling_fuzzer",
         ":tint_wgsl_reader_spv_writer_fuzzer",
       ]
+      if (build_with_chromium) {
+        deps += [ ":tint_ast_spv_writer_fuzzer" ]
+      }
     }
     if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
       deps += [
-        ":tint_ast_hlsl_writer_fuzzer",
         ":tint_regex_hlsl_writer_fuzzer",
         ":tint_wgsl_reader_hlsl_writer_fuzzer",
       ]
+      if (build_with_chromium) {
+        deps += [ ":tint_ast_hlsl_writer_fuzzer" ]
+      }
     }
     if (tint_build_wgsl_reader && tint_build_msl_writer) {
       deps += [
-        ":tint_ast_msl_writer_fuzzer",
         ":tint_regex_msl_writer_fuzzer",
         ":tint_wgsl_reader_msl_writer_fuzzer",
       ]
+      if (build_with_chromium) {
+        deps += [ ":tint_ast_msl_writer_fuzzer" ]
+      }
     }
   }
 } else {

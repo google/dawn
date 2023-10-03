@@ -15,7 +15,7 @@
 import("//build_overrides/build.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
-if (build_with_chromium) {
+if (tint_has_fuzzers) {
   source_set("tint_regex_fuzzer") {
     public_configs = [
       "${tint_src_dir}:tint_config",

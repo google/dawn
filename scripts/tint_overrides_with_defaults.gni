@@ -16,6 +16,12 @@ import("//build_overrides/tint.gni")
 
 # This file contains Tint-related build flags.
 
+if (!defined(tint_has_build)) {
+  tint_has_build = true
+}
+
+tint_has_fuzzers = tint_has_build
+
 declare_args() {
   # Path to tint checkout
   if (!defined(tint_root_dir)) {
