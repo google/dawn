@@ -27,6 +27,7 @@ namespace tint::ast {
 class AccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
+class BlockStatement;
 class BuiltinAttribute;
 class CallExpression;
 class Expression;
@@ -42,14 +43,15 @@ class Struct;
 class StructMember;
 class SwitchStatement;
 class TypeDecl;
+class UnaryOpExpression;
 class Variable;
 class WhileStatement;
-class UnaryOpExpression;
 }  // namespace tint::ast
 namespace tint::core {
 enum class BuiltinValue : uint8_t;
 }
 namespace tint::sem {
+class BlockStatement;
 class Expression;
 class ForLoopStatement;
 class Function;
@@ -77,6 +79,7 @@ namespace tint::sem {
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
     //! @cond Doxygen_Suppress
+    BlockStatement* operator()(ast::BlockStatement*);
     BuiltinEnumExpression<core::BuiltinValue>* operator()(ast::BuiltinAttribute*);
     CastableBase* operator()(ast::Node*);
     Expression* operator()(ast::Expression*);

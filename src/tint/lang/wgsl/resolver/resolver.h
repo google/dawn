@@ -676,7 +676,7 @@ class Resolver {
         tint::Slice<char const* const> suggestions = tint::Empty;
     };
 
-    ProgramBuilder* const builder_;
+    ProgramBuilder& b;
     diag::List& diagnostics_;
     core::constant::Eval const_eval_;
     core::intrinsic::Table<wgsl::intrinsic::Dialect> intrinsic_table_;
