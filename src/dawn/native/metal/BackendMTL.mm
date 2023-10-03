@@ -689,6 +689,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
             uint32_t maxTextureArrayLayers;
             uint32_t minBufferOffsetAlignment;
             uint32_t maxColorRenderTargets;
+            uint32_t maxTotalRenderTargetSize;
         };
 
         struct LimitsForFamily {
@@ -700,7 +701,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
             // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
             //                                                               Apple                                                      Mac
             //                                                                   1,      2,      3,      4,      5,      6,      7,       1,      2
-            constexpr LimitsForFamily kMTLLimits[13] = {
+            constexpr LimitsForFamily kMTLLimits[14] = {
                 {&MTLDeviceLimits::maxVertexAttribsPerDescriptor,         {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
                 {&MTLDeviceLimits::maxBufferArgumentEntriesPerFunc,       {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
                 {&MTLDeviceLimits::maxTextureArgumentEntriesPerFunc,      {    31u,    31u,    31u,    96u,    96u,   128u,   128u,    128u,   128u }},
@@ -714,6 +715,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 {&MTLDeviceLimits::maxTextureArrayLayers,                 {  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,   2048u,  2048u }},
                 {&MTLDeviceLimits::minBufferOffsetAlignment,              {     4u,     4u,     4u,     4u,     4u,     4u,     4u,    256u,   256u }},
                 {&MTLDeviceLimits::maxColorRenderTargets,                 {     4u,     8u,     8u,     8u,     8u,     8u,     8u,      8u,     8u }},
+                // Note: the feature set tables list No Limit for Mac 1 and Mac 2.
+                // For these, we use maxColorRenderTargets * 16. 16 is the largest cost of any color format.
+                {&MTLDeviceLimits::maxTotalRenderTargetSize,              {    16u,    32u,    32u,    64u,    64u,    64u,    64u,    128u,   128u }},
             };
         // clang-format on
 
@@ -732,6 +736,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         limits->v1.maxTextureDimension3D = mtlLimits.max3DTextureSize;
         limits->v1.maxTextureArrayLayers = mtlLimits.maxTextureArrayLayers;
         limits->v1.maxColorAttachments = mtlLimits.maxColorRenderTargets;
+        limits->v1.maxColorAttachmentBytesPerSample = mtlLimits.maxTotalRenderTargetSize;
 
         uint32_t maxBuffersPerStage = mtlLimits.maxBufferArgumentEntriesPerFunc;
         maxBuffersPerStage -= 1;  // One slot is reserved to store buffer lengths.
