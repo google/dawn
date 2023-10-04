@@ -118,6 +118,9 @@ struct Options {
     /// Set to `true` to clamp frag depth
     bool clamp_frag_depth = false;
 
+    /// Set to `true` to always pass matrices to user functions by pointer instead of by value.
+    bool pass_matrix_by_pointer = false;
+
     /// Set to `true` to generate SPIR-V via the Tint IR instead of from the AST.
     bool use_tint_ir = false;
 

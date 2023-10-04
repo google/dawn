@@ -36,6 +36,7 @@
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
 #include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
+#include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
@@ -102,6 +103,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     dva_options.transform_function = true;
     dva_options.transform_private = true;
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_options);
+
+    if (options.pass_matrix_by_pointer) {
+        // PassMatrixByPointer must come after PreservePadding+DirectVariableAccess.
+        RUN_TRANSFORM(PassMatrixByPointer, module);
+    }
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);

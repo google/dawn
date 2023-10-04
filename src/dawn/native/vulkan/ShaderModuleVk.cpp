@@ -19,11 +19,13 @@
 #include <vector>
 
 #include "dawn/native/CacheRequest.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -182,6 +184,7 @@ ShaderModule::~ShaderModule() = default;
     X(bool, disableImageRobustness)                                                              \
     X(bool, disableRuntimeSizedArrayIndexClamping)                                               \
     X(bool, experimentalRequireSubgroupUniformControlFlow)                                       \
+    X(bool, passMatrixByPointer)                                                                 \
     X(bool, useTintIR)                                                                           \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
@@ -319,6 +322,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
         req.experimentalRequireSubgroupUniformControlFlow = true;
     }
+    // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
+    // See crbug.com/tint/2045.
+    if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {
+        req.passMatrixByPointer = true;
+    }
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -393,6 +401,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             options.experimental_require_subgroup_uniform_control_flow =
                 r.experimentalRequireSubgroupUniformControlFlow;
             options.use_tint_ir = r.useTintIR;
+            options.pass_matrix_by_pointer = r.passMatrixByPointer;
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
             auto tintResult = tint::spirv::writer::Generate(program, options);

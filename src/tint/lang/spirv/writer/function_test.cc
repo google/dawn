@@ -371,5 +371,73 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
+    auto* mat_ty = ty.mat3x3<f32>();
+    auto* arr = mod.root_block->Append(b.Var("var", ty.ptr(private_, ty.array(mat_ty, 4))));
+
+    auto* target = b.Function("target", mat_ty);
+    auto* value_a = b.FunctionParam("value_a", mat_ty);
+    auto* scalar = b.FunctionParam("scalar", ty.f32());
+    auto* value_b = b.FunctionParam("value_b", mat_ty);
+    target->SetParams({value_a, scalar, value_b});
+    b.Append(target->Block(), [&] {
+        auto* scale = b.Multiply(mat_ty, value_a, scalar);
+        auto* sum = b.Add(mat_ty, scale, value_b);
+        b.Return(target, sum);
+    });
+
+    auto* caller = b.Function("caller", mat_ty);
+    b.Append(caller->Block(), [&] {
+        auto* mat_ptr = ty.ptr(private_, mat_ty);
+        auto* ma = b.Load(b.Access(mat_ptr, arr, 0_u));
+        auto* mb = b.Load(b.Access(mat_ptr, arr, 1_u));
+        auto* result = b.Call(mat_ty, target, ma, b.Constant(2_f), mb);
+        b.Return(caller, result);
+    });
+
+    Options options;
+    options.pass_matrix_by_pointer = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+
+    EXPECT_INST(R"(
+               ; Function target
+     %target = OpFunction %mat3v3float None %15
+         %12 = OpFunctionParameter %_ptr_Function_mat3v3float
+     %scalar = OpFunctionParameter %float
+         %14 = OpFunctionParameter %_ptr_Function_mat3v3float
+         %16 = OpLabel
+         %17 = OpLoad %mat3v3float %14
+         %18 = OpLoad %mat3v3float %12
+         %19 = OpMatrixTimesScalar %mat3v3float %18 %scalar
+         %20 = OpCompositeExtract %v3float %19 0
+         %21 = OpCompositeExtract %v3float %17 0
+         %22 = OpFAdd %v3float %20 %21
+         %23 = OpCompositeExtract %v3float %19 1
+         %24 = OpCompositeExtract %v3float %17 1
+         %25 = OpFAdd %v3float %23 %24
+         %26 = OpCompositeExtract %v3float %19 2
+         %27 = OpCompositeExtract %v3float %17 2
+         %28 = OpFAdd %v3float %26 %27
+         %29 = OpCompositeConstruct %mat3v3float %22 %25 %28
+               OpReturnValue %29
+               OpFunctionEnd
+
+               ; Function caller
+     %caller = OpFunction %mat3v3float None %31
+         %32 = OpLabel
+         %40 = OpVariable %_ptr_Function_mat3v3float Function
+         %41 = OpVariable %_ptr_Function_mat3v3float Function
+         %33 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_0
+         %36 = OpLoad %mat3v3float %33
+         %37 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_1
+         %39 = OpLoad %mat3v3float %37
+               OpStore %40 %36
+               OpStore %41 %39
+         %42 = OpFunctionCall %mat3v3float %target %40 %float_2 %41
+               OpReturnValue %42
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

@@ -39,6 +39,8 @@ if (tint_build_spv_writer) {
       "handle_matrix_arithmetic.h",
       "merge_return.cc",
       "merge_return.h",
+      "pass_matrix_by_pointer.cc",
+      "pass_matrix_by_pointer.h",
       "raise.cc",
       "raise.h",
       "shader_io.cc",
@@ -91,6 +93,7 @@ if (tint_build_unittests) {
         "expand_implicit_splats_test.cc",
         "handle_matrix_arithmetic_test.cc",
         "merge_return_test.cc",
+        "pass_matrix_by_pointer_test.cc",
         "shader_io_test.cc",
         "var_for_dynamic_index_test.cc",
       ]
