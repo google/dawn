@@ -28,6 +28,8 @@
 tint_add_target(tint_lang_spirv_ir lib
   lang/spirv/ir/builtin_call.cc
   lang/spirv/ir/builtin_call.h
+  lang/spirv/ir/literal_operand.cc
+  lang/spirv/ir/literal_operand.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_ir lib

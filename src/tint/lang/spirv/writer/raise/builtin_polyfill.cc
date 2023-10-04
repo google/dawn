@@ -29,10 +29,9 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::LiteralOperand);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -177,8 +176,8 @@ struct State {
     /// Create a literal operand.
     /// @param value the literal value
     /// @returns the literal operand
-    LiteralOperand* Literal(u32 value) {
-        return ir.values.Create<LiteralOperand>(b.ConstantValue(value));
+    spirv::ir::LiteralOperand* Literal(u32 value) {
+        return ir.values.Create<spirv::ir::LiteralOperand>(b.ConstantValue(value));
     }
 
     /// Handle an `arrayLength()` builtin.
@@ -884,9 +883,5 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
 
     return Success;
 }
-
-LiteralOperand::LiteralOperand(const core::constant::Value* value) : Base(value) {}
-
-LiteralOperand::~LiteralOperand() = default;
 
 }  // namespace tint::spirv::writer::raise

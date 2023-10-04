@@ -27,9 +27,11 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
+    "literal_operand.cc",
   ],
   hdrs = [
     "builtin_call.h",
+    "literal_operand.h",
   ],
   deps = [
     "//src/tint/api/common",

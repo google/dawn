@@ -73,6 +73,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
@@ -231,7 +232,7 @@ uint32_t Printer::Builtin(core::BuiltinValue builtin, core::AddressSpace addrspa
 
 uint32_t Printer::Constant(core::ir::Constant* constant) {
     // If it is a literal operand, just return the value.
-    if (auto* literal = constant->As<raise::LiteralOperand>()) {
+    if (auto* literal = constant->As<spirv::ir::LiteralOperand>()) {
         return literal->Value()->ValueAs<uint32_t>();
     }
 

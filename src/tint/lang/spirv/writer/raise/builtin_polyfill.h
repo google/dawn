@@ -36,18 +36,6 @@ namespace tint::spirv::writer::raise {
 /// @returns success or failure
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& module);
 
-/// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
-/// the SPIR-V instruction stream.
-/// TODO(jrprice): Move this to lang/spirv.
-class LiteralOperand final : public Castable<LiteralOperand, core::ir::Constant> {
-  public:
-    /// Constructor
-    /// @param value the operand value
-    explicit LiteralOperand(const core::constant::Value* value);
-    /// Destructor
-    ~LiteralOperand() override;
-};
-
 }  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_BUILTIN_POLYFILL_H_
