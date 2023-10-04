@@ -82,7 +82,7 @@
     X(Maximum,                               maxBindGroups,         4,         4,          4) \
     X(Maximum,              maxBindGroupsPlusVertexBuffers,        24,        24,         24) \
     X(Maximum,                     maxBindingsPerBindGroup,      1000,      1000,       1000) \
-    X(Maximum,                 maxUniformBufferBindingSize,     65536,     65536,      65536) \
+    X(Maximum,                 maxUniformBufferBindingSize,     16384,     65536,      65536) \
     X(Alignment,           minUniformBufferOffsetAlignment,       256,       256,        256) \
     X(Alignment,           minStorageBufferOffsetAlignment,       256,       256,        256) \
     X(Maximum,                            maxVertexBuffers,         8,         8,          8) \
