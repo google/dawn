@@ -852,6 +852,14 @@ crbug.com/tint/2035 [ ventura ] webgpu:shader,validation,expression,call,builtin
 crbug.com/tint/2035 [ webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 
 ################################################################################
+# Abstract matrix by matrix operations
+# Skipped because they are very slow and cause general timeouts
+# KEEP
+################################################################################
+crbug.com/tint/2051 webgpu:shader,execution,expression,binary,af_matrix_addition:* [ Skip ]
+crbug.com/tint/2051 webgpu:shader,execution,expression,binary,af_matrix_subtraction:* [ Skip ]
+
+################################################################################
 # untriaged DXC failures
 ################################################################################
 crbug.com/tint/0000 [ intel-0x9bc5 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,basic:writeMask=0;renderMode="direct";bufferOffset="zero";querySetOffset="non-zero" [ Failure ]
