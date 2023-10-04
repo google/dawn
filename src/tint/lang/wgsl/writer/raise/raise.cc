@@ -18,6 +18,8 @@
 
 #include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 
@@ -151,17 +153,66 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
     }
 }
 
+void ReplaceBuiltinFnCall(core::ir::Module& mod, core::ir::CoreBuiltinCall* call) {
+    Vector<core::ir::Value*, 8> args(call->Args());
+    auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
+        call->Result(), Convert(call->Func()), std::move(args));
+    call->ReplaceWith(replacement);
+    call->ClearResults();
+    call->Destroy();
+}
+
+void ReplaceWorkgroupBarrier(core::ir::Module& mod, core::ir::CoreBuiltinCall* call) {
+    // Pattern match:
+    //    call workgroupBarrier
+    //    %value = load &ptr
+    //    call workgroupBarrier
+    // And replace with:
+    //    %value = call workgroupUniformLoad %ptr
+
+    auto* load = As<core::ir::Load>(call->next);
+    if (!load || load->From()->Type()->As<core::type::Pointer>()->AddressSpace() !=
+                     core::AddressSpace::kWorkgroup) {
+        // No match
+        ReplaceBuiltinFnCall(mod, call);
+        return;
+    }
+
+    auto* post_load = As<core::ir::CoreBuiltinCall>(load->next);
+    if (!post_load || post_load->Func() != core::BuiltinFn::kWorkgroupBarrier) {
+        // No match
+        ReplaceBuiltinFnCall(mod, call);
+        return;
+    }
+
+    // Remove both calls to workgroupBarrier
+    post_load->Destroy();
+    call->Destroy();
+
+    // Replace load with workgroupUniformLoad
+    auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
+        load->Result(), wgsl::BuiltinFn::kWorkgroupUniformLoad, Vector{load->From()});
+    load->ReplaceWith(replacement);
+    load->ClearResults();
+    load->Destroy();
+}
+
 }  // namespace
 
 Result<SuccessType> Raise(core::ir::Module& mod) {
     for (auto* inst : mod.instructions.Objects()) {
+        if (!inst->Alive()) {
+            continue;
+        }
         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
-            Vector<core::ir::Value*, 8> args(call->Args());
-            auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
-                call->Result(), Convert(call->Func()), std::move(args));
-            call->ReplaceWith(replacement);
-            call->ClearResults();
-            call->Destroy();
+            switch (call->Func()) {
+                case core::BuiltinFn::kWorkgroupBarrier:
+                    ReplaceWorkgroupBarrier(mod, call);
+                    break;
+                default:
+                    ReplaceBuiltinFnCall(mod, call);
+                    break;
+            }
         }
     }
     return Success;
