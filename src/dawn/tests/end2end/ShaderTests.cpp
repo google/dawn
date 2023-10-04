@@ -1142,8 +1142,7 @@ TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
 
 // Check that chromium_disable_uniformity_analysis can be used. It is normally disallowed as unsafe
 // but DawnTests allow all unsafe APIs by default.
-// TODO(crbug.com/tint/1728): Enable again when uniformity failures are errors again
-TEST_P(ShaderTests, DISABLED_CheckUsageOf_chromium_disable_uniformity_analysis) {
+TEST_P(ShaderTests, CheckUsageOf_chromium_disable_uniformity_analysis) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         enable chromium_disable_uniformity_analysis;
 
