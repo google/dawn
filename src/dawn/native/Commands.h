@@ -72,20 +72,20 @@ enum class Command {
     WriteTimestamp,
 };
 
-struct TimestampWrite {
-    TimestampWrite();
-    ~TimestampWrite();
+struct TimestampWrites {
+    TimestampWrites();
+    ~TimestampWrites();
 
     Ref<QuerySetBase> querySet;
-    uint32_t queryIndex;
+    uint32_t beginningOfPassWriteIndex = wgpu::kQuerySetIndexUndefined;
+    uint32_t endOfPassWriteIndex = wgpu::kQuerySetIndexUndefined;
 };
 
 struct BeginComputePassCmd {
     BeginComputePassCmd();
     ~BeginComputePassCmd();
 
-    TimestampWrite beginTimestamp;
-    TimestampWrite endTimestamp;
+    TimestampWrites timestampWrites;
     std::string label;
 };
 
@@ -138,8 +138,7 @@ struct BeginRenderPassCmd {
     uint32_t height;
 
     Ref<QuerySetBase> occlusionQuerySet;
-    TimestampWrite beginTimestamp;
-    TimestampWrite endTimestamp;
+    TimestampWrites timestampWrites;
     std::string label;
 };
 

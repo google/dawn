@@ -948,23 +948,19 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
             }
             cmd->label = std::string(descriptor->label ? descriptor->label : "");
 
-            // Record timestamp writes at the beginning and end of compute pass. The timestamp write
-            // at the end also be needed in BeginComputePassCmd because it's required by compute
-            // pass descriptor when beginning compute pass on Metal.
             if (descriptor->timestampWrites != nullptr) {
                 QuerySetBase* querySet = descriptor->timestampWrites->querySet;
                 uint32_t beginningOfPassWriteIndex =
                     descriptor->timestampWrites->beginningOfPassWriteIndex;
                 uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
 
+                cmd->timestampWrites.querySet = querySet;
+                cmd->timestampWrites.beginningOfPassWriteIndex = beginningOfPassWriteIndex;
+                cmd->timestampWrites.endOfPassWriteIndex = endOfPassWriteIndex;
                 if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-                    cmd->beginTimestamp.querySet = querySet;
-                    cmd->beginTimestamp.queryIndex = beginningOfPassWriteIndex;
                     TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
                 }
                 if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-                    cmd->endTimestamp.querySet = querySet;
-                    cmd->endTimestamp.queryIndex = endOfPassWriteIndex;
                     TrackQueryAvailability(querySet, endOfPassWriteIndex);
                 }
             }
@@ -1149,26 +1145,22 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             cmd->occlusionQuerySet = descriptor->occlusionQuerySet;
 
-            // Record timestamp writes at the beginning and end of render pass. The timestamp write
-            // at the end also be needed in BeginComputePassCmd because it's required by render pass
-            // descriptor when beginning render pass on Metal.
             if (descriptor->timestampWrites != nullptr) {
                 QuerySetBase* querySet = descriptor->timestampWrites->querySet;
                 uint32_t beginningOfPassWriteIndex =
                     descriptor->timestampWrites->beginningOfPassWriteIndex;
                 uint32_t endOfPassWriteIndex = descriptor->timestampWrites->endOfPassWriteIndex;
 
+                cmd->timestampWrites.querySet = querySet;
+                cmd->timestampWrites.beginningOfPassWriteIndex = beginningOfPassWriteIndex;
+                cmd->timestampWrites.endOfPassWriteIndex = endOfPassWriteIndex;
                 if (beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-                    cmd->beginTimestamp.querySet = querySet;
-                    cmd->beginTimestamp.queryIndex = beginningOfPassWriteIndex;
                     TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
                     // Track the query availability with true on render pass again for rewrite
                     // validation and query reset on Vulkan
                     usageTracker.TrackQueryAvailability(querySet, beginningOfPassWriteIndex);
                 }
                 if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
-                    cmd->endTimestamp.querySet = querySet;
-                    cmd->endTimestamp.queryIndex = endOfPassWriteIndex;
                     TrackQueryAvailability(querySet, endOfPassWriteIndex);
                     // Track the query availability with true on render pass again for rewrite
                     // validation and query reset on Vulkan

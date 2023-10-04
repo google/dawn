@@ -371,8 +371,8 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
-TimestampWrite::TimestampWrite() = default;
-TimestampWrite::~TimestampWrite() = default;
+TimestampWrites::TimestampWrites() = default;
+TimestampWrites::~TimestampWrites() = default;
 
 BeginComputePassCmd::BeginComputePassCmd() = default;
 BeginComputePassCmd::~BeginComputePassCmd() = default;

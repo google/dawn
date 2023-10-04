@@ -1168,9 +1168,9 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
     // Write timestamp at the beginning of compute pass if it's set.
-    if (computePass->beginTimestamp.querySet.Get() != nullptr) {
-        RecordWriteTimestampCmd(commandList, computePass->beginTimestamp.querySet.Get(),
-                                computePass->beginTimestamp.queryIndex);
+    if (computePass->timestampWrites.beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        RecordWriteTimestampCmd(commandList, computePass->timestampWrites.querySet.Get(),
+                                computePass->timestampWrites.beginningOfPassWriteIndex);
     }
 
     Command type;
@@ -1216,9 +1216,11 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 mCommands.NextCommand<EndComputePassCmd>();
 
                 // Write timestamp at the end of compute pass if it's set.
-                if (computePass->endTimestamp.querySet.Get() != nullptr) {
-                    RecordWriteTimestampCmd(commandList, computePass->endTimestamp.querySet.Get(),
-                                            computePass->endTimestamp.queryIndex);
+                if (computePass->timestampWrites.endOfPassWriteIndex !=
+                    wgpu::kQuerySetIndexUndefined) {
+                    RecordWriteTimestampCmd(commandList,
+                                            computePass->timestampWrites.querySet.Get(),
+                                            computePass->timestampWrites.endOfPassWriteIndex);
                 }
                 return {};
             }
@@ -1492,9 +1494,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
     // Write timestamp at the beginning of render pass if it's set.
-    if (renderPass->beginTimestamp.querySet.Get() != nullptr) {
-        RecordWriteTimestampCmd(commandList, renderPass->beginTimestamp.querySet.Get(),
-                                renderPass->beginTimestamp.queryIndex);
+    if (renderPass->timestampWrites.beginningOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
+        RecordWriteTimestampCmd(commandList, renderPass->timestampWrites.querySet.Get(),
+                                renderPass->timestampWrites.beginningOfPassWriteIndex);
     }
 
     // Set up default dynamic state
@@ -1671,9 +1673,10 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 mCommands.NextCommand<EndRenderPassCmd>();
 
                 // Write timestamp at the end of render pass if it's set.
-                if (renderPass->endTimestamp.querySet.Get() != nullptr) {
-                    RecordWriteTimestampCmd(commandList, renderPass->endTimestamp.querySet.Get(),
-                                            renderPass->endTimestamp.queryIndex);
+                if (renderPass->timestampWrites.endOfPassWriteIndex !=
+                    wgpu::kQuerySetIndexUndefined) {
+                    RecordWriteTimestampCmd(commandList, renderPass->timestampWrites.querySet.Get(),
+                                            renderPass->timestampWrites.endOfPassWriteIndex);
                 }
 
                 if (useRenderPass) {
