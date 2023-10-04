@@ -9,6 +9,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.16
+	github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6
 	github.com/sergi/go-diff v1.3.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/tidwall/jsonc v0.3.2
@@ -17,7 +18,7 @@ require (
 	golang.org/x/oauth2 v0.6.0
 	google.golang.org/api v0.112.0
 	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.29.0
+	google.golang.org/protobuf v1.29.1
 )
 
 require (
@@ -37,7 +38,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/maruel/subcommands v1.1.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6 // indirect
+	github.com/mzohreva/GoGraphviz v0.0.0-20180226085351-533f4a37d9c6 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect

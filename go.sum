@@ -6,8 +6,6 @@ cloud.google.com/go/compute/metadata v0.2.3 h1:mg4jlk7mCAj6xXp9UJ4fjI9VUI5rubuGB
 cloud.google.com/go/compute/metadata v0.2.3/go.mod h1:VAV5nSsACxMJvgaAuX6Pk2AawlZn8kiOGuCv6gTkwuA=
 cloud.google.com/go/longrunning v0.4.1 h1:v+yFJOfKC3yZdY6ZUI933pIYdhyhV8S3NpWrXWmg7jM=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5 h1:HBlTlvyq4siv4ZK41DebGIX11/9gFBqUF8G64AePjyQ=
-github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5/go.mod h1:aqcjwEnmLLSalFNYR0p2ttnEXOVVRctIzsUMHbEcruU=
 github.com/andygrunwald/go-gerrit v0.0.0-20230508072829-423d372345aa h1:bGSzPoUh/2eduqGEk54TCoB4v81MVi6Hr3+fYQwFrBM=
 github.com/andygrunwald/go-gerrit v0.0.0-20230508072829-423d372345aa/go.mod h1:SeP12EkHZxEVjuJ2HZET304NBtHGG2X6w2Gzd0QXAZw=
 github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094 h1:CTVJdI6oUCRNucMEmoh3c2U88DesoPtefsxKhoZ1WuQ=
@@ -94,6 +92,8 @@ github.com/mattn/go-isatty v0.0.16 h1:bq3VjFmv/sOjHtdEhmkEV4x1AJtvUvOJ2PFAZ5+peK
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
+github.com/mzohreva/GoGraphviz v0.0.0-20180226085351-533f4a37d9c6 h1:yd4o0qJNQc2PBlymcRCUHM0ltxciTkPjUuVTj8cDbLA=
+github.com/mzohreva/GoGraphviz v0.0.0-20180226085351-533f4a37d9c6/go.mod h1:eILxk8m1m1XGxWu1nQHdKKKl/JnDltcRTe2n84cUWDw=
 github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6 h1:E1u0tpQfk5go6GQ4Gg03I3FRLKdcxM7PNzo5lKTqh7U=
 github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6/go.mod h1:bBX+0ahzrDlJ3NtK345LYHaf+xDeNwttNkWPy+NL6wM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -227,8 +227,8 @@ google.golang.org/protobuf v1.23.1-0.20200526195155-81db48ad09cc/go.mod h1:EGpAD
 google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlbajtzgsN7c=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
-google.golang.org/protobuf v1.29.0 h1:44S3JjaKmLEE4YIkjzexaP+NzZsudE3Zin5Njn/pYX0=
-google.golang.org/protobuf v1.29.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+google.golang.org/protobuf v1.29.1 h1:7QBf+IK2gx70Ap/hDsOmam3GE0v9HicjfEdAxE62UoM=
+google.golang.org/protobuf v1.29.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
