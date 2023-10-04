@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <vector>
 
 #include "src/tint/lang/spirv/writer/common/function.h"
@@ -154,7 +155,7 @@ class Module {
     InstructionList annotations_;
     std::vector<Function> functions_;
     Hashset<uint32_t, 8> capability_set_;
-    Hashset<const char*, 8> extension_set_;
+    Hashset<std::string, 8> extension_set_;
 };
 
 }  // namespace tint::spirv::writer
