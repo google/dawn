@@ -31,6 +31,7 @@ cc_library(
     "instruction.cc",
     "module.cc",
     "operand.cc",
+    "option_builder.cc",
   ],
   hdrs = [
     "binary_writer.h",
@@ -38,13 +39,14 @@ cc_library(
     "instruction.h",
     "module.h",
     "operand.h",
+    "option_builder.h",
     "options.h",
   ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/api/options",
-    "//src/tint/lang/core",
     "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
@@ -76,7 +78,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/api/common",
-    "//src/tint/api/options",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",

@@ -32,7 +32,6 @@ if (tint_build_spv_writer) {
     ]
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",

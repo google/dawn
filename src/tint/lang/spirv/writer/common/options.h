@@ -15,11 +15,83 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 
-#include "src/tint/api/options/binding_remapper.h"
-#include "src/tint/api/options/external_texture.h"
+#include <unordered_map>
+
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::spirv::writer {
+namespace binding {
+
+/// Generic binding point
+struct BindingInfo {
+    /// The group
+    uint32_t group = 0;
+    /// The binding
+    uint32_t binding = 0;
+
+    /// Equality operator
+    /// @param rhs the BindingInfo to compare against
+    /// @returns true if this BindingInfo is equal to `rhs`
+    inline bool operator==(const BindingInfo& rhs) const {
+        return group == rhs.group && binding == rhs.binding;
+    }
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(group, binding);
+};
+using Uniform = BindingInfo;
+using Storage = BindingInfo;
+using Texture = BindingInfo;
+using StorageTexture = BindingInfo;
+using Sampler = BindingInfo;
+
+/// An external texture
+struct ExternalTexture {
+    /// Metadata
+    BindingInfo metadata{};
+    /// Plane0 binding data
+    BindingInfo plane0{};
+    /// Plane1 binding data
+    BindingInfo plane1{};
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(metadata, plane0, plane1);
+};
+
+}  // namespace binding
+
+// Maps the WGSL binding point to the SPIR-V group,binding for uniforms
+using UniformBindings = std::unordered_map<BindingPoint, binding::Uniform>;
+// Maps the WGSL binding point to the SPIR-V group,binding for storage
+using StorageBindings = std::unordered_map<BindingPoint, binding::Storage>;
+// Maps the WGSL binding point to the SPIR-V group,binding for textures
+using TextureBindings = std::unordered_map<BindingPoint, binding::Texture>;
+// Maps the WGSL binding point to the SPIR-V group,binding for storage textures
+using StorageTextureBindings = std::unordered_map<BindingPoint, binding::StorageTexture>;
+// Maps the WGSL binding point to the SPIR-V group,binding for samplers
+using SamplerBindings = std::unordered_map<BindingPoint, binding::Sampler>;
+// Maps the WGSL binding point to the plane0, plane1, and metadata information for external textures
+using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::ExternalTexture>;
+
+/// Binding information
+struct Bindings {
+    /// Uniform bindings
+    UniformBindings uniform{};
+    /// Storage bindings
+    StorageBindings storage{};
+    /// Texture bindings
+    TextureBindings texture{};
+    /// Storage texture bindings
+    StorageTextureBindings storage_texture{};
+    /// Sampler bindings
+    SamplerBindings sampler{};
+    /// External bindings
+    ExternalTextureBindings external_texture{};
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(uniform, storage, texture, sampler, external_texture);
+};
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
@@ -49,16 +121,13 @@ struct Options {
     /// Set to `true` to generate SPIR-V via the Tint IR instead of from the AST.
     bool use_tint_ir = false;
 
-    /// Options used in the binding mappings for external textures
-    ExternalTextureOptions external_texture_options = {};
-
-    /// Options used in the bindings remapper
-    BindingRemapperOptions binding_remapper_options = {};
-
     /// Set to `true` to require `SPV_KHR_subgroup_uniform_control_flow` extension and
     /// `SubgroupUniformControlFlowKHR` execution mode for compute stage entry points in generated
     /// SPIRV module. Issue: dawn:464
     bool experimental_require_subgroup_uniform_control_flow = false;
+
+    /// The bindings
+    Bindings bindings;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
@@ -69,9 +138,8 @@ struct Options {
                  emit_vertex_point_size,
                  clamp_frag_depth,
                  use_tint_ir,
-                 external_texture_options,
-                 binding_remapper_options,
-                 experimental_require_subgroup_uniform_control_flow);
+                 experimental_require_subgroup_uniform_control_flow,
+                 bindings);
 };
 
 }  // namespace tint::spirv::writer

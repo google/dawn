@@ -24,6 +24,7 @@
 #include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
 #include "src/tint/lang/spirv/writer/ast_raise/vectorize_matrix_conversions.h"
 #include "src/tint/lang/spirv/writer/ast_raise/while_to_loop.h"
+#include "src/tint/lang/spirv/writer/common/option_builder.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/add_empty_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
@@ -93,16 +94,21 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         data.Add<ast::transform::Robustness::Config>(config);
     }
 
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+
     // BindingRemapper must come before MultiplanarExternalTexture. Note, this is flipped to the
     // other generators which run Multiplanar first and then binding remapper.
     manager.Add<ast::transform::BindingRemapper>();
+
     data.Add<ast::transform::BindingRemapper::Remappings>(
-        options.binding_remapper_options.binding_points,
-        std::unordered_map<BindingPoint, core::Access>{}, /* allow_collisions */ false);
+        remapper_data, std::unordered_map<BindingPoint, core::Access>{},
+        /* allow_collisions */ false);
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
     data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        options.external_texture_options.bindings_map);
+        external_texture_options.bindings_map);
     manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills

@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/spirv/writer/common/option_builder.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
@@ -39,6 +40,13 @@ Result<Output> Generate(const Program& program, const Options& options) {
 
     bool zero_initialize_workgroup_memory =
         !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
+
+    {
+        diag::List validation_diagnostics;
+        if (!ValidateBindingOptions(options, validation_diagnostics)) {
+            return Failure{validation_diagnostics};
+        }
+    }
 
     Output output;
 

@@ -22,34 +22,23 @@
 ################################################################################
 
 ################################################################################
-# Target:    tint_cmd_loopy_cmd
-# Kind:      cmd
+# Target:    tint_lang_spirv_writer_helpers
+# Kind:      lib
 ################################################################################
-tint_add_target(tint_cmd_loopy_cmd cmd
-  cmd/loopy/main.cc
+tint_add_target(tint_lang_spirv_writer_helpers lib
+  lang/spirv/writer/helpers/generate_bindings.cc
+  lang/spirv/writer/helpers/generate_bindings.h
 )
 
-tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-  tint_api
+tint_target_add_dependencies(tint_lang_spirv_writer_helpers lib
   tint_api_common
-  tint_api_options
-  tint_cmd_common
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_hlsl_writer_common
-  tint_lang_spirv_reader_common
-  tint_lang_spirv_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_helpers
-  tint_lang_wgsl_inspector
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader
-  tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -65,37 +54,8 @@ tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_utils_traits
 )
 
-if(TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-    tint_lang_glsl_writer
-    tint_lang_glsl_writer_common
-  )
-endif(TINT_BUILD_GLSL_WRITER)
-
-if(TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-    tint_lang_hlsl_writer
-  )
-endif(TINT_BUILD_HLSL_WRITER)
-
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-    tint_lang_msl_writer
-    tint_lang_msl_writer_common
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-if(TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-    tint_lang_spirv_reader
-  )
-endif(TINT_BUILD_SPV_READER)
-
 if(TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
-    tint_lang_spirv_writer
+  tint_target_add_dependencies(tint_lang_spirv_writer_helpers lib
     tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
-
-tint_target_set_output_name(tint_cmd_loopy_cmd cmd "tint_loopy")

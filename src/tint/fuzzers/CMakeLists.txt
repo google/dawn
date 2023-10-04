@@ -38,6 +38,7 @@ function(add_tint_fuzzer NAME)
     tint_spvheaders_compile_options(${NAME})
     tint_spvtools_compile_options(${NAME})
   endif()
+  target_link_libraries(${NAME} PRIVATE tint_lang_spirv_writer_helpers)
   target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)
 endfunction()
 

@@ -24,6 +24,7 @@
 include(lang/spirv/writer/ast_printer/BUILD.cmake)
 include(lang/spirv/writer/ast_raise/BUILD.cmake)
 include(lang/spirv/writer/common/BUILD.cmake)
+include(lang/spirv/writer/helpers/BUILD.cmake)
 include(lang/spirv/writer/printer/BUILD.cmake)
 include(lang/spirv/writer/raise/BUILD.cmake)
 
@@ -118,7 +119,6 @@ tint_add_target(tint_lang_spirv_writer_test test
 
 tint_target_add_dependencies(tint_lang_spirv_writer_test test
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
@@ -175,7 +175,6 @@ tint_add_target(tint_lang_spirv_writer_bench bench
 
 tint_target_add_dependencies(tint_lang_spirv_writer_bench bench
   tint_api_common
-  tint_api_options
   tint_cmd_bench_bench
   tint_lang_core
   tint_lang_core_constant

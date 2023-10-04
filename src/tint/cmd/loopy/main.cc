@@ -37,6 +37,7 @@
 #endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_SPV_WRITER
+#include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
@@ -192,8 +193,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 bool GenerateSpirv(const tint::Program& program) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
-    gen_options.external_texture_options.bindings_map =
-        tint::cmd::GenerateExternalTextureBindings(program);
+    gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
     auto result = tint::spirv::writer::Generate(program, gen_options);
     if (!result) {
         tint::cmd::PrintWGSL(std::cerr, program);

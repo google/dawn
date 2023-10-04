@@ -57,6 +57,32 @@ MaybeError stream::Stream<tint::BindingPoint>::Read(Source* s, tint::BindingPoin
     return {};
 }
 
+#if TINT_BUILD_SPV_WRITER
+// static
+template <>
+void stream::Stream<tint::spirv::writer::Bindings>::Write(
+    stream::Sink* sink,
+    const tint::spirv::writer::Bindings& bindings) {
+    StreamInTintObject(bindings, sink);
+}
+
+// static
+template <>
+void stream::Stream<tint::spirv::writer::binding::ExternalTexture>::Write(
+    stream::Sink* sink,
+    const tint::spirv::writer::binding::ExternalTexture& et) {
+    StreamInTintObject(et, sink);
+}
+
+// static
+template <>
+void stream::Stream<tint::spirv::writer::binding::BindingInfo>::Write(
+    stream::Sink* sink,
+    const tint::spirv::writer::binding::BindingInfo& point) {
+    StreamInTintObject(point, sink);
+}
+#endif  // TINT_BUILD_SPV_WRITER
+
 // static
 template <>
 void stream::Stream<tint::ExternalTextureOptions::BindingPoints>::Write(

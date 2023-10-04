@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/spirv/writer/common/option_builder.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
 #include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
@@ -49,8 +50,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }                                \
     } while (false)
 
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module,
-                  options.binding_remapper_options.binding_points);
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;
@@ -84,7 +88,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
-                  options.external_texture_options);
+                  external_texture_options);
 
     if (!options.disable_workgroup_init &&
         !options.use_zero_initialize_workgroup_memory_extension) {

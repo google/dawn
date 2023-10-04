@@ -38,14 +38,16 @@ tint_add_target(tint_lang_spirv_writer_common lib
   lang/spirv/writer/common/module.h
   lang/spirv/writer/common/operand.cc
   lang/spirv/writer/common/operand.h
+  lang/spirv/writer/common/option_builder.cc
+  lang/spirv/writer/common/option_builder.h
   lang/spirv/writer/common/options.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_writer_common lib
   tint_api_common
   tint_api_options
-  tint_lang_core
   tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
@@ -81,7 +83,6 @@ tint_add_target(tint_lang_spirv_writer_common_test test
 
 tint_target_add_dependencies(tint_lang_spirv_writer_common_test test
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
