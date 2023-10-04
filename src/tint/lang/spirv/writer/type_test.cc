@@ -368,9 +368,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                                 Dim::k3d, Format::kR32Float},
 
                              // Test all the formats with 2D.
-                             // TODO(jrprice): Enable this format when we polyfill it.
-                             // StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Bgra8Unorm",
-                             //                    Dim::k2d, Format::kBgra8Unorm},
                              StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 R32i",  //
                                                 Dim::k2d, Format::kR32Sint},
                              StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 R32u",  //

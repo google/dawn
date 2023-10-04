@@ -160,13 +160,9 @@ Result<std::vector<uint32_t>> Printer::Generate() {
         return valid.Failure();
     }
 
-    // TODO(crbug.com/tint/1906): Check supported extensions.
-
     module_.PushCapability(SpvCapabilityShader);
     module_.PushMemoryModel(spv::Op::OpMemoryModel, {U32Operand(SpvAddressingModelLogical),
                                                      U32Operand(SpvMemoryModelGLSL450)});
-
-    // TODO(crbug.com/tint/1906): Emit extensions.
 
     // Emit module-scope declarations.
     EmitRootBlock(ir_.root_block);
