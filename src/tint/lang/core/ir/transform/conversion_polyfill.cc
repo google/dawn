@@ -164,13 +164,13 @@ struct State {
 
                 auto* converted = b.Convert(res_ty, value);
 
-                // low = select(low_limit_i, i32(value), value > low_limit_f)
-                auto* low_cond = b.GreaterThan(bool_ty, value, limits.low_limit_f);
+                // low = select(low_limit_i, i32(value), value >= low_limit_f)
+                auto* low_cond = b.GreaterThanEqual(bool_ty, value, limits.low_limit_f);
                 auto* select_low = b.Call(res_ty, core::BuiltinFn::kSelect, limits.low_limit_i,
                                           converted, low_cond);
 
-                // result = select(high_limit_i, low, value < high_limit_f)
-                auto* high_cond = b.LessThan(bool_ty, value, limits.high_limit_f);
+                // result = select(high_limit_i, low, value <= high_limit_f)
+                auto* high_cond = b.LessThanEqual(bool_ty, value, limits.high_limit_f);
                 auto* select_high = b.Call(res_ty, core::BuiltinFn::kSelect, limits.high_limit_i,
                                            select_low, high_cond);
 
