@@ -747,7 +747,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
                                    const CopyTextureForBrowserOptions* options) {
     TextureInfo info;
     info.origin = source->origin;
-    info.size = source->texture->GetSize();
+    info.size = source->texture->GetSize(source->aspect);
 
     Ref<TextureViewBase> srcTextureView = nullptr;
     TextureViewDescriptor srcTextureViewDesc = {};

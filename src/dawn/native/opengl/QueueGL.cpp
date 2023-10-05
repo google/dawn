@@ -63,7 +63,8 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     textureCopy.aspect = SelectFormatAspects(destination.texture->GetFormat(), destination.aspect);
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(textureCopy, writeSizePixel);
-    if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel,
+                                      destination.aspect)) {
         destination.texture->SetIsSubresourceContentInitialized(true, range);
     } else {
         DAWN_TRY(ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range));

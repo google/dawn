@@ -884,14 +884,15 @@ Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
 }
 
 ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateImplicitMSAARenderTextureViewFor(
-    const TextureBase* singleSampledTexture,
+    const TextureViewBase* singleSampledTextureView,
     uint32_t sampleCount) {
     DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
 
     TextureDescriptor desc = {};
     desc.dimension = wgpu::TextureDimension::e2D;
-    desc.format = singleSampledTexture->GetFormat().format;
-    desc.size = {singleSampledTexture->GetWidth(), singleSampledTexture->GetHeight(), 1};
+    desc.format = singleSampledTextureView->GetFormat().format;
+    desc.size = {singleSampledTextureView->GetSingleSubresourceVirtualSize().width,
+                 singleSampledTextureView->GetSingleSubresourceVirtualSize().height, 1};
     desc.sampleCount = sampleCount;
     desc.usage = wgpu::TextureUsage::RenderAttachment;
     if (HasFeature(Feature::TransientAttachments)) {

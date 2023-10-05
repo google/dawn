@@ -69,8 +69,8 @@ bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Ex
     DAWN_ASSERT(src.texture->GetFormat().CopyCompatibleWith(dst.texture->GetFormat()));
     DAWN_ASSERT(src.aspect == dst.aspect);
 
-    const Extent3D& srcSize = src.texture->GetSize();
-    const Extent3D& dstSize = dst.texture->GetSize();
+    const Extent3D& srcSize = src.texture->GetSize(src.aspect);
+    const Extent3D& dstSize = dst.texture->GetSize(dst.aspect);
 
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
     // In order to use D3D12's copy resource, the textures must be the same dimensions, and
@@ -839,7 +839,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
 
                 if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
-                                                  copy->destination.mipLevel)) {
+                                                  copy->destination.mipLevel,
+                                                  copy->destination.aspect)) {
                     texture->SetIsSubresourceContentInitialized(true, subresources);
                 } else {
                     DAWN_TRY(
@@ -913,7 +914,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
                 DAWN_TRY(source->EnsureSubresourceContentInitialized(commandContext, srcRange));
                 if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
-                                                  copy->destination.mipLevel)) {
+                                                  copy->destination.mipLevel,
+                                                  copy->destination.aspect)) {
                     destination->SetIsSubresourceContentInitialized(true, dstRange);
                 } else {
                     DAWN_TRY(

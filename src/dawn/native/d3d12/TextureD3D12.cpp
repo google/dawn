@@ -246,7 +246,7 @@ MaybeError Texture::InitializeAsInternalTexture() {
     resourceDescriptor.Dimension = D3D12TextureDimension(GetDimension());
     resourceDescriptor.Alignment = 0;
 
-    const Extent3D& size = GetSize();
+    const Extent3D& size = GetBaseSize();
     resourceDescriptor.Width = size.width;
     resourceDescriptor.Height = size.height;
     resourceDescriptor.DepthOrArraySize = size.depthOrArrayLayers;
@@ -812,7 +812,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                 uint32_t sliceCount = 1;
                 if (GetDimension() == wgpu::TextureDimension::e3D) {
                     baseSlice = 0;
-                    sliceCount = std::max(GetDepth() >> level, 1u);
+                    sliceCount = std::max(GetDepth(Aspect::Color) >> level, 1u);
                 }
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
                     GetRTVDescriptor(GetFormat(), level, baseSlice, sliceCount);
@@ -830,7 +830,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
             const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
-            Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
+            Extent3D largestMipSize =
+                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect);
 
             uint32_t bytesPerRow =
                 Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
@@ -847,7 +848,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
                 // compute d3d12 texture copy locations for texture and buffer
-                Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level);
+                Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level, aspect);
 
                 for (uint32_t layer = range.baseArrayLayer;
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
@@ -1116,7 +1117,8 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
         case wgpu::TextureViewDimension::e3D:
             uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
             uavDesc.Texture3D.FirstWSlice = 0;
-            uavDesc.Texture3D.WSize = std::max(1u, GetTexture()->GetDepth() >> GetBaseMipLevel());
+            uavDesc.Texture3D.WSize =
+                std::max(1u, GetSingleSubresourceVirtualSize().depthOrArrayLayers);
             uavDesc.Texture3D.MipSlice = GetBaseMipLevel();
             break;
         // Cube and Cubemap can't be used as storage texture. So there is no need to create UAV

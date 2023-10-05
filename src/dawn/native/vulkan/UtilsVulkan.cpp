@@ -115,7 +115,7 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
     Extent3D validTextureCopyExtent = copySize;
     const TextureBase* texture = textureCopy.texture.Get();
     Extent3D virtualSizeAtLevel =
-        texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel);
+        texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel, textureCopy.aspect);
     DAWN_ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
     DAWN_ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
     if (copySize.width > virtualSizeAtLevel.width - textureCopy.origin.x) {

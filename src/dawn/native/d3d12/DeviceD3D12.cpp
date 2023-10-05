@@ -550,7 +550,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
 
-    if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel, dst.aspect)) {
         texture->SetIsSubresourceContentInitialized(true, range);
     } else {
         DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));

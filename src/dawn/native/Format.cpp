@@ -140,41 +140,6 @@ const AspectInfo& Format::GetAspectInfo(Aspect aspect) const {
     return aspectInfo[aspectIndex];
 }
 
-Extent3D Format::GetAspectSize(Aspect aspect, const Extent3D& textureSize) const {
-    switch (aspect) {
-        case Aspect::Color:
-        case Aspect::Depth:
-        case Aspect::Stencil:
-        case Aspect::CombinedDepthStencil:
-            return textureSize;
-        case Aspect::Plane0:
-            DAWN_ASSERT(IsMultiPlanar());
-            return textureSize;
-        case Aspect::Plane1: {
-            DAWN_ASSERT(IsMultiPlanar());
-            auto planeSize = textureSize;
-            switch (format) {
-                case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-                case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-                    if (planeSize.width > 1) {
-                        planeSize.width >>= 1;
-                    }
-                    if (planeSize.height > 1) {
-                        planeSize.height >>= 1;
-                    }
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-            }
-            return planeSize;
-        }
-        case Aspect::None:
-            break;
-    }
-
-    DAWN_UNREACHABLE();
-}
-
 FormatIndex Format::GetIndex() const {
     return ComputeFormatIndex(format);
 }

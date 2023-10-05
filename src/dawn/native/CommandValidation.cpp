@@ -337,13 +337,15 @@ MaybeError ValidateImageCopyTexture(DeviceBase const* device,
                     textureCopy.mipLevel, texture->GetNumMipLevels(), texture);
 
     DAWN_TRY(ValidateTextureAspect(textureCopy.aspect));
-    DAWN_INVALID_IF(SelectFormatAspects(texture->GetFormat(), textureCopy.aspect) == Aspect::None,
+
+    const auto aspect = SelectFormatAspects(texture->GetFormat(), textureCopy.aspect);
+    DAWN_INVALID_IF(aspect == Aspect::None,
                     "%s format (%s) does not have the selected aspect (%s).", texture,
                     texture->GetFormat().format, textureCopy.aspect);
 
     if (texture->GetSampleCount() > 1 || texture->GetFormat().HasDepthOrStencil()) {
         Extent3D subresourceSize =
-            texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel);
+            texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel, aspect);
         DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
         DAWN_INVALID_IF(
             textureCopy.origin.x != 0 || textureCopy.origin.y != 0 ||
@@ -363,9 +365,14 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
                                     const ImageCopyTexture& textureCopy,
                                     const Extent3D& copySize) {
     const TextureBase* texture = textureCopy.texture;
+    const Format& format = textureCopy.texture->GetFormat();
+    const Aspect aspect = ConvertAspect(format, textureCopy.aspect);
+
+    DAWN_ASSERT(!format.IsMultiPlanar() || HasOneBit(aspect));
 
     // Validation for the copy being in-bounds:
-    Extent3D mipSize = texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel);
+    Extent3D mipSize =
+        texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel, aspect);
     // For 1D/2D textures, include the array layer as depth so it can be checked with other
     // dimensions.
     if (texture->GetDimension() != wgpu::TextureDimension::e3D) {
@@ -386,7 +393,6 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
         &textureCopy.origin, &copySize, texture, textureCopy.mipLevel, &mipSize);
 
     // Validation for the texel block alignments:
-    const Format& format = textureCopy.texture->GetFormat();
     if (format.isCompressed) {
         const TexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
         DAWN_INVALID_IF(

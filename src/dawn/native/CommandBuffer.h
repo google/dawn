@@ -64,8 +64,13 @@ class CommandBufferBase : public ApiObjectBase {
 };
 
 bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
-                                   const Extent3D copySize,
-                                   const uint32_t mipLevel);
+                                   const Extent3D& copySize,
+                                   const uint32_t mipLevel,
+                                   Aspect aspect);
+bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
+                                   const Extent3D& copySize,
+                                   const uint32_t mipLevel,
+                                   wgpu::TextureAspect textureAspect);
 SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Extent3D& copySize);
 
 void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);

@@ -144,14 +144,7 @@ MaybeError ValidateAttachmentArrayLayersAndLevelCount(const TextureViewBase* att
 MaybeError ValidateOrSetAttachmentSize(const TextureViewBase* attachment,
                                        uint32_t* width,
                                        uint32_t* height) {
-    Extent3D attachmentSize = attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-        attachment->GetBaseMipLevel());
-    // TODO(dawn:2099): TextureBase::GetWidth/Height should take an Aspect parameter and perform the
-    // necessary computation instead.
-    if (attachment->GetTexture()->GetFormat().IsMultiPlanar()) {
-        attachmentSize = attachment->GetTexture()->GetFormat().GetAspectSize(
-            attachment->GetAspects(), attachmentSize);
-    }
+    Extent3D attachmentSize = attachment->GetSingleSubresourceVirtualSize();
 
     if (*width == 0) {
         DAWN_ASSERT(*height == 0);
@@ -230,12 +223,8 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
                     "The resolve target %s mip level count (%u) is not 1.", resolveTarget,
                     resolveTarget->GetLevelCount());
 
-    const Extent3D& colorTextureSize =
-        attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-            attachment->GetBaseMipLevel());
-    const Extent3D& resolveTextureSize =
-        resolveTarget->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-            resolveTarget->GetBaseMipLevel());
+    const Extent3D& colorTextureSize = attachment->GetSingleSubresourceVirtualSize();
+    const Extent3D& resolveTextureSize = resolveTarget->GetSingleSubresourceVirtualSize();
     DAWN_INVALID_IF(colorTextureSize.width != resolveTextureSize.width ||
                         colorTextureSize.height != resolveTextureSize.height,
                     "The Resolve target %s size (width: %u, height: %u) does not match the color "
@@ -260,9 +249,7 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
 MaybeError ValidateColorAttachmentDepthSlice(const TextureViewBase* attachment,
                                              uint32_t depthSlice) {
     if (attachment->GetDimension() == wgpu::TextureViewDimension::e3D) {
-        const Extent3D& attachmentSize =
-            attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-                attachment->GetBaseMipLevel());
+        const Extent3D& attachmentSize = attachment->GetSingleSubresourceVirtualSize();
 
         DAWN_INVALID_IF(depthSlice >= attachmentSize.depthOrArrayLayers,
                         "The depth slice index (%u) of 3D %s used as attachment is >= the "
@@ -1047,7 +1034,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     Ref<TextureViewBase> implicitMSAATargetRef;
                     DAWN_TRY_ASSIGN(implicitMSAATargetRef,
                                     device->CreateImplicitMSAARenderTextureViewFor(
-                                        resolveTarget->GetTexture(), implicitSampleCount));
+                                        resolveTarget, implicitSampleCount));
                     colorTarget = implicitMSAATargetRef.Get();
 
                     cmd->colorAttachments[index].view = std::move(implicitMSAATargetRef);
@@ -1314,9 +1301,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
                 descriptor.usage =
                     wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
                 descriptor.format = resolveTarget->GetFormat().format;
-                descriptor.size =
-                    resolveTarget->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
-                        resolveTarget->GetBaseMipLevel());
+                descriptor.size = resolveTarget->GetSingleSubresourceVirtualSize();
                 descriptor.dimension = wgpu::TextureDimension::e2D;
                 descriptor.mipLevelCount = 1;
 
@@ -1372,7 +1357,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
                         dstImageCopyTexture.origin = {0, 0,
                                                       copyTarget.copyDst->GetBaseArrayLayer()};
 
-                        Extent3D extent3D = copyTarget.copySrc->GetTexture()->GetSize();
+                        Extent3D extent3D = copyTarget.copySrc->GetSingleSubresourceVirtualSize();
 
                         auto internalUsageScope = MakeInternalUsageScope();
                         this->APICopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture,
@@ -1677,6 +1662,10 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
+                DAWN_INVALID_IF(source->texture->GetFormat().IsMultiPlanar() ||
+                                    destination->texture->GetFormat().IsMultiPlanar(),
+                                "Copying between a multiplanar texture and another texture is "
+                                "currently not allowed.");
                 DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), *source, *copySize),
                                  "validating source %s.", source->texture);
                 DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), *destination, *copySize),

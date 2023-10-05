@@ -91,9 +91,12 @@ CommandIterator* CommandBufferBase::GetCommandIteratorForTesting() {
 }
 
 bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
-                                   const Extent3D copySize,
-                                   const uint32_t mipLevel) {
-    Extent3D extent = texture->GetMipLevelSingleSubresourcePhysicalSize(mipLevel);
+                                   const Extent3D& copySize,
+                                   const uint32_t mipLevel,
+                                   Aspect aspect) {
+    DAWN_ASSERT(HasOneBit(aspect) || aspect == (Aspect::Depth | Aspect::Stencil));
+
+    Extent3D extent = texture->GetMipLevelSingleSubresourcePhysicalSize(mipLevel, aspect);
 
     switch (texture->GetDimension()) {
         case wgpu::TextureDimension::e1D:
@@ -106,6 +109,14 @@ bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
     }
 
     DAWN_UNREACHABLE();
+}
+
+bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
+                                   const Extent3D& copySize,
+                                   const uint32_t mipLevel,
+                                   wgpu::TextureAspect textureAspect) {
+    auto aspect = SelectFormatAspects(texture->GetFormat(), textureAspect);
+    return IsCompleteSubresourceCopiedTo(texture, copySize, mipLevel, aspect);
 }
 
 SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Extent3D& copySize) {

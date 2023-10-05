@@ -579,7 +579,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
 
                 if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
-                                                  subresource.mipLevel)) {
+                                                  subresource.mipLevel, dst.aspect)) {
                     // Since texture has been overwritten, it has been "initialized"
                     dst.texture->SetIsSubresourceContentInitialized(true, range);
                 } else {
@@ -647,8 +647,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 DAWN_TRY(ToBackend(src.texture)
                              ->EnsureSubresourceContentInitialized(recordingContext, srcRange));
-                if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
-                                                  dst.mipLevel)) {
+                if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize, dst.mipLevel,
+                                                  dst.aspect)) {
                     // Since destination texture has been overwritten, it has been "initialized"
                     dst.texture->SetIsSubresourceContentInitialized(true, dstRange);
                 } else {

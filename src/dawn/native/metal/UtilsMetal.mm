@@ -262,7 +262,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     // clamped to the edge of the texture if the block extends outside the bounds of a
     // texture.
     const Extent3D clampedCopyExtent =
-        texture->ClampToMipLevelVirtualSize(mipLevel, origin, copyExtent);
+        texture->ClampToMipLevelVirtualSize(mipLevel, aspect, origin, copyExtent);
 
     // Note: all current GPUs have a 3D texture size limit of 2048 and otherwise 16348
     // for non-3D textures except for Apple2 GPUs (iPhone6) which has a non-3D texture
@@ -329,7 +329,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
     uint32_t copyBlockRowCount = copyExtent.height / blockInfo.height;
     if (copyBlockRowCount > 1) {
         DAWN_ASSERT(copyExtent.height - blockInfo.height <
-                    texture->GetMipLevelSingleSubresourceVirtualSize(mipLevel).height);
+                    texture->GetMipLevelSingleSubresourceVirtualSize(mipLevel, aspect).height);
         const uint32_t localBytesPerImage = 0;  // workaround case 3
         copy.push_back(TextureBufferCopySplit::CopyInfo(
             currentOffset, bytesPerRow, localBytesPerImage,
@@ -363,7 +363,7 @@ MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandC
                                                const Extent3D& size) {
     DAWN_ASSERT(texture == dst.texture.Get());
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, size);
-    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), size, dst.mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), size, dst.mipLevel, dst.aspect)) {
         texture->SetIsSubresourceContentInitialized(true, range);
     } else {
         DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));

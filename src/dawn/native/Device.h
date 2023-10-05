@@ -200,7 +200,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     PipelineLayoutBase* GetEmptyPipelineLayout();
 
     ResultOrError<Ref<TextureViewBase>> CreateImplicitMSAARenderTextureViewFor(
-        const TextureBase* singleSampledTexture,
+        const TextureViewBase* singleSampledTexture,
         uint32_t sampleCount);
 
     ResultOrError<Ref<TextureViewBase>> GetOrCreatePlaceholderTextureViewForExternalTexture();

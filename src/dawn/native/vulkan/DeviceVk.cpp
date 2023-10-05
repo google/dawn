@@ -801,7 +801,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
 
-    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copySizePixels, subresource.mipLevel)) {
+    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copySizePixels, subresource.mipLevel,
+                                      dst.aspect)) {
         // Since texture has been overwritten, it has been "initialized"
         dst.texture->SetIsSubresourceContentInitialized(true, range);
     } else {

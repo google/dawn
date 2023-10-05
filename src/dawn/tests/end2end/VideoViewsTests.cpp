@@ -773,13 +773,13 @@ TEST_P(VideoViewsValidationTests, T2BCopyAllAspectsFails) {
     wgpu::Texture srcTexture = platformTexture->wgpuTexture;
 
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = 1;
+    bufferDescriptor.size = 256;
     bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
     wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDescriptor);
 
     wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0});
 
-    wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 4);
+    wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 256);
 
     wgpu::Extent3D copySize = {1, 1, 1};
 
@@ -799,14 +799,14 @@ TEST_P(VideoViewsValidationTests, T2BCopyPlaneAspectsFails) {
     wgpu::Texture srcTexture = platformTexture->wgpuTexture;
 
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = 1;
+    bufferDescriptor.size = 256;
     bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
     wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDescriptor);
 
     wgpu::ImageCopyTexture copySrc =
         utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
 
-    wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 4);
+    wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 256);
 
     wgpu::Extent3D copySize = {1, 1, 1};
 
@@ -1431,6 +1431,62 @@ TEST_P(VideoViewsExtendedUsagesTests, T2BCopyPlaneAspectsSucceeds) {
         memcpy(&expectedUVData, expectedData.data() + 1, sizeof(expectedUVData));
         EXPECT_BUFFER_U16_EQ(expectedUVData, dstBuffer, 0);
     }
+}
+
+// Test copying from a multi-planar format to a buffer fails if texture aspect is not single plane.
+TEST_P(VideoViewsExtendedUsagesTests, T2BCopyAllAspectsFails) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    auto srcTexture =
+        CreateMultiPlanarTexture(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+                                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc,
+                                 /*isCheckerboard*/ false,
+                                 /*initialized*/ true);
+
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = 256;
+    bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDescriptor);
+
+    wgpu::ImageCopyTexture copySrc =
+        utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+
+    wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 256);
+
+    wgpu::Extent3D copySize = {1, 1, 1};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
+    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), testing::HasSubstr("More than a single aspect"));
+}
+
+// Test copying from one multi-planar formatted texture into another fails even if
+// MultiPlanarFormatExtendedUsages is enabled.
+TEST_P(VideoViewsExtendedUsagesTests, T2TCopyPlaneAspectFails) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    auto srcTexture =
+        CreateMultiPlanarTexture(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+                                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc,
+                                 /*isCheckerboard*/ false,
+                                 /*initialized*/ true);
+    auto dstTexture =
+        CreateMultiPlanarTexture(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+                                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst,
+                                 /*isCheckerboard*/ false,
+                                 /*initialized*/ true);
+
+    wgpu::ImageCopyTexture copySrc =
+        utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+
+    wgpu::ImageCopyTexture copyDst =
+        utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+
+    wgpu::Extent3D copySize = {1, 1, 1};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
+    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), testing::HasSubstr("not allowed"));
 }
 
 DAWN_INSTANTIATE_TEST_B(VideoViewsTests,

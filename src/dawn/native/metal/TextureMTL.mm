@@ -679,7 +679,8 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
     MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
-    mtlDesc.width = GetWidth();
+    DAWN_ASSERT(!GetFormat().IsMultiPlanar());
+    mtlDesc.width = GetBaseSize().width;
     mtlDesc.sampleCount = GetSampleCount();
     // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
     // between linear space and sRGB. For example, creating bgra8Unorm texture view on
@@ -715,7 +716,7 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
             break;
 
         case wgpu::TextureDimension::e2D:
-            mtlDesc.height = GetHeight();
+            mtlDesc.height = GetBaseSize().height;
             mtlDesc.arrayLength = GetArrayLayers();
             mtlDesc.depth = 1;
             if (mtlDesc.arrayLength > 1) {
@@ -728,8 +729,8 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
             }
             break;
         case wgpu::TextureDimension::e3D:
-            mtlDesc.height = GetHeight();
-            mtlDesc.depth = GetDepth();
+            mtlDesc.height = GetBaseSize().height;
+            mtlDesc.depth = GetBaseSize().depthOrArrayLayers;
             mtlDesc.arrayLength = 1;
             DAWN_ASSERT(mtlDesc.sampleCount == 1);
             mtlDesc.textureType = MTLTextureType3D;
@@ -993,9 +994,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         }
                     }
 
-                    DAWN_TRY(
-                        EncodeEmptyMetalRenderPass(device, commandContext, descriptor,
-                                                   GetMipLevelSingleSubresourceVirtualSize(level)));
+                    DAWN_TRY(EncodeEmptyMetalRenderPass(
+                        device, commandContext, descriptor,
+                        GetMipLevelSingleSubresourceVirtualSize(level, range.aspects)));
                 }
             }
         } else {
@@ -1008,7 +1009,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                 NSRef<MTLRenderPassDescriptor> descriptor;
                 uint32_t attachment = 0;
 
-                uint32_t depth = GetMipLevelSingleSubresourceVirtualSize(level).depthOrArrayLayers;
+                uint32_t depth = GetMipLevelSingleSubresourceVirtualSize(level, Aspect::Color)
+                                     .depthOrArrayLayers;
 
                 for (uint32_t arrayLayer = range.baseArrayLayer;
                      arrayLayer < range.baseArrayLayer + range.layerCount; arrayLayer++) {
@@ -1042,16 +1044,16 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                             attachment = 0;
                             DAWN_TRY(EncodeEmptyMetalRenderPass(
                                 device, commandContext, descriptor.Get(),
-                                GetMipLevelSingleSubresourceVirtualSize(level)));
+                                GetMipLevelSingleSubresourceVirtualSize(level, Aspect::Color)));
                             descriptor = nullptr;
                         }
                     }
                 }
 
                 if (descriptor != nullptr) {
-                    DAWN_TRY(
-                        EncodeEmptyMetalRenderPass(device, commandContext, descriptor.Get(),
-                                                   GetMipLevelSingleSubresourceVirtualSize(level)));
+                    DAWN_TRY(EncodeEmptyMetalRenderPass(
+                        device, commandContext, descriptor.Get(),
+                        GetMipLevelSingleSubresourceVirtualSize(level, Aspect::Color)));
                 }
             }
         }
@@ -1065,7 +1067,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             // Computations for the bytes per row / image height are done using the physical size
             // so that enough data is reserved for compressed textures.
-            Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
+            Extent3D largestMipSize =
+                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect);
             uint32_t largestMipBytesPerRow =
                 (largestMipSize.width / blockInfo.width) * blockInfo.byteSize;
             uint64_t largestMipBytesPerImage = static_cast<uint64_t>(largestMipBytesPerRow) *
@@ -1087,7 +1090,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
-                Extent3D virtualSize = GetMipLevelSingleSubresourceVirtualSize(level);
+                Extent3D virtualSize = GetMipLevelSingleSubresourceVirtualSize(level, aspect);
 
                 for (uint32_t arrayLayer = range.baseArrayLayer;
                      arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {

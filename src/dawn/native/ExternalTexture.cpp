@@ -101,7 +101,7 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(descriptor->visibleSize.width == 0 || descriptor->visibleSize.height == 0,
                     "VisibleSize %s have 0 on width or height.", &descriptor->visibleSize);
 
-    const Extent3D textureSize = descriptor->plane0->GetTexture()->GetSize();
+    const Extent3D textureSize = descriptor->plane0->GetSingleSubresourceVirtualSize();
     DAWN_INVALID_IF(descriptor->visibleSize.width > textureSize.width ||
                         descriptor->visibleSize.height > textureSize.height,
                     "VisibleSize %s is exceed the texture size, defined by Plane0 size (%u, %u).",
@@ -289,8 +289,8 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     // Calculate scale factors and offsets from the specified visibleSize.
     DAWN_ASSERT(descriptor->visibleSize.width > 0);
     DAWN_ASSERT(descriptor->visibleSize.height > 0);
-    uint32_t frameWidth = descriptor->plane0->GetTexture()->GetWidth();
-    uint32_t frameHeight = descriptor->plane0->GetTexture()->GetHeight();
+    uint32_t frameWidth = descriptor->plane0->GetSingleSubresourceVirtualSize().width;
+    uint32_t frameHeight = descriptor->plane0->GetSingleSubresourceVirtualSize().height;
     float xScale =
         static_cast<float>(descriptor->visibleSize.width) / static_cast<float>(frameWidth);
     float yScale =

@@ -551,13 +551,13 @@ MaybeError SwapChain::PresentImpl() {
         region.srcSubresource.baseArrayLayer = 0;
         region.srcSubresource.layerCount = 1;
         region.srcOffsets[0] = {0, 0, 0};
-        region.srcOffsets[1] = {static_cast<int32_t>(mBlitTexture->GetWidth()),
-                                static_cast<int32_t>(mBlitTexture->GetHeight()), 1};
+        region.srcOffsets[1] = {static_cast<int32_t>(mBlitTexture->GetWidth(Aspect::Color)),
+                                static_cast<int32_t>(mBlitTexture->GetHeight(Aspect::Color)), 1};
 
         region.dstSubresource = region.srcSubresource;
         region.dstOffsets[0] = {0, 0, 0};
-        region.dstOffsets[1] = {static_cast<int32_t>(mTexture->GetWidth()),
-                                static_cast<int32_t>(mTexture->GetHeight()), 1};
+        region.dstOffsets[1] = {static_cast<int32_t>(mTexture->GetWidth(Aspect::Color)),
+                                static_cast<int32_t>(mTexture->GetHeight(Aspect::Color)), 1};
 
         device->fn.CmdBlitImage(recordingContext->commandBuffer, mBlitTexture->GetHandle(),
                                 mBlitTexture->GetCurrentLayoutForSwapChain(), mTexture->GetHandle(),

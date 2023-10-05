@@ -193,7 +193,7 @@ Texture::Texture(Device* device, const TextureDescriptor* descriptor)
 
     gl.BindTexture(mTarget, mHandle);
 
-    AllocateTexture(gl, mTarget, GetSampleCount(), levels, glFormat.internalFormat, GetSize());
+    AllocateTexture(gl, mTarget, GetSampleCount(), levels, glFormat.internalFormat, GetBaseSize());
 
     // The texture is not complete if it uses mipmapping and not all levels up to
     // MAX_LEVEL have been defined.
@@ -375,7 +375,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             const GLFormat& glFormat = GetGLFormat();
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
-                Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level);
+                Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level, Aspect::Color);
                 for (uint32_t layer = range.baseArrayLayer;
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
                     if (clearValue == TextureBase::ClearValue::Zero &&
@@ -441,8 +441,9 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                                 DoClear();
                                 break;
                             case wgpu::TextureDimension::e3D:
-                                uint32_t depth = GetMipLevelSingleSubresourceVirtualSize(level)
-                                                     .depthOrArrayLayers;
+                                uint32_t depth =
+                                    GetMipLevelSingleSubresourceVirtualSize(level, Aspect::Color)
+                                        .depthOrArrayLayers;
                                 for (GLint z = 0; z < static_cast<GLint>(depth); ++z) {
                                     gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, attachment,
                                                                GetHandle(), level, z);
@@ -471,7 +472,8 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
         const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(Aspect::Color).block;
         DAWN_ASSERT(kTextureBytesPerRowAlignment % blockInfo.byteSize == 0);
 
-        Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
+        Extent3D largestMipSize =
+            GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, Aspect::Color);
         uint32_t bytesPerRow =
             Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize, 4);
 
@@ -515,7 +517,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             dataLayout.bytesPerRow = bytesPerRow;
             dataLayout.rowsPerImage = largestMipSize.height;
 
-            Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level);
+            Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level, Aspect::Color);
 
             for (uint32_t layer = range.baseArrayLayer;
                  layer < range.baseArrayLayer + range.layerCount; ++layer) {
@@ -647,8 +649,8 @@ void TextureView::CopyIfNeeded() {
     uint32_t srcLevel = GetBaseMipLevel();
     uint32_t numLevels = GetLevelCount();
 
-    uint32_t width = texture->GetWidth() >> srcLevel;
-    uint32_t height = texture->GetHeight() >> srcLevel;
+    uint32_t width = GetSingleSubresourceVirtualSize().width;
+    uint32_t height = GetSingleSubresourceVirtualSize().height;
     Extent3D size{width, height, GetLayerCount()};
 
     if (mHandle == 0) {

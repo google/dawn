@@ -154,9 +154,6 @@ struct Format {
     // Currently means they differ only in sRGB-ness.
     bool ViewCompatibleWith(const Format& otherFormat) const;
 
-    // Returns the aspect's size given the texture's size.
-    Extent3D GetAspectSize(Aspect aspect, const Extent3D& textureSize) const;
-
   private:
     // Used to store the aspectInfo for one or more planes. For single plane "color" formats,
     // only the first aspect info or aspectInfo[0] is valid. For depth-stencil, the first aspect

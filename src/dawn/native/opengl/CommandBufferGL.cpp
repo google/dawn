@@ -513,7 +513,7 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
     Extent3D validTextureCopyExtent = copySize;
     const TextureBase* texture = textureCopy.texture.Get();
     Extent3D virtualSizeAtLevel =
-        texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel);
+        texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel, textureCopy.aspect);
     DAWN_ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
     DAWN_ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
     if (copySize.width > virtualSizeAtLevel.width - textureCopy.origin.x) {
@@ -628,8 +628,8 @@ MaybeError CommandBuffer::Execute() {
 
                 buffer->EnsureDataInitialized();
                 SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copy->copySize);
-                if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
-                                                  dst.mipLevel)) {
+                if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize, dst.mipLevel,
+                                                  dst.aspect)) {
                     dst.texture->SetIsSubresourceContentInitialized(true, range);
                 } else {
                     DAWN_TRY(ToBackend(dst.texture)->EnsureSubresourceContentInitialized(range));
@@ -776,7 +776,7 @@ MaybeError CommandBuffer::Execute() {
                 SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
                 DAWN_TRY(srcTexture->EnsureSubresourceContentInitialized(srcRange));
-                if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
+                if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel, dst.aspect)) {
                     dstTexture->SetIsSubresourceContentInitialized(true, dstRange);
                 } else {
                     DAWN_TRY(dstTexture->EnsureSubresourceContentInitialized(dstRange));
@@ -1342,7 +1342,8 @@ void DoTexSubImage(const OpenGLFunctions& gl,
     uint32_t z = destination.origin.z;
     if (texture->GetFormat().isCompressed) {
         size_t rowSize = copySize.width / blockInfo.width * blockInfo.byteSize;
-        Extent3D virtSize = texture->GetMipLevelSingleSubresourceVirtualSize(destination.mipLevel);
+        Extent3D virtSize = texture->GetMipLevelSingleSubresourceVirtualSize(destination.mipLevel,
+                                                                             destination.aspect);
         uint32_t width = std::min(copySize.width, virtSize.width - x);
 
         // In GLES glPixelStorei() doesn't affect CompressedTexSubImage*D() and
