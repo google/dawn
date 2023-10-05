@@ -18,9 +18,11 @@
 #include <string>
 
 #include "dawn/common/GPUInfo.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native::vulkan {
 
@@ -548,6 +550,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
 #if DAWN_PLATFORM_IS(ANDROID)
     // Default to the IR backend on Android.
     deviceToggles->Default(Toggle::UseTintIR, true);
+#else
+    // All other platforms default to the value corresponding to the feature flag.
+    deviceToggles->Default(Toggle::UseTintIR, GetInstance()->GetPlatform()->IsFeatureEnabled(
+                                                  platform::Features::kWebGPUUseTintIR));
 #endif
 
     if (IsAndroidQualcomm()) {

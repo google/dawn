@@ -87,6 +87,8 @@ bool Platform::IsFeatureEnabled(Features feature) {
 #else
             return false;
 #endif
+        case Features::kWebGPUUseTintIR:
+            return false;
     }
     return false;
 }
