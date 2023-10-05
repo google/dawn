@@ -28,6 +28,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 
 	// Register sub-commands
+	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/build_cache"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/export"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/format"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/merge"

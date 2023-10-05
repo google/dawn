@@ -17,6 +17,7 @@ package fileutils
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -74,4 +75,34 @@ func ExpandHome(path string) string {
 		}
 	}
 	return path
+}
+
+// NodePath looks for the node binary, first in dawn's third_party directory,
+// falling back to PATH.
+func NodePath() string {
+	if dawnRoot := DawnRoot(); dawnRoot != "" {
+		node := filepath.Join(dawnRoot, "third_party/node")
+		if info, err := os.Stat(node); err == nil && info.IsDir() {
+			path := ""
+			switch fmt.Sprintf("%v/%v", runtime.GOOS, runtime.GOARCH) { // See `go tool dist list`
+			case "darwin/amd64":
+				path = filepath.Join(node, "node-darwin-x64/bin/node")
+			case "darwin/arm64":
+				path = filepath.Join(node, "node-darwin-arm64/bin/node")
+			case "linux/amd64":
+				path = filepath.Join(node, "node-linux-x64/bin/node")
+			case "windows/amd64":
+				path = filepath.Join(node, "node.exe")
+			}
+			if _, err := os.Stat(path); err == nil {
+				return path
+			}
+		}
+	}
+
+	if path, err := exec.LookPath("node"); err == nil {
+		return path
+	}
+
+	return ""
 }

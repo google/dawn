@@ -15,37 +15,32 @@
 # limitations under the License.
 
 import argparse
+import tarfile
+import datetime
 import os
 import sys
 
-from dir_paths import node_dir
+
+def gen_cache(out_dir):
+    script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    tar = tarfile.open(os.path.join(script_directory, '../cache.tar.gz'))
+    tar.extractall(out_dir)
+    # Update timestamps
+    now = datetime.datetime.now().timestamp()
+    for name in tar.getnames():
+        path = os.path.join(out_dir, name)
+        os.utime(path, (now, now))
+    tar.close()
 
 
-def gen_cache(js_script, out_dir):
-    old_sys_path = sys.path
-    try:
-        sys.path = old_sys_path + [node_dir]
-        from node import RunNode
-    finally:
-        sys.path = old_sys_path
-
-    # Save the cwd. gen_cache.js needs to be run from a specific directory.
-    cwd = os.getcwd()
-    cts_dir = os.path.realpath(
-        os.path.join(cwd, os.path.dirname(js_script), '..', '..', '..'))
-    os.chdir(cts_dir)
-    RunNode([
-        os.path.join(cwd, js_script),
-        os.path.join(cwd, out_dir),
-        os.path.join('src-node', 'webgpu')
-    ])
-
-
-# Generate a cache for CTS runs.
+# Extract the cache for CTS runs.
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
+    # TODO(bclayton): Unused. Remove
     parser.add_argument('js_script', help='Path to gen_cache.js')
+
     parser.add_argument('out_dir', help='Output directory for the cache')
     args = parser.parse_args()
 
-    gen_cache(args.js_script, args.out_dir)
+    gen_cache(args.out_dir)

@@ -61,6 +61,7 @@ const (
 	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
 	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
 	cacheListRelPath     = "third_party/gn/webgpu-cts/cache_list.txt"
+	cacheTarGz           = "third_party/gn/webgpu-cts/cache.tar.gz"
 	resourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
 	webTestsPath         = "webgpu-cts/webtests"
 	refMain              = "refs/heads/main"
@@ -96,11 +97,10 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	gitPath, _ := exec.LookPath("git")
 	npmPath, _ := exec.LookPath("npm")
-	nodePath, _ := exec.LookPath("node")
 	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions())
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
-	flag.StringVar(&c.flags.nodePath, "node", nodePath, "path to node")
+	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
@@ -683,11 +683,24 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 		}
 	}()
 
+	// Generate case cache
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if caseCache, err := common.BuildCache(ctx, r.ctsDir, r.flags.nodePath); err == nil {
+			mutex.Lock()
+			defer mutex.Unlock()
+			files[cacheListRelPath] = strings.Join(caseCache.FileList, "\n") + "\n"
+			files[cacheTarGz] = string(caseCache.TarGz)
+		} else {
+			errs <- fmt.Errorf("failed to create case cache: %v", err)
+		}
+	}()
+
 	// Generate typescript sources list, test list, resources file list.
 	for relPath, generator := range map[string]func(context.Context) (string, error){
 		tsSourcesRelPath:     r.genTSDepList,
 		testListRelPath:      r.genTestList,
-		cacheListRelPath:     r.genCacheList,
 		resourceFilesRelPath: r.genResourceFilesList,
 	} {
 		relPath, generator := relPath, generator // Capture values, not iterators
@@ -800,40 +813,6 @@ func (r *roller) genTestList(ctx context.Context) (string, error) {
 	}
 
 	return strings.Join(tests, "\n"), nil
-}
-
-// genCacheList returns the file list of cached data
-func (r *roller) genCacheList(ctx context.Context) (string, error) {
-	// Run 'src/common/runtime/cmdline.ts' to obtain the full test list
-	cmd := exec.CommandContext(ctx, r.flags.nodePath,
-		"-e", "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/tools/gen_cache.ts');",
-		"--", // Start of arguments
-		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
-		// and slices away the first two arguments. When running with '-e', args
-		// start at 1, so just inject a placeholder argument.
-		"placeholder-arg",
-		".",
-		"src/webgpu",
-		"--list",
-	)
-	cmd.Dir = r.ctsDir
-
-	stderr := bytes.Buffer{}
-	cmd.Stderr = &stderr
-
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to generate cache list: %w\n%v", err, stderr.String())
-	}
-
-	files := []string{}
-	for _, file := range strings.Split(string(out), "\n") {
-		if file != "" {
-			files = append(files, strings.TrimPrefix(file, "./"))
-		}
-	}
-
-	return strings.Join(files, "\n") + "\n", nil
 }
 
 // genResourceFilesList returns a list of resource files, for the CTS checkout at r.ctsDir
