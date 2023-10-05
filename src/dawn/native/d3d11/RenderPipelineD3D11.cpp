@@ -415,9 +415,9 @@ MaybeError RenderPipeline::InitializeShaders() {
     // Tint does matrix multiplication expecting row major matrices
     compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-    // FXC can miscompile code that depends on special float values (NaN, INF, etc) when IEEE
-    // strictness is not enabled. See crbug.com/tint/976.
-    compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+    if (!device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness)) {
+        compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+    }
 
     PerStage<d3d::CompiledShader> compiledShader;
 
