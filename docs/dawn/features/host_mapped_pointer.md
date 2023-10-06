@@ -9,6 +9,7 @@ Allows creation of buffers from host-mapped pointers. These may be pointers from
 ## Requirements
  - `wgpu::FeatureName::HostMappedPointer` must be supported and enabled.
  - Both the address of the pointer and the size of the allocation that the pointer refers to must be aligned to OS-specific requirements. This is 4Kb on Mac / Linux and 64Kb on Windows. Buffers must be created with a mappable buffer usage. However, none of the mapping APIs may actually be called on the buffer since it is effectively persistently mapped.
+ - On Windows, the pointer must point to the start of the virtual or mapped memory. It will be invalid to pass a pointer returned from `MapViewOfFile` at a non-zero offset.
 
 ## Example Usage
 ```c++
