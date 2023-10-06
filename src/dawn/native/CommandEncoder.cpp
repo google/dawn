@@ -782,6 +782,11 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
         device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
         return true;
     }
+    // RGB9E5Ufloat
+    if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
+        device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy)) {
+        return true;
+    }
     // Depth
     if (aspect == Aspect::Depth &&
         ((format.format == wgpu::TextureFormat::Depth16Unorm &&

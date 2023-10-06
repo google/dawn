@@ -164,11 +164,14 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
         DAWN_SUPPRESS_TEST_IF(IsSnorm(GetParam().mTextureFormat) && IsANGLESwiftShader());
 
-        // TODO(dawn:1912) Many RGB9E5Ufloat tests failing for OpenGL/GLES backend.
+        // TODO(dawn:1895): Many RGB9E5Ufloat tests failing for OpenGL/GLES backend
+        // because of the multiple possible encodings of the same value due to using blit to emulate
+        // the copy. This issue is already covered in WebGPU CTS and has no plan to implement in
+        // dawn_end2end_tests.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
                               (IsOpenGL() || IsOpenGLES()));
 
-        // TODO(dawn:1913) Many float formats tests failing for Metal backend on Mac Intel.
+        // TODO(dawn:1913): Many float formats tests failing for Metal backend on Mac Intel.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::R32Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG32Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RGBA32Float ||
@@ -176,7 +179,7 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG11B10Ufloat) &&
                               IsMacOS() && IsIntel() && IsMetal());
 
-        // TODO(dawn:1914) Many 16 float formats tests failing for Vulkan backend on Android
+        // TODO(dawn:1914): Many 16 float formats tests failing for Vulkan backend on Android
         // Pixel 4.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::R16Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG16Float ||
@@ -1435,49 +1438,52 @@ TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
     }
 }
 
-DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend(),
-                         VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
-                                        "use_blit_for_bgra8unorm_texture_to_buffer_copy"})},
-                        {
-                            wgpu::TextureFormat::R8Unorm,
-                            wgpu::TextureFormat::RG8Unorm,
-                            wgpu::TextureFormat::RGBA8Unorm,
+DAWN_INSTANTIATE_TEST_P(
+    CopyTests_T2B,
+    {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+     VulkanBackend(),
+     VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
+                    "use_blit_for_bgra8unorm_texture_to_buffer_copy"})},
+    {
+        wgpu::TextureFormat::R8Unorm,
+        wgpu::TextureFormat::RG8Unorm,
+        wgpu::TextureFormat::RGBA8Unorm,
 
-                            wgpu::TextureFormat::R8Uint,
-                            wgpu::TextureFormat::R8Sint,
+        wgpu::TextureFormat::R8Uint,
+        wgpu::TextureFormat::R8Sint,
 
-                            wgpu::TextureFormat::R16Uint,
-                            wgpu::TextureFormat::R16Sint,
-                            wgpu::TextureFormat::R16Float,
+        wgpu::TextureFormat::R16Uint,
+        wgpu::TextureFormat::R16Sint,
+        wgpu::TextureFormat::R16Float,
 
-                            wgpu::TextureFormat::R32Uint,
-                            wgpu::TextureFormat::R32Sint,
-                            wgpu::TextureFormat::R32Float,
+        wgpu::TextureFormat::R32Uint,
+        wgpu::TextureFormat::R32Sint,
+        wgpu::TextureFormat::R32Float,
 
-                            wgpu::TextureFormat::RG32Float,
-                            wgpu::TextureFormat::RG32Uint,
-                            wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RG32Float,
+        wgpu::TextureFormat::RG32Uint,
+        wgpu::TextureFormat::RG32Sint,
 
-                            wgpu::TextureFormat::RGBA16Uint,
-                            wgpu::TextureFormat::RGBA16Sint,
-                            wgpu::TextureFormat::RGBA16Float,
+        wgpu::TextureFormat::RGBA16Uint,
+        wgpu::TextureFormat::RGBA16Sint,
+        wgpu::TextureFormat::RGBA16Float,
 
-                            wgpu::TextureFormat::RGBA32Float,
+        wgpu::TextureFormat::RGBA32Float,
 
-                            wgpu::TextureFormat::RGB10A2Unorm,
-                            wgpu::TextureFormat::RG11B10Ufloat,
-                            wgpu::TextureFormat::RGB9E5Ufloat,
+        wgpu::TextureFormat::RGB10A2Unorm,
+        wgpu::TextureFormat::RG11B10Ufloat,
 
-                            // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
-                            wgpu::TextureFormat::R8Snorm,
-                            wgpu::TextureFormat::RG8Snorm,
-                            wgpu::TextureFormat::RGBA8Snorm,
+        // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy
+        wgpu::TextureFormat::RGB9E5Ufloat,
 
-                            // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
-                            wgpu::TextureFormat::BGRA8Unorm,
-                        });
+        // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
+        wgpu::TextureFormat::R8Snorm,
+        wgpu::TextureFormat::RG8Snorm,
+        wgpu::TextureFormat::RGBA8Snorm,
+
+        // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
+        wgpu::TextureFormat::BGRA8Unorm,
+    });
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_B2T, FullTextureAligned) {
