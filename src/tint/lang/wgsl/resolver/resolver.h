@@ -507,8 +507,7 @@ class Resolver {
     /// @note this method does not resolve the attributes as these are context-dependent (global,
     /// local)
     /// @param var the variable
-    /// @param is_global true if this is module scope, otherwise function scope
-    sem::Variable* Let(const ast::Let* var, bool is_global);
+    sem::Variable* Let(const ast::Let* var);
 
     /// @returns the semantic info for the module-scope `ast::Override` `v`. If an error is raised,
     /// nullptr is returned.

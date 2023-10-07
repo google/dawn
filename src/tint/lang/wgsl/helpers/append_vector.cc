@@ -134,11 +134,9 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     if (packed_el_sem_ty != scalar_sem->Type()->UnwrapRef()) {
         // Cast scalar to the vector element type
         auto* scalar_cast_ast = b->Call(packed_el_ast_ty, scalar_ast);
-        auto* scalar_cast_target = b->create<sem::ValueConversion>(
-            packed_el_sem_ty,
-            b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
-                                      core::AddressSpace::kUndefined, core::Access::kUndefined),
-            core::EvaluationStage::kRuntime);
+        auto* param = b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef());
+        auto* scalar_cast_target = b->create<sem::ValueConversion>(packed_el_sem_ty, param,
+                                                                   core::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
             scalar_cast_ast, scalar_cast_target, core::EvaluationStage::kRuntime,
             Vector<const sem::ValueExpression*, 1>{scalar_sem}, statement,
@@ -157,9 +155,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         packed_sem_ty,
         tint::Transform(packed,
                         [&](const tint::sem::ValueExpression* arg, size_t i) {
-                            return b->create<sem::Parameter>(
-                                nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
-                                core::AddressSpace::kUndefined, core::Access::kUndefined);
+                            return b->create<sem::Parameter>(nullptr, static_cast<uint32_t>(i),
+                                                             arg->Type()->UnwrapRef());
                         }),
         core::EvaluationStage::kRuntime);
     auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, core::EvaluationStage::kRuntime,

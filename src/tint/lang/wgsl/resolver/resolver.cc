@@ -230,7 +230,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
     return Switch(
         v,  //
         [&](const ast::Var* var) { return Var(var, is_global); },
-        [&](const ast::Let* let) { return Let(let, is_global); },
+        [&](const ast::Let* let) { return Let(let); },
         [&](const ast::Override* override) { return Override(override); },
         [&](const ast::Const* const_) { return Const(const_, is_global); },
         [&](Default) {
@@ -242,15 +242,18 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
         });
 }
 
-sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
-    const core::type::Type* ty = nullptr;
+sem::Variable* Resolver::Let(const ast::Let* v) {
+    auto* sem = b.create<sem::LocalVariable>(v, current_statement_);
+    sem->SetStage(core::EvaluationStage::kRuntime);
+    b.Sem().Add(v, sem);
 
     // If the variable has a declared type, resolve it.
     if (v->type) {
-        ty = Type(v->type);
-        if (!ty) {
+        auto* ty = Type(v->type);
+        if (TINT_UNLIKELY(!ty)) {
             return nullptr;
         }
+        sem->SetType(ty);
     }
 
     for (auto* attribute : v->attributes) {
@@ -267,53 +270,42 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         }
     }
 
-    if (!v->initializer) {
+    if (TINT_UNLIKELY(!v->initializer)) {
         AddError("'let' declaration must have an initializer", v->source);
         return nullptr;
     }
 
-    auto* rhs = Load(Materialize(ValueExpression(v->initializer), ty));
-    if (!rhs) {
+    auto* rhs = Load(Materialize(ValueExpression(v->initializer), sem->Type()));
+    if (TINT_UNLIKELY(!rhs)) {
         return nullptr;
     }
+    sem->SetInitializer(rhs);
 
     // If the variable has no declared type, infer it from the RHS
-    if (!ty) {
-        ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
+    if (!sem->Type()) {
+        sem->SetType(rhs->Type()->UnwrapRef());  // Implicit load of RHS
     }
 
-    if (rhs && !validator_.VariableInitializer(v, ty, rhs)) {
+    if (TINT_UNLIKELY(rhs && !validator_.VariableInitializer(v, sem->Type(), rhs))) {
         return nullptr;
     }
 
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
-                                      const_cast<core::type::Type*>(ty), v->source)) {
+                                      const_cast<core::type::Type*>(sem->Type()), v->source)) {
         AddNote("while instantiating 'let' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
 
-    sem::Variable* sem = nullptr;
-    if (is_global) {
-        sem =
-            b.create<sem::GlobalVariable>(v, ty, core::EvaluationStage::kRuntime,
-                                          core::AddressSpace::kUndefined, core::Access::kUndefined,
-                                          /* constant_value */ nullptr, std::nullopt, std::nullopt);
-    } else {
-        sem = b.create<sem::LocalVariable>(v, ty, core::EvaluationStage::kRuntime,
-                                           core::AddressSpace::kUndefined, core::Access::kUndefined,
-                                           current_statement_,
-                                           /* constant_value */ nullptr);
-    }
-
-    sem->SetInitializer(rhs);
-    b.Sem().Add(v, sem);
     return sem;
 }
 
 sem::Variable* Resolver::Override(const ast::Override* v) {
-    const core::type::Type* ty = nullptr;
+    auto* sem = b.create<sem::GlobalVariable>(v);
+    b.Sem().Add(v, sem);
+    sem->SetStage(core::EvaluationStage::kOverride);
 
     // If the variable has a declared type, resolve it.
+    const core::type::Type* ty = nullptr;
     if (v->type) {
         ty = Type(v->type);
         if (!ty) {
@@ -321,31 +313,31 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         }
     }
 
-    const sem::ValueExpression* rhs = nullptr;
-
     // Does the variable have an initializer?
+    const sem::ValueExpression* init = nullptr;
     if (v->initializer) {
         // Note: RHS must be a const or override expression, which excludes references.
         // So there's no need to load or unwrap references here.
-
         ExprEvalStageConstraint constraint{core::EvaluationStage::kOverride,
                                            "override initializer"};
         TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-        rhs = Materialize(ValueExpression(v->initializer), ty);
-        if (!rhs) {
+        init = Materialize(ValueExpression(v->initializer), ty);
+        if (TINT_UNLIKELY(!init)) {
             return nullptr;
         }
+        sem->SetInitializer(init);
 
-        // If the variable has no declared type, infer it from the RHS
+        // If the variable has no declared type, infer it from the initializer
         if (!ty) {
-            ty = rhs->Type();
+            ty = init->Type();
         }
     } else if (!ty) {
         AddError("override declaration requires a type or initializer", v->source);
         return nullptr;
     }
+    sem->SetType(ty);
 
-    if (rhs && !validator_.VariableInitializer(v, ty, rhs)) {
+    if (init && !validator_.VariableInitializer(v, ty, init)) {
         return nullptr;
     }
 
@@ -354,12 +346,6 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         AddNote("while instantiating 'override' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
-
-    auto* sem =
-        b.create<sem::GlobalVariable>(v, ty, core::EvaluationStage::kOverride,
-                                      core::AddressSpace::kUndefined, core::Access::kUndefined,
-                                      /* constant_value */ nullptr, std::nullopt, std::nullopt);
-    sem->SetInitializer(rhs);
 
     for (auto* attribute : v->attributes) {
         Mark(attribute);
@@ -408,25 +394,17 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         }
     }
 
-    b.Sem().Add(v, sem);
     return sem;
 }
 
 sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
-    const core::type::Type* ty = nullptr;
-
-    // If the variable has a declared type, resolve it.
-    if (c->type) {
-        ty = Type(c->type);
-        if (!ty) {
-            return nullptr;
-        }
+    sem::Variable* sem = nullptr;
+    if (is_global) {
+        sem = b.create<sem::GlobalVariable>(c);
+    } else {
+        sem = b.create<sem::LocalVariable>(c, current_statement_);
     }
-
-    if (!c->initializer) {
-        AddError("'const' declaration must have an initializer", c->source);
-        return nullptr;
-    }
+    b.Sem().Add(c, sem);
 
     for (auto* attribute : c->attributes) {
         Mark(attribute);
@@ -440,31 +418,47 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         }
     }
 
-    const sem::ValueExpression* rhs = nullptr;
-    {
-        ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "const initializer"};
-        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-        rhs = ValueExpression(c->initializer);
-        if (!rhs) {
-            return nullptr;
-        }
+    if (TINT_UNLIKELY(!c->initializer)) {
+        AddError("'const' declaration must have an initializer", c->source);
+        return nullptr;
+    }
+
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "const initializer"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+    const auto* init = ValueExpression(c->initializer);
+    if (TINT_UNLIKELY(!init)) {
+        return nullptr;
     }
 
     // Note: RHS must be a const expression, which excludes references.
     // So there's no need to load or unwrap references here.
 
+    // If the variable has a declared type, resolve it.
+    const core::type::Type* ty = nullptr;
+    if (c->type) {
+        ty = Type(c->type);
+        if (TINT_UNLIKELY(!ty)) {
+            return nullptr;
+        }
+    }
+
     if (ty) {
         // If an explicit type was specified, materialize to that type
-        rhs = Materialize(rhs, ty);
-        if (!rhs) {
+        init = Materialize(init, ty);
+        if (TINT_UNLIKELY(!init)) {
             return nullptr;
         }
     } else {
         // If no type was specified, infer it from the RHS
-        ty = rhs->Type();
+        ty = init->Type();
     }
 
-    if (!validator_.VariableInitializer(c, ty, rhs)) {
+    sem->SetInitializer(init);
+    sem->SetStage(core::EvaluationStage::kConstant);
+    sem->SetConstantValue(init->ConstantValue());
+    sem->SetType(ty);
+
+    if (!validator_.VariableInitializer(c, ty, init)) {
         return nullptr;
     }
 
@@ -474,32 +468,29 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    const auto value = rhs->ConstantValue();
-    auto* sem = is_global
-                    ? static_cast<sem::Variable*>(b.create<sem::GlobalVariable>(
-                          c, ty, core::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
-                          core::Access::kUndefined, value, std::nullopt, std::nullopt))
-                    : static_cast<sem::Variable*>(b.create<sem::LocalVariable>(
-                          c, ty, core::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
-                          core::Access::kUndefined, current_statement_, value));
-
-    sem->SetInitializer(rhs);
-    b.Sem().Add(c, sem);
     return sem;
 }
 
 sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
-    const core::type::Type* storage_ty = nullptr;
+    sem::Variable* sem = nullptr;
+    sem::GlobalVariable* global = nullptr;
+    if (is_global) {
+        global = b.create<sem::GlobalVariable>(var);
+        sem = global;
+    } else {
+        sem = b.create<sem::LocalVariable>(var, current_statement_);
+    }
+    sem->SetStage(core::EvaluationStage::kRuntime);
+    b.Sem().Add(var, sem);
 
     // If the variable has a declared type, resolve it.
+    const core::type::Type* storage_ty = nullptr;
     if (auto ty = var->type) {
         storage_ty = Type(ty);
-        if (!storage_ty) {
+        if (TINT_UNLIKELY(!storage_ty)) {
             return nullptr;
         }
     }
-
-    const sem::ValueExpression* rhs = nullptr;
 
     // Does the variable have a initializer?
     if (var->initializer) {
@@ -509,13 +500,15 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         };
         TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-        rhs = Load(Materialize(ValueExpression(var->initializer), storage_ty));
-        if (!rhs) {
+        auto* init = Load(Materialize(ValueExpression(var->initializer), storage_ty));
+        if (TINT_UNLIKELY(!init)) {
             return nullptr;
         }
+        sem->SetInitializer(init);
+
         // If the variable has no declared type, infer it from the RHS
         if (!storage_ty) {
-            storage_ty = rhs->Type();
+            storage_ty = init->Type();
         }
     }
 
@@ -524,62 +517,61 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto address_space = core::AddressSpace::kUndefined;
     if (var->declared_address_space) {
-        auto expr = AddressSpaceExpression(var->declared_address_space);
-        if (TINT_UNLIKELY(!expr)) {
+        auto space = AddressSpaceExpression(var->declared_address_space);
+        if (TINT_UNLIKELY(!space)) {
             return nullptr;
         }
-        address_space = expr->Value();
+        sem->SetAddressSpace(space->Value());
     } else {
         // No declared address space. Infer from usage / type.
         if (!is_global) {
-            address_space = core::AddressSpace::kFunction;
+            sem->SetAddressSpace(core::AddressSpace::kFunction);
         } else if (storage_ty->UnwrapRef()->is_handle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
             // If the store type is a texture type or a sampler type, then the
             // variable declaration must not have a address space attribute. The
             // address space will always be handle.
-            address_space = core::AddressSpace::kHandle;
+            sem->SetAddressSpace(core::AddressSpace::kHandle);
         }
     }
 
-    if (!is_global && address_space != core::AddressSpace::kFunction &&
+    if (!is_global && sem->AddressSpace() != core::AddressSpace::kFunction &&
         validator_.IsValidationEnabled(var->attributes,
                                        ast::DisabledValidation::kIgnoreAddressSpace)) {
         AddError("function-scope 'var' declaration must use 'function' address space", var->source);
         return nullptr;
     }
 
-    auto access = core::Access::kUndefined;
     if (var->declared_access) {
         auto expr = AccessExpression(var->declared_access);
         if (!expr) {
             return nullptr;
         }
-        access = expr->Value();
+        sem->SetAccess(expr->Value());
     } else {
-        access = DefaultAccessForAddressSpace(address_space);
+        sem->SetAccess(DefaultAccessForAddressSpace(sem->AddressSpace()));
     }
 
-    if (rhs && !validator_.VariableInitializer(var, storage_ty, rhs)) {
+    sem->SetType(b.create<core::type::Reference>(sem->AddressSpace(), storage_ty, sem->Access()));
+
+    if (sem->Initializer() &&
+        !validator_.VariableInitializer(var, storage_ty, sem->Initializer())) {
         return nullptr;
     }
 
-    auto* var_ty = b.create<core::type::Reference>(address_space, storage_ty, access);
-
-    if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
+    if (!ApplyAddressSpaceUsageToType(sem->AddressSpace(),
+                                      const_cast<core::type::Type*>(sem->Type()),
                                       var->type ? var->type->source : var->source)) {
         AddNote("while instantiating 'var' " + var->name->symbol.Name(), var->source);
         return nullptr;
     }
 
-    sem::Variable* sem = nullptr;
     if (is_global) {
-        bool has_io_address_space =
-            address_space == core::AddressSpace::kIn || address_space == core::AddressSpace::kOut;
+        bool has_io_address_space = sem->AddressSpace() == core::AddressSpace::kIn ||
+                                    sem->AddressSpace() == core::AddressSpace::kOut;
 
-        std::optional<uint32_t> group, binding, location, index;
+        std::optional<uint32_t> group, binding;
         for (auto* attribute : var->attributes) {
             Mark(attribute);
             enum Status { kSuccess, kErrored, kInvalid };
@@ -609,7 +601,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     if (!value) {
                         return kErrored;
                     }
-                    location = value.Get();
+                    global->SetLocation(value.Get());
                     return kSuccess;
                 },
                 [&](const ast::IndexAttribute* attr) {
@@ -620,7 +612,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     if (!value) {
                         return kErrored;
                     }
-                    index = value.Get();
+                    global->SetIndex(value.Get());
                     return kSuccess;
                 },
                 [&](const ast::BuiltinAttribute* attr) {
@@ -657,13 +649,9 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             }
         }
 
-        std::optional<BindingPoint> binding_point;
         if (group && binding) {
-            binding_point = BindingPoint{group.value(), binding.value()};
+            global->SetBindingPoint(BindingPoint{group.value(), binding.value()});
         }
-        sem = b.create<sem::GlobalVariable>(
-            var, var_ty, core::EvaluationStage::kRuntime, address_space, access,
-            /* constant_value */ nullptr, binding_point, location, index);
 
     } else {
         for (auto* attribute : var->attributes) {
@@ -679,13 +667,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 return nullptr;
             }
         }
-        sem = b.create<sem::LocalVariable>(var, var_ty, core::EvaluationStage::kRuntime,
-                                           address_space, access, current_statement_,
-                                           /* constant_value */ nullptr);
     }
 
-    sem->SetInitializer(rhs);
-    b.Sem().Add(var, sem);
     return sem;
 }
 
@@ -694,23 +677,25 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                                     uint32_t index) {
     Mark(param->name);
 
+    auto* sem = b.create<sem::Parameter>(param, index);
+    b.Sem().Add(param, sem);
+
     auto add_note = [&] {
         AddNote("while instantiating parameter " + param->name->symbol.Name(), param->source);
     };
 
-    std::optional<uint32_t> location, group, binding;
-
     if (func->IsEntryPoint()) {
+        std::optional<uint32_t> group, binding;
         for (auto* attribute : param->attributes) {
             Mark(attribute);
             bool ok = Switch(
                 attribute,  //
                 [&](const ast::LocationAttribute* attr) {
                     auto value = LocationAttribute(attr);
-                    if (!value) {
+                    if (TINT_UNLIKELY(!value)) {
                         return false;
                     }
-                    location = value.Get();
+                    sem->SetLocation(value.Get());
                     return true;
                 },
                 [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
@@ -728,7 +713,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                         return false;
                     }
                     auto value = GroupAttribute(attr);
-                    if (!value) {
+                    if (TINT_UNLIKELY(!value)) {
                         return false;
                     }
                     group = value.Get();
@@ -741,7 +726,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                         return false;
                     }
                     auto value = BindingAttribute(attr);
-                    if (!value) {
+                    if (TINT_UNLIKELY(!value)) {
                         return false;
                     }
                     binding = value.Get();
@@ -754,6 +739,9 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
             if (!ok) {
                 return nullptr;
             }
+        }
+        if (group && binding) {
+            sem->SetBindingPoint(BindingPoint{group.value(), binding.value()});
         }
     } else {
         for (auto* attribute : param->attributes) {
@@ -781,9 +769,10 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     }
 
     core::type::Type* ty = Type(param->type);
-    if (!ty) {
+    if (TINT_UNLIKELY(!ty)) {
         return nullptr;
     }
+    sem->SetType(ty);
 
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, ty, param->type->source)) {
         add_note();
@@ -800,16 +789,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
             return nullptr;
         }
     }
-
-    std::optional<BindingPoint> binding_point;
-    if (group && binding) {
-        binding_point = BindingPoint{group.value(), binding.value()};
-    }
-
-    auto* sem = b.create<sem::Parameter>(param, index, ty, core::AddressSpace::kUndefined,
-                                         core::Access::kUndefined, core::ParameterUsage::kNone,
-                                         binding_point, location);
-    b.Sem().Add(param, sem);
 
     if (!validator_.Parameter(sem)) {
         return nullptr;
@@ -2091,9 +2070,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (match->info->flags.Contains(OverloadFlag::kIsConstructor)) {
             // Type constructor
             auto params = Transform(match->parameters, [&](auto& p, size_t i) {
-                return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
-                                                core::AddressSpace::kUndefined,
-                                                core::Access::kUndefined, p.usage);
+                return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type, p.usage);
             });
             target_sem = constructors_.GetOrCreate(match.Get(), [&] {
                 return b.create<sem::ValueConstructor>(match->return_type, std::move(params),
@@ -2102,9 +2079,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         } else {
             // Type conversion
             target_sem = converters_.GetOrCreate(match.Get(), [&] {
-                auto param = b.create<sem::Parameter>(
-                    nullptr, 0u, match->parameters[0].type, core::AddressSpace::kUndefined,
-                    core::Access::kUndefined, match->parameters[0].usage);
+                auto* param = b.create<sem::Parameter>(nullptr, 0u, match->parameters[0].type,
+                                                       match->parameters[0].usage);
                 return b.create<sem::ValueConversion>(match->return_type, param, overload_stage);
             });
         }
@@ -2199,12 +2175,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     ArrayConstructorSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
                         auto params = tint::Transform(args, [&](auto, size_t i) {
-                            return b.create<sem::Parameter>(
-                                nullptr,                         // declaration
-                                static_cast<uint32_t>(i),        // index
-                                arr->ElemType(),                 // type
-                                core::AddressSpace::kUndefined,  // address_space
-                                core::Access::kUndefined);
+                            return b.create<sem::Parameter>(nullptr,  // declaration
+                                                            static_cast<uint32_t>(i),  // index
+                                                            arr->ElemType());
                         });
                         return b.create<sem::ValueConstructor>(arr, std::move(params), args_stage);
                     });
@@ -2227,12 +2200,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         Vector<sem::Parameter*, 8> params;
                         params.Resize(std::min(args.Length(), str->Members().Length()));
                         for (size_t i = 0, n = params.Length(); i < n; i++) {
-                            params[i] = b.create<sem::Parameter>(
-                                nullptr,                         // declaration
-                                static_cast<uint32_t>(i),        // index
-                                str->Members()[i]->Type(),       // type
-                                core::AddressSpace::kUndefined,  // address_space
-                                core::Access::kUndefined);       // access
+                            params[i] =
+                                b.create<sem::Parameter>(nullptr,                     // declaration
+                                                         static_cast<uint32_t>(i),    // index
+                                                         str->Members()[i]->Type());  // type
                         }
                         return b.create<sem::ValueConstructor>(str, std::move(params), args_stage);
                     });
@@ -2405,9 +2376,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // De-duplicate builtins that are identical.
     auto* target = builtins_.GetOrCreate(std::make_pair(overload.Get(), fn), [&] {
         auto params = Transform(overload->parameters, [&](auto& p, size_t i) {
-            return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
-                                            core::AddressSpace::kUndefined,
-                                            core::Access::kUndefined, p.usage);
+            return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type, p.usage);
         });
         sem::PipelineStageSet supported_stages;
         auto flags = overload->info->flags;

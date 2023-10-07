@@ -28,62 +28,26 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Parameter);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint::sem {
-Variable::Variable(const ast::Variable* declaration,
-                   const core::type::Type* type,
-                   core::EvaluationStage stage,
-                   core::AddressSpace address_space,
-                   core::Access access,
-                   const core::constant::Value* constant_value)
-    : declaration_(declaration),
-      type_(type),
-      stage_(stage),
-      address_space_(address_space),
-      access_(access),
-      constant_value_(constant_value) {}
+Variable::Variable(const ast::Variable* declaration) : declaration_(declaration) {}
 
 Variable::~Variable() = default;
 
-LocalVariable::LocalVariable(const ast::Variable* declaration,
-                             const core::type::Type* type,
-                             core::EvaluationStage stage,
-                             core::AddressSpace address_space,
-                             core::Access access,
-                             const sem::Statement* statement,
-                             const core::constant::Value* constant_value)
-    : Base(declaration, type, stage, address_space, access, constant_value),
-      statement_(statement) {}
+LocalVariable::LocalVariable(const ast::Variable* declaration, const sem::Statement* statement)
+    : Base(declaration), statement_(statement) {}
 
 LocalVariable::~LocalVariable() = default;
 
-GlobalVariable::GlobalVariable(const ast::Variable* declaration,
-                               const core::type::Type* type,
-                               core::EvaluationStage stage,
-                               core::AddressSpace address_space,
-                               core::Access access,
-                               const core::constant::Value* constant_value,
-                               std::optional<tint::BindingPoint> binding_point,
-                               std::optional<uint32_t> location,
-                               std::optional<uint32_t> index)
-    : Base(declaration, type, stage, address_space, access, constant_value),
-      binding_point_(binding_point),
-      location_(location),
-      index_(index) {}
+GlobalVariable::GlobalVariable(const ast::Variable* declaration) : Base(declaration) {}
 
 GlobalVariable::~GlobalVariable() = default;
 
 Parameter::Parameter(const ast::Parameter* declaration,
-                     uint32_t index,
-                     const core::type::Type* type,
-                     core::AddressSpace address_space,
-                     core::Access access,
-                     const core::ParameterUsage usage /* = ParameterUsage::kNone */,
-                     std::optional<tint::BindingPoint> binding_point /* = {} */,
-                     std::optional<uint32_t> location /* = std::nullopt */)
-    : Base(declaration, type, core::EvaluationStage::kRuntime, address_space, access, nullptr),
-      index_(index),
-      usage_(usage),
-      binding_point_(binding_point),
-      location_(location) {}
+                     uint32_t index /* = 0 */,
+                     const core::type::Type* type /* = nullptr */,
+                     core::ParameterUsage usage /* = core::ParameterUsage::kNone */)
+    : Base(declaration), index_(index), usage_(usage) {
+    SetType(type);
+}
 
 Parameter::~Parameter() = default;
 
