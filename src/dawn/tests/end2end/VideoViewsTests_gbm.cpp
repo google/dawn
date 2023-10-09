@@ -106,8 +106,6 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return GBM_FORMAT_NV12;
-            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-                return GBM_FORMAT_P010;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -117,8 +115,6 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return WGPUTextureFormat_R8BG8Biplanar420Unorm;
-            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-                return WGPUTextureFormat_R10X6BG10X6Biplanar420Unorm;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -161,30 +157,14 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
                                     VideoViewsTestsBase::kYUVImageDataHeightInTexels,
                                     GBM_BO_TRANSFER_WRITE, &strideBytes, &mapHandle);
             EXPECT_NE(addr, nullptr);
-            if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
-                std::vector<uint16_t> initialData =
-                    VideoViewsTestsBase::GetTestTextureData<uint16_t>(format, isCheckerboard);
-                uint16_t* srcBegin = initialData.data();
-                uint16_t* srcEnd = srcBegin + (initialData.size() * 2);
-                uint16_t* dstBegin = static_cast<uint16_t*>(addr);
-                for (; srcBegin < srcEnd;
-                     srcBegin += VideoViewsTestsBase::kYUVImageDataWidthInTexels,
-                     dstBegin += strideBytes) {
-                    std::memcpy(dstBegin, srcBegin,
-                                VideoViewsTestsBase::kYUVImageDataWidthInTexels);
-                }
-            } else {
-                std::vector<uint8_t> initialData =
-                    VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard);
-                uint8_t* srcBegin = initialData.data();
-                uint8_t* srcEnd = srcBegin + initialData.size();
-                uint8_t* dstBegin = static_cast<uint8_t*>(addr);
-                for (; srcBegin < srcEnd;
-                     srcBegin += VideoViewsTestsBase::kYUVImageDataWidthInTexels,
-                     dstBegin += strideBytes) {
-                    std::memcpy(dstBegin, srcBegin,
-                                VideoViewsTestsBase::kYUVImageDataWidthInTexels);
-                }
+            std::vector<uint8_t> initialData =
+                VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard);
+            uint8_t* srcBegin = initialData.data();
+            uint8_t* srcEnd = srcBegin + initialData.size();
+            uint8_t* dstBegin = static_cast<uint8_t*>(addr);
+            for (; srcBegin < srcEnd; srcBegin += VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                                      dstBegin += strideBytes) {
+                std::memcpy(dstBegin, srcBegin, VideoViewsTestsBase::kYUVImageDataWidthInTexels);
             }
 
             gbm_bo_unmap(gbmBo, mapHandle);
@@ -246,8 +226,8 @@ std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
 
 // static
 std::vector<Format> VideoViewsTestBackend::Formats() {
-    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
-            wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm};
+    // TODO(dawn:551): Support sharing P010 video surfaces.
+    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm};
 }
 
 // static
