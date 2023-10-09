@@ -20,10 +20,6 @@ enum GPUFeatureName {
     "chromium-experimental-subgroup-uniform-control-flow",
 };
 
-enum GPUVertexFormat {
-    "unorm10-10-10-2",
-};
-
 dictionary GPURequestAdapterOptions {
     boolean compatibilityMode = false;
 };

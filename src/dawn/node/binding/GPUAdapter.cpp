@@ -163,8 +163,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 }
 
 interop::Promise<interop::Interface<interop::GPUAdapterInfo>> GPUAdapter::requestAdapterInfo(
-    Napi::Env env,
-    std::vector<std::string> unmaskHints) {
+    Napi::Env env) {
     interop::Promise<interop::Interface<interop::GPUAdapterInfo>> promise(env, PROMISE_INFO);
 
     WGPUAdapterProperties adapterProperties = {};
