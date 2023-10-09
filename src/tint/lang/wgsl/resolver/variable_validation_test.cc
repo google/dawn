@@ -47,7 +47,8 @@ TEST_F(ResolverVariableValidationTest, VarInitializerNoReturnValueBuiltin) {
     WrapInFunction(Var("a", NoReturnValueBuiltin));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: builtin 'storageBarrier' does not return a value");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: builtin function 'storageBarrier' does not return a value");
 }
 
 TEST_F(ResolverVariableValidationTest, GlobalVarInitializerNoReturnValueBuiltin) {
@@ -56,7 +57,8 @@ TEST_F(ResolverVariableValidationTest, GlobalVarInitializerNoReturnValueBuiltin)
     GlobalVar("a", NoReturnValueBuiltin);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: builtin 'storageBarrier' does not return a value");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: builtin function 'storageBarrier' does not return a value");
 }
 
 TEST_F(ResolverVariableValidationTest, GlobalVarNoAddressSpace) {

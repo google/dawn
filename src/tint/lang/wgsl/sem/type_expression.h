@@ -41,8 +41,12 @@ class TypeExpression : public Castable<TypeExpression, Expression> {
     /// @return the type that the expression resolved to
     const core::type::Type* Type() const { return type_; }
 
+    /// Sets the type that this expression resolved to
+    /// @param type the new type
+    void SetType(const core::type::Type* type) { type_ = type; }
+
   private:
-    core::type::Type const* const type_;
+    const core::type::Type* type_ = nullptr;
 };
 
 }  // namespace tint::sem

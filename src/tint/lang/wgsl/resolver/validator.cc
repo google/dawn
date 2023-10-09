@@ -1635,7 +1635,8 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
             // used instead.
             auto* builtin = call->Target()->As<sem::BuiltinFn>();
             auto name = tint::ToString(builtin->Fn());
-            AddError("builtin '" + name + "' does not return a value", call->Declaration()->source);
+            AddError("builtin function '" + name + "' does not return a value",
+                     call->Declaration()->source);
             return false;
         }
     }

@@ -533,7 +533,8 @@ class DependencyScanner {
             auto builtin_info = GetBuiltinInfo(to);
             switch (builtin_info.type) {
                 case BuiltinType::kNone:
-                    graph_.resolved_identifiers.Add(from, UnresolvedIdentifier{to.Name()});
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier::UnresolvedIdentifier{to.Name()});
                     break;
                 case BuiltinType::kFunction:
                     graph_.resolved_identifiers.Add(

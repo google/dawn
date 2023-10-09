@@ -1225,7 +1225,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Type) {
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(), R"(12:34 error: cannot use type 'f32' as value
-12:34 note: are you missing '()' for value constructor?)");
+12:34 note: are you missing '()'?)");
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {

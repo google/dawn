@@ -28,6 +28,8 @@
 tint_add_target(tint_lang_wgsl_resolver lib
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
+  lang/wgsl/resolver/incomplete_type.cc
+  lang/wgsl/resolver/incomplete_type.h
   lang/wgsl/resolver/resolve.cc
   lang/wgsl/resolver/resolve.h
   lang/wgsl/resolver/resolver.cc
@@ -36,6 +38,8 @@ tint_add_target(tint_lang_wgsl_resolver lib
   lang/wgsl/resolver/sem_helper.h
   lang/wgsl/resolver/uniformity.cc
   lang/wgsl/resolver/uniformity.h
+  lang/wgsl/resolver/unresolved_identifier.cc
+  lang/wgsl/resolver/unresolved_identifier.h
   lang/wgsl/resolver/validator.cc
   lang/wgsl/resolver/validator.h
 )

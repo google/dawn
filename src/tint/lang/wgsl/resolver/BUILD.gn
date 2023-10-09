@@ -33,6 +33,8 @@ libtint_source_set("resolver") {
   sources = [
     "dependency_graph.cc",
     "dependency_graph.h",
+    "incomplete_type.cc",
+    "incomplete_type.h",
     "resolve.cc",
     "resolve.h",
     "resolver.cc",
@@ -41,6 +43,8 @@ libtint_source_set("resolver") {
     "sem_helper.h",
     "uniformity.cc",
     "uniformity.h",
+    "unresolved_identifier.cc",
+    "unresolved_identifier.h",
     "validator.cc",
     "validator.h",
   ]

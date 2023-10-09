@@ -35,7 +35,8 @@ TEST_F(ResolverBuiltinValidationTest, FunctionTypeMustMatchReturnStatementType_v
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: builtin 'workgroupBarrier' does not return a value");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: builtin function 'workgroupBarrier' does not return a value");
 }
 
 TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
@@ -118,7 +119,8 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsVariable)
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot use function 'mix' as value
-12:34 note: function 'mix' declared here)");
+12:34 note: function 'mix' declared here
+56:78 note: are you missing '()'?)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariable) {

@@ -61,7 +61,9 @@
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/intrinsic/ctor_conv.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
+#include "src/tint/lang/wgsl/resolver/incomplete_type.h"
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
+#include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -101,6 +103,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::BuiltinVa
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::InterpolationSampling>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::InterpolationType>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::TexelFormat>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::wgsl::BuiltinFn>);
 
 namespace tint::resolver {
 namespace {
@@ -1554,26 +1557,34 @@ sem::ValueExpression* Resolver::ValueExpression(const ast::Expression* expr) {
 }
 
 sem::TypeExpression* Resolver::TypeExpression(const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "type"};
     return sem_.AsTypeExpression(Expression(expr));
 }
 
 sem::FunctionExpression* Resolver::FunctionExpression(const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "call target"};
     return sem_.AsFunctionExpression(Expression(expr));
 }
 
 core::type::Type* Resolver::Type(const ast::Expression* ast) {
     auto* type_expr = TypeExpression(ast);
-    if (!type_expr) {
+    if (TINT_UNLIKELY(!type_expr)) {
         return nullptr;
     }
-    return const_cast<core::type::Type*>(type_expr->Type());
+
+    auto* type = const_cast<core::type::Type*>(type_expr->Type());
+    if (TINT_UNLIKELY(!type)) {
+        return nullptr;
+    }
+
+    if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
+        AddError("expected '<' for '" + std::string(ToString(incomplete->builtin)) + "'",
+                 ast->source.End());
+        return nullptr;
+    }
+    return type;
 }
 
 sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "address space", core::kAddressSpaceStrings};
     auto address_space_expr = sem_.AsAddressSpace(Expression(expr));
     if (TINT_UNLIKELY(!address_space_expr)) {
         return nullptr;
@@ -1592,31 +1603,25 @@ sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression
 
 sem::BuiltinEnumExpression<core::BuiltinValue>* Resolver::BuiltinValueExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "builtin value", core::kBuiltinValueStrings};
     return sem_.AsBuiltinValue(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<core::TexelFormat>* Resolver::TexelFormatExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "texel format", core::kTexelFormatStrings};
     return sem_.AsTexelFormat(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<core::Access>* Resolver::AccessExpression(const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "access", core::kAccessStrings};
     return sem_.AsAccess(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<core::InterpolationSampling>* Resolver::InterpolationSampling(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "interpolation sampling",
-                                core::kInterpolationSamplingStrings};
     return sem_.AsInterpolationSampling(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<core::InterpolationType>* Resolver::InterpolationType(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "interpolation type", core::kInterpolationTypeStrings};
     return sem_.AsInterpolationType(Expression(expr));
 }
 
@@ -2025,11 +2030,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // * A builtin call.
     // * A value constructor.
     // * A value conversion.
-    auto* target = expr->target;
-    Mark(target);
-
-    auto* ident = target->identifier;
-    Mark(ident);
+    auto* target = Expression(expr->target);
+    if (TINT_UNLIKELY(!target)) {
+        return nullptr;
+    }
 
     // Resolve all of the arguments, their types and the set of behaviors.
     Vector<const sem::ValueExpression*, 8> args;
@@ -2225,134 +2229,97 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             });
     };
 
-    auto inferred_array = [&]() -> tint::sem::Call* {
-        auto el_count =
-            b.create<core::type::ConstantArrayCount>(static_cast<uint32_t>(args.Length()));
-        auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-        auto el_ty = core::type::Type::Common(arg_tys);
-        if (!el_ty) {
-            AddError("cannot infer common array element type from constructor arguments",
-                     expr->source);
-            Hashset<const core::type::Type*, 8> types;
-            for (size_t i = 0; i < args.Length(); i++) {
-                if (types.Add(args[i]->Type())) {
-                    AddNote("argument " + std::to_string(i) + " is of type '" +
-                                sem_.TypeNameOf(args[i]->Type()) + "'",
-                            args[i]->Declaration()->source);
+    auto incomplete_type = [&](const IncompleteType* t) -> sem::Call* {
+        // A type without template arguments.
+        // Examples: vec3(...), array(...)
+        switch (t->builtin) {
+            case core::BuiltinType::kVec2:
+                return ctor_or_conv(CtorConvIntrinsic::kVec2, nullptr);
+            case core::BuiltinType::kVec3:
+                return ctor_or_conv(CtorConvIntrinsic::kVec3, nullptr);
+            case core::BuiltinType::kVec4:
+                return ctor_or_conv(CtorConvIntrinsic::kVec4, nullptr);
+            case core::BuiltinType::kMat2X2:
+                return ctor_or_conv(CtorConvIntrinsic::kMat2x2, nullptr);
+            case core::BuiltinType::kMat2X3:
+                return ctor_or_conv(CtorConvIntrinsic::kMat2x3, nullptr);
+            case core::BuiltinType::kMat2X4:
+                return ctor_or_conv(CtorConvIntrinsic::kMat2x4, nullptr);
+            case core::BuiltinType::kMat3X2:
+                return ctor_or_conv(CtorConvIntrinsic::kMat3x2, nullptr);
+            case core::BuiltinType::kMat3X3:
+                return ctor_or_conv(CtorConvIntrinsic::kMat3x3, nullptr);
+            case core::BuiltinType::kMat3X4:
+                return ctor_or_conv(CtorConvIntrinsic::kMat3x4, nullptr);
+            case core::BuiltinType::kMat4X2:
+                return ctor_or_conv(CtorConvIntrinsic::kMat4x2, nullptr);
+            case core::BuiltinType::kMat4X3:
+                return ctor_or_conv(CtorConvIntrinsic::kMat4x3, nullptr);
+            case core::BuiltinType::kMat4X4:
+                return ctor_or_conv(CtorConvIntrinsic::kMat4x4, nullptr);
+            case core::BuiltinType::kArray: {
+                auto el_count =
+                    b.create<core::type::ConstantArrayCount>(static_cast<uint32_t>(args.Length()));
+                auto arg_tys =
+                    tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
+                auto el_ty = core::type::Type::Common(arg_tys);
+                if (TINT_UNLIKELY(!el_ty)) {
+                    AddError("cannot infer common array element type from constructor arguments",
+                             expr->source);
+                    Hashset<const core::type::Type*, 8> types;
+                    for (size_t i = 0; i < args.Length(); i++) {
+                        if (types.Add(args[i]->Type())) {
+                            AddNote("argument " + std::to_string(i) + " is of type '" +
+                                        sem_.TypeNameOf(args[i]->Type()) + "'",
+                                    args[i]->Declaration()->source);
+                        }
+                    }
+                    return nullptr;
                 }
+                auto* arr = Array(expr->source, expr->source, expr->source, el_ty, el_count,
+                                  /* explicit_stride */ 0);
+                if (TINT_UNLIKELY(!arr)) {
+                    return nullptr;
+                }
+                return ty_init_or_conv(arr);
             }
-            return nullptr;
+            default: {
+                TINT_ICE() << "unhandled IncompleteType builtin: " << t->builtin;
+                return nullptr;
+            }
         }
-        auto* arr = Array(expr->source, expr->source, expr->source, el_ty, el_count,
-                          /* explicit_stride */ 0);
-        if (!arr) {
-            return nullptr;
-        }
-        return ty_init_or_conv(arr);
     };
 
-    auto call = [&]() -> sem::Call* {
-        auto resolved = dependencies_.resolved_identifiers.Get(ident);
-        if (!resolved) {
-            StringStream err;
-            err << "identifier '" << ident->symbol.Name() << "' was not resolved";
-            AddICE(err.str(), ident->source);
-            return nullptr;
-        }
-
-        if (auto* ast_node = resolved->Node()) {
+    auto* call = Switch(
+        target,  //
+        [&](const sem::FunctionExpression* fn_expr) {
+            return FunctionCall(expr, const_cast<sem::Function*>(fn_expr->Function()),
+                                std::move(args), arg_behaviors);
+        },
+        [&](const sem::TypeExpression* ty_expr) {
             return Switch(
-                sem_.Get(ast_node),  //
-                [&](core::type::Type* t) -> tint::sem::Call* {
-                    // User declared types cannot be templated.
-                    if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
+                ty_expr->Type(),  //
+                [&](const IncompleteType* t) -> sem::Call* {
+                    auto* ctor = incomplete_type(t);
+                    if (TINT_UNLIKELY(!ctor)) {
                         return nullptr;
                     }
-                    return ty_init_or_conv(t);
+                    // Replace incomplete type with resolved type
+                    const_cast<sem::TypeExpression*>(ty_expr)->SetType(ctor->Type());
+                    return ctor;
                 },
-                [&](sem::Function* f) -> sem::Call* {
-                    if (!TINT_LIKELY(CheckNotTemplated("function", ident))) {
-                        return nullptr;
-                    }
-                    return FunctionCall(expr, f, args, arg_behaviors);
-                },
-                [&](sem::Expression* e) {
-                    sem_.ErrorUnexpectedExprKind(e, "call target");
-                    return nullptr;
-                },
-                [&](Default) {
-                    ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
-                    return nullptr;
-                });
-        }
-
-        if (auto f = resolved->BuiltinFn(); f != wgsl::BuiltinFn::kNone) {
-            if (!TINT_LIKELY(CheckNotTemplated("builtin", ident))) {
-                return nullptr;
-            }
-            return BuiltinCall(expr, f, args);
-        }
-
-        if (auto bt = resolved->BuiltinType(); bt != core::BuiltinType::kUndefined) {
-            if (!ident->Is<ast::TemplatedIdentifier>()) {
-                // No template arguments provided.
-                // Check to see if this is an inferred-element-type call.
-                switch (bt) {
-                    case core::BuiltinType::kArray:
-                        return inferred_array();
-                    case core::BuiltinType::kVec2:
-                        return ctor_or_conv(CtorConvIntrinsic::kVec2, nullptr);
-                    case core::BuiltinType::kVec3:
-                        return ctor_or_conv(CtorConvIntrinsic::kVec3, nullptr);
-                    case core::BuiltinType::kVec4:
-                        return ctor_or_conv(CtorConvIntrinsic::kVec4, nullptr);
-                    case core::BuiltinType::kMat2X2:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat2x2, nullptr);
-                    case core::BuiltinType::kMat2X3:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat2x3, nullptr);
-                    case core::BuiltinType::kMat2X4:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat2x4, nullptr);
-                    case core::BuiltinType::kMat3X2:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat3x2, nullptr);
-                    case core::BuiltinType::kMat3X3:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat3x3, nullptr);
-                    case core::BuiltinType::kMat3X4:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat3x4, nullptr);
-                    case core::BuiltinType::kMat4X2:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat4x2, nullptr);
-                    case core::BuiltinType::kMat4X3:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat4x3, nullptr);
-                    case core::BuiltinType::kMat4X4:
-                        return ctor_or_conv(CtorConvIntrinsic::kMat4x4, nullptr);
-                    default:
-                        break;
-                }
-            }
-            auto* ty = BuiltinType(bt, ident);
-            if (TINT_UNLIKELY(!ty)) {
-                return nullptr;
-            }
-            return ty_init_or_conv(ty);
-        }
-
-        if (auto* unresolved = resolved->Unresolved()) {
-            AddError("unresolved call target '" + unresolved->name + "'", expr->source);
+                [&](Default) { return ty_init_or_conv(ty_expr->Type()); });
+        },
+        [&](const sem::BuiltinEnumExpression<wgsl::BuiltinFn>* fn_expr) {
+            return BuiltinCall(expr, fn_expr->Value(), args);
+        },
+        [&](Default) {
+            sem_.ErrorUnexpectedExprKind(target, "call target");
             return nullptr;
-        }
-
-        ErrorMismatchedResolvedIdentifier(ident->source, *resolved, "call target");
-        return nullptr;
-    }();
+        });
 
     if (!call) {
         return nullptr;
-    }
-
-    if (call->Target()->IsAnyOf<sem::ValueConstructor, sem::ValueConversion>()) {
-        // The target of the call was a type.
-        // Associate the target identifier expression with the resolved type.
-        auto* ty_expr = b.create<sem::TypeExpression>(target, current_statement_, call->Type());
-        b.Sem().Add(target, ty_expr);
     }
 
     return validator_.Call(call, current_statement_) ? call : nullptr;
@@ -2492,29 +2459,29 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
         case core::BuiltinType::kF32:
             return check_no_tmpl_args(b.create<core::type::F32>());
         case core::BuiltinType::kVec2:
-            return VecT(ident, 2);
+            return VecT(ident, builtin_ty, 2);
         case core::BuiltinType::kVec3:
-            return VecT(ident, 3);
+            return VecT(ident, builtin_ty, 3);
         case core::BuiltinType::kVec4:
-            return VecT(ident, 4);
+            return VecT(ident, builtin_ty, 4);
         case core::BuiltinType::kMat2X2:
-            return MatT(ident, 2, 2);
+            return MatT(ident, builtin_ty, 2, 2);
         case core::BuiltinType::kMat2X3:
-            return MatT(ident, 2, 3);
+            return MatT(ident, builtin_ty, 2, 3);
         case core::BuiltinType::kMat2X4:
-            return MatT(ident, 2, 4);
+            return MatT(ident, builtin_ty, 2, 4);
         case core::BuiltinType::kMat3X2:
-            return MatT(ident, 3, 2);
+            return MatT(ident, builtin_ty, 3, 2);
         case core::BuiltinType::kMat3X3:
-            return MatT(ident, 3, 3);
+            return MatT(ident, builtin_ty, 3, 3);
         case core::BuiltinType::kMat3X4:
-            return MatT(ident, 3, 4);
+            return MatT(ident, builtin_ty, 3, 4);
         case core::BuiltinType::kMat4X2:
-            return MatT(ident, 4, 2);
+            return MatT(ident, builtin_ty, 4, 2);
         case core::BuiltinType::kMat4X3:
-            return MatT(ident, 4, 3);
+            return MatT(ident, builtin_ty, 4, 3);
         case core::BuiltinType::kMat4X4:
-            return MatT(ident, 4, 4);
+            return MatT(ident, builtin_ty, 4, 4);
         case core::BuiltinType::kMat2X2F:
             return check_no_tmpl_args(Mat(ident, F32(), 2u, 2u));
         case core::BuiltinType::kMat2X3F:
@@ -2721,15 +2688,24 @@ core::type::Vector* Resolver::Vec(const ast::Identifier* ident, core::type::Type
     return b.create<core::type::Vector>(el, n);
 }
 
-core::type::Vector* Resolver::VecT(const ast::Identifier* ident, uint32_t n) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
-    if (TINT_UNLIKELY(!tmpl_ident)) {
+core::type::Type* Resolver::VecT(const ast::Identifier* ident,
+                                 core::BuiltinType builtin,
+                                 uint32_t n) {
+    auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
+    if (!tmpl_ident) {
+        // 'vecN' has no template arguments, so return an incomplete type.
+        return b.create<IncompleteType>(builtin);
+    }
+
+    if (TINT_UNLIKELY(!CheckTemplatedIdentifierArgs(tmpl_ident, 1))) {
         return nullptr;
     }
+
     auto* ty = Type(tmpl_ident->arguments[0]);
     if (TINT_UNLIKELY(!ty)) {
         return nullptr;
     }
+
     return Vec(ident, const_cast<core::type::Type*>(ty), n);
 }
 
@@ -2750,26 +2726,39 @@ core::type::Matrix* Resolver::Mat(const ast::Identifier* ident,
     return b.create<core::type::Matrix>(column, num_columns);
 }
 
-core::type::Matrix* Resolver::MatT(const ast::Identifier* ident,
-                                   uint32_t num_columns,
-                                   uint32_t num_rows) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
-    if (TINT_UNLIKELY(!tmpl_ident)) {
+core::type::Type* Resolver::MatT(const ast::Identifier* ident,
+                                 core::BuiltinType builtin,
+                                 uint32_t num_columns,
+                                 uint32_t num_rows) {
+    auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
+    if (!tmpl_ident) {
+        // 'vecN' has no template arguments, so return an incomplete type.
+        return b.create<IncompleteType>(builtin);
+    }
+
+    if (TINT_UNLIKELY(!CheckTemplatedIdentifierArgs(tmpl_ident, 1))) {
         return nullptr;
     }
-    auto* ty = Type(tmpl_ident->arguments[0]);
-    if (TINT_UNLIKELY(!ty)) {
+
+    auto* el_ty = Type(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!el_ty)) {
         return nullptr;
     }
-    return Mat(ident, const_cast<core::type::Type*>(ty), num_columns, num_rows);
+
+    return Mat(ident, const_cast<core::type::Type*>(el_ty), num_columns, num_rows);
 }
 
-core::type::Array* Resolver::Array(const ast::Identifier* ident) {
+core::type::Type* Resolver::Array(const ast::Identifier* ident) {
     UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
     TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
 
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1, 2);
-    if (TINT_UNLIKELY(!tmpl_ident)) {
+    auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
+    if (!tmpl_ident) {
+        // 'array' has no template arguments, so return an incomplete type.
+        return b.create<IncompleteType>(core::BuiltinType::kArray);
+    }
+
+    if (TINT_UNLIKELY(!CheckTemplatedIdentifierArgs(tmpl_ident, 1, 2))) {
         return nullptr;
     }
     auto* ast_el_ty = tmpl_ident->arguments[0];
@@ -2866,6 +2855,7 @@ core::type::Pointer* Resolver::Ptr(const ast::Identifier* ident) {
     if (!validator_.Pointer(tmpl_ident, out)) {
         return nullptr;
     }
+
     if (!ApplyAddressSpaceUsageToType(address_space, store_ty,
                                       store_ty_expr->Declaration()->source)) {
         AddNote("while instantiating " + out->FriendlyName(), ident->source);
@@ -2885,6 +2875,7 @@ core::type::SampledTexture* Resolver::SampledTexture(const ast::Identifier* iden
     if (TINT_UNLIKELY(!ty_expr)) {
         return nullptr;
     }
+
     auto* out = b.create<core::type::SampledTexture>(dim, ty_expr->Type());
     return validator_.SampledTexture(out, ident->source) ? out : nullptr;
 }
@@ -2900,6 +2891,7 @@ core::type::MultisampledTexture* Resolver::MultisampledTexture(const ast::Identi
     if (TINT_UNLIKELY(!ty_expr)) {
         return nullptr;
     }
+
     auto* out = b.create<core::type::MultisampledTexture>(dim, ty_expr->Type());
     return validator_.MultisampledTexture(out, ident->source) ? out : nullptr;
 }
@@ -2915,16 +2907,19 @@ core::type::StorageTexture* Resolver::StorageTexture(const ast::Identifier* iden
     if (TINT_UNLIKELY(!format)) {
         return nullptr;
     }
+
     auto* access = AccessExpression(tmpl_ident->arguments[1]);
     if (TINT_UNLIKELY(!access)) {
         return nullptr;
     }
+
     auto* subtype = core::type::StorageTexture::SubtypeFor(format->Value(), b.Types());
     auto* tex =
         b.create<core::type::StorageTexture>(dim, format->Value(), access->Value(), subtype);
     if (!validator_.StorageTexture(tex, ident->source)) {
         return nullptr;
     }
+
     return tex;
 }
 
@@ -2933,6 +2928,7 @@ core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {
     if (TINT_UNLIKELY(!tmpl_ident)) {
         return nullptr;
     }
+
     auto* el_ty = Type(tmpl_ident->arguments[0]);
     if (TINT_UNLIKELY(!el_ty)) {
         return nullptr;
@@ -2947,9 +2943,6 @@ core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {
 const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identifier* ident,
                                                               size_t min_args,
                                                               size_t max_args /* = use min 0 */) {
-    if (max_args == 0) {
-        max_args = min_args;
-    }
     auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
     if (!tmpl_ident) {
         if (TINT_UNLIKELY(min_args != 0)) {
@@ -2958,28 +2951,37 @@ const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identif
         }
         return nullptr;
     }
+    return CheckTemplatedIdentifierArgs(tmpl_ident, min_args, max_args) ? tmpl_ident : nullptr;
+}
+
+bool Resolver::CheckTemplatedIdentifierArgs(const ast::TemplatedIdentifier* ident,
+                                            size_t min_args,
+                                            size_t max_args /* = use min 0 */) {
+    if (max_args == 0) {
+        max_args = min_args;
+    }
     if (min_args == max_args) {
-        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() != min_args)) {
+        if (TINT_UNLIKELY(ident->arguments.Length() != min_args)) {
             AddError("'" + ident->symbol.Name() + "' requires " + std::to_string(min_args) +
                          " template arguments",
                      ident->source);
-            return nullptr;
+            return false;
         }
     } else {
-        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() < min_args)) {
+        if (TINT_UNLIKELY(ident->arguments.Length() < min_args)) {
             AddError("'" + ident->symbol.Name() + "' requires at least " +
                          std::to_string(min_args) + " template arguments",
                      ident->source);
-            return nullptr;
+            return false;
         }
-        if (TINT_UNLIKELY(tmpl_ident->arguments.Length() > max_args)) {
+        if (TINT_UNLIKELY(ident->arguments.Length() > max_args)) {
             AddError("'" + ident->symbol.Name() + "' requires at most " + std::to_string(max_args) +
                          " template arguments",
                      ident->source);
-            return nullptr;
+            return false;
         }
     }
-    return tmpl_ident;
+    return ident;
 }
 
 size_t Resolver::NestDepth(const core::type::Type* ty) const {
@@ -3022,17 +3024,16 @@ void Resolver::CollectTextureSamplerPairs(const sem::BuiltinFn* builtin,
     }
 }
 
-template <size_t N>
 sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                   sem::Function* target,
-                                  Vector<const sem::ValueExpression*, N>& args,
+                                  VectorRef<const sem::ValueExpression*> args_in,
                                   sem::Behaviors arg_behaviors) {
+    Vector<const sem::ValueExpression*, 8> args = std::move(args_in);
     if (!MaybeMaterializeAndLoadArguments(args, target)) {
         return nullptr;
     }
 
-    // TODO(crbug.com/tint/1420): For now, assume all function calls have side
-    // effects.
+    // TODO(crbug.com/tint/1420): For now, assume all function calls have side effects.
     bool has_side_effects = true;
     auto* call = b.create<sem::Call>(expr, target, core::EvaluationStage::kRuntime, std::move(args),
                                      current_statement_,
@@ -3068,10 +3069,6 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
         // Note: Validation *must* be performed before calling this method.
         CollectTextureSamplerPairs(target, call->Arguments());
     }
-
-    // Associate the target identifier expression with the resolved function.
-    auto* fn_expr = b.create<sem::FunctionExpression>(expr->target, current_statement_, target);
-    b.Sem().Add(expr->target, fn_expr);
 
     return call;
 }
@@ -3295,9 +3292,11 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return b.create<sem::TypeExpression>(expr, current_statement_, ty);
     }
 
-    if (resolved->BuiltinFn() != wgsl::BuiltinFn::kNone) {
-        AddError("missing '(' for builtin function call", expr->source.End());
-        return nullptr;
+    if (auto fn = resolved->BuiltinFn(); fn != wgsl::BuiltinFn::kNone) {
+        return CheckNotTemplated("builtin function", ident)
+                   ? b.create<sem::BuiltinEnumExpression<wgsl::BuiltinFn>>(expr, current_statement_,
+                                                                           fn)
+                   : nullptr;
     }
 
     if (auto access = resolved->Access(); access != core::Access::kUndefined) {
@@ -3344,28 +3343,8 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                    : nullptr;
     }
 
-    if (auto* unresolved = resolved->Unresolved()) {
-        if (identifier_resolve_hint_.expression == expr) {
-            AddError("unresolved " + std::string(identifier_resolve_hint_.usage) + " '" +
-                         unresolved->name + "'",
-                     expr->source);
-            if (!identifier_resolve_hint_.suggestions.IsEmpty()) {
-                // Filter out suggestions that have a leading underscore.
-                Vector<const char*, 8> filtered;
-                for (auto* str : identifier_resolve_hint_.suggestions) {
-                    if (str[0] != '_') {
-                        filtered.Push(str);
-                    }
-                }
-                StringStream msg;
-                tint::SuggestAlternatives(unresolved->name,
-                                          filtered.Slice().Reinterpret<char const* const>(), msg);
-                AddNote(msg.str(), expr->source);
-            }
-        } else {
-            AddError("unresolved identifier '" + unresolved->name + "'", expr->source);
-        }
-        return nullptr;
+    if (resolved->Unresolved()) {
+        return b.create<UnresolvedIdentifier>(expr, current_statement_);
     }
 
     TINT_UNREACHABLE() << "unhandled resolved identifier: " << resolved->String();
@@ -4900,13 +4879,6 @@ bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) 
         return false;
     }
     return true;
-}
-
-void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
-                                                 const ResolvedIdentifier& resolved,
-                                                 std::string_view wanted) {
-    AddError("cannot use " + resolved.String() + " as " + std::string(wanted), source);
-    sem_.NoteDeclarationSource(resolved.Node());
 }
 
 void Resolver::ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use) {

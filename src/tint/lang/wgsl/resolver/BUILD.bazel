@@ -27,18 +27,22 @@ cc_library(
   name = "resolver",
   srcs = [
     "dependency_graph.cc",
+    "incomplete_type.cc",
     "resolve.cc",
     "resolver.cc",
     "sem_helper.cc",
     "uniformity.cc",
+    "unresolved_identifier.cc",
     "validator.cc",
   ],
   hdrs = [
     "dependency_graph.h",
+    "incomplete_type.h",
     "resolve.h",
     "resolver.h",
     "sem_helper.h",
     "uniformity.h",
+    "unresolved_identifier.h",
     "validator.h",
   ],
   deps = [

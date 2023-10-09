@@ -164,8 +164,9 @@ class Resolver {
     /// ident.
     core::type::Vector* Vec(const ast::Identifier* ident, core::type::Type* el, uint32_t n);
 
-    /// @returns a vector of width @p n resolved from the templated identifier @p ident.
-    core::type::Vector* VecT(const ast::Identifier* ident, uint32_t n);
+    /// @returns a vector of width @p n resolved from the templated identifier @p ident, or an
+    /// IncompleteType if the identifier is not templated.
+    core::type::Type* VecT(const ast::Identifier* ident, core::BuiltinType builtin, uint32_t n);
 
     /// @returns a matrix with the element type @p el of dimensions @p num_columns x @p num_rows
     /// resolved from the identifier @p ident.
@@ -175,11 +176,15 @@ class Resolver {
                             uint32_t num_rows);
 
     /// @returns a matrix of dimensions @p num_columns x @p num_rows resolved from the templated
-    /// identifier @p ident.
-    core::type::Matrix* MatT(const ast::Identifier* ident, uint32_t num_columns, uint32_t num_rows);
+    /// identifier @p ident, or an IncompleteType if the identifier is not templated.
+    core::type::Type* MatT(const ast::Identifier* ident,
+                           core::BuiltinType builtin,
+                           uint32_t num_columns,
+                           uint32_t num_rows);
 
-    /// @returns an array resolved from the templated identifier @p ident.
-    core::type::Array* Array(const ast::Identifier* ident);
+    /// @returns an array resolved from the templated identifier @p ident, or an IncompleteType if
+    /// the identifier is not templated.
+    core::type::Type* Array(const ast::Identifier* ident);
 
     /// @returns an atomic resolved from the templated identifier @p ident.
     core::type::Atomic* Atomic(const ast::Identifier* ident);
@@ -210,6 +215,12 @@ class Resolver {
     const ast::TemplatedIdentifier* TemplatedIdentifier(const ast::Identifier* ident,
                                                         size_t min_args,
                                                         size_t max_args = /* use min */ 0);
+
+    /// @returns true if the number of templated arguments are between @p min_args and  @p max_args
+    /// otherwise raises an error and returns false.
+    bool CheckTemplatedIdentifierArgs(const ast::TemplatedIdentifier* ident,
+                                      size_t min_args,
+                                      size_t max_args = /* use min */ 0);
 
     /// @returns the call of Expression() cast to a
     /// sem::BuiltinEnumExpression<core::AddressSpace>. If the sem::Expression is not a
@@ -271,10 +282,9 @@ class Resolver {
     sem::ValueExpression* Bitcast(const ast::BitcastExpression*);
     sem::Call* Call(const ast::CallExpression*);
     sem::Function* Function(const ast::Function*);
-    template <size_t N>
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
-                            Vector<const sem::ValueExpression*, N>& args,
+                            VectorRef<const sem::ValueExpression*> args,
                             sem::Behaviors arg_behaviors);
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
@@ -596,15 +606,6 @@ class Resolver {
     /// @returns true if @p ident is not a ast::TemplatedIdentifier.
     bool CheckNotTemplated(const char* use, const ast::Identifier* ident);
 
-    /// Raises an error diagnostic that the resolved identifier @p resolved was not of the expected
-    /// kind.
-    /// @param source the source of the error diagnostic
-    /// @param resolved the resolved identifier
-    /// @param wanted the expected kind
-    void ErrorMismatchedResolvedIdentifier(const Source& source,
-                                           const ResolvedIdentifier& resolved,
-                                           std::string_view wanted);
-
     /// Raises an error that the attribute is not valid for the given use.
     /// @param attr the invalue attribute
     /// @param use the thing that the attribute was applied to
@@ -664,17 +665,6 @@ class Resolver {
         std::unordered_set<const sem::Variable*> parameter_reads;
     };
 
-    /// A hint for the usage of an identifier expression.
-    /// Used to provide more informative error diagnostics on resolution failure.
-    struct IdentifierResolveHint {
-        /// The expression this hint applies to
-        const ast::Expression* expression = nullptr;
-        /// The usage of the identifier.
-        const char* usage = "identifier";
-        /// Suggested strings if the identifier failed to resolve
-        tint::Slice<char const* const> suggestions = tint::Empty;
-    };
-
     ProgramBuilder& b;
     diag::List& diagnostics_;
     core::constant::Eval const_eval_;
@@ -693,13 +683,13 @@ class Resolver {
     Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
+    sem::GlobalVariable* current_global_var_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     uint32_t current_scoping_depth_ = 0;
     UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
     Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
     Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
     Hashset<const ast::Expression*, 8> skip_const_eval_;
-    IdentifierResolveHint identifier_resolve_hint_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;
     Hashmap<std::pair<core::intrinsic::Overload, wgsl::BuiltinFn>, sem::BuiltinFn*, 64> builtins_;
     Hashmap<core::intrinsic::Overload, sem::ValueConstructor*, 16> constructors_;

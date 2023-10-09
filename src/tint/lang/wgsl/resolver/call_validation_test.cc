@@ -501,7 +501,8 @@ TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: builtin 'min' does not take template arguments)");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: builtin function 'min' does not take template arguments)");
 }
 
 }  // namespace

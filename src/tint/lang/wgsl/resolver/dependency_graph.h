@@ -31,12 +31,6 @@
 
 namespace tint::resolver {
 
-/// UnresolvedIdentifier is the variant value used by ResolvedIdentifier
-struct UnresolvedIdentifier {
-    /// Name of the unresolved identifier
-    std::string name;
-};
-
 /// ResolvedIdentifier holds the resolution of an ast::Identifier.
 /// Can hold one of:
 /// - UnresolvedIdentifier
@@ -53,6 +47,12 @@ struct UnresolvedIdentifier {
 /// - core::TexelFormat
 class ResolvedIdentifier {
   public:
+    /// UnresolvedIdentifier is the variant value used to represent an unresolved identifier
+    struct UnresolvedIdentifier {
+        /// Name of the unresolved identifier
+        std::string name;
+    };
+
     /// Constructor
     /// @param value the resolved identifier value
     template <typename T>
