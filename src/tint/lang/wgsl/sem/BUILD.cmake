@@ -28,6 +28,8 @@
 tint_add_target(tint_lang_wgsl_sem lib
   lang/wgsl/sem/accessor_expression.cc
   lang/wgsl/sem/accessor_expression.h
+  lang/wgsl/sem/array.cc
+  lang/wgsl/sem/array.h
   lang/wgsl/sem/array_count.cc
   lang/wgsl/sem/array_count.h
   lang/wgsl/sem/behavior.cc

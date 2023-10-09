@@ -15,6 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -489,7 +490,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_ZeroValue_Pass) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -505,7 +506,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_U32U32U32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -524,7 +525,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32U32U32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -543,7 +544,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_U32AIU32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -562,7 +563,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32AIU32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -581,7 +582,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayU32_AIAIAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -600,7 +601,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_AIAIAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -621,7 +622,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());
@@ -645,7 +646,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
 
     auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
-    EXPECT_TRUE(call->Type()->Is<core::type::Array>());
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::ValueConstructor>();
     ASSERT_NE(ctor, nullptr);
     EXPECT_EQ(call->Type(), ctor->ReturnType());

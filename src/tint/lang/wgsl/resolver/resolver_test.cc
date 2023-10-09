@@ -39,6 +39,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -423,7 +424,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<core::type::ConstantArrayCount>(10u));
 }
 
@@ -436,7 +437,7 @@ TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<core::type::ConstantArrayCount>(10u));
 }
 
@@ -451,7 +452,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<core::type::ConstantArrayCount>(10u));
 }
 
@@ -466,7 +467,7 @@ TEST_F(ResolverTest, ArraySize_SignedConst) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     EXPECT_EQ(ary->Count(), create<core::type::ConstantArrayCount>(10u));
 }
 
@@ -481,7 +482,7 @@ TEST_F(ResolverTest, ArraySize_NamedOverride) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary->Count(), create<sem::NamedOverrideArrayCount>(sem_override));
@@ -500,12 +501,12 @@ TEST_F(ResolverTest, ArraySize_NamedOverride_Equivalence) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref_a = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref_a, nullptr);
-    auto* ary_a = ref_a->StoreType()->As<core::type::Array>();
+    auto* ary_a = ref_a->StoreType()->As<sem::Array>();
 
     ASSERT_NE(TypeOf(b), nullptr);
     auto* ref_b = TypeOf(b)->As<core::type::Reference>();
     ASSERT_NE(ref_b, nullptr);
-    auto* ary_b = ref_b->StoreType()->As<core::type::Array>();
+    auto* ary_b = ref_b->StoreType()->As<sem::Array>();
 
     auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
@@ -526,7 +527,7 @@ TEST_F(ResolverTest, ArraySize_UnnamedOverride) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<core::type::Array>();
+    auto* ary = ref->StoreType()->As<sem::Array>();
     auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);
     EXPECT_EQ(ary->Count(), create<sem::UnnamedOverrideArrayCount>(Sem().Get(cnt)));
@@ -547,12 +548,12 @@ TEST_F(ResolverTest, ArraySize_UnamedOverride_Equivalence) {
     ASSERT_NE(TypeOf(a), nullptr);
     auto* ref_a = TypeOf(a)->As<core::type::Reference>();
     ASSERT_NE(ref_a, nullptr);
-    auto* ary_a = ref_a->StoreType()->As<core::type::Array>();
+    auto* ary_a = ref_a->StoreType()->As<sem::Array>();
 
     ASSERT_NE(TypeOf(b), nullptr);
     auto* ref_b = TypeOf(b)->As<core::type::Reference>();
     ASSERT_NE(ref_b, nullptr);
-    auto* ary_b = ref_b->StoreType()->As<core::type::Array>();
+    auto* ary_b = ref_b->StoreType()->As<sem::Array>();
 
     auto* sem_override = Sem().Get(override);
     ASSERT_NE(sem_override, nullptr);

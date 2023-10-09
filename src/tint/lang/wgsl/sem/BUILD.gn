@@ -33,6 +33,8 @@ libtint_source_set("sem") {
   sources = [
     "accessor_expression.cc",
     "accessor_expression.h",
+    "array.cc",
+    "array.h",
     "array_count.cc",
     "array_count.h",
     "behavior.cc",

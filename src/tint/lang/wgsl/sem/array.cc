@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_SEM_PIPELINE_STAGE_SET_H_
-#define SRC_TINT_LANG_WGSL_SEM_PIPELINE_STAGE_SET_H_
+#include "src/tint/lang/wgsl/sem/array.h"
 
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
-#include "src/tint/utils/containers/enum_set.h"
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
 
-/// A set of PipelineStage
-using PipelineStageSet = tint::EnumSet<ast::PipelineStage>;
+Array::Array(core::type::Type const* element,
+             const core::type::ArrayCount* count,
+             uint32_t align,
+             uint32_t size,
+             uint32_t stride,
+             uint32_t implicit_stride)
+    : Base(element, count, align, size, stride, implicit_stride) {}
+
+Array::~Array() = default;
 
 }  // namespace tint::sem
-
-#endif  // SRC_TINT_LANG_WGSL_SEM_PIPELINE_STAGE_SET_H_

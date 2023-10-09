@@ -17,6 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -91,14 +92,14 @@ TEST_F(ResolverIsStorableTest, Atomic) {
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
-    auto* arr = create<core::type::Array>(
-        create<core::type::I32>(), create<core::type::ConstantArrayCount>(5u), 4u, 20u, 4u, 4u);
+    auto* arr = create<sem::Array>(create<core::type::I32>(),
+                                   create<core::type::ConstantArrayCount>(5u), 4u, 20u, 4u, 4u);
     EXPECT_TRUE(r()->IsStorable(arr));
 }
 
 TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
-    auto* arr = create<core::type::Array>(create<core::type::I32>(),
-                                          create<core::type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+    auto* arr = create<sem::Array>(create<core::type::I32>(),
+                                   create<core::type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     EXPECT_TRUE(r()->IsStorable(arr));
 }
 

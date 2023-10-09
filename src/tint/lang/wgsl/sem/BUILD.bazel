@@ -27,6 +27,7 @@ cc_library(
   name = "sem",
   srcs = [
     "accessor_expression.cc",
+    "array.cc",
     "array_count.cc",
     "behavior.cc",
     "block_statement.cc",
@@ -60,6 +61,7 @@ cc_library(
   ],
   hdrs = [
     "accessor_expression.h",
+    "array.h",
     "array_count.h",
     "behavior.h",
     "block_statement.h",

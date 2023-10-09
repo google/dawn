@@ -484,12 +484,12 @@ class Resolver {
     /// @param el_ty the Array element type
     /// @param el_count the number of elements in the array.
     /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
-    core::type::Array* Array(const Source& array_source,
-                             const Source& el_source,
-                             const Source& count_source,
-                             const core::type::Type* el_ty,
-                             const core::type::ArrayCount* el_count,
-                             uint32_t explicit_stride);
+    sem::Array* Array(const Source& array_source,
+                      const Source& el_source,
+                      const Source& count_source,
+                      const core::type::Type* el_ty,
+                      const core::type::ArrayCount* el_count,
+                      uint32_t explicit_stride);
 
     /// Builds and returns the semantic information for the alias `alias`.
     /// This method does not mark the ast::Alias node, nor attach the generated
@@ -634,8 +634,8 @@ class Resolver {
 
     // ArrayConstructorSig represents a unique array constructor signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
-    using ArrayConstructorSig = tint::UnorderedKeyWrapper<
-        std::tuple<const core::type::Array*, size_t, core::EvaluationStage>>;
+    using ArrayConstructorSig =
+        tint::UnorderedKeyWrapper<std::tuple<const sem::Array*, size_t, core::EvaluationStage>>;
 
     // StructConstructorSig represents a unique structure constructor signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation

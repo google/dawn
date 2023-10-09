@@ -36,8 +36,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         return resolver::Resolve(*this);
     }
 };
+
+/// An alias to TestHelper templated without a test parameter
 using TestHelper = TestHelperBase<testing::Test>;
 
+/// An alias to TestHelper templated with the parameter type T
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 

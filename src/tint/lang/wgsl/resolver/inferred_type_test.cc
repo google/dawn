@@ -14,6 +14,7 @@
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 
 #include "gmock/gmock.h"
 
@@ -124,9 +125,9 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest, ResolverInferredTypeParamTest, testing::V
 
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
     auto type = ty.array<u32, 10>();
-    auto* expected_type = create<core::type::Array>(create<core::type::U32>(),
-                                                    create<core::type::ConstantArrayCount>(10u), 4u,
-                                                    4u * 10u, 4u, 4u);
+    auto* expected_type =
+        create<sem::Array>(create<core::type::U32>(), create<core::type::ConstantArrayCount>(10u),
+                           4u, 4u * 10u, 4u, 4u);
 
     auto* ctor_expr = Call(type);
     auto* var = Var("a", core::AddressSpace::kFunction, ctor_expr);

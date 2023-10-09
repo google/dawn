@@ -17,6 +17,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/utils/rtti/switch.h"
 
 #include "gmock/gmock.h"
@@ -117,7 +118,7 @@ class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
                     }
                 }
             },
-            [&](const core::type::Array* a) {
+            [&](const sem::Array* a) {
                 auto count = a->ConstantCount();
                 ASSERT_NE(count, 0u);
                 for (uint32_t i = 0; i < count; i++) {

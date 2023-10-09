@@ -64,6 +64,7 @@
 #include "src/tint/lang/wgsl/resolver/incomplete_type.h"
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
 #include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -901,7 +902,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     for (auto* var : transitively_referenced_overrides) {
         b.Sem().AddTransitivelyReferencedOverride(sem, var);
     }
-    if (auto* arr = sem->Type()->UnwrapRef()->As<core::type::Array>()) {
+    if (auto* arr = sem->Type()->UnwrapRef()->As<sem::Array>()) {
         auto* refs = b.Sem().TransitivelyReferencedOverrides(arr);
         if (refs) {
             for (auto* var : *refs) {
@@ -1775,9 +1776,9 @@ const core::type::Type* Resolver::ConcreteType(const core::type::Type* ty,
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
         },
-        [&](const core::type::Array* a) -> const core::type::Type* {
+        [&](const sem::Array* a) -> const core::type::Type* {
             const core::type::Type* target_el_ty = nullptr;
-            if (auto* target_arr_ty = As<core::type::Array>(target_ty)) {
+            if (auto* target_arr_ty = As<sem::Array>(target_ty)) {
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
@@ -1944,7 +1945,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     auto* obj_ty = obj_raw_ty->UnwrapRef();
     auto* ty = Switch(
         obj_ty,  //
-        [&](const core::type::Array* arr) { return arr->ElemType(); },
+        [&](const sem::Array* arr) { return arr->ElemType(); },
         [&](const core::type::Vector* vec) { return vec->type(); },
         [&](const core::type::Matrix* mat) {
             return b.create<core::type::Vector>(mat->type(), mat->rows());
@@ -2174,7 +2175,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 return ctor_or_conv(wgsl::intrinsic::MatrixCtorConv(m->columns(), m->rows()),
                                     m->type());
             },
-            [&](const core::type::Array* arr) -> sem::Call* {
+            [&](const sem::Array* arr) -> sem::Call* {
                 auto* call_target = array_ctors_.GetOrCreate(
                     ArrayConstructorSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
@@ -4045,12 +4046,12 @@ bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
     return true;
 }
 
-core::type::Array* Resolver::Array(const Source& array_source,
-                                   const Source& el_source,
-                                   const Source& count_source,
-                                   const core::type::Type* el_ty,
-                                   const core::type::ArrayCount* el_count,
-                                   uint32_t explicit_stride) {
+sem::Array* Resolver::Array(const Source& array_source,
+                            const Source& el_source,
+                            const Source& count_source,
+                            const core::type::Type* el_ty,
+                            const core::type::ArrayCount* el_count,
+                            uint32_t explicit_stride) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
     uint64_t implicit_stride = el_size ? tint::RoundUp<uint64_t>(el_align, el_size) : 0;
@@ -4069,9 +4070,9 @@ core::type::Array* Resolver::Array(const Source& array_source,
     } else if (el_count->Is<core::type::RuntimeArrayCount>()) {
         size = stride;
     }
-    auto* out = b.create<core::type::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
-                                            static_cast<uint32_t>(stride),
-                                            static_cast<uint32_t>(implicit_stride));
+    auto* out =
+        b.create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
+                             static_cast<uint32_t>(stride), static_cast<uint32_t>(implicit_stride));
 
     // Maximum nesting depth of composite types
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits
@@ -4735,7 +4736,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         return true;
     }
 
-    if (auto* arr = ty->As<core::type::Array>()) {
+    if (auto* arr = ty->As<sem::Array>()) {
         if (address_space != core::AddressSpace::kStorage) {
             if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",
