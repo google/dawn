@@ -176,11 +176,21 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// @returns the index value for the parameter, if set
     std::optional<uint32_t> Index() const { return index_; }
 
+    /// Records that this variable (transitively) references the given override variable.
+    /// @param var the module-scope override variable
+    void AddTransitivelyReferencedOverride(const GlobalVariable* var);
+
+    /// @returns all transitively referenced override variables
+    VectorRef<const GlobalVariable*> TransitivelyReferencedOverrides() const {
+        return transitively_referenced_overrides_;
+    }
+
   private:
     std::optional<tint::BindingPoint> binding_point_;
     tint::OverrideId override_id_;
     std::optional<uint32_t> location_;
     std::optional<uint32_t> index_;
+    UniqueVector<const GlobalVariable*, 4> transitively_referenced_overrides_;
 };
 
 /// Parameter is a function parameter

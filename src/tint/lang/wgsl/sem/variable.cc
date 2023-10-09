@@ -41,6 +41,14 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration) : Base(declarat
 
 GlobalVariable::~GlobalVariable() = default;
 
+void GlobalVariable::AddTransitivelyReferencedOverride(const GlobalVariable* var) {
+    if (transitively_referenced_overrides_.Add(var)) {
+        for (auto* ref : var->TransitivelyReferencedOverrides()) {
+            AddTransitivelyReferencedOverride(ref);
+        }
+    }
+}
+
 Parameter::Parameter(const ast::Parameter* declaration,
                      uint32_t index /* = 0 */,
                      const core::type::Type* type /* = nullptr */,

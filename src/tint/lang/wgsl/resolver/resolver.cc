@@ -308,6 +308,13 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     b.Sem().Add(v, sem);
     sem->SetStage(core::EvaluationStage::kOverride);
 
+    on_transitively_reference_global_.Push([&](const sem::GlobalVariable* ref) {
+        if (ref->Declaration()->Is<ast::Override>()) {
+            sem->AddTransitivelyReferencedOverride(ref);
+        }
+    });
+    TINT_DEFER(on_transitively_reference_global_.Pop());
+
     // If the variable has a declared type, resolve it.
     const core::type::Type* ty = nullptr;
     if (v->type) {
@@ -403,8 +410,10 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
 sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     sem::Variable* sem = nullptr;
+    sem::GlobalVariable* global = nullptr;
     if (is_global) {
-        sem = b.create<sem::GlobalVariable>(c);
+        global = b.create<sem::GlobalVariable>(c);
+        sem = global;
     } else {
         sem = b.create<sem::LocalVariable>(c, current_statement_);
     }
@@ -486,6 +495,19 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
     sem->SetStage(core::EvaluationStage::kRuntime);
     b.Sem().Add(var, sem);
+
+    if (is_global) {
+        on_transitively_reference_global_.Push([&](const sem::GlobalVariable* ref) {
+            if (ref->Declaration()->Is<ast::Override>()) {
+                global->AddTransitivelyReferencedOverride(ref);
+            }
+        });
+    }
+    TINT_DEFER({
+        if (is_global) {
+            on_transitively_reference_global_.Pop();
+        }
+    });
 
     // If the variable has a declared type, resolve it.
     const core::type::Type* storage_ty = nullptr;
@@ -881,9 +903,6 @@ void Resolver::SetShadows() {
 }
 
 sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
-    UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
-    TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
-
     auto* sem = As<sem::GlobalVariable>(Variable(v, /* is_global */ true));
     if (!sem) {
         return nullptr;
@@ -895,20 +914,6 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 
     if (!validator_.GlobalVariable(sem, override_ids_)) {
         return nullptr;
-    }
-
-    // Track the pipeline-overridable constants that are transitively referenced by this
-    // variable.
-    for (auto* var : transitively_referenced_overrides) {
-        b.Sem().AddTransitivelyReferencedOverride(sem, var);
-    }
-    if (auto* arr = sem->Type()->UnwrapRef()->As<sem::Array>()) {
-        auto* refs = b.Sem().TransitivelyReferencedOverrides(arr);
-        if (refs) {
-            for (auto* var : *refs) {
-                b.Sem().AddTransitivelyReferencedOverride(sem, var);
-            }
-        }
     }
 
     return sem;
@@ -942,6 +947,11 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     auto* func = b.create<sem::Function>(decl);
     b.Sem().Add(decl, func);
     TINT_SCOPED_ASSIGNMENT(current_function_, func);
+
+    on_transitively_reference_global_.Push([&](const sem::GlobalVariable* ref) {  //
+        func->AddDirectlyReferencedGlobal(ref);
+    });
+    TINT_DEFER(on_transitively_reference_global_.Pop());
 
     validator_.DiagnosticFilters().Push();
     TINT_DEFER(validator_.DiagnosticFilters().Pop());
@@ -1566,6 +1576,14 @@ sem::FunctionExpression* Resolver::FunctionExpression(const ast::Expression* exp
 }
 
 core::type::Type* Resolver::Type(const ast::Expression* ast) {
+    Vector<const sem::GlobalVariable*, 4> referenced_overrides;
+    on_transitively_reference_global_.Push([&](const sem::GlobalVariable* ref) {
+        if (ref->Declaration()->Is<ast::Override>()) {
+            referenced_overrides.Push(ref);
+        }
+    });
+    TINT_DEFER(on_transitively_reference_global_.Pop());
+
     auto* type_expr = TypeExpression(ast);
     if (TINT_UNLIKELY(!type_expr)) {
         return nullptr;
@@ -1581,6 +1599,13 @@ core::type::Type* Resolver::Type(const ast::Expression* ast) {
                  ast->source.End());
         return nullptr;
     }
+
+    if (auto* arr = type->As<sem::Array>()) {
+        for (auto* ref : referenced_overrides) {
+            arr->AddTransitivelyReferencedOverride(ref);
+        }
+    }
+
     return type;
 }
 
@@ -2750,9 +2775,6 @@ core::type::Type* Resolver::MatT(const ast::Identifier* ident,
 }
 
 core::type::Type* Resolver::Array(const ast::Identifier* ident) {
-    UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
-    TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
-
     auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
     if (!tmpl_ident) {
         // 'array' has no template arguments, so return an incomplete type.
@@ -2798,11 +2820,6 @@ core::type::Type* Resolver::Array(const ast::Identifier* ident) {
         }
     }
 
-    // Track the pipeline-overridable constants that are transitively referenced by this
-    // array type.
-    for (auto* var : transitively_referenced_overrides) {
-        b.Sem().AddTransitivelyReferencedOverride(out, var);
-    }
     return out;
 }
 
@@ -3233,38 +3250,17 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                     }
                 }
 
-                auto* global = variable->As<sem::GlobalVariable>();
-                if (current_function_) {
-                    if (global) {
-                        current_function_->AddDirectlyReferencedGlobal(global);
-                        auto* refs = b.Sem().TransitivelyReferencedOverrides(global);
-                        if (refs) {
-                            for (auto* var : *refs) {
-                                current_function_->AddTransitivelyReferencedGlobal(var);
-                            }
-                        }
+                if (auto* global = variable->As<sem::GlobalVariable>()) {
+                    for (auto& fn : on_transitively_reference_global_) {
+                        fn(global);
                     }
-                } else if (variable->Declaration()->Is<ast::Override>()) {
-                    if (resolved_overrides_) {
-                        // Track the reference to this pipeline-overridable constant and any other
-                        // pipeline-overridable constants that it references.
-                        resolved_overrides_->Add(global);
-                        auto* refs = b.Sem().TransitivelyReferencedOverrides(global);
-                        if (refs) {
-                            for (auto* var : *refs) {
-                                resolved_overrides_->Add(var);
-                            }
-                        }
+                    if (!current_function_ && variable->Declaration()->Is<ast::Var>()) {
+                        // Use of a module-scope 'var' outside of a function.
+                        std::string desc = "var '" + ident->symbol.Name() + "' ";
+                        AddError(desc + "cannot be referenced at module-scope", expr->source);
+                        AddNote(desc + "declared here", variable->Declaration()->source);
+                        return nullptr;
                     }
-                } else if (variable->Declaration()->Is<ast::Var>()) {
-                    // Use of a module-scope 'var' outside of a function.
-                    // Note: The spec is currently vague around the rules here. See
-                    // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when
-                    // resolved.
-                    std::string desc = "var '" + ident->symbol.Name() + "' ";
-                    AddError(desc + "cannot be referenced at module-scope", expr->source);
-                    AddNote(desc + "declared here", variable->Declaration()->source);
-                    return nullptr;
                 }
 
                 variable->AddUser(user);
@@ -3275,6 +3271,16 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
                     return nullptr;
                 }
+
+                // Notify callers of all transitively referenced globals.
+                if (auto* arr = ty->As<sem::Array>()) {
+                    for (auto& fn : on_transitively_reference_global_) {
+                        for (auto* ref : arr->TransitivelyReferencedOverrides()) {
+                            fn(ref);
+                        }
+                    }
+                }
+
                 return b.create<sem::TypeExpression>(expr, current_statement_, ty);
             },
             [&](const sem::Function* fn) -> sem::FunctionExpression* {
@@ -4094,10 +4100,10 @@ sem::Array* Resolver::Array(const Source& array_source,
 
 core::type::Type* Resolver::Alias(const ast::Alias* alias) {
     auto* ty = Type(alias->type);
-    if (!ty) {
+    if (TINT_UNLIKELY(!ty)) {
         return nullptr;
     }
-    if (!validator_.Alias(alias)) {
+    if (TINT_UNLIKELY(!validator_.Alias(alias))) {
         return nullptr;
     }
     return ty;

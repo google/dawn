@@ -86,11 +86,11 @@ class Function final : public Castable<Function, CallTarget> {
     }
 
     /// Records that this function directly references the given global variable.
-    /// Note: Implicitly adds this global to the transtively-called globals.
+    /// Note: Implicitly adds this global to the transitively-called globals.
     /// @param global the module-scope variable
     void AddDirectlyReferencedGlobal(const sem::GlobalVariable* global) {
         directly_referenced_globals_.Add(global);
-        transitively_referenced_globals_.Add(global);
+        AddTransitivelyReferencedGlobal(global);
     }
 
     /// @returns all transitively referenced global variables
@@ -101,9 +101,7 @@ class Function final : public Castable<Function, CallTarget> {
     /// Records that this function transitively references the given global
     /// variable.
     /// @param global the module-scoped variable
-    void AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global) {
-        transitively_referenced_globals_.Add(global);
-    }
+    void AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global);
 
     /// @returns the list of functions that this function transitively calls.
     const UniqueVector<const Function*, 8>& TransitivelyCalledFunctions() const {

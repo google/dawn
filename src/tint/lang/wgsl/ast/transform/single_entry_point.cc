@@ -20,6 +20,7 @@
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
+#include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -73,13 +74,10 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
             decl,  //
             [&](const TypeDecl* ty) {
                 // Strip aliases that reference unused override declarations.
-                if (auto* arr = sem.Get(ty)->As<core::type::Array>()) {
-                    auto* refs = sem.TransitivelyReferencedOverrides(arr);
-                    if (refs) {
-                        for (auto* o : *refs) {
-                            if (!referenced_vars.Contains(o)) {
-                                return;
-                            }
+                if (auto* arr = sem.Get(ty)->As<sem::Array>()) {
+                    for (auto* o : arr->TransitivelyReferencedOverrides()) {
+                        if (!referenced_vars.Contains(o)) {
+                            return;
                         }
                     }
                 }

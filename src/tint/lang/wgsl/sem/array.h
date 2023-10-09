@@ -48,6 +48,18 @@ class Array final : public Castable<Array, core::type::Array> {
 
     /// Destructor
     ~Array() override;
+
+    /// Records that this variable (transitively) references the given override variable.
+    /// @param var the module-scope override variable
+    void AddTransitivelyReferencedOverride(const GlobalVariable* var);
+
+    /// @returns all transitively referenced override variables
+    VectorRef<const GlobalVariable*> TransitivelyReferencedOverrides() const {
+        return transitively_referenced_overrides_;
+    }
+
+  private:
+    UniqueVector<const GlobalVariable*, 4> transitively_referenced_overrides_;
 };
 
 }  // namespace tint::sem

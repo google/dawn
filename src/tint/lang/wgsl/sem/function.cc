@@ -52,6 +52,14 @@ Function::TransitivelyReferencedLocationVariables() const {
     return ret;
 }
 
+void Function::AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global) {
+    if (transitively_referenced_globals_.Add(global)) {
+        for (auto* ref : global->TransitivelyReferencedOverrides()) {
+            AddTransitivelyReferencedGlobal(ref);
+        }
+    }
+}
+
 Function::VariableBindings Function::TransitivelyReferencedUniformVariables() const {
     VariableBindings ret;
 

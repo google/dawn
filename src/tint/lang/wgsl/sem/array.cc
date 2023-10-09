@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/wgsl/sem/array.h"
 
+#include "src/tint/lang/wgsl/sem/variable.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
@@ -27,5 +29,12 @@ Array::Array(core::type::Type const* element,
     : Base(element, count, align, size, stride, implicit_stride) {}
 
 Array::~Array() = default;
+
+void Array::AddTransitivelyReferencedOverride(const GlobalVariable* var) {
+    transitively_referenced_overrides_.Add(var);
+    for (auto* ref : var->TransitivelyReferencedOverrides()) {
+        AddTransitivelyReferencedOverride(ref);
+    }
+}
 
 }  // namespace tint::sem

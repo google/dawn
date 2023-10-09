@@ -683,10 +683,9 @@ class Resolver {
     Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
-    sem::GlobalVariable* current_global_var_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
+    Vector<std::function<void(const sem::GlobalVariable*)>, 4> on_transitively_reference_global_;
     uint32_t current_scoping_depth_ = 0;
-    UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
     Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
     Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
     Hashset<const ast::Expression*, 8> skip_const_eval_;

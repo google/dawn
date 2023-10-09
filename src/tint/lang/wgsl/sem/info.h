@@ -51,9 +51,6 @@ class Info {
     using GetResultType =
         std::conditional_t<std::is_same<SEM, InferFromAST>::value, SemanticNodeTypeFor<AST>, SEM>;
 
-    /// Alias to a unique vector of transitively referenced global variables
-    using TransitivelyReferenced = UniqueVector<const GlobalVariable*, 4>;
-
     /// Constructor
     Info();
 
@@ -138,25 +135,6 @@ class Info {
     /// @returns the semantic module.
     const sem::Module* Module() const { return module_; }
 
-    /// Records that this variable (transitively) references the given override variable.
-    /// @param from the item the variable is referenced from
-    /// @param var the module-scope override variable
-    void AddTransitivelyReferencedOverride(const CastableBase* from, const GlobalVariable* var) {
-        if (referenced_overrides_.count(from) == 0) {
-            referenced_overrides_.insert({from, TransitivelyReferenced{}});
-        }
-        referenced_overrides_[from].Add(var);
-    }
-
-    /// @param from the key to look up
-    /// @returns all transitively referenced override variables or nullptr if none set
-    const TransitivelyReferenced* TransitivelyReferencedOverrides(const CastableBase* from) const {
-        if (referenced_overrides_.count(from) == 0) {
-            return nullptr;
-        }
-        return &referenced_overrides_.at(from);
-    }
-
     /// Determines the severity of a filterable diagnostic rule for the AST node `ast_node`.
     /// @param ast_node the AST node
     /// @param rule the diagnostic rule
@@ -167,8 +145,6 @@ class Info {
   private:
     // AST node index to semantic node
     std::vector<const CastableBase*> nodes_;
-    // Lists transitively referenced overrides for the given item
-    std::unordered_map<const CastableBase*, TransitivelyReferenced> referenced_overrides_;
     // The semantic module
     sem::Module* module_ = nullptr;
 };
