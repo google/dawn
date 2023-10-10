@@ -15,6 +15,7 @@
 #include "dawn/wire/client/Instance.h"
 
 #include "dawn/wire/client/Client.h"
+#include "dawn/wire/client/EventManager.h"
 
 namespace dawn::wire::client {
 

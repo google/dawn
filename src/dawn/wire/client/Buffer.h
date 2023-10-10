@@ -60,7 +60,7 @@ class Buffer final : public ObjectBase {
     WGPUBufferMapState GetMapState() const;
 
   private:
-    void InvokeAndClearCallback(WGPUBufferMapAsyncStatus status);
+    bool InvokeAndClearCallback(WGPUBufferMapAsyncStatus status);
 
     bool IsMappedForReading() const;
     bool IsMappedForWriting() const;

@@ -34,6 +34,7 @@ namespace dawn::wire::client {
 
 class Device;
 class MemoryTransferService;
+class EventManager;
 
 class Client : public ClientBase {
   public:
@@ -109,7 +110,7 @@ class Client : public ClientBase {
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     PerObjectType<LinkedList<ObjectBase>> mObjects;
     // TODO(crbug.com/dawn/2061) Eventually we want an EventManager per instance not per client.
-    EventManager mEventManager;
+    std::unique_ptr<EventManager> mEventManager = nullptr;
     bool mDisconnected = false;
 };
 
