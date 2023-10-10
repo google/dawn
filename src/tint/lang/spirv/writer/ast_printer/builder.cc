@@ -1223,20 +1223,24 @@ uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
     return 0;
 }
 
-bool Builder::IsConstructorConst(const ast::Expression* expr) {
+bool Builder::IsConstructorConst(const ast::CallExpression* expr) {
     bool is_const = true;
     ast::TraverseExpressions(expr, [&](const ast::Expression* e) {
+        auto* val = builder_.Sem().GetVal(e);
+        if (!val) {
+            return ast::TraverseAction::Descend;
+        }
+
         if (e->Is<ast::LiteralExpression>()) {
             return ast::TraverseAction::Descend;
         }
-        if (auto* ce = e->As<ast::CallExpression>()) {
-            auto* sem = builder_.Sem().Get(ce);
-            if (sem->Is<sem::Materialize>()) {
+        if (e->Is<ast::CallExpression>()) {
+            if (val->Is<sem::Materialize>()) {
                 // Materialize can only occur on compile time expressions, so this sub-tree must be
                 // constant.
                 return ast::TraverseAction::Skip;
             }
-            auto* call = sem->As<sem::Call>();
+            auto* call = val->As<sem::Call>();
             if (call->Target()->Is<sem::ValueConstructor>()) {
                 return ast::TraverseAction::Descend;
             }

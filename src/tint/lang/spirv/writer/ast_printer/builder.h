@@ -465,7 +465,7 @@ class Builder {
     /// Determines if the given value constructor is created from constant values
     /// @param expr the expression to check
     /// @returns true if the constructor is constant
-    bool IsConstructorConst(const ast::Expression* expr);
+    bool IsConstructorConst(const ast::CallExpression* expr);
 
   private:
     /// @returns an Operand with a new result ID in it. Increments the next_id_

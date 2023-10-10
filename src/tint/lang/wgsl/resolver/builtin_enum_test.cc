@@ -36,8 +36,8 @@ namespace {
 using ResolverAccessUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
 
 TEST_P(ResolverAccessUsedWithTemplateArgs, Test) {
-    // @group(0) @binding(0) var t : texture_storage_2d<rgba8unorm, ACCESS<T>>;
-    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
+    // @group(0) @binding(0) var t : texture_storage_2d<rgba8unorm, ACCESS<i32>>;
+    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "i32");
     GlobalVar("v", ty("texture_storage_2d", "rgba8unorm", tmpl), Group(0_u), Binding(0_u));
 
     EXPECT_FALSE(r()->Resolve());

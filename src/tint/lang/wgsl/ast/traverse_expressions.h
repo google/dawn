@@ -24,6 +24,7 @@
 #include "src/tint/lang/wgsl/ast/literal_expression.h"
 #include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
+#include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/vector.h"
@@ -73,7 +74,7 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
 
     auto push_single = [&](const Expression* expr, size_t depth) { to_visit.Push({expr, depth}); };
     auto push_pair = [&](const Expression* left, const Expression* right, size_t depth) {
-        if (ORDER == TraverseOrder::LeftToRight) {
+        if constexpr (ORDER == TraverseOrder::LeftToRight) {
             to_visit.Push({right, depth});
             to_visit.Push({left, depth});
         } else {
@@ -82,7 +83,7 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
         }
     };
     auto push_list = [&](VectorRef<const Expression*> exprs, size_t depth) {
-        if (ORDER == TraverseOrder::LeftToRight) {
+        if constexpr (ORDER == TraverseOrder::LeftToRight) {
             for (auto* expr : tint::Reverse(exprs)) {
                 to_visit.Push({expr, depth});
             }
@@ -117,6 +118,12 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
 
         bool ok = Switch(
             expr,
+            [&](const IdentifierExpression* ident) {
+                if (auto* tmpl = ident->identifier->As<TemplatedIdentifier>()) {
+                    push_list(tmpl->arguments, p.depth + 1);
+                }
+                return true;
+            },
             [&](const IndexAccessorExpression* idx) {
                 push_pair(idx->object, idx->index, p.depth + 1);
                 return true;
@@ -130,7 +137,13 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
                 return true;
             },
             [&](const CallExpression* call) {
-                push_list(call->args, p.depth + 1);
+                if constexpr (ORDER == TraverseOrder::LeftToRight) {
+                    push_list(call->args, p.depth + 1);
+                    push_single(call->target, p.depth + 1);
+                } else {
+                    push_single(call->target, p.depth + 1);
+                    push_list(call->args, p.depth + 1);
+                }
                 return true;
             },
             [&](const MemberAccessorExpression* member) {
@@ -142,8 +155,7 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
                 return true;
             },
             [&](Default) {
-                if (TINT_LIKELY((expr->IsAnyOf<LiteralExpression, IdentifierExpression,
-                                               PhonyExpression>()))) {
+                if (TINT_LIKELY((expr->IsAnyOf<LiteralExpression, PhonyExpression>()))) {
                     return true;  // Leaf expression
                 }
                 TINT_ICE() << "unhandled expression type: "

@@ -349,13 +349,7 @@ class DependencyScanner {
                     expr,
                     [&](const ast::IdentifierExpression* e) {
                         AddDependency(e->identifier, e->identifier->symbol);
-                        if (auto* tmpl_ident = e->identifier->As<ast::TemplatedIdentifier>()) {
-                            for (auto* arg : tmpl_ident->arguments) {
-                                pending.Push(arg);
-                            }
-                        }
                     },
-                    [&](const ast::CallExpression* call) { TraverseExpression(call->target); },
                     [&](const ast::BitcastExpression* cast) { TraverseExpression(cast->type); });
                 return ast::TraverseAction::Descend;
             });
