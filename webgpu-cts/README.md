@@ -35,6 +35,14 @@ An example of a known-working command line is:
 ./content/test/gpu/run_gpu_integration_test.py webgpu_cts --show-stdout --browser=android-chromium --stable-jobs --jobs=1 --extra-browser-args="--enable-logging=stderr --js-flags=--expose-gc --force_high_performance_gpu --use-webgpu-power-preference=default-high-performance"
 ```
 
+Be aware that running the tests locally on Android is *SLOW*. Expect it to take 4 hrs+.
+
+### Running without root
+
+Typically you want to run the CTS on a device which has root, which generally means flashing a userdebug image onto the device. If this isn't an option, you can try running with the `--compatibility-mode=dont-require-rooted-device` flag as described on [this page](https://chromium.googlesource.com/catapult/+/HEAD/telemetry/docs/run_benchmarks_locally.md), though this is not a supported configuration and you may run into errors.
+
+This mode has been observed to fail if another version of Chrome besides the `chrome_public_apk` target is currently running on the device, so it's suggested to manually close all Chrome variants before starting the test.
+
 ### Android Proxy errors
 
 When running the tests on Android devices with the above commands, some devices have been observed to start displaying an `ERR_PROXY_CONNECTION_FAILED` error when attempting to browse with Chrome/Chromium. This is the result of command line proxy settings used by the test runner accidentally not getting cleaned up, likely because the script was terminated early. Should it happen to you the command line used by Chrome can be cleared by running the following command from the root of a Chromium checkout:
