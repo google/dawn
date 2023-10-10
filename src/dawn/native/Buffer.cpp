@@ -125,10 +125,6 @@ MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* 
 
         DAWN_INVALID_IF(!device->HasFeature(Feature::HostMappedPointer), "%s requires %s.",
                         hostMappedDesc->sType, ToAPI(Feature::HostMappedPointer));
-        DAWN_INVALID_IF(
-            (descriptor->usage & kMappableBufferUsages) == 0,
-            "Buffer usage (%s) created from host-mapped pointer requires mappable buffer usage.",
-            descriptor->usage);
         DAWN_INVALID_IF(!IsAligned(descriptor->size, requiredAlignment),
                         "Buffer size (%u) wrapping host-mapped memory was not aligned to %u.",
                         descriptor->size, requiredAlignment);
