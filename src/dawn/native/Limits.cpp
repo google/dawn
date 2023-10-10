@@ -305,6 +305,8 @@ void NormalizeLimits(Limits* limits) {
     limits->maxVertexBuffers = std::min(limits->maxVertexBuffers, uint32_t(kMaxVertexBuffers));
     limits->maxInterStageShaderComponents =
         std::min(limits->maxInterStageShaderComponents, kMaxInterStageShaderComponents);
+    limits->maxInterStageShaderVariables =
+        std::min(limits->maxInterStageShaderVariables, kMaxInterStageShaderVariables);
     limits->maxSampledTexturesPerShaderStage =
         std::min(limits->maxSampledTexturesPerShaderStage, kMaxSampledTexturesPerShaderStage);
     limits->maxSamplersPerShaderStage =
