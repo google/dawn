@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_EXECUTIONQUEUE_H_
 #define SRC_DAWN_NATIVE_EXECUTIONQUEUE_H_
 
+#include <atomic>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 
@@ -22,6 +24,8 @@ namespace dawn::native {
 
 // Represents an engine which processes a stream of GPU work. It handles the tracking and
 // update of the various ExecutionSerials related to that work.
+// TODO(dawn:831, dawn:1413): Make usage of the ExecutionQueue thread-safe. Right now it is
+// only partially safe - where observation of the last-submitted and pending serials is atomic.
 class ExecutionQueueBase {
   public:
     // The latest serial known to have completed execution on the queue.
@@ -70,7 +74,7 @@ class ExecutionQueueBase {
     // During device removal, the serials could be artificially incremented
     // to make it appear as if commands have been compeleted.
     ExecutionSerial mCompletedSerial = kBeginningOfGPUTime;
-    ExecutionSerial mLastSubmittedSerial = kBeginningOfGPUTime;
+    std::atomic<uint64_t> mLastSubmittedSerial = static_cast<uint64_t>(kBeginningOfGPUTime);
 
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;

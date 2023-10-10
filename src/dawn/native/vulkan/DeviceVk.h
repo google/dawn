@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -60,9 +61,9 @@ class Device final : public DeviceBase {
     uint32_t GetGraphicsQueueFamily() const;
     VkQueue GetVkQueue() const;
 
-    FencedDeleter* GetFencedDeleter() const;
+    MutexProtected<FencedDeleter>& GetFencedDeleter() const;
     RenderPassCache* GetRenderPassCache() const;
-    ResourceMemoryAllocator* GetResourceMemoryAllocator() const;
+    MutexProtected<ResourceMemoryAllocator>& GetResourceMemoryAllocator() const;
     external_semaphore::Service* GetExternalSemaphoreService() const;
 
     CommandRecordingContext* GetPendingRecordingContext(
@@ -183,8 +184,8 @@ class Device final : public DeviceBase {
 
     SerialQueue<ExecutionSerial, Ref<DescriptorSetAllocator>>
         mDescriptorAllocatorsPendingDeallocation;
-    std::unique_ptr<FencedDeleter> mDeleter;
-    std::unique_ptr<ResourceMemoryAllocator> mResourceMemoryAllocator;
+    std::unique_ptr<MutexProtected<FencedDeleter>> mDeleter;
+    std::unique_ptr<MutexProtected<ResourceMemoryAllocator>> mResourceMemoryAllocator;
     std::unique_ptr<RenderPassCache> mRenderPassCache;
 
     std::unique_ptr<external_memory::Service> mExternalMemoryService;

@@ -136,9 +136,6 @@ ApiObjectList* ApiObjectBase::GetObjectTrackingList() {
 }
 
 void ApiObjectBase::Destroy() {
-    if (!IsAlive()) {
-        return;
-    }
     ApiObjectList* list = GetObjectTrackingList();
     DAWN_ASSERT(list != nullptr);
     if (list->Untrack(this)) {

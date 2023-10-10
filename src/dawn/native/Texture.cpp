@@ -713,6 +713,16 @@ TextureBase::TextureBase(DeviceBase* device,
       mFormatEnumForReflection(descriptor->format) {}
 
 void TextureBase::DestroyImpl() {
+    // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
+    // - It may be called if the texture is explicitly destroyed with APIDestroy.
+    //   This case is NOT thread-safe and needs proper synchronization with other
+    //   simultaneous uses of the texture.
+    // - Losing the last reference to a swap chain will also call APIDestroy on its
+    //   current texture. This is protected by acquiring the global device lock on
+    //   the last release. That lock can be removed when APIDestroy is made thread-safe.
+    // - It may be called when the last ref to the texture is dropped and the texture
+    //   is implicitly destroyed. This case is thread-safe because there are no
+    //   other threads using the texture since there are no other live refs.
     mState.destroyed = true;
 
     // Destroy all of the views associated with the texture as well.
@@ -1158,8 +1168,14 @@ Extent3D TextureViewBase::GetSingleSubresourceVirtualSize() const {
 }
 
 ApiObjectList* TextureViewBase::GetObjectTrackingList() {
-    DAWN_ASSERT(!IsError());
-    return mTexture->GetViewTrackingList();
+    if (mTexture != nullptr) {
+        return mTexture->GetViewTrackingList();
+    }
+    // Return the base device list for error objects so that
+    // the list is never null. Error texture views are never tracked,
+    // so liveness checks will always return false.
+    DAWN_ASSERT(IsError());
+    return ApiObjectBase::GetObjectTrackingList();
 }
 
 }  // namespace dawn::native

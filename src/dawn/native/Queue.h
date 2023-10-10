@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
@@ -137,7 +138,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
 
     MaybeError SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
 
-    SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>> mTasksInFlight;
+    MutexProtected<SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>>> mTasksInFlight;
 };
 
 }  // namespace dawn::native

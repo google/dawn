@@ -128,11 +128,11 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         // the device.
         GatherQueueFromDevice();
 
-        mDeleter = std::make_unique<FencedDeleter>(this);
+        mDeleter = std::make_unique<MutexProtected<FencedDeleter>>(this);
     }
 
     mRenderPassCache = std::make_unique<RenderPassCache>(this);
-    mResourceMemoryAllocator = std::make_unique<ResourceMemoryAllocator>(this);
+    mResourceMemoryAllocator = std::make_unique<MutexProtected<ResourceMemoryAllocator>>(this);
 
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
     mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
@@ -232,8 +232,8 @@ MaybeError Device::TickImpl() {
         allocator->FinishDeallocation(completedSerial);
     }
 
-    mResourceMemoryAllocator->Tick(completedSerial);
-    mDeleter->Tick(completedSerial);
+    GetResourceMemoryAllocator()->Tick(completedSerial);
+    GetFencedDeleter()->Tick(completedSerial);
     mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
     if (mRecordingContext.needsSubmit) {
@@ -268,16 +268,16 @@ VkQueue Device::GetVkQueue() const {
     return mQueue;
 }
 
-FencedDeleter* Device::GetFencedDeleter() const {
-    return mDeleter.get();
+MutexProtected<FencedDeleter>& Device::GetFencedDeleter() const {
+    return *mDeleter;
 }
 
 RenderPassCache* Device::GetRenderPassCache() const {
     return mRenderPassCache.get();
 }
 
-ResourceMemoryAllocator* Device::GetResourceMemoryAllocator() const {
-    return mResourceMemoryAllocator.get();
+MutexProtected<ResourceMemoryAllocator>& Device::GetResourceMemoryAllocator() const {
+    return *mResourceMemoryAllocator;
 }
 
 external_semaphore::Service* Device::GetExternalSemaphoreService() const {
@@ -366,7 +366,7 @@ MaybeError Device::SubmitPendingCommands() {
     // Enqueue the semaphores before incrementing the serial, so that they can be deleted as
     // soon as the current submission is finished.
     for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
-        mDeleter->DeleteWhenUnused(semaphore);
+        GetFencedDeleter()->DeleteWhenUnused(semaphore);
     }
     GetQueue()->IncrementLastSubmittedCommandSerial();
     ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
@@ -1054,6 +1054,14 @@ void Device::DestroyImpl() {
         return;
     }
 
+    // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
+    // - It may be called if the device is explicitly destroyed with APIDestroy.
+    //   This case is NOT thread-safe and needs proper synchronization with other
+    //   simultaneous uses of the device.
+    // - It may be called when the last ref to the device is dropped and the device
+    //   is implicitly destroyed. This case is thread-safe because there are no
+    //   other threads using the device since there are no other live refs.
+
     // The deleter is the second thing we initialize. If it is not present, it means that
     // only the VkDevice was created and nothing else. Destroy the device and do nothing else
     // because the function pointers might not have been loaded (and there is nothing to
@@ -1111,11 +1119,11 @@ void Device::DestroyImpl() {
 
     // Releasing the uploader enqueues buffers to be released.
     // Call Tick() again to clear them before releasing the deleter.
-    mResourceMemoryAllocator->Tick(kMaxExecutionSerial);
+    GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
     mDescriptorAllocatorsPendingDeallocation.ClearUpTo(kMaxExecutionSerial);
 
     // Allow recycled memory to be deleted.
-    mResourceMemoryAllocator->DestroyPool();
+    GetResourceMemoryAllocator()->DestroyPool();
 
     // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
     // to them are guaranteed to be finished executing.
@@ -1123,7 +1131,7 @@ void Device::DestroyImpl() {
 
     // Delete all the remaining VkDevice child objects immediately since the GPU timeline is
     // finished.
-    mDeleter->Tick(kMaxExecutionSerial);
+    GetFencedDeleter()->Tick(kMaxExecutionSerial);
     mDeleter = nullptr;
 
     // VkQueues are destroyed when the VkDevice is destroyed

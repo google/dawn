@@ -63,6 +63,14 @@ class SwapChainBase : public ApiObjectBase {
     TextureViewBase* APIGetCurrentTextureView();
     void APIPresent();
 
+    // TODO(crbug.com/dawn/831):
+    // APIRelease() can be called without any synchronization guarantees so we need to use a Release
+    // method that will call LockAndDeleteThis() on destruction.
+    // This is because losing the last reference to the SwapChain will detach its surface which
+    // explicitly destroys the current texture. Explicit destruction of textures is not thread safe
+    // yet.
+    void APIRelease() { ReleaseAndLockBeforeDestroy(); }
+
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
     wgpu::TextureFormat GetFormat() const;

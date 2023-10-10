@@ -17,11 +17,11 @@
 namespace dawn::native {
 
 ExecutionSerial ExecutionQueueBase::GetPendingCommandSerial() const {
-    return mLastSubmittedSerial + ExecutionSerial(1);
+    return ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire) + 1);
 }
 
 ExecutionSerial ExecutionQueueBase::GetLastSubmittedCommandSerial() const {
-    return mLastSubmittedSerial;
+    return ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire));
 }
 
 ExecutionSerial ExecutionQueueBase::GetCompletedCommandSerial() const {
@@ -32,7 +32,8 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
 
-    DAWN_ASSERT(completedSerial <= mLastSubmittedSerial);
+    DAWN_ASSERT(completedSerial <=
+                ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)));
     // completedSerial should not be less than mCompletedSerial unless it is 0.
     // It can be 0 when there's no fences to check.
     DAWN_ASSERT(completedSerial >= mCompletedSerial || completedSerial == ExecutionSerial(0));
@@ -46,16 +47,18 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
 
 void ExecutionQueueBase::AssumeCommandsComplete() {
     // Bump serials so any pending callbacks can be fired.
-    mLastSubmittedSerial++;
-    mCompletedSerial = mLastSubmittedSerial;
+    uint64_t prev = mLastSubmittedSerial.fetch_add(1u, std::memory_order_release);
+    mCompletedSerial = ExecutionSerial(prev + 1);
 }
 
 void ExecutionQueueBase::IncrementLastSubmittedCommandSerial() {
-    mLastSubmittedSerial++;
+    mLastSubmittedSerial.fetch_add(1u, std::memory_order_release);
 }
 
 bool ExecutionQueueBase::HasScheduledCommands() const {
-    return mLastSubmittedSerial > mCompletedSerial || HasPendingCommands();
+    return ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)) >
+               mCompletedSerial ||
+           HasPendingCommands();
 }
 
 // All prevously submitted works at the moment will supposedly complete at this serial.

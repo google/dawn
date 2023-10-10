@@ -892,6 +892,13 @@ Texture::Texture(DeviceBase* dev, const TextureDescriptor* desc) : TextureBase(d
 Texture::~Texture() {}
 
 void Texture::DestroyImpl() {
+    // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
+    // - It may be called if the texture is explicitly destroyed with APIDestroy.
+    //   This case is NOT thread-safe and needs proper synchronization with other
+    //   simultaneous uses of the texture.
+    // - It may be called when the last ref to the texture is dropped and the texture
+    //   is implicitly destroyed. This case is thread-safe because there are no
+    //   other threads using the texture since there are no other live refs.
     TextureBase::DestroyImpl();
     mMtlTexture = nullptr;
     mIOSurface = nullptr;

@@ -434,6 +434,13 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 }
 
 void Device::DestroyImpl() {
+    // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
+    // - It may be called if the device is explicitly destroyed with APIDestroy.
+    //   This case is NOT thread-safe and needs proper synchronization with other
+    //   simultaneous uses of the device.
+    // - It may be called when the last ref to the device is dropped and the device
+    //   is implicitly destroyed. This case is thread-safe because there are no
+    //   other threads using the device since there are no other live refs.
     DAWN_ASSERT(GetState() == State::Disconnected);
 
     Base::DestroyImpl();
