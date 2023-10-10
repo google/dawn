@@ -15,35 +15,52 @@
 import("scripts/dawn_overrides_with_defaults.gni")
 import("scripts/tint_overrides_with_defaults.gni")
 
+group("benchmarks") {
+  testonly = true
+  deps = [ "src/tint:benchmarks" ]
+}
+
 group("fuzzers") {
   testonly = true
   deps = [
     "src/dawn/fuzzers",
-    "src/tint/cmd/fuzz/wgsl",
-    "src/tint/fuzzers",
+    "src/tint:fuzzers",
+  ]
+}
+
+group("libs") {
+  deps = [
+    "src/dawn/native:webgpu_dawn",
+    "src/tint:libs",
+  ]
+}
+
+group("tests") {
+  testonly = true
+  deps = [
+    "src/dawn/tests",
+    "src/tint:tests",
+  ]
+}
+
+group("cmds") {
+  deps = [
+    "src/dawn/samples",
+    "src/tint:cmds",
   ]
 }
 
 group("all") {
   testonly = true
   deps = [
+    ":benchmarks",
     ":fuzzers",
-    "src/dawn/native:webgpu_dawn",
-    "src/dawn/tests",
-    "src/tint/api",
+    ":libs",
+    ":tests",
   ]
-  if (tint_build_unittests) {
-    deps += [ "src/tint/cmd/test:test_cmd" ]
-  }
-  if (tint_build_benchmarks) {
-    deps += [ "src/tint/cmd/bench:bench_cmd" ]
-  }
+
   if (dawn_standalone) {
-    deps += [
-      "src/dawn/samples",
-      "src/tint/cmd/remote_compile",
-      "src/tint/cmd/tint",
-    ]
+    deps += [ ":cmds" ]
   }
 }
 

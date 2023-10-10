@@ -52,6 +52,8 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_utils_traits
 )
 
+tint_target_set_output_name(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd "tint_wgsl_fuzzer")
+
 ################################################################################
 # Target:    tint_cmd_fuzz_wgsl_fuzz
 # Kind:      fuzz

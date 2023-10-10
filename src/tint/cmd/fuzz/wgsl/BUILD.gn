@@ -58,6 +58,7 @@ tint_fuzz_source_set("fuzz") {
 }
 
 tint_fuzzer_test("wgsl") {
+  output_name = "tint_wgsl_fuzzer"
   sources = [ "main_fuzz.cc" ]
   deps = [
     "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",

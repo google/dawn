@@ -233,11 +233,50 @@ if (tint_has_fuzzers) {
 }
 
 ###############################################################################
+# Groups
+###############################################################################
+group("libs") {
+  deps = [ "${tint_src_dir}/api" ]
+}
+
+group("cmds") {
+  deps = [ "${tint_src_dir}/cmd/tint" ]
+  if (dawn_standalone) {
+    deps += [ "${tint_src_dir}/cmd/remote_compile" ]
+  }
+}
+
+group("fuzzers") {
+  testonly = true
+  deps = []
+  if (tint_has_fuzzers) {
+    deps += [
+      "${tint_src_dir}/cmd/fuzz/wgsl",
+      "${tint_src_dir}/fuzzers",
+    ]
+  }
+}
+
+group("tests") {
+  testonly = true
+  deps = []
+  if (tint_build_unittests) {
+    deps += [ "${tint_src_dir}/cmd/test:test_cmd" ]
+  }
+}
+
+group("benchmarks") {
+  testonly = true
+  deps = []
+  if (tint_build_benchmarks) {
+    deps += [ "${tint_src_dir}/cmd/bench:bench_cmd" ]
+  }
+}
+
+###############################################################################
 # Aliases
 ###############################################################################
-if (tint_build_unittests) {
-  group("tint_unittests") {
-    testonly = true
-    public_deps = [ "${tint_src_dir}/cmd/test:test_cmd" ]
-  }
+group("tint_unittests") {
+  testonly = true
+  public_deps = [ ":tests" ]
 }
