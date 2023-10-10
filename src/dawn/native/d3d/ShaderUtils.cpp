@@ -264,6 +264,8 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     return {};
 }
 
+}  // anonymous namespace
+
 std::string CompileFlagsToString(uint32_t compileFlags) {
     struct Flag {
         uint32_t value;
@@ -326,8 +328,6 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
     return result;
 }
 
-}  // anonymous namespace
-
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
     bool shouldDumpShader = r.hlsl.dumpShaders;
@@ -363,9 +363,9 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     return compiledShader;
 }
 
-void DumpCompiledShader(Device* device,
-                        const CompiledShader& compiledShader,
-                        uint32_t compileFlags) {
+void DumpFXCCompiledShader(Device* device,
+                           const CompiledShader& compiledShader,
+                           uint32_t compileFlags) {
     std::ostringstream dumpedMsg;
     // The HLSL may be empty if compilation failed.
     if (!compiledShader.hlslSource.empty()) {
@@ -373,43 +373,23 @@ void DumpCompiledShader(Device* device,
                   << compiledShader.hlslSource << std::endl;
     }
 
-    // The blob may be empty if FXC/DXC compilation failed.
+    // The blob may be empty if FXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
     if (!shaderBlob.Empty()) {
-        if (device->IsToggleEnabled(Toggle::UseDXC)) {
-            dumpedMsg << "/* DXC compile flags */ " << std::endl
-                      << CompileFlagsToString(compileFlags) << std::endl;
-            dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
-            ComPtr<IDxcBlobEncoding> disassembly;
-            DxcBuffer dxcBuffer;
-            dxcBuffer.Encoding = DXC_CP_UTF8;
-            dxcBuffer.Ptr = shaderBlob.Data();
-            dxcBuffer.Size = shaderBlob.Size();
-            if (FAILED(device->GetDxcCompiler()->Disassemble(&dxcBuffer,
-                                                             IID_PPV_ARGS(&disassembly)))) {
-                dumpedMsg << "DXC disassemble failed" << std::endl;
-            } else {
-                dumpedMsg << std::string_view(
-                    static_cast<const char*>(disassembly->GetBufferPointer()),
-                    disassembly->GetBufferSize());
-            }
+        dumpedMsg << "/* FXC compile flags */ " << std::endl
+                  << CompileFlagsToString(compileFlags) << std::endl;
+        dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
+        ComPtr<ID3DBlob> disassembly;
+        UINT flags =
+            // Some literals are printed as floats with precision(6) which is not enough
+            // precision for values very close to 0, so always print literals as hex values.
+            D3D_DISASM_PRINT_HEX_LITERALS;
+        if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
+                                                          flags, nullptr, &disassembly))) {
+            dumpedMsg << "D3D disassemble failed" << std::endl;
         } else {
-            dumpedMsg << "/* FXC compile flags */ " << std::endl
-                      << CompileFlagsToString(compileFlags) << std::endl;
-            dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
-            ComPtr<ID3DBlob> disassembly;
-            UINT flags =
-                // Some literals are printed as floats with precision(6) which is not enough
-                // precision for values very close to 0, so always print literals as hex values.
-                D3D_DISASM_PRINT_HEX_LITERALS;
-            if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
-                                                              flags, nullptr, &disassembly))) {
-                dumpedMsg << "D3D disassemble failed" << std::endl;
-            } else {
-                dumpedMsg << std::string_view(
-                    static_cast<const char*>(disassembly->GetBufferPointer()),
-                    disassembly->GetBufferSize());
-            }
+            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                          disassembly->GetBufferSize());
         }
     }
 

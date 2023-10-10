@@ -42,13 +42,6 @@ class Device : public DeviceBase {
     const PlatformFunctions* GetFunctions() const;
     ComPtr<IDXGIFactory4> GetFactory() const;
 
-    // Those DXC methods are needed by d3d::ShaderModule
-    // TODO(penghuang): remove them when related code is refactored to
-    // d3d12::ShaderModule.
-    ComPtr<IDxcLibrary> GetDxcLibrary() const;
-    ComPtr<IDxcCompiler3> GetDxcCompiler() const;
-    ComPtr<IDxcValidator> GetDxcValidator() const;
-
     HANDLE GetFenceHandle() const;
 
     std::unique_ptr<ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(

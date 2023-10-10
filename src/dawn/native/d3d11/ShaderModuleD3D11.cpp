@@ -192,7 +192,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }();
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
-        d3d::DumpCompiledShader(device, *compiledShader, compileFlags);
+        d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);
     }
 
     if (compileError.IsError()) {

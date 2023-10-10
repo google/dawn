@@ -40,6 +40,44 @@
 
 namespace dawn::native::d3d12 {
 
+namespace {
+
+void DumpDXCCompiledShader(Device* device,
+                           const dawn::native::d3d::CompiledShader& compiledShader,
+                           uint32_t compileFlags) {
+    std::ostringstream dumpedMsg;
+    // The HLSL may be empty if compilation failed.
+    if (!compiledShader.hlslSource.empty()) {
+        dumpedMsg << "/* Dumped generated HLSL */" << std::endl
+                  << compiledShader.hlslSource << std::endl;
+    }
+
+    // The blob may be empty if DXC compilation failed.
+    const Blob& shaderBlob = compiledShader.shaderBlob;
+    if (!shaderBlob.Empty()) {
+        dumpedMsg << "/* DXC compile flags */ " << std::endl
+                  << dawn::native::d3d::CompileFlagsToString(compileFlags) << std::endl;
+        dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
+        ComPtr<IDxcBlobEncoding> disassembly;
+        DxcBuffer dxcBuffer;
+        dxcBuffer.Encoding = DXC_CP_UTF8;
+        dxcBuffer.Ptr = shaderBlob.Data();
+        dxcBuffer.Size = shaderBlob.Size();
+        if (FAILED(device->GetDxcCompiler()->Disassemble(&dxcBuffer, IID_PPV_ARGS(&disassembly)))) {
+            dumpedMsg << "DXC disassemble failed" << std::endl;
+        } else {
+            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                          disassembly->GetBufferSize());
+        }
+    }
+
+    std::string logMessage = dumpedMsg.str();
+    if (!logMessage.empty()) {
+        device->EmitLog(WGPULoggingType_Info, logMessage.c_str());
+    }
+}
+}  // namespace
+
 // static
 ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     Device* device,
@@ -243,7 +281,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     }();
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
-        d3d::DumpCompiledShader(device, *compiledShader, compileFlags);
+        if (device->IsToggleEnabled(Toggle::UseDXC)) {
+            DumpDXCCompiledShader(device, *compiledShader, compileFlags);
+        } else {
+            d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);
+        }
     }
 
     if (compileError.IsError()) {

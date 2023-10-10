@@ -62,18 +62,6 @@ ComPtr<IDXGIFactory4> Device::GetFactory() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetFactory();
 }
 
-ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
-    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcLibrary();
-}
-
-ComPtr<IDxcCompiler3> Device::GetDxcCompiler() const {
-    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcCompiler();
-}
-
-ComPtr<IDxcValidator> Device::GetDxcValidator() const {
-    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcValidator();
-}
-
 HANDLE Device::GetFenceHandle() const {
     return mFenceHandle;
 }

@@ -172,6 +172,10 @@ class Device final : public d3d::Device {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
     MaybeError WaitForIdleForDestruction();
 
+    // Those DXC methods are needed by d3d12::ShaderModule
+    ComPtr<IDxcLibrary> GetDxcLibrary() const;
+    ComPtr<IDxcCompiler3> GetDxcCompiler() const;
+
   private:
     using Base = d3d::Device;
 
