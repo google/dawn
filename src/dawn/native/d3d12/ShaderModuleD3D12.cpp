@@ -58,16 +58,28 @@ void DumpDXCCompiledShader(Device* device,
         dumpedMsg << "/* DXC compile flags */ " << std::endl
                   << dawn::native::d3d::CompileFlagsToString(compileFlags) << std::endl;
         dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
-        ComPtr<IDxcBlobEncoding> disassembly;
         DxcBuffer dxcBuffer;
         dxcBuffer.Encoding = DXC_CP_UTF8;
         dxcBuffer.Ptr = shaderBlob.Data();
         dxcBuffer.Size = shaderBlob.Size();
-        if (FAILED(device->GetDxcCompiler()->Disassemble(&dxcBuffer, IID_PPV_ARGS(&disassembly)))) {
-            dumpedMsg << "DXC disassemble failed" << std::endl;
-        } else {
+
+        ComPtr<IDxcResult> dxcResult;
+        device->GetDxcCompiler()->Disassemble(&dxcBuffer, IID_PPV_ARGS(&dxcResult));
+
+        ComPtr<IDxcBlobEncoding> disassembly;
+        if (dxcResult && dxcResult->HasOutput(DXC_OUT_DISASSEMBLY) &&
+            SUCCEEDED(
+                dxcResult->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
             dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
                                           disassembly->GetBufferSize());
+        } else {
+            dumpedMsg << "DXC disassemble failed" << std::endl;
+            ComPtr<IDxcBlobEncoding> errors;
+            if (dxcResult && dxcResult->HasOutput(DXC_OUT_ERRORS) &&
+                SUCCEEDED(dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr))) {
+                dumpedMsg << std::string_view(static_cast<const char*>(errors->GetBufferPointer()),
+                                              errors->GetBufferSize());
+            }
         }
     }
 
