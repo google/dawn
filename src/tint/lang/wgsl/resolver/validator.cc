@@ -307,6 +307,12 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
         }
     }
 
+    if (auto* store_ty = s->StoreType(); !IsStorable(store_ty)) {
+        AddError(sem_.TypeNameOf(store_ty) + " cannot be used as the store type of a pointer",
+                 a->arguments[1]->source);
+        return false;
+    }
+
     return CheckTypeAccessAddressSpace(s->StoreType(), s->Access(), s->AddressSpace(), tint::Empty,
                                        a->source);
 }

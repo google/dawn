@@ -781,6 +781,21 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 56:78 note: while instantiating parameter a)");
 }
 
+TEST_F(ResolverTypeValidationTest, PtrToPtr_Fail) {
+    // fn func(a : ptr<workgroup, ptr<workgroup, u32>>) {}
+    auto* param = Param("a", ty.ptr(workgroup, ty.ptr<workgroup, u32>(Source{{12, 34}})));
+
+    Func("func", Vector{param}, ty.void_(),
+         Vector{
+             Return(),
+         });
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: ptr<workgroup, u32, read_write> cannot be used as the store type of a pointer)");
+}
+
 TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsPointerParameter_Fail) {
     // fn func(a : ptr<workgroup, array<u32>>) {}
 

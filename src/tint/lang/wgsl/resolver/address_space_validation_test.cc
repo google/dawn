@@ -216,18 +216,6 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Pointer) {
 56:78 note: while instantiating 'var' g)");
 }
 
-TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_Pointer) {
-    // type t = ptr<storage, ptr<private, f32>>;
-    Alias("t", ty.ptr<storage>(Source{{56, 78}}, ty.ptr<private_, f32>(Source{{12, 34}})));
-
-    ASSERT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'storage' as it is non-host-shareable
-56:78 note: while instantiating ptr<storage, ptr<private, f32, read_write>, read>)");
-}
-
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_IntScalar) {
     // var<storage> g : i32;
     GlobalVar("g", ty.i32(), core::AddressSpace::kStorage, Binding(0_a), Group(0_a));
@@ -631,18 +619,6 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformPointer) {
 56:78 note: while instantiating 'var' g)");
 }
 
-TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformPointer) {
-    // type t = ptr<uniform, ptr<private, f32>>;
-    Alias("t", ty.ptr<uniform>(Source{{56, 78}}, ty.ptr<private_, f32>(Source{{12, 34}})));
-
-    ASSERT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'uniform' as it is non-host-shareable
-56:78 note: while instantiating ptr<uniform, ptr<private, f32, read_write>, read>)");
-}
-
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferIntScalar) {
     // var<uniform> g : i32;
     GlobalVar(Source{{56, 78}}, "g", ty.i32(), core::AddressSpace::kUniform, Binding(0_a),
@@ -918,19 +894,6 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantPointer) {
         r()->error(),
         R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'push_constant' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
-}
-
-TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantPointer) {
-    // enable chromium_experimental_push_constant;
-    // type t = ptr<push_constant, ptr<private, f32>>;
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
-    Alias(Source{{56, 78}}, "t", ty.ptr<push_constant>(ty.ptr<private_, f32>(Source{{12, 34}})));
-
-    ASSERT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'push_constant' as it is non-host-shareable
-note: while instantiating ptr<push_constant, ptr<private, f32, read_write>, read_write>)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantIntScalar) {
