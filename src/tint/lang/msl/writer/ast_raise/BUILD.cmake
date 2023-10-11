@@ -88,7 +88,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_ast_raise_test test
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -115,6 +114,12 @@ if(TINT_BUILD_MSL_WRITER)
     tint_lang_msl_writer_ast_raise
   )
 endif(TINT_BUILD_MSL_WRITER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_msl_writer_ast_raise_test test
+    tint_lang_wgsl_reader
+  )
+endif(TINT_BUILD_WGSL_READER)
 
 if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_ast_raise_test test

@@ -42,7 +42,6 @@ libtint_source_set("api") {
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/program",
-    "${tint_src_dir}/lang/wgsl/reader",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
@@ -86,6 +85,10 @@ libtint_source_set("api") {
       "${tint_src_dir}/lang/spirv/writer",
       "${tint_src_dir}/lang/spirv/writer/common",
     ]
+  }
+
+  if (tint_build_wgsl_reader) {
+    deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
   }
 
   if (tint_build_wgsl_writer) {

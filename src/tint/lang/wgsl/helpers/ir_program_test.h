@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader)
+
 #ifndef SRC_TINT_LANG_WGSL_HELPERS_IR_PROGRAM_TEST_H_
 #define SRC_TINT_LANG_WGSL_HELPERS_IR_PROGRAM_TEST_H_
 
@@ -67,7 +69,6 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
     Result<core::ir::Module> Build(std::string wgsl) {
-#if TINT_BUILD_WGSL_READER
         Source::File file("test.wgsl", std::move(wgsl));
         auto result = wgsl::reader::WgslToIR(&file);
         if (result) {
@@ -77,10 +78,6 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             }
         }
         return result;
-#else
-        (void)wgsl;
-        return Failure{"error: Tint not built with the WGSL reader"};
-#endif
     }
 };
 

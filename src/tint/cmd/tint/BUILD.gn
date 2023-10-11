@@ -45,8 +45,6 @@ executable("tint") {
     "${tint_src_dir}/lang/wgsl/helpers",
     "${tint_src_dir}/lang/wgsl/inspector",
     "${tint_src_dir}/lang/wgsl/program",
-    "${tint_src_dir}/lang/wgsl/reader",
-    "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/utils/cli",
     "${tint_src_dir}/utils/command",
@@ -106,6 +104,13 @@ executable("tint") {
       "${tint_src_dir}/lang/spirv/writer",
       "${tint_src_dir}/lang/spirv/writer/common",
       "${tint_src_dir}/lang/spirv/writer/helpers",
+    ]
+  }
+
+  if (tint_build_wgsl_reader) {
+    deps += [
+      "${tint_src_dir}/lang/wgsl/reader",
+      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     ]
   }
 

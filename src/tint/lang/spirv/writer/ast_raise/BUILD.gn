@@ -94,7 +94,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/ast/transform",
         "${tint_src_dir}/lang/wgsl/program",
-        "${tint_src_dir}/lang/wgsl/reader",
         "${tint_src_dir}/lang/wgsl/sem",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
@@ -113,6 +112,10 @@ if (tint_build_unittests) {
 
       if (tint_build_spv_writer) {
         deps += [ "${tint_src_dir}/lang/spirv/writer/ast_raise" ]
+      }
+
+      if (tint_build_wgsl_reader) {
+        deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
       }
 
       if (tint_build_wgsl_reader && tint_build_wgsl_writer) {

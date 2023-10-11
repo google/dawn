@@ -45,7 +45,6 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/reader",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -64,6 +63,10 @@ if (tint_build_benchmarks) {
 
     if (tint_build_spv_reader) {
       deps += [ "${tint_src_dir}/lang/spirv/reader" ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
     }
 
     if (tint_build_wgsl_writer) {
@@ -87,7 +90,6 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/lang/wgsl:bench",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/reader:bench",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -118,6 +120,10 @@ if (tint_build_benchmarks) {
 
     if (tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/writer:bench" ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      deps += [ "${tint_src_dir}/lang/wgsl/reader:bench" ]
     }
 
     if (tint_build_wgsl_writer) {

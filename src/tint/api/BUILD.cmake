@@ -45,7 +45,6 @@ tint_target_add_dependencies(tint_api lib
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
@@ -94,6 +93,12 @@ if(TINT_BUILD_SPV_WRITER)
     tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_wgsl_reader
+  )
+endif(TINT_BUILD_WGSL_READER)
 
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_api lib

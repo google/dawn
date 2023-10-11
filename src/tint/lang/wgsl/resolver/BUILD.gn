@@ -127,7 +127,6 @@ if (tint_build_unittests) {
       "struct_pipeline_stage_use_test.cc",
       "subgroups_extension_test.cc",
       "type_validation_test.cc",
-      "uniformity_test.cc",
       "unresolved_identifier_test.cc",
       "validation_test.cc",
       "validator_is_storeable_test.cc",
@@ -150,7 +149,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/ast/transform",
       "${tint_src_dir}/lang/wgsl/intrinsic",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/reader",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/sem:unittests",
@@ -168,5 +166,10 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (tint_build_wgsl_reader) {
+      sources += [ "uniformity_test.cc" ]
+      deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
+    }
   }
 }

@@ -84,8 +84,6 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast/transform",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
-    "//src/tint/lang/wgsl/reader/parser",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
@@ -105,6 +103,12 @@ cc_library(
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader/ast_lower",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
+      "//src/tint/lang/wgsl/reader/parser",
     ],
     "//conditions:default": [],
   }) + select({

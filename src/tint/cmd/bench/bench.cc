@@ -27,7 +27,9 @@
 #include "src/tint/lang/wgsl/writer/writer.h"
 #endif
 
+#if TINT_BUILD_WGSL_READER
 #include "src/tint/lang/wgsl/reader/reader.h"
+#endif
 
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"

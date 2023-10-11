@@ -41,8 +41,6 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader/lower",
-    "//src/tint/lang/wgsl/reader/parser",
-    "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
@@ -58,7 +56,13 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
-  ],
+  ] + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader/parser",
+      "//src/tint/lang/wgsl/reader/program_to_ir",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
@@ -78,7 +82,6 @@ cc_library(
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -94,8 +97,18 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
-  ],
+  ] + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_wgsl_reader",
+  actual = "//src/tint:tint_build_wgsl_reader_true",
 )
 

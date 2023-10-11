@@ -18,7 +18,6 @@
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"
@@ -42,6 +41,7 @@
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_READER
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #endif  // TINT_BUILD_WGSL_READER
 
@@ -380,6 +380,7 @@ int main(int argc, const char** argv) {
     opts.filename = options.input_filename;
 
     auto info = tint::cmd::LoadProgramInfo(opts);
+#if TINT_BUILD_WGSL_READER
     {
         uint32_t loop_count = 1;
         if (options.loop == Looper::kIRGenerate) {
@@ -392,6 +393,7 @@ int main(int argc, const char** argv) {
             }
         }
     }
+#endif  // TINT_BUILD_WGSL_READER
 
     bool success = false;
     {

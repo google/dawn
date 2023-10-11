@@ -90,7 +90,6 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast/transform",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -109,6 +108,11 @@ cc_library(
   ] + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer/ast_raise",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
     ],
     "//conditions:default": [],
   }) + select({

@@ -45,7 +45,6 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/inspector",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -68,6 +67,11 @@ cc_library(
   }) + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_tools",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
     ],
     "//conditions:default": [],
   }) + select({
@@ -124,6 +128,11 @@ alias(
 alias(
   name = "tint_build_spv_writer",
   actual = "//src/tint:tint_build_spv_writer_true",
+)
+
+alias(
+  name = "tint_build_wgsl_reader",
+  actual = "//src/tint:tint_build_wgsl_reader_true",
 )
 
 alias(

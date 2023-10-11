@@ -60,6 +60,8 @@ cc_library(
     "extension_test.cc",
     "wgsl_test.cc",
   ] + select({
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
       "ir_roundtrip_test.cc",
     ],
@@ -77,9 +79,7 @@ cc_library(
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/helpers:test",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/reader/lower",
-    "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/lang/wgsl/writer/ir_to_program",
@@ -98,6 +98,12 @@ cc_library(
     "//src/tint/utils/traits",
     "@gtest",
   ] + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
+      "//src/tint/lang/wgsl/reader/program_to_ir",
+    ],
+    "//conditions:default": [],
+  }) + select({
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer": [

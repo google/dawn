@@ -47,11 +47,8 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl:unittests",
       "${tint_src_dir}/lang/wgsl/ast:unittests",
       "${tint_src_dir}/lang/wgsl/helpers:unittests",
-      "${tint_src_dir}/lang/wgsl/inspector:unittests",
       "${tint_src_dir}/lang/wgsl/program:unittests",
       "${tint_src_dir}/lang/wgsl/reader/lower:unittests",
-      "${tint_src_dir}/lang/wgsl/reader/parser:unittests",
-      "${tint_src_dir}/lang/wgsl/reader/program_to_ir:unittests",
       "${tint_src_dir}/lang/wgsl/resolver:unittests",
       "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
@@ -128,6 +125,14 @@ if (tint_build_unittests) {
     if (tint_build_spv_writer && tint_build_wgsl_reader &&
         tint_build_wgsl_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/writer/ast_raise:unittests" ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      deps += [
+        "${tint_src_dir}/lang/wgsl/inspector:unittests",
+        "${tint_src_dir}/lang/wgsl/reader/parser:unittests",
+        "${tint_src_dir}/lang/wgsl/reader/program_to_ir:unittests",
+      ]
     }
 
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {

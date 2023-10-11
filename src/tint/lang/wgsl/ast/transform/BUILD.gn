@@ -175,7 +175,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl/ast:unittests",
         "${tint_src_dir}/lang/wgsl/ast/transform",
         "${tint_src_dir}/lang/wgsl/program",
-        "${tint_src_dir}/lang/wgsl/reader",
         "${tint_src_dir}/lang/wgsl/resolver",
         "${tint_src_dir}/lang/wgsl/sem",
         "${tint_src_dir}/utils/containers",
@@ -192,6 +191,10 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/text",
         "${tint_src_dir}/utils/traits",
       ]
+
+      if (tint_build_wgsl_reader) {
+        deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
+      }
 
       if (tint_build_wgsl_writer) {
         deps += [ "${tint_src_dir}/lang/wgsl/writer" ]

@@ -21,9 +21,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_reader_parser
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader_parser lib
   lang/wgsl/reader/parser/classify_template_args.cc
@@ -63,9 +65,12 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_parser lib
   tint_utils_traits
 )
 
+endif(TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_reader_parser_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader_parser_test test
   lang/wgsl/reader/parser/additive_expression_test.cc
@@ -146,7 +151,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_parser_test test
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_test
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader_parser
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -167,3 +171,11 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_parser_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_reader_parser_test test
   "gtest"
 )
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_wgsl_reader_parser_test test
+    tint_lang_wgsl_reader_parser
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_WGSL_READER)

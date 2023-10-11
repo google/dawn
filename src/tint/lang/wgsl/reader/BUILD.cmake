@@ -25,9 +25,11 @@ include(lang/wgsl/reader/lower/BUILD.cmake)
 include(lang/wgsl/reader/parser/BUILD.cmake)
 include(lang/wgsl/reader/program_to_ir/BUILD.cmake)
 
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_reader
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader lib
   lang/wgsl/reader/reader.cc
@@ -44,8 +46,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
-  tint_lang_wgsl_reader_parser
-  tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -63,9 +63,19 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_utils_traits
 )
 
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_wgsl_reader lib
+    tint_lang_wgsl_reader_parser
+    tint_lang_wgsl_reader_program_to_ir
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_reader_bench
 # Kind:      bench
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader_bench bench
   lang/wgsl/reader/reader_bench.cc
@@ -81,7 +91,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
-  tint_lang_wgsl_reader
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
@@ -101,3 +110,11 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
 tint_target_add_external_dependencies(tint_lang_wgsl_reader_bench bench
   "google-benchmark"
 )
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
+    tint_lang_wgsl_reader
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_WGSL_READER)

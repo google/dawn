@@ -50,7 +50,6 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader/lower",
-      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -78,6 +77,10 @@ if (tint_build_spv_writer) {
         "${tint_src_dir}/lang/spirv/writer/printer",
         "${tint_src_dir}/lang/spirv/writer/raise",
       ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      deps += [ "${tint_src_dir}/lang/wgsl/reader/program_to_ir" ]
     }
   }
 }

@@ -107,6 +107,8 @@ cc_library(
     "std140_test.cc",
     "zero_init_workgroup_memory_test.cc",
   ] + select({
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
       "direct_variable_access_wgsl_test.cc",
     ],
@@ -126,8 +128,6 @@ cc_library(
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader",
-    "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
@@ -145,6 +145,12 @@ cc_library(
     "//src/tint/utils/traits",
     "@gtest",
   ] + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
+      "//src/tint/lang/wgsl/reader/program_to_ir",
+    ],
+    "//conditions:default": [],
+  }) + select({
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer": [
