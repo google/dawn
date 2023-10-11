@@ -15,12 +15,12 @@ struct S_2 {
 
 alias RTArr = array<vec4f>;
 
-alias RTArr_1 = array<vec4f>;
-
 struct S_3 {
   /* @offset(0) */
-  field0 : RTArr_1,
+  field0 : RTArr,
 }
+
+alias RTArr_1 = array<vec4f>;
 
 struct S_4 {
   /* @offset(0) */

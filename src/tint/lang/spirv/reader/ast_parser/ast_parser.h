@@ -774,8 +774,7 @@ class ASTParser {
     /// preserve member names, which are given by OpMemberName which is normally
     /// not significant to the optimizer's module representation.
     /// @param type_id the SPIR-V ID for the type.
-    /// @param struct_ty the Tint type
-    const Type* ConvertType(uint32_t type_id, const spvtools::opt::analysis::Struct* struct_ty);
+    const Type* ConvertStructType(uint32_t type_id);
     /// Converts a specific SPIR-V type to a Tint type. Pointer / Reference case
     /// The pointer to gl_PerVertex maps to nullptr, and instead is recorded
     /// in member #builtin_position_.

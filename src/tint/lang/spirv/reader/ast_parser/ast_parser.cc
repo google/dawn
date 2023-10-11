@@ -377,7 +377,7 @@ const Type* ASTParser::ConvertType(uint32_t type_id, PtrAs ptr_as) {
         case spvtools::opt::analysis::Type::kArray:
             return ConvertType(type_id, spirv_type->AsArray());
         case spvtools::opt::analysis::Type::kStruct:
-            return ConvertType(type_id, spirv_type->AsStruct());
+            return ConvertStructType(type_id);
         case spvtools::opt::analysis::Type::kPointer:
             return ConvertType(type_id, ptr_as, spirv_type->AsPointer());
         case spvtools::opt::analysis::Type::kFunction:
@@ -1061,8 +1061,7 @@ bool ASTParser::ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_t
     return true;
 }
 
-const Type* ASTParser::ConvertType(uint32_t type_id,
-                                   const spvtools::opt::analysis::Struct* struct_ty) {
+const Type* ASTParser::ConvertStructType(uint32_t type_id) {
     // Compute the struct decoration.
     auto struct_decorations = this->GetDecorationsFor(type_id);
     if (struct_decorations.size() == 1) {
@@ -1079,18 +1078,22 @@ const Type* ASTParser::ConvertType(uint32_t type_id,
         return nullptr;
     }
 
-    // Compute members
-    tint::Vector<const ast::StructMember*, 8> ast_members;
-    const auto members = struct_ty->element_types();
-    if (members.empty()) {
+    // The SPIR-V optimizer's types representation deduplicates types. We don't want that
+    // deduplication, so get the member types from the SPIR-V instruction directly.
+    const auto* inst = def_use_mgr_->GetDef(type_id);
+    auto num_members = inst->NumOperands() - 1;
+    if (num_members == 0) {
         Fail() << "WGSL does not support empty structures. can't convert type: "
                << def_use_mgr_->GetDef(type_id)->PrettyPrint();
         return nullptr;
     }
+
+    // Compute members
+    tint::Vector<const ast::StructMember*, 8> ast_members;
     TypeList ast_member_types;
     unsigned num_non_writable_members = 0;
-    for (uint32_t member_index = 0; member_index < members.size(); ++member_index) {
-        const auto member_type_id = type_mgr_->GetId(members[member_index]);
+    for (uint32_t member_index = 0; member_index < num_members; ++member_index) {
+        const auto member_type_id = inst->GetOperand(member_index + 1).AsId();
         auto* ast_member_ty = ConvertType(member_type_id);
         if (ast_member_ty == nullptr) {
             // Already emitted diagnostics.
@@ -1181,7 +1184,7 @@ const Type* ASTParser::ConvertType(uint32_t type_id,
     auto sym = builder_.Symbols().Register(name);
     auto* ast_struct =
         create<ast::Struct>(Source{}, builder_.Ident(sym), std::move(ast_members), tint::Empty);
-    if (num_non_writable_members == members.size()) {
+    if (num_non_writable_members == num_members) {
         read_only_struct_types_.insert(ast_struct->name->symbol);
     }
     AddTypeDecl(sym, ast_struct);

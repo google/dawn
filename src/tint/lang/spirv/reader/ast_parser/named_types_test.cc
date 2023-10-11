@@ -143,6 +143,91 @@ alias Arr_1 = @stride(8) array<u32, 5u>;
     p->DeliberatelyInvalidSpirv();
 }
 
+// Make sure that we do not deduplicate nested structures, as this will break the names used for
+// chained accessors.
+TEST_F(SpirvASTParserTest, NamedTypes_NestedStructsDifferOnlyInMemberNames) {
+    auto p = parser(test::Assemble(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+
+               OpName %FooInner "FooInner"
+               OpName %FooOuter "FooOuter"
+               OpMemberName %FooInner 0 "foo_member"
+               OpMemberName %FooOuter 0 "foo_inner"
+
+               OpName %BarInner "BarInner"
+               OpName %BarOuter "BarOuter"
+               OpMemberName %BarInner 0 "bar_member"
+               OpMemberName %BarOuter 0 "bar_inner"
+
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+
+   %FooInner = OpTypeStruct %int
+   %FooOuter = OpTypeStruct %FooInner
+
+   %BarInner = OpTypeStruct %int
+   %BarOuter = OpTypeStruct %BarInner
+
+     %FooPtr = OpTypePointer Private %FooOuter
+     %FooVar = OpVariable %FooPtr Private
+
+     %BarPtr = OpTypePointer Private %BarOuter
+     %BarVar = OpVariable %BarPtr Private
+
+    %ptr_int = OpTypePointer Private %int
+
+       %main = OpFunction %void None %3
+      %start = OpLabel
+ %access_foo = OpAccessChain %ptr_int %FooVar %int_0 %int_0
+ %access_bar = OpAccessChain %ptr_int %BarVar %int_0 %int_0
+     %fooval = OpLoad %int %access_foo
+     %barval = OpLoad %int %access_bar
+               OpReturn
+               OpFunctionEnd
+  )"));
+
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+    auto program = p->program();
+    EXPECT_EQ(test::ToString(program), R"(struct FooInner {
+  foo_member : i32,
+}
+
+struct FooOuter {
+  foo_inner : FooInner,
+}
+
+struct BarInner {
+  bar_member : i32,
+}
+
+struct BarOuter {
+  bar_inner : BarInner,
+}
+
+var<private> x_11 : FooOuter;
+
+var<private> x_13 : BarOuter;
+
+fn main_1() {
+  let x_18 = x_11.foo_inner.foo_member;
+  let x_19 = x_13.bar_inner.bar_member;
+  return;
+}
+
+@compute @workgroup_size(1i, 1i, 1i)
+fn main() {
+  main_1();
+}
+)");
+}
+
 // TODO(dneto): Handle arrays sized by a spec constant.
 // Blocked by crbug.com/tint/32
 

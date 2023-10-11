@@ -1,22 +1,22 @@
 alias RTArr = array<f32>;
 
-alias RTArr_1 = array<f32>;
-
 struct ResultMatrix {
   /* @offset(0) */
-  numbers : RTArr_1,
+  numbers : RTArr,
 }
 
-alias RTArr_2 = array<f32>;
+alias RTArr_1 = array<f32>;
 
 struct FirstMatrix {
   /* @offset(0) */
   numbers : RTArr_1,
 }
 
+alias RTArr_2 = array<f32>;
+
 struct SecondMatrix {
   /* @offset(0) */
-  numbers : RTArr_1,
+  numbers : RTArr_2,
 }
 
 struct Uniforms {
