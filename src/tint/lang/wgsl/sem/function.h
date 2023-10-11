@@ -129,9 +129,10 @@ class Function final : public Castable<Function, CallTarget> {
     /// that this function uses (directly or indirectly). These can only
     /// be parameters to this function or global variables. Uniqueness is
     /// ensured by texture_sampler_pairs_ being a UniqueVector.
-    /// @param texture the texture (must be non-null)
+    /// @param texture the texture (null indicates a sampler-only reference)
     /// @param sampler the sampler (null indicates a texture-only reference)
     void AddTextureSamplerPair(const sem::Variable* texture, const sem::Variable* sampler) {
+        TINT_ASSERT(texture || sampler);
         texture_sampler_pairs_.Add(VariablePair(texture, sampler));
     }
 

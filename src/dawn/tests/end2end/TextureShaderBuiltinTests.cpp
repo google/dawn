@@ -179,10 +179,7 @@ TEST_P(TextureShaderBuiltinTests, BuiltinCallInFunction) {
 @group(0) @binding(2) var tex2 : texture_2d_array<f32>;
 
 fn f(tex: texture_2d_array<f32>) -> u32 {
-    // TODO(tint:2006) Workaround to preserve usage of tex param. Remove when bug is fixed.
-    var result = textureNumLayers(tex);
-    result = textureNumLevels(tex);
-    return result;
+    return textureNumLevels(tex);
 }
 
 fn f_nested(tex: texture_2d_array<f32>, d: u32) -> u32 {
