@@ -21,6 +21,29 @@ namespace {
 
 using BumpAllocatorTest = testing::Test;
 
+TEST_F(BumpAllocatorTest, AllocationSizes) {
+    BumpAllocator allocator;
+    for (size_t n : {1u, 0x10u, 0x100u, 0x1000u, 0x10000u, 0x100000u,  //
+                     2u, 0x34u, 0x567u, 0x8912u, 0x34567u, 0x891234u}) {
+        auto ptr = allocator.Allocate(n);
+        memset(ptr, 0x42, n);
+    }
+}
+
+TEST_F(BumpAllocatorTest, AllocationSizesAroundBlockSize) {
+    for (size_t n : {
+             BumpAllocator::kDefaultBlockDataSize - sizeof(void*),
+             BumpAllocator::kDefaultBlockDataSize - 4,
+             BumpAllocator::kDefaultBlockDataSize,
+             BumpAllocator::kDefaultBlockDataSize + 4,
+             BumpAllocator::kDefaultBlockDataSize + sizeof(void*),
+         }) {
+        BumpAllocator allocator;
+        auto ptr = allocator.Allocate(n);
+        memset(ptr, 0x42, n);
+    }
+}
+
 TEST_F(BumpAllocatorTest, Count) {
     for (size_t n : {0u, 1u, 10u, 16u, 20u, 32u, 50u, 64u, 100u, 256u, 300u, 512u, 500u, 512u}) {
         BumpAllocator allocator;

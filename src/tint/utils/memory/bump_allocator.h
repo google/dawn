@@ -15,10 +15,12 @@
 #ifndef SRC_TINT_UTILS_MEMORY_BUMP_ALLOCATOR_H_
 #define SRC_TINT_UTILS_MEMORY_BUMP_ALLOCATOR_H_
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <utility>
 
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
 
@@ -27,16 +29,17 @@ namespace tint {
 /// A allocator for chunks of memory. The memory is owned by the BumpAllocator. When the
 /// BumpAllocator is freed all of the allocated memory is freed.
 class BumpAllocator {
-    static constexpr size_t kBlockSize = 64 * 1024;
-
-    /// Block is linked list of memory blocks.
+    /// BlockHeader is linked list of memory blocks.
     /// Blocks are allocated out of heap memory.
-    struct Block {
-        uint8_t data[kBlockSize];
-        Block* next;
+    struct BlockHeader {
+        BlockHeader* next;
     };
 
   public:
+    /// The default size for a block's data. Allocations can be greater than this, but smaller
+    /// allocations will use this size.
+    static constexpr size_t kDefaultBlockDataSize = 64 * 1024;
+
     /// Constructor
     BumpAllocator() = default;
 
@@ -61,38 +64,42 @@ class BumpAllocator {
     /// Allocates @p size_in_bytes from the current block, or from a newly allocated block if the
     /// current block is full.
     /// @param size_in_bytes the number of bytes to allocate
-    /// @returns the pointer to the allocated memory or |nullptr| if the memory can not be allocated
-    char* Allocate(size_t size_in_bytes) {
-        auto& block = data.block;
-        if (block.current_offset + size_in_bytes > kBlockSize) {
+    /// @returns the pointer to the allocated memory or `nullptr` if the memory can not be allocated
+    uint8_t* Allocate(size_t size_in_bytes) {
+        if (TINT_UNLIKELY(data.current_offset + size_in_bytes < size_in_bytes)) {
+            return nullptr;  // integer overflow
+        }
+        if (data.current_offset + size_in_bytes > data.current_data_size) {
             // Allocate a new block from the heap
-            auto* prev_block = block.current;
-            block.current = new Block;
-            if (!block.current) {
+            auto* prev_block = data.current;
+            data.current_data_size = std::max(size_in_bytes, kDefaultBlockDataSize);
+            data.current =
+                Bitcast<BlockHeader*>(new uint8_t[sizeof(BlockHeader) + data.current_data_size]);
+            if (!data.current) {
                 return nullptr;  // out of memory
             }
-            block.current->next = nullptr;
-            block.current_offset = 0;
+            data.current->next = nullptr;
+            data.current_offset = 0;
             if (prev_block) {
-                prev_block->next = block.current;
+                prev_block->next = data.current;
             } else {
-                block.root = block.current;
+                data.root = data.current;
             }
         }
 
-        auto* base = &block.current->data[0];
-        auto* ptr = reinterpret_cast<char*>(base + block.current_offset);
-        block.current_offset += size_in_bytes;
+        auto* base = Bitcast<uint8_t*>(data.current) + sizeof(BlockHeader);
+        auto* ptr = base + data.current_offset;
+        data.current_offset += size_in_bytes;
         data.count++;
         return ptr;
     }
 
     /// Frees all allocations from the allocator.
     void Reset() {
-        auto* block = data.block.root;
+        auto* block = data.root;
         while (block != nullptr) {
             auto* next = block->next;
-            delete block;
+            delete[] Bitcast<uint8_t*>(block);
             block = next;
         }
         data = {};
@@ -106,18 +113,16 @@ class BumpAllocator {
     BumpAllocator& operator=(const BumpAllocator&) = delete;
 
     struct {
-        struct {
-            /// The root block of the block linked list
-            Block* root = nullptr;
-            /// The current (end) block of the blocked linked list.
-            /// New allocations come from this block
-            Block* current = nullptr;
-            /// The byte offset in #current for the next allocation.
-            /// Initialized with kBlockSize so that the first allocation triggers a block
-            /// allocation.
-            size_t current_offset = kBlockSize;
-        } block;
-
+        /// The root block of the block linked list
+        BlockHeader* root = nullptr;
+        /// The current (end) block of the blocked linked list.
+        /// New allocations come from this block
+        BlockHeader* current = nullptr;
+        /// The byte offset in #current for the next allocation.
+        size_t current_offset = 0;
+        /// The size of the #current, excluding the header size
+        size_t current_data_size = 0;
+        /// Total number of allocations
         size_t count = 0;
     } data;
 };
