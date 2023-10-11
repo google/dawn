@@ -860,5 +860,41 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+// Test that we transform unreachable functions that discard (see crbug.com/tint/2052).
+TEST_F(IR_DemoteToHelperTest, UnreachableHelperThatDiscards) {
+    auto* helper = b.Function("foo", ty.void_());
+    b.Append(helper->Block(), [&] {
+        b.Discard();
+        b.Return(helper);
+    });
+
+    auto* src = R"(
+%foo = func():void -> %b1 {
+  %b1 = block {
+    discard
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %continue_execution:ptr<private, bool, read_write> = var, true
+}
+
+%foo = func():void -> %b2 {
+  %b2 = block {
+    store %continue_execution, false
+    ret
+  }
+}
+)";
+
+    Run(DemoteToHelper);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

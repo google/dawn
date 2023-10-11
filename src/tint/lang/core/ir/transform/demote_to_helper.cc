@@ -50,15 +50,13 @@ struct State {
 
     /// Process the module.
     void Process() {
-        // Check each fragment shader entry point for discard instruction, potentially inside
-        // functions called (transitively) by the entry point.
+        // Check each function for discard instructions, potentially inside other functions called
+        // (transitively) by the function.
         Vector<Function*, 4> to_process;
         for (auto* func : ir.functions) {
-            // If the function is a fragment shader that contains a discard, we need to process it.
-            if (func->Stage() == Function::PipelineStage::kFragment) {
-                if (HasDiscard(func)) {
-                    to_process.Push(func);
-                }
+            // If the function contains a discard (directly or indirectly), we need to process it.
+            if (HasDiscard(func)) {
+                to_process.Push(func);
             }
         }
         if (to_process.IsEmpty()) {
@@ -70,7 +68,7 @@ struct State {
         continue_execution->SetInitializer(b.Constant(true));
         ir.root_block->Append(continue_execution);
 
-        // Process each entry point function that contains a discard.
+        // Process each function that directly or indirectly discards.
         for (auto* ep : to_process) {
             ProcessFunction(ep);
         }
