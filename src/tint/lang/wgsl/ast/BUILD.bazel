@@ -256,7 +256,6 @@ cc_library(
     "location_attribute_test.cc",
     "loop_statement_test.cc",
     "member_accessor_expression_test.cc",
-    "module_clone_test.cc",
     "module_test.cc",
     "phony_expression_test.cc",
     "return_statement_test.cc",
@@ -275,7 +274,14 @@ cc_library(
     "variable_test.cc",
     "while_statement_test.cc",
     "workgroup_attribute_test.cc",
-  ],
+  ] + select({
+    ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
+      "module_clone_test.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    "//conditions:default": [],
+  }),
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
@@ -289,7 +295,6 @@ cc_library(
     "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
@@ -304,8 +309,33 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ],
+  ] + select({
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_wgsl_reader",
+  actual = "//src/tint:tint_build_wgsl_reader_true",
+)
+
+alias(
+  name = "tint_build_wgsl_writer",
+  actual = "//src/tint:tint_build_wgsl_writer_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_wgsl_reader_and_tint_build_wgsl_writer",
+    match_all = [
+        ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
+    ],
 )
 

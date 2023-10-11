@@ -118,9 +118,11 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform lib
   tint_utils_traits
 )
 
+if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_ast_transform_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/add_block_attribute_test.cc
@@ -175,7 +177,6 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform_test test
   tint_lang_wgsl_reader
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -194,3 +195,11 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_ast_transform_test test
   "gtest"
 )
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_wgsl_ast_transform_test test
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
+endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)

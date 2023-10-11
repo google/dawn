@@ -260,7 +260,7 @@ Builder::Builder(const Program& program,
 Builder::~Builder() = default;
 
 bool Builder::Build() {
-    if (!tint::writer::CheckSupportedExtensions(
+    if (!tint::wgsl::CheckSupportedExtensions(
             "SPIR-V", builder_.AST(), builder_.Diagnostics(),
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
@@ -2754,8 +2754,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     auto append_coords_to_spirv_params = [&]() -> bool {
         if (auto* array_index = arg(Usage::kArrayIndex)) {
             // Array index needs to be appended to the coordinates.
-            auto* packed = tint::writer::AppendVector(&builder_, arg(Usage::kCoords)->Declaration(),
-                                                      array_index->Declaration());
+            auto* packed = tint::wgsl::AppendVector(&builder_, arg(Usage::kCoords)->Declaration(),
+                                                    array_index->Declaration());
             auto param = GenerateExpression(packed);
             if (param == 0) {
                 return false;

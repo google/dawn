@@ -20,7 +20,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -498,4 +498,4 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
 }
 
 }  // namespace
-}  // namespace tint::writer
+}  // namespace tint::wgsl

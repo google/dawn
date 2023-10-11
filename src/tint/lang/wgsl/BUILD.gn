@@ -76,7 +76,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -95,6 +94,10 @@ if (tint_build_unittests) {
 
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
       sources += [ "ir_roundtrip_test.cc" ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
     }
   }
 }

@@ -18,7 +18,7 @@
 #include <optional>
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 
 /// If needed, remaps resource numbers of `program` to a flat namespace: all in
 /// group 0 within unique binding numbers.
@@ -26,6 +26,6 @@ namespace tint::writer {
 /// @return A new program with bindings remapped if needed
 std::optional<Program> FlattenBindings(const Program& program);
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl
 
 #endif  // SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_

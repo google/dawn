@@ -25,7 +25,7 @@ namespace tint::diag {
 class List;
 }  // namespace tint::diag
 
-namespace tint::writer {
+namespace tint::wgsl {
 
 /// Checks that all the extensions enabled in @p module are found in @p supported, raising an error
 /// diagnostic if an enabled extension is not supported.
@@ -38,6 +38,6 @@ bool CheckSupportedExtensions(std::string_view writer_name,
                               diag::List& diags,
                               VectorRef<wgsl::Extension> supported);
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl
 
 #endif  // SRC_TINT_LANG_WGSL_HELPERS_CHECK_SUPPORTED_EXTENSIONS_H_

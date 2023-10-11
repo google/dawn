@@ -65,11 +65,11 @@ tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower lib
 )
 
 endif(TINT_BUILD_SPV_READER)
-if(TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_spirv_reader_ast_lower_test
 # Kind:      test
-# Condition: TINT_BUILD_SPV_READER
+# Condition: TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_ast_lower_test test
   lang/spirv/reader/ast_lower/atomics_test.cc
@@ -87,13 +87,11 @@ tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower_test test
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
-  tint_lang_wgsl_ast_transform_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
   tint_lang_wgsl_reader_parser
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -119,4 +117,16 @@ if(TINT_BUILD_SPV_READER)
   )
 endif(TINT_BUILD_SPV_READER)
 
-endif(TINT_BUILD_SPV_READER)
+if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower_test test
+    tint_lang_wgsl_ast_transform_test
+  )
+endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower_test test
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
+endif(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)

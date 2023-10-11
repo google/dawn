@@ -337,7 +337,7 @@ ASTPrinter::ASTPrinter(const Program& program) : builder_(ProgramBuilder::Wrap(p
 ASTPrinter::~ASTPrinter() = default;
 
 bool ASTPrinter::Generate() {
-    if (!tint::writer::CheckSupportedExtensions(
+    if (!tint::wgsl::CheckSupportedExtensions(
             "HLSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
@@ -2842,13 +2842,13 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                                      zero, i32, core::EvaluationStage::kRuntime, stmt,
                                      /* constant_value */ nullptr,
                                      /* has_side_effects */ false));
-        auto* packed = tint::writer::AppendVector(&builder_, vector, zero);
+        auto* packed = tint::wgsl::AppendVector(&builder_, vector, zero);
         return EmitExpression(out, packed->Declaration());
     };
 
     auto emit_vector_appended_with_level = [&](const ast::Expression* vector) {
         if (auto* level = arg(Usage::kLevel)) {
-            auto* packed = tint::writer::AppendVector(&builder_, vector, level);
+            auto* packed = tint::wgsl::AppendVector(&builder_, vector, level);
             return EmitExpression(out, packed->Declaration());
         }
         return emit_vector_appended_with_i32_zero(vector);
@@ -2856,7 +2856,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     if (auto* array_index = arg(Usage::kArrayIndex)) {
         // Array index needs to be appended to the coordinates.
-        auto* packed = tint::writer::AppendVector(&builder_, param_coords, array_index);
+        auto* packed = tint::wgsl::AppendVector(&builder_, param_coords, array_index);
         if (pack_level_in_coords) {
             // Then mip level needs to be appended to the coordinates.
             if (!emit_vector_appended_with_level(packed->Declaration())) {

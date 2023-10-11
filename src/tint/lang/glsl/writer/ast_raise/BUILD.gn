@@ -69,7 +69,8 @@ if (tint_build_glsl_writer) {
   }
 }
 if (tint_build_unittests) {
-  if (tint_build_glsl_writer) {
+  if (tint_build_glsl_writer && tint_build_wgsl_reader &&
+      tint_build_wgsl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
         "combine_samplers_test.cc",
@@ -88,11 +89,9 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/ast/transform",
-        "${tint_src_dir}/lang/wgsl/ast/transform:unittests",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/reader",
         "${tint_src_dir}/lang/wgsl/sem",
-        "${tint_src_dir}/lang/wgsl/writer",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
@@ -110,6 +109,14 @@ if (tint_build_unittests) {
 
       if (tint_build_glsl_writer) {
         deps += [ "${tint_src_dir}/lang/glsl/writer/ast_raise" ]
+      }
+
+      if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+        deps += [ "${tint_src_dir}/lang/wgsl/ast/transform:unittests" ]
+      }
+
+      if (tint_build_wgsl_writer) {
+        deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
       }
     }
   }

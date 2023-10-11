@@ -40,7 +40,6 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_bench
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_bench
   tint_lang_wgsl_bench
   tint_utils_containers
   tint_utils_diagnostic
@@ -85,6 +84,12 @@ if(TINT_BUILD_SPV_WRITER)
   )
 endif(TINT_BUILD_SPV_WRITER)
 
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_wgsl_writer_bench
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
 tint_target_set_output_name(tint_cmd_bench_bench_cmd bench_cmd "tint_benchmark")
 
 ################################################################################
@@ -108,7 +113,6 @@ tint_target_add_dependencies(tint_cmd_bench_bench bench
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -133,3 +137,9 @@ if(TINT_BUILD_SPV_READER)
     tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_bench_bench bench
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)

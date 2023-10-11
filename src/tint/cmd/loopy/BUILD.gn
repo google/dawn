@@ -47,7 +47,6 @@ executable("loopy") {
     "${tint_src_dir}/lang/wgsl/reader",
     "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -91,5 +90,9 @@ executable("loopy") {
       "${tint_src_dir}/lang/spirv/writer/common",
       "${tint_src_dir}/lang/spirv/writer/helpers",
     ]
+  }
+
+  if (tint_build_wgsl_writer) {
+    deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
   }
 }

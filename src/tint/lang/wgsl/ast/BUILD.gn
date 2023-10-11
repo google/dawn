@@ -256,7 +256,6 @@ if (tint_build_unittests) {
       "location_attribute_test.cc",
       "loop_statement_test.cc",
       "member_accessor_expression_test.cc",
-      "module_clone_test.cc",
       "module_test.cc",
       "phony_expression_test.cc",
       "return_statement_test.cc",
@@ -290,7 +289,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/reader",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -305,5 +303,13 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+      sources += [ "module_clone_test.cc" ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
+    }
   }
 }

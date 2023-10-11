@@ -21,7 +21,7 @@
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 
 std::optional<Program> FlattenBindings(const Program& program) {
     // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
@@ -79,4 +79,4 @@ std::optional<Program> FlattenBindings(const Program& program) {
     return {};
 }
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl

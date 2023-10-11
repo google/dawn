@@ -22,7 +22,7 @@
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -34,7 +34,7 @@ TEST_F(FlattenBindingsTest, NoBindings) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
-    auto flattened = tint::writer::FlattenBindings(program);
+    auto flattened = FlattenBindings(program);
     EXPECT_FALSE(flattened);
 }
 
@@ -47,7 +47,7 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
-    auto flattened = tint::writer::FlattenBindings(program);
+    auto flattened = FlattenBindings(program);
     EXPECT_FALSE(flattened);
 }
 
@@ -61,7 +61,7 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
-    auto flattened = tint::writer::FlattenBindings(program);
+    auto flattened = FlattenBindings(program);
     EXPECT_TRUE(flattened);
 
     auto& vars = flattened->AST().GlobalVariables();
@@ -123,7 +123,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
-    auto flattened = tint::writer::FlattenBindings(program);
+    auto flattened = FlattenBindings(program);
     EXPECT_TRUE(flattened);
 
     auto& vars = flattened->AST().GlobalVariables();
@@ -149,4 +149,4 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
 }
 
 }  // namespace
-}  // namespace tint::writer
+}  // namespace tint::wgsl

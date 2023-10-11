@@ -22,11 +22,6 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
 
-#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
-#include "src/tint/lang/wgsl/reader/reader.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
-#include "src/tint/lang/wgsl/writer/writer.h"
-
 namespace tint::core::ir::transform {
 namespace {
 

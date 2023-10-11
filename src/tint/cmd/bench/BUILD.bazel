@@ -42,7 +42,6 @@ cc_library(
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
@@ -60,6 +59,11 @@ cc_library(
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
     ],
     "//conditions:default": [],
   }),
@@ -82,7 +86,6 @@ cc_binary(
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader:bench",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer:bench",
     "//src/tint/lang/wgsl:bench",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -118,6 +121,11 @@ cc_binary(
       "//src/tint/lang/spirv/writer:bench",
     ],
     "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer:bench",
+    ],
+    "//conditions:default": [],
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -146,5 +154,10 @@ alias(
 alias(
   name = "tint_build_spv_writer",
   actual = "//src/tint:tint_build_spv_writer_true",
+)
+
+alias(
+  name = "tint_build_wgsl_writer",
+  actual = "//src/tint:tint_build_wgsl_writer_true",
 )
 

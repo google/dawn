@@ -66,8 +66,6 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ir_to_program_test test
-  lang/wgsl/writer/ir_to_program/inlining_test.cc
-  lang/wgsl/writer/ir_to_program/ir_to_program_test.cc
   lang/wgsl/writer/ir_to_program/ir_to_program_test.h
   lang/wgsl/writer/ir_to_program/rename_conflicts_test.cc
 )
@@ -86,7 +84,6 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   tint_lang_wgsl_ir
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
@@ -106,3 +103,13 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   "gtest"
 )
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_sources(tint_lang_wgsl_writer_ir_to_program_test test
+    "lang/wgsl/writer/ir_to_program/inlining_test.cc"
+    "lang/wgsl/writer/ir_to_program/ir_to_program_test.cc"
+  )
+  tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)

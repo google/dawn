@@ -103,7 +103,6 @@ cc_library(
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer/ast_printer",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/generator",
@@ -119,8 +118,18 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ],
+  ] + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer/ast_printer",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_wgsl_writer",
+  actual = "//src/tint:tint_build_wgsl_writer_true",
 )
 

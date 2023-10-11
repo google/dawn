@@ -353,7 +353,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
             // Remap resource numbers to a flat namespace.
             // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
-            if (auto flattened = tint::writer::FlattenBindings(program)) {
+            if (auto flattened = tint::wgsl::FlattenBindings(program)) {
                 program = std::move(*flattened);
             }
 

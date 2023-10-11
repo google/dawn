@@ -49,7 +49,6 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_lang_wgsl_reader
   tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_cli
   tint_utils_command
   tint_utils_containers
@@ -113,5 +112,11 @@ if(TINT_BUILD_SPV_WRITER)
     tint_lang_spirv_writer_helpers
   )
 endif(TINT_BUILD_SPV_WRITER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_tint_cmd cmd "tint")

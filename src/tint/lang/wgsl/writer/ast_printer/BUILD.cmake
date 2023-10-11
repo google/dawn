@@ -21,9 +21,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_writer_ast_printer
 # Kind:      lib
+# Condition: TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ast_printer lib
   lang/wgsl/writer/ast_printer/ast_printer.cc
@@ -54,9 +56,12 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer lib
   tint_utils_traits
 )
 
+endif(TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_writer_ast_printer_test
 # Kind:      test
+# Condition: TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ast_printer_test test
   lang/wgsl/writer/ast_printer/alias_type_test.cc
@@ -102,7 +107,6 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer_test test
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_ast_printer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_generator
@@ -122,3 +126,11 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_ast_printer_test test
   "gtest"
 )
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer_test test
+    tint_lang_wgsl_writer_ast_printer
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
+endif(TINT_BUILD_WGSL_WRITER)

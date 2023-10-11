@@ -111,6 +111,8 @@ cc_library(
       "direct_variable_access_wgsl_test.cc",
     ],
     "//conditions:default": [],
+  }) + select({
+    "//conditions:default": [],
   }),
   deps = [
     "//src/tint/api/common",
@@ -127,7 +129,6 @@ cc_library(
     "//src/tint/lang/wgsl/reader",
     "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer",
     "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -143,7 +144,14 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ],
+  ] + select({
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
 )

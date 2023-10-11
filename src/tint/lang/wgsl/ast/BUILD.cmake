@@ -256,7 +256,6 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/location_attribute_test.cc
   lang/wgsl/ast/loop_statement_test.cc
   lang/wgsl/ast/member_accessor_expression_test.cc
-  lang/wgsl/ast/module_clone_test.cc
   lang/wgsl/ast/module_test.cc
   lang/wgsl/ast/phony_expression_test.cc
   lang/wgsl/ast/return_statement_test.cc
@@ -290,7 +289,6 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_test test
   tint_lang_wgsl_reader
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -309,3 +307,15 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_ast_test test
   "gtest"
 )
+
+if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+  tint_target_add_sources(tint_lang_wgsl_ast_test test
+    "lang/wgsl/ast/module_clone_test.cc"
+  )
+endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_wgsl_ast_test test
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)

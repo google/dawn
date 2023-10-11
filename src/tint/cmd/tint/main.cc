@@ -675,12 +675,16 @@ bool GenerateWgsl(const tint::Program& program, const Options& options) {
 /// @param program the program to generate
 /// @param options the options that Tint was invoked with
 /// @returns true on success
-bool GenerateMsl(const tint::Program& program, const Options& options) {
-#if TINT_BUILD_MSL_WRITER
+bool GenerateMsl([[maybe_unused]] const tint::Program& program,
+                 [[maybe_unused]] const Options& options) {
+#if !TINT_BUILD_MSL_WRITER
+    std::cerr << "MSL writer not enabled in tint build" << std::endl;
+    return false;
+#else
     // Remap resource numbers to a flat namespace.
     // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
     const tint::Program* input_program = &program;
-    auto flattened = tint::writer::FlattenBindings(program);
+    auto flattened = tint::wgsl::FlattenBindings(program);
     if (flattened) {
         input_program = &*flattened;
     }
@@ -752,11 +756,6 @@ bool GenerateMsl(const tint::Program& program, const Options& options) {
     }
 
     return true;
-#else
-    (void)program;
-    (void)options;
-    std::cerr << "MSL writer not enabled in tint build" << std::endl;
-    return false;
 #endif  // TINT_BUILD_MSL_WRITER
 }
 

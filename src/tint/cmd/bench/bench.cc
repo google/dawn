@@ -23,8 +23,12 @@
 #include "src/tint/lang/spirv/reader/reader.h"
 #endif
 
-#include "src/tint/lang/wgsl/reader/reader.h"
+#if TINT_BUILD_WGSL_WRITER
 #include "src/tint/lang/wgsl/writer/writer.h"
+#endif
+
+#include "src/tint/lang/wgsl/reader/reader.h"
+
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -117,7 +121,12 @@ Result<Source::File> LoadInputFile(std::string name) {
 #endif
     }
     if (tint::HasSuffix(path, ".spv")) {
-#if TINT_BUILD_SPV_READER
+#if !TINT_BUILD_SPV_READER
+        return Failure{"cannot load " + path + " as TINT_BUILD_SPV_READER is not enabled"};
+#elif !TINT_BUILD_WGSL_WRITER
+        return Failure{"cannot load " + path + " as TINT_BUILD_WGSL_WRITER is not enabled"};
+#else
+
         auto spirv = ReadFile<uint32_t>(path);
         if (spirv) {
             auto program = tint::spirv::reader::Read(spirv.Get(), {});
@@ -131,8 +140,6 @@ Result<Source::File> LoadInputFile(std::string name) {
             return tint::Source::File(path, result->wgsl);
         }
         return spirv.Failure();
-#else
-        return Failure{"cannot load " + path + " as TINT_BUILD_SPV_READER is not enabled"};
 #endif
     }
     return Failure{"unsupported file extension: '" + name + "'"};

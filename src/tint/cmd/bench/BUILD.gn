@@ -47,7 +47,6 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader",
       "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -65,6 +64,10 @@ if (tint_build_benchmarks) {
 
     if (tint_build_spv_reader) {
       deps += [ "${tint_src_dir}/lang/spirv/reader" ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
     }
   }
 }
@@ -86,7 +89,6 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader:bench",
       "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer:bench",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -116,6 +118,10 @@ if (tint_build_benchmarks) {
 
     if (tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/writer:bench" ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer:bench" ]
     }
   }
 }

@@ -246,6 +246,16 @@ func scanSourceFiles(p *Project) error {
 				}
 				conditions[len(conditions)-1] = cnf.Not(conditions[len(conditions)-1])
 			}
+			if match := reElif.FindStringSubmatch(line); len(match) > 0 {
+				condition, err := cnf.Parse(strings.ToLower(match[1]))
+				if err != nil {
+					condition = Condition{{cnf.Unary{Var: "FAILED_TO_PARSE_CONDITION"}}}
+				}
+				if len(conditions) == 0 {
+					return path, nil, wrapErr(fmt.Errorf("#elif without #if"))
+				}
+				conditions[len(conditions)-1] = cnf.And(cnf.Not(conditions[len(conditions)-1]), condition)
+			}
 			if match := reEndif.FindStringSubmatch(line); len(match) > 0 {
 				if len(conditions) == 0 {
 					return path, nil, wrapErr(fmt.Errorf("#endif without #if"))
@@ -718,6 +728,7 @@ var (
 	reIfdef         = regexp.MustCompile(`\s*#\s*ifdef\s+(.*)`)
 	reIfndef        = regexp.MustCompile(`\s*#\s*ifndef\s+(.*)`)
 	reElse          = regexp.MustCompile(`\s*#\s*else\s+(.*)`)
+	reElif          = regexp.MustCompile(`\s*#\s*elif\s+(.*)`)
 	reEndif         = regexp.MustCompile(`\s*#\s*endif`)
 	reInclude       = regexp.MustCompile(`\s*#\s*include\s*(?:\"|<)([^(\"|>)]+)(?:\"|>)`)
 	reHashImport    = regexp.MustCompile(`\s*#\s*import\s*\<([\w\/\.]+)\>`)

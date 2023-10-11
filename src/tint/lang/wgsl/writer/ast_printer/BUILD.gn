@@ -28,83 +28,20 @@ import("${tint_src_dir}/tint.gni")
 if (tint_build_unittests || tint_build_benchmarks) {
   import("//testing/test.gni")
 }
-
-libtint_source_set("ast_printer") {
-  sources = [
-    "ast_printer.cc",
-    "ast_printer.h",
-  ]
-  deps = [
-    "${tint_src_dir}/lang/core",
-    "${tint_src_dir}/lang/core/constant",
-    "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/wgsl",
-    "${tint_src_dir}/lang/wgsl/ast",
-    "${tint_src_dir}/lang/wgsl/program",
-    "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/generator",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/result",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/strconv",
-    "${tint_src_dir}/utils/symbol",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
-  ]
-}
-if (tint_build_unittests) {
-  tint_unittests_source_set("unittests") {
+if (tint_build_wgsl_writer) {
+  libtint_source_set("ast_printer") {
     sources = [
-      "alias_type_test.cc",
-      "array_accessor_test.cc",
-      "assign_test.cc",
-      "ast_printer_test.cc",
-      "binary_test.cc",
-      "bitcast_test.cc",
-      "block_test.cc",
-      "break_test.cc",
-      "call_test.cc",
-      "case_test.cc",
-      "cast_test.cc",
-      "const_assert_test.cc",
-      "constructor_test.cc",
-      "continue_test.cc",
-      "diagnostic_test.cc",
-      "discard_test.cc",
-      "enable_test.cc",
-      "function_test.cc",
-      "global_decl_test.cc",
-      "helper_test.h",
-      "identifier_test.cc",
-      "if_test.cc",
-      "literal_test.cc",
-      "loop_test.cc",
-      "member_accessor_test.cc",
-      "return_test.cc",
-      "switch_test.cc",
-      "type_test.cc",
-      "unary_op_test.cc",
-      "variable_decl_statement_test.cc",
-      "variable_test.cc",
+      "ast_printer.cc",
+      "ast_printer.h",
     ]
     deps = [
-      "${tint_src_dir}:gmock_and_gtest",
-      "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer/ast_printer",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/generator",
@@ -113,12 +50,81 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/strconv",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+  }
+}
+if (tint_build_unittests) {
+  if (tint_build_wgsl_writer) {
+    tint_unittests_source_set("unittests") {
+      sources = [
+        "alias_type_test.cc",
+        "array_accessor_test.cc",
+        "assign_test.cc",
+        "ast_printer_test.cc",
+        "binary_test.cc",
+        "bitcast_test.cc",
+        "block_test.cc",
+        "break_test.cc",
+        "call_test.cc",
+        "case_test.cc",
+        "cast_test.cc",
+        "const_assert_test.cc",
+        "constructor_test.cc",
+        "continue_test.cc",
+        "diagnostic_test.cc",
+        "discard_test.cc",
+        "enable_test.cc",
+        "function_test.cc",
+        "global_decl_test.cc",
+        "helper_test.h",
+        "identifier_test.cc",
+        "if_test.cc",
+        "literal_test.cc",
+        "loop_test.cc",
+        "member_accessor_test.cc",
+        "return_test.cc",
+        "switch_test.cc",
+        "type_test.cc",
+        "unary_op_test.cc",
+        "variable_decl_statement_test.cc",
+        "variable_test.cc",
+      ]
+      deps = [
+        "${tint_src_dir}:gmock_and_gtest",
+        "${tint_src_dir}/api/common",
+        "${tint_src_dir}/lang/core",
+        "${tint_src_dir}/lang/core/constant",
+        "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/lang/wgsl",
+        "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/lang/wgsl/program",
+        "${tint_src_dir}/lang/wgsl/resolver",
+        "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/utils/containers",
+        "${tint_src_dir}/utils/diagnostic",
+        "${tint_src_dir}/utils/generator",
+        "${tint_src_dir}/utils/ice",
+        "${tint_src_dir}/utils/id",
+        "${tint_src_dir}/utils/macros",
+        "${tint_src_dir}/utils/math",
+        "${tint_src_dir}/utils/memory",
+        "${tint_src_dir}/utils/reflection",
+        "${tint_src_dir}/utils/result",
+        "${tint_src_dir}/utils/rtti",
+        "${tint_src_dir}/utils/symbol",
+        "${tint_src_dir}/utils/text",
+        "${tint_src_dir}/utils/traits",
+      ]
+
+      if (tint_build_wgsl_writer) {
+        deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer" ]
+      }
+    }
   }
 }

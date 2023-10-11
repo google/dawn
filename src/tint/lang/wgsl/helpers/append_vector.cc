@@ -26,7 +26,7 @@
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::writer {
+namespace tint::wgsl {
 namespace {
 
 struct VectorConstructorInfo {
@@ -167,4 +167,4 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     return ctor_sem;
 }
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl

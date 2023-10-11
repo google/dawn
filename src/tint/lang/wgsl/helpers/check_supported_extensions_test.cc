@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 namespace {
 
 class CheckSupportedExtensionsTest : public ::testing::Test, public ProgramBuilder {};
@@ -44,4 +44,4 @@ TEST_F(CheckSupportedExtensionsTest, Unsupported) {
 }
 
 }  // namespace
-}  // namespace tint::writer
+}  // namespace tint::wgsl

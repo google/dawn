@@ -278,7 +278,7 @@ ASTPrinter::ASTPrinter(const Program& program, const Version& version)
 ASTPrinter::~ASTPrinter() = default;
 
 bool ASTPrinter::Generate() {
-    if (!tint::writer::CheckSupportedExtensions(
+    if (!tint::wgsl::CheckSupportedExtensions(
             "GLSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
@@ -1534,7 +1534,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
     if (auto* array_index = arg(Usage::kArrayIndex)) {
         // Array index needs to be appended to the coordinates.
         param_coords =
-            tint::writer::AppendVector(&builder_, param_coords, array_index)->Declaration();
+            tint::wgsl::AppendVector(&builder_, param_coords, array_index)->Declaration();
     }
 
     // GLSL requires Dref to be appended to the coordinates, *unless* it's
@@ -1551,8 +1551,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
             // append zero here.
             depth_ref = CreateF32Zero(builder_.Sem().Get(param_coords)->Stmt());
         }
-        param_coords =
-            tint::writer::AppendVector(&builder_, param_coords, depth_ref)->Declaration();
+        param_coords = tint::wgsl::AppendVector(&builder_, param_coords, depth_ref)->Declaration();
     }
 
     emit_expr_as_signed(param_coords);

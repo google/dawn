@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer)
+
 #include <unordered_set>
 
 #include "gtest/gtest.h"

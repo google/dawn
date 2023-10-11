@@ -68,11 +68,15 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "inlining_test.cc",
-    "ir_to_program_test.cc",
     "ir_to_program_test.h",
     "rename_conflicts_test.cc",
-  ],
+  ] + select({
+    ":tint_build_wgsl_writer": [
+      "inlining_test.cc",
+      "ir_to_program_test.cc",
+    ],
+    "//conditions:default": [],
+  }),
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
@@ -87,7 +91,6 @@ cc_library(
     "//src/tint/lang/wgsl/ir",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer",
     "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -103,8 +106,18 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ],
+  ] + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_wgsl_writer",
+  actual = "//src/tint:tint_build_wgsl_writer_true",
 )
 

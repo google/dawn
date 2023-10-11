@@ -95,7 +95,7 @@ if (tint_build_spv_reader) {
   }
 }
 if (tint_build_unittests) {
-  if (tint_build_spv_reader) {
+  if (tint_build_spv_reader && tint_build_wgsl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
         "ast_parser_test.cc",
@@ -144,7 +144,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
-        "${tint_src_dir}/lang/wgsl/writer/ast_printer",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/generator",
@@ -174,6 +173,10 @@ if (tint_build_unittests) {
           "${tint_spirv_tools_dir}:spvtools_val",
           "${tint_spirv_tools_dir}:spvtools_val",
         ]
+      }
+
+      if (tint_build_wgsl_writer) {
+        deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer" ]
       }
       public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
     }

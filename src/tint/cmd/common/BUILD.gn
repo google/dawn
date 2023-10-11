@@ -50,7 +50,6 @@ libtint_source_set("common") {
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/reader",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -75,6 +74,10 @@ libtint_source_set("common") {
       "${tint_spirv_tools_dir}:spvtools_headers",
       "${tint_spirv_tools_dir}:spvtools_val",
     ]
+  }
+
+  if (tint_build_wgsl_writer) {
+    deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
   }
 }
 if (tint_build_unittests) {

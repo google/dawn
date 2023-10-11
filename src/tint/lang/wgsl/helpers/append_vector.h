@@ -26,7 +26,7 @@ namespace tint::sem {
 class Call;
 }  // namespace tint::sem
 
-namespace tint::writer {
+namespace tint::wgsl {
 
 /// A helper function used to append a vector with an additional scalar.
 /// If the scalar's type does not match the target vector element type,
@@ -42,6 +42,6 @@ const sem::Call* AppendVector(ProgramBuilder* builder,
                               const ast::Expression* vector,
                               const ast::Expression* scalar);
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl
 
 #endif  // SRC_TINT_LANG_WGSL_HELPERS_APPEND_VECTOR_H_

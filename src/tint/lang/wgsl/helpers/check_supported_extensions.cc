@@ -21,7 +21,7 @@
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::writer {
+namespace tint::wgsl {
 
 bool CheckSupportedExtensions(std::string_view writer_name,
                               const ast::Module& module,
@@ -46,4 +46,4 @@ bool CheckSupportedExtensions(std::string_view writer_name,
     return true;
 }
 
-}  // namespace tint::writer
+}  // namespace tint::wgsl

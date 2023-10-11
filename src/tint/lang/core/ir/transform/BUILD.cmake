@@ -121,7 +121,6 @@ tint_target_add_dependencies(tint_lang_core_ir_transform_test test
   tint_lang_wgsl_reader
   tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer
   tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
@@ -147,3 +146,9 @@ if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
     "lang/core/ir/transform/direct_variable_access_wgsl_test.cc"
   )
 endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_lang_core_ir_transform_test test
+    tint_lang_wgsl_writer
+  )
+endif(TINT_BUILD_WGSL_WRITER)
