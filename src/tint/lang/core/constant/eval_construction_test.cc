@@ -1446,6 +1446,7 @@ TEST_F(ConstEvalTest, Array_Struct_f32_Zero) {
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
     EXPECT_TRUE(arr->ElemType()->Is<core::type::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1478,6 +1479,7 @@ TEST_F(ConstEvalTest, Array_i32_Elements) {
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 4u);
     EXPECT_TRUE(arr->ElemType()->Is<core::type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1498,6 +1500,131 @@ TEST_F(ConstEvalTest, Array_i32_Elements) {
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<i32>(), 40_i);
+}
+
+TEST_F(ConstEvalTest, Array_Infer_i32_i32) {
+    auto* expr = Call<array<Infer>>(10_i, 20_i);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<core::type::Array>();
+    ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::I32>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 10_i);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<i32>(), 20_i);
+}
+
+TEST_F(ConstEvalTest, Array_Infer_ai_ai) {
+    auto* expr = Call<array<Infer>>(10_a, 20_a);
+    GlobalConst("C", expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<core::type::Array>();
+    ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::AbstractInt>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AInt>(), 10_a);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AInt>(), 20_a);
+}
+
+TEST_F(ConstEvalTest, Array_Infer_af_af) {
+    auto* expr = Call<array<Infer>>(10.0_a, 20.0_a);
+    GlobalConst("C", expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<core::type::Array>();
+    ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::AbstractFloat>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 10_a);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 20_a);
+}
+
+TEST_F(ConstEvalTest, Array_Infer_af_ai) {
+    auto* expr = Call<array<Infer>>(10.0_a, 20_a);
+    GlobalConst("C", expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<core::type::Array>();
+    ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::AbstractFloat>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 10_a);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 20_a);
+}
+
+TEST_F(ConstEvalTest, Array_Infer_ai_af) {
+    auto* expr = Call<array<Infer>>(10_a, 20.0_a);
+    GlobalConst("C", expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<core::type::Array>();
+    ASSERT_NE(arr, nullptr);
+    ASSERT_EQ(arr->ConstantCount(), 2u);
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::AbstractFloat>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 10_a);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), 20_a);
 }
 
 namespace ArrayInit {

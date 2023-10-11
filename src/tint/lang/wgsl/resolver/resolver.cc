@@ -2145,18 +2145,17 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // constructor call target.
     auto arr_or_str_init = [&](const core::type::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
-        if (!MaybeMaterializeAndLoadArguments(args, call_target)) {
-            return nullptr;
-        }
-
         auto stage = args_stage;                       // The evaluation stage of the call
         const core::constant::Value* value = nullptr;  // The constant value for the call
         if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
-            auto els = tint::Transform(args, [&](auto* arg) { return arg->ConstantValue(); });
-            if (auto r = const_eval_.ArrayOrStructCtor(ty, std::move(els))) {
+            auto const_args = ConvertArguments(args, call_target);
+            if (!const_args) {
+                return nullptr;
+            }
+            if (auto r = const_eval_.ArrayOrStructCtor(ty, std::move(const_args.Get()))) {
                 value = r.Get();
             } else {
                 return nullptr;
@@ -2212,16 +2211,15 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         return b.create<sem::ValueConstructor>(arr, std::move(params), args_stage);
                     });
 
-                auto* call = arr_or_str_init(arr, call_target);
-                if (!call) {
+                if (TINT_UNLIKELY(!MaybeMaterializeAndLoadArguments(args, call_target))) {
                     return nullptr;
                 }
 
-                // Validation must occur after argument materialization in arr_or_str_init().
-                if (!validator_.ArrayConstructor(expr, arr)) {
+                if (TINT_UNLIKELY(!validator_.ArrayConstructor(expr, arr))) {
                     return nullptr;
                 }
-                return call;
+
+                return arr_or_str_init(arr, call_target);
             },
             [&](const core::type::Struct* str) -> sem::Call* {
                 auto* call_target = struct_ctors_.GetOrCreate(
@@ -2238,16 +2236,15 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         return b.create<sem::ValueConstructor>(str, std::move(params), args_stage);
                     });
 
-                auto* call = arr_or_str_init(str, call_target);
-                if (!call) {
+                if (TINT_UNLIKELY(!MaybeMaterializeAndLoadArguments(args, call_target))) {
                     return nullptr;
                 }
 
-                // Validation must occur after argument materialization in arr_or_str_init().
-                if (!validator_.StructureInitializer(expr, str)) {
+                if (TINT_UNLIKELY(!validator_.StructureInitializer(expr, str))) {
                     return nullptr;
                 }
-                return call;
+
+                return arr_or_str_init(str, call_target);
             },
             [&](Default) {
                 AddError("type is not constructible", expr->source);
