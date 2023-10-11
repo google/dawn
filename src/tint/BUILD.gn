@@ -240,9 +240,12 @@ group("libs") {
 }
 
 group("cmds") {
-  deps = [ "${tint_src_dir}/cmd/tint" ]
-  if (dawn_standalone) {
-    deps += [ "${tint_src_dir}/cmd/remote_compile" ]
+  deps = []
+  if (tint_build_cmds) {
+    deps += [
+      "${tint_src_dir}/cmd/remote_compile",
+      "${tint_src_dir}/cmd/tint",
+    ]
   }
 }
 

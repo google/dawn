@@ -54,14 +54,11 @@ group("all") {
   testonly = true
   deps = [
     ":benchmarks",
+    ":cmds",
     ":fuzzers",
     ":libs",
     ":tests",
   ]
-
-  if (dawn_standalone) {
-    deps += [ ":cmds" ]
-  }
 }
 
 # This target is built when no specific target is specified on the command line.

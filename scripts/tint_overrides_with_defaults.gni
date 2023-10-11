@@ -16,6 +16,14 @@ import("//build_overrides/tint.gni")
 
 # This file contains Tint-related build flags.
 
+if (!defined(tint_standalone)) {
+  if (defined(dawn_standalone)) {
+    tint_standalone = dawn_standalone
+  } else {
+    tint_standalone = false
+  }
+}
+
 if (!defined(tint_has_build)) {
   tint_has_build = true
 }
@@ -46,6 +54,10 @@ declare_args() {
   # Path to spirv-headers checkout
   if (!defined(tint_spirv_headers_dir)) {
     tint_spirv_headers_dir = "//third_party/vulkan-deps/spirv-headers/src"
+  }
+
+  if (!defined(tint_build_cmds)) {
+    tint_build_cmds = tint_standalone
   }
 
   # Build the SPIR-V input reader

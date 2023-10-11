@@ -44,7 +44,18 @@ template("libtint_source_set") {
 }
 
 ###############################################################################
-# Unit tests
+# Executables - only built when tint_build_cmds is enabled
+###############################################################################
+template("tint_executable") {
+  if (tint_build_cmds) {
+    source_set(target_name) {
+      forward_variables_from(invoker, "*")
+    }
+  }
+}
+
+###############################################################################
+# Unit tests - only built when tint_build_unittests is enabled
 ###############################################################################
 template("tint_unittests_source_set") {
   if (tint_build_unittests) {
@@ -74,7 +85,7 @@ template("tint_unittests_source_set") {
 }
 
 ###############################################################################
-# Fuzzers
+# Fuzzers - only built when tint_has_fuzzers is enabled
 ###############################################################################
 if (tint_has_fuzzers) {
   import("//testing/libfuzzer/fuzzer_test.gni")

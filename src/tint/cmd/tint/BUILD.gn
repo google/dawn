@@ -25,7 +25,7 @@ import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-executable("tint") {
+tint_executable("tint") {
   output_name = "tint"
   sources = [ "main.cc" ]
   deps = [
