@@ -63,11 +63,14 @@ cc_binary(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ] + select({
+    ":tint_build_glsl_validator": [
+      "//src/tint/lang/glsl/validate",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer",
       "//src/tint/lang/glsl/writer/common",
-      
-      
     ],
     "//conditions:default": [],
   }) + select({
@@ -114,6 +117,11 @@ cc_binary(
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_glsl_validator",
+  actual = "//src/tint:tint_build_glsl_validator_true",
 )
 
 alias(

@@ -24,11 +24,6 @@
 #include <unordered_map>
 #include <vector>
 
-#if TINT_BUILD_GLSL_WRITER
-#include "glslang/Public/ResourceLimits.h"
-#include "glslang/Public/ShaderLang.h"
-#endif  // TINT_BUILD_GLSL_WRITER
-
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
@@ -86,6 +81,10 @@
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"
 #endif  // TINT_BUILD_GLSL_WRITER
+
+#if TINT_BUILD_GLSL_VALIDATOR
+#include "src/tint/lang/glsl/validate/validate.h"
+#endif  // TINT_BUILD_GLSL_VALIDATOR
 
 #if TINT_BUILD_SPV_WRITER
 #define SPV_WRITER_ONLY(x) x
@@ -885,32 +884,16 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
 #endif  // TINT_BUILD_HLSL_WRITER
 }
 
-#if TINT_BUILD_GLSL_WRITER
-EShLanguage pipeline_stage_to_esh_language(tint::ast::PipelineStage stage) {
-    switch (stage) {
-        case tint::ast::PipelineStage::kFragment:
-            return EShLangFragment;
-        case tint::ast::PipelineStage::kVertex:
-            return EShLangVertex;
-        case tint::ast::PipelineStage::kCompute:
-            return EShLangCompute;
-        default:
-            TINT_UNREACHABLE();
-            return EShLangVertex;
-    }
-}
-#endif
-
 /// Generate GLSL code for a program.
 /// @param program the program to generate
 /// @param options the options that Tint was invoked with
 /// @returns true on success
-bool GenerateGlsl(const tint::Program& program, const Options& options) {
-#if TINT_BUILD_GLSL_WRITER
-    if (options.validate) {
-        glslang::InitializeProcess();
-    }
-
+bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
+                  [[maybe_unused]] const Options& options) {
+#if !TINT_BUILD_GLSL_WRITER
+    std::cerr << "GLSL writer not enabled in tint build" << std::endl;
+    return false;
+#else
     auto generate = [&](const tint::Program& prg, const std::string entry_point_name) -> bool {
         tint::glsl::writer::Options gen_options;
         gen_options.disable_robustness = !options.enable_robustness;
@@ -937,22 +920,16 @@ bool GenerateGlsl(const tint::Program& program, const Options& options) {
         }
 
         if (options.validate && options.skip_hash.count(hash) == 0) {
-            for (auto entry_pt : result->entry_points) {
-                EShLanguage lang = pipeline_stage_to_esh_language(entry_pt.second);
-                glslang::TShader shader(lang);
-                const char* strings[1] = {result->glsl.c_str()};
-                int lengths[1] = {static_cast<int>(result->glsl.length())};
-                shader.setStringsWithLengths(strings, lengths, 1);
-                shader.setEntryPoint("main");
-                bool glslang_result = shader.parse(GetDefaultResources(), 310, EEsProfile, false,
-                                                   false, EShMsgDefault);
-                if (!glslang_result) {
-                    std::cerr << "Error parsing GLSL shader:\n"
-                              << shader.getInfoLog() << "\n"
-                              << shader.getInfoDebugLog() << "\n";
-                    return false;
-                }
+#if !TINT_BUILD_GLSL_VALIDATOR
+            std::cerr << "GLSL validator not enabled in tint build" << std::endl;
+            return false;
+#else
+            auto val = tint::glsl::validate::Validate(result->glsl, result->entry_points);
+            if (!val) {
+                std::cerr << "Error parsing GLSL shader:\n" << val.Failure();
+                return false;
             }
+#endif
         }
         return true;
     };
@@ -970,11 +947,6 @@ bool GenerateGlsl(const tint::Program& program, const Options& options) {
         success &= generate(program, entry_point.name);
     }
     return success;
-#else
-    (void)program;
-    (void)options;
-    std::cerr << "GLSL writer not enabled in tint build" << std::endl;
-    return false;
 #endif  // TINT_BUILD_GLSL_WRITER
 }
 

@@ -17,7 +17,6 @@
 
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
@@ -27,8 +26,6 @@ class Program;
 }  // namespace tint
 
 namespace tint::msl::validate {
-
-using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 
 /// The version of MSL to validate against.
 /// Note: these must kept be in ascending order

@@ -21,5 +21,36 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/glsl/validate/BUILD.cmake)
-include(lang/glsl/writer/BUILD.cmake)
+if(TINT_BUILD_GLSL_VALIDATOR)
+################################################################################
+# Target:    tint_lang_glsl_validate
+# Kind:      lib
+# Condition: TINT_BUILD_GLSL_VALIDATOR
+################################################################################
+tint_add_target(tint_lang_glsl_validate lib
+  lang/glsl/validate/validate.cc
+  lang/glsl/validate/validate.h
+)
+
+tint_target_add_dependencies(tint_lang_glsl_validate lib
+  tint_lang_wgsl_ast
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)
+
+if(TINT_BUILD_GLSL_WRITER)
+  tint_target_add_external_dependencies(tint_lang_glsl_validate lib
+    "glslang"
+    "glslang-res-limits"
+  )
+endif(TINT_BUILD_GLSL_WRITER)
+
+endif(TINT_BUILD_GLSL_VALIDATOR)
