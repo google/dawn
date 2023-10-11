@@ -107,8 +107,8 @@ class TruncateInterstageVariables final
         Config& operator=(const Config&);
 
         /// Indicate which interstage io locations are actually used by the later stage.
-        /// There can be at most 16 user defined interstage variables with locations.
-        std::bitset<16> interstage_locations;
+        /// There can be at most 30 user defined interstage variables with locations.
+        std::bitset<30> interstage_locations;
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
         TINT_REFLECT(interstage_variables);

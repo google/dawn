@@ -338,7 +338,6 @@ TEST(Limits, NormalizeLimits) {
         limits.maxBindGroupsPlusVertexBuffers = kMaxBindGroupsPlusVertexBuffers + 1;
         limits.maxVertexAttributes = uint32_t(kMaxVertexAttributes) + 1;
         limits.maxVertexBuffers = uint32_t(kMaxVertexBuffers) + 1;
-        limits.maxInterStageShaderComponents = kMaxInterStageShaderComponents + 1;
         limits.maxSampledTexturesPerShaderStage = kMaxSampledTexturesPerShaderStage + 1;
         limits.maxSamplersPerShaderStage = kMaxSamplersPerShaderStage + 1;
         limits.maxStorageBuffersPerShaderStage = kMaxStorageBuffersPerShaderStage + 1;
@@ -353,7 +352,6 @@ TEST(Limits, NormalizeLimits) {
         EXPECT_EQ(limits.maxBindGroupsPlusVertexBuffers, kMaxBindGroupsPlusVertexBuffers);
         EXPECT_EQ(limits.maxVertexAttributes, uint32_t(kMaxVertexAttributes));
         EXPECT_EQ(limits.maxVertexBuffers, uint32_t(kMaxVertexBuffers));
-        EXPECT_EQ(limits.maxInterStageShaderComponents, kMaxInterStageShaderComponents);
         EXPECT_EQ(limits.maxSampledTexturesPerShaderStage, kMaxSampledTexturesPerShaderStage);
         EXPECT_EQ(limits.maxSamplersPerShaderStage, kMaxSamplersPerShaderStage);
         EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);

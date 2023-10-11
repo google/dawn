@@ -64,7 +64,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     uint32_t compileFlags,
-    const std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables) {
+    const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
+        usedInterstageVariables) {
     Device* device = ToBackend(GetDevice());
     TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D11::Compile");
     DAWN_ASSERT(!IsError());
@@ -80,7 +81,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.disableWorkgroupInit = device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
 
-    if (usedInterstageVariables) {
+    if (usedInterstageVariables.has_value()) {
         req.hlsl.interstageLocations = *usedInterstageVariables;
     }
 

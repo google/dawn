@@ -18,6 +18,7 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "dawn/native/CreatePipelineAsyncTask.h"
@@ -421,13 +422,14 @@ MaybeError RenderPipeline::InitializeShaders() {
 
     PerStage<d3d::CompiledShader> compiledShader;
 
-    std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables = nullptr;
+    std::optional<dawn::native::d3d::InterStageShaderVariablesMask> usedInterstageVariables;
     dawn::native::EntryPointMetadata fragmentEntryPoint;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
         // Now that only fragment shader can have inter-stage inputs.
         const ProgrammableStage& programmableStage = GetStage(SingleShaderStage::Fragment);
         fragmentEntryPoint = programmableStage.module->GetEntryPoint(programmableStage.entryPoint);
-        usedInterstageVariables = &fragmentEntryPoint.usedInterStageVariables;
+        usedInterstageVariables = dawn::native::d3d::ToInterStageShaderVariablesMask(
+            fragmentEntryPoint.usedInterStageVariables);
     }
 
     if (GetStageMask() & wgpu::ShaderStage::Vertex) {

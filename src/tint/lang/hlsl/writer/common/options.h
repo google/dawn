@@ -28,6 +28,10 @@
 
 namespace tint::hlsl::writer {
 
+/// kMaxInterStageLocations == D3D11_PS_INPUT_REGISTER_COUNT - 2
+/// D3D11_PS_INPUT_REGISTER_COUNT == D3D12_PS_INPUT_REGISTER_COUNT
+constexpr uint32_t kMaxInterStageLocations = 30;
+
 /// Configuration options used for generating HLSL.
 struct Options {
     /// Constructor
@@ -58,7 +62,7 @@ struct Options {
 
     /// Interstage locations actually used as inputs in the next stage of the pipeline.
     /// This is potentially used for truncating unused interstage outputs at current shader stage.
-    std::bitset<16> interstage_locations;
+    std::bitset<kMaxInterStageLocations> interstage_locations;
 
     /// The binding point to use for information passed via root constants.
     std::optional<BindingPoint> root_constant_binding_point;

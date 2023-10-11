@@ -46,6 +46,8 @@ enum class Compiler { FXC, DXC };
 
 using AccessControl = std::unordered_map<tint::BindingPoint, tint::core::Access>;
 
+using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterStageLocations>;
+
 #define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
     X(const tint::Program*, inputProgram)                                                        \
     X(std::string_view, entryPointName)                                                          \
@@ -69,7 +71,7 @@ using AccessControl = std::unordered_map<tint::BindingPoint, tint::core::Access>
     X(tint::BindingRemapperOptions, bindingRemapper)                                             \
     X(AccessControl, accessControls)                                                             \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                           \
+    X(InterStageShaderVariablesMask, interstageLocations)                                        \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(bool, disableSymbolRenaming)                                                               \
     X(bool, isRobustnessEnabled)                                                                 \

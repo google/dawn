@@ -601,22 +601,21 @@ MaybeError ValidateInterStageMatching(DeviceBase* device,
     const EntryPointMetadata& fragmentMetadata =
         fragmentState.module->GetEntryPoint(fragmentState.entryPoint);
 
-    if (DAWN_UNLIKELY(
-            (vertexMetadata.usedInterStageVariables | fragmentMetadata.usedInterStageVariables) !=
-            vertexMetadata.usedInterStageVariables)) {
-        for (size_t i : IterateBitSet(fragmentMetadata.usedInterStageVariables)) {
-            if (!vertexMetadata.usedInterStageVariables.test(i)) {
+    size_t maxInterStageShaderVariables = device->GetLimits().v1.maxInterStageShaderVariables;
+    DAWN_ASSERT(vertexMetadata.usedInterStageVariables.size() == maxInterStageShaderVariables);
+    DAWN_ASSERT(fragmentMetadata.usedInterStageVariables.size() == maxInterStageShaderVariables);
+    for (size_t i = 0; i < maxInterStageShaderVariables; ++i) {
+        if (!vertexMetadata.usedInterStageVariables[i]) {
+            if (fragmentMetadata.usedInterStageVariables[i]) {
                 return DAWN_VALIDATION_ERROR(
                     "The fragment input at location %u doesn't have a corresponding vertex output.",
                     i);
             }
+            continue;
         }
-        DAWN_UNREACHABLE();
-    }
 
-    for (size_t i : IterateBitSet(vertexMetadata.usedInterStageVariables)) {
-        if (!fragmentMetadata.usedInterStageVariables.test(i)) {
-            // It is valid that fragment output is a subset of vertex input
+        // It is valid that fragment output is a subset of vertex input
+        if (!fragmentMetadata.usedInterStageVariables[i]) {
             continue;
         }
         const auto& vertexOutputInfo = vertexMetadata.interStageVariables[i];

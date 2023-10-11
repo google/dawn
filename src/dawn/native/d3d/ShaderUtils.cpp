@@ -399,4 +399,13 @@ void DumpFXCCompiledShader(Device* device,
     }
 }
 
+InterStageShaderVariablesMask ToInterStageShaderVariablesMask(const std::vector<bool>& inputMask) {
+    InterStageShaderVariablesMask outputMask;
+    DAWN_ASSERT(inputMask.size() <= outputMask.size());
+    for (size_t i = 0; i < inputMask.size(); ++i) {
+        outputMask[i] = inputMask[i];
+    }
+    return outputMask;
+}
+
 }  // namespace dawn::native::d3d

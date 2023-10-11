@@ -215,8 +215,8 @@ struct EntryPointMetadata {
     };
     // Now that we only support vertex and fragment stages, there can't be both inter-stage
     // inputs and outputs in one shader stage.
-    std::bitset<kMaxInterStageShaderVariables> usedInterStageVariables;
-    std::array<InterStageVariableInfo, kMaxInterStageShaderVariables> interStageVariables;
+    std::vector<bool> usedInterStageVariables;
+    std::vector<InterStageVariableInfo> interStageVariables;
     uint32_t totalInterStageShaderComponents;
 
     // The shader stage for this entry point.

@@ -343,13 +343,15 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // D3D12 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
 
+    // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
+    // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
+    limits->v1.maxInterStageShaderVariables = D3D12_PS_INPUT_REGISTER_COUNT - 2;
+    limits->v1.maxInterStageShaderComponents =
+        limits->v1.maxInterStageShaderVariables * D3D12_PS_INPUT_REGISTER_COMPONENTS;
+
     // Using base limits for:
     // TODO(crbug.com/dawn/685):
-    // - maxInterStageShaderComponents
     // - maxVertexBufferArrayStride
-
-    // TODO(crbug.com/dawn/1448):
-    // - maxInterStageShaderVariables
 
     // Experimental limits for subgroups
     limits->experimentalSubgroupLimits.minSubgroupSize = mDeviceInfo.waveLaneCountMin;

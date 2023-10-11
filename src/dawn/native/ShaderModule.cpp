@@ -603,6 +603,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     const uint32_t maxVertexAttributes = limits.v1.maxVertexAttributes;
     const uint32_t maxInterStageShaderVariables = limits.v1.maxInterStageShaderVariables;
     const uint32_t maxInterStageShaderComponents = limits.v1.maxInterStageShaderComponents;
+
+    metadata->usedInterStageVariables.resize(maxInterStageShaderVariables);
+    metadata->interStageVariables.resize(maxInterStageShaderVariables);
+
     if (metadata->stage == SingleShaderStage::Vertex) {
         for (const auto& inputVar : entryPoint.input_variables) {
             uint32_t unsanitizedLocation = inputVar.location_attribute;
@@ -641,7 +645,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 continue;
             }
 
-            metadata->usedInterStageVariables.set(location);
+            metadata->usedInterStageVariables[location] = true;
             metadata->interStageVariables[location] = variable;
         }
 
@@ -677,7 +681,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 continue;
             }
 
-            metadata->usedInterStageVariables.set(location);
+            metadata->usedInterStageVariables[location] = true;
             metadata->interStageVariables[location] = variable;
         }
 

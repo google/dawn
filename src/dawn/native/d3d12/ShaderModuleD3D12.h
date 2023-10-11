@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 
+#include <optional>
 #include <string>
 
 #include "dawn/native/Blob.h"
@@ -44,7 +45,8 @@ class ShaderModule final : public ShaderModuleBase {
         SingleShaderStage stage,
         const PipelineLayout* layout,
         uint32_t compileFlags,
-        const std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables = nullptr);
+        const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
+            usedInterstageVariables = {});
 
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
