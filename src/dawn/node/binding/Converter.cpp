@@ -1524,6 +1524,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SurfaceCapabilities:
         case wgpu::FeatureName::TimestampQueryInsidePasses:
         case wgpu::FeatureName::TransientAttachments:
+        case wgpu::FeatureName::HostMappedPointer:
+        case wgpu::FeatureName::MultiPlanarRenderTargets:
         case wgpu::FeatureName::Undefined:
             return false;
     }
