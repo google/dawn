@@ -54,11 +54,10 @@ class WireQueueTests : public WireTest {
 
 // Test that a successful OnSubmittedWorkDone call is forwarded to the client.
 TEST_F(WireQueueTests, OnSubmittedWorkDoneSuccess) {
-    wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
-        }));
+    wgpuQueueOnSubmittedWorkDone(queue, ToMockQueueWorkDone, this);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
@@ -67,11 +66,10 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneSuccess) {
 
 // Test that an error OnSubmittedWorkDone call is forwarded as an error to the client.
 TEST_F(WireQueueTests, OnSubmittedWorkDoneError) {
-    wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
-        }));
+    wgpuQueueOnSubmittedWorkDone(queue, ToMockQueueWorkDone, this);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Error, this)).Times(1);
@@ -81,11 +79,10 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneError) {
 // Test registering an OnSubmittedWorkDone then disconnecting the wire calls the callback with
 // device loss
 TEST_F(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnect) {
-    wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
-        }));
+    wgpuQueueOnSubmittedWorkDone(queue, ToMockQueueWorkDone, this);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, this))
@@ -100,7 +97,7 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneAfterDisconnect) {
 
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, this))
         .Times(1);
-    wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
+    wgpuQueueOnSubmittedWorkDone(queue, ToMockQueueWorkDone, this);
 }
 
 // Hack to pass in test context into user callback
@@ -120,19 +117,17 @@ static void ToMockQueueWorkDoneWithNewRequests(WGPUQueueWorkDoneStatus status, v
 
     // Send the requests a number of times
     for (size_t i = 0; i < testData->numRequests; i++) {
-        wgpuQueueOnSubmittedWorkDone(*(testData->pTestQueue), 0u, ToMockQueueWorkDone,
-                                     testData->pTest);
+        wgpuQueueOnSubmittedWorkDone(*(testData->pTestQueue), ToMockQueueWorkDone, testData->pTest);
     }
 }
 
 // Test that requests inside user callbacks before disconnect are called
 TEST_F(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     TestData testData = {this, &queue, 10};
-    wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDoneWithNewRequests, &testData);
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
-        }));
+    wgpuQueueOnSubmittedWorkDone(queue, ToMockQueueWorkDoneWithNewRequests, &testData);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, this))

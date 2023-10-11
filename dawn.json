@@ -2274,7 +2274,7 @@
             },
             {
                 "name": "on submitted work done",
-                "tags": ["dawn", "emscripten"],
+                "tags": ["emscripten"],
                 "args": [
                     {"name": "signal value", "type": "uint64_t"},
                     {"name": "callback", "type": "queue work done callback"},
@@ -2283,7 +2283,7 @@
             },
             {
                 "name": "on submitted work done",
-                "tags": ["upstream"],
+                "tags": ["dawn", "upstream"],
                 "args": [
                     {"name": "callback", "type": "queue work done callback"},
                     {"name": "userdata", "type": "void *"}

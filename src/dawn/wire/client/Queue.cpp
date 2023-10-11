@@ -67,9 +67,7 @@ bool Queue::OnWorkDoneCallback(WGPUFuture future, WGPUQueueWorkDoneStatus status
            WireResult::Success;
 }
 
-void Queue::OnSubmittedWorkDone(uint64_t signalValue,
-                                WGPUQueueWorkDoneCallback callback,
-                                void* userdata) {
+void Queue::OnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
     WGPUQueueWorkDoneCallbackInfo callbackInfo = {};
     callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
     callbackInfo.callback = callback;
@@ -91,7 +89,6 @@ WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& call
 
     QueueOnSubmittedWorkDoneCmd cmd;
     cmd.queueId = GetWireId();
-    cmd.signalValue = 0;
     cmd.future = {futureIDInternal};
 
     client->SerializeCommand(cmd);

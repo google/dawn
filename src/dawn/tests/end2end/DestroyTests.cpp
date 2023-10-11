@@ -208,7 +208,6 @@ TEST_P(DestroyTest, GetQueueAfterDeviceDestroy) {
 
     wgpu::Queue queue = device.GetQueue();
     ASSERT_DEVICE_ERROR(queue.OnSubmittedWorkDone(
-        0u,
         [](WGPUQueueWorkDoneStatus status, void* userdata) {
             // TODO(crbug.com/dawn/2021): Wire and native differ slightly for now. Unify once we
             // decide on the correct result. In theory maybe we want to pretend that things succeed

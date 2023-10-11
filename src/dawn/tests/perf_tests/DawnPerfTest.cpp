@@ -257,7 +257,6 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
 
         submittedIterations++;
         mTest->queue.OnSubmittedWorkDone(
-            0u,
             [](WGPUQueueWorkDoneStatus, void* userdata) {
                 uint64_t* counter = static_cast<uint64_t*>(userdata);
                 (*counter)++;

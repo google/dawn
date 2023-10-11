@@ -28,15 +28,13 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatu
     SerializeCommand(cmd);
 }
 
-WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
-                                              uint64_t signalValue,
-                                              WGPUFuture future) {
+WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue, WGPUFuture future) {
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
     userdata->future = future;
 
-    mProcs.queueOnSubmittedWorkDone(queue->handle, signalValue,
-                                    ForwardToServer<&Server::OnQueueWorkDone>, userdata.release());
+    mProcs.queueOnSubmittedWorkDone(queue->handle, ForwardToServer<&Server::OnQueueWorkDone>,
+                                    userdata.release());
     return WireResult::Success;
 }
 

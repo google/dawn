@@ -265,12 +265,10 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
         ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount)));
 }
 
-void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
-                                       WGPUQueueWorkDoneCallback callback,
-                                       void* userdata) {
+void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
     // The error status depends on the type of error so we let the validation function choose it
     wgpu::QueueWorkDoneStatus status;
-    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(signalValue, &status))) {
+    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&status))) {
         GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
             [callback, status, userdata] { callback(ToAPI(status), userdata); });
         return;
@@ -297,7 +295,7 @@ Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callb
     Ref<EventManager::TrackedEvent> event;
 
     wgpu::QueueWorkDoneStatus validationEarlyStatus;
-    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(0, &validationEarlyStatus))) {
+    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&validationEarlyStatus))) {
         // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the device is
         // lost. When the old OnSubmittedWorkDone is removed then we can update
         // ValidateOnSubmittedWorkDone to just return the correct thing here.
@@ -593,15 +591,12 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
     return {};
 }
 
-MaybeError QueueBase::ValidateOnSubmittedWorkDone(uint64_t signalValue,
-                                                  wgpu::QueueWorkDoneStatus* status) const {
+MaybeError QueueBase::ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const {
     *status = wgpu::QueueWorkDoneStatus::DeviceLost;
     DAWN_TRY(GetDevice()->ValidateIsAlive());
 
     *status = wgpu::QueueWorkDoneStatus::Error;
     DAWN_TRY(GetDevice()->ValidateObject(this));
-
-    DAWN_INVALID_IF(signalValue != 0, "SignalValue (%u) is not 0.", signalValue);
 
     return {};
 }

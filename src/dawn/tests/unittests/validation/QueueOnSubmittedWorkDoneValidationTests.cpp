@@ -43,7 +43,7 @@ class QueueOnSubmittedWorkDoneValidationTests : public ValidationTest {
 // Test that OnSubmittedWorkDone can be called as soon as the queue is created.
 TEST_F(QueueOnSubmittedWorkDoneValidationTests, CallBeforeSubmits) {
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
-    device.GetQueue().OnSubmittedWorkDone(0u, ToMockQueueWorkDone, this);
+    device.GetQueue().OnSubmittedWorkDone(ToMockQueueWorkDone, this);
 
     WaitForAllOperations(device);
 }
