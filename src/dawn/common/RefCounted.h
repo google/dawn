@@ -59,7 +59,9 @@ class RefCounted {
     void Release();
 
     void APIReference() { Reference(); }
-    void APIRelease() { Release(); }
+    // APIRelease() can be called without any synchronization guarantees so we need to use a Release
+    // method that will call LockAndDeleteThis() on destruction.
+    void APIRelease() { ReleaseAndLockBeforeDestroy(); }
 
   protected:
     // Friend class is needed to access the RefCount to TryIncrement.
