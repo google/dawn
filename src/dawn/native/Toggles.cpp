@@ -402,9 +402,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy bgra8unorm texture to a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/1393", ToggleStage::Device}},
-    {Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy,
-     {"use_blit_for_rgb9e5ufloat_texture_to_buffer_copy",
-      "Use a blit instead of a copy command to copy rgb9e5ufloat texture to a buffer."
+    {Toggle::UseBlitForRGB9E5UfloatTextureCopy,
+     {"use_blit_for_rgb9e5ufloat_texture_copy",
+      "Use a blit instead of a copy command to copy rgb9e5ufloat texture to a texture or a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/2079", ToggleStage::Device}},
     {Toggle::D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,

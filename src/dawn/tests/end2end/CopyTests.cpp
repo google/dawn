@@ -77,6 +77,35 @@ class CopyTests {
         return textureData;
     }
 
+    // Special function to generate test data for RGB9E5Ufloat to workaround nonunique encoding
+    // issue.
+    static std::vector<uint8_t> GetExpectedTextureDataRGB9E5Ufloat(
+        const utils::TextureDataCopyLayout& layout) {
+        // These are some known RGB9E5Ufloat values that always unpack and pack to the same bytes.
+        // Pick test data from these values to provide some level of test coverage for RGB9E5Ufloat.
+        constexpr uint8_t goodBytes[] = {
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+            0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C,
+            0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28};
+        uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
+        std::vector<uint8_t> textureData(layout.byteLength);
+        for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
+            const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
+            for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
+                for (uint32_t x = 0; x < layout.mipSize.width; ++x) {
+                    uint32_t o =
+                        x * bytesPerTexelBlock + y * layout.bytesPerRow + byteOffsetPerSlice;
+                    uint32_t idx = 4 * ((x + 1 + (layer + 1) * y) % (sizeof(goodBytes) / 4));
+                    textureData[o + 0] = goodBytes[idx + 0];
+                    textureData[o + 1] = goodBytes[idx + 1];
+                    textureData[o + 2] = goodBytes[idx + 2];
+                    textureData[o + 3] = goodBytes[idx + 3];
+                }
+            }
+        }
+        return textureData;
+    }
+
     // TODO(crbug.com/dawn/818): remove this function when all the tests in this file support
     // testing arbitrary formats.
     static std::vector<utils::RGBA8> GetExpectedTextureDataRGBA8(
@@ -161,15 +190,14 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
     void SetUp() override {
         DawnTestWithParams<CopyTextureFormatParams>::SetUp();
 
-        // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
-        DAWN_SUPPRESS_TEST_IF(IsSnorm(GetParam().mTextureFormat) && IsANGLESwiftShader());
-
-        // TODO(dawn:1895): Many RGB9E5Ufloat tests failing for OpenGL/GLES backend
-        // because of the multiple possible encodings of the same value due to using blit to emulate
-        // the copy. This issue is already covered in WebGPU CTS and has no plan to implement in
-        // dawn_end2end_tests.
+        // TODO(dawn:2129): Fail for Win ANGLE D3D11
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                              (IsOpenGL() || IsOpenGLES()));
+                              IsANGLED3D11() && IsWindows());
+
+        // TODO(dawn:1877): blit texture to copy path failing some tests on ANGLE Swiftshader
+        DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
+                               GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                              IsANGLESwiftShader());
 
         // TODO(dawn:1913): Many float formats tests failing for Metal backend on Mac Intel.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::R32Float ||
@@ -225,7 +253,10 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
             utils::GetTextureDataCopyLayoutForTextureAtLevel(
                 textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel, dimension);
 
-        std::vector<uint8_t> textureArrayData = GetExpectedTextureData(copyLayout);
+        std::vector<uint8_t> textureArrayData =
+            (textureSpec.format == wgpu::TextureFormat::RGB9E5Ufloat)
+                ? GetExpectedTextureDataRGB9E5Ufloat(copyLayout)
+                : GetExpectedTextureData(copyLayout);
         {
             wgpu::ImageCopyTexture imageCopyTexture =
                 utils::CreateImageCopyTexture(texture, textureSpec.copyLevel, {0, 0, 0});
@@ -444,7 +475,10 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
                 srcSpec.copyLevel, srcDimension);
 
         // Initialize the source texture
-        const std::vector<uint8_t> srcTextureCopyData = GetExpectedTextureData(srcDataCopyLayout);
+        const std::vector<uint8_t> srcTextureCopyData =
+            (format == wgpu::TextureFormat::RGB9E5Ufloat)
+                ? GetExpectedTextureDataRGB9E5Ufloat(srcDataCopyLayout)
+                : GetExpectedTextureData(srcDataCopyLayout);
         {
             wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
                 srcTexture, srcSpec.copyLevel, {0, 0, srcSpec.copyOrigin.z});
@@ -547,7 +581,24 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
     }
 };
 
-class CopyTests_T2T : public CopyTests_T2TBase<DawnTest> {};
+class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFormatParams>> {
+  protected:
+    struct TextureSpec : CopyTests::TextureSpec {
+        TextureSpec() { format = GetParam().mTextureFormat; }
+    };
+
+    void SetUp() override {
+        DawnTestWithParams<CopyTextureFormatParams>::SetUp();
+
+        // TODO(dawn:2129): Fail for Win ANGLE D3D11
+        DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                              IsANGLED3D11() && IsWindows());
+
+        // TODO(dawn:1877): blit texture to copy path failing some tests on ANGLE Swiftshader
+        DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                              IsANGLESwiftShader());
+    }
+};
 
 namespace {
 using SrcColorFormat = wgpu::TextureFormat;
@@ -840,8 +891,10 @@ TEST_P(CopyTests_T2B, TextureMipAligned) {
 // Test that copying mips when one dimension is 256-byte aligned and another dimension reach one
 // works
 TEST_P(CopyTests_T2B, TextureMipDimensionReachOne) {
-    // TODO(dawn:1873): suppress
-    DAWN_SUPPRESS_TEST_IF(IsSnorm(GetParam().mTextureFormat) && (IsOpenGL() || IsOpenGLES()));
+    // TODO(dawn:1873): GL textureLoad result is incorrect.
+    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
+                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
 
     constexpr uint32_t mipLevelCount = 4;
     constexpr uint32_t kWidth = 256 << mipLevelCount;
@@ -872,6 +925,9 @@ TEST_P(CopyTests_T2B, TextureMipUnaligned) {
                           IsWindows());
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_blit_for_bgra8unorm_texture_to_buffer_copy") &&
                           (GetParam().mTextureFormat == wgpu::TextureFormat::BGRA8Unorm) &&
+                          IsVulkan() && IsIntel() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_blit_for_rgb9e5ufloat_texture_copy") &&
+                          (GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
                           IsVulkan() && IsIntel() && IsWindows());
 
     constexpr uint32_t kWidth = 259;
@@ -1396,8 +1452,10 @@ TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
 
 // Test that copying texture 3D array mips with 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, Texture3DMipAligned) {
-    // TODO(dawn:1872): suppress
-    DAWN_SUPPRESS_TEST_IF(IsSnorm(GetParam().mTextureFormat) && (IsOpenGL() || IsOpenGLES()));
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
+                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1418,8 +1476,10 @@ TEST_P(CopyTests_T2B, Texture3DMipAligned) {
 
 // Test that copying texture 3D array mips with 256-byte unaligned sizes works
 TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
-    // TODO(dawn:1872): suppress
-    DAWN_SUPPRESS_TEST_IF(IsSnorm(GetParam().mTextureFormat) && (IsOpenGL() || IsOpenGLES()));
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
+                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
 
     constexpr uint32_t kWidth = 261;
     constexpr uint32_t kHeight = 123;
@@ -1438,52 +1498,51 @@ TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
     }
 }
 
-DAWN_INSTANTIATE_TEST_P(
-    CopyTests_T2B,
-    {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-     VulkanBackend(),
-     VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
-                    "use_blit_for_bgra8unorm_texture_to_buffer_copy"})},
-    {
-        wgpu::TextureFormat::R8Unorm,
-        wgpu::TextureFormat::RG8Unorm,
-        wgpu::TextureFormat::RGBA8Unorm,
+DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
+                         OpenGLESBackend(), VulkanBackend(),
+                         VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
+                                        "use_blit_for_bgra8unorm_texture_to_buffer_copy"})},
+                        {
+                            wgpu::TextureFormat::R8Unorm,
+                            wgpu::TextureFormat::RG8Unorm,
+                            wgpu::TextureFormat::RGBA8Unorm,
 
-        wgpu::TextureFormat::R8Uint,
-        wgpu::TextureFormat::R8Sint,
+                            wgpu::TextureFormat::R8Uint,
+                            wgpu::TextureFormat::R8Sint,
 
-        wgpu::TextureFormat::R16Uint,
-        wgpu::TextureFormat::R16Sint,
-        wgpu::TextureFormat::R16Float,
+                            wgpu::TextureFormat::R16Uint,
+                            wgpu::TextureFormat::R16Sint,
+                            wgpu::TextureFormat::R16Float,
 
-        wgpu::TextureFormat::R32Uint,
-        wgpu::TextureFormat::R32Sint,
-        wgpu::TextureFormat::R32Float,
+                            wgpu::TextureFormat::R32Uint,
+                            wgpu::TextureFormat::R32Sint,
+                            wgpu::TextureFormat::R32Float,
 
-        wgpu::TextureFormat::RG32Float,
-        wgpu::TextureFormat::RG32Uint,
-        wgpu::TextureFormat::RG32Sint,
+                            wgpu::TextureFormat::RG32Float,
+                            wgpu::TextureFormat::RG32Uint,
+                            wgpu::TextureFormat::RG32Sint,
 
-        wgpu::TextureFormat::RGBA16Uint,
-        wgpu::TextureFormat::RGBA16Sint,
-        wgpu::TextureFormat::RGBA16Float,
+                            wgpu::TextureFormat::RGBA16Uint,
+                            wgpu::TextureFormat::RGBA16Sint,
+                            wgpu::TextureFormat::RGBA16Float,
 
-        wgpu::TextureFormat::RGBA32Float,
+                            wgpu::TextureFormat::RGBA32Float,
 
-        wgpu::TextureFormat::RGB10A2Unorm,
-        wgpu::TextureFormat::RG11B10Ufloat,
+                            wgpu::TextureFormat::RGB10A2Unorm,
+                            wgpu::TextureFormat::RG11B10Ufloat,
 
-        // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy
-        wgpu::TextureFormat::RGB9E5Ufloat,
+                            // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureCopy
+                            wgpu::TextureFormat::RGB9E5Ufloat,
 
-        // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
-        wgpu::TextureFormat::R8Snorm,
-        wgpu::TextureFormat::RG8Snorm,
-        wgpu::TextureFormat::RGBA8Snorm,
+                            // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
+                            wgpu::TextureFormat::R8Snorm,
+                            wgpu::TextureFormat::RG8Snorm,
+                            wgpu::TextureFormat::RGBA8Snorm,
 
-        // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
-        wgpu::TextureFormat::BGRA8Unorm,
-    });
+                            // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
+                            wgpu::TextureFormat::BGRA8Unorm,
+                        });
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_B2T, FullTextureAligned) {
@@ -2390,6 +2449,10 @@ TEST_P(CopyTests_T2T, Texture3DFull) {
 
 // Test that copying from one mip level to another mip level within the same 3D texture works.
 TEST_P(CopyTests_T2T, Texture3DSameTextureDifferentMipLevels) {
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2426,6 +2489,9 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 TEST_P(CopyTests_T2T, Texture3DAnd2DArraySubRegion) {
     // TODO(crbug.com/dawn/1426): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows() && IsIntel());
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
 
     constexpr uint32_t kWidth = 8;
     constexpr uint32_t kHeight = 4;
@@ -2536,6 +2602,10 @@ TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
 
 // Test that copying texture 3D array mips in one texture-to-texture-copy works
 TEST_P(CopyTests_T2T, Texture3DMipAligned) {
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 64u;
@@ -2555,6 +2625,10 @@ TEST_P(CopyTests_T2T, Texture3DMipAligned) {
 
 // Test that copying texture 3D array mips in one texture-to-texture-copy works
 TEST_P(CopyTests_T2T, Texture3DMipUnaligned) {
+    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
+    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
+                          (IsOpenGL() || IsOpenGLES()));
+
     constexpr uint32_t kWidth = 261;
     constexpr uint32_t kHeight = 123;
     constexpr uint32_t kDepth = 69u;
@@ -2573,16 +2647,15 @@ TEST_P(CopyTests_T2T, Texture3DMipUnaligned) {
 }
 
 // TODO(dawn:1705): enable this test for D3D11
-DAWN_INSTANTIATE_TEST(
+DAWN_INSTANTIATE_TEST_P(
     CopyTests_T2T,
-    D3D12Backend(),
-    D3D12Backend({"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_"
-                  "mip_level"}),
-    D3D12Backend({"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions"}),
-    MetalBackend(),
-    OpenGLBackend(),
-    OpenGLESBackend(),
-    VulkanBackend());
+    {D3D12Backend(),
+     D3D12Backend({"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_"
+                   "mip_level"}),
+     D3D12Backend(
+         {"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions"}),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB9E5Ufloat});
 
 // Test copying between textures that have srgb compatible texture formats;
 TEST_P(CopyTests_Formats, SrgbCompatibility) {

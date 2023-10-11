@@ -418,7 +418,7 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
     }
     // RGB9E5Ufloat
     if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
-        device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy)) {
+        device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
         return true;
     }
     // Depth

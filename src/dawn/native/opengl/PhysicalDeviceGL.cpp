@@ -380,8 +380,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy, !supportsBGRARead);
 
     // For OpenGL ES, use compute shader blit to emulate rgb9e5ufloat texture to buffer copies.
-    deviceToggles->Default(Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy,
-                           gl.GetVersion().IsES());
+    deviceToggles->Default(Toggle::UseBlitForRGB9E5UfloatTextureCopy, gl.GetVersion().IsES());
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

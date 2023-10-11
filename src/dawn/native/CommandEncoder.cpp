@@ -791,7 +791,7 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
     }
     // RGB9E5Ufloat
     if (format.format == wgpu::TextureFormat::RGB9E5Ufloat &&
-        device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureToBufferCopy)) {
+        device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
         return true;
     }
     // Depth
@@ -1720,6 +1720,42 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
             dst.origin = destination->origin;
             dst.mipLevel = destination->mipLevel;
             dst.aspect = aspect;
+
+            // Emulate RGB9E5Ufloat T2T copy by calling a T2B copy and then a B2T copy
+            // for OpenGL/ES.
+            if (src.texture->GetFormat().baseFormat == wgpu::TextureFormat::RGB9E5Ufloat &&
+                GetDevice()->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
+                DAWN_ASSERT(dst.texture->GetFormat().baseFormat ==
+                            wgpu::TextureFormat::RGB9E5Ufloat);
+
+                // Calculate needed buffer size to hold copied texel data.
+                const TexelBlockInfo& blockInfo =
+                    source->texture->GetFormat().GetAspectInfo(aspect).block;
+                const uint64_t bytesPerRow =
+                    Align(4 * copySize->width, kTextureBytesPerRowAlignment);
+                const uint64_t rowsPerImage = copySize->height;
+                uint64_t requiredBytes;
+                DAWN_TRY_ASSIGN(
+                    requiredBytes,
+                    ComputeRequiredBytesInCopy(blockInfo, *copySize, bytesPerRow, rowsPerImage));
+
+                // Create an intermediate dst buffer.
+                BufferDescriptor descriptor = {};
+                descriptor.size = Align(requiredBytes, 4);
+                descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+                Ref<BufferBase> intermediateBuffer;
+                DAWN_TRY_ASSIGN(intermediateBuffer, GetDevice()->CreateBuffer(&descriptor));
+
+                ImageCopyBuffer buf;
+                buf.buffer = intermediateBuffer.Get();
+                buf.layout.bytesPerRow = bytesPerRow;
+                buf.layout.rowsPerImage = rowsPerImage;
+
+                APICopyTextureToBuffer(source, &buf, copySize);
+                APICopyBufferToTexture(&buf, destination, copySize);
+
+                return {};
+            }
 
             const bool blitDepth =
                 (aspect & Aspect::Depth) &&
