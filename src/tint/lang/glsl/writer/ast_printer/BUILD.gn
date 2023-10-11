@@ -69,10 +69,6 @@ if (tint_build_glsl_writer) {
         "${tint_src_dir}/lang/glsl/writer/common",
       ]
     }
-
-    if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer/ast_raise" ]
-    }
   }
 }
 if (tint_build_unittests) {

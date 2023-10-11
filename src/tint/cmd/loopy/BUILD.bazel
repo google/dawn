@@ -39,7 +39,6 @@ cc_binary(
     "//src/tint/lang/core/type",
     "//src/tint/lang/hlsl/writer/common",
     "//src/tint/lang/spirv/reader/common",
-    "//src/tint/lang/spirv/writer/helpers",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/helpers",
@@ -88,6 +87,7 @@ cc_binary(
     ":tint_build_spv_writer": [
       "//src/tint/lang/spirv/writer",
       "//src/tint/lang/spirv/writer/common",
+      "//src/tint/lang/spirv/writer/helpers",
     ],
     "//conditions:default": [],
   }),

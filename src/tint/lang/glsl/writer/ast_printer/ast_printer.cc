@@ -38,7 +38,6 @@
 #include "src/tint/lang/glsl/writer/ast_raise/texture_1d_to_2d.h"
 #include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"

@@ -21,9 +21,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_SPV_WRITER)
 ################################################################################
 # Target:    tint_lang_spirv_writer_helpers
 # Kind:      lib
+# Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer_helpers lib
   lang/spirv/writer/helpers/generate_bindings.cc
@@ -58,4 +60,6 @@ if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_helpers lib
     tint_lang_spirv_writer_common
   )
+endif(TINT_BUILD_SPV_WRITER)
+
 endif(TINT_BUILD_SPV_WRITER)

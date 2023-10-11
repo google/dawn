@@ -23,7 +23,10 @@
 #include <type_traits>
 #include <vector>
 
+#if TINT_BUILD_MSL_WRITER
 #include "src/tint/lang/msl/validate/val.h"
+#endif
+
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/socket/socket.h"
 
@@ -421,7 +424,7 @@ bool RunServer(std::string port) {
                     DEBUG("%s\n", stream.error.c_str());
                     return;
                 }
-#ifdef __APPLE__
+#if TINT_BUILD_MSL_WRITER && defined(__APPLE__)
                 if (req.language == SourceLanguage::MSL) {
                     auto version = tint::msl::validate::MslVersion::kMsl_1_2;
                     if (req.version_major == 2 && req.version_minor == 1) {

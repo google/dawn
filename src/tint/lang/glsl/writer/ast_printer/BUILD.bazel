@@ -64,11 +64,6 @@ cc_library(
       "//src/tint/lang/glsl/writer/common",
     ],
     "//conditions:default": [],
-  }) + select({
-    ":tint_build_hlsl_writer": [
-      "//src/tint/lang/hlsl/writer/ast_raise",
-    ],
-    "//conditions:default": [],
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -153,10 +148,5 @@ cc_library(
 alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
-)
-
-alias(
-  name = "tint_build_hlsl_writer",
-  actual = "//src/tint:tint_build_hlsl_writer_true",
 )
 

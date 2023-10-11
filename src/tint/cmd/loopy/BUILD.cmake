@@ -40,7 +40,6 @@ tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_lang_spirv_reader_common
-  tint_lang_spirv_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_helpers
@@ -95,6 +94,7 @@ if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
     tint_lang_spirv_writer
     tint_lang_spirv_writer_common
+    tint_lang_spirv_writer_helpers
   )
 endif(TINT_BUILD_SPV_WRITER)
 

@@ -39,7 +39,6 @@ executable("tint") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/hlsl/writer/common",
     "${tint_src_dir}/lang/spirv/reader/common",
-    "${tint_src_dir}/lang/spirv/writer/helpers",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/ast/transform",
@@ -107,6 +106,7 @@ executable("tint") {
     deps += [
       "${tint_src_dir}/lang/spirv/writer",
       "${tint_src_dir}/lang/spirv/writer/common",
+      "${tint_src_dir}/lang/spirv/writer/helpers",
     ]
   }
 }

@@ -18,7 +18,11 @@
 #include <vector>
 
 #include "src/tint/cmd/bench/bench.h"
+
+#if TINT_BUILD_SPV_READER
 #include "src/tint/lang/spirv/reader/reader.h"
+#endif
+
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"

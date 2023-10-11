@@ -68,12 +68,6 @@ if(TINT_BUILD_GLSL_WRITER)
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-if(TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies(tint_lang_glsl_writer_ast_printer lib
-    tint_lang_hlsl_writer_ast_raise
-  )
-endif(TINT_BUILD_HLSL_WRITER)
-
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
