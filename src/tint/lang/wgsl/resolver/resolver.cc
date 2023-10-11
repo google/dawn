@@ -1594,12 +1594,6 @@ core::type::Type* Resolver::Type(const ast::Expression* ast) {
         return nullptr;
     }
 
-    if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
-        AddError("expected '<' for '" + std::string(ToString(incomplete->builtin)) + "'",
-                 ast->source.End());
-        return nullptr;
-    }
-
     if (auto* arr = type->As<sem::Array>()) {
         for (auto* ref : referenced_overrides) {
             arr->AddTransitivelyReferencedOverride(ref);

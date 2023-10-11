@@ -81,15 +81,7 @@ class SemHelper {
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to type::Type if the cast is
     /// successful, otherwise an error diagnostic is raised.
-    sem::TypeExpression* AsTypeExpression(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
-            if (auto* ty_expr = expr->As<sem::TypeExpression>(); TINT_LIKELY(ty_expr)) {
-                return ty_expr;
-            }
-            ErrorUnexpectedExprKind(expr, "type");
-        }
-        return nullptr;
-    }
+    sem::TypeExpression* AsTypeExpression(sem::Expression* expr) const;
 
     /// GetType is a helper for obtaining the semantic type for the given AST expression.
     /// Raises an error diagnostic and returns `nullptr` if the semantic node is not a

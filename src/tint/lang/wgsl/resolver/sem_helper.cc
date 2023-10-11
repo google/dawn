@@ -14,6 +14,7 @@
 
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 
+#include "src/tint/lang/wgsl/resolver/incomplete_type.h"
 #include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -39,6 +40,27 @@ std::string SemHelper::RawTypeNameOf(const core::type::Type* ty) const {
 core::type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
     auto* sem = GetVal(expr);
     return sem ? const_cast<core::type::Type*>(sem->Type()) : nullptr;
+}
+
+sem::TypeExpression* SemHelper::AsTypeExpression(sem::Expression* expr) const {
+    if (TINT_UNLIKELY(!expr)) {
+        return nullptr;
+    }
+
+    auto* ty_expr = expr->As<sem::TypeExpression>();
+    if (TINT_UNLIKELY(!ty_expr)) {
+        ErrorUnexpectedExprKind(expr, "type");
+        return nullptr;
+    }
+
+    auto* type = ty_expr->Type();
+    if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
+        AddError("expected '<' for '" + std::string(ToString(incomplete->builtin)) + "'",
+                 expr->Declaration()->source.End());
+        return nullptr;
+    }
+
+    return ty_expr;
 }
 
 std::string SemHelper::Describe(const sem::Expression* expr) const {

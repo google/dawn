@@ -579,7 +579,20 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
 56:78 note: while instantiating 'var' a)");
 }
 
-TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
+TEST_F(ResolverTypeValidationTest, PtrType_ArrayIncomplete) {
+    // fn f(l: ptr<function, array>) {}
+
+    Func("f",
+         Vector{
+             Param("l", ty.ptr(function, ty(Source{{12, 34}}, "array"))),
+         },
+         ty.void_(), Empty);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'array'");
+}
+
+TEST_F(ResolverTypeValidationTest, Struct_Member_VectorIncomplete) {
     // struct S {
     //   a: vec3;
     // };
@@ -592,7 +605,7 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
 }
 
-TEST_F(ResolverTypeValidationTest, Struct_Member_MatrixNoType) {
+TEST_F(ResolverTypeValidationTest, Struct_Member_MatrixIncomplete) {
     // struct S {
     //   a: mat3x3;
     // };
