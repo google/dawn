@@ -48,7 +48,7 @@ template("libtint_source_set") {
 ###############################################################################
 template("tint_executable") {
   if (tint_build_cmds) {
-    source_set(target_name) {
+    executable(target_name) {
       forward_variables_from(invoker, "*")
     }
   }
