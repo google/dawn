@@ -18,6 +18,8 @@ package build
 type TargetConfig struct {
 	// Override for the output name of this target
 	OutputName string
+	// Conditionals for this target
+	Condition string
 	// Additional dependencies to add to this target
 	AdditionalDependencies struct {
 		// List of internal dependency patterns

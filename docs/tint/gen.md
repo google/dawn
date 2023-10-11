@@ -126,6 +126,8 @@ The syntax of `TargetConfig` is:
 {
   /* An override for the output file name for the target */
   "OutputName": "name",
+  /* An additional condition for building this target */
+  "Condition": "cond",
   "AdditionalDependencies": {
     "Internal": [
       /*

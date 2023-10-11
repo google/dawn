@@ -18,8 +18,9 @@ import "path"
 
 // Include describes a single #include in a file
 type Include struct {
-	Path string
-	Line int
+	Path      string
+	Line      int
+	Condition Condition
 }
 
 // File holds information about a source file

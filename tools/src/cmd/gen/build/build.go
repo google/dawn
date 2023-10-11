@@ -209,15 +209,48 @@ func scanSourceFiles(p *Project) error {
 	// parseFile parses the source file at 'path' represented by 'file'
 	// As this is run concurrently, it must not modify any shared state (including file)
 	parseFile := func(path string, file *File) (string, *ParsedFile, error) {
+		conditions := []Condition{}
+
 		body, err := os.ReadFile(file.AbsPath())
 		if err != nil {
 			return path, nil, err
 		}
 		out := &ParsedFile{}
 		for i, line := range strings.Split(string(body), "\n") {
+			wrapErr := func(err error) error {
+				return fmt.Errorf("%v:%v %w", file.Path(), i+1, err)
+			}
 			if match := reIgnoreFile.FindStringSubmatch(line); len(match) > 0 {
 				out.removeFromProject = true
 				continue
+			}
+			if match := reIf.FindStringSubmatch(line); len(match) > 0 {
+				condition, err := cnf.Parse(strings.ToLower(match[1]))
+				if err != nil {
+					condition = Condition{{cnf.Unary{Var: "FAILED_TO_PARSE_CONDITION"}}}
+				}
+				if len(conditions) > 0 {
+					condition = cnf.And(condition, conditions[len(conditions)-1])
+				}
+				conditions = append(conditions, condition)
+			}
+			if match := reIfdef.FindStringSubmatch(line); len(match) > 0 {
+				conditions = append(conditions, Condition{})
+			}
+			if match := reIfndef.FindStringSubmatch(line); len(match) > 0 {
+				conditions = append(conditions, Condition{})
+			}
+			if match := reElse.FindStringSubmatch(line); len(match) > 0 {
+				if len(conditions) == 0 {
+					return path, nil, wrapErr(fmt.Errorf("#else without #if"))
+				}
+				conditions[len(conditions)-1] = cnf.Not(conditions[len(conditions)-1])
+			}
+			if match := reEndif.FindStringSubmatch(line); len(match) > 0 {
+				if len(conditions) == 0 {
+					return path, nil, wrapErr(fmt.Errorf("#endif without #if"))
+				}
+				conditions = conditions[:len(conditions)-1]
 			}
 			if match := reCondition.FindStringSubmatch(line); len(match) > 0 {
 				out.conditions = append(out.conditions, match[1])
@@ -225,7 +258,14 @@ func scanSourceFiles(p *Project) error {
 			if !reIgnoreInclude.MatchString(line) {
 				for _, re := range []*regexp.Regexp{reInclude, reHashImport, reAtImport} {
 					if match := re.FindStringSubmatch(line); len(match) > 0 {
-						out.includes = append(out.includes, Include{match[1], i + 1})
+						include := Include{
+							Path: match[1],
+							Line: i + 1,
+						}
+						if len(conditions) > 0 {
+							include.Condition = conditions[len(conditions)-1]
+						}
+						out.includes = append(out.includes, include)
 					}
 				}
 			}
@@ -321,6 +361,14 @@ func applyDirectoryConfigs(p *Project) error {
 
 			// Apply any custom output name
 			target.OutputName = tc.cfg.OutputName
+
+			if tc.cfg.Condition != "" {
+				condition, err := cnf.Parse(tc.cfg.Condition)
+				if err != nil {
+					return fmt.Errorf("%v: %v", path, err)
+				}
+				target.Condition = cnf.And(target.Condition, condition)
+			}
 
 			// Add any additional internal dependencies
 			for _, depPattern := range tc.cfg.AdditionalDependencies.Internal {
@@ -422,6 +470,25 @@ func buildDependencies(p *Project) error {
 					}
 					for _, dependency := range includeFile.TransitiveDependencies.External() {
 						addExternalDependency(dependency)
+					}
+
+					noneIfEmpty := func(cond Condition) string {
+						if len(cond) == 0 {
+							return "<none>"
+						}
+						return cond.String()
+					}
+					sourceConditions := cnf.And(cnf.And(include.Condition, file.Condition), file.Target.Condition)
+					targetConditions := cnf.And(includeFile.Condition, includeFile.Target.Condition)
+					if missing := targetConditions.Remove(sourceConditions); len(missing) > 0 {
+						return fmt.Errorf(`%v:%v #include "%v" requires guard: #if %v
+
+%v build conditions: %v
+%v build conditions: %v`,
+							file.Path(), include.Line, include.Path, strings.ToUpper(missing.String()),
+							file.Path(), noneIfEmpty(sourceConditions),
+							include.Path, targetConditions,
+						)
 					}
 
 				} else {
@@ -647,6 +714,11 @@ func emitDotFile(p *Project, kind TargetKind) error {
 
 var (
 	// Regular expressions used by this file
+	reIf            = regexp.MustCompile(`\s*#\s*if\s+(.*)`)
+	reIfdef         = regexp.MustCompile(`\s*#\s*ifdef\s+(.*)`)
+	reIfndef        = regexp.MustCompile(`\s*#\s*ifndef\s+(.*)`)
+	reElse          = regexp.MustCompile(`\s*#\s*else\s+(.*)`)
+	reEndif         = regexp.MustCompile(`\s*#\s*endif`)
 	reInclude       = regexp.MustCompile(`\s*#\s*include\s*(?:\"|<)([^(\"|>)]+)(?:\"|>)`)
 	reHashImport    = regexp.MustCompile(`\s*#\s*import\s*\<([\w\/\.]+)\>`)
 	reAtImport      = regexp.MustCompile(`\s*@\s*import\s*(\w+)\s*;`)

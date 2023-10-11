@@ -14,6 +14,8 @@
 
 package cnf
 
+import "dawn.googlesource.com/dawn/tools/src/container"
+
 // Expr is a boolean expression, expressed in a Conjunctive Normal Form.
 // Expr is an alias to Ands, which represent all the OR expressions that are
 // AND'd together.
@@ -37,4 +39,19 @@ type Unary struct {
 	Negate bool
 	// The name of the variable
 	Var string
+}
+
+// Remove returns a new expression with all the And expressions of o removed from e
+func (e Expr) Remove(o Expr) Expr {
+	set := container.NewSet[Key]()
+	for _, expr := range o {
+		set.Add(expr.Key())
+	}
+	out := Expr{}
+	for _, expr := range e {
+		if !set.Contains(expr.Key()) {
+			out = append(out, expr)
+		}
+	}
+	return out
 }
