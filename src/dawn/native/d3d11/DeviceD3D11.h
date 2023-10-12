@@ -135,6 +135,7 @@ class Device final : public d3d::Device {
     void DestroyImpl() override;
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
+    void AppendDeviceLostMessage(ErrorData* error) override;
 
     ComPtr<ID3D11Fence> mFence;
     HANDLE mFenceEvent = nullptr;

@@ -225,6 +225,7 @@ class Device final : public d3d::Device {
 
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
+    void AppendDeviceLostMessage(ErrorData* error) override;
 
     MaybeError EnsureDXCIfRequired();
 

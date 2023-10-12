@@ -538,6 +538,9 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         InternalErrorType::Validation | InternalErrorType::DeviceLost | additionalAllowedErrors;
     InternalErrorType type = error->GetType();
     if (type == InternalErrorType::DeviceLost) {
+        // D3D device can provide additional device removed reason.
+        AppendDeviceLostMessage(error.get());
+
         mState = State::Disconnected;
 
         // If the ErrorInjector is enabled, then the device loss might be fake and the device

@@ -431,6 +431,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     void APIDestroy();
 
     virtual void AppendDebugLayerMessages(ErrorData* error) {}
+    virtual void AppendDeviceLostMessage(ErrorData* error) {}
 
     [[nodiscard]] virtual bool WaitAnyImpl(size_t futureCount,
                                            TrackedFutureWaitInfo* futures,

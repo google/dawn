@@ -64,6 +64,16 @@ class [[nodiscard]] ErrorData {
     }
     void AppendDebugGroup(std::string label);
     void AppendBackendMessage(std::string message);
+    template <typename... Args>
+    void AppendBackendMessage(const char* formatStr, const Args&... args) {
+        std::string out;
+        absl::UntypedFormatSpec format(formatStr);
+        if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
+            AppendBackendMessage(std::move(out));
+        } else {
+            AppendBackendMessage(absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
+        }
+    }
 
     InternalErrorType GetType() const;
     const std::string& GetMessage() const;

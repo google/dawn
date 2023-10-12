@@ -50,6 +50,8 @@ const char* HRESULTAsString(HRESULT result) {
             return "DXGI_ERROR_DEVICE_HUNG";
         case DXGI_ERROR_DEVICE_RESET:
             return "DXGI_ERROR_DEVICE_RESET";
+        case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+            return "DXGI_ERROR_DRIVER_INTERNAL_ERROR";
         case DXGI_ERROR_WAS_STILL_DRAWING:
             return "DXGI_ERROR_WAS_STILL_DRAWING";
 

@@ -433,6 +433,14 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
     AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error);
 }
 
+void Device::AppendDeviceLostMessage(ErrorData* error) {
+    if (mD3d11Device) {
+        HRESULT result = mD3d11Device->GetDeviceRemovedReason();
+        error->AppendBackendMessage("Device removed reason: %s (0x08X)",
+                                    d3d::HRESULTAsString(result), result);
+    }
+}
+
 void Device::DestroyImpl() {
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.
     // - It may be called if the device is explicitly destroyed with APIDestroy.

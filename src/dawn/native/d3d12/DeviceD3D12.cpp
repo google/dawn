@@ -741,6 +741,14 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
     AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error);
 }
 
+void Device::AppendDeviceLostMessage(ErrorData* error) {
+    if (mD3d12Device) {
+        HRESULT result = mD3d12Device->GetDeviceRemovedReason();
+        error->AppendBackendMessage("Device removed reason: %s (0x08X)",
+                                    d3d::HRESULTAsString(result), result);
+    }
+}
+
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
