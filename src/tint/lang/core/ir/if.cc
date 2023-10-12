@@ -14,12 +14,12 @@
 
 #include "src/tint/lang/core/ir/if.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::If);
-
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::If);
 
 namespace tint::core::ir {
 
@@ -58,6 +58,9 @@ If* If::Clone(CloneContext& ctx) {
 
     true_->CloneInto(ctx, new_true);
     false_->CloneInto(ctx, new_false);
+
+    new_if->SetResults(ctx.Clone(results_));
+
     return new_if;
 }
 

@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %foo "foo"
+               OpExecutionMode %foo LocalSize 1 1 1
+               OpName %out_block "out_block"
+               OpMemberName %out_block 0 "inner"
+               OpName %out "out"
+               OpName %bar "bar"
+               OpName %p "p"
+               OpName %foo "foo"
+               OpName %param "param"
+               OpDecorate %out_block Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpDecorate %out DescriptorSet 0
+               OpDecorate %out Binding 0
+      %float = OpTypeFloat 32
+  %out_block = OpTypeStruct %float
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+        %out = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
+       %void = OpTypeVoid
+%_ptr_Function_float = OpTypePointer Function %float
+          %5 = OpTypeFunction %void %_ptr_Function_float
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+         %13 = OpConstantNull %float
+       %bool = OpTypeBool
+         %22 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+        %bar = OpFunction %void None %5
+          %p = OpFunctionParameter %_ptr_Function_float
+         %10 = OpLabel
+         %14 = OpFOrdGreaterThanEqual %bool %float_1 %13
+               OpSelectionMerge %16 None
+               OpBranchConditional %14 %17 %16
+         %17 = OpLabel
+         %18 = OpFOrdGreaterThanEqual %bool %float_2 %13
+               OpBranch %16
+         %16 = OpLabel
+         %19 = OpPhi %bool %14 %10 %18 %17
+         %21 = OpSelect %float %19 %float_2 %float_1
+               OpStore %p %21
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %void None %22
+         %24 = OpLabel
+      %param = OpVariable %_ptr_Function_float Function %13
+         %26 = OpFunctionCall %void %bar %param
+         %31 = OpAccessChain %_ptr_StorageBuffer_float %out %uint_0
+         %32 = OpLoad %float %param
+               OpStore %31 %32
+               OpReturn
+               OpFunctionEnd

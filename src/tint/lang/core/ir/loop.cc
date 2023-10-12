@@ -14,8 +14,6 @@
 
 #include "src/tint/lang/core/ir/loop.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
@@ -55,6 +53,8 @@ Loop* Loop::Clone(CloneContext& ctx) {
     initializer_->CloneInto(ctx, new_init);
     body_->CloneInto(ctx, new_body);
     continuing_->CloneInto(ctx, new_continuing);
+
+    new_loop->SetResults(ctx.Clone(results_));
 
     return new_loop;
 }

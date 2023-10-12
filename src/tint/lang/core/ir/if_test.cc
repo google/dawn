@@ -92,5 +92,27 @@ TEST_F(IR_IfTest, CloneWithExits) {
     EXPECT_EQ(new_if, new_if->True()->Front()->As<ExitIf>()->If());
 }
 
+TEST_F(IR_IfTest, CloneWithResults) {
+    If* new_if = nullptr;
+    auto* r0 = b.InstructionResult(ty.i32());
+    auto* r1 = b.InstructionResult(ty.f32());
+    {
+        auto* if_ = b.If(true);
+        if_->SetResults(Vector{r0, r1});
+        b.Append(if_->True(), [&] { b.ExitIf(if_, b.Constant(42_i), b.Constant(42_f)); });
+        new_if = clone_ctx.Clone(if_);
+    }
+
+    ASSERT_EQ(2u, new_if->Results().Length());
+    auto* new_r0 = new_if->Results()[0]->As<InstructionResult>();
+    ASSERT_NE(new_r0, nullptr);
+    ASSERT_NE(new_r0, r0);
+    EXPECT_EQ(new_r0->Type(), ty.i32());
+    auto* new_r1 = new_if->Results()[1]->As<InstructionResult>();
+    ASSERT_NE(new_r1, nullptr);
+    ASSERT_NE(new_r1, r1);
+    EXPECT_EQ(new_r1->Type(), ty.f32());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

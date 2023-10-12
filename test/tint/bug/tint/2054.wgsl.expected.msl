@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void bar(thread float* const p) {
+  float const a = 1.0f;
+  float const b = 2.0f;
+  bool const cond = ((a >= 0.0f) && (b >= 0.0f));
+  *(p) = select(a, b, cond);
+}
+
+kernel void foo(device float* tint_symbol [[buffer(0)]]) {
+  float param = 0.0f;
+  bar(&(param));
+  *(tint_symbol) = param;
+  return;
+}
+

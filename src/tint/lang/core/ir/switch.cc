@@ -54,6 +54,9 @@ Switch* Switch::Clone(CloneContext& ctx) {
         }
         new_switch->cases_.Push(new_case);
     }
+
+    new_switch->SetResults(ctx.Clone(results_));
+
     return new_switch;
 }
 

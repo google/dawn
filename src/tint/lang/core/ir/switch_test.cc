@@ -101,5 +101,30 @@ TEST_F(IR_SwitchTest, CloneWithExits) {
     EXPECT_EQ(new_switch, case_.block->Front()->As<ExitSwitch>()->Switch());
 }
 
+TEST_F(IR_SwitchTest, CloneWithResults) {
+    Switch* new_switch = nullptr;
+    auto* r0 = b.InstructionResult(ty.i32());
+    auto* r1 = b.InstructionResult(ty.f32());
+    {
+        auto* switch_ = b.Switch(1_i);
+        switch_->SetResults(Vector{r0, r1});
+
+        auto* blk = b.Block();
+        b.Append(blk, [&] { b.ExitSwitch(switch_, b.Constant(42_i), b.Constant(42_f)); });
+        switch_->Cases().Push(Switch::Case{{Switch::CaseSelector{b.Constant(3_i)}}, blk});
+        new_switch = clone_ctx.Clone(switch_);
+    }
+
+    ASSERT_EQ(2u, new_switch->Results().Length());
+    auto* new_r0 = new_switch->Results()[0]->As<InstructionResult>();
+    ASSERT_NE(new_r0, nullptr);
+    ASSERT_NE(new_r0, r0);
+    EXPECT_EQ(new_r0->Type(), ty.i32());
+    auto* new_r1 = new_switch->Results()[1]->As<InstructionResult>();
+    ASSERT_NE(new_r1, nullptr);
+    ASSERT_NE(new_r1, r1);
+    EXPECT_EQ(new_r1->Type(), ty.f32());
+}
+
 }  // namespace
 }  // namespace tint::core::ir
