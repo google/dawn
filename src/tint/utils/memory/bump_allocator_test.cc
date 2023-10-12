@@ -34,12 +34,14 @@ TEST_F(BumpAllocatorTest, AllocationSizesAroundBlockSize) {
     for (size_t n : {
              BumpAllocator::kDefaultBlockDataSize - sizeof(void*),
              BumpAllocator::kDefaultBlockDataSize - 4,
+             BumpAllocator::kDefaultBlockDataSize - 1,
              BumpAllocator::kDefaultBlockDataSize,
+             BumpAllocator::kDefaultBlockDataSize + 1,
              BumpAllocator::kDefaultBlockDataSize + 4,
              BumpAllocator::kDefaultBlockDataSize + sizeof(void*),
          }) {
         BumpAllocator allocator;
-        auto ptr = allocator.Allocate(n);
+        auto* ptr = allocator.Allocate(n);
         memset(ptr, 0x42, n);
     }
 }
