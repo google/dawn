@@ -83,7 +83,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
   ]
   deps = [
 
-{{- /* Emit unconditional inernal dependencies */}}
+{{- /* Emit unconditional internal dependencies */}}
 {{- range $Dep := $.Dependencies.UnconditionalInternal}}
     "{{Eval "Dependency" $Dep}}",
 {{- end}}
