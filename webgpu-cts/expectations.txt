@@ -598,12 +598,12 @@ crbug.com/tint/1974 [ android arm ] webgpu:shader,execution,expression,call,buil
 ################################################################################
 # matCx3 and array_of_matCx3...use_struct=2 causes device lost on DXC
 ################################################################################
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=2;use_struct=true [ Failure ]
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=3;use_struct=true [ Failure ]
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=4;use_struct=true [ Failure ]
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=2;use_struct=true [ Failure ]
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=3;use_struct=true [ Failure ]
-crbug.com/tint/1975 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=4;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=2;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=3;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=4;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=2;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=3;use_struct=true [ Failure ]
+crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=4;use_struct=true [ Failure ]
 
 ################################################################################
 # maxInterStageShaderComponents limit tests fail with CreateGraphicsPipelines fail with <Unknown VkResult> on Android Qualcomm (Pixel 4)
