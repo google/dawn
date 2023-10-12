@@ -732,6 +732,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		cmd.Stdout = &pl
 		cmd.Stderr = &pl
 
+		if r.verbose {
+			PrintCommand(r.stdout, cmd)
+		}
 		err := cmd.Start()
 		if err != nil {
 			return fmt.Errorf("failed to start test runner server: %v", err)
@@ -1170,6 +1173,9 @@ func (r *runner) runTestcase(ctx context.Context, query string) result {
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
 
+	if r.verbose {
+		PrintCommand(r.stdout, cmd)
+	}
 	err := cmd.Run()
 
 	msg := buf.String()
@@ -1471,4 +1477,45 @@ func SplitCTSQuery(testcase string) cov.Path {
 		out = append(out, end)
 	}
 	return out
+}
+
+func PrintCommand(writer io.Writer, cmd *exec.Cmd) {
+	maybeQuote := func(s string) string {
+		if strings.ContainsAny(s, " ,()") {
+			return fmt.Sprintf("\"%v\"", s)
+		}
+		return s
+	}
+
+	fmt.Fprint(writer, "Running:\n")
+	fmt.Fprintf(writer, "  Cmd: %v ", maybeQuote(cmd.Path))
+	for i, arg := range cmd.Args[1:] {
+		if i > 0 {
+			fmt.Fprint(writer, " ")
+		}
+		fmt.Fprint(writer, maybeQuote(arg))
+	}
+	fmt.Fprintln(writer)
+	fmt.Fprintf(writer, "  Dir: %v\n\n", cmd.Dir)
+
+	fmt.Fprint(writer, "  For VS Code launch.json:\n")
+	launchCmd := struct {
+		Program string   `json:"program"`
+		Args    []string `json:"args"`
+		Cwd     string   `json:"cwd"`
+	}{
+		Program: cmd.Path,
+		Args:    cmd.Args[1:],
+		Cwd:     cmd.Dir,
+	}
+
+	b := &bytes.Buffer{}
+	e := json.NewEncoder(b)
+	e.SetIndent("", "    ")
+	e.Encode(launchCmd)
+	s := b.String()
+	// Remove object braces and add trailing comma
+	s = strings.TrimPrefix(s, "{\n")
+	s = strings.TrimSuffix(s, "\n}\n") + ",\n"
+	fmt.Fprintln(writer, s)
 }
