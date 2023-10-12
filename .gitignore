@@ -34,6 +34,7 @@
 /third_party/node
 /third_party/node-addon-api
 /third_party/node-api-headers
+/third_party/partition_alloc
 /third_party/protobuf
 /third_party/swiftshader
 /third_party/vulkan-deps

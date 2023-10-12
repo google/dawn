@@ -110,3 +110,7 @@
 	path = third_party/protobuf
 	url = https://chromium.googlesource.com/external/github.com/protocolbuffers/protobuf.git
 	gclient-condition = dawn_standalone
+[submodule "third_party/partition_alloc"]
+	path = third_party/partition_alloc
+	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git
+	gclient-condition = dawn_standalone
