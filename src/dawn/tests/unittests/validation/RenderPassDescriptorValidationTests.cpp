@@ -107,6 +107,26 @@ TEST_F(RenderPassDescriptorValidationTest, OneAttachment) {
     }
 }
 
+// Regression test for chromium:1487788 were cached attachment states used in a pass encoder created
+// from an error command encoder are not cleaned up if the device's last reference is dropped before
+// the pass.
+TEST_F(RenderPassDescriptorValidationTest, ErrorEncoderLingeringAttachmentState) {
+    utils::ComboRenderPassDescriptor descriptor(
+        {Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm)});
+
+    // Purposely add a bad chain to the command encoder to force an error command encoder.
+    wgpu::CommandEncoderDescriptor commandEncoderDesc = {};
+    wgpu::ChainedStruct chain = {};
+    commandEncoderDesc.nextInChain = &chain;
+
+    wgpu::CommandEncoder commandEncoder;
+    ASSERT_DEVICE_ERROR(commandEncoder = device.CreateCommandEncoder(&commandEncoderDesc));
+    wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&descriptor);
+
+    ExpectDeviceDestruction();
+    device = nullptr;
+}
+
 // Test OOB color attachment indices are handled
 TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
     std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments + 1> colorAttachments;
