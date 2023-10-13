@@ -683,6 +683,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
             uint32_t maxSamplerStateArgumentEntriesPerFunc;
             uint32_t maxThreadsPerThreadgroup;
             uint32_t maxTotalThreadgroupMemory;
+            uint32_t maxFragmentInputs;
             uint32_t maxFragmentInputComponents;
             uint32_t max1DTextureSize;
             uint32_t max2DTextureSize;
@@ -702,13 +703,14 @@ class PhysicalDevice : public PhysicalDeviceBase {
             // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
             //                                                               Apple                                                      Mac
             //                                                                   1,      2,      3,      4,      5,      6,      7,       1,      2
-            constexpr LimitsForFamily kMTLLimits[14] = {
+            constexpr LimitsForFamily kMTLLimits[15] = {
                 {&MTLDeviceLimits::maxVertexAttribsPerDescriptor,         {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
                 {&MTLDeviceLimits::maxBufferArgumentEntriesPerFunc,       {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
                 {&MTLDeviceLimits::maxTextureArgumentEntriesPerFunc,      {    31u,    31u,    31u,    96u,    96u,   128u,   128u,    128u,   128u }},
                 {&MTLDeviceLimits::maxSamplerStateArgumentEntriesPerFunc, {    16u,    16u,    16u,    16u,    16u,    16u,    16u,     16u,    16u }},
                 {&MTLDeviceLimits::maxThreadsPerThreadgroup,              {   512u,   512u,   512u,  1024u,  1024u,  1024u,  1024u,   1024u,  1024u }},
                 {&MTLDeviceLimits::maxTotalThreadgroupMemory,             { 16352u, 16352u, 16384u, 32768u, 32768u, 32768u, 32768u,  32768u, 32768u }},
+                {&MTLDeviceLimits::maxFragmentInputs,                     {    60u,    60u,    60u,   124u,   124u,   124u,   124u,     32u,    32u }},
                 {&MTLDeviceLimits::maxFragmentInputComponents,            {    60u,    60u,    60u,   124u,   124u,   124u,   124u,    124u,   124u }},
                 {&MTLDeviceLimits::max1DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u,  16384u, 16384u }},
                 {&MTLDeviceLimits::max2DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u,  16384u, 16384u }},
@@ -784,11 +786,16 @@ class PhysicalDevice : public PhysicalDeviceBase {
         limits->v1.maxVertexAttributes =
             limits->v1.maxVertexBuffers * mtlLimits.maxVertexAttribsPerDescriptor;
 
-        limits->v1.maxInterStageShaderComponents = mtlLimits.maxFragmentInputComponents;
-        // TODO(dawn:685): Support higher values. Metal also has limitations on Maximum scalars or
-        // vectors inputs to a fragment function.
-        limits->v1.maxInterStageShaderComponents =
-            std::min(limits->v1.maxInterStageShaderComponents, kMaxInterStageShaderComponents);
+        // See https://github.com/gpuweb/gpuweb/issues/1962 for more details.
+        uint32_t vendorId = GetVendorId();
+        if (gpu_info::IsApple(vendorId)) {
+            limits->v1.maxInterStageShaderComponents = mtlLimits.maxFragmentInputComponents;
+            limits->v1.maxInterStageShaderVariables = mtlLimits.maxFragmentInputs;
+        } else {
+            // On non-Apple macOS each built-in consumes one individual inter-stage shader variable.
+            limits->v1.maxInterStageShaderVariables = mtlLimits.maxFragmentInputs - 4;
+            limits->v1.maxInterStageShaderComponents = limits->v1.maxInterStageShaderVariables * 4;
+        }
 
         limits->v1.maxComputeWorkgroupStorageSize = mtlLimits.maxTotalThreadgroupMemory;
         limits->v1.maxComputeInvocationsPerWorkgroup = mtlLimits.maxThreadsPerThreadgroup;
@@ -811,9 +818,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
         // TODO(crbug.com/dawn/685):
         // - maxBindGroups
         // - maxVertexBufferArrayStride
-
-        // TODO(crbug.com/dawn/1448):
-        // - maxInterStageShaderVariables
 
         // Experimental limits for subgroups
         limits->experimentalSubgroupLimits.minSubgroupSize = 4;
