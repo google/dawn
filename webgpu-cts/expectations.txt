@@ -800,11 +800,11 @@ crbug.com/dawn/2141 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,exe
 crbug.com/dawn/2141 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="none";isAtomic=false [ Failure ]
 crbug.com/dawn/2142 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]
 crbug.com/dawn/2143 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:* [ Failure ]
+crbug.com/dawn/2144 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:* [ RetryOnFailure ]
 
 ################################################################################
 # Manually added failures to facilitate roll. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="f32" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-64 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="f32" [ Failure ]
 crbug.com/tint/2030 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ RetryOnFailure ]
