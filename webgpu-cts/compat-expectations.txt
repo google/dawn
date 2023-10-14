@@ -84,6 +84,7 @@ crbug.com/dawn/2006 [ angle-opengl ] webgpu:web_platform,copyToTexture,ImageData
 
 # Offscreen copy issue
 crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";* [ Failure ]
+crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";* [ Failure ]
 
 # snorm / stencil8 issues
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
@@ -238,6 +239,7 @@ crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,des
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";* [ Failure ]
+crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoFrame";* [ Failure ]
 
 crbug.com/dawn/0000 webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ RetryOnFailure ]
 crbug.com/dawn/2113 webgpu:shader,execution,memory_model,* [ Failure ]
