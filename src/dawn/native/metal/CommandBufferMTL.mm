@@ -662,7 +662,7 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                       sourceBytesPerRow:copyInfo.bytesPerRow
                     sourceBytesPerImage:copyInfo.bytesPerImage
                              sourceSize:MTLSizeMake(copyInfo.copyExtent.width, 1, 1)
-                              toTexture:texture->GetMTLTexture()
+                              toTexture:texture->GetMTLTexture(aspect)
                        destinationSlice:0
                        destinationLevel:mipLevel
                       destinationOrigin:MTLOriginMake(copyInfo.textureOrigin.x, 0, 0)
@@ -682,7 +682,7 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                                                sourceBytesPerRow:copyInfo.bytesPerRow
                                              sourceBytesPerImage:copyInfo.bytesPerImage
                                                       sourceSize:copyExtent
-                                                       toTexture:texture->GetMTLTexture()
+                                                       toTexture:texture->GetMTLTexture(aspect)
                                                 destinationSlice:z
                                                 destinationLevel:mipLevel
                                                destinationOrigin:textureOrigin
@@ -700,7 +700,7 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
                              sourceSize:MTLSizeMake(copyInfo.copyExtent.width,
                                                     copyInfo.copyExtent.height,
                                                     copyInfo.copyExtent.depthOrArrayLayers)
-                              toTexture:texture->GetMTLTexture()
+                              toTexture:texture->GetMTLTexture(aspect)
                        destinationSlice:0
                        destinationLevel:mipLevel
                       destinationOrigin:MTLOriginMake(copyInfo.textureOrigin.x,
@@ -909,7 +909,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                     switch (texture->GetDimension()) {
                         case wgpu::TextureDimension::e1D: {
                             [commandContext->EnsureBlit()
-                                         copyFromTexture:texture->GetMTLTexture()
+                                         copyFromTexture:texture->GetMTLTexture(src.aspect)
                                              sourceSlice:0
                                              sourceLevel:src.mipLevel
                                             sourceOrigin:MTLOriginMake(copyInfo.textureOrigin.x, 0,
@@ -935,7 +935,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                  copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers;
                                  ++z) {
                                 [commandContext->EnsureBlit()
-                                             copyFromTexture:texture->GetMTLTexture()
+                                             copyFromTexture:texture->GetMTLTexture(src.aspect)
                                                  sourceSlice:z
                                                  sourceLevel:src.mipLevel
                                                 sourceOrigin:textureOrigin
@@ -951,7 +951,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         }
                         case wgpu::TextureDimension::e3D: {
                             [commandContext->EnsureBlit()
-                                         copyFromTexture:texture->GetMTLTexture()
+                                         copyFromTexture:texture->GetMTLTexture(src.aspect)
                                              sourceSlice:0
                                              sourceLevel:src.mipLevel
                                             sourceOrigin:MTLOriginMake(copyInfo.textureOrigin.x,
@@ -1023,7 +1023,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         dstTexture->CreateFormatView(srcTexture->GetFormat().format);
 
                     [commandContext->EnsureBlit()
-                          copyFromTexture:srcTexture->GetMTLTexture()
+                          copyFromTexture:srcTexture->GetMTLTexture(copy->source.aspect)
                               sourceSlice:sourceLayer
                               sourceLevel:copy->source.mipLevel
                              sourceOrigin:MTLOriginMake(copy->source.origin.x,

@@ -23,6 +23,7 @@
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
+#include "dawn/common/StackContainer.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
 
@@ -55,7 +56,7 @@ class Texture final : public TextureBase {
 
     Texture(DeviceBase* device, const TextureDescriptor* descriptor);
 
-    id<MTLTexture> GetMTLTexture() const;
+    id<MTLTexture> GetMTLTexture(Aspect aspect) const;
     IOSurfaceRef GetIOSurface();
     NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
 
@@ -88,7 +89,8 @@ class Texture final : public TextureBase {
                             const SubresourceRange& range,
                             TextureBase::ClearValue clearValue);
 
-    NSPRef<id<MTLTexture>> mMtlTexture;
+    StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
+    MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
 
     MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface = nullptr;

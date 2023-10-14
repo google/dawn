@@ -47,6 +47,22 @@ Aspect ConvertViewAspect(const Format& format, wgpu::TextureAspect aspect) {
     return ConvertAspect(format, aspect);
 }
 
+Aspect GetPlaneAspect(const Format& format, uint32_t planeIndex) {
+    wgpu::TextureAspect textureAspect;
+    switch (planeIndex) {
+        case 0:
+            textureAspect = wgpu::TextureAspect::Plane0Only;
+            break;
+        case 1:
+            textureAspect = wgpu::TextureAspect::Plane1Only;
+            break;
+        default:
+            DAWN_UNREACHABLE();
+    }
+
+    return ConvertAspect(format, textureAspect);
+}
+
 Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect) {
     switch (aspect) {
         case wgpu::TextureAspect::All:

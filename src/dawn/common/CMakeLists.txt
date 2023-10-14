@@ -101,6 +101,8 @@ if (WIN32)
     )
 elseif(APPLE)
     target_sources(dawn_common PRIVATE
+        "IOSurfaceUtils.cpp"
+        "IOSurfaceUtils.h"
         "SystemUtils_mac.mm"
     )
 endif()

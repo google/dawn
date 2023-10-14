@@ -14,7 +14,9 @@
 
 #include "dawn/native/metal/TextureMTL.h"
 
+#include "absl/strings/str_format.h"
 #include "dawn/common/Constants.h"
+#include "dawn/common/IOSurfaceUtils.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/DynamicUploader.h"
@@ -223,17 +225,6 @@ ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t
             return wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm;
         default:
             return DAWN_VALIDATION_ERROR("Unsupported IOSurface format (%x).", format);
-    }
-}
-
-uint32_t GetIOSurfacePlane(wgpu::TextureAspect aspect) {
-    switch (aspect) {
-        case wgpu::TextureAspect::Plane0Only:
-            return 0;
-        case wgpu::TextureAspect::Plane1Only:
-            return 1;
-        default:
-            DAWN_UNREACHABLE();
     }
 }
 
@@ -743,7 +734,37 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
-    DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
+
+    if (texture->GetFormat().IsMultiPlanar()) {
+        // Metal doesn't allow creating multiplanar texture directly. So we create an IOSurface
+        // internally and wrap it.
+        ExternalImageDescriptorIOSurface ioSurfaceImageDesc;
+        ioSurfaceImageDesc.isInitialized = false;
+
+        DAWN_ASSERT(descriptor->dimension == wgpu::TextureDimension::e2D &&
+                    descriptor->mipLevelCount == 1 && descriptor->size.depthOrArrayLayers == 1);
+
+        IOSurfaceRef iosurface = CreateMultiPlanarIOSurface(
+            descriptor->format, descriptor->size.width, descriptor->size.height);
+
+        DAWN_INVALID_IF(iosurface == nullptr,
+                        "Failed to create IOSurface for multiplanar texture.");
+        DAWN_TRY(texture->InitializeFromIOSurface(&ioSurfaceImageDesc, descriptor, iosurface, {}));
+
+    } else {
+        DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
+    }
+
+    if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+        DAWN_TRY(texture->ClearTexture(device->GetPendingCommandContext(),
+                                       texture->GetAllSubresources(),
+                                       TextureBase::ClearValue::NonZero));
+    } else if (texture->ShouldKeepInitialized()) {
+        DAWN_TRY(texture->ClearTexture(device->GetPendingCommandContext(),
+                                       texture->GetAllSubresources(),
+                                       TextureBase::ClearValue::Zero));
+    }
+
     return texture;
 }
 
@@ -790,20 +811,15 @@ MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descrip
 
     NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
     mMtlUsage = [*mtlDesc usage];
-    mMtlTexture = AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
+    mMtlFormat = [*mtlDesc pixelFormat];
+    mMtlPlaneTextures->resize(1);
+    mMtlPlaneTextures[0] =
+        AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
 
-    if (mMtlTexture == nil) {
+    if (mMtlPlaneTextures[0] == nil) {
         return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate texture.");
     }
     SetLabelImpl();
-
-    if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        DAWN_TRY(ClearTexture(device->GetPendingCommandContext(), GetAllSubresources(),
-                              TextureBase::ClearValue::NonZero));
-    } else if (ShouldKeepInitialized()) {
-        DAWN_TRY(ClearTexture(device->GetPendingCommandContext(), GetAllSubresources(),
-                              TextureBase::ClearValue::Zero));
-    }
 
     return {};
 }
@@ -812,7 +828,9 @@ void Texture::InitializeAsWrapping(const TextureDescriptor* descriptor,
                                    NSPRef<id<MTLTexture>> wrapped) {
     NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
     mMtlUsage = [*mtlDesc usage];
-    mMtlTexture = std::move(wrapped);
+    mMtlFormat = [*mtlDesc pixelFormat];
+    mMtlPlaneTextures->resize(1);
+    mMtlPlaneTextures[0] = std::move(wrapped);
     SetLabelImpl();
 }
 
@@ -828,25 +846,63 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
     mIOSurface = ioSurface;
     mWaitEvents = std::move(waitEvents);
 
-    // Uses WGPUTexture which wraps multiplanar ioSurface needs to create
-    // texture view explicitly. Wrap the ioSurface and delay to extract
-    // MTLTexture from the plane of it when creating texture view.
-    // WGPUTexture which wraps non-multplanar ioSurface needs to support
-    // ops that doesn't require creating texture view(e.g. copy). Extract
-    // MTLTexture from such ioSurface to support this.
-    if (!GetFormat().IsMultiPlanar()) {
-        Device* device = ToBackend(GetDevice());
+    Device* device = ToBackend(GetDevice());
 
+    // Uses WGPUTexture which wraps multiplanar ioSurface needs to create
+    // texture view explicitly.
+    if (!GetFormat().IsMultiPlanar()) {
         NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
         [*mtlDesc setStorageMode:kIOSurfaceStorageMode];
 
         mMtlUsage = [*mtlDesc usage];
-        mMtlTexture = AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()
-                                                                           iosurface:ioSurface
-                                                                               plane:0]);
-        SetLabelImpl();
+        mMtlFormat = [*mtlDesc pixelFormat];
+        mMtlPlaneTextures->resize(1);
+        mMtlPlaneTextures[0] =
+            AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()
+                                                                 iosurface:ioSurface
+                                                                     plane:0]);
+    } else {
+        mMtlUsage = MetalTextureUsage(GetFormat(), GetInternalUsage());
+        // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
+        mMtlFormat = MTLPixelFormatInvalid;
+        const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
+        mMtlPlaneTextures->resize(numPlanes);
+        for (size_t plane = 0; plane < numPlanes; ++plane) {
+            Aspect aspect = GetPlaneAspect(GetFormat(), plane);
+            const auto& aspectInfo = GetFormat().GetAspectInfo(aspect);
+
+            NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
+            MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
+
+            mtlDesc.sampleCount = GetSampleCount();
+            mtlDesc.usage = mMtlUsage;
+            mtlDesc.pixelFormat = MetalPixelFormat(device, aspectInfo.format);
+            mtlDesc.mipmapLevelCount = GetNumMipLevels();
+            mtlDesc.storageMode = kIOSurfaceStorageMode;
+
+            mtlDesc.width = IOSurfaceGetWidthOfPlane(GetIOSurface(), plane);
+            mtlDesc.height = IOSurfaceGetHeightOfPlane(GetIOSurface(), plane);
+
+            // Multiplanar texture is validated to only have single layer, single mipLevel
+            // and 2d textures (depth == 1)
+            DAWN_ASSERT(GetArrayLayers() == 1 && GetDimension() == wgpu::TextureDimension::e2D &&
+                        GetNumMipLevels() == 1);
+            mtlDesc.arrayLength = 1;
+            mtlDesc.depth = 1;
+
+            mMtlPlaneTextures[plane] =
+                AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
+                                                                     iosurface:GetIOSurface()
+                                                                         plane:plane]);
+            if (mMtlPlaneTextures[plane] == nil) {
+                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+            }
+        }
     }
+
+    SetLabelImpl();
     SetIsSubresourceContentInitialized(descriptor->isInitialized, GetAllSubresources());
+
     return {};
 }
 
@@ -900,16 +956,34 @@ void Texture::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the texture since there are no other live refs.
     TextureBase::DestroyImpl();
-    mMtlTexture = nullptr;
+    mMtlPlaneTextures->clear();
     mIOSurface = nullptr;
 }
 
 void Texture::SetLabelImpl() {
-    SetDebugName(GetDevice(), mMtlTexture.Get(), "Dawn_Texture", GetLabel());
+    if (!GetFormat().IsMultiPlanar()) {
+        DAWN_ASSERT(mMtlPlaneTextures->size() == 1);
+        SetDebugName(GetDevice(), mMtlPlaneTextures[0].Get(), "Dawn_Texture", GetLabel());
+    } else {
+        for (size_t i = 0; i < mMtlPlaneTextures->size(); ++i) {
+            SetDebugName(GetDevice(), mMtlPlaneTextures[i].Get(),
+                         absl::StrFormat("Dawn_Plane_Texture[%zu]", i).c_str(), GetLabel());
+        }
+    }
 }
 
-id<MTLTexture> Texture::GetMTLTexture() const {
-    return mMtlTexture.Get();
+id<MTLTexture> Texture::GetMTLTexture(Aspect aspect) const {
+    switch (aspect) {
+        case Aspect::Plane0:
+            DAWN_ASSERT(mMtlPlaneTextures->size() > 1);
+            return mMtlPlaneTextures[0].Get();
+        case Aspect::Plane1:
+            DAWN_ASSERT(mMtlPlaneTextures->size() > 1);
+            return mMtlPlaneTextures[1].Get();
+        default:
+            DAWN_ASSERT(mMtlPlaneTextures->size() == 1);
+            return mMtlPlaneTextures[0].Get();
+    }
 }
 
 IOSurfaceRef Texture::GetIOSurface() {
@@ -917,14 +991,17 @@ IOSurfaceRef Texture::GetIOSurface() {
 }
 
 NSPRef<id<MTLTexture>> Texture::CreateFormatView(wgpu::TextureFormat format) {
+    DAWN_ASSERT(!GetFormat().IsMultiPlanar());
+    DAWN_ASSERT(mMtlFormat != MTLPixelFormatInvalid);
+
     if (GetFormat().format == format) {
-        return mMtlTexture;
+        return mMtlPlaneTextures[0];
     }
 
-    DAWN_ASSERT(AllowFormatReinterpretationWithoutFlag(
-        MetalPixelFormat(GetDevice(), GetFormat().format), MetalPixelFormat(GetDevice(), format)));
-    return AcquireNSPRef(
-        [mMtlTexture.Get() newTextureViewWithPixelFormat:MetalPixelFormat(GetDevice(), format)]);
+    DAWN_ASSERT(
+        AllowFormatReinterpretationWithoutFlag(mMtlFormat, MetalPixelFormat(GetDevice(), format)));
+    return AcquireNSPRef([mMtlPlaneTextures[0].Get()
+        newTextureViewWithPixelFormat:MetalPixelFormat(GetDevice(), format)]);
 }
 
 bool Texture::ShouldKeepInitialized() const {
@@ -980,7 +1057,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         DAWN_ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
                         switch (aspect) {
                             case Aspect::Depth:
-                                descriptor.depthAttachment.texture = GetMTLTexture();
+                                descriptor.depthAttachment.texture = GetMTLTexture(aspect);
                                 descriptor.depthAttachment.level = level;
                                 descriptor.depthAttachment.slice = arrayLayer;
                                 descriptor.depthAttachment.loadAction = MTLLoadActionClear;
@@ -988,7 +1065,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                                 descriptor.depthAttachment.clearDepth = dClearColor;
                                 break;
                             case Aspect::Stencil:
-                                descriptor.stencilAttachment.texture = GetMTLTexture();
+                                descriptor.stencilAttachment.texture = GetMTLTexture(aspect);
                                 descriptor.stencilAttachment.level = level;
                                 descriptor.stencilAttachment.slice = arrayLayer;
                                 descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
@@ -1006,6 +1083,38 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         GetMipLevelSingleSubresourceVirtualSize(level, range.aspects)));
                 }
             }
+        } else if (GetFormat().IsMultiPlanar()) {
+            DAWN_ASSERT(range.levelCount == 1);
+            DAWN_ASSERT(range.layerCount == 1);
+            DAWN_ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
+            DAWN_ASSERT(GetBaseSize().depthOrArrayLayers == 1);
+
+            // At least one aspect needs clearing. Iterate the aspects individually to
+            // determine which to clear.
+            for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                if (clearValue == TextureBase::ClearValue::Zero &&
+                    IsSubresourceContentInitialized(
+                        SubresourceRange::SingleMipAndLayer(0, 0, aspect))) {
+                    // Skip lazy clears if already initialized.
+                    continue;
+                }
+
+                NSRef<MTLRenderPassDescriptor> descriptorRef =
+                    [MTLRenderPassDescriptor renderPassDescriptor];
+                MTLRenderPassDescriptor* descriptor = descriptorRef.Get();
+
+                Extent3D aspectSize = GetMipLevelSingleSubresourcePhysicalSize(0, aspect);
+
+                descriptor.colorAttachments[0].texture = GetMTLTexture(aspect);
+                descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+                descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+                descriptor.colorAttachments[0].clearColor =
+                    MTLClearColorMake(dClearColor, dClearColor, dClearColor, dClearColor);
+
+                DAWN_TRY(
+                    EncodeEmptyMetalRenderPass(device, commandContext, descriptor, aspectSize));
+            }
+
         } else {
             DAWN_ASSERT(GetFormat().IsColor());
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
@@ -1035,7 +1144,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                             descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
                         }
 
-                        [*descriptor colorAttachments][attachment].texture = GetMTLTexture();
+                        [*descriptor colorAttachments][attachment].texture =
+                            GetMTLTexture(Aspect::Color);
                         [*descriptor colorAttachments][attachment].loadAction = MTLLoadActionClear;
                         [*descriptor colorAttachments][attachment].storeAction =
                             MTLStoreActionStore;
@@ -1116,7 +1226,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         sourceBytesPerImage:largestMipBytesPerImage
                                  sourceSize:MTLSizeMake(virtualSize.width, virtualSize.height,
                                                         virtualSize.depthOrArrayLayers)
-                                  toTexture:GetMTLTexture()
+                                  toTexture:GetMTLTexture(aspect)
                            destinationSlice:arrayLayer
                            destinationLevel:level
                           destinationOrigin:MTLOriginMake(0, 0, 0)
@@ -1131,9 +1241,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 MTLBlitOption Texture::ComputeMTLBlitOption(Aspect aspect) const {
     DAWN_ASSERT(HasOneBit(aspect));
     DAWN_ASSERT(GetFormat().aspects & aspect);
-    MTLPixelFormat format = MetalPixelFormat(GetDevice(), GetFormat().format);
 
-    if (format == MTLPixelFormatDepth32Float_Stencil8) {
+    if (mMtlFormat == MTLPixelFormatDepth32Float_Stencil8) {
         // We only provide a blit option if the format has both depth and stencil.
         // It is invalid to provide a blit option otherwise.
         switch (aspect) {
@@ -1180,7 +1289,8 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
         return {};
     }
 
-    id<MTLTexture> mtlTexture = texture->GetMTLTexture();
+    Aspect aspect = SelectFormatAspects(texture->GetFormat(), descriptor->aspect);
+    id<MTLTexture> mtlTexture = texture->GetMTLTexture(aspect);
 
     bool needsNewView = RequiresCreatingNewTextureView(texture, descriptor);
     if (device->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
@@ -1193,39 +1303,14 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     if (!needsNewView) {
         mMtlTextureView = mtlTexture;
     } else if (texture->GetFormat().IsMultiPlanar()) {
-        NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-        MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
-
-        mtlDesc.sampleCount = texture->GetSampleCount();
-        mtlDesc.usage = MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage());
-        mtlDesc.pixelFormat = MetalPixelFormat(device, descriptor->format);
-        mtlDesc.mipmapLevelCount = texture->GetNumMipLevels();
-        mtlDesc.storageMode = kIOSurfaceStorageMode;
-
-        uint32_t plane = GetIOSurfacePlane(descriptor->aspect);
-        mtlDesc.width = IOSurfaceGetWidthOfPlane(texture->GetIOSurface(), plane);
-        mtlDesc.height = IOSurfaceGetHeightOfPlane(texture->GetIOSurface(), plane);
-
-        // Multiplanar texture is validated to only have single layer, single mipLevel
-        // and 2d textures (depth == 1)
-        DAWN_ASSERT(texture->GetArrayLayers() == 1 &&
-                    texture->GetDimension() == wgpu::TextureDimension::e2D &&
-                    texture->GetNumMipLevels() == 1);
-        mtlDesc.arrayLength = 1;
-        mtlDesc.depth = 1;
-
-        mMtlTextureView = AcquireNSPRef([ToBackend(GetDevice())->GetMTLDevice()
-            newTextureWithDescriptor:mtlDesc
-                           iosurface:texture->GetIOSurface()
-                               plane:plane]);
-        if (mMtlTextureView == nil) {
-            return DAWN_INTERNAL_ERROR("Failed to create MTLTexture view for external texture.");
-        }
+        // For multiplanar texture, plane view is already created in InitializeFromIOSurface().
+        // The view is only nullptr if aspect is invalid.
+        DAWN_ASSERT(mtlTexture != nullptr);
+        mMtlTextureView = mtlTexture;
     } else {
         MTLPixelFormat viewFormat = MetalPixelFormat(device, descriptor->format);
         MTLPixelFormat textureFormat = MetalPixelFormat(device, GetTexture()->GetFormat().format);
 
-        Aspect aspect = SelectFormatAspects(GetFormat(), descriptor->aspect);
         if (aspect == Aspect::Stencil && textureFormat != MTLPixelFormatStencil8) {
             DAWN_ASSERT(textureFormat == MTLPixelFormatDepth32Float_Stencil8);
             viewFormat = MTLPixelFormatX32_Stencil8;
@@ -1281,7 +1366,7 @@ TextureView::AttachmentInfo TextureView::GetAttachmentInfo() const {
         return {mMtlTextureView, 0, 0};
     }
     AttachmentInfo info;
-    info.texture = ToBackend(GetTexture())->GetMTLTexture();
+    info.texture = ToBackend(GetTexture())->GetMTLTexture(GetTexture()->GetFormat().aspects);
     info.baseMipLevel = GetBaseMipLevel();
     info.baseArrayLayer = GetBaseArrayLayer();
     return info;

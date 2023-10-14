@@ -459,14 +459,20 @@ MaybeError ValidateTextureDescriptor(
     const Format* format;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
 
-    switch (allowMultiPlanar) {
-        case AllowMultiPlanarTextureFormat::Yes:
-            break;
-        case AllowMultiPlanarTextureFormat::No:
-            DAWN_INVALID_IF(format->IsMultiPlanar(),
-                            "Creation of multiplanar texture format %s is not allowed.",
-                            descriptor->format);
-            break;
+    if (format->IsMultiPlanar()) {
+        switch (allowMultiPlanar) {
+            case AllowMultiPlanarTextureFormat::Yes:
+                DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D ||
+                                    descriptor->mipLevelCount != 1 ||
+                                    descriptor->size.depthOrArrayLayers != 1,
+                                "Multiplanar texture must be non-mipmapped & 2D in order to be "
+                                "created directly.");
+                break;
+            case AllowMultiPlanarTextureFormat::No:
+                return DAWN_VALIDATION_ERROR(
+                    "Creation of multiplanar texture format %s is not allowed.",
+                    descriptor->format);
+        }
     }
 
     for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {

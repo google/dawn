@@ -211,7 +211,7 @@ BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
     descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     wgpu::Texture color = device.CreateTexture(&descriptor);
 
-    return BasicRenderPass(width, height, color);
+    return BasicRenderPass(width, height, color, format);
 }
 
 wgpu::ImageCopyBuffer CreateImageCopyBuffer(wgpu::Buffer buffer,

@@ -61,6 +61,9 @@ Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect);
 // special cases per plane view formats before calling ConvertAspect.
 Aspect ConvertViewAspect(const Format& format, wgpu::TextureAspect aspect);
 
+// Return aspect which corresponds to a plane.
+Aspect GetPlaneAspect(const Format& format, uint32_t planeIndex);
+
 // Helper struct to make it clear that what the parameters of a range mean.
 template <typename T>
 struct FirstAndCountRange {
