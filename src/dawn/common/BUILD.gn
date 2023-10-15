@@ -296,12 +296,15 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       ":dawn_version_gen",
     ]
 
-    if (is_mac) {
+    if (is_apple) {
       sources += [
         "IOSurfaceUtils.cpp",
         "IOSurfaceUtils.h",
-        "SystemUtils_mac.mm",
       ]
+    }
+
+    if (is_mac) {
+      sources += [ "SystemUtils_mac.mm" ]
     }
 
     # Note that while this doesn't make `internal_config` a public config of
