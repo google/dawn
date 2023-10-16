@@ -271,8 +271,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(r.glVersionStandard),
                                                               r.glVersionMajor, r.glVersionMinor);
 
-            // TODO(crbug.com/dawn/1686): Robustness causes shader compilation failures.
-            tintOptions.disable_robustness = true;
+            tintOptions.disable_robustness = false;
 
             tintOptions.external_texture_options = r.externalTextureOptions;
 

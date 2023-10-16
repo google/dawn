@@ -771,6 +771,9 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
 
 // Verify 1D write-only storage textures work correctly.
 TEST_P(StorageTextureTests, Writeonly1DStorageTexture) {
+    // TODO(crbug.com/tint/2060): shader compile error for glsl writer.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
 
     // Prepare the write-only storage texture.
