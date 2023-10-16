@@ -48,7 +48,7 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
     };
 
     auto valid = [&wgsl_seen, &spirv_seen](const auto& hsh) -> bool {
-        for (const auto it : hsh) {
+        for (const auto& it : hsh) {
             const auto& src_binding = it.first;
             const auto& dst_binding = it.second;
 
@@ -84,7 +84,7 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
         return false;
     }
 
-    for (const auto it : options.bindings.external_texture) {
+    for (const auto& it : options.bindings.external_texture) {
         const auto& src_binding = it.first;
         const auto& plane0 = it.second.plane0;
         const auto& plane1 = it.second.plane1;
@@ -158,7 +158,7 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
                                            RemapperData& remapper_data,
                                            ExternalTextureOptions& external_texture) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
-        for (const auto it : hsh) {
+        for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
             const binding::Uniform& dst_binding_point = it.second;
 
@@ -180,7 +180,7 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
     create_remappings(options.bindings.sampler);
 
     // External textures are re-bound to their plane0 location
-    for (const auto it : options.bindings.external_texture) {
+    for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
         const binding::BindingInfo& plane0 = it.second.plane0;
         const binding::BindingInfo& plane1 = it.second.plane1;
