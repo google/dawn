@@ -38,7 +38,7 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:8: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.

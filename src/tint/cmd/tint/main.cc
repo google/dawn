@@ -926,7 +926,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 #else
             auto val = tint::glsl::validate::Validate(result->glsl, result->entry_points);
             if (!val) {
-                std::cerr << "Error parsing GLSL shader:\n" << val.Failure();
+                std::cerr << val.Failure();
                 return false;
             }
 #endif

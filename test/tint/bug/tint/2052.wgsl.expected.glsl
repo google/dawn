@@ -10,7 +10,7 @@ void f() {
   discard;
 }
 
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:8: 'discard' : not supported in this stage: compute
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.

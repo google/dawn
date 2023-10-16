@@ -27,7 +27,7 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:11: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
@@ -57,7 +57,7 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:12: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
@@ -87,7 +87,7 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:11: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
 ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.

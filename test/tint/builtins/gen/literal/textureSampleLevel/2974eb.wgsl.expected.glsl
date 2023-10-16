@@ -26,7 +26,7 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:10: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
 ERROR: 0:10: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:10: '' : compilation terminated 
@@ -56,7 +56,7 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:11: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
 ERROR: 0:11: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:11: '' : compilation terminated 
@@ -86,7 +86,7 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:10: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
 ERROR: 0:10: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:10: '' : compilation terminated 

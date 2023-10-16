@@ -29,7 +29,7 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:3: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
@@ -61,7 +61,7 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
@@ -93,7 +93,7 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:3: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.

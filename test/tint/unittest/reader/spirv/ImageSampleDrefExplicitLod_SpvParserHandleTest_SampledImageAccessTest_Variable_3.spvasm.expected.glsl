@@ -38,7 +38,7 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
+error: Error parsing GLSL shader:
 ERROR: 0:27: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
 ERROR: 0:27: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
