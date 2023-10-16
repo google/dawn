@@ -90,13 +90,18 @@ crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:co
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
-
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r8snorm" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg8snorm" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba8snorm" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
+crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
 # Can't copy compressed textures issue
 crbug.com/dawn/1327 [ angle-opengl ] webgpu:api,operation,command_buffer,copyTextureToTexture:* [ Skip ]
@@ -134,7 +139,6 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";* [ Failure ]
 
 # Undiagnosed
-[ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,general:occlusion_query,invalid_query_set: [ Failure ]
@@ -150,6 +154,9 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 [ angle-opengl ] webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:* [ Failure ]
+
+# many 2d zero-init readMethod="Sample" tests are failing
+crbug.com/dawn/2147 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";* [ Failure ]
 
 # Shader issues
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,binary,f32_addition:* [ Failure ]
