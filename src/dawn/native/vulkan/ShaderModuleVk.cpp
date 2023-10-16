@@ -172,20 +172,11 @@ ShaderModule::~ShaderModule() = default;
 #define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                     \
     X(SingleShaderStage, stage)                                                                  \
     X(const tint::Program*, inputProgram)                                                        \
-    X(tint::spirv::writer::Bindings, bindings)                                                   \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(std::string_view, entryPointName)                                                          \
-    X(bool, isRobustnessEnabled)                                                                 \
-    X(bool, disableWorkgroupInit)                                                                \
     X(bool, disableSymbolRenaming)                                                               \
-    X(bool, useZeroInitializeWorkgroupMemoryExtension)                                           \
-    X(bool, clampFragDepth)                                                                      \
-    X(bool, disableImageRobustness)                                                              \
-    X(bool, disableRuntimeSizedArrayIndexClamping)                                               \
-    X(bool, experimentalRequireSubgroupUniformControlFlow)                                       \
-    X(bool, passMatrixByPointer)                                                                 \
-    X(bool, useTintIR)                                                                           \
+    X(tint::spirv::writer::Options, tintOptions)                                                 \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -301,31 +292,38 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     SpirvCompilationRequest req = {};
     req.stage = stage;
     req.inputProgram = GetTintProgram();
-    req.bindings = std::move(bindings);
     req.entryPointName = programmableStage.entryPoint;
-    req.isRobustnessEnabled = GetDevice()->IsRobustnessEnabled();
-    req.disableWorkgroupInit = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
-    req.useZeroInitializeWorkgroupMemoryExtension =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
-    req.clampFragDepth = clampFragDepth;
-    req.disableImageRobustness = GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
-    // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
-    // transform as unsized arrays can only be declared on storage address space.
-    req.disableRuntimeSizedArrayIndexClamping =
-        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
-    req.useTintIR = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
+
+    req.tintOptions.clamp_frag_depth = clampFragDepth;
+    req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
+    req.tintOptions.emit_vertex_point_size = true;
+    req.tintOptions.disable_workgroup_init =
+        GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+    req.tintOptions.use_zero_initialize_workgroup_memory_extension =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
+    req.tintOptions.bindings = std::move(bindings);
+    req.tintOptions.disable_image_robustness =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
+    // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
+    // transform as unsized arrays can only be declared on storage address space.
+    req.tintOptions.disable_runtime_sized_array_index_clamping =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
+    req.tintOptions.use_tint_ir = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
+
     // Set subgroup uniform control flow flag for subgroup experiment, if device has
     // Chromium-experimental-subgroup-uniform-control-flow feature. (dawn:464)
     if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
-        req.experimentalRequireSubgroupUniformControlFlow = true;
+        req.tintOptions.experimental_require_subgroup_uniform_control_flow = true;
+    } else {
+        req.tintOptions.experimental_require_subgroup_uniform_control_flow = false;
     }
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.
     if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {
-        req.passMatrixByPointer = true;
+        req.tintOptions.pass_matrix_by_pointer = true;
     }
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
@@ -387,24 +385,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                        program, remappedEntryPoint.c_str(), r.limits));
             }
 
-            tint::spirv::writer::Options options;
-            options.clamp_frag_depth = r.clampFragDepth;
-            options.disable_robustness = !r.isRobustnessEnabled;
-            options.emit_vertex_point_size = true;
-            options.disable_workgroup_init = r.disableWorkgroupInit;
-            options.use_zero_initialize_workgroup_memory_extension =
-                r.useZeroInitializeWorkgroupMemoryExtension;
-            options.bindings = r.bindings;
-            options.disable_image_robustness = r.disableImageRobustness;
-            options.disable_runtime_sized_array_index_clamping =
-                r.disableRuntimeSizedArrayIndexClamping;
-            options.experimental_require_subgroup_uniform_control_flow =
-                r.experimentalRequireSubgroupUniformControlFlow;
-            options.use_tint_ir = r.useTintIR;
-            options.pass_matrix_by_pointer = r.passMatrixByPointer;
-
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
-            auto tintResult = tint::spirv::writer::Generate(program, options);
+            auto tintResult = tint::spirv::writer::Generate(program, r.tintOptions);
             DAWN_INVALID_IF(!tintResult, "An error occurred while generating SPIR-V\n%s",
                             tintResult.Failure().reason.str());
 

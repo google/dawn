@@ -60,6 +60,14 @@ MaybeError stream::Stream<tint::BindingPoint>::Read(Source* s, tint::BindingPoin
 #if TINT_BUILD_SPV_WRITER
 // static
 template <>
+void stream::Stream<tint::spirv::writer::Options>::Write(
+    stream::Sink* sink,
+    const tint::spirv::writer::Options& options) {
+    StreamInTintObject(options, sink);
+}
+
+// static
+template <>
 void stream::Stream<tint::spirv::writer::Bindings>::Write(
     stream::Sink* sink,
     const tint::spirv::writer::Bindings& bindings) {

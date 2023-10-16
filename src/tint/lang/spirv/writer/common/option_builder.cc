@@ -25,7 +25,7 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& info) -> bool {
         if (seen_wgsl_bindings.Contains(info)) {
             std::stringstream str;
-            str << "Found duplicate WGSL binding point: " << info;
+            str << "found duplicate WGSL binding point: " << info;
 
             diagnostics.add_error(diag::System::Writer, str.str());
             return true;
@@ -38,7 +38,7 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
                        &seen_spirv_bindings](const binding::BindingInfo& info) -> bool {
         if (seen_spirv_bindings.Contains(info)) {
             std::stringstream str;
-            str << "Found duplicate SPIR-V binding point: [group: " << info.group
+            str << "found duplicate SPIR-V binding point: [group: " << info.group
                 << ", binding: " << info.binding << "]";
             diagnostics.add_error(diag::System::Writer, str.str());
             return true;
@@ -64,23 +64,23 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
     };
 
     if (!valid(options.bindings.uniform)) {
-        diagnostics.add_note(diag::System::Writer, "When processing uniform", {});
+        diagnostics.add_note(diag::System::Writer, "when processing uniform", {});
         return false;
     }
     if (!valid(options.bindings.storage)) {
-        diagnostics.add_note(diag::System::Writer, "When processing storage", {});
+        diagnostics.add_note(diag::System::Writer, "when processing storage", {});
         return false;
     }
     if (!valid(options.bindings.texture)) {
-        diagnostics.add_note(diag::System::Writer, "When processing texture", {});
+        diagnostics.add_note(diag::System::Writer, "when processing texture", {});
         return false;
     }
     if (!valid(options.bindings.storage_texture)) {
-        diagnostics.add_note(diag::System::Writer, "When processing storage_texture", {});
+        diagnostics.add_note(diag::System::Writer, "when processing storage_texture", {});
         return false;
     }
     if (!valid(options.bindings.sampler)) {
-        diagnostics.add_note(diag::System::Writer, "When processing sampler", {});
+        diagnostics.add_note(diag::System::Writer, "when processing sampler", {});
         return false;
     }
 
@@ -92,20 +92,20 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
 
         // Validate with the actual source regardless of what the remapper will do
         if (wgsl_seen(src_binding)) {
-            diagnostics.add_note(diag::System::Writer, "When processing external_texture", {});
+            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
 
         if (spirv_seen(plane0)) {
-            diagnostics.add_note(diag::System::Writer, "When processing external_texture", {});
+            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
         if (spirv_seen(plane1)) {
-            diagnostics.add_note(diag::System::Writer, "When processing external_texture", {});
+            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
         if (spirv_seen(metadata)) {
-            diagnostics.add_note(diag::System::Writer, "When processing external_texture", {});
+            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
     }

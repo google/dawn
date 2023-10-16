@@ -25,6 +25,8 @@
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::spirv::writer {
@@ -38,31 +40,34 @@ Bindings GenerateBindings(const Program& program) {
     std::unordered_set<tint::BindingPoint> seen_binding_points;
 
     // Collect next valid binding number per group
-    std::unordered_map<uint32_t, uint32_t> group_to_next_binding_number;
-    std::vector<tint::BindingPoint> ext_tex_bps;
+    Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
+    Vector<tint::BindingPoint, 4> ext_tex_bps;
     for (auto* var : program.AST().GlobalVariables()) {
         if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
             if (auto bp = sem_var->BindingPoint()) {
                 // This is a bit of a hack. The binding points must be unique over all the `binding`
                 // entries. But, this is looking at _all_ entry points where bindings can overlap.
                 // In the case where both entry points used the same type (uniform, sampler, etc)
-                // then it woudl be fine as it just overwrites with itself. But, if one entry point
+                // then it would be fine as it just overwrites with itself. But, if one entry point
                 // has a uniform and the other a sampler at the same (group,binding) pair then we'll
                 // get a validation error due to duplicate WGSL bindings.
                 //
-                // For generate bindings we don't really care as we always map to itself, so if it
+                // For generating bindings we don't really care as we always map to itself, so if it
                 // exists anywhere, we just pretend that's the only one.
                 if (seen_binding_points.find(*bp) != seen_binding_points.end()) {
                     continue;
                 }
                 seen_binding_points.emplace(*bp);
 
-                auto& n = group_to_next_binding_number[bp->group];
-                n = std::max(n, bp->binding + 1);
+                if (auto val = group_to_next_binding_number.Find(bp->group)) {
+                    *val = std::max(*val, bp->binding + 1);
+                } else {
+                    group_to_next_binding_number.Add(bp->group, bp->binding + 1);
+                }
 
                 // Store up the external textures, we'll add them in the next step
                 if (sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
-                    ext_tex_bps.emplace_back(*bp);
+                    ext_tex_bps.Push(*bp);
                     continue;
                 }
 
@@ -104,11 +109,13 @@ Bindings GenerateBindings(const Program& program) {
 
     for (auto bp : ext_tex_bps) {
         uint32_t g = bp.group;
-        uint32_t& next_num = group_to_next_binding_number[g];
+        uint32_t next_num = *(group_to_next_binding_number.GetOrZero(g));
 
         binding::BindingInfo plane0{bp.group, bp.binding};
         binding::BindingInfo plane1{g, next_num++};
         binding::BindingInfo metadata{g, next_num++};
+
+        group_to_next_binding_number.Replace(g, next_num);
 
         bindings.external_texture.emplace(bp, binding::ExternalTexture{metadata, plane0, plane1});
     }
