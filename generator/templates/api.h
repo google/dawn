@@ -67,6 +67,8 @@
 #define {{API}}_NULLABLE
 #endif
 
+#define WGPU_BREAKING_WORK_DONE_SIGNAL_VALUE_CHANGE
+
 #include <stdint.h>
 #include <stddef.h>
 
