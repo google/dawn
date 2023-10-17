@@ -534,13 +534,19 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                              InternalErrorType additionalAllowedErrors,
                              WGPUDeviceLostReason lost_reason) {
     AppendDebugLayerMessages(error.get());
+
+    InternalErrorType type = error->GetType();
+    if (type != InternalErrorType::Validation) {
+        // D3D device can provide additional device removed reason. We would
+        // like to query and log the the device removed reason if the error is
+        // not validation error.
+        AppendDeviceLostMessage(error.get());
+    }
+
     InternalErrorType allowedErrors =
         InternalErrorType::Validation | InternalErrorType::DeviceLost | additionalAllowedErrors;
-    InternalErrorType type = error->GetType();
-    if (type == InternalErrorType::DeviceLost) {
-        // D3D device can provide additional device removed reason.
-        AppendDeviceLostMessage(error.get());
 
+    if (type == InternalErrorType::DeviceLost) {
         mState = State::Disconnected;
 
         // If the ErrorInjector is enabled, then the device loss might be fake and the device
