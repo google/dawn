@@ -555,11 +555,12 @@ class TimestampQueryInsidePassesValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
-        // The timestamp query feature must be supported if the timestamp query inside passes
-        // feature is supported. Enable timestamp query for validating queries overwrite inside and
-        // outside of the passes.
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::TimestampQuery,
-                                                 wgpu::FeatureName::TimestampQueryInsidePasses};
+        // The timestamp query feature must be supported if the chromium experimental timestamp
+        // query inside passes feature is supported. Enable timestamp query for validating queries
+        // overwrite inside and outside of the passes.
+        wgpu::FeatureName requiredFeatures[2] = {
+            wgpu::FeatureName::TimestampQuery,
+            wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeatureCount = 2;
 

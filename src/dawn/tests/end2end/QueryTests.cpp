@@ -1188,16 +1188,17 @@ class TimestampQueryInsidePassesTests : public TimestampQueryTests {
 
         // Skip all tests if timestamp feature is not supported
         DAWN_TEST_UNSUPPORTED_IF(
-            !SupportsFeatures({wgpu::FeatureName::TimestampQueryInsidePasses}));
+            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses}));
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::TimestampQueryInsidePasses})) {
-            requiredFeatures.push_back(wgpu::FeatureName::TimestampQueryInsidePasses);
-            // The timestamp query feature must be supported if the timestamp query inside passes
-            // feature is supported. Enable timestamp query for testing queries overwrite inside and
-            // outside of the passes.
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses})) {
+            requiredFeatures.push_back(
+                wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses);
+            // The timestamp query feature must be supported if the chromium experimental timestamp
+            // query inside passes feature is supported. Enable timestamp query for testing queries
+            // overwrite inside and outside of the passes.
             requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
         }
         return requiredFeatures;

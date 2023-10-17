@@ -45,6 +45,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:
         case WGPUFeatureName_TimestampQueryInsidePasses:
+        case WGPUFeatureName_ChromiumExperimentalTimestampQueryInsidePasses:
         case WGPUFeatureName_PipelineStatisticsQuery:
         case WGPUFeatureName_TextureCompressionBC:
         case WGPUFeatureName_TextureCompressionETC2:

@@ -82,9 +82,10 @@ MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescript
                             "Timestamp queries are disallowed because they may expose precise "
                             "timing information.");
 
-            DAWN_INVALID_IF(!device->HasFeature(Feature::TimestampQuery) &&
-                                !device->HasFeature(Feature::TimestampQueryInsidePasses),
-                            "Timestamp query set created without the feature being enabled.");
+            DAWN_INVALID_IF(
+                !device->HasFeature(Feature::TimestampQuery) &&
+                    !device->HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses),
+                "Timestamp query set created without the feature being enabled.");
 
             DAWN_INVALID_IF(descriptor->pipelineStatisticCount != 0,
                             "Pipeline statistics specified for a query of type %s.",

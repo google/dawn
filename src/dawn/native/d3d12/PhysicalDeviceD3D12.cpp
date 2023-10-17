@@ -132,6 +132,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
         EnableFeature(Feature::TimestampQueryInsidePasses);
+        EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
     }
     EnableFeature(Feature::PipelineStatisticsQuery);
 

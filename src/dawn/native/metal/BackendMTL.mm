@@ -507,6 +507,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
                 if (enableTimestampQueryInsidePasses) {
                     EnableFeature(Feature::TimestampQueryInsidePasses);
+                    EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
                 }
             }
         }

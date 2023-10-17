@@ -86,7 +86,8 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                      "D3D12 create command queue"));
 
-    if ((HasFeature(Feature::TimestampQuery) || HasFeature(Feature::TimestampQueryInsidePasses)) &&
+    if ((HasFeature(Feature::TimestampQuery) ||
+         HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses)) &&
         !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Get GPU timestamp counter frequency (in ticks/second). This fails if the specified
         // command queue doesn't support timestamps. D3D12_COMMAND_LIST_TYPE_DIRECT queues

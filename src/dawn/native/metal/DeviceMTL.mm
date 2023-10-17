@@ -135,8 +135,8 @@ Device::Device(AdapterBase* adapter,
         mCounterSamplingAtStageBoundary = false;
     }
 
-    mIsTimestampQueryEnabled =
-        HasFeature(Feature::TimestampQuery) || HasFeature(Feature::TimestampQueryInsidePasses);
+    mIsTimestampQueryEnabled = HasFeature(Feature::TimestampQuery) ||
+                               HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
 }
 
 Device::~Device() {

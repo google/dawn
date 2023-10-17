@@ -92,10 +92,12 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
         // Requires that timestamp query feature is enabled and timestamp query conversion is
         // disabled.
         DAWN_TEST_UNSUPPORTED_IF(!mIsFeatureSupported);
-        // The "timestamp-query-inside-passes" feature is not supported on command encoder.
-        DAWN_TEST_UNSUPPORTED_IF(GetParam().mFeatureName ==
-                                     wgpu::FeatureName::TimestampQueryInsidePasses &&
-                                 GetParam().mEncoderType == EncoderType::NonPass);
+        // The "chromium-experimental-timestamp-query-inside-passes" feature is not supported on
+        // command encoder.
+        DAWN_TEST_UNSUPPORTED_IF(
+            GetParam().mFeatureName ==
+                wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses &&
+            GetParam().mEncoderType == EncoderType::NonPass);
 
         mBackend = GPUTimestampCalibrationTestBackend::Create(device);
         DAWN_TEST_UNSUPPORTED_IF(!mBackend->IsSupported());
@@ -163,7 +165,7 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
                 pass.End();
                 break;
             }
-            case wgpu::FeatureName::TimestampQueryInsidePasses: {
+            case wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses: {
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
                 pass.WriteTimestamp(querySet, 0);
                 pass.SetPipeline(CreateComputePipeline());
@@ -194,7 +196,7 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
                 pass.End();
                 break;
             }
-            case wgpu::FeatureName::TimestampQueryInsidePasses: {
+            case wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses: {
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.WriteTimestamp(querySet, 0);
                 pass.SetPipeline(CreateRenderPipeline());
@@ -228,9 +230,10 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         switch (GetParam().mEncoderType) {
             case EncoderType::NonPass: {
-                // The "timestamp-query-inside-passes" feature is not supported on command encoder
+                // The "chromium-experimental-timestamp-query-inside-passes" feature is not
+                // supported on command encoder
                 DAWN_ASSERT(GetParam().mFeatureName !=
-                            wgpu::FeatureName::TimestampQueryInsidePasses);
+                            wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses);
                 encoder.WriteTimestamp(querySet, 0);
                 encoder.WriteTimestamp(querySet, 1);
                 break;
@@ -296,7 +299,8 @@ DAWN_INSTANTIATE_TEST_P(
      D3D12Backend({}, {"disable_timestamp_query_conversion"}),
      MetalBackend({"disable_timestamp_query_conversion"}, {}),
      MetalBackend({}, {"disable_timestamp_query_conversion"})},
-    {wgpu::FeatureName::TimestampQuery, wgpu::FeatureName::TimestampQueryInsidePasses},
+    {wgpu::FeatureName::TimestampQuery,
+     wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses},
     {EncoderType::NonPass, EncoderType::ComputePass, EncoderType::RenderPass});
 
 }  // anonymous namespace
