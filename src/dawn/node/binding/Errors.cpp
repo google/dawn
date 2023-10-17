@@ -46,6 +46,7 @@ constexpr char kReadOnlyError[] = "ReadOnlyError";
 constexpr char kVersionError[] = "VersionError";
 constexpr char kOperationError[] = "OperationError";
 constexpr char kNotAllowedError[] = "NotAllowedError";
+constexpr char kGPUPipelineError[] = "GPUPipelineError";
 
 static Napi::Error New(Napi::Env env, std::string name, std::string message, uint16_t code = 0) {
     auto err = Napi::Error::New(env);
@@ -171,6 +172,10 @@ Napi::Error Errors::OperationError(Napi::Env env, std::string message) {
 
 Napi::Error Errors::NotAllowedError(Napi::Env env, std::string message) {
     return New(env, kNotAllowedError, message);
+}
+
+Napi::Error Errors::GPUPipelineError(Napi::Env env, std::string message) {
+    return New(env, kGPUPipelineError, message);
 }
 
 }  // namespace wgpu::binding

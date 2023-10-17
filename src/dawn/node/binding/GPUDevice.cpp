@@ -395,7 +395,7 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
                         c->env, pipeline, c->label));
                     break;
                 default:
-                    c->promise.Reject(Errors::OperationError(c->env));
+                    c->promise.Reject(Errors::GPUPipelineError(c->env));
                     break;
             }
         },
@@ -440,7 +440,7 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
                         c->env, pipeline, c->label));
                     break;
                 default:
-                    c->promise.Reject(Errors::OperationError(c->env));
+                    c->promise.Reject(Errors::GPUPipelineError(c->env));
                     break;
             }
         },

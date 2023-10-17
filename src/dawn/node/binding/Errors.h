@@ -55,6 +55,7 @@ class Errors {
     static Napi::Error VersionError(Napi::Env, std::string message = {});
     static Napi::Error OperationError(Napi::Env, std::string message = {});
     static Napi::Error NotAllowedError(Napi::Env, std::string message = {});
+    static Napi::Error GPUPipelineError(Napi::Env, std::string message = {});
 };
 
 }  // namespace wgpu::binding
