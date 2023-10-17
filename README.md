@@ -48,7 +48,7 @@ User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
 
 ## License
 
-Apache 2.0 Public License, please see [LICENSE](/LICENSE).
+BSD 3-Clause License, please see [LICENSE](/LICENSE).
 
 ## Disclaimer
 
