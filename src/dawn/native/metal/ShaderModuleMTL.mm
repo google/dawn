@@ -41,18 +41,12 @@ using OptionalVertexPullingTransformConfig =
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
     X(SingleShaderStage, stage)                                                                  \
     X(const tint::Program*, inputProgram)                                                        \
-    X(tint::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                               \
-    X(tint::BindingRemapperOptions, bindingRemapper)                                             \
-    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
     X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(std::string, entryPointName)                                                               \
-    X(uint32_t, sampleMask)                                                                      \
-    X(bool, emitVertexPointSize)                                                                 \
-    X(bool, isRobustnessEnabled)                                                                 \
     X(bool, disableSymbolRenaming)                                                               \
-    X(bool, disableWorkgroupInit)                                                                \
+    X(tint::msl::writer::Options, tintOptions)                                                   \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -185,19 +179,22 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     MslCompilationRequest req = {};
     req.stage = stage;
     req.inputProgram = programmableStage.module->GetTintProgram();
-    req.bindingRemapper = std::move(bindingRemapper);
-    req.externalTextureOptions = BuildExternalTextureTransformBindings(layout);
     req.vertexPullingTransformConfig = std::move(vertexPullingTransformConfig);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.entryPointName = programmableStage.entryPoint.c_str();
-    req.sampleMask = sampleMask;
-    req.emitVertexPointSize =
-        stage == SingleShaderStage::Vertex &&
-        renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
-    req.isRobustnessEnabled = device->IsRobustnessEnabled();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(device->GetPlatform());
-    req.arrayLengthFromUniform = std::move(arrayLengthFromUniform);
+
+    req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
+    req.tintOptions.buffer_size_ubo_index = kBufferLengthBufferSlot;
+    req.tintOptions.fixed_sample_mask = sampleMask;
+    req.tintOptions.disable_workgroup_init = false;
+    req.tintOptions.emit_vertex_point_size =
+        stage == SingleShaderStage::Vertex &&
+        renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
+    req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
+    req.tintOptions.binding_remapper_options = std::move(bindingRemapper);
+    req.tintOptions.external_texture_options = BuildExternalTextureTransformBindings(layout);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -268,18 +265,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                                program, remappedEntryPointName.data(), r.limits));
             }
 
-            tint::msl::writer::Options options;
-            options.disable_robustness = !r.isRobustnessEnabled;
-            options.buffer_size_ubo_index = kBufferLengthBufferSlot;
-            options.fixed_sample_mask = r.sampleMask;
-            options.disable_workgroup_init = r.disableWorkgroupInit;
-            options.emit_vertex_point_size = r.emitVertexPointSize;
-            options.array_length_from_uniform = r.arrayLengthFromUniform;
-            options.binding_remapper_options = r.bindingRemapper;
-            options.external_texture_options = r.externalTextureOptions;
-
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-            auto result = tint::msl::writer::Generate(program, options);
+            auto result = tint::msl::writer::Generate(program, r.tintOptions);
             DAWN_INVALID_IF(!result, "An error occurred while generating MSL:\n%s",
                             result.Failure().reason.str());
 
