@@ -88,7 +88,7 @@ void Run(core::ir::Module& ir) {
     // Replace scalar operands to binary instructions that produce vectors.
     for (auto* binary : binary_worklist) {
         auto* result_ty = binary->Result()->Type();
-        if (result_ty->is_float_vector() && binary->Kind() == core::ir::Binary::Kind::kMultiply) {
+        if (result_ty->is_float_vector() && binary->Op() == core::ir::BinaryOp::kMultiply) {
             // Use OpVectorTimesScalar for floating point multiply.
             auto* vts =
                 b.Call<spirv::ir::BuiltinCall>(result_ty, spirv::BuiltinFn::kVectorTimesScalar);

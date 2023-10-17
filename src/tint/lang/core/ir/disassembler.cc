@@ -791,53 +791,53 @@ void Disassembler::EmitBinary(Binary* b) {
     SourceMarker sm(this);
     EmitValueWithType(b);
     out_ << " = ";
-    switch (b->Kind()) {
-        case Binary::Kind::kAdd:
+    switch (b->Op()) {
+        case BinaryOp::kAdd:
             out_ << "add";
             break;
-        case Binary::Kind::kSubtract:
+        case BinaryOp::kSubtract:
             out_ << "sub";
             break;
-        case Binary::Kind::kMultiply:
+        case BinaryOp::kMultiply:
             out_ << "mul";
             break;
-        case Binary::Kind::kDivide:
+        case BinaryOp::kDivide:
             out_ << "div";
             break;
-        case Binary::Kind::kModulo:
+        case BinaryOp::kModulo:
             out_ << "mod";
             break;
-        case Binary::Kind::kAnd:
+        case BinaryOp::kAnd:
             out_ << "and";
             break;
-        case Binary::Kind::kOr:
+        case BinaryOp::kOr:
             out_ << "or";
             break;
-        case Binary::Kind::kXor:
+        case BinaryOp::kXor:
             out_ << "xor";
             break;
-        case Binary::Kind::kEqual:
+        case BinaryOp::kEqual:
             out_ << "eq";
             break;
-        case Binary::Kind::kNotEqual:
+        case BinaryOp::kNotEqual:
             out_ << "neq";
             break;
-        case Binary::Kind::kLessThan:
+        case BinaryOp::kLessThan:
             out_ << "lt";
             break;
-        case Binary::Kind::kGreaterThan:
+        case BinaryOp::kGreaterThan:
             out_ << "gt";
             break;
-        case Binary::Kind::kLessThanEqual:
+        case BinaryOp::kLessThanEqual:
             out_ << "lte";
             break;
-        case Binary::Kind::kGreaterThanEqual:
+        case BinaryOp::kGreaterThanEqual:
             out_ << "gte";
             break;
-        case Binary::Kind::kShiftLeft:
+        case BinaryOp::kShiftLeft:
             out_ << "shiftl";
             break;
-        case Binary::Kind::kShiftRight:
+        case BinaryOp::kShiftRight:
             out_ << "shiftr";
             break;
     }

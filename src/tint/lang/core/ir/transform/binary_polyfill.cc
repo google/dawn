@@ -59,16 +59,16 @@ struct State {
                 continue;
             }
             if (auto* binary = inst->As<ir::Binary>()) {
-                switch (binary->Kind()) {
-                    case ir::Binary::Kind::kDivide:
-                    case ir::Binary::Kind::kModulo:
+                switch (binary->Op()) {
+                    case BinaryOp::kDivide:
+                    case BinaryOp::kModulo:
                         if (config.int_div_mod &&
                             binary->Result()->Type()->is_integer_scalar_or_vector()) {
                             worklist.Push(binary);
                         }
                         break;
-                    case ir::Binary::Kind::kShiftLeft:
-                    case ir::Binary::Kind::kShiftRight:
+                    case BinaryOp::kShiftLeft:
+                    case BinaryOp::kShiftRight:
                         if (config.bitshift_modulo) {
                             worklist.Push(binary);
                         }
@@ -82,13 +82,13 @@ struct State {
         // Polyfill the binary instructions that we found.
         for (auto* binary : worklist) {
             ir::Value* replacement = nullptr;
-            switch (binary->Kind()) {
-                case Binary::Kind::kDivide:
-                case Binary::Kind::kModulo:
+            switch (binary->Op()) {
+                case BinaryOp::kDivide:
+                case BinaryOp::kModulo:
                     replacement = IntDivMod(binary);
                     break;
-                case Binary::Kind::kShiftLeft:
-                case Binary::Kind::kShiftRight:
+                case BinaryOp::kShiftLeft:
+                case BinaryOp::kShiftRight:
                     replacement = MaskShiftAmount(binary);
                     break;
                 default:
@@ -138,7 +138,7 @@ struct State {
     /// @returns the replacement value
     ir::Value* IntDivMod(ir::Binary* binary) {
         auto* result_ty = binary->Result()->Type();
-        bool is_div = binary->Kind() == Binary::Kind::kDivide;
+        bool is_div = binary->Op() == BinaryOp::kDivide;
         bool is_signed = result_ty->is_signed_integer_scalar_or_vector();
 
         auto& helpers = is_div ? int_div_helpers : int_mod_helpers;
@@ -182,10 +182,10 @@ struct State {
                 }
                 auto* rhs_or_one = b.Call(result_ty, core::BuiltinFn::kSelect, rhs, one, cond);
 
-                if (binary->Kind() == Binary::Kind::kDivide) {
+                if (binary->Op() == BinaryOp::kDivide) {
                     // Perform the divide with the modified RHS.
                     b.Return(func, b.Divide(result_ty, lhs, rhs_or_one)->Result());
-                } else if (binary->Kind() == Binary::Kind::kModulo) {
+                } else if (binary->Op() == BinaryOp::kModulo) {
                     // Calculate the modulo manually, as modulo with negative operands is undefined
                     // behavior for many backends:
                     //   result = lhs - ((lhs / rhs_or_one) * rhs_or_one)

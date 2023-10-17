@@ -87,14 +87,14 @@ void Run(core::ir::Module& ir) {
             replace(b.Construct(ty, std::move(args)));
         };
 
-        switch (binary->Kind()) {
-            case core::ir::Binary::Kind::kAdd:
-                column_wise(core::ir::Binary::Kind::kAdd);
+        switch (binary->Op()) {
+            case core::ir::BinaryOp::kAdd:
+                column_wise(core::ir::BinaryOp::kAdd);
                 break;
-            case core::ir::Binary::Kind::kSubtract:
-                column_wise(core::ir::Binary::Kind::kSubtract);
+            case core::ir::BinaryOp::kSubtract:
+                column_wise(core::ir::BinaryOp::kSubtract);
                 break;
-            case core::ir::Binary::Kind::kMultiply:
+            case core::ir::BinaryOp::kMultiply:
                 // Select the SPIR-V intrinsic that corresponds to the operation being performed.
                 if (lhs_ty->Is<core::type::Matrix>()) {
                     if (rhs_ty->Is<core::type::Scalar>()) {

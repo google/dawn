@@ -879,12 +879,12 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
-    switch (binary->Kind()) {
-        case core::ir::Binary::Kind::kAdd: {
+    switch (binary->Op()) {
+        case core::ir::BinaryOp::kAdd: {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
-        case core::ir::Binary::Kind::kDivide: {
+        case core::ir::BinaryOp::kDivide: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpSDiv;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -894,7 +894,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kMultiply: {
+        case core::ir::BinaryOp::kMultiply: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpIMul;
             } else if (ty->is_float_scalar_or_vector()) {
@@ -902,11 +902,11 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kSubtract: {
+        case core::ir::BinaryOp::kSubtract: {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;
         }
-        case core::ir::Binary::Kind::kModulo: {
+        case core::ir::BinaryOp::kModulo: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpSRem;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -917,7 +917,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             break;
         }
 
-        case core::ir::Binary::Kind::kAnd: {
+        case core::ir::BinaryOp::kAnd: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpBitwiseAnd;
             } else if (ty->is_bool_scalar_or_vector()) {
@@ -925,7 +925,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kOr: {
+        case core::ir::BinaryOp::kOr: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpBitwiseOr;
             } else if (ty->is_bool_scalar_or_vector()) {
@@ -933,16 +933,16 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kXor: {
+        case core::ir::BinaryOp::kXor: {
             op = spv::Op::OpBitwiseXor;
             break;
         }
 
-        case core::ir::Binary::Kind::kShiftLeft: {
+        case core::ir::BinaryOp::kShiftLeft: {
             op = spv::Op::OpShiftLeftLogical;
             break;
         }
-        case core::ir::Binary::Kind::kShiftRight: {
+        case core::ir::BinaryOp::kShiftRight: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpShiftRightArithmetic;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -951,7 +951,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             break;
         }
 
-        case core::ir::Binary::Kind::kEqual: {
+        case core::ir::BinaryOp::kEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalEqual;
             } else if (lhs_ty->is_float_scalar_or_vector()) {
@@ -961,7 +961,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kNotEqual: {
+        case core::ir::BinaryOp::kNotEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalNotEqual;
             } else if (lhs_ty->is_float_scalar_or_vector()) {
@@ -971,7 +971,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kGreaterThan: {
+        case core::ir::BinaryOp::kGreaterThan: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdGreaterThan;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -981,7 +981,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kGreaterThanEqual: {
+        case core::ir::BinaryOp::kGreaterThanEqual: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdGreaterThanEqual;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -991,7 +991,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kLessThan: {
+        case core::ir::BinaryOp::kLessThan: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdLessThan;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -1001,7 +1001,7 @@ void Printer::EmitBinary(core::ir::Binary* binary) {
             }
             break;
         }
-        case core::ir::Binary::Kind::kLessThanEqual: {
+        case core::ir::BinaryOp::kLessThanEqual: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdLessThanEqual;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {

@@ -61,7 +61,7 @@ TEST_F(IR_MultiInBlockTest, CloneInto) {
     EXPECT_EQ(1u, new_blk->Length());
     EXPECT_NE(add, new_blk->Front());
     EXPECT_TRUE(new_blk->Front()->Is<Binary>());
-    EXPECT_EQ(Binary::Kind::kAdd, new_blk->Front()->As<Binary>()->Kind());
+    EXPECT_EQ(BinaryOp::kAdd, new_blk->Front()->As<Binary>()->Op());
 }
 
 TEST_F(IR_MultiInBlockTest, CloneEmpty) {

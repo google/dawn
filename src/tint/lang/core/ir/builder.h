@@ -417,18 +417,18 @@ class Builder {
     }
 
     /// Creates an op for `lhs kind rhs`
-    /// @param kind the kind of operation
+    /// @param op the binary operator
     /// @param type the result type of the binary expression
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::Binary* Binary(enum Binary::Kind kind, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
+    ir::Binary* Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
         auto* rhs_val = Value(std::forward<RHS>(rhs));
         return Append(
-            ir.instructions.Create<ir::Binary>(InstructionResult(type), kind, lhs_val, rhs_val));
+            ir.instructions.Create<ir::Binary>(InstructionResult(type), op, lhs_val, rhs_val));
     }
 
     /// Creates an And operation
@@ -438,7 +438,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* And(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kAnd, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kAnd, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Or operation
@@ -448,7 +448,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Or(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kOr, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kOr, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Xor operation
@@ -458,7 +458,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Xor(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kXor, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kXor, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Equal operation
@@ -468,8 +468,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Equal(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kEqual, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kEqual, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an NotEqual operation
@@ -479,8 +478,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* NotEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kNotEqual, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kNotEqual, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an LessThan operation
@@ -490,8 +488,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* LessThan(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kLessThan, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kLessThan, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an GreaterThan operation
@@ -501,8 +498,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* GreaterThan(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kGreaterThan, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kGreaterThan, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an LessThanEqual operation
@@ -512,7 +508,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* LessThanEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kLessThanEqual, type, std::forward<LHS>(lhs),
+        return Binary(BinaryOp::kLessThanEqual, type, std::forward<LHS>(lhs),
                       std::forward<RHS>(rhs));
     }
 
@@ -523,7 +519,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* GreaterThanEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kGreaterThanEqual, type, std::forward<LHS>(lhs),
+        return Binary(BinaryOp::kGreaterThanEqual, type, std::forward<LHS>(lhs),
                       std::forward<RHS>(rhs));
     }
 
@@ -534,8 +530,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* ShiftLeft(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kShiftLeft, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kShiftLeft, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an ShiftRight operation
@@ -545,8 +540,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* ShiftRight(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kShiftRight, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kShiftRight, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Add operation
@@ -556,7 +550,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Add(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kAdd, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kAdd, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Subtract operation
@@ -566,8 +560,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Subtract(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kSubtract, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kSubtract, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Multiply operation
@@ -577,8 +570,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Multiply(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kMultiply, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kMultiply, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Divide operation
@@ -588,8 +580,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Divide(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kDivide, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kDivide, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an Modulo operation
@@ -599,8 +590,7 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Modulo(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(ir::Binary::Kind::kModulo, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
+        return Binary(BinaryOp::kModulo, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
     /// Creates an op for `kind val`

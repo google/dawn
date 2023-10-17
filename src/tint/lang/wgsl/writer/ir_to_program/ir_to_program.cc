@@ -701,7 +701,7 @@ class State {
     }
 
     void Binary(core::ir::Binary* e) {
-        if (e->Kind() == core::ir::Binary::Kind::kEqual) {
+        if (e->Op() == core::ir::BinaryOp::kEqual) {
             auto* rhs = e->RHS()->As<core::ir::Constant>();
             if (rhs && rhs->Type()->Is<core::type::Bool>() &&
                 rhs->Value()->ValueAs<bool>() == false) {
@@ -713,53 +713,53 @@ class State {
         auto* lhs = Expr(e->LHS());
         auto* rhs = Expr(e->RHS());
         const ast::Expression* expr = nullptr;
-        switch (e->Kind()) {
-            case core::ir::Binary::Kind::kAdd:
+        switch (e->Op()) {
+            case core::ir::BinaryOp::kAdd:
                 expr = b.Add(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kSubtract:
+            case core::ir::BinaryOp::kSubtract:
                 expr = b.Sub(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kMultiply:
+            case core::ir::BinaryOp::kMultiply:
                 expr = b.Mul(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kDivide:
+            case core::ir::BinaryOp::kDivide:
                 expr = b.Div(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kModulo:
+            case core::ir::BinaryOp::kModulo:
                 expr = b.Mod(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kAnd:
+            case core::ir::BinaryOp::kAnd:
                 expr = b.And(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kOr:
+            case core::ir::BinaryOp::kOr:
                 expr = b.Or(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kXor:
+            case core::ir::BinaryOp::kXor:
                 expr = b.Xor(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kEqual:
+            case core::ir::BinaryOp::kEqual:
                 expr = b.Equal(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kNotEqual:
+            case core::ir::BinaryOp::kNotEqual:
                 expr = b.NotEqual(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kLessThan:
+            case core::ir::BinaryOp::kLessThan:
                 expr = b.LessThan(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kGreaterThan:
+            case core::ir::BinaryOp::kGreaterThan:
                 expr = b.GreaterThan(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kLessThanEqual:
+            case core::ir::BinaryOp::kLessThanEqual:
                 expr = b.LessThanEqual(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kGreaterThanEqual:
+            case core::ir::BinaryOp::kGreaterThanEqual:
                 expr = b.GreaterThanEqual(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kShiftLeft:
+            case core::ir::BinaryOp::kShiftLeft:
                 expr = b.Shl(lhs, rhs);
                 break;
-            case core::ir::Binary::Kind::kShiftRight:
+            case core::ir::BinaryOp::kShiftRight:
                 expr = b.Shr(lhs, rhs);
                 break;
         }

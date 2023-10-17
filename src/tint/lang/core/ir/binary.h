@@ -22,6 +22,29 @@
 
 namespace tint::core::ir {
 
+/// A binary operator.
+enum class BinaryOp {
+    kAdd,
+    kSubtract,
+    kMultiply,
+    kDivide,
+    kModulo,
+
+    kAnd,
+    kOr,
+    kXor,
+
+    kEqual,
+    kNotEqual,
+    kLessThan,
+    kGreaterThan,
+    kLessThanEqual,
+    kGreaterThanEqual,
+
+    kShiftLeft,
+    kShiftRight
+};
+
 /// A binary instruction in the IR.
 class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
   public:
@@ -31,42 +54,19 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
     /// The offset in Operands() for the RHS
     static constexpr size_t kRhsOperandOffset = 1;
 
-    /// The kind of instruction.
-    enum class Kind {
-        kAdd,
-        kSubtract,
-        kMultiply,
-        kDivide,
-        kModulo,
-
-        kAnd,
-        kOr,
-        kXor,
-
-        kEqual,
-        kNotEqual,
-        kLessThan,
-        kGreaterThan,
-        kLessThanEqual,
-        kGreaterThanEqual,
-
-        kShiftLeft,
-        kShiftRight
-    };
-
     /// Constructor
     /// @param result the result value
-    /// @param kind the kind of binary instruction
+    /// @param op the binary operator
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(InstructionResult* result, enum Kind kind, Value* lhs, Value* rhs);
+    Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
     ~Binary() override;
 
     /// @copydoc Instruction::Clone()
     Binary* Clone(CloneContext& ctx) override;
 
-    /// @returns the kind of the binary instruction
-    enum Kind Kind() { return kind_; }
+    /// @returns the binary operator
+    BinaryOp Op() { return op_; }
 
     /// @returns the left-hand-side value for the instruction
     Value* LHS() { return operands_[kLhsOperandOffset]; }
@@ -78,16 +78,16 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
     std::string FriendlyName() override { return "binary"; }
 
   private:
-    enum Kind kind_;
+    BinaryOp op_;
 };
 
 /// @param kind the enum value
 /// @returns the string for the given enum value
-std::string_view ToString(enum Binary::Kind kind);
+std::string_view ToString(BinaryOp kind);
 
 /// Emits the name of the intrinsic type.
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, enum Binary::Kind kind) {
+auto& operator<<(STREAM& out, BinaryOp kind) {
     return out << ToString(kind);
 }
 

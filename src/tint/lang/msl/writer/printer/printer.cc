@@ -170,7 +170,7 @@ void Printer::EmitBlockInstructions(core::ir::Block* block) {
 }
 
 void Printer::EmitBinary(core::ir::Binary* b) {
-    if (b->Kind() == core::ir::Binary::Kind::kEqual) {
+    if (b->Op() == core::ir::BinaryOp::kEqual) {
         auto* rhs = b->RHS()->As<core::ir::Constant>();
         if (rhs && rhs->Type()->Is<core::type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
             // expr == false
@@ -180,38 +180,38 @@ void Printer::EmitBinary(core::ir::Binary* b) {
     }
 
     auto kind = [&] {
-        switch (b->Kind()) {
-            case core::ir::Binary::Kind::kAdd:
+        switch (b->Op()) {
+            case core::ir::BinaryOp::kAdd:
                 return "+";
-            case core::ir::Binary::Kind::kSubtract:
+            case core::ir::BinaryOp::kSubtract:
                 return "-";
-            case core::ir::Binary::Kind::kMultiply:
+            case core::ir::BinaryOp::kMultiply:
                 return "*";
-            case core::ir::Binary::Kind::kDivide:
+            case core::ir::BinaryOp::kDivide:
                 return "/";
-            case core::ir::Binary::Kind::kModulo:
+            case core::ir::BinaryOp::kModulo:
                 return "%";
-            case core::ir::Binary::Kind::kAnd:
+            case core::ir::BinaryOp::kAnd:
                 return "&";
-            case core::ir::Binary::Kind::kOr:
+            case core::ir::BinaryOp::kOr:
                 return "|";
-            case core::ir::Binary::Kind::kXor:
+            case core::ir::BinaryOp::kXor:
                 return "^";
-            case core::ir::Binary::Kind::kEqual:
+            case core::ir::BinaryOp::kEqual:
                 return "==";
-            case core::ir::Binary::Kind::kNotEqual:
+            case core::ir::BinaryOp::kNotEqual:
                 return "!=";
-            case core::ir::Binary::Kind::kLessThan:
+            case core::ir::BinaryOp::kLessThan:
                 return "<";
-            case core::ir::Binary::Kind::kGreaterThan:
+            case core::ir::BinaryOp::kGreaterThan:
                 return ">";
-            case core::ir::Binary::Kind::kLessThanEqual:
+            case core::ir::BinaryOp::kLessThanEqual:
                 return "<=";
-            case core::ir::Binary::Kind::kGreaterThanEqual:
+            case core::ir::BinaryOp::kGreaterThanEqual:
                 return ">=";
-            case core::ir::Binary::Kind::kShiftLeft:
+            case core::ir::BinaryOp::kShiftLeft:
                 return "<<";
-            case core::ir::Binary::Kind::kShiftRight:
+            case core::ir::BinaryOp::kShiftRight:
                 return ">>";
         }
         return "<error>";
