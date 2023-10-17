@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::sem {
@@ -42,6 +43,19 @@ struct SamplerTexturePair {
     /// @param rhs the SamplerTexturePair to compare against
     /// @returns true if this SamplerTexturePair is not equal to `rhs`
     inline bool operator!=(const SamplerTexturePair& rhs) const { return !(*this == rhs); }
+
+    /// Less than operator
+    /// @param rhs the SamplerTexturePair to compare against
+    /// @returns true if this SamplerTexturePair is less then `rhs`
+    inline bool operator<(const SamplerTexturePair& rhs) const {
+        if (sampler_binding_point == rhs.sampler_binding_point) {
+            return texture_binding_point < rhs.texture_binding_point;
+        }
+        return sampler_binding_point < rhs.sampler_binding_point;
+    }
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(sampler_binding_point, texture_binding_point);
 };
 
 /// Prints the SamplerTexturePair @p stp to @p o

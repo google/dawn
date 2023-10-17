@@ -58,6 +58,33 @@ void stream::Stream<tint::PixelLocalOptions>::Write(stream::Sink* sink,
     StreamInTintObject(options, sink);
 }
 
+#if TINT_BUILD_GLSL_WRITER
+// static
+template <>
+void stream::Stream<tint::glsl::writer::Options>::Write(
+    stream::Sink* sink,
+    const tint::glsl::writer::Options& options) {
+    StreamInTintObject(options, sink);
+}
+
+// static
+template <>
+void stream::Stream<tint::glsl::writer::Version>::Write(
+    stream::Sink* sink,
+    const tint::glsl::writer::Version& version) {
+    StreamInTintObject(version, sink);
+}
+
+// static
+template <>
+void stream::Stream<tint::glsl::writer::SamplerTexturePair>::Write(
+    stream::Sink* sink,
+    const tint::glsl::writer::SamplerTexturePair& options) {
+    StreamInTintObject(options, sink);
+}
+
+#endif  // TINT_BUILD_GLSL_WRITER
+
 // static
 template <>
 void stream::Stream<tint::BindingPoint>::Write(stream::Sink* sink,

@@ -75,26 +75,18 @@ opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info
     X(const tint::Program*, inputProgram)                                                        \
     X(std::string, entryPointName)                                                               \
     X(SingleShaderStage, stage)                                                                  \
-    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
-    X(BindingMap, glBindings)                                                                    \
-    X(BindingMap, externalTextureExpansionMap)                                                   \
-    X(tint::TextureBuiltinsFromUniformOptions, textureBuiltinsFromUniform)                       \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
-    X(opengl::OpenGLVersion::Standard, glVersionStandard)                                        \
-    X(uint32_t, glVersionMajor)                                                                  \
-    X(uint32_t, glVersionMinor)                                                                  \
+    X(tint::glsl::writer::Options, tintOptions)                                                  \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
 #undef GLSL_COMPILATION_REQUEST_MEMBERS
 
-#define GLSL_COMPILATION_MEMBERS(X)                                                              \
-    X(std::string, glsl)                                                                         \
-    X(bool, needsPlaceholderSampler)                                                             \
-    X(bool, needsInternalUniformBuffer)                                                          \
-    X(tint::TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset, bindingPointToData) \
-    X(opengl::CombinedSamplerInfo, combinedSamplerInfo)
+#define GLSL_COMPILATION_MEMBERS(X)     \
+    X(std::string, glsl)                \
+    X(bool, needsInternalUniformBuffer) \
+    X(tint::TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset, bindingPointToData)
 
 DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS){};
 #undef GLSL_COMPILATION_MEMBERS
@@ -226,16 +218,58 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.inputProgram = GetTintProgram();
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
-    req.externalTextureOptions = BuildExternalTextureTransformBindings(layout);
-    req.glBindings = std::move(glBindings);
-    req.externalTextureExpansionMap = std::move(externalTextureExpansionMap);
-    req.textureBuiltinsFromUniform = std::move(textureBuiltinsFromUniform);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.glVersionStandard = version.GetStandard();
-    req.glVersionMajor = version.GetMajor();
-    req.glVersionMinor = version.GetMinor();
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
+
+    req.tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(version.GetStandard()),
+                                                          version.GetMajor(), version.GetMinor());
+
+    req.tintOptions.disable_robustness = false;
+
+    req.tintOptions.external_texture_options = BuildExternalTextureTransformBindings(layout);
+    req.tintOptions.binding_remapper_options.binding_points = std::move(glBindings);
+    req.tintOptions.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
+
+    // When textures are accessed without a sampler (e.g., textureLoad()),
+    // GetSamplerTextureUses() will return this sentinel value.
+    BindingPoint placeholderBindingPoint{static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
+
+    *needsPlaceholderSampler = false;
+    tint::inspector::Inspector inspector(*req.inputProgram);
+    // Find all the sampler/texture pairs for this entry point, and create
+    // CombinedSamplers for them. CombinedSampler records the binding points
+    // of the original texture and sampler, and generates a unique name. The
+    // corresponding uniforms will be retrieved by these generated names
+    // in PipelineGL. Any texture-only references will have
+    // "usePlaceholderSampler" set to true, and only the texture binding point
+    // will be used in naming them. In addition, Dawn will bind a
+    // non-filtering sampler for them (see PipelineGL).
+    auto uses =
+        inspector.GetSamplerTextureUses(programmableStage.entryPoint, placeholderBindingPoint);
+    CombinedSamplerInfo combinedSamplerInfo;
+    for (const auto& use : uses) {
+        CombinedSampler* info =
+            AppendCombinedSampler(&combinedSamplerInfo, use, placeholderBindingPoint);
+
+        if (info->usePlaceholderSampler) {
+            *needsPlaceholderSampler = true;
+            req.tintOptions.placeholder_binding_point = placeholderBindingPoint;
+        }
+        req.tintOptions.binding_map[use] = info->GetName();
+
+        // If the texture has an associated plane1 texture (ie., it's an external texture),
+        // append a new combined sampler with the same sampler and the plane1 texture.
+        BindingMap::iterator plane1Texture =
+            externalTextureExpansionMap.find(use.texture_binding_point);
+        if (plane1Texture != externalTextureExpansionMap.end()) {
+            tint::inspector::SamplerTexturePair plane1Use{use.sampler_binding_point,
+                                                          plane1Texture->second};
+            CombinedSampler* plane1Info =
+                AppendCombinedSampler(&combinedSamplerInfo, plane1Use, placeholderBindingPoint);
+            req.tintOptions.binding_map[plane1Use] = plane1Info->GetName();
+        }
+    }
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
@@ -267,63 +301,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                        program, r.entryPointName.c_str(), r.limits));
             }
 
-            tint::glsl::writer::Options tintOptions;
-            tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(r.glVersionStandard),
-                                                              r.glVersionMajor, r.glVersionMinor);
-
-            tintOptions.disable_robustness = false;
-
-            tintOptions.external_texture_options = r.externalTextureOptions;
-
-            // When textures are accessed without a sampler (e.g., textureLoad()),
-            // GetSamplerTextureUses() will return this sentinel value.
-            BindingPoint placeholderBindingPoint{static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
-
-            bool needsPlaceholderSampler = false;
-            tint::inspector::Inspector inspector(program);
-            // Find all the sampler/texture pairs for this entry point, and create
-            // CombinedSamplers for them. CombinedSampler records the binding points
-            // of the original texture and sampler, and generates a unique name. The
-            // corresponding uniforms will be retrieved by these generated names
-            // in PipelineGL. Any texture-only references will have
-            // "usePlaceholderSampler" set to true, and only the texture binding point
-            // will be used in naming them. In addition, Dawn will bind a
-            // non-filtering sampler for them (see PipelineGL).
-            auto uses = inspector.GetSamplerTextureUses(r.entryPointName, placeholderBindingPoint);
-            CombinedSamplerInfo combinedSamplerInfo;
-            for (const auto& use : uses) {
-                CombinedSampler* info =
-                    AppendCombinedSampler(&combinedSamplerInfo, use, placeholderBindingPoint);
-
-                if (info->usePlaceholderSampler) {
-                    needsPlaceholderSampler = true;
-                    tintOptions.placeholder_binding_point = placeholderBindingPoint;
-                }
-                tintOptions.binding_map[use] = info->GetName();
-
-                // If the texture has an associated plane1 texture (ie., it's an external texture),
-                // append a new combined sampler with the same sampler and the plane1 texture.
-                BindingMap::iterator plane1Texture =
-                    r.externalTextureExpansionMap.find(use.texture_binding_point);
-                if (plane1Texture != r.externalTextureExpansionMap.end()) {
-                    tint::inspector::SamplerTexturePair plane1Use{use.sampler_binding_point,
-                                                                  plane1Texture->second};
-                    CombinedSampler* plane1Info = AppendCombinedSampler(
-                        &combinedSamplerInfo, plane1Use, placeholderBindingPoint);
-                    tintOptions.binding_map[plane1Use] = plane1Info->GetName();
-                }
-            }
-
-            tintOptions.binding_remapper_options.binding_points = std::move(r.glBindings);
-            tintOptions.texture_builtins_from_uniform = r.textureBuiltinsFromUniform;
-
-            auto result = tint::glsl::writer::Generate(program, tintOptions, r.entryPointName);
+            auto result = tint::glsl::writer::Generate(program, r.tintOptions, r.entryPointName);
             DAWN_INVALID_IF(!result, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.str());
 
-            return GLSLCompilation{{std::move(result->glsl), needsPlaceholderSampler,
-                                    result->needs_internal_uniform_buffer,
-                                    result->bindpoint_to_data, std::move(combinedSamplerInfo)}};
+            return GLSLCompilation{{std::move(result->glsl), result->needs_internal_uniform_buffer,
+                                    result->bindpoint_to_data}};
         },
         "OpenGL.CompileShaderToGLSL");
 
@@ -355,7 +338,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     }
 
     GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
-    *needsPlaceholderSampler = compilationResult->needsPlaceholderSampler;
     *needsTextureBuiltinUniformBuffer = compilationResult->needsInternalUniformBuffer;
 
     // Since the TextureBuiltinsFromUniform transform runs before BindingRemapper,
@@ -371,7 +353,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         bindingPointToData->emplace(bindingPoint, e.second);
     }
 
-    *combinedSamplers = std::move(compilationResult->combinedSamplerInfo);
+    *combinedSamplers = std::move(combinedSamplerInfo);
     return shader;
 }
 

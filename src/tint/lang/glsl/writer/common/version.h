@@ -17,6 +17,8 @@
 
 #include <cstdint>
 
+#include "src/tint/utils/reflection/reflection.h"
+
 namespace tint::glsl::writer {
 
 /// A structure representing the version of GLSL to be generated.
@@ -51,6 +53,9 @@ struct Version {
 
     /// Minor GLSL version
     uint32_t minor_version = 1;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(standard, major_version, minor_version);
 };
 
 }  // namespace tint::glsl::writer

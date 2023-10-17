@@ -28,7 +28,8 @@
 
 namespace tint::glsl::writer {
 
-using BindingMap = std::unordered_map<sem::SamplerTexturePair, std::string>;
+using SamplerTexturePair = sem::SamplerTexturePair;
+using BindingMap = std::unordered_map<SamplerTexturePair, std::string>;
 
 /// Configuration options used for generating GLSL.
 struct Options {
