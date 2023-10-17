@@ -1221,9 +1221,6 @@ TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
 // Test that when fragment input is a subset of the vertex output, the render pipeline should be
 // valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {
-    // TODO(dawn:1610): Fails on Adreno (Pixel 4)
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm() && IsVulkan());
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,
@@ -1287,9 +1284,6 @@ struct ShaderIO {
 // Test that when fragment input is a subset of the vertex output and the order of them is
 // different, the render pipeline should be valid.
 TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutputWithDifferentOrder) {
-    // TODO(dawn:1610): Fails on Adreno (Pixel 4)
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm() && IsVulkan());
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(5) @align(16) var5: f32,
