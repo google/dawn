@@ -1481,24 +1481,26 @@ func SplitCTSQuery(testcase string) cov.Path {
 
 func PrintCommand(writer io.Writer, cmd *exec.Cmd) {
 	maybeQuote := func(s string) string {
-		if strings.ContainsAny(s, " ,()") {
-			return fmt.Sprintf("\"%v\"", s)
+		if strings.ContainsAny(s, ` ,()"`) {
+			s = strings.ReplaceAll(s, `"`, `\"`)
+			s = fmt.Sprintf("\"%v\"", s)
 		}
 		return s
 	}
 
-	fmt.Fprint(writer, "Running:\n")
-	fmt.Fprintf(writer, "  Cmd: %v ", maybeQuote(cmd.Path))
+	output := &strings.Builder{}
+	fmt.Fprintln(output, "Running:")
+	fmt.Fprintf(output, "  Cmd: %v ", maybeQuote(cmd.Path))
 	for i, arg := range cmd.Args[1:] {
 		if i > 0 {
-			fmt.Fprint(writer, " ")
+			fmt.Fprint(output, " ")
 		}
-		fmt.Fprint(writer, maybeQuote(arg))
+		fmt.Fprint(output, maybeQuote(arg))
 	}
-	fmt.Fprintln(writer)
-	fmt.Fprintf(writer, "  Dir: %v\n\n", cmd.Dir)
+	fmt.Fprintln(output)
+	fmt.Fprintf(output, "  Dir: %v\n\n", cmd.Dir)
 
-	fmt.Fprint(writer, "  For VS Code launch.json:\n")
+	fmt.Fprint(output, "  For VS Code launch.json:\n")
 	launchCmd := struct {
 		Program string   `json:"program"`
 		Args    []string `json:"args"`
@@ -1517,5 +1519,7 @@ func PrintCommand(writer io.Writer, cmd *exec.Cmd) {
 	// Remove object braces and add trailing comma
 	s = strings.TrimPrefix(s, "{\n")
 	s = strings.TrimSuffix(s, "\n}\n") + ",\n"
-	fmt.Fprintln(writer, s)
+	fmt.Fprintln(output, s)
+
+	fmt.Print(output.String())
 }
