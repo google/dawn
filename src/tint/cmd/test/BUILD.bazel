@@ -82,6 +82,7 @@ cc_binary(
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/ast_printer:test",
+      "//src/tint/lang/glsl/writer/printer:test",
     ],
     "//conditions:default": [],
   }) + select({

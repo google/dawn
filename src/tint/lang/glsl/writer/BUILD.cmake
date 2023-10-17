@@ -37,6 +37,8 @@
 include(lang/glsl/writer/ast_printer/BUILD.cmake)
 include(lang/glsl/writer/ast_raise/BUILD.cmake)
 include(lang/glsl/writer/common/BUILD.cmake)
+include(lang/glsl/writer/printer/BUILD.cmake)
+include(lang/glsl/writer/raise/BUILD.cmake)
 
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
@@ -56,11 +58,13 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_api_options
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
+  tint_lang_glsl_writer_raise
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_ast_transform
   tint_lang_wgsl_program
+  tint_lang_wgsl_reader_lower
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
@@ -82,8 +86,15 @@ if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer lib
     tint_lang_glsl_writer_ast_printer
     tint_lang_glsl_writer_common
+    tint_lang_glsl_writer_printer
   )
 endif(TINT_BUILD_GLSL_WRITER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_glsl_writer lib
+    tint_lang_wgsl_reader_program_to_ir
+  )
+endif(TINT_BUILD_WGSL_READER)
 
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
