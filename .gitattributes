@@ -1,6 +1,8 @@
 *           text=auto
 *.glsl      eol=lf
 *.gn        eol=lf
+*.bazel     eol=lf
+*.cmake     eol=lf
 *.gni       eol=lf
 *.hlsl      eol=lf
 *.msl       eol=lf
