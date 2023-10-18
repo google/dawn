@@ -220,7 +220,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&
         !IsAndroidQualcomm()) {
         EnableFeature(Feature::TimestampQuery);
-        EnableFeature(Feature::TimestampQueryInsidePasses);
         EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
     }
 

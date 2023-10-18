@@ -57,7 +57,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
             return false;
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:
-        case WGPUFeatureName_TimestampQueryInsidePasses:
         case WGPUFeatureName_ChromiumExperimentalTimestampQueryInsidePasses:
         case WGPUFeatureName_PipelineStatisticsQuery:
         case WGPUFeatureName_TextureCompressionBC:

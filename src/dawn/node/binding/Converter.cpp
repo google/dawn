@@ -1535,7 +1535,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
         case wgpu::FeatureName::SharedTextureMemoryZirconHandle:
         case wgpu::FeatureName::SurfaceCapabilities:
-        case wgpu::FeatureName::TimestampQueryInsidePasses:
         case wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::HostMappedPointer:
