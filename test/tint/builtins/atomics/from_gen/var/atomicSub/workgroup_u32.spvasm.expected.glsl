@@ -7,7 +7,7 @@ void atomicSub_0d26c2() {
   uint res = 0u;
   arg_1 = 1u;
   uint x_18 = arg_1;
-  uint x_14 = atomicAdd(arg_0, x_18);
+  uint x_14 = atomicAdd(arg_0, -(x_18));
   res = x_14;
   return;
 }

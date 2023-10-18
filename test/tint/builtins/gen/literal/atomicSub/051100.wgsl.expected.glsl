@@ -14,7 +14,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void atomicSub_051100() {
-  int res = atomicAdd(sb_rw.inner.arg_0, 1);
+  int res = atomicAdd(sb_rw.inner.arg_0, -(1));
   prevent_dce.inner = res;
 }
 
@@ -41,7 +41,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void atomicSub_051100() {
-  int res = atomicAdd(sb_rw.inner.arg_0, 1);
+  int res = atomicAdd(sb_rw.inner.arg_0, -(1));
   prevent_dce.inner = res;
 }
 

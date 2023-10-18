@@ -6,7 +6,7 @@ void atomicAdd_794055() {
   int res = 0;
   arg_1 = 1;
   int atomic_result = 0;
-  InterlockedAdd(arg_0, -1, atomic_result);
+  InterlockedAdd(arg_0, -(1), atomic_result);
   const int x_15 = atomic_result;
   res = x_15;
   return;

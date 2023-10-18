@@ -1032,8 +1032,21 @@ void ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
         }
 
         case wgsl::BuiltinFn::kAtomicAdd:
-        case wgsl::BuiltinFn::kAtomicSub:
             call("atomicAdd");
+            return;
+
+        case wgsl::BuiltinFn::kAtomicSub:
+            out << "atomicAdd";
+            {
+                ScopedParen sp(out);
+                TINT_ASSERT(expr->args.Length() == 2);
+                EmitExpression(out, expr->args[0]);
+                out << ", -";
+                {
+                    ScopedParen argSP(out);
+                    EmitExpression(out, expr->args[1]);
+                }
+            }
             return;
 
         case wgsl::BuiltinFn::kAtomicMax:

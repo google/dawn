@@ -15,7 +15,7 @@ layout(binding = 0, std430) buffer sb_rw_block_ssbo {
 
 void atomicAdd_8a199a() {
   uint res = 0u;
-  uint x_9 = atomicAdd(sb_rw.inner.arg_0, 1u);
+  uint x_9 = atomicAdd(sb_rw.inner.arg_0, -(1u));
   res = x_9;
   return;
 }
@@ -49,7 +49,7 @@ layout(binding = 0, std430) buffer sb_rw_block_ssbo {
 
 void atomicAdd_8a199a() {
   uint res = 0u;
-  uint x_9 = atomicAdd(sb_rw.inner.arg_0, 1u);
+  uint x_9 = atomicAdd(sb_rw.inner.arg_0, -(1u));
   res = x_9;
   return;
 }

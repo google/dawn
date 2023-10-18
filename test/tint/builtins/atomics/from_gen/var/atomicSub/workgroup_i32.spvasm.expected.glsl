@@ -7,7 +7,7 @@ void atomicSub_77883a() {
   int res = 0;
   arg_1 = 1;
   int x_19 = arg_1;
-  int x_15 = atomicAdd(arg_0, x_19);
+  int x_15 = atomicAdd(arg_0, -(x_19));
   res = x_15;
   return;
 }

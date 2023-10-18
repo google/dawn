@@ -6,7 +6,7 @@ void atomicAdd_d5db1d() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_14 = atomicAdd(arg_0, 1u);
+  uint x_14 = atomicAdd(arg_0, -(1u));
   res = x_14;
   return;
 }

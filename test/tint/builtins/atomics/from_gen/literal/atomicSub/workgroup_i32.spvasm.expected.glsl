@@ -4,7 +4,7 @@ uint local_invocation_index_1 = 0u;
 shared int arg_0;
 void atomicSub_77883a() {
   int res = 0;
-  int x_11 = atomicAdd(arg_0, 1);
+  int x_11 = atomicAdd(arg_0, -(1));
   res = x_11;
   return;
 }

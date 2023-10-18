@@ -6,7 +6,7 @@ void atomicAdd_d5db1d() {
   uint res = 0u;
   arg_1 = 1u;
   uint atomic_result = 0u;
-  InterlockedAdd(arg_0, -1u, atomic_result);
+  InterlockedAdd(arg_0, -(1u), atomic_result);
   const uint x_14 = atomic_result;
   res = x_14;
   return;

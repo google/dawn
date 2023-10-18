@@ -4,7 +4,7 @@ groupshared int arg_0;
 void atomicAdd_794055() {
   int res = 0;
   int atomic_result = 0;
-  InterlockedAdd(arg_0, -1, atomic_result);
+  InterlockedAdd(arg_0, -(1), atomic_result);
   const int x_11 = atomic_result;
   res = x_11;
   return;

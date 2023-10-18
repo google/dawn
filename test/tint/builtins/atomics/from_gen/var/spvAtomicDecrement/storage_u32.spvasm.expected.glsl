@@ -17,7 +17,7 @@ void atomicAdd_8a199a() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicAdd(sb_rw.inner.arg_0, 1u);
+  uint x_13 = atomicAdd(sb_rw.inner.arg_0, -(1u));
   res = x_13;
   return;
 }
@@ -53,7 +53,7 @@ void atomicAdd_8a199a() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicAdd(sb_rw.inner.arg_0, 1u);
+  uint x_13 = atomicAdd(sb_rw.inner.arg_0, -(1u));
   res = x_13;
   return;
 }

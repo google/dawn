@@ -7,7 +7,7 @@ void atomicSub_0d26c2() {
   arg_1 = 1u;
   const uint x_18 = arg_1;
   uint atomic_result = 0u;
-  InterlockedAdd(arg_0, -x_18, atomic_result);
+  InterlockedAdd(arg_0, -(x_18), atomic_result);
   const uint x_14 = atomic_result;
   res = x_14;
   return;

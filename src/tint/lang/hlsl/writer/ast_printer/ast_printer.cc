@@ -2034,10 +2034,6 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
                 if (i > 0) {
                     pre << ", ";
                 }
-                if (i == 1 && builtin->Fn() == wgsl::BuiltinFn::kAtomicSub) {
-                    // Sub uses InterlockedAdd with the operand negated.
-                    pre << "-";
-                }
                 if (!EmitExpression(pre, arg)) {
                     return false;
                 }
@@ -2151,8 +2147,35 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
         }
 
         case wgsl::BuiltinFn::kAtomicAdd:
-        case wgsl::BuiltinFn::kAtomicSub:
             return call("InterlockedAdd");
+
+        case wgsl::BuiltinFn::kAtomicSub: {
+            auto pre = Line();
+            // Sub uses InterlockedAdd with the operand negated.
+            pre << "InterlockedAdd";
+            {
+                ScopedParen sp(pre);
+                TINT_ASSERT(expr->args.Length() == 2);
+
+                if (!EmitExpression(pre, expr->args[0])) {
+                    return false;
+                }
+                pre << ", -";
+                {
+                    ScopedParen argSP(pre);
+                    if (!EmitExpression(pre, expr->args[1])) {
+                        return false;
+                    }
+                }
+
+                pre << ", " << result;
+            }
+
+            pre << ";";
+
+            out << result;
+        }
+            return true;
 
         case wgsl::BuiltinFn::kAtomicMax:
             return call("InterlockedMax");

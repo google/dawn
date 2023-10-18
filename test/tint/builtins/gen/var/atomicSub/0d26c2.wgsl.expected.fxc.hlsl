@@ -4,7 +4,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void atomicSub_0d26c2() {
   uint arg_1 = 1u;
   uint atomic_result = 0u;
-  InterlockedAdd(arg_0, -arg_1, atomic_result);
+  InterlockedAdd(arg_0, -(arg_1), atomic_result);
   uint res = atomic_result;
   prevent_dce.Store(0u, asuint(res));
 }

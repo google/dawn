@@ -6,7 +6,7 @@ void atomicAdd_794055() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
-  int x_15 = atomicAdd(arg_0, 1);
+  int x_15 = atomicAdd(arg_0, -(1));
   res = x_15;
   return;
 }

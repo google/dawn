@@ -7,7 +7,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void atomicSub_0d26c2() {
   uint arg_1 = 1u;
-  uint res = atomicAdd(arg_0, arg_1);
+  uint res = atomicAdd(arg_0, -(arg_1));
   prevent_dce.inner = res;
 }
 
