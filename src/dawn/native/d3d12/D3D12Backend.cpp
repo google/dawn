@@ -52,10 +52,4 @@ uint64_t SetExternalMemoryReservation(WGPUDevice device,
         memorySegment, requestedReservationSize);
 }
 
-PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions()
-    : PhysicalDeviceDiscoveryOptions(nullptr) {}
-
-PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
-    : d3d::PhysicalDeviceDiscoveryOptions(WGPUBackendType_D3D12, std::move(adapter)) {}
-
 }  // namespace dawn::native::d3d12

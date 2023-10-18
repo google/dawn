@@ -50,11 +50,6 @@ Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapter adapter) {
     return ToBackend(FromAPI(adapter)->GetPhysicalDevice())->GetHardwareAdapter();
 }
 
-PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(
-    WGPUBackendType type,
-    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter)
-    : PhysicalDeviceDiscoveryOptionsBase(type), dxgiAdapter(std::move(adapter)) {}
-
 ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
     : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {}
 

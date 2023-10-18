@@ -38,9 +38,6 @@ RequestAdapterOptionsGetGLProc::RequestAdapterOptionsGetGLProc() {
     sType = wgpu::SType::RequestAdapterOptionsGetGLProc;
 }
 
-PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(WGPUBackendType type)
-    : PhysicalDeviceDiscoveryOptionsBase(type) {}
-
 ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
     : ExternalImageDescriptor(ExternalImageType::EGLImage) {}
 

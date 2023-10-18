@@ -45,14 +45,6 @@ struct DAWN_NATIVE_EXPORT RequestAdapterOptionsGetGLProc : wgpu::ChainedStruct {
     EGLDisplay display;
 };
 
-struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
-    : public PhysicalDeviceDiscoveryOptionsBase {
-    explicit PhysicalDeviceDiscoveryOptions(WGPUBackendType type);
-
-    void* (*getProc)(const char*);
-    EGLDisplay display;
-};
-
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
   public:
     ExternalImageDescriptorEGLImage();

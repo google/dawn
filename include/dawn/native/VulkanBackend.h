@@ -41,16 +41,6 @@ DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);
 
-struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
-    : public PhysicalDeviceDiscoveryOptionsBase {
-    PhysicalDeviceDiscoveryOptions();
-
-    bool forceSwiftShader = false;
-};
-
-// TODO(dawn:1774): Deprecated.
-using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
-
 enum class NeedsDedicatedAllocation {
     Yes,
     No,

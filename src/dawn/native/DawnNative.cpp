@@ -143,11 +143,6 @@ void Adapter::ResetInternalDeviceForTesting() {
     mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting();
 }
 
-// AdapterDiscoverOptionsBase
-
-PhysicalDeviceDiscoveryOptionsBase::PhysicalDeviceDiscoveryOptionsBase(WGPUBackendType type)
-    : backendType(type) {}
-
 // DawnInstanceDescriptor
 
 DawnInstanceDescriptor::DawnInstanceDescriptor() {
@@ -173,34 +168,6 @@ Instance::~Instance() {
         mImpl->APIRelease();
         mImpl = nullptr;
     }
-}
-
-void Instance::DiscoverDefaultPhysicalDevices() {
-    mImpl->DiscoverDefaultPhysicalDevices();
-}
-
-bool Instance::DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options) {
-    return mImpl->DiscoverPhysicalDevices(options);
-}
-
-// Deprecated.
-void Instance::DiscoverDefaultAdapters() {
-    mImpl->DiscoverDefaultPhysicalDevices();
-}
-
-// Deprecated.
-bool Instance::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
-    return mImpl->DiscoverPhysicalDevices(options);
-}
-
-std::vector<Adapter> Instance::GetAdapters() const {
-    dawn::WarningLog() << "GetAdapters() is deprecated. Call EnumerateAdapters(options) instead.";
-    // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
-    std::vector<Adapter> adapters;
-    for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
-        adapters.push_back(Adapter(adapter.Get()));
-    }
-    return adapters;
 }
 
 std::vector<Adapter> Instance::EnumerateAdapters(const WGPURequestAdapterOptions* options) const {

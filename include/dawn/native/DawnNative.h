@@ -128,19 +128,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     AdapterBase* mImpl = nullptr;
 };
 
-// Base class for options passed to Instance::DiscoverPhysicalDevices.
-struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptionsBase {
-  public:
-    const WGPUBackendType backendType;
-
-  protected:
-    explicit PhysicalDeviceDiscoveryOptionsBase(WGPUBackendType type);
-};
-
-// Deprecated, use PhysicalDeviceDiscoveryOptionsBase instead.
-// TODO(dawn:1774): Remove this.
-using AdapterDiscoveryOptionsBase = PhysicalDeviceDiscoveryOptionsBase;
-
 enum BackendValidationLevel { Full, Partial, Disabled };
 
 // Can be chained in InstanceDescriptor
@@ -168,19 +155,6 @@ class DAWN_NATIVE_EXPORT Instance {
     Instance(const Instance& other) = delete;
     Instance& operator=(const Instance& other) = delete;
 
-    // Gather all physical devices in the system that can be accessed with no special options.
-    void DiscoverDefaultPhysicalDevices();
-
-    // Adds physical devices that can be discovered with the options provided (like a
-    // getProcAddress). The backend is chosen based on the type of the options used. Returns true on
-    // success.
-    bool DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options);
-
-    // Deprecated, use DiscoverDefaultPhysicalDevices and DiscoverPhysicalDevices instead.
-    // TODO(Dawn:1774): Remove these.
-    void DiscoverDefaultAdapters();
-    bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
-
     // Discovers and returns a vector of adapters.
     // All systems adapters that can be found are returned if no options are passed.
     // Otherwise, returns adapters based on the `options`. Adapter toggles descriptor can chained
@@ -188,9 +162,6 @@ class DAWN_NATIVE_EXPORT Instance {
     std::vector<Adapter> EnumerateAdapters(const WGPURequestAdapterOptions* options) const;
     std::vector<Adapter> EnumerateAdapters(
         const wgpu::RequestAdapterOptions* options = nullptr) const;
-
-    // Deprecated. Call EnumerateAdapters instead.
-    std::vector<Adapter> GetAdapters() const;
 
     const ToggleInfo* GetToggleInfo(const char* toggleName);
     const FeatureInfo* GetFeatureInfo(WGPUFeatureName feature);

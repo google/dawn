@@ -76,14 +76,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
                            WGPURequestAdapterCallback callback,
                            void* userdata);
 
-    // Deprecated: Discover physical devices and save them on the instance.
-    void DiscoverDefaultPhysicalDevices();
-    bool DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options);
-
-    // Deprecated. Use EnumerateAdapters instead.
-    // Return adapters created on physical device discovered by the instance.
-    std::vector<Ref<AdapterBase>> GetAdapters() const;
-
     // Discovers and returns a vector of adapters.
     // All systems adapters that can be found are returned if no options are passed.
     // Otherwise, returns adapters based on the `options`.
@@ -181,8 +173,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // compiled in backends.
     BackendConnection* GetBackendConnection(wgpu::BackendType backendType);
 
-    // Deprecated: Discover physical devices with options, and save them on the instance.
-    void DeprecatedDiscoverPhysicalDevices(const RequestAdapterOptions* options);
     // Enumerate physical devices according to options and return them.
     std::vector<Ref<PhysicalDeviceBase>> EnumeratePhysicalDevices(
         const RequestAdapterOptions* options);
@@ -211,9 +201,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     BackendsArray mBackends;
     BackendsBitset mBackendsTried;
-
-    std::vector<Ref<PhysicalDeviceBase>> mDeprecatedPhysicalDevices;
-    bool mDeprecatedDiscoveredDefaultPhysicalDevices = false;
 
     TogglesState mToggles;
     TogglesInfo mTogglesInfo;

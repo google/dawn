@@ -513,6 +513,7 @@ source_set("end2end_tests_sources") {
 
   sources = [
     "end2end/AdapterCreationTests.cpp",
+    "end2end/AdapterEnumerationTests.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
     "end2end/BufferHostMappedPointerTests.cpp",
@@ -567,7 +568,6 @@ source_set("end2end_tests_sources") {
     "end2end/NonzeroBufferCreationTests.cpp",
     "end2end/NonzeroTextureCreationTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
-    "end2end/PhysicalDeviceDiscoveryTests.cpp",
     "end2end/PipelineCachingTests.cpp",
     "end2end/PipelineLayoutTests.cpp",
     "end2end/PrimitiveStateTests.cpp",

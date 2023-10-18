@@ -48,14 +48,6 @@ typedef __IOSurface* IOSurfaceRef;
 
 namespace dawn::native::metal {
 
-struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
-    : public PhysicalDeviceDiscoveryOptionsBase {
-    PhysicalDeviceDiscoveryOptions();
-};
-
-// TODO(dawn:1774): Deprecated.
-using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
-
 struct DAWN_NATIVE_EXPORT ExternalImageMTLSharedEventDescriptor {
     // Shared event handle `id<MTLSharedEvent>`.
     // This never passes ownership to the callee (when used as an input

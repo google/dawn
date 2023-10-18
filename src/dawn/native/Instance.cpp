@@ -163,7 +163,6 @@ void InstanceBase::WillDropLastExternalRef() {
     // In order to break this cycle and prevent leaks, when the application drops the last external
     // ref and WillDropLastExternalRef is called, the instance clears out any member refs to
     // physical devices that hold back-refs to the instance - thus breaking any reference cycles.
-    mDeprecatedPhysicalDevices.clear();
     for (auto& backend : mBackends) {
         if (backend != nullptr) {
             backend->ClearPhysicalDevices();
@@ -219,98 +218,6 @@ void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
     }
 }
 
-void InstanceBase::DiscoverDefaultPhysicalDevices() {
-    dawn::WarningLog() << "DiscoverDefaultPhysicalDevices is deprecated. Call EnumerateAdapters or "
-                          "RequestAdapter instead.";
-    if (mDeprecatedDiscoveredDefaultPhysicalDevices) {
-        return;
-    }
-    mDeprecatedDiscoveredDefaultPhysicalDevices = true;
-
-    // Discover in compat mode so that all physical devices are found. All Core physical devices can
-    // also support compat.
-    RequestAdapterOptions defaultOptions = {};
-    defaultOptions.compatibilityMode = true;
-    DeprecatedDiscoverPhysicalDevices(&defaultOptions);
-}
-
-bool InstanceBase::DiscoverPhysicalDevices(
-    const PhysicalDeviceDiscoveryOptionsBase* deprecatedOptions) {
-    dawn::WarningLog() << "DiscoverPhysicalDevices is deprecated. Call EnumerateAdapters or "
-                          "RequestAdapter instead.";
-    // Transform the deprecated options to RequestAdapterOptions.
-    RequestAdapterOptions adapterOptions = {};
-    adapterOptions.backendType = wgpu::BackendType(deprecatedOptions->backendType);
-
-#if defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
-    d3d::RequestAdapterOptionsLUID adapterOptionsLUID = {};
-#endif  // defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
-
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-    opengl::RequestAdapterOptionsGetGLProc glGetProcOptions = {};
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
-
-    switch (adapterOptions.backendType) {
-#if defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
-        case wgpu::BackendType::D3D11:
-        case wgpu::BackendType::D3D12: {
-            if (IDXGIAdapter* dxgiAdapter =
-                    static_cast<const d3d::PhysicalDeviceDiscoveryOptions*>(deprecatedOptions)
-                        ->dxgiAdapter.Get()) {
-                DXGI_ADAPTER_DESC desc;
-                if (ConsumedErrorAndWarnOnce(
-                        CheckHRESULT(dxgiAdapter->GetDesc(&desc), "IDXGIAdapter::GetDesc"))) {
-                    return false;
-                }
-                adapterOptionsLUID.adapterLUID = desc.AdapterLuid;
-                adapterOptions.nextInChain = &adapterOptionsLUID;
-            }
-            break;
-        }
-#endif  // defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
-
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-        case wgpu::BackendType::OpenGL:
-        case wgpu::BackendType::OpenGLES:
-            glGetProcOptions.getProc =
-                static_cast<const opengl::PhysicalDeviceDiscoveryOptions*>(deprecatedOptions)
-                    ->getProc;
-            adapterOptions.nextInChain = &glGetProcOptions;
-            break;
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
-
-#if defined(DAWN_ENABLE_BACKEND_VULKAN)
-        case wgpu::BackendType::Vulkan:
-            adapterOptions.forceFallbackAdapter =
-                static_cast<const vulkan::PhysicalDeviceDiscoveryOptions*>(deprecatedOptions)
-                    ->forceSwiftShader;
-            break;
-#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
-
-        default:
-            break;
-    }
-    DeprecatedDiscoverPhysicalDevices(&adapterOptions);
-    return true;
-}
-
-void InstanceBase::DeprecatedDiscoverPhysicalDevices(const RequestAdapterOptions* options) {
-    for (auto physicalDevice : EnumeratePhysicalDevices(options)) {
-        // Keep mDeprecatedPhysicalDevices current with discovered physical devices,
-        // while avoiding duplicates. There shouldn't be many so an O(n^2) loop is OK.
-        bool found = false;
-        for (const auto& other : mDeprecatedPhysicalDevices) {
-            if (other.Get() == physicalDevice.Get()) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            mDeprecatedPhysicalDevices.push_back(physicalDevice);
-        }
-    }
-}
-
 Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
                                              FeatureLevel featureLevel,
                                              const DawnTogglesDescriptor* requiredAdapterToggles,
@@ -325,21 +232,6 @@ Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDev
 
     return AcquireRef(
         new AdapterBase(std::move(physicalDevice), featureLevel, adapterToggles, powerPreference));
-}
-
-std::vector<Ref<AdapterBase>> InstanceBase::GetAdapters() const {
-    std::vector<Ref<AdapterBase>> adapters;
-    for (const auto& physicalDevice : mDeprecatedPhysicalDevices) {
-        for (FeatureLevel featureLevel : {FeatureLevel::Compatibility, FeatureLevel::Core}) {
-            if (physicalDevice->SupportsFeatureLevel(featureLevel)) {
-                // GetAdapters is deprecated, just set up default toggles state. Use
-                // EnumerateAdapters instead.
-                adapters.push_back(CreateAdapter(physicalDevice, featureLevel, nullptr,
-                                                 wgpu::PowerPreference::Undefined));
-            }
-        }
-    }
-    return adapters;
 }
 
 const TogglesState& InstanceBase::GetTogglesState() const {
@@ -385,7 +277,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
 }
 
 size_t InstanceBase::GetPhysicalDeviceCountForTesting() const {
-    size_t count = mDeprecatedPhysicalDevices.size();
+    size_t count = 0;
     for (auto& backend : mBackends) {
         if (backend != nullptr) {
             count += backend->GetPhysicalDeviceCountForTesting();

@@ -51,16 +51,6 @@ struct DAWN_NATIVE_EXPORT RequestAdapterOptionsLUID : wgpu::ChainedStruct {
     ::LUID adapterLUID;
 };
 
-struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
-    : public PhysicalDeviceDiscoveryOptionsBase {
-    PhysicalDeviceDiscoveryOptions(WGPUBackendType type,
-                                   Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
-    Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-};
-
-// TODO(dawn:1774): Deprecated.
-using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
-
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
   public:
     ExternalImageDescriptorDXGISharedHandle();
