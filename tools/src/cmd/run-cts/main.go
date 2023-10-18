@@ -170,7 +170,7 @@ func run() error {
 	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
 
 	var bin, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, adapterName, coverageFile string
-	var verbose, isolated, build, validate, dumpShaders, unrollConstEvalLoops, genCoverage bool
+	var verbose, isolated, build, validate, dumpShaders, unrollConstEvalLoops, genCoverage, compatibilityMode bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&bin, "bin", defaultBinPath(), "path to the directory holding cts.js and dawn.node")
@@ -194,6 +194,7 @@ func run() error {
 	flag.BoolVar(&unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
 	flag.BoolVar(&genCoverage, "coverage", false, "displays coverage data")
 	flag.StringVar(&coverageFile, "export-coverage", "", "write coverage data to the given path")
+	flag.BoolVar(&compatibilityMode, "compat", false, "run tests in compatibility mode")
 	flag.Parse()
 
 	// Create a thread-safe, color supporting stdout wrapper.
@@ -282,6 +283,7 @@ func run() error {
 		cts:                  cts,
 		tmpDir:               filepath.Join(os.TempDir(), "dawn-cts"),
 		unrollConstEvalLoops: unrollConstEvalLoops,
+		compatibilityMode:    compatibilityMode,
 		flags:                flags,
 		results:              testcaseStatuses{},
 		evalScript: func(main string) string {
@@ -481,6 +483,7 @@ type runner struct {
 	cts                  string
 	tmpDir               string
 	unrollConstEvalLoops bool
+	compatibilityMode    bool
 	flags                dawnNodeFlags
 	covEnv               *cov.Env
 	coverageFile         string
@@ -723,6 +726,9 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 		}
 		if r.unrollConstEvalLoops {
 			args = append(args, "--unroll-const-eval-loops")
+		}
+		if r.compatibilityMode {
+			args = append(args, "--compat")
 		}
 		for _, f := range r.flags {
 			args = append(args, "--gpu-provider-flag", f)
@@ -1173,6 +1179,9 @@ func (r *runner) runTestcase(ctx context.Context, query string) result {
 	}
 	if r.unrollConstEvalLoops {
 		args = append(args, "--unroll-const-eval-loops")
+	}
+	if r.compatibilityMode {
+		args = append(args, "--compat")
 	}
 	for _, f := range r.flags {
 		args = append(args, "--gpu-provider-flag", f)
