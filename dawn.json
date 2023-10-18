@@ -1910,6 +1910,7 @@
             {"value": 1021, "name": "multi planar format p010", "tags": ["dawn"]},
             {"value": 1022, "name": "host mapped pointer", "tags": ["dawn"]},
             {"value": 1023, "name": "multi planar render targets", "tags": ["dawn"]},
+            {"value": 1024, "name": "chromium experimental pipeline statistics query"},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},

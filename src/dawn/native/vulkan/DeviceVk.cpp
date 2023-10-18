@@ -500,7 +500,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
-    if (HasFeature(Feature::PipelineStatisticsQuery)) {
+    if (HasFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery)) {
         DAWN_ASSERT(
             ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.pipelineStatisticsQuery ==
             VK_TRUE);

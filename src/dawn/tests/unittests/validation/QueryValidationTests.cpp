@@ -715,7 +715,8 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
         // Create a device with pipeline statistic query feature required. Note that Pipeline
         // statistic query is an unsafe API, while AllowUnsafeApis instance toggle is enabled
         // when ValidationTest creating testing instance, so we can test it.
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};
+        wgpu::FeatureName requiredFeatures[1] = {
+            wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeatureCount = 1;
 

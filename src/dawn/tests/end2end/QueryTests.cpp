@@ -600,13 +600,15 @@ class PipelineStatisticsQueryTests : public QueryTests {
         DawnTest::SetUp();
 
         // Skip all tests if pipeline statistics feature is not supported
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::PipelineStatisticsQuery}));
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery}));
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::PipelineStatisticsQuery})) {
-            requiredFeatures.push_back(wgpu::FeatureName::PipelineStatisticsQuery);
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery})) {
+            requiredFeatures.push_back(
+                wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery);
         }
 
         return requiredFeatures;

@@ -213,6 +213,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
         EnableFeature(Feature::PipelineStatisticsQuery);
+        EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
     }
 
     // TODO(dawn:1559) Resolving timestamp queries after a render pass is failing on Qualcomm-based

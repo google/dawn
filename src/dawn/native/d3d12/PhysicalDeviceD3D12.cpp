@@ -147,6 +147,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
     }
     EnableFeature(Feature::PipelineStatisticsQuery);
+    EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
 
     // Both Dp4a and ShaderF16 features require DXC version being 1.4 or higher
     if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {

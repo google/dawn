@@ -492,6 +492,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
                      MTLCommonCounterClipperPrimitivesOut, MTLCommonCounterFragmentInvocations,
                      MTLCommonCounterComputeKernelInvocations})) {
                 EnableFeature(Feature::PipelineStatisticsQuery);
+                EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
             }
 
             if (IsGPUCounterSupported(*mDevice, MTLCommonCounterSetTimestamp,

@@ -73,7 +73,7 @@ MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescript
                             "fully implemented");
 
             DAWN_INVALID_IF(
-                !device->HasFeature(Feature::PipelineStatisticsQuery),
+                !device->HasFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery),
                 "Pipeline statistics query set created without the feature being enabled.");
 
             DAWN_INVALID_IF(descriptor->pipelineStatisticCount == 0,
