@@ -449,7 +449,7 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 void Device::AppendDeviceLostMessage(ErrorData* error) {
     if (mD3d11Device) {
         HRESULT result = mD3d11Device->GetDeviceRemovedReason();
-        error->AppendBackendMessage("Device removed reason: %s (0x08X)",
+        error->AppendBackendMessage("Device removed reason: %s (0x%08X)",
                                     d3d::HRESULTAsString(result), result);
     }
 }
