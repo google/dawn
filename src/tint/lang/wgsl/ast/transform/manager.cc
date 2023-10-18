@@ -52,16 +52,16 @@ Program Manager::Run(const Program& program_in, const DataMap& inputs, DataMap& 
 
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
-        auto wgsl = Program::printer(program);
+        auto wgsl = Program::printer(*program);
         std::cout << "=========================================================" << std::endl;
         std::cout << "== " << msg << " "
                   << (transform ? transform->TypeInfo().name : "transform manager") << ":"
                   << std::endl;
         std::cout << "=========================================================" << std::endl;
         std::cout << wgsl << std::endl;
-        if (!program.IsValid()) {
+        if (!program->IsValid()) {
             std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --" << std::endl;
-            std::cout << program.Diagnostics() << std::endl;
+            std::cout << program->Diagnostics() << std::endl;
         }
         std::cout << "=========================================================" << std::endl
                   << std::endl;
