@@ -36,6 +36,7 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Blob.h"
 #include "dawn/native/Serializable.h"
+#include "dawn/native/TintUtils.h"
 #include "dawn/native/stream/BlobSource.h"
 #include "dawn/native/stream/ByteVectorSink.h"
 #include "dawn/native/stream/Stream.h"

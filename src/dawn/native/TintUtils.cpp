@@ -216,12 +216,18 @@ tint::ast::transform::SubstituteOverride::Config BuildSubstituteOverridesTransfo
     return cfg;
 }
 
-}  // namespace dawn::native
-
-namespace tint::sem {
-
-bool operator<(const BindingPoint& a, const BindingPoint& b) {
-    return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
+// static
+template <>
+void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Program& p) {
+#if TINT_BUILD_WGSL_WRITER
+    tint::wgsl::writer::Options options{};
+    StreamIn(sink, tint::wgsl::writer::Generate(p, options)->wgsl);
+#else
+    // TODO(crbug.com/dawn/1481): We shouldn't need to write back to WGSL if we have a CacheKey
+    // built from the initial shader module input. Then, we would never need to parse the program
+    // and write back out to WGSL.
+    DAWN_UNREACHABLE();
+#endif
 }
 
-}  // namespace tint::sem
+}  // namespace dawn::native

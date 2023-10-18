@@ -212,7 +212,6 @@ target_sources(dawn_native
     "SharedFence.h"
     "SharedTextureMemory.cpp"
     "SharedTextureMemory.h"
-    "StreamImplTint.cpp"
     "Subresource.cpp"
     "Subresource.h"
     "SubresourceStorage.h"

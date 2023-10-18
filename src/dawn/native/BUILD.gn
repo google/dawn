@@ -358,7 +358,6 @@ source_set("sources") {
     "SharedFence.h",
     "SharedTextureMemory.cpp",
     "SharedTextureMemory.h",
-    "StreamImplTint.cpp",
     "Subresource.cpp",
     "Subresource.h",
     "SubresourceStorage.h",

@@ -32,6 +32,7 @@
 
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/stream/Stream.h"
 
 #include "tint/tint.h"
 
@@ -63,13 +64,24 @@ tint::ast::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
 tint::ast::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage);
 
+// Uses tint::ForeachField when available to implement the stream::Stream trait for types.
+template <typename T>
+class stream::Stream<T, std::enable_if_t<tint::HasReflection<T>>> {
+  public:
+    static void Write(Sink* s, const T& v) {
+        tint::ForeachField(v, [&](const auto& f) { StreamIn(s, f); });
+    }
+    static MaybeError Read(Source* s, T* v) {
+        MaybeError error = {};
+        tint::ForeachField(*v, [&](auto& f) {
+            if (!error.IsError()) {
+                error = StreamOut(s, &f);
+            }
+        });
+        return error;
+    }
+};
+
 }  // namespace dawn::native
-
-namespace tint::sem {
-
-// Defin operator< for std::map containing BindingPoint
-bool operator<(const BindingPoint& a, const BindingPoint& b);
-
-}  // namespace tint::sem
 
 #endif  // SRC_DAWN_NATIVE_TINTUTILS_H_
