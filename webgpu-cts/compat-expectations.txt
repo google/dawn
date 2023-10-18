@@ -171,7 +171,6 @@ crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Failure ]
 
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="storage";storageMode="read_write";* [ Failure ]
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:alias_name:ident="bitcast" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:function_const_name:ident="bitcast" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:function_let_name:ident="bitcast" [ Failure ]
