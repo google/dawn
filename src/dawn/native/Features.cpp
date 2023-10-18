@@ -88,8 +88,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1197", FeatureInfo::FeatureState::Stable}},
     {Feature::ShaderF16,
      {"Supports the \"enable f16;\" directive in WGSL",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1510",
-      FeatureInfo::FeatureState::Experimental}},
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1510", FeatureInfo::FeatureState::Stable}},
     {Feature::RG11B10UfloatRenderable,
      {"Allows the RENDER_ATTACHMENT usage on textures with format \"rg11b10ufloat\", and also "
       "allows textures of that format to be multisampled.",

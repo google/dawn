@@ -562,9 +562,9 @@ TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
 
     const Field& field = GetParam().mField;
 
-    if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
-        return;
-    }
+    // Skip if device don't support f16 extension.
+    DAWN_TEST_UNSUPPORTED_IF(field.IsRequireF16Feature() &&
+                             !device.HasFeature(wgpu::FeatureName::ShaderF16));
 
     std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
                          R"(
@@ -725,9 +725,9 @@ TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
         return;
     }
 
-    if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
-        return;
-    }
+    // Skip if device don't support f16 extension.
+    DAWN_TEST_UNSUPPORTED_IF(field.IsRequireF16Feature() &&
+                             !device.HasFeature(wgpu::FeatureName::ShaderF16));
 
     std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
                          R"(

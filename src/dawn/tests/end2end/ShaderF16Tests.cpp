@@ -111,9 +111,8 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
         GetParam().mRequireShaderF16Feature &&
         // Adapter support the feature
         IsShaderF16SupportedOnAdapter() &&
-        // Proper toggle, allow_unsafe_apis and use_dxc if d3d12
-        // Note that "allow_unsafe_apis" is always enabled in DawnTestBase::CreateDeviceImpl.
-        HasToggleEnabled("allow_unsafe_apis") && UseDxcEnabledOrNonD3D12();
+        // Proper toggle, use_dxc if d3d12
+        UseDxcEnabledOrNonD3D12();
     const bool deviceSupportShaderF16Feature = device.HasFeature(wgpu::FeatureName::ShaderF16);
     EXPECT_EQ(deviceSupportShaderF16Feature, shouldShaderF16FeatureSupportedByDevice);
 
