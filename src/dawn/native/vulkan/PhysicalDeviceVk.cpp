@@ -212,7 +212,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
-        EnableFeature(Feature::PipelineStatisticsQuery);
         EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
     }
 

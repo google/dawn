@@ -491,7 +491,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
                     {MTLCommonCounterVertexInvocations, MTLCommonCounterClipperInvocations,
                      MTLCommonCounterClipperPrimitivesOut, MTLCommonCounterFragmentInvocations,
                      MTLCommonCounterComputeKernelInvocations})) {
-                EnableFeature(Feature::PipelineStatisticsQuery);
                 EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
             }
 

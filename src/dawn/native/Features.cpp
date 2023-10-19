@@ -59,9 +59,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Support Adaptable Scalable Texture Compressed (ASTC) "
       "texture formats",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=955", FeatureInfo::FeatureState::Stable}},
-    {Feature::PipelineStatisticsQuery,
-     {"Support Pipeline Statistics Query", "https://bugs.chromium.org/p/dawn/issues/detail?id=434",
-      FeatureInfo::FeatureState::Experimental}},
     {Feature::ChromiumExperimentalPipelineStatisticsQuery,
      {"Support experimental Pipeline Statistics Query",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=434",
