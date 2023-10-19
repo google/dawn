@@ -18,7 +18,7 @@ vars = {
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:bd99dbf98cbdefe18a4128189665c5761263bcfb',
+  'dawn_gn_version': 'git_revision:182a6eb05d15cc76d2302f7928fdb4f645d52c53',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:2@1.11.1.chromium.6',
