@@ -58,8 +58,7 @@ uint32_t GPUSupportedLimits::getMaxBindGroups(Napi::Env) {
 }
 
 uint32_t GPUSupportedLimits::getMaxBindGroupsPlusVertexBuffers(Napi::Env) {
-    // TODO(dawn:1849): Use Dawn's limit ones it is present.
-    return 24;
+    return limits_.limits.maxBindGroupsPlusVertexBuffers;
 }
 
 uint32_t GPUSupportedLimits::getMaxBindingsPerBindGroup(Napi::Env) {
