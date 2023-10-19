@@ -57,7 +57,7 @@ if (tint_build_glsl_validator) {
       "${tint_src_dir}/utils/traits",
     ]
 
-    if (tint_build_glsl_writer) {
+    if (tint_build_glsl_validator) {
       deps += [
         "${tint_glslang_dir}:glslang_default_resource_limits_sources",
         "${tint_glslang_dir}:glslang_lib_sources",

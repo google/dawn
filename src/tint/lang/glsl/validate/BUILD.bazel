@@ -57,7 +57,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ] + select({
-    ":tint_build_glsl_writer": [
+    ":tint_build_glsl_validator": [
       
       
     ],
@@ -70,10 +70,5 @@ cc_library(
 alias(
   name = "tint_build_glsl_validator",
   actual = "//src/tint:tint_build_glsl_validator_true",
-)
-
-alias(
-  name = "tint_build_glsl_writer",
-  actual = "//src/tint:tint_build_glsl_writer_true",
 )
 

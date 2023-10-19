@@ -59,11 +59,11 @@ tint_target_add_dependencies(tint_lang_glsl_validate lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_VALIDATOR)
   tint_target_add_external_dependencies(tint_lang_glsl_validate lib
     "glslang"
     "glslang-res-limits"
   )
-endif(TINT_BUILD_GLSL_WRITER)
+endif(TINT_BUILD_GLSL_VALIDATOR)
 
 endif(TINT_BUILD_GLSL_VALIDATOR)
