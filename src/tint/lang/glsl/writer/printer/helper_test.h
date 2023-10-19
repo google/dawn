@@ -50,6 +50,8 @@ class GlslPrinterTestHelperBase : public BASE {
     core::ir::Builder b{mod};
     /// The type manager.
     core::type::Manager& ty{mod.Types()};
+    /// The GLSL version
+    Version version{};
 
   protected:
     /// The GLSL writer.
@@ -70,7 +72,7 @@ class GlslPrinterTestHelperBase : public BASE {
             return false;
         }
 
-        auto result = writer_.Generate();
+        auto result = writer_.Generate(version);
         if (!result) {
             err_ = result.Failure().reason.str();
             return false;
@@ -78,6 +80,17 @@ class GlslPrinterTestHelperBase : public BASE {
         output_ = writer_.Result();
 
         return true;
+    }
+
+    /// @returns the metal header string
+    std::string GlslHeader() const {
+        std::stringstream ver;
+        ver << "#version " << version.major_version << version.minor_version << "0";
+        if (version.IsES()) {
+            ver << " es";
+        }
+        ver << "\n";
+        return ver.str();
     }
 };
 

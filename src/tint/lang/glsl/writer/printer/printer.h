@@ -31,6 +31,7 @@
 #include <string>
 
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/generator/text_generator.h"
 
 // Forward declarations
@@ -55,17 +56,45 @@ class Printer : public tint::TextGenerator {
     explicit Printer(core::ir::Module& module);
     ~Printer() override;
 
+    /// @param version the GLSL version information
     /// @returns success or failure
-    tint::Result<SuccessType> Generate();
+    tint::Result<SuccessType> Generate(Version version);
 
     /// @copydoc tint::TextGenerator::Result
     std::string Result() const override;
 
   private:
+    /// Emit the function
+    /// @param func the function to emit
+    void EmitFunction(core::ir::Function* func);
+
+    /// Emit a block
+    /// @param block the block to emit
+    void EmitBlock(core::ir::Block* block);
+    /// Emit the instructions in a block
+    /// @param block the block with the instructions to emit
+    void EmitBlockInstructions(core::ir::Block* block);
+
+    /// Emit a return instruction
+    /// @param r the return instruction
+    void EmitReturn(core::ir::Return* r);
+    /// Emit an unreachable instruction
+    void EmitUnreachable();
+
+    /// Emit a type
+    /// @param out the stream to emit too
+    /// @param ty the type to emit
+    void EmitType(StringStream& out, const core::type::Type* ty);
+
     core::ir::Module& ir_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
+
+    /// The current function being emitted
+    core::ir::Function* current_function_ = nullptr;
+    /// The current block being emitted
+    core::ir::Block* current_block_ = nullptr;
 };
 
 }  // namespace tint::glsl::writer

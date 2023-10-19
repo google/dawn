@@ -64,7 +64,12 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
-  ],
+  ] + select({
+    ":tint_build_glsl_writer": [
+      "//src/tint/lang/glsl/writer/common",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
@@ -73,6 +78,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "constant_test.cc",
+    "function_test.cc",
     "helper_test.h",
   ],
   deps = [
@@ -100,6 +106,7 @@ cc_library(
     "@gtest",
   ] + select({
     ":tint_build_glsl_writer": [
+      "//src/tint/lang/glsl/writer/common",
       "//src/tint/lang/glsl/writer/printer",
     ],
     "//conditions:default": [],

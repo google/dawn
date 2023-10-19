@@ -72,7 +72,7 @@ Result<Output> Generate(const Program& program,
 
         // Generate the GLSL code.
         auto impl = std::make_unique<Printer>(ir);
-        auto result = impl->Generate();
+        auto result = impl->Generate(options.version);
         if (!result) {
             return result.Failure();
         }
