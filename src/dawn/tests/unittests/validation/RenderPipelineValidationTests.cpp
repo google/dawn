@@ -1269,7 +1269,33 @@ TEST_F(RenderPipelineValidationTest, DepthCompareRequiredForFormatsWithDepth) {
     descriptor.cDepthStencil.depthCompare = wgpu::CompareFunction::Undefined;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
+    // Undefined is valid though if depthCompare is not used by anything.
     descriptor.cDepthStencil.depthWriteEnabled = false;
+    descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+    descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Undefined is invalid if depthCompare is used by depthWriteEnabled.
+    descriptor.cDepthStencil.depthWriteEnabled = true;
+    descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+    descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    // Undefined is invalid if depthCompare is used by stencilFront.depthFailOp.
+    descriptor.cDepthStencil.depthWriteEnabled = false;
+    descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Zero;
+    descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    // Undefined is invalid if depthCompare is used by stencilBack.depthFailOp.
+    descriptor.cDepthStencil.depthWriteEnabled = false;
+    descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+    descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Zero;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    descriptor.cDepthStencil.depthWriteEnabled = false;
+    descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+    descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
 
     // Always is valid for format with no depth.
