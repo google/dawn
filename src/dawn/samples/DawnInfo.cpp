@@ -160,6 +160,11 @@ std::string LimitsToString(const wgpu::Limits& limits, const std::string& indent
     out << indent << "maxTextureArrayLayers: " << FormatNumber(limits.maxTextureArrayLayers)
         << "\n";
     out << indent << "maxBindGroups: " << FormatNumber(limits.maxBindGroups) << "\n";
+    out << indent
+        << "maxBindGroupsPlusVertexBuffers: " << FormatNumber(limits.maxBindGroupsPlusVertexBuffers)
+        << "\n";
+    out << indent << "maxBindingsPerBindGroup: " << FormatNumber(limits.maxBindingsPerBindGroup)
+        << "\n";
     out << indent << "maxDynamicUniformBuffersPerPipelineLayout: "
         << FormatNumber(limits.maxDynamicUniformBuffersPerPipelineLayout) << "\n";
     out << indent << "maxDynamicStorageBuffersPerPipelineLayout: "
@@ -185,6 +190,7 @@ std::string LimitsToString(const wgpu::Limits& limits, const std::string& indent
     out << indent << "minStorageBufferOffsetAlignment: "
         << FormatNumber(limits.minStorageBufferOffsetAlignment) << "\n";
     out << indent << "maxVertexBuffers: " << FormatNumber(limits.maxVertexBuffers) << "\n";
+    out << indent << "maxBufferSize: " << FormatNumber(limits.maxBufferSize) << "\n";
     out << indent << "maxVertexAttributes: " << FormatNumber(limits.maxVertexAttributes) << "\n";
     out << indent
         << "maxVertexBufferArrayStride: " << FormatNumber(limits.maxVertexBufferArrayStride)
@@ -196,6 +202,8 @@ std::string LimitsToString(const wgpu::Limits& limits, const std::string& indent
         << "maxInterStageShaderVariables: " << FormatNumber(limits.maxInterStageShaderVariables)
         << "\n";
     out << indent << "maxColorAttachments: " << FormatNumber(limits.maxColorAttachments) << "\n";
+    out << indent << "maxColorAttachmentBytesPerSample: "
+        << FormatNumber(limits.maxColorAttachmentBytesPerSample) << "\n";
     out << indent
         << "maxComputeWorkgroupStorageSize: " << FormatNumber(limits.maxComputeWorkgroupStorageSize)
         << "\n";
