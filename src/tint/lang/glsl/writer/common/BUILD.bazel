@@ -40,9 +40,11 @@ cc_library(
   name = "common",
   srcs = [
     "options.cc",
+    "printer_support.cc",
   ],
   hdrs = [
     "options.h",
+    "printer_support.h",
     "version.h",
   ],
   deps = [
@@ -53,6 +55,7 @@ cc_library(
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/reflection",
+    "//src/tint/utils/strconv",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ],

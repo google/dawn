@@ -25,23 +25,44 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
-#define SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
+#include "src/tint/lang/glsl/writer/common/printer_support.h"
 
-#include "src/tint/utils/result/result.h"
+#include <cmath>
+#include <limits>
 
-// Forward declarations
-namespace tint::core::ir {
-class Module;
-}  // namespace tint::core::ir
+#include "src/tint/utils/strconv/float_to_string.h"
 
-namespace tint::glsl::raise {
+namespace tint::glsl::writer {
 
-/// Raise a core IR module to the MSL dialect of the IR.
-/// @param mod the core IR module to raise to MSL dialect
-/// @returns success or failure
-Result<SuccessType> Raise(core::ir::Module& mod);
+void PrintI32(StringStream& out, int32_t value) {
+    // GLSL parses `-2147483648` as a unary minus and `2147483648` as separate tokens, and the
+    // latter doesn't fit into an (32-bit) `int`. Emit `(-2147483647 - 1)` instead, which ensures
+    // the expression type is `int`.
+    if (auto int_min = std::numeric_limits<int32_t>::min(); value == int_min) {
+        out << "(" << int_min + 1 << " - 1)";
+    } else {
+        out << value;
+    }
+}
 
-}  // namespace tint::glsl::raise
+void PrintF32(StringStream& out, float value) {
+    if (std::isinf(value)) {
+        out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
+    } else if (std::isnan(value)) {
+        out << "0.0f /* nan */";
+    } else {
+        out << tint::writer::FloatToString(value) << "f";
+    }
+}
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
+void PrintF16(StringStream& out, float value) {
+    if (std::isinf(value)) {
+        out << "0.0hf " << (value >= 0 ? "/* inf */" : "/* -inf */");
+    } else if (std::isnan(value)) {
+        out << "0.0hf /* nan */";
+    } else {
+        out << tint::writer::FloatToString(value) << "hf";
+    }
+}
+
+}  // namespace tint::glsl::writer

@@ -43,6 +43,8 @@ if(TINT_BUILD_GLSL_WRITER)
 tint_add_target(tint_lang_glsl_writer_common lib
   lang/glsl/writer/common/options.cc
   lang/glsl/writer/common/options.h
+  lang/glsl/writer/common/printer_support.cc
+  lang/glsl/writer/common/printer_support.h
   lang/glsl/writer/common/version.h
 )
 
@@ -54,6 +56,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer_common lib
   tint_utils_macros
   tint_utils_math
   tint_utils_reflection
+  tint_utils_strconv
   tint_utils_text
   tint_utils_traits
 )

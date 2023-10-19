@@ -51,6 +51,7 @@
 #include "src/tint/lang/glsl/writer/ast_raise/texture_1d_to_2d.h"
 #include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/common/options.h"
+#include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
@@ -97,7 +98,6 @@
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
-#include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -127,37 +127,6 @@ bool RequiresOESSampleVariables(tint::core::BuiltinValue builtin) {
             return true;
         default:
             return false;
-    }
-}
-
-void PrintI32(StringStream& out, int32_t value) {
-    // GLSL parses `-2147483648` as a unary minus and `2147483648` as separate tokens, and the
-    // latter doesn't fit into an (32-bit) `int`. Emit `(-2147483647 - 1)` instead, which ensures
-    // the expression type is `int`.
-    if (auto int_min = std::numeric_limits<int32_t>::min(); value == int_min) {
-        out << "(" << int_min + 1 << " - 1)";
-    } else {
-        out << value;
-    }
-}
-
-void PrintF32(StringStream& out, float value) {
-    if (std::isinf(value)) {
-        out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
-    } else if (std::isnan(value)) {
-        out << "0.0f /* nan */";
-    } else {
-        out << tint::writer::FloatToString(value) << "f";
-    }
-}
-
-void PrintF16(StringStream& out, float value) {
-    if (std::isinf(value)) {
-        out << "0.0hf " << (value >= 0 ? "/* inf */" : "/* -inf */");
-    } else if (std::isnan(value)) {
-        out << "0.0hf /* nan */";
-    } else {
-        out << tint::writer::FloatToString(value) << "hf";
     }
 }
 

@@ -25,23 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
-#define SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_PRINTER_SUPPORT_H_
+#define SRC_TINT_LANG_GLSL_WRITER_COMMON_PRINTER_SUPPORT_H_
 
-#include "src/tint/utils/result/result.h"
+#include <cstdint>
 
-// Forward declarations
-namespace tint::core::ir {
-class Module;
-}  // namespace tint::core::ir
+#include "src/tint/utils/text/string_stream.h"
 
-namespace tint::glsl::raise {
+namespace tint::glsl::writer {
 
-/// Raise a core IR module to the MSL dialect of the IR.
-/// @param mod the core IR module to raise to MSL dialect
-/// @returns success or failure
-Result<SuccessType> Raise(core::ir::Module& mod);
+/// Prints a float32 to the output stream
+/// @param out the stream to write too
+/// @param value the float32 value
+void PrintF32(StringStream& out, float value);
 
-}  // namespace tint::glsl::raise
+/// Prints a float16 to the output stream
+/// @param out the stream to write too
+/// @param value the float16 value
+void PrintF16(StringStream& out, float value);
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
+/// Prints an int32 to the output stream
+/// @param out the stream to write too
+/// @param value the int32 value
+void PrintI32(StringStream& out, int32_t value);
+
+}  // namespace tint::glsl::writer
+
+#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_PRINTER_SUPPORT_H_

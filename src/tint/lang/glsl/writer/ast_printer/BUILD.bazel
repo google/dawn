@@ -67,7 +67,6 @@ cc_library(
     "//src/tint/utils/reflection",
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/strconv",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
