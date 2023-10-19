@@ -39,6 +39,10 @@ const (
 	// expectations.txt file.
 	RelativeExpectationsPath = "webgpu-cts/expectations.txt"
 
+	// RelativeCompatExpectationsPath is the dawn-root relative path to the
+	// compat-expectations.txt file.
+	RelativeCompatExpectationsPath = "webgpu-cts/compat-expectations.txt"
+
 	// RelativeSlowExpectationsPath is the dawn-root relative path to the
 	// slow_tests.txt file.
 	RelativeSlowExpectationsPath = "webgpu-cts/slow_tests.txt"
@@ -56,6 +60,25 @@ func DefaultExpectationsPath() string {
 		return ""
 	}
 	return path
+}
+
+// DefaultCompatExpectationsPath returns the default path to the compat-expectations.txt
+// file. Returns an empty string if the file cannot be found.
+func DefaultCompatExpectationsPath() string {
+	path := filepath.Join(fileutils.DawnRoot(), RelativeCompatExpectationsPath)
+	if _, err := os.Stat(path); err != nil {
+		return ""
+	}
+	return path
+}
+
+// DefaultExpectationsPaths returns the default set of expectations files commands
+// will use if no alternative list of files is supplied.
+func DefaultExpectationsPaths() []string {
+	return []string{
+		DefaultExpectationsPath(),
+		DefaultCompatExpectationsPath(),
+	}
 }
 
 // DefaultSlowExpectationsPath returns the default path to the slow_tests.txt
