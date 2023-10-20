@@ -154,11 +154,6 @@ struct Texture1DTo2D::State {
             }
 
             if (builtin->Fn() == wgsl::BuiltinFn::kTextureDimensions) {
-                // If this textureDimensions() call is in a CallStatement, we can leave it
-                // unmodified since the return value will be dropped on the floor anyway.
-                if (call->Stmt()->Declaration()->Is<ast::CallStatement>()) {
-                    return nullptr;
-                }
                 auto* new_call = ctx.CloneWithoutTransform(c);
                 return ctx.dst->MemberAccessor(new_call, "x");
             }

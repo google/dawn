@@ -153,17 +153,21 @@ fn main() -> u32 {
 
 TEST_F(Texture1DTo2DTest, Global1DDeclAndTextureDimensionsInCallStmt) {
     auto* src = R"(
-@group(0) @binding(0) var t : texture_1d<f32>;
+@group(0) @binding(0) var st : texture_storage_1d<r32uint, write>;
+
+@group(0) @binding(1) var t : texture_1d<f32>;
 
 fn main() {
-  _ = textureDimensions(t);
+  textureStore(st, clamp(5, 0, i32((textureDimensions(st) - 1))), vec4u(0, 0, 0, 0));
 }
 )";
     auto* expect = R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
+@group(0) @binding(0) var st : texture_storage_2d<r32uint, write>;
+
+@group(0) @binding(1) var t : texture_2d<f32>;
 
 fn main() {
-  _ = textureDimensions(t).x;
+  textureStore(st, vec2<i32>(clamp(5, 0, i32((textureDimensions(st).x - 1))), 0), vec4u(0, 0, 0, 0));
 }
 )";
 
