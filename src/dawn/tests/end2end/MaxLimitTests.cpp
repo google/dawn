@@ -418,6 +418,128 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     EXPECT_TEXTURE_EQ(&expected, renderTarget, {0, 0}, {1, 1});
 }
 
+// Test using the maximum number of storage buffers per shader stage.
+TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
+    // TODO(dawn:2162): Triage this failure.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    wgpu::Limits limits = GetSupportedLimits().limits;
+
+    std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
+    std::vector<wgpu::BindGroupEntry> bgEntries;
+
+    // Binding number counter which is bumped as we create bind group layout
+    // entries.
+    uint32_t bindingNumber = 1u;
+
+    // Lambda to create a buffer.
+    // The test binds checks that the contents of the buffer are equal to the binding number.
+    auto MakeBuffer = [&]() {
+        uint32_t bufferData = bindingNumber;
+        return utils::CreateBufferFromData(device, &bufferData, sizeof(bufferData),
+                                           wgpu::BufferUsage::Storage);
+    };
+
+    // Create as many storage buffers as the limits allow.
+    for (uint32_t i = 0; i < 2 * limits.maxStorageBuffersPerShaderStage; ++i) {
+        wgpu::Buffer buffer = MakeBuffer();
+
+        bglEntries.push_back(utils::BindingLayoutEntryInitializationHelper{
+            bindingNumber,
+            // When we surpass the per-stage limit, switch to the fragment shader.
+            i < limits.maxStorageBuffersPerShaderStage ? wgpu::ShaderStage::Vertex
+                                                       : wgpu::ShaderStage::Fragment,
+            wgpu::BufferBindingType::ReadOnlyStorage});
+        bgEntries.push_back(
+            utils::BindingInitializationHelper(bindingNumber, buffer, 0, sizeof(uint32_t))
+                .GetAsBinding());
+        ++bindingNumber;
+    }
+
+    // Create the bind group layout.
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = bglEntries.size();
+    bglDesc.entries = bglEntries.data();
+    wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+    // Create the bind group.
+    wgpu::BindGroupDescriptor bgDesc;
+    bgDesc.layout = bgl;
+    bgDesc.entryCount = bgEntries.size();
+    bgDesc.entries = bgEntries.data();
+    wgpu::BindGroup bindGroup = device.CreateBindGroup(&bgDesc);
+
+    // Generate binding declarations at the top of the the shader.
+    std::ostringstream wgslShader;
+    for (const auto& binding : bglEntries) {
+        wgslShader << "@group(0) @binding(" << binding.binding << ") var<storage, read> b"
+                   << binding.binding << ": u32;\n";
+    }
+
+    // Generate a vertex shader which rasterizes primitives outside the viewport
+    // if the bound buffer contents are not expected.
+    wgslShader << "@vertex fn vert_main() -> @builtin(position) vec4f {\n";
+    for (const auto& binding : bglEntries) {
+        if (binding.visibility == wgpu::ShaderStage::Vertex) {
+            // If the value is not what is expected, return a vertex that will be clipped.
+            wgslShader << "    if (b" << binding.binding << " != " << binding.binding
+                       << "u) { return vec4f(10.0, 10.0, 10.0, 1.0); }\n";
+        }
+    }
+    wgslShader << "    return vec4f(0.0, 0.0, 0.5, 1.0);\n";
+    wgslShader << "}\n";
+
+    // Generate a fragment shader which discards fragments if the bound buffer
+    // contents are not expected.
+    wgslShader << "@fragment fn frag_main() -> @location(0) u32 {\n";
+    for (const auto& binding : bglEntries) {
+        if (binding.visibility == wgpu::ShaderStage::Fragment) {
+            // If the value is not what is expected, discard.
+            wgslShader << "    if (b" << binding.binding << " != " << binding.binding
+                       << "u) { discard; }\n";
+        }
+    }
+    wgslShader << "    return 1u;\n";
+    wgslShader << "}\n";
+
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, wgslShader.str().c_str());
+
+    // Create a render target. Its contents will be 1 if the test passes.
+    wgpu::TextureDescriptor renderTargetDesc;
+    renderTargetDesc.size = {1, 1};
+    renderTargetDesc.format = wgpu::TextureFormat::R8Uint;
+    renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture renderTarget = device.CreateTexture(&renderTargetDesc);
+
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = utils::MakePipelineLayout(device, {bgl});
+    pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    pipelineDesc.vertex.module = shaderModule;
+    pipelineDesc.vertex.entryPoint = "vert_main";
+    pipelineDesc.cFragment.module = shaderModule;
+    pipelineDesc.cFragment.entryPoint = "frag_main";
+    pipelineDesc.cTargets[0].format = renderTargetDesc.format;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    utils::ComboRenderPassDescriptor rpDesc({renderTarget.CreateView()});
+    rpDesc.cColorAttachments[0].clearValue = {};
+    rpDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    rpDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+
+    pass.SetBindGroup(0, bindGroup);
+    pass.SetPipeline(pipeline);
+    pass.Draw(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    uint32_t expected = 1u;
+    EXPECT_TEXTURE_EQ(&expected, renderTarget, {0, 0}, {1, 1});
+}
+
 // Test that creating a large bind group, with each binding type at the max count, works and can be
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.

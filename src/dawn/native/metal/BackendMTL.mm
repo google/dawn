@@ -764,10 +764,11 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
         DAWN_ASSERT(maxBuffersPerStage >= baseMaxBuffersPerStage);
         {
+            // Allocate all remaining buffers to maxStorageBuffersPerShaderStage.
+            // TODO(crbug.com/2158): We can have more of all types of buffers when
+            // using Metal argument buffers.
             uint32_t additional = maxBuffersPerStage - baseMaxBuffersPerStage;
-            limits->v1.maxStorageBuffersPerShaderStage += additional / 3;
-            limits->v1.maxUniformBuffersPerShaderStage += additional / 3;
-            limits->v1.maxVertexBuffers += (additional - 2 * (additional / 3));
+            limits->v1.maxStorageBuffersPerShaderStage += additional;
         }
 
         uint32_t baseMaxTexturesPerStage = limits->v1.maxSampledTexturesPerShaderStage +
