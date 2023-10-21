@@ -864,11 +864,11 @@ void Disassembler::EmitUnary(Unary* u) {
     SourceMarker sm(this);
     EmitValueWithType(u);
     out_ << " = ";
-    switch (u->Kind()) {
-        case Unary::Kind::kComplement:
+    switch (u->Op()) {
+        case UnaryOp::kComplement:
             out_ << "complement";
             break;
-        case Unary::Kind::kNegation:
+        case UnaryOp::kNegation:
             out_ << "negation";
             break;
     }

@@ -653,11 +653,11 @@ class State {
 
     void Unary(core::ir::Unary* u) {
         const ast::Expression* expr = nullptr;
-        switch (u->Kind()) {
-            case core::ir::Unary::Kind::kComplement:
+        switch (u->Op()) {
+            case core::ir::UnaryOp::kComplement:
                 expr = b.Complement(Expr(u->Val()));
                 break;
-            case core::ir::Unary::Kind::kNegation:
+            case core::ir::UnaryOp::kNegation:
                 expr = b.Negation(Expr(u->Val()));
                 break;
         }

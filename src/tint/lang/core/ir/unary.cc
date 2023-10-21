@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unary);
 
 namespace tint::core::ir {
 
-Unary::Unary(InstructionResult* result, enum Kind k, Value* val) : kind_(k) {
+Unary::Unary(InstructionResult* result, UnaryOp op, Value* val) : op_(op) {
     AddOperand(Unary::kValueOperandOffset, val);
     AddResult(result);
 }
@@ -44,7 +44,7 @@ Unary::~Unary() = default;
 Unary* Unary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result());
     auto* val = ctx.Remap(Val());
-    return ctx.ir.instructions.Create<Unary>(new_result, kind_, val);
+    return ctx.ir.instructions.Create<Unary>(new_result, op_, val);
 }
 
 }  // namespace tint::core::ir

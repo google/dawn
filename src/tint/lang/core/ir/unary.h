@@ -35,23 +35,23 @@
 
 namespace tint::core::ir {
 
+/// A unary operator.
+enum class UnaryOp {
+    kComplement,
+    kNegation,
+};
+
 /// A unary instruction in the IR.
 class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
-    /// The kind of instruction.
-    enum class Kind {
-        kComplement,
-        kNegation,
-    };
-
     /// Constructor
     /// @param result the result value
-    /// @param kind the kind of unary instruction
+    /// @param op the unary operator
     /// @param val the input value for the instruction
-    Unary(InstructionResult* result, enum Kind kind, Value* val);
+    Unary(InstructionResult* result, UnaryOp op, Value* val);
     ~Unary() override;
 
     /// @copydoc Instruction::Clone()
@@ -60,14 +60,14 @@ class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
     /// @returns the value for the instruction
     Value* Val() { return operands_[kValueOperandOffset]; }
 
-    /// @returns the kind of unary instruction
-    enum Kind Kind() { return kind_; }
+    /// @returns the unary operator
+    UnaryOp Op() { return op_; }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "unary"; }
 
   private:
-    enum Kind kind_;
+    UnaryOp op_;
 };
 
 }  // namespace tint::core::ir

@@ -1332,7 +1332,7 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     auto* bin =
-        mod.instructions.Create<ir::Unary>(nullptr, ir::Unary::Kind::kNegation, b.Constant(2_i));
+        mod.instructions.Create<ir::Unary>(nullptr, ir::UnaryOp::kNegation, b.Constant(2_i));
 
     auto* f = b.Function("my_func", ty.void_());
 

@@ -606,15 +606,15 @@ class Builder {
         return Binary(BinaryOp::kModulo, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
     }
 
-    /// Creates an op for `kind val`
-    /// @param kind the kind of operation
+    /// Creates an op for `op val`
+    /// @param op the unary operator
     /// @param type the result type of the binary expression
     /// @param val the value of the operation
     /// @returns the operation
     template <typename VAL>
-    ir::Unary* Unary(enum Unary::Kind kind, const core::type::Type* type, VAL&& val) {
+    ir::Unary* Unary(UnaryOp op, const core::type::Type* type, VAL&& val) {
         auto* value = Value(std::forward<VAL>(val));
-        return Append(ir.instructions.Create<ir::Unary>(InstructionResult(type), kind, value));
+        return Append(ir.instructions.Create<ir::Unary>(InstructionResult(type), op, value));
     }
 
     /// Creates a Complement operation
@@ -623,7 +623,7 @@ class Builder {
     /// @returns the operation
     template <typename VAL>
     ir::Unary* Complement(const core::type::Type* type, VAL&& val) {
-        return Unary(ir::Unary::Kind::kComplement, type, std::forward<VAL>(val));
+        return Unary(ir::UnaryOp::kComplement, type, std::forward<VAL>(val));
     }
 
     /// Creates a Negation operation
@@ -632,7 +632,7 @@ class Builder {
     /// @returns the operation
     template <typename VAL>
     ir::Unary* Negation(const core::type::Type* type, VAL&& val) {
-        return Unary(ir::Unary::Kind::kNegation, type, std::forward<VAL>(val));
+        return Unary(ir::UnaryOp::kNegation, type, std::forward<VAL>(val));
     }
 
     /// Creates a Not operation

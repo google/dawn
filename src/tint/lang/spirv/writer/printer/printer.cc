@@ -1761,11 +1761,11 @@ void Printer::EmitUnary(core::ir::Unary* unary) {
     auto id = Value(unary);
     auto* ty = unary->Result()->Type();
     spv::Op op = spv::Op::Max;
-    switch (unary->Kind()) {
-        case core::ir::Unary::Kind::kComplement:
+    switch (unary->Op()) {
+        case core::ir::UnaryOp::kComplement:
             op = spv::Op::OpNot;
             break;
-        case core::ir::Unary::Kind::kNegation:
+        case core::ir::UnaryOp::kNegation:
             if (ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFNegate;
             } else if (ty->is_signed_integer_scalar_or_vector()) {
