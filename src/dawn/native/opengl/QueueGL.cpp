@@ -36,6 +36,10 @@
 
 namespace dawn::native::opengl {
 
+ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
+    return AcquireRef(new Queue(device, descriptor));
+}
+
 Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
@@ -87,20 +91,67 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     return {};
 }
 
+void Queue::OnGLUsed() {
+    mHasPendingCommands = true;
+}
+
+void Queue::SubmitFenceSync() {
+    if (!mHasPendingCommands) {
+        return;
+    }
+
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+    GLsync sync = gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    IncrementLastSubmittedCommandSerial();
+    mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
+    mHasPendingCommands = false;
+}
+
 bool Queue::HasPendingCommands() const {
-    return ToBackend(GetDevice())->HasPendingCommands();
+    return mHasPendingCommands;
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
-    return ToBackend(GetDevice())->CheckAndUpdateCompletedSerials();
+    const Device* device = ToBackend(GetDevice());
+    const OpenGLFunctions& gl = device->GetGL();
+
+    ExecutionSerial fenceSerial{0};
+    while (!mFencesInFlight.empty()) {
+        auto [sync, tentativeSerial] = mFencesInFlight.front();
+
+        // Fence are added in order, so we can stop searching as soon
+        // as we see one that's not ready.
+
+        // TODO(crbug.com/dawn/633): Remove this workaround after the deadlock issue is fixed.
+        if (device->IsToggleEnabled(Toggle::FlushBeforeClientWaitSync)) {
+            gl.Flush();
+        }
+        GLenum result = gl.ClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
+        if (result == GL_TIMEOUT_EXPIRED) {
+            return fenceSerial;
+        }
+        // Update fenceSerial since fence is ready.
+        fenceSerial = tentativeSerial;
+
+        gl.DeleteSync(sync);
+
+        mFencesInFlight.pop();
+
+        DAWN_ASSERT(fenceSerial > GetCompletedCommandSerial());
+    }
+    return fenceSerial;
 }
 
 void Queue::ForceEventualFlushOfCommands() {
-    return ToBackend(GetDevice())->ForceEventualFlushOfCommands();
+    mHasPendingCommands = true;
 }
 
 MaybeError Queue::WaitForIdleForDestruction() {
-    return ToBackend(GetDevice())->WaitForIdleForDestruction();
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+    gl.Finish();
+    DAWN_TRY(CheckPassedSerials());
+    DAWN_ASSERT(mFencesInFlight.empty());
+    return {};
 }
 
 }  // namespace dawn::native::opengl

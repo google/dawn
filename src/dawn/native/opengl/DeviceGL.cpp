@@ -27,8 +27,9 @@
 
 #include "dawn/native/opengl/DeviceGL.h"
 
-#include "dawn/common/Log.h"
+#include <utility>
 
+#include "dawn/common/Log.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
@@ -140,9 +141,12 @@ Device::~Device() {
 }
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
-    const OpenGLFunctions& gl = GetGL();
+    // Directly set the context current and use mGL instead of calling GetGL as GetGL will notify
+    // the (yet inexistent) queue that GL was used.
+    mContext->MakeCurrent();
+    const OpenGLFunctions& gl = mGL;
 
-    mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat());
+    mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat(gl));
 
     // Use the debug output functionality to get notified about GL errors
     // TODO(crbug.com/dawn/1475): add support for the KHR_debug and ARB_debug_output
@@ -185,7 +189,9 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     }
     gl.Enable(GL_SAMPLE_MASK);
 
-    return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
+    Ref<Queue> queue;
+    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
+    return DeviceBase::Initialize(std::move(queue));
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
@@ -197,8 +203,7 @@ const GLFormat& Device::GetGLFormat(const Format& format) {
     return result;
 }
 
-GLenum Device::GetBGRAInternalFormat() const {
-    const OpenGLFunctions& gl = GetGL();
+GLenum Device::GetBGRAInternalFormat(const OpenGLFunctions& gl) const {
     if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
         gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
         return GL_BGRA8_EXT;
@@ -272,20 +277,6 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
     return usages;
 }
 
-void Device::SubmitFenceSync() {
-    if (!mHasPendingCommands) {
-        return;
-    }
-
-    const OpenGLFunctions& gl = GetGL();
-    GLsync sync = gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-    GetQueue()->IncrementLastSubmittedCommandSerial();
-    mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
-
-    // Reset mHasPendingCommands after GetGL() which will set mHasPendingCommands to true.
-    mHasPendingCommands = false;
-}
-
 MaybeError Device::ValidateTextureCanBeWrapped(const TextureDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
@@ -306,6 +297,7 @@ MaybeError Device::ValidateTextureCanBeWrapped(const TextureDescriptor* descript
 
     return {};
 }
+
 TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                    ::EGLImage image) {
     const OpenGLFunctions& gl = GetGL();
@@ -384,37 +376,8 @@ TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescripto
 }
 
 MaybeError Device::TickImpl() {
-    SubmitFenceSync();
+    ToBackend(GetQueue())->SubmitFenceSync();
     return {};
-}
-
-ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-    ExecutionSerial fenceSerial{0};
-    const OpenGLFunctions& gl = GetGL();
-    while (!mFencesInFlight.empty()) {
-        auto [sync, tentativeSerial] = mFencesInFlight.front();
-
-        // Fence are added in order, so we can stop searching as soon
-        // as we see one that's not ready.
-
-        // TODO(crbug.com/dawn/633): Remove this workaround after the deadlock issue is fixed.
-        if (IsToggleEnabled(Toggle::FlushBeforeClientWaitSync)) {
-            gl.Flush();
-        }
-        GLenum result = gl.ClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
-        if (result == GL_TIMEOUT_EXPIRED) {
-            return fenceSerial;
-        }
-        // Update fenceSerial since fence is ready.
-        fenceSerial = tentativeSerial;
-
-        gl.DeleteSync(sync);
-
-        mFencesInFlight.pop();
-
-        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
-    }
-    return fenceSerial;
 }
 
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
@@ -436,19 +399,6 @@ void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
 }
 
-MaybeError Device::WaitForIdleForDestruction() {
-    const OpenGLFunctions& gl = GetGL();
-    gl.Finish();
-    DAWN_TRY(GetQueue()->CheckPassedSerials());
-    DAWN_ASSERT(mFencesInFlight.empty());
-
-    return {};
-}
-
-bool Device::HasPendingCommands() const {
-    return mHasPendingCommands;
-}
-
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
     return 1;
 }
@@ -461,13 +411,9 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
-void Device::ForceEventualFlushOfCommands() {}
-
 const OpenGLFunctions& Device::GetGL() const {
-    if (mContext) {
-        mContext->MakeCurrent();
-    }
-    mHasPendingCommands = true;
+    mContext->MakeCurrent();
+    ToBackend(GetQueue())->OnGLUsed();
     return mGL;
 }
 
