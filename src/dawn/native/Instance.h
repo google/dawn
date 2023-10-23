@@ -121,6 +121,9 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // name of an feature supported in Dawn.
     const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature);
 
+    // TODO(dawn:2166): Move this method to PhysicalDevice to better detect that the backend
+    // validation is actually enabled or not when a physical device is created. Sometimes it is
+    // enabled externally via command line or environment variables.
     bool IsBackendValidationEnabled() const;
     void SetBackendValidationLevel(BackendValidationLevel level);
     BackendValidationLevel GetBackendValidationLevel() const;
