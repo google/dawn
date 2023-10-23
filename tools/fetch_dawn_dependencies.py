@@ -96,16 +96,19 @@ def main(args):
     # The dependencies that we need to pull from the DEPS files.
     # Dependencies of dependencies are prefixed by their ancestors.
     required_submodules = [
+        'third_party/abseil-cpp',
+        'third_party/glfw',
+        'third_party/jinja2',
+        'third_party/khronos/EGL-Registry',
+        'third_party/khronos/OpenGL-Registry',
+        'third_party/markupsafe',
         'third_party/vulkan-deps',
+        'third_party/vulkan-deps/glslang/src',
         'third_party/vulkan-deps/spirv-headers/src',
         'third_party/vulkan-deps/spirv-tools/src',
         'third_party/vulkan-deps/vulkan-headers/src',
         'third_party/vulkan-deps/vulkan-loader/src',
         'third_party/vulkan-deps/vulkan-utility-libraries/src',
-        'third_party/glfw',
-        'third_party/abseil-cpp',
-        'third_party/jinja2',
-        'third_party/markupsafe',
     ]
 
     if args.use_test_deps:
