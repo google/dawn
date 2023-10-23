@@ -254,9 +254,6 @@ DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
 // test for dawn:1389 where Intel Metal devices fail to do that correctly, requiring a workaround.
 class RenderPassTest_RegressionDawn1389 : public RenderPassTest {};
 TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16Unorm) {
-    // TODO(crbug.com/dawn/1492): Support copying to Depth16Unorm on GL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     // TODO(dawn:1705): fix this test for Intel D3D11.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
 

@@ -2797,11 +2797,6 @@ class CopyToDepthStencilTextureAfterDestroyingBigBufferTests
     : public DawnTestWithParams<CopyToDepthStencilTextureAfterDestroyingBigBufferTestsParams> {};
 
 TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
-    // TODO(crbug.com/dawn/1492): Support CopyBufferToTexture() with Depth16Unorm on OpenGL /
-    // OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     // Copies to stencil textures are unsupported on the OpenGL backend.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8 &&
                              (IsOpenGL() || IsOpenGLES()));
