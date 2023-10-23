@@ -161,7 +161,6 @@ crbug.com/dawn/2147 [ angle-opengl ] webgpu:api,operation,resource_init,texture_
 # Shader issues
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,binary,f32_matrix_vector_multiplication:matrix_vector:inputSource="const";cols=4;rows=4 [ Failure ]
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const"* [ Failure ]
