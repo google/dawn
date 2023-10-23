@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+#include "dawn/common/NonCopyable.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Toggles.h"
@@ -39,7 +40,7 @@ namespace dawn::native {
 
 // An common interface for all backends. Mostly used to create adapters for a particular
 // backend.
-class BackendConnection {
+class BackendConnection : NonMovable {
   public:
     BackendConnection(InstanceBase* instance, wgpu::BackendType type);
     virtual ~BackendConnection() = default;
