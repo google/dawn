@@ -25,10 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <iostream>
-#include <string>
-#include <unordered_set>
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer)
 
+#include <iostream>
+
+#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
@@ -37,84 +39,68 @@
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    std::cerr << err.Error() << std::endl;
-    __builtin_trap();
+namespace tint::wgsl {
+namespace {
+
+bool IsUnsupported(const tint::ast::Enable* enable) {
+    for (auto ext : enable->extensions) {
+        switch (ext->name) {
+            case tint::wgsl::Extension::kChromiumExperimentalDp4A:
+            case tint::wgsl::Extension::kChromiumExperimentalFullPtrParameters:
+            case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
+            case tint::wgsl::Extension::kChromiumExperimentalPushConstant:
+            case tint::wgsl::Extension::kChromiumInternalDualSourceBlending:
+            case tint::wgsl::Extension::kChromiumInternalRelaxedUniformLayout:
+                return true;
+            default:
+                break;
+        }
+    }
+    return false;
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-    std::string str(reinterpret_cast<const char*>(data), size);
+}  // namespace
 
-    tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
-
-    tint::Source::File file("test.wgsl", str);
-
-    // Parse the wgsl, create the src program
-    tint::wgsl::reader::Parser parser(&file);
-    parser.set_max_errors(1);
-    if (!parser.Parse()) {
-        return 0;
+void IRRoundtripFuzzer(const tint::Program& program) {
+    if (program.AST().Enables().Any(IsUnsupported)) {
+        return;
     }
-    auto src = parser.program();
+
+    auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
+    auto& src = transformed ? transformed.value() : program;
     if (!src.IsValid()) {
-        return 0;
-    }
-
-    auto is_unsupported = [](const tint::ast::Enable* enable) {
-        for (auto ext : enable->extensions) {
-            switch (ext->name) {
-                case tint::wgsl::Extension::kChromiumExperimentalDp4A:
-                case tint::wgsl::Extension::kChromiumExperimentalFullPtrParameters:
-                case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
-                case tint::wgsl::Extension::kChromiumExperimentalPushConstant:
-                case tint::wgsl::Extension::kChromiumInternalDualSourceBlending:
-                case tint::wgsl::Extension::kChromiumInternalRelaxedUniformLayout:
-                    return true;
-                default:
-                    break;
-            }
-        }
-        return false;
-    };
-
-    if (src.AST().Enables().Any(is_unsupported)) {
-        return 0;
-    }
-
-    if (auto transformed = tint::wgsl::ApplySubstituteOverrides(src)) {
-        src = std::move(*transformed);
-        if (!src.IsValid()) {
-            return 0;
-        }
+        return;
     }
 
     auto ir = tint::wgsl::reader::ProgramToIR(src);
     if (!ir) {
-        std::cerr << ir.Failure() << std::endl;
-        __builtin_trap();
+        TINT_ICE() << ir.Failure();
+        return;
     }
 
     if (auto res = tint::wgsl::reader::Lower(ir.Get()); !res) {
-        std::cerr << res.Failure() << std::endl;
-        __builtin_trap();
+        TINT_ICE() << res.Failure();
+        return;
     }
 
     if (auto res = tint::wgsl::writer::Raise(ir.Get()); !res) {
-        std::cerr << res.Failure() << std::endl;
-        __builtin_trap();
+        TINT_ICE() << res.Failure();
+        return;
     }
 
     auto dst = tint::wgsl::writer::IRToProgram(ir.Get());
     if (!dst.IsValid()) {
-#if TINT_BUILD_WGSL_WRITER
+        std::cerr << "IR:\n" << core::ir::Disassemble(ir.Get()) << std::endl;
         if (auto result = tint::wgsl::writer::Generate(dst, {}); result) {
-            std::cerr << result->wgsl << std::endl << std::endl;
+            std::cerr << "WGSL:\n" << result->wgsl << std::endl << std::endl;
         }
-#endif
-
-        std::cerr << dst.Diagnostics() << std::endl;
-        __builtin_trap();
+        TINT_ICE() << dst.Diagnostics();
+        return;
     }
 
-    return 0;
+    return;
 }
+
+}  // namespace tint::wgsl
+
+TINT_WGSL_PROGRAM_FUZZER(tint::wgsl::IRRoundtripFuzzer);

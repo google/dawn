@@ -148,6 +148,11 @@ struct Slice {
     constexpr Slice(T* d, size_t l, size_t c) : data(d), len(l), cap(c) {}
 
     /// Constructor
+    /// @param d pointer to the first element in the slice
+    /// @param l total number of elements in the slice
+    constexpr Slice(T* d, size_t l) : data(d), len(l), cap(l) {}
+
+    /// Constructor
     /// @param elements c-array of elements
     template <size_t N>
     constexpr Slice(T (&elements)[N])  // NOLINT
