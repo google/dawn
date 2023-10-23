@@ -138,6 +138,15 @@ void Module::AddFunction(const Function* func) {
     global_declarations_.Push(func);
 }
 
+bool Module::HasOverrides() const {
+    for (auto* var : global_variables_) {
+        if (var->As<ast::Override>()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 const Module* Module::Clone(CloneContext& ctx) const {
     auto* out = ctx.dst->create<Module>();
     out->Copy(ctx, this);

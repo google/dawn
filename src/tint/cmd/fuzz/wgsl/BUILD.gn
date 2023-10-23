@@ -100,7 +100,10 @@ if (tint_build_wgsl_reader) {
     ]
 
     if (tint_build_wgsl_reader) {
-      deps += [ "${tint_src_dir}/cmd/fuzz/wgsl:fuzz" ]
+      deps += [
+        "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",
+        "${tint_src_dir}/lang/wgsl/ast/transform:fuzz",
+      ]
     }
   }
 }

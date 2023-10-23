@@ -141,6 +141,9 @@ class Module final : public Castable<Module, Node> {
     /// @returns the functions declared in the module
     const FunctionList& Functions() const { return functions_; }
 
+    /// @returns true if the module has any 'override' declarations
+    bool HasOverrides() const;
+
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
     /// @param ctx the clone context

@@ -221,3 +221,43 @@ if(TINT_BUILD_WGSL_WRITER)
 endif(TINT_BUILD_WGSL_WRITER)
 
 endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_READER)
+################################################################################
+# Target:    tint_lang_wgsl_ast_transform_fuzz
+# Kind:      fuzz
+# Condition: TINT_BUILD_WGSL_READER
+################################################################################
+tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
+  lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
+)
+
+tint_target_add_dependencies(tint_lang_wgsl_ast_transform_fuzz fuzz
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_lang_wgsl_ast_transform_fuzz fuzz
+    tint_cmd_fuzz_wgsl_fuzz
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+endif(TINT_BUILD_WGSL_READER)
