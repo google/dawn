@@ -35,6 +35,14 @@ vars = {
   # Fetch clang-tidy into the same bin/ directory as our clang binary.
   'checkout_clang_tidy': False,
 
+  # Fetch the rust toolchain.
+  #
+  # Use a custom_vars section to enable it:
+  # "custom_vars": {
+  #   "checkout_rust": True,
+  # }
+  'checkout_rust': False,
+
   # Fetch configuration files required for the 'use_remoteexec' gn arg
   'download_remoteexec_cfg': False,
   # RBE instance to use for running remote builds
@@ -53,11 +61,6 @@ vars = {
 }
 
 deps = {
-  # Dependencies required to use GN/Clang in standalone
-  'build': {
-    'url': '{chromium_git}/chromium/src/build@5885d3c24833ad72845a52a1b913a2b8bc651b56',
-    'condition': 'dawn_standalone',
-  },
   'buildtools': {
     'url': '{chromium_git}/chromium/src/buildtools@a9a6f0c49d0e8fa0cda37337430b4736ab3dc944',
     'condition': 'dawn_standalone',
@@ -101,9 +104,20 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@8f75392b4aa947fb55c7c206b36804229595e4da',
+  # Dependencies required to use GN, Clang, and Rust in standalone.
+  # The //build, //tools/clang, and //tools/rust deps should all be updated
+  # in unison, as there are dependencies between them.
+  'build': {
+    'url': '{chromium_git}/chromium/src/build@e2f4d00875f7d00fad39d5af2c6869ac7c7413cc',
     'condition': 'dawn_standalone',
+  },
+  'tools/clang': {
+    'url': '{chromium_git}/chromium/src/tools/clang@86aed39db276fb876a2b98c93cc6ff8940377903',
+    'condition': 'dawn_standalone',
+  },
+  'tools/rust': {
+    'url': '{chromium_git}/chromium/src/tools/rust@7052bd3aa0eba2d3d701b7a76219e3b04770540e',
+    'condition': 'dawn_standalone and checkout_rust',
   },
   'tools/clang/dsymutil': {
     'packages': [{
@@ -331,6 +345,12 @@ hooks = [
     'condition': 'dawn_standalone and checkout_clang_tidy',
     'action': ['python3', 'tools/clang/scripts/update.py',
                '--package=clang-tidy'],
+  },
+  {
+    'name': 'rust',
+    'pattern': '.',
+    'action': ['python3', 'tools/rust/update_rust.py'],
+    'condition': 'dawn_standalone and checkout_rust',
   },
   {
     # Pull rc binaries using checked-in hashes.
