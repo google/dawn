@@ -154,7 +154,11 @@ if (tint_has_fuzzers) {
   }
 } else {
   template("tint_fuzz_source_set") {
+    not_needed(invoker, "*")
+    not_needed("*")
   }
   template("tint_fuzzer_test") {
+    not_needed(invoker, "*")
+    not_needed("*")
   }
 }
