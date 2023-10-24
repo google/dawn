@@ -27,7 +27,9 @@
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 
-import("//build/config/win/visual_studio_version.gni")
+if (is_win) {
+  import("//build/config/win/visual_studio_version.gni")
+}
 import("${dawn_root}/scripts/dawn_features.gni")
 
 import("build/add_hlsl_hctgen.gni")
@@ -193,8 +195,6 @@ cmake_configure_file("config-header") {
     "HAVE_LONGJMP=",
     "HAVE_MALLCTL=",
     "HAVE_MALLINFO2=",
-    "HAVE_MALLOC_MALLOC_H=",
-    "HAVE_MALLOC_ZONE_STATISTICS=",
     "HAVE_MKDTEMP=",
     "HAVE_MKSTEMP=",
     "HAVE_MKTEMP=",
@@ -246,7 +246,6 @@ cmake_configure_file("config-header") {
       "HAVE_FUTIMES=",
       "HAVE_GETPAGESIZE=",
       "HAVE_GETRUSAGE=",
-      "HAVE_MALLINFO=",
       "HAVE_SYS_MMAN_H=",
       "HAVE_SYS_PARAM_H=",
       "HAVE_SYS_RESOURCE_H=",
@@ -258,6 +257,9 @@ cmake_configure_file("config-header") {
       "HAVE_MACH_MACH_H=",
       "HAVE_MACH_O_DYLD_H=",
       "HAVE_MALLOC_H=1",
+      "HAVE_MALLINFO=",
+      "HAVE_MALLOC_MALLOC_H=",
+      "HAVE_MALLOC_ZONE_STATISTICS=",
     ]
   } else if (is_linux || is_mac) {
     values += [
@@ -281,6 +283,8 @@ cmake_configure_file("config-header") {
         "HAVE_MALLINFO=1",
         "HAVE_MACH_MACH_H=",
         "HAVE_MACH_O_DYLD_H=",
+        "HAVE_MALLOC_MALLOC_H=",
+        "HAVE_MALLOC_ZONE_STATISTICS=",
       ]
     } else {
       values += [
@@ -288,6 +292,8 @@ cmake_configure_file("config-header") {
         "HAVE_MALLINFO=",
         "HAVE_MACH_MACH_H=1",
         "HAVE_MACH_O_DYLD_H=1",
+        "HAVE_MALLOC_MALLOC_H=1",
+        "HAVE_MALLOC_ZONE_STATISTICS=1",
       ]
     }
   }
@@ -399,11 +405,19 @@ cmake_configure_file("Disassemblers-def") {
 cmake_configure_file("SharedLibAffix-h") {
   input = "$dawn_dxc_dir/lib/DxcSupport/SharedLibAffix.inc"
   output = "$target_gen_dir/include/dxc/Support/SharedLibAffix.h"
+  shared_library_prefix = ""
+  if (is_linux) {
+    shared_library_prefix = "lib"
+  }
+  shared_library_suffix = ""
+  if (is_win) {
+    shared_library_suffix = ".dll"
+  } else {
+    shared_library_suffix = ".so"
+  }
   values = [
-    "CMAKE_SHARED_LIBRARY_PREFIX=",
-
-    # TODO(amaiorano): .dll for Win32, .so for Linux, .dylib for MacOS?
-    "CMAKE_SHARED_LIBRARY_SUFFIX=.dll",
+    "CMAKE_SHARED_LIBRARY_PREFIX=${shared_library_prefix}",
+    "CMAKE_SHARED_LIBRARY_SUFFIX=${shared_library_suffix}",
   ]
 }
 
@@ -1952,7 +1966,6 @@ dxcompiler_sourceset("clang_lib_frontend") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
     "$dawn_dxc_dir/tools/clang/lib/Frontend/ASTConsumers.cpp",
-    "$dawn_dxc_dir/tools/clang/lib/Frontend/ASTMerge.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Frontend/ASTUnit.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Frontend/CacheTokens.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Frontend/ChainedDiagnosticConsumer.cpp",
@@ -2322,9 +2335,16 @@ executable("dxc") {
 
   data_deps = [ ":dxcompiler" ]
 
-  include_dirs = [
-    "$visual_studio_path/DIA SDK/include",  # Required for msvc builds
-  ]
+  # Set rpath to executable_path to be able to find dxcompiler.so on MacOS
+  if (is_mac) {
+    ldflags = [ "-Wl,-rpath,@executable_path" ]
+  }
+
+  if (is_win) {
+    include_dirs = [
+      "$visual_studio_path/DIA SDK/include",  # Required for msvc builds
+    ]
+  }
 
   sources = [
     "$dawn_dxc_dir/tools/clang/tools/dxc/dxcmain.cpp",
