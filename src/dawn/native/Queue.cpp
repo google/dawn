@@ -245,7 +245,9 @@ void TrackTaskCallback::SetFinishedSerial(ExecutionSerial serial) {
 // QueueBase
 
 QueueBase::QueueBase(DeviceBase* device, const QueueDescriptor* descriptor)
-    : ApiObjectBase(device, descriptor->label) {}
+    : ApiObjectBase(device, descriptor->label) {
+    GetObjectTrackingList()->Track(this);
+}
 
 QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
     : ApiObjectBase(device, tag, label) {}

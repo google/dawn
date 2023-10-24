@@ -49,7 +49,6 @@ class Queue final : public QueueBase {
     MaybeError SubmitPendingCommandBuffer();
     void WaitForCommandsToBeScheduled();
     void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
-    void Destroy();
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
@@ -64,6 +63,7 @@ class Queue final : public QueueBase {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
+    void DestroyImpl() override;
 
     NSPRef<id<MTLCommandQueue>> mCommandQueue;
     CommandRecordingContext mCommandContext;

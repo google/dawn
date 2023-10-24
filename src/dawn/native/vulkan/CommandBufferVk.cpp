@@ -46,6 +46,7 @@
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/QuerySetVk.h"
+#include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 #include "dawn/native/vulkan/RenderPipelineVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
@@ -767,7 +768,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     device->IsToggleEnabled(
                         Toggle::VulkanSplitCommandBufferOnComputePassAfterRenderPass)) {
                     // Identified a potential crash case, split the command buffer.
-                    DAWN_TRY(device->SplitRecordingContext(recordingContext));
+                    DAWN_TRY(
+                        ToBackend(device->GetQueue())->SplitRecordingContext(recordingContext));
                     hasRecordedRenderPassInCurrentCommandBuffer = false;
                     commands = recordingContext->commandBuffer;
                 }

@@ -38,6 +38,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
+#include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
@@ -610,8 +611,8 @@ MaybeError SwapChain::PresentImpl() {
     mTexture->APIDestroy();
     mTexture = nullptr;
 
-    VkResult result =
-        VkResult::WrapUnsafe(device->fn.QueuePresentKHR(device->GetVkQueue(), &presentInfo));
+    VkResult result = VkResult::WrapUnsafe(
+        device->fn.QueuePresentKHR(ToBackend(device->GetQueue())->GetVkQueue(), &presentInfo));
 
     switch (result) {
         case VK_SUCCESS:

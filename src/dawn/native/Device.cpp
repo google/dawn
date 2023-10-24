@@ -370,7 +370,7 @@ void DeviceBase::WillDropLastExternalRef() {
     } while (!mCallbackTaskManager->IsEmpty());
 
     auto deviceLock(GetScopedLock());
-    // Drop te device's reference to the queue. Because the application dropped the last external
+    // Drop the device's reference to the queue. Because the application dropped the last external
     // references, they can no longer get the queue from APIGetQueue().
     mQueue = nullptr;
 

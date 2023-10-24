@@ -51,13 +51,15 @@ Queue::Queue(Device* device, const QueueDescriptor* descriptor)
 
 Queue::~Queue() {}
 
-void Queue::Destroy() {
+void Queue::DestroyImpl() {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
     UpdateWaitingEvents(kMaxExecutionSerial);
     mCommandQueue = nullptr;
     mLastSubmittedCommands = nullptr;
     mMtlSharedEvent = nullptr;
+
+    QueueBase::DestroyImpl();
 }
 
 MaybeError Queue::Initialize() {

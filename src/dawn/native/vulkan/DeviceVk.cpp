@@ -60,48 +60,6 @@
 
 namespace dawn::native::vulkan {
 
-namespace {
-
-// Destroy the semaphore when out of scope.
-class ScopedSignalSemaphore : public NonCopyable {
-  public:
-    ScopedSignalSemaphore(Device* device, VkSemaphore semaphore)
-        : mDevice(device), mSemaphore(semaphore) {}
-    ScopedSignalSemaphore(ScopedSignalSemaphore&& other)
-        : mDevice(other.mDevice), mSemaphore(std::exchange(other.mSemaphore, VK_NULL_HANDLE)) {}
-    ~ScopedSignalSemaphore() {
-        if (mSemaphore != VK_NULL_HANDLE) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(mSemaphore);
-        }
-    }
-
-    VkSemaphore Get() { return mSemaphore; }
-    VkSemaphore* InitializeInto() { return &mSemaphore; }
-
-  private:
-    Device* mDevice = nullptr;
-    VkSemaphore mSemaphore = VK_NULL_HANDLE;
-};
-
-// Destroys command pool/buffer.
-// TODO(dawn:1601) Revisit this and potentially bake into pool/buffer objects instead.
-void DestroyCommandPoolAndBuffer(const VulkanFunctions& fn,
-                                 VkDevice device,
-                                 const CommandPoolAndBuffer& commands) {
-    // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
-    // destroyed, but that's not the case in some drivers and they leak memory. So we call
-    // FreeCommandBuffers before DestroyCommandPool to be safe.
-    // TODO(enga): Only do this on a known list of bad drivers.
-    if (commands.pool != VK_NULL_HANDLE) {
-        if (commands.commandBuffer != VK_NULL_HANDLE) {
-            fn.FreeCommandBuffers(device, commands.pool, 1, &commands.commandBuffer);
-        }
-        fn.DestroyCommandPool(device, commands.pool, nullptr);
-    }
-}
-
-}  // namespace
-
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const DeviceDescriptor* descriptor,
@@ -137,10 +95,6 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
         DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
 
-        // The queue can be loaded before the fenced deleter because their lifetime is tied to
-        // the device.
-        GatherQueueFromDevice();
-
         mDeleter = std::make_unique<MutexProtected<FencedDeleter>>(this);
     }
 
@@ -150,13 +104,14 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
     mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
 
-    DAWN_TRY(PrepareRecordingContext());
-
     SetLabelImpl();
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
 
-    return DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue));
+    Ref<Queue> queue;
+    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
+
+    return DeviceBase::Initialize(std::move(queue));
 }
 
 Device::~Device() {
@@ -237,8 +192,10 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 }
 
 MaybeError Device::TickImpl() {
-    ExecutionSerial completedSerial = GetQueue()->GetCompletedCommandSerial();
-    RecycleCompletedCommands(completedSerial);
+    Queue* queue = ToBackend(GetQueue());
+
+    ExecutionSerial completedSerial = queue->GetCompletedCommandSerial();
+    queue->RecycleCompletedCommands(completedSerial);
 
     for (Ref<DescriptorSetAllocator>& allocator :
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
@@ -249,10 +206,7 @@ MaybeError Device::TickImpl() {
     GetFencedDeleter()->Tick(completedSerial);
     mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
-    if (mRecordingContext.needsSubmit) {
-        DAWN_TRY(SubmitPendingCommands());
-    }
-
+    DAWN_TRY(queue->SubmitPendingCommands());
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
 
     return {};
@@ -274,11 +228,7 @@ VkDevice Device::GetVkDevice() const {
 }
 
 uint32_t Device::GetGraphicsQueueFamily() const {
-    return mQueueFamily;
-}
-
-VkQueue Device::GetVkQueue() const {
-    return mQueue;
+    return mMainQueueFamily;
 }
 
 MutexProtected<FencedDeleter>& Device::GetFencedDeleter() const {
@@ -299,116 +249,6 @@ external_semaphore::Service* Device::GetExternalSemaphoreService() const {
 
 void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
     mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator, GetPendingCommandSerial());
-}
-
-CommandRecordingContext* Device::GetPendingRecordingContext(Device::SubmitMode submitMode) {
-    DAWN_ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
-    mRecordingContext.needsSubmit |= (submitMode == DeviceBase::SubmitMode::Normal);
-    mRecordingContext.used = true;
-    return &mRecordingContext;
-}
-
-bool Device::HasPendingCommands() const {
-    return mRecordingContext.needsSubmit;
-}
-
-void Device::ForceEventualFlushOfCommands() {
-    mRecordingContext.needsSubmit |= mRecordingContext.used;
-}
-
-MaybeError Device::SubmitPendingCommands() {
-    if (!mRecordingContext.needsSubmit) {
-        return {};
-    }
-
-    if (!mRecordingContext.mappableBuffersForEagerTransition.empty()) {
-        // Transition mappable buffers back to map usages with the submit.
-        Buffer::TransitionMappableBuffersEagerly(
-            fn, &mRecordingContext, mRecordingContext.mappableBuffersForEagerTransition);
-    }
-
-    std::vector<ScopedSignalSemaphore> externalTextureSemaphores;
-    for (size_t i = 0; i < mRecordingContext.externalTexturesForEagerTransition.size(); ++i) {
-        // Create an external semaphore for each external textures that have been used in the
-        // pending submit.
-        auto& externalTextureSemaphore =
-            externalTextureSemaphores.emplace_back(this, VK_NULL_HANDLE);
-        DAWN_TRY_ASSIGN(*externalTextureSemaphore.InitializeInto(),
-                        mExternalSemaphoreService->CreateExportableSemaphore());
-    }
-
-    // Transition eagerly all used external textures for export.
-    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
-        texture->TransitionEagerlyForExport(&mRecordingContext);
-        std::vector<VkSemaphore> waitRequirements = texture->AcquireWaitRequirements();
-        mRecordingContext.waitSemaphores.insert(mRecordingContext.waitSemaphores.end(),
-                                                waitRequirements.begin(), waitRequirements.end());
-    }
-
-    DAWN_TRY(
-        CheckVkSuccess(fn.EndCommandBuffer(mRecordingContext.commandBuffer), "vkEndCommandBuffer"));
-
-    std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
-                                                    VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-
-    for (auto& externalTextureSemaphore : externalTextureSemaphores) {
-        mRecordingContext.signalSemaphores.push_back(externalTextureSemaphore.Get());
-    }
-
-    VkSubmitInfo submitInfo;
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.pNext = nullptr;
-    submitInfo.waitSemaphoreCount = static_cast<uint32_t>(mRecordingContext.waitSemaphores.size());
-    submitInfo.pWaitSemaphores = AsVkArray(mRecordingContext.waitSemaphores.data());
-    submitInfo.pWaitDstStageMask = dstStageMasks.data();
-    submitInfo.commandBufferCount = mRecordingContext.commandBufferList.size();
-    submitInfo.pCommandBuffers = mRecordingContext.commandBufferList.data();
-    submitInfo.signalSemaphoreCount = mRecordingContext.signalSemaphores.size();
-    submitInfo.pSignalSemaphores = AsVkArray(mRecordingContext.signalSemaphores.data());
-
-    VkFence fence = VK_NULL_HANDLE;
-    DAWN_TRY_ASSIGN(fence, GetUnusedFence());
-    DAWN_TRY_WITH_CLEANUP(
-        CheckVkSuccess(fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"), {
-            // If submitting to the queue fails, move the fence back into the unused fence
-            // list, as if it were never acquired. Not doing so would leak the fence since
-            // it would be neither in the unused list nor in the in-flight list.
-            mUnusedFences.push_back(fence);
-        });
-
-    // Enqueue the semaphores before incrementing the serial, so that they can be deleted as
-    // soon as the current submission is finished.
-    for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
-        GetFencedDeleter()->DeleteWhenUnused(semaphore);
-    }
-    GetQueue()->IncrementLastSubmittedCommandSerial();
-    ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
-    mFencesInFlight.emplace(fence, lastSubmittedSerial);
-
-    for (size_t i = 0; i < mRecordingContext.commandBufferList.size(); ++i) {
-        CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPoolList[i],
-                                                  mRecordingContext.commandBufferList[i]};
-        mCommandsInFlight.Enqueue(submittedCommands, lastSubmittedSerial);
-    }
-
-    auto externalTextureSemaphoreIter = externalTextureSemaphores.begin();
-    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
-        // Export the signal semaphore.
-        ExternalSemaphoreHandle semaphoreHandle;
-        DAWN_TRY_ASSIGN(semaphoreHandle, mExternalSemaphoreService->ExportSemaphore(
-                                             externalTextureSemaphoreIter->Get()));
-        ++externalTextureSemaphoreIter;
-
-        // Update all external textures, eagerly transitioned in the submit, with the exported
-        // handles.
-        texture->UpdateExternalSemaphoreHandle(semaphoreHandle);
-    }
-    DAWN_ASSERT(externalTextureSemaphoreIter == externalTextureSemaphores.end());
-
-    mRecordingContext = CommandRecordingContext();
-    DAWN_TRY(PrepareRecordingContext());
-
-    return {};
 }
 
 ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
@@ -570,7 +410,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         if (universalQueueFamily == -1) {
             return DAWN_INTERNAL_ERROR("No universal queue family");
         }
-        mQueueFamily = static_cast<uint32_t>(universalQueueFamily);
+        mMainQueueFamily = static_cast<uint32_t>(universalQueueFamily);
     }
 
     // Choose to create a single universal queue
@@ -581,7 +421,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.pNext = nullptr;
         queueCreateInfo.flags = 0;
-        queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(mQueueFamily);
+        queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(mMainQueueFamily);
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &zero;
 
@@ -616,152 +456,16 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     return usedKnobs;
 }
 
-void Device::GatherQueueFromDevice() {
-    fn.GetDeviceQueue(mVkDevice, mQueueFamily, 0, &mQueue);
-}
-
 VulkanFunctions* Device::GetMutableFunctions() {
     return const_cast<VulkanFunctions*>(&fn);
 }
 
-ResultOrError<VkFence> Device::GetUnusedFence() {
-    if (!mUnusedFences.empty()) {
-        VkFence fence = mUnusedFences.back();
-        DAWN_TRY(CheckVkSuccess(fn.ResetFences(mVkDevice, 1, &*fence), "vkResetFences"));
-
-        mUnusedFences.pop_back();
-        return fence;
-    }
-
-    VkFenceCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-
-    VkFence fence = VK_NULL_HANDLE;
-    DAWN_TRY(
-        CheckVkSuccess(fn.CreateFence(mVkDevice, &createInfo, nullptr, &*fence), "vkCreateFence"));
-
-    return fence;
+CommandRecordingContext* Device::GetPendingRecordingContext(Device::SubmitMode submitMode) {
+    return ToBackend(GetQueue())->GetPendingRecordingContext(submitMode);
 }
 
-ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-    ExecutionSerial fenceSerial(0);
-    while (!mFencesInFlight.empty()) {
-        VkFence fence = mFencesInFlight.front().first;
-        ExecutionSerial tentativeSerial = mFencesInFlight.front().second;
-        VkResult result = VkResult::WrapUnsafe(
-            INJECT_ERROR_OR_RUN(fn.GetFenceStatus(mVkDevice, fence), VK_ERROR_DEVICE_LOST));
-
-        // Fence are added in order, so we can stop searching as soon
-        // as we see one that's not ready.
-        if (result == VK_NOT_READY) {
-            return fenceSerial;
-        } else {
-            DAWN_TRY(CheckVkSuccess(::VkResult(result), "GetFenceStatus"));
-        }
-
-        // Update fenceSerial since fence is ready.
-        fenceSerial = tentativeSerial;
-
-        mUnusedFences.push_back(fence);
-
-        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
-        mFencesInFlight.pop();
-    }
-    return fenceSerial;
-}
-
-MaybeError Device::PrepareRecordingContext() {
-    DAWN_ASSERT(!mRecordingContext.needsSubmit);
-    DAWN_ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
-    DAWN_ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
-
-    CommandPoolAndBuffer commands;
-    DAWN_TRY_ASSIGN(commands, BeginVkCommandBuffer());
-
-    mRecordingContext.commandBuffer = commands.commandBuffer;
-    mRecordingContext.commandPool = commands.pool;
-    mRecordingContext.commandBufferList.push_back(commands.commandBuffer);
-    mRecordingContext.commandPoolList.push_back(commands.pool);
-
-    return {};
-}
-
-// Splits the recording context, ending the current command buffer and beginning a new one.
-// This should not be necessary in most cases, and is provided only to work around driver issues
-// on some hardware.
-MaybeError Device::SplitRecordingContext(CommandRecordingContext* recordingContext) {
-    DAWN_ASSERT(recordingContext->used);
-
-    DAWN_TRY(
-        CheckVkSuccess(fn.EndCommandBuffer(recordingContext->commandBuffer), "vkEndCommandBuffer"));
-
-    CommandPoolAndBuffer commands;
-    DAWN_TRY_ASSIGN(commands, BeginVkCommandBuffer());
-
-    recordingContext->commandBuffer = commands.commandBuffer;
-    recordingContext->commandPool = commands.pool;
-    recordingContext->commandBufferList.push_back(commands.commandBuffer);
-    recordingContext->commandPoolList.push_back(commands.pool);
-
-    return {};
-}
-
-ResultOrError<CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
-    CommandPoolAndBuffer commands;
-
-    // First try to recycle unused command pools.
-    if (!mUnusedCommands.empty()) {
-        commands = mUnusedCommands.back();
-        mUnusedCommands.pop_back();
-        DAWN_TRY_WITH_CLEANUP(
-            CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0), "vkResetCommandPool"),
-            { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
-    } else {
-        // Create a new command pool for our commands and allocate the command buffer.
-        VkCommandPoolCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-        createInfo.queueFamilyIndex = mQueueFamily;
-
-        DAWN_TRY(
-            CheckVkSuccess(fn.CreateCommandPool(mVkDevice, &createInfo, nullptr, &*commands.pool),
-                           "vkCreateCommandPool"));
-
-        VkCommandBufferAllocateInfo allocateInfo;
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocateInfo.pNext = nullptr;
-        allocateInfo.commandPool = commands.pool;
-        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocateInfo.commandBufferCount = 1;
-
-        DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(fn.AllocateCommandBuffers(mVkDevice, &allocateInfo,
-                                                                       &commands.commandBuffer),
-                                             "vkAllocateCommandBuffers"),
-                              { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
-    }
-
-    // Start the recording of commands in the command buffer.
-    VkCommandBufferBeginInfo beginInfo;
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.pNext = nullptr;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    beginInfo.pInheritanceInfo = nullptr;
-
-    DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(fn.BeginCommandBuffer(commands.commandBuffer, &beginInfo),
-                                         "vkBeginCommandBuffer"),
-                          { DestroyCommandPoolAndBuffer(fn, mVkDevice, commands); });
-
-    return commands;
-}
-
-void Device::RecycleCompletedCommands(ExecutionSerial completedSerial) {
-    for (auto& commands : mCommandsInFlight.IterateUpTo(completedSerial)) {
-        mUnusedCommands.push_back(commands);
-    }
-    mCommandsInFlight.ClearUpTo(completedSerial);
+MaybeError Device::SubmitPendingCommands() {
+    return ToBackend(GetQueue())->SubmitPendingCommands();
 }
 
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
@@ -1009,55 +713,6 @@ void Device::CheckDebugMessagesAfterDestruction() const {
     DAWN_ASSERT(false);
 }
 
-MaybeError Device::WaitForIdleForDestruction() {
-    // Immediately tag the recording context as unused so we don't try to submit it in Tick.
-    // Move the mRecordingContext.used to mUnusedCommands so it can be cleaned up in
-    // ShutDownImpl
-    if (mRecordingContext.used) {
-        CommandPoolAndBuffer commands = {mRecordingContext.commandPool,
-                                         mRecordingContext.commandBuffer};
-        mUnusedCommands.push_back(commands);
-        mRecordingContext = CommandRecordingContext();
-    }
-
-    VkResult waitIdleResult = VkResult::WrapUnsafe(fn.QueueWaitIdle(mQueue));
-    // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
-    // about, Device lost, which means workloads running on the GPU are no longer accessible
-    // (so they are as good as waited on) or success.
-    DAWN_UNUSED(waitIdleResult);
-
-    // Make sure all fences are complete by explicitly waiting on them all
-    while (!mFencesInFlight.empty()) {
-        VkFence fence = mFencesInFlight.front().first;
-        ExecutionSerial fenceSerial = mFencesInFlight.front().second;
-        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
-
-        VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
-        do {
-            // If WaitForIdleForDesctruction is called while we are Disconnected, it means that
-            // the device lost came from the ErrorInjector and we need to wait without allowing
-            // any more error to be injected. This is because the device lost was "fake" and
-            // commands might still be running.
-            if (GetState() == State::Disconnected) {
-                result =
-                    VkResult::WrapUnsafe(fn.WaitForFences(mVkDevice, 1, &*fence, true, UINT64_MAX));
-                continue;
-            }
-
-            result = VkResult::WrapUnsafe(INJECT_ERROR_OR_RUN(
-                fn.WaitForFences(mVkDevice, 1, &*fence, true, UINT64_MAX), VK_ERROR_DEVICE_LOST));
-        } while (result == VK_TIMEOUT);
-        // Ignore errors from vkWaitForFences: it can be either OOM which we can't do anything
-        // about (and we need to keep going with the destruction of all fences), or device
-        // loss, which means the workload on the GPU is no longer accessible and we can
-        // safely destroy the fence.
-
-        fn.DestroyFence(mVkDevice, fence, nullptr);
-        mFencesInFlight.pop();
-    }
-    return {};
-}
-
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
 
@@ -1090,40 +745,7 @@ void Device::DestroyImpl() {
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
-    // Immediately tag the recording context as unused so we don't try to submit it in Tick.
-    mRecordingContext.needsSubmit = false;
-    if (mRecordingContext.commandPool != VK_NULL_HANDLE) {
-        DestroyCommandPoolAndBuffer(
-            fn, mVkDevice, {mRecordingContext.commandPool, mRecordingContext.commandBuffer});
-    }
-
-    for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
-        fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
-    }
-    mRecordingContext.waitSemaphores.clear();
-    mRecordingContext.signalSemaphores.clear();
-
-    // Some commands might still be marked as in-flight if we shut down because of a device
-    // loss. Recycle them as unused so that we free them below.
-    RecycleCompletedCommands(kMaxExecutionSerial);
-    DAWN_ASSERT(mCommandsInFlight.Empty());
-
-    for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
-        DestroyCommandPoolAndBuffer(fn, mVkDevice, commands);
-    }
-    mUnusedCommands.clear();
-
-    // Some fences might still be marked as in-flight if we shut down because of a device loss.
-    // Delete them since at this point all commands are complete.
-    while (!mFencesInFlight.empty()) {
-        fn.DestroyFence(mVkDevice, *mFencesInFlight.front().first, nullptr);
-        mFencesInFlight.pop();
-    }
-
-    for (VkFence fence : mUnusedFences) {
-        fn.DestroyFence(mVkDevice, fence, nullptr);
-    }
-    mUnusedFences.clear();
+    GetQueue()->Destroy();
 
     for (Ref<DescriptorSetAllocator>& allocator :
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(kMaxExecutionSerial)) {

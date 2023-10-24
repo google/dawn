@@ -28,7 +28,15 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_QUEUEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_QUEUEVK_H_
 
+#include <queue>
+#include <utility>
+#include <vector>
+
+#include "dawn/common/SerialQueue.h"
+#include "dawn/common/vulkan_platform.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
+#include "dawn/native/vulkan/CommandRecordingContext.h"
 
 namespace dawn::native::vulkan {
 
@@ -36,23 +44,57 @@ class Device;
 
 class Queue final : public QueueBase {
   public:
-    static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
+    static ResultOrError<Ref<Queue>> Create(Device* device,
+                                            const QueueDescriptor* descriptor,
+                                            uint32_t family);
+
+    VkQueue GetVkQueue() const;
+
+    CommandRecordingContext* GetPendingRecordingContext(
+        DeviceBase::SubmitMode submitMode = DeviceBase::SubmitMode::Normal);
+    MaybeError SplitRecordingContext(CommandRecordingContext* recordingContext);
+    MaybeError SubmitPendingCommands();
+
+    void RecycleCompletedCommands(ExecutionSerial completedSerial);
 
   private:
-    Queue(Device* device, const QueueDescriptor* descriptor);
+    Queue(Device* device, const QueueDescriptor* descriptor, uint32_t family);
     ~Queue() override;
     using QueueBase::QueueBase;
 
-    void Initialize();
+    MaybeError Initialize();
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
+    void DestroyImpl() override;
 
     // Dawn API
     void SetLabelImpl() override;
+
+    ResultOrError<VkFence> GetUnusedFence();
+
+    // We track which operations are in flight on the GPU with an increasing serial.
+    // This works only because we have a single queue. Each submit to a queue is associated
+    // to a serial and a fence, such that when the fence is "ready" we know the operations
+    // have finished.
+    std::queue<std::pair<VkFence, ExecutionSerial>> mFencesInFlight;
+    // Fences in the unused list aren't reset yet.
+    std::vector<VkFence> mUnusedFences;
+
+    MaybeError PrepareRecordingContext();
+    ResultOrError<CommandPoolAndBuffer> BeginVkCommandBuffer();
+
+    SerialQueue<ExecutionSerial, CommandPoolAndBuffer> mCommandsInFlight;
+    // Command pools in the unused list haven't been reset yet.
+    std::vector<CommandPoolAndBuffer> mUnusedCommands;
+    // There is always a valid recording context stored in mRecordingContext
+    CommandRecordingContext mRecordingContext;
+
+    uint32_t mQueueFamily = 0;
+    VkQueue mQueue = VK_NULL_HANDLE;
 };
 
 }  // namespace dawn::native::vulkan
