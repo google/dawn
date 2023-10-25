@@ -56,7 +56,10 @@ class SyncScopeUsageTracker {
     SyncScopeUsageTracker& operator=(SyncScopeUsageTracker&&);
 
     void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
-    void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
+    void TextureViewUsedAs(TextureViewBase* view, wgpu::TextureUsage usage);
+    void TextureRangeUsedAs(TextureBase* texture,
+                            const SubresourceRange& range,
+                            wgpu::TextureUsage usage);
     void AddRenderBundleTextureUsage(TextureBase* texture,
                                      const TextureSubresourceUsage& textureUsage);
 

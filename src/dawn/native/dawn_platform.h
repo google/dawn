@@ -55,10 +55,11 @@ static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
     kInternalStorageBuffer | kReadOnlyStorageBuffer;
 
 // Extra texture usages
-// Internal usage to help tracking when a subresource is used as render attachment usage
-// more than once in a render pass.
-static constexpr wgpu::TextureUsage kAgainAsAttachment =
-    static_cast<wgpu::TextureUsage>((1u << 31) + 1);
+// Usage to denote an extra tag value used in system specific ways.
+//  - Used to store that attachments are used more than once in PassResourceUsageTracker.
+//  - Used to store mixed read-only vs. not depth-stencil layouts in Vulkan.
+static constexpr wgpu::TextureUsage kReservedTextureUsage =
+    static_cast<wgpu::TextureUsage>(1u << 31);
 
 // Add an extra texture usage for textures that will be presented, for use in backends
 // that needs to transition to present usage.

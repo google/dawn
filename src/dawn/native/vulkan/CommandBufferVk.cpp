@@ -236,8 +236,8 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
             query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
                                   attachmentInfo.depthLoadOp, attachmentInfo.depthStoreOp,
-                                  attachmentInfo.stencilLoadOp, attachmentInfo.stencilStoreOp,
-                                  attachmentInfo.depthReadOnly || attachmentInfo.stencilReadOnly);
+                                  attachmentInfo.depthReadOnly, attachmentInfo.stencilLoadOp,
+                                  attachmentInfo.stencilStoreOp, attachmentInfo.stencilReadOnly);
         }
 
         query.SetSampleCount(renderPass->attachmentState->GetSampleCount());

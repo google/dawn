@@ -82,16 +82,18 @@ void RenderPassCacheQuery::SetColor(ColorAttachmentIndex index,
 void RenderPassCacheQuery::SetDepthStencil(wgpu::TextureFormat format,
                                            wgpu::LoadOp depthLoadOpIn,
                                            wgpu::StoreOp depthStoreOpIn,
+                                           bool depthReadOnlyIn,
                                            wgpu::LoadOp stencilLoadOpIn,
                                            wgpu::StoreOp stencilStoreOpIn,
-                                           bool readOnly) {
+                                           bool stencilReadOnlyIn) {
     hasDepthStencil = true;
     depthStencilFormat = format;
     depthLoadOp = depthLoadOpIn;
     depthStoreOp = depthStoreOpIn;
+    depthReadOnly = depthReadOnlyIn;
     stencilLoadOp = stencilLoadOpIn;
     stencilStoreOp = stencilStoreOpIn;
-    readOnlyDepthStencil = readOnly;
+    stencilReadOnly = stencilReadOnlyIn;
 }
 
 void RenderPassCacheQuery::SetSampleCount(uint32_t sampleCountIn) {
@@ -175,17 +177,17 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
 
     VkAttachmentReference* depthStencilAttachment = nullptr;
     if (query.hasDepthStencil) {
-        auto& attachmentDesc = attachmentDescs[attachmentCount];
+        const Format& dsFormat = mDevice->GetValidInternalFormat(query.depthStencilFormat);
 
         depthStencilAttachment = &depthStencilAttachmentRef;
-
         depthStencilAttachmentRef.attachment = attachmentCount;
-        depthStencilAttachmentRef.layout = query.readOnlyDepthStencil
-                                               ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-                                               : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthStencilAttachmentRef.layout = VulkanImageLayoutForDepthStencilAttachment(
+            dsFormat, query.depthReadOnly, query.stencilReadOnly);
 
+        // Build the attachment descriptor.
+        auto& attachmentDesc = attachmentDescs[attachmentCount];
         attachmentDesc.flags = 0;
-        attachmentDesc.format = VulkanImageFormat(mDevice, query.depthStencilFormat);
+        attachmentDesc.format = VulkanImageFormat(mDevice, dsFormat.format);
         attachmentDesc.samples = vkSampleCount;
 
         attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.depthLoadOp);
@@ -264,6 +266,8 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
 
 // RenderPassCache
 
+// If you change these, remember to also update StreamImplVk.cpp
+
 size_t RenderPassCache::CacheFuncs::operator()(const RenderPassCacheQuery& query) const {
     size_t hash = Hash(query.colorMask);
 
@@ -276,7 +280,8 @@ size_t RenderPassCache::CacheFuncs::operator()(const RenderPassCacheQuery& query
     HashCombine(&hash, query.hasDepthStencil);
     if (query.hasDepthStencil) {
         HashCombine(&hash, query.depthStencilFormat, query.depthLoadOp, query.depthStoreOp,
-                    query.stencilLoadOp, query.stencilStoreOp, query.readOnlyDepthStencil);
+                    query.depthReadOnly, query.stencilLoadOp, query.stencilStoreOp,
+                    query.stencilReadOnly);
     }
 
     HashCombine(&hash, query.sampleCount);
@@ -312,8 +317,8 @@ bool RenderPassCache::CacheFuncs::operator()(const RenderPassCacheQuery& a,
     if (a.hasDepthStencil) {
         if ((a.depthStencilFormat != b.depthStencilFormat) || (a.depthLoadOp != b.depthLoadOp) ||
             (a.stencilLoadOp != b.stencilLoadOp) || (a.depthStoreOp != b.depthStoreOp) ||
-            (a.stencilStoreOp != b.stencilStoreOp) ||
-            (a.readOnlyDepthStencil != b.readOnlyDepthStencil)) {
+            (a.depthReadOnly != b.depthReadOnly) || (a.stencilStoreOp != b.stencilStoreOp) ||
+            (a.stencilReadOnly != b.stencilReadOnly)) {
             return false;
         }
     }

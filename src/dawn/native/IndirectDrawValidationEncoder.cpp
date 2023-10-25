@@ -107,7 +107,7 @@ static const char sRenderValidationShaderSource[] = R"(
 
             fn numIndirectParamsPerDrawCallOutput() -> u32 {
                 var numParams = numIndirectParamsPerDrawCallInput();
-                // 2 extra parameter for duplicated first/baseVexter and firstInstance
+                // 2 extra parameter for duplicated first/baseVertex and firstInstance
                 if (bool(batch.flags & kDuplicateBaseVertexInstance)) {
                     numParams = numParams + 2u;
                 }

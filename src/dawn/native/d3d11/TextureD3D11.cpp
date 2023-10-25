@@ -68,9 +68,10 @@ UINT D3D11TextureBindFlags(wgpu::TextureUsage usage, const Format& format) {
 Aspect D3D11Aspect(Aspect aspect) {
     // https://learn.microsoft.com/en-us/windows/win32/direct3d12/subresources
     // Planar formats existed in Direct3D 11, but individual planes could not be addressed
-    // individually.
-    if (IsSubset(aspect, Aspect::Depth | Aspect::Stencil)) {
-        return Aspect::CombinedDepthStencil;
+    // individually, so squash stencil into depth.
+    if (aspect & Aspect::Stencil) {
+        DAWN_ASSERT(IsSubset(aspect, Aspect::Depth | Aspect::Stencil));
+        return Aspect::Depth;
     }
 
     DAWN_ASSERT(HasOneBit(aspect));
@@ -653,7 +654,7 @@ MaybeError Texture::ClearCompressed(CommandRecordingContext* commandContext,
                 // Skip lazy clears if already initialized.
                 continue;
             }
-            uint32_t dstSubresource = GetSubresourceIndex(level, layer, D3D11Aspect(range.aspects));
+            uint32_t dstSubresource = GetSubresourceIndex(level, layer, Aspect::Color);
             auto physicalSize = GetMipLevelSingleSubresourcePhysicalSize(level, Aspect::Color);
             // The documentation says D3D11_BOX's coordinates should be in texels for
             // textures. However the validation layer seemingly assumes them to be in
@@ -802,11 +803,11 @@ MaybeError Texture::WriteDepthStencilInternal(CommandRecordingContext* commandCo
         copyCmd.source.texture = this;
         copyCmd.source.origin = origin;
         copyCmd.source.mipLevel = subresources.baseMipLevel;
-        copyCmd.source.aspect = Aspect::CombinedDepthStencil;
+        copyCmd.source.aspect = otherAspects;
         copyCmd.destination.texture = stagingTexture.Get();
         copyCmd.destination.origin = {0, 0, 0};
         copyCmd.destination.mipLevel = 0;
-        copyCmd.destination.aspect = Aspect::CombinedDepthStencil;
+        copyCmd.destination.aspect = otherAspects;
         copyCmd.copySize = size;
         DAWN_TRY(Texture::CopyInternal(commandContext, &copyCmd));
     }
@@ -846,11 +847,11 @@ MaybeError Texture::WriteDepthStencilInternal(CommandRecordingContext* commandCo
     copyCmd.source.texture = stagingTexture.Get();
     copyCmd.source.origin = {0, 0, 0};
     copyCmd.source.mipLevel = 0;
-    copyCmd.source.aspect = Aspect::CombinedDepthStencil;
+    copyCmd.source.aspect = GetFormat().aspects;
     copyCmd.destination.texture = this;
     copyCmd.destination.origin = origin;
     copyCmd.destination.mipLevel = subresources.baseMipLevel;
-    copyCmd.destination.aspect = Aspect::CombinedDepthStencil;
+    copyCmd.destination.aspect = GetFormat().aspects;
     copyCmd.copySize = size;
     DAWN_TRY(Texture::CopyInternal(commandContext, &copyCmd));
 

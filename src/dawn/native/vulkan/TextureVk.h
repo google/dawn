@@ -47,7 +47,10 @@ class Texture;
 
 VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format);
 VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& format);
-VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage);
+VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage);
+VkImageLayout VulkanImageLayoutForDepthStencilAttachment(const Format& format,
+                                                         bool depthReadOnly,
+                                                         bool stencilReadOnly);
 VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount);
 
 MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,

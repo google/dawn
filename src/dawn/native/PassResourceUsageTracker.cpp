@@ -54,9 +54,12 @@ void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage u
 }
 
 void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view, wgpu::TextureUsage usage) {
-    TextureBase* texture = view->GetTexture();
-    const SubresourceRange& range = view->GetSubresourceRange();
+    TextureRangeUsedAs(view->GetTexture(), view->GetSubresourceRange(), usage);
+}
 
+void SyncScopeUsageTracker::TextureRangeUsedAs(TextureBase* texture,
+                                               const SubresourceRange& range,
+                                               wgpu::TextureUsage usage) {
     // Get or create a new TextureSubresourceUsage for that texture (initially filled with
     // wgpu::TextureUsage::None)
     auto it = mTextureUsages.emplace(
@@ -69,8 +72,10 @@ void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view, wgpu::Textu
         // TODO(crbug.com/dawn/1001): Consider optimizing to have fewer branches.
 
         // Using the same subresource for two different attachments is a write-write or read-write
-        // hazard. Add the internal kAgainAsAttachment usage to fail the later check that a
+        // hazard. Add an internal kAgainAsAttachment usage to fail the later check that a
         // subresource with a writable usage has a single usage.
+        constexpr wgpu::TextureUsage kAgainAsAttachment =
+            kReservedTextureUsage | static_cast<wgpu::TextureUsage>(1);
         constexpr wgpu::TextureUsage kWritableAttachmentUsages =
             wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageAttachment;
         if ((usage & kWritableAttachmentUsages) && (*storedUsage & kWritableAttachmentUsages)) {

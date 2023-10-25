@@ -1280,187 +1280,103 @@ TEST_F(RenderPassDescriptorValidationTest, DefaultDepthClearValue) {
     AssertBeginRenderPassSuccess(&renderPassDescriptor);
 }
 
+// Check the validation rules around depth/stencilReadOnly
 TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilReadOnly) {
     wgpu::TextureView colorView = Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
     wgpu::TextureView depthStencilView =
         Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
     wgpu::TextureView depthStencilViewNoStencil =
         Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
+    wgpu::TextureView stencilView = Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Stencil8);
 
-    // Tests that a read-only pass with depthReadOnly set to true succeeds.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+    using Aspect = wgpu::TextureAspect;
+    struct TestSpec {
+        wgpu::TextureFormat format;
+        Aspect formatAspects;
+        Aspect testAspect;
+    };
+
+    TestSpec specs[] = {
+        {wgpu::TextureFormat::Depth24PlusStencil8, Aspect::All, Aspect::StencilOnly},
+        {wgpu::TextureFormat::Depth24PlusStencil8, Aspect::All, Aspect::DepthOnly},
+        {wgpu::TextureFormat::Depth24Plus, Aspect::DepthOnly, Aspect::DepthOnly},
+        {wgpu::TextureFormat::Stencil8, Aspect::All, Aspect::StencilOnly},
+    };
+    for (const auto& spec : specs) {
+        wgpu::TextureView depthStencil = Create2DAttachment(device, 1, 1, spec.format);
+        utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
+
+        Aspect testAspect = spec.testAspect;
+        Aspect otherAspect =
+            testAspect == Aspect::DepthOnly ? Aspect::StencilOnly : Aspect::DepthOnly;
+
+        auto Set = [&](Aspect aspect, wgpu::LoadOp loadOp, wgpu::StoreOp storeOp, bool readonly) {
+            if (aspect == Aspect::DepthOnly) {
+                renderPass.cDepthStencilAttachmentInfo.depthLoadOp = loadOp;
+                renderPass.cDepthStencilAttachmentInfo.depthStoreOp = storeOp;
+                renderPass.cDepthStencilAttachmentInfo.depthReadOnly = readonly;
+            } else {
+                DAWN_ASSERT(aspect == Aspect::StencilOnly);
+                renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = loadOp;
+                renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = storeOp;
+                renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = readonly;
+            }
+        };
+
+        // Tests that a read-only pass with depth/stencilReadOnly both set to true succeeds.
+        Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
         AssertBeginRenderPassSuccess(&renderPass);
-    }
 
-    // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values passes when
-    // there is no stencil component in the format (deprecated).
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values fails when
-    // there there is no stencil component in the format and stencil loadOp/storeOp are passed.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+        // Tests that readOnly with LoadOp not undefined is invalid.
+        Set(testAspect, wgpu::LoadOp::Clear, wgpu::StoreOp::Undefined, true);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
         AssertBeginRenderPassError(&renderPass);
 
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+        Set(testAspect, wgpu::LoadOp::Load, wgpu::StoreOp::Undefined, true);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
         AssertBeginRenderPassError(&renderPass);
 
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+        // Tests that readOnly with StoreOp not undefined is invalid.
+        Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Store, true);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
         AssertBeginRenderPassError(&renderPass);
-    }
 
-    // Tests that a pass with depthReadOnly=true and stencilReadOnly=true can pass
-    // when there is only depth component in the format. We actually enable readonly
-    // depth/stencil attachment in this case.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+        Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Discard, true);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+        AssertBeginRenderPassError(&renderPass);
+
+        // Test for the aspect's not present in the format, if applicable.
+        if (testAspect != spec.formatAspects) {
+            // Tests that readOnly with LoadOp not undefined is invalid even if the aspect is not in
+            // the format.
+            Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+            Set(otherAspect, wgpu::LoadOp::Clear, wgpu::StoreOp::Undefined, true);
+            AssertBeginRenderPassError(&renderPass);
+
+            Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+            Set(otherAspect, wgpu::LoadOp::Load, wgpu::StoreOp::Undefined, true);
+            AssertBeginRenderPassError(&renderPass);
+
+            // Tests that readOnly with StoreOp not undefined is invalid even if the aspect is not
+            // in the format.
+            Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+            Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Store, true);
+            AssertBeginRenderPassError(&renderPass);
+
+            Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+            Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Discard, true);
+            AssertBeginRenderPassError(&renderPass);
+        }
+
+        // Test that it is allowed to set only one of the aspects readonly.
+        Set(testAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
+        Set(otherAspect, wgpu::LoadOp::Load, wgpu::StoreOp::Store, false);
         AssertBeginRenderPassSuccess(&renderPass);
-    }
 
-    // Tests that a pass with depthReadOnly=false and stencilReadOnly=true can pass
-    // when there is only depth component in the format. We actually don't enable readonly
-    // depth/stencil attachment in this case.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = false;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+        Set(testAspect, wgpu::LoadOp::Load, wgpu::StoreOp::Store, false);
+        Set(otherAspect, wgpu::LoadOp::Undefined, wgpu::StoreOp::Undefined, true);
         AssertBeginRenderPassSuccess(&renderPass);
-    }
-
-    // TODO(https://crbug.com/dawn/666): Add a test case for stencil-only once stencil8 is
-    // supported (depthReadOnly and stencilReadOnly mismatch but no depth component).
-
-    // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values fails when
-    // both depth and stencil components exist.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with loadOp set to clear and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with storeOp set to discard and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Discard;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with loadOp set to load, storeOp set to store, and readOnly set to true
-    // fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with only depthLoadOp set to load and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with only depthStoreOp set to store and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with only stencilLoadOp set to load and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
-    }
-
-    // Tests that a pass with only stencilStoreOp set to store and readOnly set to true fails.
-    {
-        utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
-        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
-        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        AssertBeginRenderPassError(&renderPass);
     }
 }
 

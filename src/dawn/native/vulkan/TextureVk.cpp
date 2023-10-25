@@ -71,12 +71,59 @@ VkImageViewType VulkanImageViewType(wgpu::TextureViewDimension dimension) {
     DAWN_UNREACHABLE();
 }
 
+// Reserved texture usages to represent mixed read-only/writable depth-stencil texture usages
+// when combining the planes of depth-stencil textures. They can be combined with other in-pass
+// readonly usages like wgpu::TextureUsage::TextureBinding.
+// TODO(dawn:2172): Consider making a bespoke enum instead of hackily extending TextureUsage.
+constexpr wgpu::TextureUsage kDepthReadOnlyStencilWritableAttachment =
+    kReservedTextureUsage | static_cast<wgpu::TextureUsage>(1 << 30);
+constexpr wgpu::TextureUsage kDepthWritableStencilReadOnlyAttachment =
+    kReservedTextureUsage | static_cast<wgpu::TextureUsage>(1 << 29);
+
+// Merge two usages for depth and stencil into a single combined usage that uses the reserved
+// texture usages above. This is used to handle combining Aspect::Depth and Aspect::Stencil into a
+// single Aspect::CombinedDepthStencil.
+wgpu::TextureUsage MergeDepthStencilUsage(wgpu::TextureUsage depth, wgpu::TextureUsage stencil) {
+    // Aspects that are RenderAttachment cannot be anything else at the same time. This lets us
+    // check if we are in one of the RenderAttachment + (ReadOnlyAttachment|readonly usage) cases
+    // and know only the aspect with the readonly attachment might contain extra usages like
+    // TextureBinding.
+    DAWN_ASSERT(depth == wgpu::TextureUsage::RenderAttachment ||
+                IsSubset(depth, ~wgpu::TextureUsage::RenderAttachment));
+    DAWN_ASSERT(stencil == wgpu::TextureUsage::RenderAttachment ||
+                IsSubset(stencil, ~wgpu::TextureUsage::RenderAttachment));
+
+    if (depth == wgpu::TextureUsage::RenderAttachment && stencil & kReadOnlyRenderAttachment) {
+        return kDepthWritableStencilReadOnlyAttachment | (stencil & ~kReadOnlyRenderAttachment);
+    } else if (depth & kReadOnlyRenderAttachment &&
+               stencil == wgpu::TextureUsage::RenderAttachment) {
+        return kDepthReadOnlyStencilWritableAttachment | (depth & ~kReadOnlyRenderAttachment);
+    } else {
+        // Not one of the reserved usage special cases, we can just combine the aspect's usage the
+        // simple way!
+        return depth | stencil;
+    }
+}
+
 // Computes which vulkan access type could be required for the given Dawn usage.
 // TODO(crbug.com/dawn/269): We shouldn't need any access usages for srcAccessMask when
 // the previous usage is readonly because an execution dependency is sufficient.
 VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) {
-    VkAccessFlags flags = 0;
+    if (usage & kReservedTextureUsage) {
+        // Handle the special readonly usages for mixed depth-stencil.
+        DAWN_ASSERT(IsSubset(kDepthReadOnlyStencilWritableAttachment, usage) ||
+                    IsSubset(kDepthWritableStencilReadOnlyAttachment, usage));
 
+        // Add any additional access flags for the non-attachment part of the usage.
+        const wgpu::TextureUsage nonAttachmentUsages =
+            usage &
+            ~(kDepthReadOnlyStencilWritableAttachment | kDepthWritableStencilReadOnlyAttachment);
+        return VulkanAccessFlags(nonAttachmentUsages, format) |
+               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+               VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    }
+
+    VkAccessFlags flags = 0;
     if (usage & wgpu::TextureUsage::CopySrc) {
         flags |= VK_ACCESS_TRANSFER_READ_BIT;
     }
@@ -127,6 +174,19 @@ VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) 
 
 // Computes which Vulkan pipeline stage can access a texture in the given Dawn usage
 VkPipelineStageFlags VulkanPipelineStage(wgpu::TextureUsage usage, const Format& format) {
+    if (usage & kReservedTextureUsage) {
+        // Handle the special readonly usages for mixed depth-stencil.
+        DAWN_ASSERT(IsSubset(kDepthReadOnlyStencilWritableAttachment, usage) ||
+                    IsSubset(kDepthWritableStencilReadOnlyAttachment, usage));
+
+        // Convert all the reserved attachment usages into just RenderAttachment.
+        const wgpu::TextureUsage nonAttachmentUsages =
+            usage &
+            ~(kDepthReadOnlyStencilWritableAttachment | kDepthWritableStencilReadOnlyAttachment);
+        return VulkanPipelineStage(nonAttachmentUsages | wgpu::TextureUsage::RenderAttachment,
+                                   format);
+    }
+
     VkPipelineStageFlags flags = 0;
 
     if (usage == wgpu::TextureUsage::None) {
@@ -183,13 +243,15 @@ VkImageMemoryBarrier BuildMemoryBarrier(const Texture* texture,
                                         wgpu::TextureUsage lastUsage,
                                         wgpu::TextureUsage usage,
                                         const SubresourceRange& range) {
+    const Format& format = texture->GetFormat();
+
     VkImageMemoryBarrier barrier;
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.pNext = nullptr;
-    barrier.srcAccessMask = VulkanAccessFlags(lastUsage, texture->GetFormat());
-    barrier.dstAccessMask = VulkanAccessFlags(usage, texture->GetFormat());
-    barrier.oldLayout = VulkanImageLayout(texture, lastUsage);
-    barrier.newLayout = VulkanImageLayout(texture, usage);
+    barrier.srcAccessMask = VulkanAccessFlags(lastUsage, format);
+    barrier.dstAccessMask = VulkanAccessFlags(usage, format);
+    barrier.oldLayout = VulkanImageLayout(format, lastUsage);
+    barrier.newLayout = VulkanImageLayout(format, usage);
     barrier.image = texture->GetHandle();
     barrier.subresourceRange.aspectMask = VulkanAspectMask(range.aspects);
     barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
@@ -538,23 +600,27 @@ VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& forma
 // Chooses which Vulkan image layout should be used for the given Dawn usage. Note that this
 // layout must match the layout given to various Vulkan operations as well as the layout given
 // to descriptor set writes.
-VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage) {
+VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage) {
     if (usage == wgpu::TextureUsage::None) {
         return VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     if (!wgpu::HasZeroOrOneBits(usage)) {
-        // Sampled | kReadOnlyRenderAttachment is the only possible multi-bit usage, if more
-        // appear we might need additional special-casing.
-        DAWN_ASSERT(usage == (wgpu::TextureUsage::TextureBinding | kReadOnlyRenderAttachment));
+        // sampled | (some sort of readonly depth-stencil aspect) is the only possible multi-bit
+        // usage, if more appear we will need additional special-casing.
+        DAWN_ASSERT(IsSubset(
+            usage, wgpu::TextureUsage::TextureBinding | kDepthReadOnlyStencilWritableAttachment |
+                       kDepthWritableStencilReadOnlyAttachment | kReadOnlyRenderAttachment));
 
-        // WebGPU requires both aspects to be readonly if the attachment's format does have
-        // both depth and stencil aspects. Vulkan 1.0 supports readonly for both aspects too
-        // via DEPTH_STENCIL_READ_ONLY image layout. Vulkan 1.1 and above can support separate
-        // readonly for a single aspect via DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL and
-        // DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL layouts. But Vulkan 1.0 cannot support
-        // it, and WebGPU doesn't need that currently.
-        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        if (IsSubset(kDepthReadOnlyStencilWritableAttachment, usage)) {
+            return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+        } else if (IsSubset(kDepthWritableStencilReadOnlyAttachment, usage)) {
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+        } else {
+            DAWN_ASSERT(
+                IsSubset(usage, kReadOnlyRenderAttachment | wgpu::TextureUsage::TextureBinding));
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        }
     }
 
     // Usage has a single bit so we can switch on its value directly.
@@ -567,7 +633,7 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             // The sampled image can be used as a readonly depth/stencil attachment at the same
             // time if it is a depth/stencil renderable format, so the image layout need to be
             // VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL.
-            if (texture->GetFormat().HasDepthOrStencil() && texture->GetFormat().isRenderable) {
+            if (format.HasDepthOrStencil() && format.isRenderable) {
                 return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
             }
             return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -589,7 +655,7 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             return VK_IMAGE_LAYOUT_GENERAL;
 
         case wgpu::TextureUsage::RenderAttachment:
-            if (texture->GetFormat().HasDepthOrStencil()) {
+            if (format.HasDepthOrStencil()) {
                 return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             } else {
                 return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -616,6 +682,23 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             break;
     }
     DAWN_UNREACHABLE();
+}
+
+VkImageLayout VulkanImageLayoutForDepthStencilAttachment(const Format& format,
+                                                         bool depthReadOnly,
+                                                         bool stencilReadOnly) {
+    wgpu::TextureUsage depth = wgpu::TextureUsage::None;
+    if (format.HasDepth()) {
+        depth = depthReadOnly ? kReadOnlyRenderAttachment : wgpu::TextureUsage::RenderAttachment;
+    }
+
+    wgpu::TextureUsage stencil = wgpu::TextureUsage::None;
+    if (format.HasStencil()) {
+        stencil =
+            stencilReadOnly ? kReadOnlyRenderAttachment : wgpu::TextureUsage::RenderAttachment;
+    }
+
+    return VulkanImageLayout(format, MergeDepthStencilUsage(depth, stencil));
 }
 
 VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
@@ -704,6 +787,12 @@ Texture::Texture(Device* device, const TextureDescriptor* descriptor)
 
 MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     Device* device = ToBackend(GetDevice());
+
+    // If this triggers, it means it's time to add tests and implement support for readonly
+    // depth-stencil attachments that are also used as readonly storage bindings in the pass.
+    // Have fun! :)
+    DAWN_ASSERT(
+        !(GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::StorageBinding)));
 
     // Create the Vulkan image "container". We don't need to check that the format supports the
     // combination of sample, usage etc. because validation should have been done in the Dawn
@@ -981,7 +1070,7 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     // value used to export with whatever the current layout is. However queue transitioning to the
     // UNDEFINED layout is disallowed so we handle the case where currentLayout is UNDEFINED by
     // promoting to GENERAL.
-    VkImageLayout currentLayout = VulkanImageLayout(this, usage);
+    VkImageLayout currentLayout = VulkanImageLayout(GetFormat(), usage);
     VkImageLayout targetLayout;
     if (currentLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
         targetLayout = currentLayout;
@@ -1166,9 +1255,41 @@ void Texture::TransitionUsageForPass(CommandRecordingContext* recordingContext,
                                      std::vector<VkImageMemoryBarrier>* imageBarriers,
                                      VkPipelineStageFlags* srcStages,
                                      VkPipelineStageFlags* dstStages) {
-    if (UseCombinedAspects()) {
-        SubresourceStorage<wgpu::TextureUsage> combinedUsages(mCombinedAspect, GetArrayLayers(),
-                                                              GetNumMipLevels());
+    if (!UseCombinedAspects()) {
+        TransitionUsageForPassImpl(recordingContext, textureUsages, imageBarriers, srcStages,
+                                   dstStages);
+        return;
+    }
+
+    // We need to combine aspects for the transition, use a new subresource storage that will
+    // contain the combined usages for the aspects.
+    SubresourceStorage<wgpu::TextureUsage> combinedUsages(mCombinedAspect, GetArrayLayers(),
+                                                          GetNumMipLevels());
+
+    if (mCombinedAspect == Aspect::CombinedDepthStencil) {
+        // For depth-stencil we can't just combine the aspect with an | operation because there
+        // needs to be special handling for readonly aspects. Instead figure out which aspect is
+        // currently being added (and which one is already present) and call the custom merging
+        // function for depth-stencil.
+        textureUsages.Iterate([&](const SubresourceRange& range, wgpu::TextureUsage usage) {
+            SubresourceRange updateRange = range;
+            updateRange.aspects = mCombinedAspect;
+            Aspect aspectsToMerge = range.aspects;
+
+            combinedUsages.Update(
+                updateRange, [&](const SubresourceRange&, wgpu::TextureUsage* combinedUsage) {
+                    if (aspectsToMerge == Aspect::Depth) {
+                        *combinedUsage = MergeDepthStencilUsage(usage, *combinedUsage);
+                    } else if (aspectsToMerge == Aspect::Stencil) {
+                        *combinedUsage = MergeDepthStencilUsage(*combinedUsage, usage);
+                    } else {
+                        DAWN_ASSERT(aspectsToMerge == (Aspect::Depth | Aspect::Stencil));
+                        *combinedUsage = usage;
+                    }
+                });
+        });
+    } else {
+        // Combine aspect's usages with the | operation.
         textureUsages.Iterate([&](const SubresourceRange& range, wgpu::TextureUsage usage) {
             SubresourceRange updateRange = range;
             updateRange.aspects = mCombinedAspect;
@@ -1178,13 +1299,10 @@ void Texture::TransitionUsageForPass(CommandRecordingContext* recordingContext,
                                       *combinedUsage |= usage;
                                   });
         });
-
-        TransitionUsageForPassImpl(recordingContext, combinedUsages, imageBarriers, srcStages,
-                                   dstStages);
-    } else {
-        TransitionUsageForPassImpl(recordingContext, textureUsages, imageBarriers, srcStages,
-                                   dstStages);
     }
+
+    TransitionUsageForPassImpl(recordingContext, combinedUsages, imageBarriers, srcStages,
+                               dstStages);
 }
 
 void Texture::TransitionUsageForPassImpl(
@@ -1448,7 +1566,7 @@ void Texture::UpdateExternalSemaphoreHandle(ExternalSemaphoreHandle handle) {
 
 VkImageLayout Texture::GetCurrentLayoutForSwapChain() const {
     DAWN_ASSERT(GetFormat().aspects == Aspect::Color);
-    return VulkanImageLayout(this, mSubresourceLastUsages.Get(Aspect::Color, 0, 0));
+    return VulkanImageLayout(GetFormat(), mSubresourceLastUsages.Get(Aspect::Color, 0, 0));
 }
 
 bool Texture::UseCombinedAspects() const {

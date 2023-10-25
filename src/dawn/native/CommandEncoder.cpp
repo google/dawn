@@ -424,12 +424,14 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
                     "The depth stencil attachment %s format (%s) is not renderable.", attachment,
                     format.format);
 
-    DAWN_INVALID_IF(
-        attachment->GetAspects() == (Aspect::Depth | Aspect::Stencil) &&
-            depthStencilAttachment->depthReadOnly != depthStencilAttachment->stencilReadOnly,
-        "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when texture aspect "
-        "is 'all'.",
-        depthStencilAttachment->depthReadOnly, depthStencilAttachment->stencilReadOnly);
+    if (!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
+        DAWN_INVALID_IF(
+            attachment->GetAspects() == (Aspect::Depth | Aspect::Stencil) &&
+                depthStencilAttachment->depthReadOnly != depthStencilAttachment->stencilReadOnly,
+            "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when texture aspect "
+            "is 'all'.",
+            depthStencilAttachment->depthReadOnly, depthStencilAttachment->stencilReadOnly);
+    }
 
     // Read only, or depth doesn't exist.
     if (depthStencilAttachment->depthReadOnly ||
@@ -738,21 +740,6 @@ MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
 
     return EncodeConvertTimestampsToNanoseconds(encoder, destination, availabilityBuffer.Get(),
                                                 paramsBuffer.Get());
-}
-
-bool IsReadOnlyDepthStencilAttachment(
-    const RenderPassDepthStencilAttachment* depthStencilAttachment) {
-    DAWN_ASSERT(depthStencilAttachment != nullptr);
-    Aspect aspects = depthStencilAttachment->view->GetAspects();
-    DAWN_ASSERT(IsSubset(aspects, Aspect::Depth | Aspect::Stencil));
-
-    if ((aspects & Aspect::Depth) && !depthStencilAttachment->depthReadOnly) {
-        return false;
-    }
-    if (aspects & Aspect::Stencil && !depthStencilAttachment->stencilReadOnly) {
-        return false;
-    }
-    return true;
 }
 
 // Load resolve texture to MSAA attachment if needed.
@@ -1086,8 +1073,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             if (cmd->attachmentState->HasDepthStencilAttachment()) {
                 TextureViewBase* view = descriptor->depthStencilAttachment->view;
-
+                TextureBase* attachment = view->GetTexture();
                 cmd->depthStencilAttachment.view = view;
+                // Range that will be modified per aspect to track the usage.
+                SubresourceRange usageRange = view->GetSubresourceRange();
 
                 switch (descriptor->depthStencilAttachment->depthLoadOp) {
                     case wgpu::LoadOp::Clear:
@@ -1101,57 +1090,67 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                         cmd->depthStencilAttachment.clearDepth = 0.f;
                         break;
                 }
-                cmd->depthStencilAttachment.clearStencil =
-                    descriptor->depthStencilAttachment->stencilClearValue;
 
-                // Copy parameters for the depth, reyifing the values when it is not present or
-                // readonly.
+                // GPURenderPassDepthStencilAttachment.stencilClearValue will be converted to
+                // the type of the stencil aspect of view by taking the same number of LSBs as
+                // the number of bits in the stencil aspect of one texel block of view.
+                DAWN_ASSERT(!(view->GetFormat().aspects & Aspect::Stencil) ||
+                            view->GetFormat().GetAspectInfo(Aspect::Stencil).block.byteSize == 1u);
+                cmd->depthStencilAttachment.clearStencil =
+                    descriptor->depthStencilAttachment->stencilClearValue & 0xFF;
+
+                // Depth aspect:
+                //  - Copy parameters for the aspect, reyifing the values when it is not present or
+                //  readonly.
+                //  - Export depthReadOnly to the outside of the depth-stencil attachment handling.
+                //  - Track the usage of this aspect.
+                depthReadOnly = descriptor->depthStencilAttachment->depthReadOnly;
+
                 cmd->depthStencilAttachment.depthReadOnly = false;
                 cmd->depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
                 cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
-                if (view->GetFormat().HasDepth()) {
-                    cmd->depthStencilAttachment.depthReadOnly =
-                        descriptor->depthStencilAttachment->depthReadOnly;
-                    if (!cmd->depthStencilAttachment.depthReadOnly) {
+                if (attachment->GetFormat().HasDepth()) {
+                    cmd->depthStencilAttachment.depthReadOnly = depthReadOnly;
+                    if (!depthReadOnly) {
                         cmd->depthStencilAttachment.depthLoadOp =
                             descriptor->depthStencilAttachment->depthLoadOp;
                         cmd->depthStencilAttachment.depthStoreOp =
                             descriptor->depthStencilAttachment->depthStoreOp;
                     }
+
+                    usageRange.aspects = Aspect::Depth;
+                    usageTracker.TextureRangeUsedAs(attachment, usageRange,
+                                                    depthReadOnly
+                                                        ? kReadOnlyRenderAttachment
+                                                        : wgpu::TextureUsage::RenderAttachment);
                 }
 
-                // Copy parameters for the stencil, reyifing the values when it is not present or
-                // readonly.
+                // Stencil aspect:
+                //  - Copy parameters for the aspect, reyifing the values when it is not present or
+                //  readonly.
+                //  - Export stencilReadOnly to the outside of the depth-stencil attachment
+                //  handling.
+                //  - Track the usage of this aspect.
+                stencilReadOnly = descriptor->depthStencilAttachment->stencilReadOnly;
+
                 cmd->depthStencilAttachment.stencilReadOnly = false;
                 cmd->depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
                 cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
-                if (view->GetFormat().HasStencil()) {
-                    cmd->depthStencilAttachment.stencilReadOnly =
-                        descriptor->depthStencilAttachment->stencilReadOnly;
-                    if (!cmd->depthStencilAttachment.stencilReadOnly) {
+                if (attachment->GetFormat().HasStencil()) {
+                    cmd->depthStencilAttachment.stencilReadOnly = stencilReadOnly;
+                    if (!stencilReadOnly) {
                         cmd->depthStencilAttachment.stencilLoadOp =
                             descriptor->depthStencilAttachment->stencilLoadOp;
                         cmd->depthStencilAttachment.stencilStoreOp =
                             descriptor->depthStencilAttachment->stencilStoreOp;
                     }
 
-                    // GPURenderPassDepthStencilAttachment.stencilClearValue will be converted to
-                    // the type of the stencil aspect of view by taking the same number of LSBs as
-                    // the number of bits in the stencil aspect of one texel block of view.
-                    DAWN_ASSERT(view->GetFormat()
-                                    .GetAspectInfo(dawn::native::Aspect::Stencil)
-                                    .block.byteSize == 1u);
-                    cmd->depthStencilAttachment.clearStencil &= 0xFF;
+                    usageRange.aspects = Aspect::Stencil;
+                    usageTracker.TextureRangeUsedAs(attachment, usageRange,
+                                                    stencilReadOnly
+                                                        ? kReadOnlyRenderAttachment
+                                                        : wgpu::TextureUsage::RenderAttachment);
                 }
-
-                if (IsReadOnlyDepthStencilAttachment(descriptor->depthStencilAttachment)) {
-                    usageTracker.TextureViewUsedAs(view, kReadOnlyRenderAttachment);
-                } else {
-                    usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
-                }
-
-                depthReadOnly = descriptor->depthStencilAttachment->depthReadOnly;
-                stencilReadOnly = descriptor->depthStencilAttachment->stencilReadOnly;
             }
 
             cmd->width = width;

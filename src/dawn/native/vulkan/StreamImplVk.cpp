@@ -329,8 +329,8 @@ void stream::Stream<vulkan::RenderPassCacheQuery>::Write(stream::Sink* sink,
     // Serialize the depth-stencil toggle bit, and the parameters if applicable.
     StreamIn(sink, t.hasDepthStencil);
     if (t.hasDepthStencil) {
-        StreamIn(sink, t.depthStencilFormat, t.depthLoadOp, t.depthStoreOp, t.stencilLoadOp,
-                 t.stencilStoreOp, t.readOnlyDepthStencil);
+        StreamIn(sink, t.depthStencilFormat, t.depthLoadOp, t.depthStoreOp, t.depthReadOnly,
+                 t.stencilLoadOp, t.stencilStoreOp, t.stencilReadOnly);
     }
 }
 

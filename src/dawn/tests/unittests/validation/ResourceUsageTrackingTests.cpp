@@ -936,6 +936,68 @@ TEST_F(ResourceUsageTrackingTest, TextureWithSamplingAndDepthStencilAttachment) 
     }
 }
 
+// Test that it is valid to use a depth-stencil texture in mixed readonly and writable attachment
+TEST_F(ResourceUsageTrackingTest, MixedReadOnlyAndNotAttachment) {
+    // Create the depth stencil texture and views.
+    wgpu::Texture texture =
+        CreateTexture(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+                      wgpu::TextureFormat::Depth24PlusStencil8);
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+
+    viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+    wgpu::TextureView depthView = texture.CreateView(&viewDesc);
+    viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
+    wgpu::TextureView stencilView = texture.CreateView(&viewDesc);
+    viewDesc.aspect = wgpu::TextureAspect::All;
+    wgpu::TextureView depthStencilView = texture.CreateView(&viewDesc);
+
+    // Create a bind group.
+    wgpu::BindGroupLayout depthBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+    wgpu::BindGroup depthBg = utils::MakeBindGroup(device, depthBgl, {{0, depthView}});
+
+    wgpu::BindGroupLayout stencilBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Uint}});
+    wgpu::BindGroup stencilBg = utils::MakeBindGroup(device, stencilBgl, {{0, stencilView}});
+
+    // It is valid to use attachments with depth readonly+sampled and stencil written.
+    {
+        utils::ComboRenderPassDescriptor passDesc({}, depthStencilView);
+        passDesc.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        passDesc.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+        passDesc.cDepthStencilAttachmentInfo.depthReadOnly = true;
+
+        passDesc.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+        passDesc.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+        passDesc.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+        pass.SetBindGroup(0, depthBg);
+        pass.End();
+        encoder.Finish();
+    }
+
+    // It is valid to use attachments with depth written and stencil readonly+sampled.
+    {
+        utils::ComboRenderPassDescriptor passDesc({}, depthStencilView);
+        passDesc.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        passDesc.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        passDesc.cDepthStencilAttachmentInfo.depthReadOnly = false;
+
+        passDesc.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDesc.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        passDesc.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+        pass.SetBindGroup(0, stencilBg);
+        pass.End();
+        encoder.Finish();
+    }
+}
+
 // Test using multiple writable usages on the same texture in a single pass/dispatch
 TEST_F(ResourceUsageTrackingTest, TextureWithMultipleWriteUsage) {
     // Test render pass

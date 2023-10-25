@@ -115,7 +115,7 @@ BindGroup::BindGroup(Device* device,
                 }
                 writeImageInfo[numWrites].imageView = handle;
                 writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
-                    ToBackend(view->GetTexture()), wgpu::TextureUsage::TextureBinding);
+                    view->GetTexture()->GetFormat(), wgpu::TextureUsage::TextureBinding);
 
                 write.pImageInfo = &writeImageInfo[numWrites];
                 break;

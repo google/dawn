@@ -540,7 +540,7 @@ MaybeError RenderPipeline::Initialize() {
 
         if (HasDepthStencilAttachment()) {
             query.SetDepthStencil(GetDepthStencilFormat(), wgpu::LoadOp::Load, wgpu::StoreOp::Store,
-                                  wgpu::LoadOp::Load, wgpu::StoreOp::Store, false);
+                                  false, wgpu::LoadOp::Load, wgpu::StoreOp::Store, false);
         }
 
         query.SetSampleCount(GetSampleCount());
