@@ -144,9 +144,6 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 [ angle-opengl ] webgpu:api,validation,encoding,queries,general:occlusion_query,invalid_query_set: [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,begin_end:occlusion_query,begin_end_invalid_nesting: [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,begin_end:occlusion_query,begin_end_balance: [ Failure ]
-[ angle-opengl ] webgpu:api,validation,error_scope:* [ Failure ]
-[ angle-opengl ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyB2T";format="stencil8";dimension="2d" [ Failure ]
-[ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,* [ Failure ]
 [ angle-opengl ] webgpu:api,validation,queue,destroyed,query_set:beginOcclusionQuery: [ Failure ]
 [ angle-opengl ] webgpu:api,validation,render_pipeline,inter_stage:location,mismatch:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,command_buffer,queries,* [ Skip ]
@@ -154,6 +151,24 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 [ angle-opengl ] webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:* [ Failure ]
+
+# error_scope validation tests with errorType="out-of-memory" are failing
+crbug.com/dawn/2168 [ angle-opengl ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";* [ Failure ]
+crbug.com/dawn/2168 [ angle-opengl ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";* [ Failure ]
+crbug.com/dawn/2168 [ angle-opengl ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";* [ Failure ]
+
+# Uploads and writes to stencil textures are failing on the OpenGL backend
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_related:bytes_per_row_alignment:method="CopyB2T";format="stencil8";dimension="2d" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_usage_and_aspect:format="stencil8" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_usage_and_aspect:format="depth24plus-stencil8" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="stencil8";aspect="stencil-only";copyType="WriteTexture" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="depth24plus-stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="depth24plus-stencil8";aspect="stencil-only";copyType="WriteTexture" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_offset:format="stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_offset:format="stencil8";aspect="stencil-only";copyType="WriteTexture" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_offset:format="depth24plus-stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
+crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_offset:format="depth24plus-stencil8";aspect="stencil-only";copyType="WriteTexture" [ Failure ]
 
 # many 2d zero-init readMethod="Sample" tests are failing
 crbug.com/dawn/2147 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";* [ Failure ]
