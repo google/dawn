@@ -696,25 +696,14 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 		}
 	}()
 
-	// Generate case cache
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if caseCache, err := common.BuildCache(ctx, r.ctsDir, r.flags.nodePath); err == nil {
-			mutex.Lock()
-			defer mutex.Unlock()
-			files[cacheListRelPath] = strings.Join(caseCache.FileList, "\n") + "\n"
-			files[cacheTarGz] = string(caseCache.TarGz)
-		} else {
-			errs <- fmt.Errorf("failed to create case cache: %v", err)
-		}
-	}()
-
 	// Generate typescript sources list, test list, resources file list.
 	for relPath, generator := range map[string]func(context.Context) (string, error){
 		tsSourcesRelPath:     r.genTSDepList,
 		testListRelPath:      r.genTestList,
 		resourceFilesRelPath: r.genResourceFilesList,
+		cacheListRelPath: func(context.Context) (string, error) {
+			return common.BuildCache(ctx, r.ctsDir, r.flags.nodePath, r.flags.npmPath, r.flags.auth)
+		},
 	} {
 		relPath, generator := relPath, generator // Capture values, not iterators
 		wg.Add(1)
