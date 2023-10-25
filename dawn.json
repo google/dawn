@@ -905,14 +905,6 @@
                 ]
             },
             {
-                "name": "begin pipeline statistics query",
-                "tags": ["upstream", "emscripten"],
-                "args": [
-                    {"name": "query set", "type": "query set"},
-                    {"name": "query index", "type": "uint32_t"}
-                ]
-            },
-            {
                 "name": "dispatch workgroups",
                 "args": [
                     {"name": "workgroupCountX", "type": "uint32_t"},
@@ -929,10 +921,6 @@
             },
             {
                 "name": "end"
-            },
-            {
-                "name": "end pipeline statistics query",
-                "tags": ["upstream", "emscripten"]
             },
             {
                 "name": "set label",
@@ -1878,15 +1866,14 @@
             {"value": 1, "name": "depth clip control"},
             {"value": 2, "name": "depth32 float stencil8"},
             {"value": 3, "name": "timestamp query"},
-            {"value": 4, "name": "chromium experimental pipeline statistics query"},
-            {"value": 5, "name": "texture compression BC"},
-            {"value": 6, "name": "texture compression ETC2"},
-            {"value": 7, "name": "texture compression ASTC"},
-            {"value": 8, "name": "indirect first instance"},
-            {"value": 9, "name": "shader f16"},
-            {"value": 10, "name": "RG11B10 ufloat renderable"},
-            {"value": 11, "name": "BGRA8 unorm storage"},
-            {"value": 12, "name": "float32 filterable"},
+            {"value": 4, "name": "texture compression BC"},
+            {"value": 5, "name": "texture compression ETC2"},
+            {"value": 6, "name": "texture compression ASTC"},
+            {"value": 7, "name": "indirect first instance"},
+            {"value": 8, "name": "shader f16"},
+            {"value": 9, "name": "RG11B10 ufloat renderable"},
+            {"value": 10, "name": "BGRA8 unorm storage"},
+            {"value": 11, "name": "float32 filterable"},
 
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2185,16 +2172,6 @@
             {"name": "format", "type": "texture format"}
         ]
     },
-    "pipeline statistic name": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "vertex shader invocations"},
-            {"value": 1, "name": "clipper invocations"},
-            {"value": 2, "name": "clipper primitives out"},
-            {"value": 3, "name": "fragment shader invocations"},
-            {"value": 4, "name": "compute shader invocations"}
-        ]
-    },
     "power preference": {
         "category": "enum",
         "values": [
@@ -2262,17 +2239,14 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "query type"},
-            {"name": "count", "type": "uint32_t"},
-            {"name": "pipeline statistics", "type": "pipeline statistic name", "annotation": "const*", "length": "pipeline statistic count"},
-            {"name": "pipeline statistic count", "type": "size_t", "default": "0"}
+            {"name": "count", "type": "uint32_t"}
         ]
     },
     "query type": {
         "category": "enum",
         "values": [
             {"value": 0, "name": "occlusion"},
-            {"value": 1, "name": "pipeline statistics"},
-            {"value": 2, "name": "timestamp"}
+            {"value": 1, "name": "timestamp"}
         ]
     },
     "queue": {
@@ -2744,14 +2718,6 @@
                 ]
             },
             {
-                "name": "begin pipeline statistics query",
-                "tags": ["upstream", "emscripten"],
-                "args": [
-                    {"name": "query set", "type": "query set"},
-                    {"name": "query index", "type": "uint32_t"}
-                ]
-            },
-            {
                 "name": "end occlusion query"
             },
             {
@@ -2768,10 +2734,6 @@
             },
             {
                 "name": "end"
-            },
-            {
-                "name": "end pipeline statistics query",
-                "tags": ["upstream", "emscripten"]
             },
             {
                 "name": "set label",

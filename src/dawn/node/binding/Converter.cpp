@@ -1517,7 +1517,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::MultiPlanarFormatExtendedUsages:
         case wgpu::FeatureName::MultiPlanarFormatP010:
         case wgpu::FeatureName::Norm16TextureFormats:
-        case wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery:
         case wgpu::FeatureName::PixelLocalStorageCoherent:
         case wgpu::FeatureName::PixelLocalStorageNonCoherent:
         case wgpu::FeatureName::SharedFenceDXGISharedHandle:
@@ -1553,9 +1552,6 @@ bool Converter::Convert(interop::GPUQueryType& out, wgpu::QueryType in) {
         case wgpu::QueryType::Timestamp:
             out = interop::GPUQueryType::kTimestamp;
             return true;
-        case wgpu::QueryType::PipelineStatistics:
-            // TODO(dawn:1123): Add support for pipeline statistics if they are in WebGPU one day.
-            return false;
     }
     return false;
 }

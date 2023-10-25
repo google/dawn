@@ -508,13 +508,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
             if (ShouldLeakCounterSets()) {
                 [[*mDevice counterSets] retain];
             }
-            if (IsGPUCounterSupported(
-                    *mDevice, MTLCommonCounterSetStatistic,
-                    {MTLCommonCounterVertexInvocations, MTLCommonCounterClipperInvocations,
-                     MTLCommonCounterClipperPrimitivesOut, MTLCommonCounterFragmentInvocations,
-                     MTLCommonCounterComputeKernelInvocations})) {
-                EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
-            }
 
             if (IsGPUCounterSupported(*mDevice, MTLCommonCounterSetTimestamp,
                                       {MTLCommonCounterTimestamp})) {

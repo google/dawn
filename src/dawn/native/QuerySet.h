@@ -48,7 +48,6 @@ class QuerySetBase : public ApiObjectBase {
 
     wgpu::QueryType GetQueryType() const;
     uint32_t GetQueryCount() const;
-    const std::vector<wgpu::PipelineStatisticName>& GetPipelineStatistics() const;
 
     const std::vector<bool>& GetQueryAvailability() const;
     void SetQueryAvailability(uint32_t index, bool available);
@@ -72,7 +71,6 @@ class QuerySetBase : public ApiObjectBase {
   private:
     wgpu::QueryType mQueryType;
     uint32_t mQueryCount;
-    std::vector<wgpu::PipelineStatisticName> mPipelineStatistics;
 
     enum class QuerySetState { Unavailable, Available, Destroyed };
     QuerySetState mState = QuerySetState::Unavailable;

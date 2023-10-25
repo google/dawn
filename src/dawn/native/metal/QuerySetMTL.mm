@@ -105,18 +105,6 @@ MaybeError QuerySet::Initialize() {
             }
             break;
         }
-        case wgpu::QueryType::PipelineStatistics:
-            if (@available(macOS 10.15, iOS 14.0, *)) {
-                NSRef<NSString> label = MakeDebugName(
-                    GetDevice(), "Dawn_QuerySet_PipelineStatisticCounterSampleBuffer", GetLabel());
-                DAWN_TRY_ASSIGN(
-                    mCounterSampleBuffer,
-                    CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetStatistic,
-                                              GetQueryCount()));
-            } else {
-                DAWN_UNREACHABLE();
-            }
-            break;
         case wgpu::QueryType::Timestamp:
             if (@available(macOS 10.15, iOS 14.0, *)) {
                 NSRef<NSString> label = MakeDebugName(

@@ -211,10 +211,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::TextureCompressionASTC);
     }
 
-    if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
-        EnableFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery);
-    }
-
     // TODO(dawn:1559) Resolving timestamp queries after a render pass is failing on Qualcomm-based
     // Android devices.
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&

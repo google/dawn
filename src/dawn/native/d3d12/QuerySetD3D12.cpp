@@ -40,8 +40,6 @@ D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
     switch (type) {
         case wgpu::QueryType::Occlusion:
             return D3D12_QUERY_HEAP_TYPE_OCCLUSION;
-        case wgpu::QueryType::PipelineStatistics:
-            return D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
         case wgpu::QueryType::Timestamp:
             return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
     }

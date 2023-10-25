@@ -35,19 +35,12 @@ namespace {
 
 class QuerySetValidationTest : public ValidationTest {
   protected:
-    wgpu::QuerySet CreateQuerySet(
-        wgpu::Device cDevice,
-        wgpu::QueryType queryType,
-        uint32_t queryCount,
-        std::vector<wgpu::PipelineStatisticName> pipelineStatistics = {}) {
+    wgpu::QuerySet CreateQuerySet(wgpu::Device cDevice,
+                                  wgpu::QueryType queryType,
+                                  uint32_t queryCount) {
         wgpu::QuerySetDescriptor descriptor;
         descriptor.type = queryType;
         descriptor.count = queryCount;
-
-        if (pipelineStatistics.size() > 0) {
-            descriptor.pipelineStatistics = pipelineStatistics.data();
-            descriptor.pipelineStatisticCount = pipelineStatistics.size();
-        }
 
         return cDevice.CreateQuerySet(&descriptor);
     }
@@ -57,19 +50,6 @@ class QuerySetValidationTest : public ValidationTest {
 TEST_F(QuerySetValidationTest, CreationWithoutFeatures) {
     // Creating a query set for occlusion queries succeeds without any features enabled.
     CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
-
-    // Creating a query set for other types of queries fails without features enabled.
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::ClipperPrimitivesOut}));
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::ComputeShaderInvocations}));
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::FragmentShaderInvocations}));
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1));
 }
 
 // Test creating query set with invalid count
@@ -84,12 +64,6 @@ TEST_F(QuerySetValidationTest, InvalidQueryCount) {
 // Test creating query set with invalid type
 TEST_F(QuerySetValidationTest, InvalidQueryType) {
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, static_cast<wgpu::QueryType>(0xFFFFFFFF), 1));
-}
-
-// Test creating query set with unnecessary pipeline statistics for occlusion queries
-TEST_F(QuerySetValidationTest, UnnecessaryPipelineStatistics) {
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Occlusion, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
 }
 
 // Test destroying a destroyed query set
@@ -324,23 +298,8 @@ TEST_F(TimestampQueryValidationTest, Creation) {
     // Creating a query set for occlusion queries succeeds.
     CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
 
-    // Creating a query set for pipeline statistics queries fails.
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
-
     // Creating a query set for timestamp queries succeeds.
     CreateQuerySet(device, wgpu::QueryType::Timestamp, 1);
-
-    // Fail to create with pipeline statistics for Timestamp query
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
-}
-
-// Test creating query set with unnecessary pipeline statistics for timestamp queries
-TEST_F(TimestampQueryValidationTest, UnnecessaryPipelineStatistics) {
-    // Fail to create with pipeline statistics for Occlusion query
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1,
-                                       {wgpu::PipelineStatisticName::VertexShaderInvocations}));
 }
 
 // Test query set with type of timestamp is set to the occlusionQuerySet of RenderPassDescriptor.
@@ -706,80 +665,6 @@ TEST_F(TimestampQueryInsidePassesValidationTest, WriteTimestampOnRenderPassEncod
         timestampQuerySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
-}
-
-class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
-  protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        // Create a device with pipeline statistic query feature required. Note that Pipeline
-        // statistic query is an unsafe API, while AllowUnsafeApis instance toggle is enabled
-        // when ValidationTest creating testing instance, so we can test it.
-        wgpu::FeatureName requiredFeatures[1] = {
-            wgpu::FeatureName::ChromiumExperimentalPipelineStatisticsQuery};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-
-        return dawnAdapter.CreateDevice(&descriptor);
-    }
-};
-
-// Test creating query set with only the pipeline statistics feature enabled.
-TEST_F(PipelineStatisticsQueryValidationTest, Creation) {
-    // Creating a query set for occlusion queries succeeds.
-    CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
-
-    // Creating a query set for timestamp queries fails.
-    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1));
-
-    // Creating a query set for pipeline statistics queries succeeds.
-    CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                   {wgpu::PipelineStatisticName::VertexShaderInvocations});
-}
-
-// Test creating query set with invalid pipeline statistics
-TEST_F(PipelineStatisticsQueryValidationTest, InvalidPipelineStatistics) {
-    // Success to create with all pipeline statistics names which are not in the same order as
-    // defined in webgpu header file
-    {
-        CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                       {wgpu::PipelineStatisticName::ClipperInvocations,
-                        wgpu::PipelineStatisticName::ClipperPrimitivesOut,
-                        wgpu::PipelineStatisticName::ComputeShaderInvocations,
-                        wgpu::PipelineStatisticName::FragmentShaderInvocations,
-                        wgpu::PipelineStatisticName::VertexShaderInvocations});
-    }
-
-    // Fail to create with empty pipeline statistics
-    { ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1, {})); }
-
-    // Fail to create with invalid pipeline statistics
-    {
-        ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                           {static_cast<wgpu::PipelineStatisticName>(0xFFFFFFFF)}));
-    }
-
-    // Fail to create with duplicate pipeline statistics
-    {
-        ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                                           {wgpu::PipelineStatisticName::VertexShaderInvocations,
-                                            wgpu::PipelineStatisticName::VertexShaderInvocations}));
-    }
-}
-
-// Test query set with type of pipeline statistics is set to the occlusionQuerySet of
-// RenderPassDescriptor.
-TEST_F(PipelineStatisticsQueryValidationTest, BeginRenderPassWithPipelineStatisticsQuerySet) {
-    // Fail to begin render pass if the type of occlusionQuerySet is not Occlusion
-    wgpu::QuerySet querySet =
-        CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
-                       {wgpu::PipelineStatisticName::VertexShaderInvocations});
-    PlaceholderRenderPass renderPass(device);
-    renderPass.occlusionQuerySet = querySet;
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.BeginRenderPass(&renderPass);
-    ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
 class ResolveQuerySetValidationTest : public QuerySetValidationTest {

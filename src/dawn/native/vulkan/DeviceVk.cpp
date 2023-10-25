@@ -340,13 +340,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
-    if (HasFeature(Feature::ChromiumExperimentalPipelineStatisticsQuery)) {
-        DAWN_ASSERT(
-            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.pipelineStatisticsQuery ==
-            VK_TRUE);
-        usedKnobs.features.pipelineStatisticsQuery = VK_TRUE;
-    }
-
     if (HasFeature(Feature::DepthClipControl)) {
         usedKnobs.features.depthClamp = VK_TRUE;
     }
