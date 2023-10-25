@@ -264,6 +264,7 @@ MaybeError Queue::SplitRecordingContext(CommandRecordingContext* recordingContex
     recordingContext->commandPool = commands.pool;
     recordingContext->commandBufferList.push_back(commands.commandBuffer);
     recordingContext->commandPoolList.push_back(commands.pool);
+    recordingContext->hasRecordedRenderPass = false;
 
     return {};
 }

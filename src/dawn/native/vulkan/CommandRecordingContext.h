@@ -77,6 +77,10 @@ struct CommandRecordingContext {
     // with commandBuffer always being the last element.
     std::vector<VkCommandBuffer> commandBufferList;
     std::vector<VkCommandPool> commandPoolList;
+
+    // Need to track if a render pass has already been recorded for the
+    // VulkanSplitCommandBufferOnComputePassAfterRenderPass workaround.
+    bool hasRecordedRenderPass = false;
 };
 
 }  // namespace dawn::native::vulkan

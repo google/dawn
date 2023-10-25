@@ -539,10 +539,6 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
     size_t nextComputePassNumber = 0;
     size_t nextRenderPassNumber = 0;
 
-    // Need to track if a render pass has already been recorded for the
-    // VulkanSplitCommandBufferOnComputePassAfterRenderPass workaround.
-    bool hasRecordedRenderPassInCurrentCommandBuffer = false;
-
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
@@ -754,7 +750,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 LazyClearRenderPassAttachments(cmd);
                 DAWN_TRY(RecordRenderPass(recordingContext, cmd));
 
-                hasRecordedRenderPassInCurrentCommandBuffer = true;
+                recordingContext->hasRecordedRenderPass = true;
                 nextRenderPassNumber++;
                 break;
             }
@@ -764,13 +760,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 // If required, split the command buffer any time a compute pass follows a render
                 // pass to work around a Qualcomm bug.
-                if (hasRecordedRenderPassInCurrentCommandBuffer &&
+                if (recordingContext->hasRecordedRenderPass &&
                     device->IsToggleEnabled(
                         Toggle::VulkanSplitCommandBufferOnComputePassAfterRenderPass)) {
                     // Identified a potential crash case, split the command buffer.
                     DAWN_TRY(
                         ToBackend(device->GetQueue())->SplitRecordingContext(recordingContext));
-                    hasRecordedRenderPassInCurrentCommandBuffer = false;
                     commands = recordingContext->commandBuffer;
                 }
 
