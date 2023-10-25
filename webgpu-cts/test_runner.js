@@ -119,7 +119,13 @@ async function runCtsTestViaSocket(event) {
 
 dataCache.setStore({
   load: async (path) => {
-    return await (await fetch(`/third_party/webgpu-cts/cache/data/${path}`)).text();
+    if (path.endsWith('.json')) {
+      // TODO(bclayton): Remove this once https://github.com/gpuweb/cts/pull/3094 lands and rolls.
+      return await (await fetch(`/third_party/webgpu-cts/cache/data/${path}`)).text();
+    } else {
+      const response = await fetch(`/third_party/webgpu-cts/cache/data/${path}`);
+      return new Uint8Array(await response.arrayBuffer());
+    }
   }
 });
 
@@ -278,8 +284,8 @@ function sendMessageTestFinished() {
 
 function sendMessageInfraFailure(message) {
   socket.send(JSON.stringify({
-      'type': 'INFRA_FAILURE',
-      'message': message,
+    'type': 'INFRA_FAILURE',
+    'message': message,
   }));
 }
 
