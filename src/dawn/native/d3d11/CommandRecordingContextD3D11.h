@@ -50,8 +50,6 @@ class CommandRecordingContext {
     MaybeError ExecuteCommandList(Device* device);
 
     ID3D11Device* GetD3D11Device() const;
-    ID3D11DeviceContext* GetD3D11DeviceContext() const;
-    ID3D11DeviceContext1* GetD3D11DeviceContext1() const;
     ID3D11DeviceContext4* GetD3D11DeviceContext4() const;
     ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
     Buffer* GetUniformBuffer() const;

@@ -105,16 +105,6 @@ ID3D11Device* CommandRecordingContext::GetD3D11Device() const {
     return mD3D11Device.Get();
 }
 
-ID3D11DeviceContext* CommandRecordingContext::GetD3D11DeviceContext() const {
-    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
-    return mD3D11DeviceContext4.Get();
-}
-
-ID3D11DeviceContext1* CommandRecordingContext::GetD3D11DeviceContext1() const {
-    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
-    return mD3D11DeviceContext4.Get();
-}
-
 ID3D11DeviceContext4* CommandRecordingContext::GetD3D11DeviceContext4() const {
     DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();

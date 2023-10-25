@@ -361,12 +361,12 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
 
     CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-    ID3D11DeviceContext4* d3d11DeviceContext4 = commandContext->GetD3D11DeviceContext4();
+    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
     for (Ref<d3d::Fence>& fence : waitFences) {
-        DAWN_TRY(CheckHRESULT(
-            d3d11DeviceContext4->Wait(static_cast<Fence*>(fence.Get())->GetD3D11Fence(),
-                                      fence->GetFenceValue()),
-            "ID3D11DeviceContext4::Wait"));
+        DAWN_TRY(
+            CheckHRESULT(d3d11DeviceContext->Wait(static_cast<Fence*>(fence.Get())->GetD3D11Fence(),
+                                                  fence->GetFenceValue()),
+                         "ID3D11DeviceContext4::Wait"));
     }
     mD3d11Resource = std::move(d3d11Texture);
     SetLabelHelper("Dawn_ExternalTexture");
@@ -508,7 +508,7 @@ MaybeError Texture::ClearRenderable(CommandRecordingContext* commandContext,
                                     const SubresourceRange& range,
                                     TextureBase::ClearValue clearValue,
                                     const D3D11ClearValue& d3d11ClearValue) {
-    ID3D11DeviceContext* d3d11DeviceContext = commandContext->GetD3D11DeviceContext();
+    ID3D11DeviceContext* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
 
     UINT clearFlags = 0;
     if (GetFormat().HasDepth() && range.aspects & Aspect::Depth) {
@@ -667,7 +667,7 @@ MaybeError Texture::ClearCompressed(CommandRecordingContext* commandContext,
             //     RESOURCE_MANIPULATION ERROR #280:COPYSUBRESOURCEREGION_INVALIDSOURCEBOX]
             srcBox.right = physicalSize.width / blockInfo.width;
             srcBox.bottom = physicalSize.height / blockInfo.height;
-            commandContext->GetD3D11DeviceContext1()->CopySubresourceRegion(
+            commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
                 GetD3D11Resource(), dstSubresource, 0, 0, 0, interimTexture->GetD3D11Resource(),
                 srcSubresource, &srcBox);
         }
@@ -746,7 +746,7 @@ MaybeError Texture::WriteInternal(CommandRecordingContext* commandContext,
         dstBox.back = origin.z + size.depthOrArrayLayers;
         uint32_t subresource =
             GetSubresourceIndex(subresources.baseMipLevel, 0, D3D11Aspect(subresources.aspects));
-        commandContext->GetD3D11DeviceContext1()->UpdateSubresource(GetD3D11Resource(), subresource,
+        commandContext->GetD3D11DeviceContext4()->UpdateSubresource(GetD3D11Resource(), subresource,
                                                                     &dstBox, data, bytesPerRow,
                                                                     bytesPerRow * rowsPerImage);
     } else {
@@ -757,7 +757,7 @@ MaybeError Texture::WriteInternal(CommandRecordingContext* commandContext,
                 GetSubresourceIndex(subresources.baseMipLevel, subresources.baseArrayLayer + layer,
                                     D3D11Aspect(subresources.aspects));
             D3D11_BOX* pDstBox = GetFormat().HasDepthOrStencil() ? nullptr : &dstBox;
-            commandContext->GetD3D11DeviceContext1()->UpdateSubresource(
+            commandContext->GetD3D11DeviceContext4()->UpdateSubresource(
                 GetD3D11Resource(), subresource, pDstBox, data, bytesPerRow, 0);
             data += rowsPerImage * bytesPerRow;
         }
@@ -816,12 +816,12 @@ MaybeError Texture::WriteDepthStencilInternal(CommandRecordingContext* commandCo
         DepthStencilAspectLayout(d3d::DXGITextureFormat(GetFormat().format), subresources.aspects);
 
     // Map and write to the staging texture.
-    ID3D11DeviceContext1* d3d11DeviceContext1 = commandContext->GetD3D11DeviceContext1();
+    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     const uint8_t* pSrcData = data;
     for (uint32_t layer = 0; layer < size.depthOrArrayLayers; ++layer) {
-        DAWN_TRY(CheckHRESULT(d3d11DeviceContext1->Map(stagingTexture->GetD3D11Resource(), layer,
-                                                       D3D11_MAP_READ, 0, &mappedResource),
+        DAWN_TRY(CheckHRESULT(d3d11DeviceContext->Map(stagingTexture->GetD3D11Resource(), layer,
+                                                      D3D11_MAP_READ, 0, &mappedResource),
                               "D3D11 map staging texture"));
         uint8_t* pDstData = static_cast<uint8_t*>(mappedResource.pData);
         for (uint32_t y = 0; y < size.height; ++y) {
@@ -836,7 +836,7 @@ MaybeError Texture::WriteDepthStencilInternal(CommandRecordingContext* commandCo
             pDstData += mappedResource.RowPitch;
             pSrcData += bytesPerRow;
         }
-        d3d11DeviceContext1->Unmap(stagingTexture->GetD3D11Resource(), layer);
+        d3d11DeviceContext->Unmap(stagingTexture->GetD3D11Resource(), layer);
         DAWN_ASSERT(size.height <= rowsPerImage);
         // Skip the padding rows.
         pSrcData += (rowsPerImage - size.height) * bytesPerRow;
@@ -870,7 +870,7 @@ MaybeError Texture::ReadStaging(CommandRecordingContext* commandContext,
     DAWN_ASSERT(subresources.baseArrayLayer == 0);
     DAWN_ASSERT(origin.z == 0);
 
-    ID3D11DeviceContext1* d3d11DeviceContext1 = commandContext->GetD3D11DeviceContext1();
+    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
     const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(subresources.aspects).block;
     const bool hasStencil = GetFormat().HasStencil();
     DAWN_ASSERT(size.width % blockInfo.width == 0);
@@ -884,8 +884,8 @@ MaybeError Texture::ReadStaging(CommandRecordingContext* commandContext,
             // The Map() will block until the GPU is done with the texture.
             // TODO(dawn:1705): avoid blocking the CPU.
             D3D11_MAPPED_SUBRESOURCE mappedResource;
-            DAWN_TRY(CheckHRESULT(d3d11DeviceContext1->Map(GetD3D11Resource(), layer,
-                                                           D3D11_MAP_READ, 0, &mappedResource),
+            DAWN_TRY(CheckHRESULT(d3d11DeviceContext->Map(GetD3D11Resource(), layer, D3D11_MAP_READ,
+                                                          0, &mappedResource),
                                   "D3D11 map staging texture"));
 
             uint8_t* pSrcData = static_cast<uint8_t*>(mappedResource.pData);
@@ -922,7 +922,7 @@ MaybeError Texture::ReadStaging(CommandRecordingContext* commandContext,
                     pSrcData += mappedResource.RowPitch;
                 }
             }
-            d3d11DeviceContext1->Unmap(GetD3D11Resource(), layer);
+            d3d11DeviceContext->Unmap(GetD3D11Resource(), layer);
         }
         return {};
     }
@@ -933,7 +933,7 @@ MaybeError Texture::ReadStaging(CommandRecordingContext* commandContext,
     // TODO(dawn:1705): avoid blocking the CPU.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     DAWN_TRY(CheckHRESULT(
-        d3d11DeviceContext1->Map(GetD3D11Resource(), 0, D3D11_MAP_READ, 0, &mappedResource),
+        d3d11DeviceContext->Map(GetD3D11Resource(), 0, D3D11_MAP_READ, 0, &mappedResource),
         "D3D11 map staging texture"));
 
     for (uint32_t z = 0; z < size.depthOrArrayLayers; ++z) {
@@ -953,7 +953,7 @@ MaybeError Texture::ReadStaging(CommandRecordingContext* commandContext,
             }
         }
     }
-    d3d11DeviceContext1->Unmap(GetD3D11Resource(), 0);
+    d3d11DeviceContext->Unmap(GetD3D11Resource(), 0);
 
     return {};
 }
@@ -1075,7 +1075,7 @@ MaybeError Texture::CopyInternal(CommandRecordingContext* commandContext,
         uint32_t dstSubresource =
             dst.texture->GetSubresourceIndex(dst.mipLevel, dstSubresources.baseArrayLayer + layer,
                                              D3D11Aspect(dstSubresources.aspects));
-        commandContext->GetD3D11DeviceContext1()->CopySubresourceRegion(
+        commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
             ToBackend(dst.texture)->GetD3D11Resource(), dstSubresource, dst.origin.x, dst.origin.y,
             dst.texture->GetDimension() == wgpu::TextureDimension::e3D ? dst.origin.z : 0,
             ToBackend(src.texture)->GetD3D11Resource(), srcSubresource,

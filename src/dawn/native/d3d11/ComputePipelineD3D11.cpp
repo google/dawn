@@ -88,8 +88,8 @@ void ComputePipeline::SetLabelImpl() {
 }
 
 void ComputePipeline::ApplyNow(CommandRecordingContext* commandContext) {
-    ID3D11DeviceContext1* d3dDeviceContext1 = commandContext->GetD3D11DeviceContext1();
-    d3dDeviceContext1->CSSetShader(mComputeShader.Get(), nullptr, 0);
+    auto* d3dDeviceContext = commandContext->GetD3D11DeviceContext4();
+    d3dDeviceContext->CSSetShader(mComputeShader.Get(), nullptr, 0);
 }
 
 void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,

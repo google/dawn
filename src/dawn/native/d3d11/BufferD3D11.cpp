@@ -252,9 +252,9 @@ MaybeError Buffer::MapInternal() {
     // TODO(dawn:1705): investigate the performance impact of mapping with D3D11_MAP_READ_WRITE.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     DAWN_TRY(CheckHRESULT(
-        commandContext->GetD3D11DeviceContext()->Map(mD3d11NonConstantBuffer.Get(),
-                                                     /*Subresource=*/0, D3D11_MAP_READ_WRITE,
-                                                     /*MapFlags=*/0, &mappedResource),
+        commandContext->GetD3D11DeviceContext4()->Map(mD3d11NonConstantBuffer.Get(),
+                                                      /*Subresource=*/0, D3D11_MAP_READ_WRITE,
+                                                      /*MapFlags=*/0, &mappedResource),
         "ID3D11DeviceContext::Map"));
     mMappedData = reinterpret_cast<uint8_t*>(mappedResource.pData);
 
@@ -265,8 +265,8 @@ void Buffer::UnmapInternal() {
     DAWN_ASSERT(mMappedData);
 
     CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-    commandContext->GetD3D11DeviceContext()->Unmap(mD3d11NonConstantBuffer.Get(),
-                                                   /*Subresource=*/0);
+    commandContext->GetD3D11DeviceContext4()->Unmap(mD3d11NonConstantBuffer.Get(),
+                                                    /*Subresource=*/0);
     mMappedData = nullptr;
 }
 
@@ -381,7 +381,7 @@ void Buffer::EnsureConstantBufferIsUpdated(CommandRecordingContext* commandConte
 
     DAWN_ASSERT(mD3d11NonConstantBuffer);
     DAWN_ASSERT(mD3d11ConstantBuffer);
-    commandContext->GetD3D11DeviceContext1()->CopyResource(mD3d11ConstantBuffer.Get(),
+    commandContext->GetD3D11DeviceContext4()->CopyResource(mD3d11ConstantBuffer.Get(),
                                                            mD3d11NonConstantBuffer.Get());
     mConstantBufferIsUpdated = true;
 }
@@ -516,7 +516,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     // UpdateSubresource can only be used to update non-mappable buffers.
     DAWN_ASSERT(!IsMappable(GetUsage()));
 
-    ID3D11DeviceContext1* d3d11DeviceContext1 = commandContext->GetD3D11DeviceContext1();
+    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
 
     if (mD3d11NonConstantBuffer) {
         D3D11_BOX box;
@@ -526,10 +526,10 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         box.bottom = 1;
         box.front = 0;
         box.back = 1;
-        d3d11DeviceContext1->UpdateSubresource(mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0,
-                                               &box, data,
-                                               /*SrcRowPitch=*/0,
-                                               /*SrcDepthPitch*/ 0);
+        d3d11DeviceContext->UpdateSubresource(mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0,
+                                              &box, data,
+                                              /*SrcRowPitch=*/0,
+                                              /*SrcDepthPitch*/ 0);
         if (!mD3d11ConstantBuffer) {
             return {};
         }
@@ -541,7 +541,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         }
 
         // Copy the modified part of the mD3d11NonConstantBuffer to mD3d11ConstantBuffer.
-        d3d11DeviceContext1->CopySubresourceRegion(
+        d3d11DeviceContext->CopySubresourceRegion(
             mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0, /*DstX=*/offset,
             /*DstY=*/0,
             /*DstZ=*/0, mD3d11NonConstantBuffer.Get(), /*SrcSubresource=*/0, &box);
@@ -554,17 +554,17 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     // For a full size write, UpdateSubresource() can be used to update mD3d11ConstantBuffer.
     if (size == GetSize() && offset == 0) {
         if (size == mAllocatedSize) {
-            d3d11DeviceContext1->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
-                                                   nullptr, data,
-                                                   /*SrcRowPitch=*/size,
-                                                   /*SrcDepthPitch*/ 0);
+            d3d11DeviceContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                                  nullptr, data,
+                                                  /*SrcRowPitch=*/size,
+                                                  /*SrcDepthPitch*/ 0);
         } else {
             std::vector<uint8_t> allocatedData(mAllocatedSize, 0);
             std::memcpy(allocatedData.data(), data, size);
-            d3d11DeviceContext1->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
-                                                   nullptr, allocatedData.data(),
-                                                   /*SrcRowPitch=*/mAllocatedSize,
-                                                   /*SrcDepthPitch*/ 0);
+            d3d11DeviceContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                                  nullptr, allocatedData.data(),
+                                                  /*SrcRowPitch=*/mAllocatedSize,
+                                                  /*SrcDepthPitch*/ 0);
         }
         return {};
     }
@@ -620,7 +620,7 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     DAWN_ASSERT(d3d11SourceBuffer);
 
     if (destination->mD3d11NonConstantBuffer) {
-        commandContext->GetD3D11DeviceContext()->CopySubresourceRegion(
+        commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
             destination->mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0,
             /*DstX=*/destinationOffset,
             /*DstY=*/0,
@@ -634,7 +634,7 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     }
 
     if (destination->mD3d11ConstantBuffer) {
-        commandContext->GetD3D11DeviceContext()->CopySubresourceRegion(
+        commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
             destination->mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
             /*DstX=*/destinationOffset,
             /*DstY=*/0,
