@@ -292,6 +292,23 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
     EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
 }
 
+TEST_F(ResolverBuiltinsValidationTest, PositionIsVec4h_Fail) {
+    // @vertex
+    // fn main() -> @builtin(position) vec4h { return vec4h(); }
+    Enable(wgsl::Extension::kF16);
+    Func("main", tint::Empty, ty.vec4<f16>(),
+         Vector{
+             Return(Call(ty.vec4<f16>())),
+         },
+         Vector{Stage(ast::PipelineStage::kVertex)},
+         Vector{
+             Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
+}
+
 TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
     // struct MyInputs {
     //   @builtin(kFragDepth) p: i32;

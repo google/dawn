@@ -863,19 +863,21 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     bool is_output = !is_input;
     auto builtin = sem_.Get(attr)->Value();
     switch (builtin) {
-        case core::BuiltinValue::kPosition:
+        case core::BuiltinValue::kPosition: {
             if (stage != ast::PipelineStage::kNone &&
                 !((is_input && stage == ast::PipelineStage::kFragment) ||
                   (is_output && stage == ast::PipelineStage::kVertex))) {
                 is_stage_mismatch = true;
             }
-            if (!(type->is_float_vector() && type->As<core::type::Vector>()->Width() == 4)) {
+            auto* vec = type->As<core::type::Vector>();
+            if (!(vec && vec->Width() == 4 && vec->type()->Is<core::type::F32>())) {
                 StringStream err;
                 err << "store type of @builtin(" << builtin << ") must be 'vec4<f32>'";
                 AddError(err.str(), attr->source);
                 return false;
             }
             break;
+        }
         case core::BuiltinValue::kGlobalInvocationId:
         case core::BuiltinValue::kLocalInvocationId:
         case core::BuiltinValue::kNumWorkgroups:
