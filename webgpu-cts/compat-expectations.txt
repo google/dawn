@@ -139,8 +139,6 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";* [ Failure ]
 
 # Undiagnosed
-[ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
-[ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,general:occlusion_query,invalid_query_set: [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,begin_end:occlusion_query,begin_end_invalid_nesting: [ Failure ]
 [ angle-opengl ] webgpu:api,validation,encoding,queries,begin_end:occlusion_query,begin_end_balance: [ Failure ]
@@ -151,6 +149,17 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 [ angle-opengl ] webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:* [ Failure ]
 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:* [ Failure ]
+
+# Writes to frag_depth are not clamped to viewport min/max depth
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth=false;writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth="_undef_";writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";unclippedDepth=false;writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth="_undef_";writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=true;* [ Failure ]
+crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
 
 # error_scope validation tests with errorType="out-of-memory" are failing
 crbug.com/dawn/2168 [ angle-opengl ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";* [ Failure ]
