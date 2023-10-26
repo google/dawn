@@ -131,7 +131,7 @@ func BuildCache(ctx context.Context, ctsDir, nodePath, npmPath string, authFlags
 		return "", err
 	}
 
-	files, err := glob.Glob(filepath.Join(cacheDir, "**.json"))
+	files, err := glob.Glob(filepath.Join(cacheDir, "**.bin"))
 	if err != nil {
 		return "", fmt.Errorf("failed to glob cached files: %w", err)
 	}
