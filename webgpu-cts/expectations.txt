@@ -699,27 +699,10 @@ crbug.com/tint/2033 [ android qualcomm ] webgpu:shader,execution,expression,call
 crbug.com/tint/2033 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/tint/2033 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/tint/2033 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/tint/2033 [ android qualcomm ] webgpu:shader,execution,expression,binary,f32_matrix_vector_multiplication:matrix_vector:inputSource="const";cols=3;rows=3 [ Failure ]
 
 ################################################################################
 # tan/atan failing with f16 on Android and Mac
 ################################################################################
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="f16" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="override";type="f16" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="override";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="constant";type="f16" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="constant";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="constant";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="constant";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="f16" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2035 [ android ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 crbug.com/tint/2035 [ ventura ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="f16" [ Failure ]
 crbug.com/tint/2035 [ ventura ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="vec2%3Cf16%3E" [ Failure ]
 crbug.com/tint/2035 [ ventura ] webgpu:shader,validation,expression,call,builtin,atan:values:stage="constant";type="vec3%3Cf16%3E" [ Failure ]
@@ -746,7 +729,7 @@ crbug.com/dawn/2141 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,exe
 crbug.com/dawn/2141 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";shadowingMode="none";isAtomic=false [ Failure ]
 crbug.com/dawn/2142 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]
 crbug.com/dawn/2143 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:* [ Failure ]
-crbug.com/dawn/2144 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:* [ RetryOnFailure ]
+crbug.com/dawn/2144 [ dawn-backend-validation nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:* [ RetryOnFailure ]
 
 ################################################################################
 # DXC/FXC + Intel timeouts on atan2 validation
@@ -829,7 +812,6 @@ crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-3
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 ubuntu webgpu-adapter-default ] webgpu:api,validation,gpu_external_texture_expiration:use_import_to_refresh: [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r8sint";awaitLost=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format="bc2-rgba-unorm";usageType="texture";usageCopy="src";awaitLost=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format="bc2-rgba-unorm-srgb";usageType="texture";usageCopy="dst";awaitLost=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,compressed_format:format="bc2-rgba-unorm-srgb";usageType="texture";usageCopy="src";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:api,validation,state,device_lost,destroy:createTexture,2d,uncompressed_format:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="r32sint";usageType="storage";usageCopy="src-dest";awaitLost=true [ RetryOnFailure ]
@@ -837,15 +819,12 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="r8sint";usageType="texture";usageCopy="dst";awaitLost=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="rg16sint";usageType="render";usageCopy="src-dest";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="rg16uint";usageType="render";usageCopy="src";awaitLost=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="rg32sint";usageType="storage";usageCopy="dst";awaitLost=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="rg32sint";usageType="texture";usageCopy="src-dest";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="rgba8sint";usageType="render";usageCopy="src-dest";awaitLost=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";awaitLost=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format="bc2-rgba-unorm-srgb";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,compressed_format:format="bc6h-rgb-float";awaitLost=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format="bgra8unorm";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth24plus-stencil8" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth24plus-stencil8" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth24plus-stencil8" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rg32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba16float" [ RetryOnFailure ]
@@ -855,7 +834,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="r8unorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoElement";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoFrame";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,usage: [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
