@@ -138,12 +138,22 @@ crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebG
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";* [ Failure ]
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";* [ Failure ]
 
-# Undiagnosed
-[ angle-opengl ] webgpu:api,validation,render_pipeline,inter_stage:location,mismatch:* [ Failure ]
-[ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:* [ Skip ]
-[ angle-opengl ] webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard:* [ Failure ]
-[ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:* [ Failure ]
-[ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:* [ Failure ]
+# GL backend is not clamping maximum anisotropy to 16
+crbug.com/dawn/2188 [ angle-opengl ] webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard:* [ Failure ]
+
+# Texture internal usage doesn't include TextureUsage::TextureBinding.
+# WebGPUTextureAlphaClearer usage doesn't include TextureUsage::RenderAttachment.
+crbug.com/dawn/2187 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl";upload="texImage2D" [ Failure ]
+crbug.com/dawn/2187 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl";upload="texSubImage2D" [ Failure ]
+crbug.com/dawn/2187 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl2";upload="texImage2D" [ Failure ]
+crbug.com/dawn/2187 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl2";upload="texSubImage2D" [ Failure ]
+
+# Mismatched interstage variables aren't working on OpenGLES
+crbug.com/dawn/1585 [ angle-opengl ] webgpu:api,validation,render_pipeline,inter_stage:location,mismatch:* [ Failure ]
+
+# View format reinterpretation is unsupported on OpenGLES
+crbug.com/dawn/1360 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:* [ Failure ]
+crbug.com/dawn/1360 [ angle-opengl ] webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:* [ Failure ]
 
 # Writes to frag_depth are not clamped to viewport min/max depth
 crbug.com/dawn/2185 [ angle-opengl ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;* [ Failure ]
