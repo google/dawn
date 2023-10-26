@@ -69,12 +69,11 @@ Result<Output> Generate(const Program& program, const Options& options) {
         }
 
         // Generate the MSL code.
-        auto impl = std::make_unique<Printer>(ir);
-        auto result = impl->Generate();
+        auto result = Print(ir);
         if (!result) {
             return result.Failure();
         }
-        output.msl = impl->Result();
+        output.msl = result.Get();
 #else
         return Failure{"use_tint_ir requires building with TINT_BUILD_WGSL_READER"};
 #endif
