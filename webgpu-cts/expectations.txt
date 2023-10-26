@@ -113,10 +113,10 @@ crbug.com/dawn/0000 [ intel-0x9bc5 linux no-clang-coverage webgpu-adapter-defaul
 crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,* [ Skip ]
 
 ################################################################################
-# Flaky multisampled sample_mask tests on Mac AMD
+# Very flaky multisampled sample_mask tests on Mac AMD
 # KEEP
 ################################################################################
-crbug.com/dawn/1843 [ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ RetryOnFailure ]
+crbug.com/1496410 [ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
 
 ################################################################################
 # Causing bot instability on Mac AMD
