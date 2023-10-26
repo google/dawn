@@ -30,7 +30,7 @@ matrix<float16_t, 2, 4> u_load_3(uint offset) {
 S u_load_1(uint offset) {
   const uint scalar_offset_2 = ((offset + 0u)) / 4;
   const uint scalar_offset_3 = ((offset + 64u)) / 4;
-  const S tint_symbol_3 = {asint(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), u_load_3((offset + 8u)), asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4])};
+  S tint_symbol_3 = {asint(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), u_load_3((offset + 8u)), asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4])};
   return tint_symbol_3;
 }
 
@@ -49,7 +49,7 @@ void f_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
       const uint i = idx;
-      const S tint_symbol_2 = (S)0;
+      S tint_symbol_2 = (S)0;
       w[i] = tint_symbol_2;
     }
   }

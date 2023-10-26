@@ -185,7 +185,7 @@ void main() {
   sb_store_33(696u, matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
   const float3 tint_symbol[2] = (float3[2])0;
   sb_store_34(736u, tint_symbol);
-  const matrix<float16_t, 4, 2> tint_symbol_1[2] = (matrix<float16_t, 4, 2>[2])0;
+  matrix<float16_t, 4, 2> tint_symbol_1[2] = (matrix<float16_t, 4, 2>[2])0;
   sb_store_35(768u, tint_symbol_1);
   const Inner tint_symbol_2 = (Inner)0;
   sb_store_36(800u, tint_symbol_2);

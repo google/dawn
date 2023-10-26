@@ -38,7 +38,7 @@ matrix<float16_t, 4, 2> u_load_3(uint offset) {
 S u_load_1(uint offset) {
   const uint scalar_offset_4 = ((offset + 0u)) / 4;
   const uint scalar_offset_5 = ((offset + 64u)) / 4;
-  const S tint_symbol = {asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4]), u_load_3((offset + 4u)), asint(u[scalar_offset_5 / 4][scalar_offset_5 % 4])};
+  S tint_symbol = {asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4]), u_load_3((offset + 4u)), asint(u[scalar_offset_5 / 4][scalar_offset_5 % 4])};
   return tint_symbol;
 }
 

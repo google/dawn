@@ -20,17 +20,17 @@ float2x4 u_load_4(uint offset) {
 Inner u_load_1(uint offset) {
   const uint scalar_offset_2 = ((offset + 0u)) / 4;
   const uint scalar_offset_3 = ((offset + 16u)) / 4;
-  const Inner tint_symbol = {asfloat(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), asfloat(u[scalar_offset_3 / 4].xyz), u_load_4((offset + 32u))};
+  Inner tint_symbol = {asfloat(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), asfloat(u[scalar_offset_3 / 4].xyz), u_load_4((offset + 32u))};
   return tint_symbol;
 }
 
 S u_load(uint offset) {
-  const S tint_symbol_1 = {u_load_1((offset + 0u))};
+  S tint_symbol_1 = {u_load_1((offset + 0u))};
   return tint_symbol_1;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S x = u_load(0u);
+  S x = u_load(0u);
   return;
 }

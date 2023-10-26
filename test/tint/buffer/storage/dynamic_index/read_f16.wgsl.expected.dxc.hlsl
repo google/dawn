@@ -134,7 +134,7 @@ void main_inner(uint idx) {
   const matrix<float16_t, 4, 3> mat4x3_f16 = sb_load_32(((800u * idx) + 664u));
   const matrix<float16_t, 4, 4> mat4x4_f16 = sb_load_33(((800u * idx) + 696u));
   const float3 arr2_vec3_f32[2] = sb_load_34(((800u * idx) + 736u));
-  const matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = sb_load_35(((800u * idx) + 768u));
+  matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = sb_load_35(((800u * idx) + 768u));
 }
 
 [numthreads(1, 1, 1)]

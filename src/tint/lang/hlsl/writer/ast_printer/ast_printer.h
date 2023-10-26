@@ -595,6 +595,10 @@ class ASTPrinter : public tint::TextGenerator {
         return builder_.TypeOf(ptr);
     }
 
+    /// @return true if ty is a struct or array with a matrix member (recursively), false otherwise.
+    /// @param ty the type that will be queried.
+    bool IsStructOrArrayOfMatrix(const core::type::Type* ty);
+
     ProgramBuilder builder_;
 
     /// Helper functions emitted at the top of the output
@@ -613,6 +617,7 @@ class ASTPrinter : public tint::TextGenerator {
     std::unordered_map<const core::type::Matrix*, std::string> dynamic_matrix_scalar_write_;
     std::unordered_map<const core::type::Type*, std::string> value_or_one_if_zero_;
     std::unordered_set<const core::type::Struct*> emitted_structs_;
+    std::unordered_map<const core::type::Type*, bool> is_struct_or_array_of_matrix_;
 };
 
 }  // namespace tint::hlsl::writer

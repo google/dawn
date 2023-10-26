@@ -17,7 +17,7 @@ float3x3 a_load_4(uint offset) {
 }
 
 Inner a_load_3(uint offset) {
-  const Inner tint_symbol = {a_load_4((offset + 0u))};
+  Inner tint_symbol = {a_load_4((offset + 0u))};
   return tint_symbol;
 }
 
@@ -33,7 +33,7 @@ a_load_2_ret a_load_2(uint offset) {
 }
 
 Outer a_load_1(uint offset) {
-  const Outer tint_symbol_1 = {a_load_2((offset + 0u))};
+  Outer tint_symbol_1 = {a_load_2((offset + 0u))};
   return tint_symbol_1;
 }
 
@@ -50,10 +50,10 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const Outer l_a[4] = a_load(0u);
-  const Outer l_a_3 = a_load_1(768u);
-  const Inner l_a_3_a[4] = a_load_2(768u);
-  const Inner l_a_3_a_2 = a_load_3(896u);
+  Outer l_a[4] = a_load(0u);
+  Outer l_a_3 = a_load_1(768u);
+  Inner l_a_3_a[4] = a_load_2(768u);
+  Inner l_a_3_a_2 = a_load_3(896u);
   const float3x3 l_a_3_a_2_m = a_load_4(896u);
   const float3 l_a_3_a_2_m_1 = asfloat(a[57].xyz);
   const float l_a_3_a_2_m_1_0 = asfloat(a[57].x);

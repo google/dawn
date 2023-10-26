@@ -30,7 +30,7 @@ a_load_ret a_load(uint offset) {
 void f() {
   const int p_a_i_save = i();
   const int p_a_i_i_save = i();
-  const float3x4 l_a[4] = a_load(0u);
+  float3x4 l_a[4] = a_load(0u);
   const float3x4 l_a_i = a_load_1((48u * uint(p_a_i_save)));
   const uint scalar_offset_3 = (((48u * uint(p_a_i_save)) + (16u * uint(p_a_i_i_save)))) / 4;
   const float4 l_a_i_i = asfloat(a[scalar_offset_3 / 4]);

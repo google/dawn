@@ -15,12 +15,12 @@ matrix<float16_t, 2, 4> tint_symbol_load_4(uint offset) {
 }
 
 Inner tint_symbol_load_1(uint offset) {
-  const Inner tint_symbol_2 = {tint_symbol.Load<float16_t>((offset + 0u)), tint_symbol.Load<vector<float16_t, 3> >((offset + 8u)), tint_symbol_load_4((offset + 16u))};
+  Inner tint_symbol_2 = {tint_symbol.Load<float16_t>((offset + 0u)), tint_symbol.Load<vector<float16_t, 3> >((offset + 8u)), tint_symbol_load_4((offset + 16u))};
   return tint_symbol_2;
 }
 
 S tint_symbol_load(uint offset) {
-  const S tint_symbol_3 = {tint_symbol_load_1((offset + 0u))};
+  S tint_symbol_3 = {tint_symbol_load_1((offset + 0u))};
   return tint_symbol_3;
 }
 
@@ -41,7 +41,7 @@ void tint_symbol_1_store(uint offset, S value) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S t = tint_symbol_load(0u);
+  S t = tint_symbol_load(0u);
   tint_symbol_1_store(0u, t);
   return;
 }

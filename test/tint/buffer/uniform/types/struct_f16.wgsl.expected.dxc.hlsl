@@ -33,17 +33,17 @@ Inner u_load_1(uint offset) {
   uint2 ubo_load_4 = ((scalar_offset_2 & 2) ? ubo_load_5.zw : ubo_load_5.xy);
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
-  const Inner tint_symbol = {float16_t(f16tof32(((u[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF))), vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]), u_load_4((offset + 16u))};
+  Inner tint_symbol = {float16_t(f16tof32(((u[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF))), vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]), u_load_4((offset + 16u))};
   return tint_symbol;
 }
 
 S u_load(uint offset) {
-  const S tint_symbol_1 = {u_load_1((offset + 0u))};
+  S tint_symbol_1 = {u_load_1((offset + 0u))};
   return tint_symbol_1;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S x = u_load(0u);
+  S x = u_load(0u);
   return;
 }

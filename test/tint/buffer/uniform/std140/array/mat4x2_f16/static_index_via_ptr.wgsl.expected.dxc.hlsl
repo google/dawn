@@ -27,7 +27,7 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 4, 2> l_a[4] = a_load(0u);
+  matrix<float16_t, 4, 2> l_a[4] = a_load(0u);
   const matrix<float16_t, 4, 2> l_a_i = a_load_1(32u);
   uint ubo_load_4 = a[2].y;
   const vector<float16_t, 2> l_a_i_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16)));

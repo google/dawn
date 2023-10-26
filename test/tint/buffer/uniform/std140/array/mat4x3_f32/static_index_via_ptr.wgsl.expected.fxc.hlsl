@@ -23,7 +23,7 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float4x3 l_a[4] = a_load(0u);
+  float4x3 l_a[4] = a_load(0u);
   const float4x3 l_a_i = a_load_1(128u);
   const float3 l_a_i_i = asfloat(a[9].xyz);
   return;

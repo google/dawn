@@ -16,6 +16,6 @@ struct S {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S s = (S)0;
+  S s = (S)0;
   return;
 }

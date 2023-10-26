@@ -153,7 +153,7 @@ void main() {
   const matrix<float16_t, 4, 3> mat4x3_f16 = sb_load_32(664u);
   const matrix<float16_t, 4, 4> mat4x4_f16 = sb_load_33(696u);
   const float3 arr2_vec3_f32[2] = sb_load_34(736u);
-  const matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = sb_load_35(768u);
+  matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = sb_load_35(768u);
   const Inner struct_inner = sb_load_36(800u);
   const Inner array_struct_inner[4] = sb_load_37(812u);
   return;

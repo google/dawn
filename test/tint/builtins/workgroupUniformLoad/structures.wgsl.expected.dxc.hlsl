@@ -16,7 +16,7 @@ groupshared Outer v;
 
 Outer tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const Outer result = v;
+  Outer result = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

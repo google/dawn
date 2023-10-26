@@ -35,7 +35,7 @@ a_load_ret a_load(uint offset) {
 void f() {
   const int p_a_i_save = i();
   const int p_a_i_i_save = i();
-  const matrix<float16_t, 4, 2> l_a[4] = a_load(0u);
+  matrix<float16_t, 4, 2> l_a[4] = a_load(0u);
   const matrix<float16_t, 4, 2> l_a_i = a_load_1((16u * uint(p_a_i_save)));
   const uint scalar_offset_4 = (((16u * uint(p_a_i_save)) + (4u * uint(p_a_i_i_save)))) / 4;
   uint ubo_load_4 = a[scalar_offset_4 / 4][scalar_offset_4 % 4];

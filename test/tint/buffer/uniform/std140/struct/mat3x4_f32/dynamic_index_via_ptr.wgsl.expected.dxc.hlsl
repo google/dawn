@@ -23,7 +23,7 @@ float3x4 a_load_4(uint offset) {
 }
 
 Inner a_load_3(uint offset) {
-  const Inner tint_symbol_4 = {a_load_4((offset + 0u))};
+  Inner tint_symbol_4 = {a_load_4((offset + 0u))};
   return tint_symbol_4;
 }
 
@@ -39,7 +39,7 @@ a_load_2_ret a_load_2(uint offset) {
 }
 
 Outer a_load_1(uint offset) {
-  const Outer tint_symbol_5 = {a_load_2((offset + 0u))};
+  Outer tint_symbol_5 = {a_load_2((offset + 0u))};
   return tint_symbol_5;
 }
 
@@ -59,10 +59,10 @@ void f() {
   const int p_a_i_save = i();
   const int p_a_i_a_i_save = i();
   const int p_a_i_a_i_m_i_save = i();
-  const Outer l_a[4] = a_load(0u);
-  const Outer l_a_i = a_load_1((256u * uint(p_a_i_save)));
-  const Inner l_a_i_a[4] = a_load_2((256u * uint(p_a_i_save)));
-  const Inner l_a_i_a_i = a_load_3(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
+  Outer l_a[4] = a_load(0u);
+  Outer l_a_i = a_load_1((256u * uint(p_a_i_save)));
+  Inner l_a_i_a[4] = a_load_2((256u * uint(p_a_i_save)));
+  Inner l_a_i_a_i = a_load_3(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
   const float3x4 l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
   const uint scalar_offset_3 = ((((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))) + (16u * uint(p_a_i_a_i_m_i_save)))) / 4;
   const float4 l_a_i_a_i_m_i = asfloat(a[scalar_offset_3 / 4]);
