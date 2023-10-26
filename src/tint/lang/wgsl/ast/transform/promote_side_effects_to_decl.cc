@@ -180,11 +180,8 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             [&](const PhonyExpression* e) {
                 no_side_effects.insert(e);
                 return false;
-            },
-            [&](Default) {
-                TINT_ICE() << "Unhandled expression type";
-                return false;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Adds `e` to `to_hoist` for hoisting to a let later on.
@@ -344,11 +341,8 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             [&](const PhonyExpression*) {
                 // Leaf
                 return false;
-            },
-            [&](Default) {
-                TINT_ICE() << "Unhandled expression type";
-                return false;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Starts the recursive processing of a statement's expression(s) to hoist side-effects to lets.
@@ -527,11 +521,8 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             },
             [&](const PhonyExpression* phony) {
                 return clone_maybe_hoisted(phony);  // Leaf expression, just clone as is
-            },
-            [&](Default) {
-                TINT_ICE() << "unhandled expression type: " << expr->TypeInfo().name;
-                return nullptr;
-            });
+            },                                      //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Inserts statements in `stmts` before `stmt`

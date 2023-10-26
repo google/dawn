@@ -258,10 +258,8 @@ class Impl {
                 },
                 [&](const ast::DiagnosticDirective*) {
                     // Ignored for now.
-                },
-                [&](Default) {
-                    add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
-                });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
         }
 
         if (diagnostics_.contains_errors()) {
@@ -517,11 +515,8 @@ class Impl {
             [&](const ast::IncrementDecrementStatement* i) { EmitIncrementDecrement(i); },
             [&](const ast::ConstAssert*) {
                 // Not emitted
-            },
-            [&](Default) {
-                add_error(stmt->source,
-                          "unknown statement type: " + std::string(stmt->TypeInfo().name));
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void EmitAssignment(const ast::AssignmentStatement* stmt) {
@@ -982,11 +977,8 @@ class Impl {
                         impl.current_block_->Append(val);
                         Bind(expr, val->Result());
                         return nullptr;
-                    },
-                    [&](Default) {
-                        TINT_ICE() << "invalid accessor: " + std::string(sem->TypeInfo().name);
-                        return nullptr;
-                    });
+                    },  //
+                    TINT_ICE_ON_NO_MATCH);
 
                 if (!index) {
                     return;
@@ -1287,11 +1279,8 @@ class Impl {
                         tasks.Push([=] { Process(e->expr); });
                     },
                     [&](const ast::LiteralExpression* e) { EmitLiteral(e); },
-                    [&](const ast::IdentifierExpression* e) { EmitIdentifier(e); },
-                    [&](Default) {
-                        impl.add_error(expr->source,
-                                       "Unhandled: " + std::string(expr->TypeInfo().name));
-                    });
+                    [&](const ast::IdentifierExpression* e) { EmitIdentifier(e); },  //
+                    TINT_ICE_ON_NO_MATCH);
             }
         };
 
@@ -1378,10 +1367,8 @@ class Impl {
                 // TODO(dsinclair): Probably want to store the const variable somewhere and then
                 // in identifier expression log an error if we ever see a const identifier. Add
                 // this when identifiers and variables are supported.
-            },
-            [&](Default) {
-                add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     core::ir::Binary* BinaryOp(const core::type::Type* ty,

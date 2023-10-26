@@ -92,8 +92,8 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl) {
         [&](const ConstAssert* assertion) {
             TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(assertion, generation_id);
             const_asserts_.Push(assertion);
-        },
-        [&](Default) { TINT_ICE() << "Unknown global declaration type"; });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void Module::AddDiagnosticDirective(const DiagnosticDirective* directive) {

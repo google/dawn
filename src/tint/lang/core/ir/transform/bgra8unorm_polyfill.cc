@@ -174,9 +174,7 @@ struct State {
                     // Just replace arguments to user functions and then stop.
                     call->SetOperand(use.operand_index, new_value);
                 },
-                [&](Default) {
-                    TINT_ICE() << "unhandled instruction " << use.instruction->FriendlyName();
-                });
+                TINT_ICE_ON_NO_MATCH);
         });
     }
 };

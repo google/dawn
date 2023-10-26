@@ -644,11 +644,8 @@ struct Std140::State {
                        "_" + ConvertSuffix(mat->type());
             },
             [&](const core::type::F32*) { return "f32"; },  //
-            [&](const core::type::F16*) { return "f16"; },
-            [&](Default) {
-                TINT_ICE() << "unhandled type for conversion name: " << ty->FriendlyName();
-                return "";
-            });
+            [&](const core::type::F16*) { return "f16"; },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Generates and returns an expression that loads the value from a std140 uniform buffer,
@@ -748,10 +745,8 @@ struct Std140::State {
                                      b.Assign(i, b.Add(i, 1_a)),         //
                                      b.Block(b.Assign(dst_el, src_el))));
                     stmts.Push(b.Return(var));
-                },
-                [&](Default) {
-                    TINT_ICE() << "unhandled type for conversion: " << ty->FriendlyName();
-                });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
 
             // Generate the function
             auto ret_ty = CreateASTTypeFor(ctx, ty);
@@ -1094,10 +1089,7 @@ struct Std140::State {
                     auto* expr = b.IndexAccessor(lhs, idx);
                     return {expr, vec->type(), name};
                 },  //
-                [&](Default) -> ExprTypeName {
-                    TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
-                    return {};
-                });
+                TINT_ICE_ON_NO_MATCH);
         }
         if (auto* swizzle = std::get_if<Swizzle>(&access)) {
             /// The access is a vector swizzle.
@@ -1114,10 +1106,7 @@ struct Std140::State {
                     auto* expr = b.MemberAccessor(lhs, rhs);
                     return {expr, swizzle_ty, rhs};
                 },  //
-                [&](Default) -> ExprTypeName {
-                    TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
-                    return {};
-                });
+                TINT_ICE_ON_NO_MATCH);
         }
         /// The access is a static index.
         auto idx = std::get<u32>(access);
@@ -1142,10 +1131,7 @@ struct Std140::State {
                 auto* expr = b.IndexAccessor(lhs, idx);
                 return {expr, vec->type(), std::to_string(idx)};
             },  //
-            [&](Default) -> ExprTypeName {
-                TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
-                return {};
-            });
+            TINT_ICE_ON_NO_MATCH);
     }
 };
 

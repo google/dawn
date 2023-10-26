@@ -2054,11 +2054,8 @@ TypedExpression ASTParser::MakeConstantExpressionForScalarSpirvConstant(
             const bool value =
                 spirv_const->AsNullConstant() ? false : spirv_const->AsBoolConstant()->value();
             return TypedExpression{ty_.Bool(), create<ast::BoolLiteralExpression>(source, value)};
-        },
-        [&](Default) {
-            Fail() << "expected scalar constant";
-            return TypedExpression{};
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 const ast::Expression* ASTParser::MakeNullValue(const Type* type) {
@@ -2100,11 +2097,8 @@ const ast::Expression* ASTParser::MakeNullValue(const Type* type) {
             }
             return builder_.Call(Source{}, original_type->Build(builder_),
                                  std::move(ast_components));
-        },
-        [&](Default) {
-            Fail() << "can't make null value for type: " << type->TypeInfo().name;
-            return nullptr;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 TypedExpression ASTParser::MakeNullExpression(const Type* type) {

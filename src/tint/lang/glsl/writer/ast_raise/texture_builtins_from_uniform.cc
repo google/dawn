@@ -160,10 +160,8 @@ struct TextureBuiltinsFromUniform::State {
                                         GetAndRecordFunctionParameter(fn, variable, dataType);
                                     // Record the call and new_param to be replaced later.
                                     builtin_to_replace.Add(call_expr, new_param);
-                                },
-                                [&](Default) {
-                                    TINT_ICE() << "unexpected texture root identifier";
-                                });
+                                },  //
+                                TINT_ICE_ON_NO_MATCH);
                         },
                         [&](const sem::Function* user_fn) {
                             auto user_param_to_info = fn_to_data.Find(user_fn);
@@ -200,10 +198,8 @@ struct TextureBuiltinsFromUniform::State {
                                                 fn, variable, info->field);
                                             // Record adding extra function parameter
                                             args.Push(new_param);
-                                        },
-                                        [&](Default) {
-                                            TINT_ICE() << "unexpected texture root identifier";
-                                        });
+                                        },  //
+                                        TINT_ICE_ON_NO_MATCH);
                                 }
                             }
                         });

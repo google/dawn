@@ -262,8 +262,8 @@ struct State {
                     new_indices.Push(member->Index());
                     PrepareStores(var, member->Type(), iteration_count, new_indices, stores);
                 }
-            },
-            [&](Default) { TINT_UNREACHABLE(); });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Get or inject an entry point builtin for the local invocation index.

@@ -76,11 +76,6 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::msl::writer {
 namespace {
 
-// Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
-#define UNHANDLED_CASE(object_ptr)                         \
-    TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
-                         << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
-
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -247,9 +242,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Return* r) { EmitReturn(r); },         //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
-                [&](Default) {
-                    TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name;
-                });
+                TINT_ICE_ON_NO_MATCH);
         }
     }
 
@@ -482,8 +475,8 @@ class Printer : public tint::TextGenerator {
 
                 TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
                 EmitStructType(str);
-            },
-            [&](Default) { UNHANDLED_CASE(ty); });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Handles generating a pointer declaration
@@ -622,8 +615,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::SampledTexture* sampled) {
                 EmitType(out, sampled->type());
                 out << ", access::sample";
-            },
-            [&](Default) { TINT_ICE() << "invalid texture type"; });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Handles generating a struct declaration. If the structure has already been emitted, then
@@ -840,8 +833,8 @@ class Printer : public tint::TextGenerator {
                     out << "." << members[i]->Name().Name() << "=";
                     EmitConstant(out, c->Index(i));
                 }
-            },
-            [&](Default) { UNHANDLED_CASE(c->Type()); });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Emits the zero value for the given type
@@ -863,9 +856,7 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Array*) { out << "{}"; },   //
             [&](const core::type::Struct*) { out << "{}"; },  //
-            [&](Default) {
-                TINT_ICE() << "Invalid type for zero emission: " << ty->FriendlyName();
-            });
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// @param s the structure

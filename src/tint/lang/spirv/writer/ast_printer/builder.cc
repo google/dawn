@@ -541,11 +541,8 @@ uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
         [&](const ast::CallExpression* c) { return GenerateCallExpression(c); },
         [&](const ast::IdentifierExpression* i) { return GenerateIdentifierExpression(i); },
         [&](const ast::LiteralExpression* l) { return GenerateLiteralIfNeeded(l); },
-        [&](const ast::UnaryOpExpression* u) { return GenerateUnaryOpExpression(u); },
-        [&](Default) {
-            TINT_ICE() << "unknown expression type: " + std::string(expr->TypeInfo().name);
-            return 0;
-        });
+        [&](const ast::UnaryOpExpression* u) { return GenerateUnaryOpExpression(u); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
@@ -858,11 +855,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             },
             [&](const ast::InternalAttribute*) {
                 return true;  // ignored
-            },
-            [&](Default) {
-                TINT_ICE() << "unknown attribute";
-                return false;
-            });
+            },                //
+            TINT_ICE_ON_NO_MATCH);
         if (!ok) {
             return false;
         }
@@ -1049,11 +1043,8 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
             info->source_id = result_id;
             info->source_type = expr_type;
             return true;
-        },
-        [&](Default) {
-            TINT_ICE() << "unhandled member index type: " << expr_sem->TypeInfo().name;
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr) {
@@ -1097,11 +1088,8 @@ uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr
             },
             [&](const ast::MemberAccessorExpression* member) {
                 return GenerateMemberAccessor(member, &info);
-            },
-            [&](Default) {
-                TINT_ICE() << "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
-                return false;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
         if (!ok) {
             return false;
         }
@@ -1620,8 +1608,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::LiteralExpression* lit) {
                     constant.value.f16 = {f16(static_cast<float>(f->value)).BitsRepresentation()};
                     return;
             }
-        },
-        [&](Default) { TINT_ICE() << "unknown literal type"; });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 
     if (has_error()) {
         return false;
@@ -1699,11 +1687,8 @@ uint32_t Builder::GenerateConstantIfNeeded(const core::constant::Value* constant
             }
             return composite(count.value());
         },
-        [&](const core::type::Struct* s) { return composite(s->Members().Length()); },
-        [&](Default) {
-            TINT_ICE() << "unhandled constant type: " + ty->FriendlyName();
-            return 0;
-        });
+        [&](const core::type::Struct* s) { return composite(s->Members().Length()); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
@@ -2232,11 +2217,8 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
         },
         [&](const sem::ValueConstructor*) {
             return GenerateValueConstructorOrConversion(call, nullptr);
-        },
-        [&](Default) {
-            TINT_ICE() << "unhandled call target: " << target->TypeInfo().name;
-            return 0;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 uint32_t Builder::GenerateFunctionCall(const sem::Call* call, const sem::Function* fn) {
@@ -3639,11 +3621,8 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
         [&](const ast::VariableDeclStatement* v) { return GenerateVariableDeclStatement(v); },
         [&](const ast::ConstAssert*) {
             return true;  // Not emitted
-        },
-        [&](Default) {
-            TINT_ICE() << "unknown statement type: " + std::string(stmt->TypeInfo().name);
-            return false;
-        });
+        },                //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool Builder::GenerateVariableDeclStatement(const ast::VariableDeclStatement* stmt) {
@@ -3767,11 +3746,8 @@ uint32_t Builder::GenerateTypeIfNeeded(const core::type::Type* type) {
                         core::type::SamplerKind::kSampler)] = id;
                 }
                 return true;
-            },
-            [&](Default) {
-                TINT_ICE() << "unable to convert type: " + type->FriendlyName();
-                return false;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
 
         if (!ok) {
             return 0;
@@ -3843,8 +3819,8 @@ bool Builder::GenerateTextureType(const core::type::Texture* texture, const Oper
         },
         [&](const core::type::SampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
         [&](const core::type::MultisampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
-        [&](const core::type::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },
-        [&](Default) { return 0u; });
+        [&](const core::type::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },  //
+        TINT_ICE_ON_NO_MATCH);
     if (type_id == 0u) {
         return false;
     }

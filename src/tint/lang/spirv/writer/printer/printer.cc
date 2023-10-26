@@ -445,8 +445,8 @@ class Printer {
                         operands.push_back(Constant(constant->Index(i)));
                     }
                     module_.PushType(spv::Op::OpConstantComposite, operands);
-                },
-                [&](Default) { TINT_ICE() << "unhandled constant type: " << ty->FriendlyName(); });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
             return id;
         });
     }
@@ -529,8 +529,8 @@ class Printer {
                 [&](const core::type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
                 [&](const type::SampledImage* s) {
                     module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
-                },
-                [&](Default) { TINT_ICE() << "unhandled type: " << ty->FriendlyName(); });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
             return id;
         });
     }
@@ -616,11 +616,8 @@ class Printer {
             texture,  //
             [&](const core::type::SampledTexture* t) { return Type(t->type()); },
             [&](const core::type::MultisampledTexture* t) { return Type(t->type()); },
-            [&](const core::type::StorageTexture* t) { return Type(t->type()); },
-            [&](Default) {
-                TINT_ICE() << "unhandled texture type: " << texture->TypeInfo().name;
-                return 0u;
-            });
+            [&](const core::type::StorageTexture* t) { return Type(t->type()); },  //
+            TINT_ICE_ON_NO_MATCH);
 
         uint32_t dim = SpvDimMax;
         uint32_t array = 0u;
@@ -822,11 +819,9 @@ class Printer {
     void EmitRootBlock(core::ir::Block* root_block) {
         for (auto* inst : *root_block) {
             Switch(
-                inst,  //
-                [&](core::ir::Var* v) { return EmitVar(v); },
-                [&](Default) {
-                    TINT_ICE() << "unimplemented root block instruction: " << inst->TypeInfo().name;
-                });
+                inst,                                          //
+                [&](core::ir::Var* v) { return EmitVar(v); },  //
+                TINT_ICE_ON_NO_MATCH);
         }
     }
 
@@ -899,9 +894,7 @@ class Printer {
                 [&](core::ir::Let* l) { EmitLet(l); },                                //
                 [&](core::ir::If* i) { EmitIf(i); },                                  //
                 [&](core::ir::Terminator* t) { EmitTerminator(t); },                  //
-                [&](Default) {
-                    TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name;
-                });
+                TINT_ICE_ON_NO_MATCH);
 
             // Set the name for the SPIR-V result ID if provided in the module.
             if (inst->Result() && !inst->Is<core::ir::Var>()) {
@@ -961,9 +954,8 @@ class Printer {
             },
             [&](core::ir::Unreachable*) {
                 current_function_.push_inst(spv::Op::OpUnreachable, {});
-            },
-
-            [&](Default) { TINT_ICE() << "unimplemented branch: " << t->TypeInfo().name; });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Emit an `if` flow node.

@@ -136,11 +136,6 @@ struct Global {
 /// A map of global name to Global
 using GlobalMap = Hashmap<Symbol, Global*, 16>;
 
-/// Raises an ICE that a global ast::Node type was not handled by this system.
-void UnhandledNode(const ast::Node* node) {
-    TINT_ICE() << "unhandled node type: " << node->TypeInfo().name;
-}
-
 /// Raises an error diagnostic with the given message and source.
 void AddError(diag::List& diagnostics, const std::string& msg, const Source& source) {
     diagnostics.add_error(diag::System::Resolver, msg, source);
@@ -206,8 +201,10 @@ class DependencyScanner {
             [&](const ast::Enable*) {
                 // Enable directives do not affect the dependency graph.
             },
-            [&](const ast::ConstAssert* assertion) { TraverseExpression(assertion->condition); },
-            [&](Default) { UnhandledNode(global->node); });
+            [&](const ast::ConstAssert* assertion) {
+                TraverseExpression(assertion->condition);
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
   private:
@@ -328,12 +325,10 @@ class DependencyScanner {
                 TraverseStatement(w->body);
             },
             [&](const ast::ConstAssert* assertion) { TraverseExpression(assertion->condition); },
-            [&](Default) {
-                if (TINT_UNLIKELY((!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
-                                                  ast::DiscardStatement>()))) {
-                    UnhandledNode(stmt);
-                }
-            });
+            [&](const ast::BreakStatement*) {},     //
+            [&](const ast::ContinueStatement*) {},  //
+            [&](const ast::DiscardStatement*) {},   //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Adds the symbol definition to the current scope, raising an error if two
@@ -384,69 +379,38 @@ class DependencyScanner {
     /// Traverses the attribute, performing symbol resolution and determining
     /// global dependencies.
     void TraverseAttribute(const ast::Attribute* attr) {
-        bool handled = Switch(
-            attr,
-            [&](const ast::BindingAttribute* binding) {
-                TraverseExpression(binding->expr);
-                return true;
-            },
-            [&](const ast::BuiltinAttribute* builtin) {
-                TraverseExpression(builtin->builtin);
-                return true;
-            },
-            [&](const ast::GroupAttribute* group) {
-                TraverseExpression(group->expr);
-                return true;
-            },
-            [&](const ast::IdAttribute* id) {
-                TraverseExpression(id->expr);
-                return true;
-            },
-            [&](const ast::IndexAttribute* index) {
-                TraverseExpression(index->expr);
-                return true;
-            },
+        Switch(
+            attr,  //
+            [&](const ast::BindingAttribute* binding) { TraverseExpression(binding->expr); },
+            [&](const ast::BuiltinAttribute* builtin) { TraverseExpression(builtin->builtin); },
+            [&](const ast::GroupAttribute* group) { TraverseExpression(group->expr); },
+            [&](const ast::IdAttribute* id) { TraverseExpression(id->expr); },
+            [&](const ast::IndexAttribute* index) { TraverseExpression(index->expr); },
             [&](const ast::InterpolateAttribute* interpolate) {
                 TraverseExpression(interpolate->type);
                 TraverseExpression(interpolate->sampling);
-                return true;
             },
-            [&](const ast::LocationAttribute* loc) {
-                TraverseExpression(loc->expr);
-                return true;
-            },
-            [&](const ast::StructMemberAlignAttribute* align) {
-                TraverseExpression(align->expr);
-                return true;
-            },
-            [&](const ast::StructMemberSizeAttribute* size) {
-                TraverseExpression(size->expr);
-                return true;
-            },
+            [&](const ast::LocationAttribute* loc) { TraverseExpression(loc->expr); },
+            [&](const ast::StructMemberAlignAttribute* align) { TraverseExpression(align->expr); },
+            [&](const ast::StructMemberSizeAttribute* size) { TraverseExpression(size->expr); },
             [&](const ast::WorkgroupAttribute* wg) {
                 TraverseExpression(wg->x);
                 TraverseExpression(wg->y);
                 TraverseExpression(wg->z);
-                return true;
             },
             [&](const ast::InternalAttribute* i) {
                 for (auto* dep : i->dependencies) {
                     TraverseExpression(dep);
                 }
-                return true;
+            },
+            [&](Default) {
+                if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute,
+                                   ast::InterpolateAttribute, ast::InvariantAttribute,
+                                   ast::MustUseAttribute, ast::StageAttribute, ast::StrideAttribute,
+                                   ast::StructMemberOffsetAttribute>()) {
+                    TINT_ICE() << "unhandled attribute type: " << attr->TypeInfo().name;
+                }
             });
-        if (handled) {
-            return;
-        }
-
-        if (attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute,
-                          ast::InterpolateAttribute, ast::InvariantAttribute, ast::MustUseAttribute,
-                          ast::StageAttribute, ast::StrideAttribute,
-                          ast::StructMemberOffsetAttribute>()) {
-            return;
-        }
-
-        UnhandledNode(attr);
     }
 
     /// The type of builtin that a symbol could represent.
@@ -647,11 +611,8 @@ struct DependencyAnalysis {
             [&](const ast::Variable* var) { return var->name->symbol; },
             [&](const ast::DiagnosticDirective*) { return Symbol(); },
             [&](const ast::Enable*) { return Symbol(); },
-            [&](const ast::ConstAssert*) { return Symbol(); },
-            [&](Default) {
-                UnhandledNode(node);
-                return Symbol{};
-            });
+            [&](const ast::ConstAssert*) { return Symbol(); },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// @param node the ast::Node of the global declaration
@@ -672,10 +633,7 @@ struct DependencyAnalysis {
             [&](const ast::Function*) { return "function"; },         //
             [&](const ast::Variable* v) { return v->Kind(); },        //
             [&](const ast::ConstAssert*) { return "const_assert"; },  //
-            [&](Default) {
-                UnhandledNode(node);
-                return "<unknown>";
-            });
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Traverses `module`, collecting all the global declarations and populating
@@ -923,11 +881,8 @@ std::string ResolvedIdentifier::String() const {
             },
             [&](const ast::Parameter* n) {  //
                 return "parameter '" + n->name->symbol.Name() + "'";
-            },
-            [&](Default) {
-                TINT_UNREACHABLE() << "unhandled ast::Node: " << node->TypeInfo().name;
-                return "<unknown>";
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
     if (auto builtin_fn = BuiltinFn(); builtin_fn != wgsl::BuiltinFn::kNone) {
         return "builtin function '" + tint::ToString(builtin_fn) + "'";

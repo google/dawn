@@ -607,11 +607,7 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
         },                                            //
         [&](const ast::Let*) { return Let(local); },  //
         [&](const ast::Const*) { return true; },      //
-        [&](Default) {
-            TINT_ICE() << "Validator::Variable() called with a unknown variable type: "
-                       << decl->TypeInfo().name;
-            return false;
-        });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool Validator::GlobalVariable(
@@ -645,12 +641,8 @@ bool Validator::GlobalVariable(
             return Var(global);
         },
         [&](const ast::Override*) { return Override(global, override_ids); },
-        [&](const ast::Const*) { return Const(global); },
-        [&](Default) {
-            TINT_ICE() << "Validator::GlobalVariable() called with a unknown variable type: "
-                       << decl->TypeInfo().name;
-            return false;
-        });
+        [&](const ast::Const*) { return Const(global); },  //
+        TINT_ICE_ON_NO_MATCH);
 
     if (!ok) {
         return false;

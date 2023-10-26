@@ -141,7 +141,7 @@ TEST_F(ResolverValidationTest, UnhandledStmt) {
             b.WrapInFunction(b.create<FakeStmt>());
             resolver::Resolve(b);
         },
-        "internal compiler error: unhandled node type: tint::resolver::FakeStmt");
+        "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeStmt");
 }
 
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
@@ -171,7 +171,7 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
             b.WrapInFunction(b.create<FakeExpr>());
             Resolver(&b).Resolve();
         },
-        "internal compiler error: unhandled expression type: tint::resolver::FakeExpr");
+        "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeExpr");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {

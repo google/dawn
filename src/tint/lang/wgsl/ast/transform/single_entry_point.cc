@@ -128,10 +128,8 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
                 }
             },
             [&](const Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
-            [&](const DiagnosticDirective* d) { b.AST().AddDiagnosticDirective(ctx.Clone(d)); },
-            [&](Default) {
-                TINT_UNREACHABLE() << "unhandled global declaration: " << decl->TypeInfo().name;
-            });
+            [&](const DiagnosticDirective* d) { b.AST().AddDiagnosticDirective(ctx.Clone(d)); },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Clone the entry point.

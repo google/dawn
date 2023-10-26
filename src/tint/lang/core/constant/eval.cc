@@ -2788,11 +2788,7 @@ Eval::Result Eval::frexp(const core::type::Type* ty,
                     CreateScalar(source, mgr.types.AInt(), AInt(exp)),
                 };
             },
-            [&](Default) {
-                TINT_ICE() << "unhandled element type for frexp() const-eval: "
-                           << s->Type()->FriendlyName();
-                return FractExp{error, error};
-            });
+            TINT_ICE_ON_NO_MATCH);
     };
 
     if (auto* vec = arg->Type()->As<core::type::Vector>()) {

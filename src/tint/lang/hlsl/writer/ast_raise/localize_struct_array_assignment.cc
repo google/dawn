@@ -215,12 +215,8 @@ struct LocalizeStructArrayAssignment::State {
             },
             [&](const core::type::Pointer* ptr) {
                 return std::make_pair(ptr->StoreType(), ptr->AddressSpace());
-            },
-            [&](Default) {
-                TINT_ICE() << "Expecting to find variable of type pointer or reference on lhs "
-                              "of assignment statement";
-                return std::pair<const core::type::Type*, core::AddressSpace>{};
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 };
 

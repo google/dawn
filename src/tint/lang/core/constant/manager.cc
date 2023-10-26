@@ -156,17 +156,14 @@ const Value* Manager::Zero(const core::type::Type* type) {
             }
             return Composite(s, std::move(zeros));
         },
-        [&](Default) -> const Value* {
-            return Switch(
-                type,                                                              //
-                [&](const core::type::AbstractInt*) { return Get(AInt(0)); },      //
-                [&](const core::type::AbstractFloat*) { return Get(AFloat(0)); },  //
-                [&](const core::type::I32*) { return Get(i32(0)); },               //
-                [&](const core::type::U32*) { return Get(u32(0)); },               //
-                [&](const core::type::F32*) { return Get(f32(0)); },               //
-                [&](const core::type::F16*) { return Get(f16(0)); },               //
-                [&](const core::type::Bool*) { return Get(false); });
-        });
+        [&](const core::type::AbstractInt*) { return Get(AInt(0)); },      //
+        [&](const core::type::AbstractFloat*) { return Get(AFloat(0)); },  //
+        [&](const core::type::I32*) { return Get(i32(0)); },               //
+        [&](const core::type::U32*) { return Get(u32(0)); },               //
+        [&](const core::type::F32*) { return Get(f32(0)); },               //
+        [&](const core::type::F16*) { return Get(f16(0)); },               //
+        [&](const core::type::Bool*) { return Get(false); },               //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 }  // namespace tint::core::constant

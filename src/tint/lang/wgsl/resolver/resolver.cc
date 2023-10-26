@@ -192,11 +192,8 @@ bool Resolver::ResolveInternal() {
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
-                [&](const ast::ConstAssert* ca) { return ConstAssert(ca); },
-                [&](Default) {
-                    TINT_UNREACHABLE() << "unhandled global declaration: " << decl->TypeInfo().name;
-                    return false;
-                })) {
+                [&](const ast::ConstAssert* ca) { return ConstAssert(ca); },  //
+                TINT_ICE_ON_NO_MATCH)) {
             return false;
         }
     }
@@ -241,14 +238,8 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
         [&](const ast::Var* var) { return Var(var, is_global); },
         [&](const ast::Let* let) { return Let(let); },
         [&](const ast::Override* override) { return Override(override); },
-        [&](const ast::Const* const_) { return Const(const_, is_global); },
-        [&](Default) {
-            StringStream err;
-            err << "Resolver::GlobalVariable() called with a unknown variable type: "
-                << v->TypeInfo().name;
-            AddICE(err.str(), v->source);
-            return nullptr;
-        });
+        [&](const ast::Const* const_) { return Const(const_, is_global); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 sem::Variable* Resolver::Let(const ast::Let* v) {
@@ -1515,13 +1506,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                                                       current_statement_,
                                                       /* constant_value */ nullptr,
                                                       /* has_side_effects */ false);
-            },
-            [&](Default) {
-                StringStream err;
-                err << "unhandled expression type: " << expr->TypeInfo().name;
-                AddICE(err.str(), expr->source);
-                return nullptr;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
         if (!sem_expr) {
             return nullptr;
         }
@@ -3163,11 +3149,8 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
             TINT_UNREACHABLE() << "Unhandled float literal suffix: " << f->suffix;
             return nullptr;
         },
-        [&](const ast::BoolLiteralExpression*) { return b.create<core::type::Bool>(); },
-        [&](Default) {
-            TINT_UNREACHABLE() << "Unhandled literal type: " << literal->TypeInfo().name;
-            return nullptr;
-        });
+        [&](const ast::BoolLiteralExpression*) { return b.create<core::type::Bool>(); },  //
+        TINT_ICE_ON_NO_MATCH);
 
     if (ty == nullptr) {
         return nullptr;

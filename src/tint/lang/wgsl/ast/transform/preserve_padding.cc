@@ -187,11 +187,8 @@ struct PreservePadding::State {
                     }
                     return body;
                 });
-            },
-            [&](Default) {
-                TINT_ICE() << "unhandled type with padding";
-                return nullptr;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Checks if a type contains padding bytes.

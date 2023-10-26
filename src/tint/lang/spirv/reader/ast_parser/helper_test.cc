@@ -88,10 +88,8 @@ std::string ToString(const Program& program, const ast::Node* node) {
             }
             return writer.Result();
         },
-        [&](const ast::Identifier* ident) { return ident->symbol.Name(); },
-        [&](Default) {
-            return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";
-        });
+        [&](const ast::Identifier* ident) { return ident->symbol.Name(); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 }  // namespace tint::spirv::reader::ast_parser::test

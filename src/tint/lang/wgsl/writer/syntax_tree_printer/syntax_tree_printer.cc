@@ -103,8 +103,8 @@ bool SyntaxTreePrinter::Generate() {
             [&](const ast::TypeDecl* td) { EmitTypeDecl(td); },
             [&](const ast::Function* func) { EmitFunction(func); },
             [&](const ast::Variable* var) { EmitVariable(var); },
-            [&](const ast::ConstAssert* ca) { EmitConstAssert(ca); },
-            [&](Default) { TINT_UNREACHABLE(); });
+            [&](const ast::ConstAssert* ca) { EmitConstAssert(ca); },  //
+            TINT_ICE_ON_NO_MATCH);
 
         if (decl != program_.AST().GlobalDeclarations().Back()) {
             Line();
@@ -148,11 +148,8 @@ void SyntaxTreePrinter::EmitTypeDecl(const ast::TypeDecl* ty) {
             }
             Line() << "]";
         },
-        [&](const ast::Struct* str) { EmitStructType(str); },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unknown declared type: " + std::string(ty->TypeInfo().name));
-        });
+        [&](const ast::Struct* str) { EmitStructType(str); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void SyntaxTreePrinter::EmitExpression(const ast::Expression* expr) {
@@ -166,8 +163,8 @@ void SyntaxTreePrinter::EmitExpression(const ast::Expression* expr) {
         [&](const ast::LiteralExpression* l) { EmitLiteral(l); },
         [&](const ast::MemberAccessorExpression* m) { EmitMemberAccessor(m); },
         [&](const ast::PhonyExpression*) { Line() << "[PhonyExpression]"; },
-        [&](const ast::UnaryOpExpression* u) { EmitUnaryOp(u); },
-        [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown expression type"); });
+        [&](const ast::UnaryOpExpression* u) { EmitUnaryOp(u); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void SyntaxTreePrinter::EmitIndexAccessor(const ast::IndexAccessorExpression* expr) {
@@ -272,8 +269,8 @@ void SyntaxTreePrinter::EmitLiteral(const ast::LiteralExpression* lit) {
                            << l->suffix;
                 }
             },
-            [&](const ast::IntLiteralExpression* l) { Line() << l->value << l->suffix; },
-            [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown literal type"); });
+            [&](const ast::IntLiteralExpression* l) { Line() << l->value << l->suffix; },  //
+            TINT_ICE_ON_NO_MATCH);
     }
     Line() << "]";
 }
@@ -499,8 +496,8 @@ void SyntaxTreePrinter::EmitVariable(const ast::Variable* v) {
             },
             [&](const ast::Let*) { Line() << "Let []"; },
             [&](const ast::Override*) { Line() << "Override []"; },
-            [&](const ast::Const*) { Line() << "Const []"; },
-            [&](Default) { TINT_ICE() << "unhandled variable type " << v->TypeInfo().name; });
+            [&](const ast::Const*) { Line() << "Const []"; },  //
+            TINT_ICE_ON_NO_MATCH);
 
         Line() << "name: " << v->name->symbol.Name();
 
@@ -648,10 +645,8 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
             },
             [&](const ast::InternalAttribute* internal) {
                 Line() << "InternalAttribute [" << internal->InternalName() << "]";
-            },
-            [&](Default) {
-                TINT_ICE() << "Unsupported attribute '" << attr->TypeInfo().name << "'";
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 }
 
@@ -812,11 +807,8 @@ void SyntaxTreePrinter::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::ReturnStatement* r) { EmitReturn(r); },
         [&](const ast::ConstAssert* c) { EmitConstAssert(c); },
         [&](const ast::SwitchStatement* s) { EmitSwitch(s); },
-        [&](const ast::VariableDeclStatement* v) { EmitVariable(v->variable); },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unknown statement type: " + std::string(stmt->TypeInfo().name));
-        });
+        [&](const ast::VariableDeclStatement* v) { EmitVariable(v->variable); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void SyntaxTreePrinter::EmitStatements(VectorRef<const ast::Statement*> stmts) {

@@ -45,11 +45,6 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::glsl::writer {
 namespace {
 
-// Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
-#define UNHANDLED_CASE(object_ptr)                         \
-    TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
-                         << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
-
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -142,7 +137,7 @@ class Printer : public tint::TextGenerator {
                 inst,                                                //
                 [&](core::ir::Return* r) { EmitReturn(r); },         //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
-                [&](Default) { UNHANDLED_CASE(inst); });
+                TINT_ICE_ON_NO_MATCH);
         }
     }
 

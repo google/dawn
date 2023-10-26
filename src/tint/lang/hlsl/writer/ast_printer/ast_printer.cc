@@ -411,11 +411,8 @@ bool ASTPrinter::Generate() {
                     return EmitEntryPointFunction(func);
                 }
                 return EmitFunction(func);
-            },
-            [&](Default) {
-                TINT_ICE() << "unhandled module-scope declaration: " << decl->TypeInfo().name;
-                return false;
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
 
         if (!ok) {
             return false;
@@ -1106,10 +1103,7 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
         [&](const sem::BuiltinFn* builtin) { return EmitBuiltinCall(out, call, builtin); },
         [&](const sem::ValueConversion* conv) { return EmitValueConversion(out, call, conv); },
         [&](const sem::ValueConstructor* ctor) { return EmitValueConstructor(out, call, ctor); },
-        [&](Default) {
-            TINT_ICE() << "unhandled call target: " << target->TypeInfo().name;
-            return false;
-        });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitFunctionCall(StringStream& out,
@@ -3119,12 +3113,8 @@ bool ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) 
         [&](const ast::IdentifierExpression* i) { return EmitIdentifier(out, i); },
         [&](const ast::LiteralExpression* l) { return EmitLiteral(out, l); },
         [&](const ast::MemberAccessorExpression* m) { return EmitMemberAccessor(out, m); },
-        [&](const ast::UnaryOpExpression* u) { return EmitUnaryOp(out, u); },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer, "unknown expression type: " +
-                                                             std::string(expr->TypeInfo().name));
-            return false;
-        });
+        [&](const ast::UnaryOpExpression* u) { return EmitUnaryOp(out, u); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr) {
@@ -3335,12 +3325,8 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
         },
         [&](const ast::Const*) {
             return true;  // Constants are embedded at their use
-        },
-        [&](Default) {
-            TINT_ICE() << "unhandled global variable type " << global->TypeInfo().name;
-
-            return false;
-        });
+        },                //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
@@ -3756,12 +3742,8 @@ bool ASTPrinter::EmitConstant(StringStream& out,
             }
 
             return true;
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unhandled constant type: " + constant->Type()->FriendlyName());
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* lit) {
@@ -3793,11 +3775,8 @@ bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
             }
             diagnostics_.add_error(diag::System::Writer, "unknown integer literal suffix type");
             return false;
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer, "unknown literal type");
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitValue(StringStream& out, const core::type::Type* type, int value) {
@@ -3866,12 +3845,8 @@ bool ASTPrinter::EmitValue(StringStream& out, const core::type::Type* type, int 
             TINT_DEFER(out << ")" << value);
             return EmitType(out, type, core::AddressSpace::kUndefined, core::Access::kUndefined,
                             "");
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "Invalid type for value emission: " + type->FriendlyName());
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitZeroValue(StringStream& out, const core::type::Type* type) {
@@ -4081,11 +4056,8 @@ bool ASTPrinter::EmitMemberAccessor(StringStream& out, const ast::MemberAccessor
         [&](const sem::StructMemberAccess* member_access) {
             out << member_access->Member()->Name().Name();
             return true;
-        },
-        [&](Default) {
-            TINT_ICE() << "unknown member access type: " << sem->TypeInfo().name;
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitReturn(const ast::ReturnStatement* stmt) {
@@ -4156,20 +4128,13 @@ bool ASTPrinter::EmitStatement(const ast::Statement* stmt) {
                 [&](const ast::Let* let) { return EmitLet(let); },
                 [&](const ast::Const*) {
                     return true;  // Constants are embedded at their use
-                },
-                [&](Default) {  //
-                    TINT_ICE() << "unknown variable type: " << v->variable->TypeInfo().name;
-                    return false;
-                });
+                },                //
+                TINT_ICE_ON_NO_MATCH);
         },
         [&](const ast::ConstAssert*) {
             return true;  // Not emitted
-        },
-        [&](Default) {  //
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unknown statement type: " + std::string(stmt->TypeInfo().name));
-            return false;
-        });
+        },                //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
@@ -4450,11 +4415,8 @@ bool ASTPrinter::EmitType(StringStream& out,
         [&](const core::type::Void*) {
             out << "void";
             return true;
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer, "unknown type in EmitType");
-            return false;
-        });
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 bool ASTPrinter::EmitTypeAndName(StringStream& out,

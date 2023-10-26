@@ -167,14 +167,9 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
                 push_single(unary->expr, p.depth + 1);
                 return true;
             },
-            [&](Default) {
-                if (TINT_LIKELY((expr->IsAnyOf<LiteralExpression, PhonyExpression>()))) {
-                    return true;  // Leaf expression
-                }
-                TINT_ICE() << "unhandled expression type: "
-                           << (expr ? expr->TypeInfo().name : "<null>");
-                return false;
-            });
+            [&](const LiteralExpression*) { return true; },
+            [&](const PhonyExpression*) { return true; },  //
+            TINT_ICE_ON_NO_MATCH);
         if (!ok) {
             return false;
         }

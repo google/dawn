@@ -98,16 +98,10 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
                         build(kModfVecF16Names[width - 2], types.vec(types.f16(), width)),
                     });
                     return abstract;
-                },
-                [&](Default) {
-                    TINT_UNREACHABLE() << "unhandled modf type";
-                    return nullptr;
-                });
-        },
-        [&](Default) {
-            TINT_UNREACHABLE() << "unhandled modf type";
-            return nullptr;
-        });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 /// An array of `frexp()` return type names for an argument of `vecN<f32>`.
@@ -170,16 +164,10 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
                         build(kFrexpVecF16Names[width - 2], vec_f16, vec_i32),
                     });
                     return abstract;
-                },
-                [&](Default) {
-                    TINT_UNREACHABLE() << "unhandled frexp type";
-                    return nullptr;
-                });
-        },
-        [&](Default) {
-            TINT_UNREACHABLE() << "unhandled frexp type";
-            return nullptr;
-        });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
+        },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty) {
@@ -194,10 +182,7 @@ Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, 
         ty,  //
         [&](const I32*) { return build(core::BuiltinType::kAtomicCompareExchangeResultI32); },
         [&](const U32*) { return build(core::BuiltinType::kAtomicCompareExchangeResultU32); },
-        [&](Default) {
-            TINT_UNREACHABLE() << "unhandled atomic_compare_exchange type";
-            return nullptr;
-        });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 }  // namespace tint::core::type

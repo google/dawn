@@ -236,11 +236,8 @@ struct Atomics::State {
                 return b.ty.ptr(ptr->AddressSpace(), AtomicTypeFor(ptr->StoreType()),
                                 ptr->Access());
             },
-            [&](const core::type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },
-            [&](Default) {
-                TINT_ICE() << "unhandled type: " << ty->FriendlyName();
-                return ast::Type{};
-            });
+            [&](const core::type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void ReplaceLoadsAndStores() {

@@ -104,12 +104,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         [&](const core::type::I32*) { return b->ty.i32(); },
         [&](const core::type::U32*) { return b->ty.u32(); },
         [&](const core::type::F32*) { return b->ty.f32(); },
-        [&](const core::type::Bool*) { return b->ty.bool_(); },
-        [&](Default) {
-            TINT_UNREACHABLE() << "unsupported vector element type: "
-                               << packed_el_sem_ty->TypeInfo().name;
-            return ast::Type{};
-        });
+        [&](const core::type::Bool*) { return b->ty.bool_(); },  //
+        TINT_ICE_ON_NO_MATCH);
 
     auto* statement = vector_sem->Stmt();
 

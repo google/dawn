@@ -224,10 +224,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
 
         [&](const core::type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
 
-        [&](Default) {
-            TINT_UNREACHABLE() << "Unhandled type " << ty->TypeInfo().name;
-            return SizeAndAlign{};
-        });
+        TINT_ICE_ON_NO_MATCH);
 }
 
 void PrintF32(StringStream& out, float value) {

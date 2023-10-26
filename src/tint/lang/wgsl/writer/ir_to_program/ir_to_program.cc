@@ -89,11 +89,6 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
 
-// Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
-#define UNHANDLED_CASE(object_ptr)                         \
-    TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
-                         << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
-
 // Helper for incrementing nesting_depth_ and then decrementing nesting_depth_ at the end
 // of the scope that holds the call.
 #define SCOPED_NESTING() \
@@ -202,7 +197,7 @@ class State {
             tint::Switch(
                 inst,                                   //
                 [&](core::ir::Var* var) { Var(var); },  //
-                [&](Default) { UNHANDLED_CASE(inst); });
+                TINT_ICE_ON_NO_MATCH);
         }
     }
     const ast::Function* Fn(core::ir::Function* fn) {
@@ -341,7 +336,7 @@ class State {
             [&](core::ir::Unary* i) { Unary(i); },                            //
             [&](core::ir::Unreachable*) {},                                   //
             [&](core::ir::Var* i) { Var(i); },                                //
-            [&](Default) { UNHANDLED_CASE(inst); });
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void If(core::ir::If* if_) {
@@ -641,7 +636,7 @@ class State {
                 Bind(c->Result(), b.Bitcast(ty, args[0]), PtrKind::kPtr);
             },
             [&](core::ir::Discard*) { Append(b.Discard()); },  //
-            [&](Default) { UNHANDLED_CASE(call); });
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void Load(core::ir::Load* l) { Bind(l->Result(), Expr(l->From())); }
@@ -692,8 +687,8 @@ class State {
                     } else {
                         TINT_ICE() << "invalid index for struct type: " << index->TypeInfo().name;
                     }
-                },
-                [&](Default) { UNHANDLED_CASE(obj_ty); });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
         }
         Bind(a->Result(), expr);
     }
@@ -868,11 +863,8 @@ class State {
             [&](const core::type::Array*) { return composite(/* can_splat */ false); },
             [&](const core::type::Vector*) { return composite(/* can_splat */ true); },
             [&](const core::type::Matrix*) { return composite(/* can_splat */ false); },
-            [&](const core::type::Struct*) { return composite(/* can_splat */ false); },
-            [&](Default) {
-                UNHANDLED_CASE(c->Type());
-                return b.Expr("<error>");
-            });
+            [&](const core::type::Struct*) { return composite(/* can_splat */ false); },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void Enable(wgsl::Extension ext) {
@@ -969,11 +961,8 @@ class State {
             [&](const core::type::Reference*) {
                 TINT_ICE() << "reference types should never appear in the IR";
                 return b.ty.i32();
-            },
-            [&](Default) {
-                UNHANDLED_CASE(ty);
-                return b.ty.i32();
-            });
+            },  //
+            TINT_ICE_ON_NO_MATCH);
     }
 
     ast::Type Struct(const core::type::Struct* s) {

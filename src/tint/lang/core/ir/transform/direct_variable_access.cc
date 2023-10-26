@@ -471,24 +471,16 @@ struct State {
                             chain.root_ptr = var->Result();
                             return nullptr;
                         },
-                        [&](Let* let) { return let->Value(); },
-                        [&](Default) {
-                            TINT_ICE() << "unhandled instruction type: "
-                                       << (inst ? inst->TypeInfo().name : "<null>");
-                            return nullptr;
-                        });
+                        [&](Let* let) { return let->Value(); },  //
+                        TINT_ICE_ON_NO_MATCH);
                 },
                 [&](FunctionParam* param) {
                     // Root pointer is a parameter of the caller
                     chain.shape.root = RootPtrParameter{param->Type()->As<type::Pointer>()};
                     chain.root_ptr = param;
                     return nullptr;
-                },
-                [&](Default) {
-                    TINT_ICE() << "unhandled value type: "
-                               << (value ? value->TypeInfo().name : "<null>");
-                    return nullptr;
-                });
+                },  //
+                TINT_ICE_ON_NO_MATCH);
         }
 
         // Reverse the chain's ops and indices. See above for why.
