@@ -93,7 +93,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/glsl/writer/raise",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
-        "${tint_src_dir}/utils/generator",
         "${tint_src_dir}/utils/ice",
         "${tint_src_dir}/utils/id",
         "${tint_src_dir}/utils/macros",

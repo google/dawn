@@ -71,12 +71,11 @@ Result<Output> Generate(const Program& program,
         }
 
         // Generate the GLSL code.
-        auto impl = std::make_unique<Printer>(ir);
-        auto result = impl->Generate(options.version);
+        auto result = Print(ir, options.version);
         if (!result) {
             return result.Failure();
         }
-        output.glsl = impl->Result();
+        output.glsl = result.Get();
 #else
         return Failure{"use_tint_ir requires building with TINT_BUILD_WGSL_READER"};
 #endif

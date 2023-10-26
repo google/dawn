@@ -91,7 +91,6 @@ cc_library(
     "//src/tint/lang/glsl/writer/raise",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
-    "//src/tint/utils/generator",
     "//src/tint/utils/ice",
     "//src/tint/utils/id",
     "//src/tint/utils/macros",

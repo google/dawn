@@ -33,6 +33,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
@@ -42,8 +43,6 @@ namespace tint::glsl::writer {
 template <typename BASE>
 class GlslPrinterTestHelperBase : public BASE {
   public:
-    GlslPrinterTestHelperBase() : writer_(mod) {}
-
     /// The test module.
     core::ir::Module mod;
     /// The test builder.
@@ -54,9 +53,6 @@ class GlslPrinterTestHelperBase : public BASE {
     Version version{};
 
   protected:
-    /// The GLSL writer.
-    Printer writer_;
-
     /// Validation errors
     std::string err_;
 
@@ -66,18 +62,17 @@ class GlslPrinterTestHelperBase : public BASE {
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
     bool Generate() {
-        auto raised = raise::Raise(mod);
-        if (!raised) {
+        if (auto raised = raise::Raise(mod); !raised) {
             err_ = raised.Failure().reason.str();
             return false;
         }
 
-        auto result = writer_.Generate(version);
+        auto result = Print(mod, version);
         if (!result) {
             err_ = result.Failure().reason.str();
             return false;
         }
-        output_ = writer_.Result();
+        output_ = result.Get();
 
         return true;
     }
