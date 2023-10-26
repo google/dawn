@@ -291,10 +291,10 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             tint::ast::transform::Manager transformManager;
             tint::ast::transform::DataMap transformInputs;
 
+            transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
+
             if (r.substituteOverrideConfig) {
-                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
-                    r.entryPointName);
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
                 // for current entry point.
                 transformManager.Add<tint::ast::transform::SubstituteOverride>();

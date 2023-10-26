@@ -605,9 +605,6 @@ fn fragmentMain(@builtin(position) position : vec4<f32>) -> @location(0) vec4f {
 // the BindingRemapper, causing an intermediate AST to be invalid (and fail the overall
 // compilation).
 TEST_P(ShaderTests, FirstIndexOffsetRegisterConflictInHLSLTransforms) {
-    // TODO(crbug.com/dawn/658): Crashes on bots because there are two entrypoints in the shader.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     const char* shader = R"(
 // Dumped WGSL:
 

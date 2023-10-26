@@ -37,8 +37,6 @@ class EntryPointTests : public DawnTest {};
 
 // Test creating a render pipeline from two entryPoints in the same module.
 TEST_P(EntryPointTests, FragAndVertexSameModule) {
-    // TODO(crbug.com/dawn/658): Crashes on bots
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vertex_main() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.0, 1.0);
