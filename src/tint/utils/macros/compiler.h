@@ -46,6 +46,7 @@
 #define TINT_DISABLE_WARNING_FLOAT_EQUAL  /* currently no-op */
 #define TINT_DISABLE_WARNING_DEPRECATED __pragma(warning(disable : 4996))
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER /* currently no-op */
+#define TINT_DISABLE_WARNING_UNUSED_VALUE        /* currently no-op */
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
@@ -75,6 +76,7 @@
 #define TINT_DISABLE_WARNING_DEPRECATED /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER \
     _Pragma("clang diagnostic ignored \"-Wreserved-identifier\"")
+#define TINT_DISABLE_WARNING_UNUSED_VALUE _Pragma("clang diagnostic ignored \"-Wunused-value\"")
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
@@ -103,6 +105,7 @@
 #define TINT_DISABLE_WARNING_FLOAT_EQUAL         /* currently no-op */
 #define TINT_DISABLE_WARNING_DEPRECATED          /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER /* currently no-op */
+#define TINT_DISABLE_WARNING_UNUSED_VALUE _Pragma("GCC diagnostic ignored \"-Wunused-value\"")
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \

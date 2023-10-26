@@ -43,9 +43,11 @@ cc_library(
   ],
   hdrs = [
     "castable.h",
+    "ignore.h",
     "switch.h",
   ],
   deps = [
+    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
@@ -62,6 +64,7 @@ cc_library(
     "switch_test.cc",
   ],
   deps = [
+    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
@@ -79,6 +82,7 @@ cc_library(
     "switch_bench.cc",
   ],
   deps = [
+    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",

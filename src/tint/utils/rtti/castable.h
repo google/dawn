@@ -35,6 +35,7 @@
 #include <utility>
 
 #include "src/tint/utils/math/crc32.h"
+#include "src/tint/utils/rtti/ignore.h"
 #include "src/tint/utils/traits/traits.h"
 
 #if defined(__clang__)
@@ -58,10 +59,6 @@ TINT_CASTABLE_PUSH_DISABLE_WARNINGS();
 // Forward declarations
 namespace tint {
 class CastableBase;
-
-/// Ignore is used as a special type used for skipping over types for trait
-/// helper functions.
-class Ignore {};
 }  // namespace tint
 
 namespace tint::detail {

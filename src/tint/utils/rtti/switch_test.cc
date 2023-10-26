@@ -30,6 +30,7 @@
 #include <memory>
 #include <string>
 
+#include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 
 namespace tint {
@@ -163,6 +164,121 @@ TEST(Castable, SwitchDefault) {
             [&](Default) { gecko_matched_default = true; });
         EXPECT_TRUE(gecko_matched_default);
     }
+}
+
+TEST(Castable, SwitchMustMatch_MatchedWithoutReturnValue) {
+    std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+    std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+    std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+    {
+        bool ok = false;
+        Switch(
+            frog.get(),                      //
+            [&](Amphibian*) { ok = true; },  //
+            [&](Mammal*) {},                 //
+            TINT_ICE_ON_NO_MATCH);
+        EXPECT_TRUE(ok);
+    }
+    {
+        bool ok = false;
+        Switch(
+            bear.get(),                   //
+            [&](Amphibian*) {},           //
+            [&](Mammal*) { ok = true; },  //
+            TINT_ICE_ON_NO_MATCH);        //
+        EXPECT_TRUE(ok);
+    }
+    {
+        bool ok = false;
+        Switch(
+            gecko.get(),                   //
+            [&](Reptile*) { ok = true; },  //
+            [&](Amphibian*) {},            //
+            TINT_ICE_ON_NO_MATCH);         //
+        EXPECT_TRUE(ok);
+    }
+}
+
+TEST(Castable, SwitchMustMatch_MatchedWithReturnValue) {
+    std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+    std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+    std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+    {
+        int res = Switch(
+            frog.get(),                     //
+            [&](Amphibian*) { return 1; },  //
+            [&](Mammal*) { return 0; },     //
+            TINT_ICE_ON_NO_MATCH);
+        EXPECT_EQ(res, 1);
+    }
+    {
+        int res = Switch(
+            bear.get(),                     //
+            [&](Amphibian*) { return 0; },  //
+            [&](Mammal*) { return 2; },     //
+            TINT_ICE_ON_NO_MATCH);
+        EXPECT_EQ(res, 2);
+    }
+    {
+        int res = Switch(
+            gecko.get(),                    //
+            [&](Reptile*) { return 3; },    //
+            [&](Amphibian*) { return 0; },  //
+            TINT_ICE_ON_NO_MATCH);
+        EXPECT_EQ(res, 3);
+    }
+}
+
+TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+            Switch(
+                frog.get(),        //
+                [&](Reptile*) {},  //
+                [&](Mammal*) {},   //
+                TINT_ICE_ON_NO_MATCH);
+        },
+        "internal compiler error: Switch() matched no cases. Type: Frog");
+}
+
+TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+            int res = Switch(
+                frog.get(),                   //
+                [&](Reptile*) { return 1; },  //
+                [&](Mammal*) { return 2; },   //
+                TINT_ICE_ON_NO_MATCH);
+            ASSERT_EQ(res, 0);
+        },
+        "internal compiler error: Switch() matched no cases. Type: Frog");
+}
+
+TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Switch(
+                static_cast<CastableBase*>(nullptr),  //
+                [&](Reptile*) {},                     //
+                [&](Mammal*) {},                      //
+                TINT_ICE_ON_NO_MATCH);
+        },
+        "internal compiler error: Switch() passed nullptr");
+}
+
+TEST(Castable, SwitchMustMatch_NullptrWithReturnValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            int res = Switch(
+                static_cast<CastableBase*>(nullptr),  //
+                [&](Reptile*) { return 1; },          //
+                [&](Mammal*) { return 2; },           //
+                TINT_ICE_ON_NO_MATCH);
+            ASSERT_EQ(res, 0);
+        },
+        "internal compiler error: Switch() passed nullptr");
 }
 
 TEST(Castable, SwitchMatchFirst) {
