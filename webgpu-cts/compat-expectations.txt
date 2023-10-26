@@ -483,3 +483,5 @@ crbug.com/dawn/2125 [ angle-opengl ] webgpu:shader,execution,zero_init:compute,z
 [ angle-opengl intel ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="storage_r";* [ Failure ]
 [ angle-opengl intel ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="storage_rw";* [ Failure ]
 [ angle-opengl intel ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="uniform";* [ Failure ]
+
+crbug.com/dawn/2146 [ angle-opengl ] webgpu:api,validation,render_pass,render_pass_descriptor:depth_stencil_attachment,loadOp_storeOp_match_depthReadOnly_stencilReadOnly:format="depth24plus-stencil8" [ Failure ]
