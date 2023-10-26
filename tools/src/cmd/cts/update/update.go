@@ -31,7 +31,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -67,13 +66,13 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	defaultExpectations := common.DefaultExpectationsPath()
 	c.flags.results.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions( /* needsCloudScopes */ false))
 	flag.StringVar(&c.flags.expectations, "expectations", defaultExpectations, "path to CTS expectations file to update")
 	return nil, nil
 }
 
 func loadTestList(path string) ([]query.Query, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load test list: %w", err)
 	}

@@ -110,7 +110,7 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	gitPath, _ := exec.LookPath("git")
 	npmPath, _ := exec.LookPath("npm")
-	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions( /* needsCloudScopes */ true))
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")

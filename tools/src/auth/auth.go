@@ -35,12 +35,16 @@ import (
 
 // DefaultAuthOptions returns the default authentication options for use by
 // command line arguments.
-func DefaultAuthOptions() auth.Options {
+// Set needsCloudScopes to true if the authentication requires cloud access.
+func DefaultAuthOptions(needsCloudScopes bool) auth.Options {
 	def := chromeinfra.DefaultAuthOptions()
 	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts")
 	def.Scopes = append(def.Scopes,
 		"https://www.googleapis.com/auth/gerritcodereview",
-		"https://www.googleapis.com/auth/cloud-platform", // For calling GCR, GCS and Cloud Build.
 		auth.OAuthScopeEmail)
+	if needsCloudScopes {
+		def.Scopes = append(def.Scopes,
+			"https://www.googleapis.com/auth/cloud-platform")
+	}
 	return def
 }

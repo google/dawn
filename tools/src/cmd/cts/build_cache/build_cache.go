@@ -68,7 +68,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.ctsDir, "cts", ctsPath, "path to CTS")
 	flag.StringVar(&c.flags.cacheListOut, "out", cacheListOut, "path to cache_list.txt output file")
-	c.flags.authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions( /* needsCloudScopes */ true))
 	return nil, nil
 }
 
