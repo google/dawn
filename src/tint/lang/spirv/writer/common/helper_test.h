@@ -89,8 +89,6 @@ auto& operator<<(STREAM& out, TestElementType type) {
 template <typename BASE>
 class SpirvWriterTestHelperBase : public BASE {
   public:
-    SpirvWriterTestHelperBase() : writer_(mod, false) {}
-
     /// The test module.
     core::ir::Module mod;
     /// The test builder.
@@ -99,50 +97,47 @@ class SpirvWriterTestHelperBase : public BASE {
     core::type::Manager& ty{mod.Types()};
 
   protected:
-    /// The SPIR-V writer.
-    Printer writer_;
-
     /// Errors produced during codegen or SPIR-V validation.
     std::string err_;
 
     /// SPIR-V output.
     std::string output_;
 
+    /// The generated SPIR-V
+    writer::Module spirv_;
+
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
-    /// Run the specified writer on the IR module and validate the result.
-    /// @param writer the writer to use for SPIR-V generation
+    /// Run the printer on the IR module and validate the result.
     /// @param options the optional writer options to use when raising the IR
+    /// @param zero_init_workgroup_memory  `true` to initialize all the variables in the Workgroup
+    /// storage class with OpConstantNull
     /// @returns true if generation and validation succeeded
-    bool Generate(Printer& writer, Options options = {}) {
+    bool Generate(Options options = {}, bool zero_init_workgroup_memory = false) {
         auto raised = raise::Raise(mod, options);
         if (!raised) {
             err_ = raised.Failure().reason.str();
             return false;
         }
 
-        auto spirv = writer.Generate();
+        auto spirv = PrintModule(mod, zero_init_workgroup_memory);
         if (!spirv) {
             err_ = spirv.Failure().reason.str();
             return false;
         }
 
-        output_ = Disassemble(spirv.Get(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
-                                               SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                                               SPV_BINARY_TO_TEXT_OPTION_COMMENT);
+        output_ = Disassemble(spirv->Code(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+                                                 SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                                                 SPV_BINARY_TO_TEXT_OPTION_COMMENT);
 
-        if (!Validate(spirv.Get())) {
+        if (!Validate(spirv->Code())) {
             return false;
         }
 
+        spirv_ = std::move(spirv.Get());
         return true;
     }
-
-    /// Run the writer on the IR module and validate the result.
-    /// @param options the optional writer options to use when raising the IR
-    /// @returns true if generation and validation succeeded
-    bool Generate(Options options = {}) { return Generate(writer_, options); }
 
     /// Validate the generated SPIR-V using the SPIR-V Tools Validator.
     /// @param binary the SPIR-V binary module to validate
@@ -180,7 +175,7 @@ class SpirvWriterTestHelperBase : public BASE {
     }
 
     /// @returns the disassembled types from the generated module.
-    std::string DumpTypes() { return DumpInstructions(writer_.Module().Types()); }
+    std::string DumpTypes() { return DumpInstructions(spirv_.Types()); }
 
     /// Helper to make a scalar type corresponding to the element type `type`.
     /// @param type the element type

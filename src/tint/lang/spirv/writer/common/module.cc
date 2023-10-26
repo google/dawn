@@ -43,9 +43,17 @@ uint32_t SizeOf(const InstructionList& instructions) {
 
 }  // namespace
 
-Module::Module() {}
+Module::Module() = default;
+
+Module::Module(const Module&) = default;
+
+Module::Module(Module&&) = default;
 
 Module::~Module() = default;
+
+Module& Module::operator=(const Module& other) = default;
+
+Module& Module::operator=(Module&& other) = default;
 
 uint32_t Module::TotalSize() const {
     // The 5 covers the magic, version, generator, id bound and reserved.

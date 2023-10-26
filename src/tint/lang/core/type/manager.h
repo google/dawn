@@ -129,6 +129,8 @@ class Manager final {
             return ptr<T::address, typename T::type, T::access>(std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsArray<T>) {
             return array<typename T::type, T::length>(std::forward<ARGS>(args)...);
+        } else if constexpr (core::fluent_types::IsAtomic<T>) {
+            return atomic<typename T::type>(std::forward<ARGS>(args)...);
         } else if constexpr (tint::traits::IsTypeOrDerived<T, Type>) {
             return types_.Get<T>(std::forward<ARGS>(args)...);
         } else if constexpr (tint::traits::IsTypeOrDerived<T, UniqueNode>) {

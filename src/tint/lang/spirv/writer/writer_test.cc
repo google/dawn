@@ -35,12 +35,9 @@ namespace {
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, ModuleHeader) {
-    auto spirv = writer_.Generate();
-    ASSERT_TRUE(spirv) << spirv.Failure();
-    auto got = Disassemble(spirv.Get());
-    EXPECT_THAT(got, testing::StartsWith(R"(OpCapability Shader
-OpMemoryModel Logical GLSL450
-)"));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability Shader");
+    EXPECT_INST("OpMemoryModel Logical GLSL450");
 }
 
 TEST_F(SpirvWriterTest, Unreachable) {

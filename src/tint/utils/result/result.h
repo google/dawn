@@ -138,6 +138,13 @@ struct [[nodiscard]] Result {
     }
 
     /// @returns the success value
+    /// @warning attempting to call this when the Result holds an failure will result in UB.
+    SUCCESS_TYPE* operator->() {
+        Validate();
+        return &(Get());
+    }
+
+    /// @returns the success value
     /// @warning attempting to call this when the Result holds an failure value will result in UB.
     const SUCCESS_TYPE& Get() const {
         Validate();

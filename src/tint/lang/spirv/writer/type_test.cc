@@ -46,42 +46,53 @@ namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, Type_Void) {
-    writer_.Type(ty.void_());
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%void = OpTypeVoid");
 }
 
 TEST_F(SpirvWriterTest, Type_Bool) {
-    writer_.Type(ty.bool_());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, bool, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%bool = OpTypeBool");
 }
 
 TEST_F(SpirvWriterTest, Type_I32) {
-    writer_.Type(ty.i32());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, i32, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int = OpTypeInt 32 1");
 }
 
 TEST_F(SpirvWriterTest, Type_U32) {
-    writer_.Type(ty.u32());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, u32, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%uint = OpTypeInt 32 0");
 }
 
 TEST_F(SpirvWriterTest, Type_F32) {
-    writer_.Type(ty.f32());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, f32, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%float = OpTypeFloat 32");
 }
 
 TEST_F(SpirvWriterTest, Type_F16) {
-    writer_.Type(ty.f16());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, f16, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpCapability Float16");
@@ -92,56 +103,72 @@ TEST_F(SpirvWriterTest, Type_F16) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec2i) {
-    writer_.Type(ty.vec2<i32>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, vec2<i32>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v2int = OpTypeVector %int 2");
 }
 
 TEST_F(SpirvWriterTest, Type_Vec3u) {
-    writer_.Type(ty.vec3<u32>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, vec3<u32>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v3uint = OpTypeVector %uint 3");
 }
 
 TEST_F(SpirvWriterTest, Type_Vec4f) {
-    writer_.Type(ty.vec4<f32>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, vec4<f32>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v4float = OpTypeVector %float 4");
 }
 
 TEST_F(SpirvWriterTest, Type_Vec2h) {
-    writer_.Type(ty.vec2<f16>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, vec2<f16>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v2half = OpTypeVector %half 2");
 }
 
 TEST_F(SpirvWriterTest, Type_Vec4Bool) {
-    writer_.Type(ty.vec4<bool>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, vec4<bool>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v4bool = OpTypeVector %bool 4");
 }
 
 TEST_F(SpirvWriterTest, Type_Mat2x3f) {
-    writer_.Type(ty.mat2x3(ty.f32()));
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, mat2x3<f32>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%mat2v3float = OpTypeMatrix %v3float 2");
 }
 
 TEST_F(SpirvWriterTest, Type_Mat4x2h) {
-    writer_.Type(ty.mat4x2(ty.f16()));
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, mat4x2<f16>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%mat4v2half = OpTypeMatrix %v2half 4");
 }
 
 TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
-    writer_.Type(ty.array<f32, 4>());
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, array<f32, 4>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_arr_float_uint_4 ArrayStride 4");
@@ -149,7 +176,9 @@ TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
-    writer_.Type(ty.array<f32, 4>(16));
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var("v", ty.ptr<private_, read_write>(ty.array<f32, 4>(16)));
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_arr_float_uint_4 ArrayStride 16");
@@ -157,7 +186,9 @@ TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_NestedArray) {
-    writer_.Type(ty.array(ty.array<f32, 64u>(), 4u));
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, array<array<f32, 64>, 4>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_arr_float_uint_64 ArrayStride 4");
@@ -167,7 +198,10 @@ TEST_F(SpirvWriterTest, Type_Array_NestedArray) {
 }
 
 TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
-    writer_.Type(ty.array<f32>());
+    b.Append(b.ir.root_block, [&] {  //
+        auto* v = b.Var<storage, array<f32>, read_write>("v");
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_runtimearr_float ArrayStride 4");
@@ -175,7 +209,10 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
-    writer_.Type(ty.array<f32>(16));
+    b.Append(b.ir.root_block, [&] {  //
+        auto* v = b.Var("v", ty.ptr<storage, read_write>(ty.array<f32>(16)));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpDecorate %_runtimearr_float ArrayStride 16");
@@ -188,7 +225,9 @@ TEST_F(SpirvWriterTest, Type_Struct) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
-    writer_.Type(str);
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var("v", ty.ptr<private_, read_write>(str));
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpMemberName %MyStruct 0 \"a\"");
@@ -207,7 +246,9 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
             // Matrices nested inside arrays need layout decorations on the struct member too.
             {mod.symbols.Register("arr"), ty.array(ty.array(ty.mat2x4<f16>(), 4), 4)},
         });
-    writer_.Type(str);
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var("v", ty.ptr<private_, read_write>(str));
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpMemberDecorate %MyStruct 0 ColMajor");
@@ -218,31 +259,48 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
 }
 
 TEST_F(SpirvWriterTest, Type_Atomic) {
-    writer_.Type(ty.atomic(ty.i32()));
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, atomic<i32>, read_write>("v");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int = OpTypeInt 32 1");
 }
 
 TEST_F(SpirvWriterTest, Type_Sampler) {
-    writer_.Type(ty.sampler());
+    b.Append(b.ir.root_block, [&] {  //
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.sampler()));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%1 = OpTypeSampler");
+    EXPECT_INST(" = OpTypeSampler");
 }
 
 TEST_F(SpirvWriterTest, Type_SamplerComparison) {
-    writer_.Type(ty.comparison_sampler());
+    b.Append(b.ir.root_block, [&] {  //
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.comparison_sampler()));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%1 = OpTypeSampler");
+    EXPECT_INST(" = OpTypeSampler");
 }
 
 TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
-    auto id = writer_.Type(ty.sampler());
-    EXPECT_EQ(writer_.Type(ty.comparison_sampler()), id);
+    b.Append(b.ir.root_block, [&] {
+        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(ty.sampler()));
+        auto* v2 = b.Var("v2", ty.ptr<handle, read_write>(ty.comparison_sampler()));
+        v1->SetBindingPoint(0, 1);
+        v2->SetBindingPoint(0, 2);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%3 = OpTypeSampler");
+    EXPECT_INST("%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3");
+    EXPECT_INST("%v1 = OpVariable %_ptr_UniformConstant_3 UniformConstant");
+    EXPECT_INST("%_ptr_UniformConstant_3_0 = OpTypePointer UniformConstant %3");
+    EXPECT_INST("%v2 = OpVariable %_ptr_UniformConstant_3_0 UniformConstant");
 }
 
 using Dim = core::type::TextureDimension;
@@ -255,7 +313,11 @@ struct TextureCase {
 using Type_SampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_SampledTexture, Emit) {
     auto params = GetParam();
-    writer_.Type(ty.Get<core::type::SampledTexture>(params.dim, MakeScalarType(params.format)));
+    b.Append(b.ir.root_block, [&] {
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::SampledTexture>(
+                                 params.dim, MakeScalarType(params.format))));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.result);
@@ -264,30 +326,33 @@ INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Type_SampledTexture,
     testing::Values(
-        TextureCase{"%1 = OpTypeImage %float 1D 0 0 0 1 Unknown", Dim::k1d, kF32},
-        TextureCase{"%1 = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d, kF32},
-        TextureCase{"%1 = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray, kF32},
-        TextureCase{"%1 = OpTypeImage %float 3D 0 0 0 1 Unknown", Dim::k3d, kF32},
-        TextureCase{"%1 = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube, kF32},
-        TextureCase{"%1 = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray, kF32},
-        TextureCase{"%1 = OpTypeImage %int 1D 0 0 0 1 Unknown", Dim::k1d, kI32},
-        TextureCase{"%1 = OpTypeImage %int 2D 0 0 0 1 Unknown", Dim::k2d, kI32},
-        TextureCase{"%1 = OpTypeImage %int 2D 0 1 0 1 Unknown", Dim::k2dArray, kI32},
-        TextureCase{"%1 = OpTypeImage %int 3D 0 0 0 1 Unknown", Dim::k3d, kI32},
-        TextureCase{"%1 = OpTypeImage %int Cube 0 0 0 1 Unknown", Dim::kCube, kI32},
-        TextureCase{"%1 = OpTypeImage %int Cube 0 1 0 1 Unknown", Dim::kCubeArray, kI32},
-        TextureCase{"%1 = OpTypeImage %uint 1D 0 0 0 1 Unknown", Dim::k1d, kU32},
-        TextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 1 Unknown", Dim::k2d, kU32},
-        TextureCase{"%1 = OpTypeImage %uint 2D 0 1 0 1 Unknown", Dim::k2dArray, kU32},
-        TextureCase{"%1 = OpTypeImage %uint 3D 0 0 0 1 Unknown", Dim::k3d, kU32},
-        TextureCase{"%1 = OpTypeImage %uint Cube 0 0 0 1 Unknown", Dim::kCube, kU32},
-        TextureCase{"%1 = OpTypeImage %uint Cube 0 1 0 1 Unknown", Dim::kCubeArray, kU32}));
+        TextureCase{" = OpTypeImage %float 1D 0 0 0 1 Unknown", Dim::k1d, kF32},
+        TextureCase{" = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d, kF32},
+        TextureCase{" = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray, kF32},
+        TextureCase{" = OpTypeImage %float 3D 0 0 0 1 Unknown", Dim::k3d, kF32},
+        TextureCase{" = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube, kF32},
+        TextureCase{" = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray, kF32},
+        TextureCase{" = OpTypeImage %int 1D 0 0 0 1 Unknown", Dim::k1d, kI32},
+        TextureCase{" = OpTypeImage %int 2D 0 0 0 1 Unknown", Dim::k2d, kI32},
+        TextureCase{" = OpTypeImage %int 2D 0 1 0 1 Unknown", Dim::k2dArray, kI32},
+        TextureCase{" = OpTypeImage %int 3D 0 0 0 1 Unknown", Dim::k3d, kI32},
+        TextureCase{" = OpTypeImage %int Cube 0 0 0 1 Unknown", Dim::kCube, kI32},
+        TextureCase{" = OpTypeImage %int Cube 0 1 0 1 Unknown", Dim::kCubeArray, kI32},
+        TextureCase{" = OpTypeImage %uint 1D 0 0 0 1 Unknown", Dim::k1d, kU32},
+        TextureCase{" = OpTypeImage %uint 2D 0 0 0 1 Unknown", Dim::k2d, kU32},
+        TextureCase{" = OpTypeImage %uint 2D 0 1 0 1 Unknown", Dim::k2dArray, kU32},
+        TextureCase{" = OpTypeImage %uint 3D 0 0 0 1 Unknown", Dim::k3d, kU32},
+        TextureCase{" = OpTypeImage %uint Cube 0 0 0 1 Unknown", Dim::kCube, kU32},
+        TextureCase{" = OpTypeImage %uint Cube 0 1 0 1 Unknown", Dim::kCubeArray, kU32}));
 
 using Type_MultisampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_MultisampledTexture, Emit) {
     auto params = GetParam();
-    writer_.Type(
-        ty.Get<core::type::MultisampledTexture>(params.dim, MakeScalarType(params.format)));
+    b.Append(b.ir.root_block, [&] {
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::MultisampledTexture>(
+                                 params.dim, MakeScalarType(params.format))));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.result);
@@ -295,14 +360,18 @@ TEST_P(Type_MultisampledTexture, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Type_MultisampledTexture,
-    testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 1 1 Unknown", Dim::k2d, kF32},
-                    TextureCase{"%1 = OpTypeImage %int 2D 0 0 1 1 Unknown", Dim::k2d, kI32},
-                    TextureCase{"%1 = OpTypeImage %uint 2D 0 0 1 1 Unknown", Dim::k2d, kU32}));
+    testing::Values(TextureCase{" = OpTypeImage %float 2D 0 0 1 1 Unknown", Dim::k2d, kF32},
+                    TextureCase{" = OpTypeImage %int 2D 0 0 1 1 Unknown", Dim::k2d, kI32},
+                    TextureCase{" = OpTypeImage %uint 2D 0 0 1 1 Unknown", Dim::k2d, kU32}));
 
 using Type_DepthTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_DepthTexture, Emit) {
     auto params = GetParam();
-    writer_.Type(ty.Get<core::type::DepthTexture>(params.dim));
+    b.Append(b.ir.root_block, [&] {  //
+        auto* v =
+            b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::DepthTexture>(params.dim)));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.result);
@@ -310,39 +379,63 @@ TEST_P(Type_DepthTexture, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Type_DepthTexture,
-    testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d},
-                    TextureCase{"%1 = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray},
-                    TextureCase{"%1 = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube},
-                    TextureCase{"%1 = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray}));
+    testing::Values(TextureCase{" = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d},
+                    TextureCase{" = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray},
+                    TextureCase{" = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube},
+                    TextureCase{" = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray}));
 
 TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
-    writer_.Type(ty.Get<core::type::SampledTexture>(Dim::k2d, ty.f32()));
-    writer_.Type(ty.Get<core::type::DepthTexture>(Dim::k2d));
+    b.Append(b.ir.root_block, [&] {
+        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(
+                                   ty.Get<core::type::SampledTexture>(Dim::k2d, ty.f32())));
+        auto* v2 =
+            b.Var("v2", ty.ptr<handle, read_write>(ty.Get<core::type::DepthTexture>(Dim::k2d)));
+        v1->SetBindingPoint(0, 1);
+        v2->SetBindingPoint(0, 2);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 0 0 0 1 Unknown
-%4 = OpTypeVoid
-%5 = OpTypeFunction %4
+    EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%6 = OpTypePointer UniformConstant %3
+%5 = OpVariable %6 UniformConstant
+%8 = OpTypeVoid
+%9 = OpTypeFunction %8
 )");
 }
 
 TEST_F(SpirvWriterTest, Type_DepthMultiSampledTexture) {
-    writer_.Type(ty.Get<core::type::DepthMultisampledTexture>(Dim::k2d));
+    b.Append(b.ir.root_block, [&] {
+        auto* v = b.Var("v", ty.ptr<handle, read_write>(
+                                 ty.Get<core::type::DepthMultisampledTexture>(Dim::k2d)));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%1 = OpTypeImage %float 2D 0 0 1 1 Unknown");
+    EXPECT_INST(" = OpTypeImage %float 2D 0 0 1 1 Unknown");
 }
 
 TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTexture) {
-    writer_.Type(ty.Get<core::type::MultisampledTexture>(Dim::k2d, ty.f32()));
-    writer_.Type(ty.Get<core::type::DepthMultisampledTexture>(Dim::k2d));
+    b.Append(b.ir.root_block, [&] {
+        auto* v1 = b.Var("v1", ty.ptr<handle, read_write>(
+                                   ty.Get<core::type::MultisampledTexture>(Dim::k2d, ty.f32())));
+        auto* v2 = b.Var("v2", ty.ptr<handle, read_write>(
+                                   ty.Get<core::type::DepthMultisampledTexture>(Dim::k2d)));
+        v1->SetBindingPoint(0, 1);
+        v2->SetBindingPoint(0, 2);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 0 0 1 1 Unknown
-%4 = OpTypeVoid
-%5 = OpTypeFunction %4
+    EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%6 = OpTypePointer UniformConstant %3
+%5 = OpVariable %6 UniformConstant
+%8 = OpTypeVoid
+%9 = OpTypeFunction %8
 )");
 }
 
@@ -355,9 +448,13 @@ struct StorageTextureCase {
 using Type_StorageTexture = SpirvWriterTestWithParam<StorageTextureCase>;
 TEST_P(Type_StorageTexture, Emit) {
     auto params = GetParam();
-    writer_.Type(ty.Get<core::type::StorageTexture>(
-        params.dim, params.format, core::Access::kWrite,
-        core::type::StorageTexture::SubtypeFor(params.format, mod.Types())));
+    b.Append(b.ir.root_block, [&] {
+        auto* v =
+            b.Var("v", ty.ptr<handle, read_write>(ty.Get<core::type::StorageTexture>(
+                           params.dim, params.format, core::Access::kWrite,
+                           core::type::StorageTexture::SubtypeFor(params.format, mod.Types()))));
+        v->SetBindingPoint(0, 0);
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.result);
@@ -371,71 +468,77 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Type_StorageTexture,
                          testing::Values(
                              // Test all the dimensions with a single format.
-                             StorageTextureCase{"%1 = OpTypeImage %float 1D 0 0 0 2 R32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 1D 0 0 0 2 R32f",  //
                                                 Dim::k1d, Format::kR32Float},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 R32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 R32f",  //
                                                 Dim::k2d, Format::kR32Float},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 1 0 2 R32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 1 0 2 R32f",  //
                                                 Dim::k2dArray, Format::kR32Float},
-                             StorageTextureCase{"%1 = OpTypeImage %float 3D 0 0 0 2 R32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 3D 0 0 0 2 R32f",  //
                                                 Dim::k3d, Format::kR32Float},
 
                              // Test all the formats with 2D.
-                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 R32i",  //
+                             StorageTextureCase{" = OpTypeImage %int 2D 0 0 0 2 R32i",  //
                                                 Dim::k2d, Format::kR32Sint},
-                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 R32u",  //
+                             StorageTextureCase{" = OpTypeImage %uint 2D 0 0 0 2 R32u",  //
                                                 Dim::k2d, Format::kR32Uint},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rg32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rg32f",  //
                                                 Dim::k2d, Format::kRg32Float},
-                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rg32i",  //
+                             StorageTextureCase{" = OpTypeImage %int 2D 0 0 0 2 Rg32i",  //
                                                 Dim::k2d, Format::kRg32Sint},
-                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rg32ui",  //
+                             StorageTextureCase{" = OpTypeImage %uint 2D 0 0 0 2 Rg32ui",  //
                                                 Dim::k2d, Format::kRg32Uint},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba16f",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rgba16f",  //
                                                 Dim::k2d, Format::kRgba16Float},
-                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba16i",  //
+                             StorageTextureCase{" = OpTypeImage %int 2D 0 0 0 2 Rgba16i",  //
                                                 Dim::k2d, Format::kRgba16Sint},
-                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba16ui",  //
+                             StorageTextureCase{" = OpTypeImage %uint 2D 0 0 0 2 Rgba16ui",  //
                                                 Dim::k2d, Format::kRgba16Uint},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba32f",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rgba32f",  //
                                                 Dim::k2d, Format::kRgba32Float},
-                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba32i",  //
+                             StorageTextureCase{" = OpTypeImage %int 2D 0 0 0 2 Rgba32i",  //
                                                 Dim::k2d, Format::kRgba32Sint},
-                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba32ui",  //
+                             StorageTextureCase{" = OpTypeImage %uint 2D 0 0 0 2 Rgba32ui",  //
                                                 Dim::k2d, Format::kRgba32Uint},
-                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba8i",  //
+                             StorageTextureCase{" = OpTypeImage %int 2D 0 0 0 2 Rgba8i",  //
                                                 Dim::k2d, Format::kRgba8Sint},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba8Snorm",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rgba8Snorm",  //
                                                 Dim::k2d, Format::kRgba8Snorm},
-                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba8ui",  //
+                             StorageTextureCase{" = OpTypeImage %uint 2D 0 0 0 2 Rgba8ui",  //
                                                 Dim::k2d, Format::kRgba8Uint},
-                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba8",  //
+                             StorageTextureCase{" = OpTypeImage %float 2D 0 0 0 2 Rgba8",  //
                                                 Dim::k2d, Format::kRgba8Unorm}));
 
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpirvWriterTest, Type_Multiple) {
-    writer_.Type(ty.i32());
-    writer_.Type(ty.u32());
-    writer_.Type(ty.f32());
-    writer_.Type(ty.f16());
+    b.Append(b.ir.root_block, [&] {
+        b.Var<private_, i32, read_write>("v1");
+        b.Var<private_, u32, read_write>("v2");
+        b.Var<private_, f32, read_write>("v3");
+        b.Var<private_, f16, read_write>("v4");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST(R"(
-        %int = OpTypeInt 32 1
-       %uint = OpTypeInt 32 0
-      %float = OpTypeFloat 32
-       %half = OpTypeFloat 16
-)");
+    EXPECT_INST("%int = OpTypeInt 32 1");
+    EXPECT_INST("%uint = OpTypeInt 32 0");
+    EXPECT_INST("%float = OpTypeFloat 32");
+    EXPECT_INST("%half = OpTypeFloat 16");
 }
 
 // Test that we do not emit the same type more than once.
 TEST_F(SpirvWriterTest, Type_Deduplicate) {
-    auto id = writer_.Type(ty.i32());
-    EXPECT_EQ(writer_.Type(ty.i32()), id);
-    EXPECT_EQ(writer_.Type(ty.i32()), id);
+    b.Append(b.ir.root_block, [&] {
+        b.Var<private_, i32, read_write>("v1");
+        b.Var<private_, i32, read_write>("v2");
+        b.Var<private_, i32, read_write>("v3");
+    });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%_ptr_Private_int = OpTypePointer Private %int");
+    EXPECT_INST("%v1 = OpVariable %_ptr_Private_int Private %4");
+    EXPECT_INST("%v2 = OpVariable %_ptr_Private_int Private %4");
+    EXPECT_INST("%v3 = OpVariable %_ptr_Private_int Private %4");
 }
 
 }  // namespace

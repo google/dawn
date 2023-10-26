@@ -87,8 +87,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
         }
 
         // Generate the SPIR-V code.
-        auto impl = std::make_unique<Printer>(ir, zero_initialize_workgroup_memory);
-        auto spirv = impl->Generate();
+        auto spirv = Print(ir, zero_initialize_workgroup_memory);
         if (!spirv) {
             return std::move(spirv.Failure());
         }
