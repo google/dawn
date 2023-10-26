@@ -57,7 +57,9 @@ void Queue::DestroyImpl() {
     UpdateWaitingEvents(kMaxExecutionSerial);
     mCommandQueue = nullptr;
     mLastSubmittedCommands = nullptr;
-    mMtlSharedEvent = nullptr;
+
+    // Don't free mMtlSharedEvent because it can be queried after device destruction for
+    // synchronization needs.
 
     QueueBase::DestroyImpl();
 }
