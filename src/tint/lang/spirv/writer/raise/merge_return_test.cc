@@ -1180,6 +1180,91 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Consecutive) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Consecutive_ThenUnreachable) {
+    auto* value = b.FunctionParam(ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value});
+
+    b.Append(func->Block(), [&] {
+        {
+            auto* if_ = b.If(b.Equal(ty.bool_(), value, 1_i));
+            b.Append(if_->True(), [&] { b.Return(func, 101_i); });
+        }
+        {
+            auto* ifelse = b.If(b.Equal(ty.bool_(), value, 2_i));
+            b.Append(ifelse->True(), [&] { b.Return(func, 202_i); });
+            b.Append(ifelse->False(), [&] { b.Return(func, 303_i); });
+        }
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%foo = func(%2:i32):i32 -> %b1 {
+  %b1 = block {
+    %3:bool = eq %2, 1i
+    if %3 [t: %b2] {  # if_1
+      %b2 = block {  # true
+        ret 101i
+      }
+    }
+    %4:bool = eq %2, 2i
+    if %4 [t: %b3, f: %b4] {  # if_2
+      %b3 = block {  # true
+        ret 202i
+      }
+      %b4 = block {  # false
+        ret 303i
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%2:i32):i32 -> %b1 {
+  %b1 = block {
+    %return_value:ptr<function, i32, read_write> = var
+    %continue_execution:ptr<function, bool, read_write> = var, true
+    %5:bool = eq %2, 1i
+    if %5 [t: %b2] {  # if_1
+      %b2 = block {  # true
+        store %continue_execution, false
+        store %return_value, 101i
+        exit_if  # if_1
+      }
+    }
+    %6:bool = load %continue_execution
+    if %6 [t: %b3] {  # if_2
+      %b3 = block {  # true
+        %7:bool = eq %2, 2i
+        if %7 [t: %b4, f: %b5] {  # if_3
+          %b4 = block {  # true
+            store %continue_execution, false
+            store %return_value, 202i
+            exit_if  # if_3
+          }
+          %b5 = block {  # false
+            store %continue_execution, false
+            store %return_value, 303i
+            exit_if  # if_3
+          }
+        }
+        exit_if  # if_2
+      }
+    }
+    %8:i32 = load %return_value
+    ret %8
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.i32());
 

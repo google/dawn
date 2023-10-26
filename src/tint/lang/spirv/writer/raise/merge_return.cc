@@ -198,7 +198,7 @@ struct State {
             // Loop over the 'if' instructions, starting with the inner-most, and add any missing
             // terminating instructions to the blocks holding the 'if'.
             for (auto* i = inner_if; i; i = tint::As<core::ir::If>(i->Block()->Parent())) {
-                if (!i->Block()->HasTerminator()) {
+                if (!i->Block()->HasTerminator() && i->Block()->Parent()) {
                     // Append the exit instruction to the block holding the 'if'.
                     Vector<core::ir::InstructionResult*, 8> exit_args = i->Results();
                     if (!i->HasResults()) {
