@@ -74,6 +74,8 @@ libtint_source_set("transform") {
     "shader_io.h",
     "std140.cc",
     "std140.h",
+    "vectorize_scalar_matrix_constructors.cc",
+    "vectorize_scalar_matrix_constructors.h",
     "zero_init_workgroup_memory.cc",
     "zero_init_workgroup_memory.h",
   ]
@@ -118,6 +120,7 @@ if (tint_build_unittests) {
       "preserve_padding_test.cc",
       "robustness_test.cc",
       "std140_test.cc",
+      "vectorize_scalar_matrix_constructors_test.cc",
       "zero_init_workgroup_memory_test.cc",
     ]
     deps = [

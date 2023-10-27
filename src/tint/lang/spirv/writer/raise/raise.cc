@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
+#include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/spirv/writer/common/option_builder.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
@@ -125,6 +126,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
+    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 
     // CombineAccessInstructions must come after DirectVariableAccess and BlockDecoratedStructs.
     // We run this transform as some Qualcomm drivers struggle with partial access chains that

@@ -69,6 +69,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/shader_io.h
   lang/core/ir/transform/std140.cc
   lang/core/ir/transform/std140.h
+  lang/core/ir/transform/vectorize_scalar_matrix_constructors.cc
+  lang/core/ir/transform/vectorize_scalar_matrix_constructors.h
   lang/core/ir/transform/zero_init_workgroup_memory.cc
   lang/core/ir/transform/zero_init_workgroup_memory.h
 )
@@ -116,6 +118,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/preserve_padding_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/std140_test.cc
+  lang/core/ir/transform/vectorize_scalar_matrix_constructors_test.cc
   lang/core/ir/transform/zero_init_workgroup_memory_test.cc
 )
 

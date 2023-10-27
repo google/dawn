@@ -54,6 +54,7 @@ cc_library(
     "robustness.cc",
     "shader_io.cc",
     "std140.cc",
+    "vectorize_scalar_matrix_constructors.cc",
     "zero_init_workgroup_memory.cc",
   ],
   hdrs = [
@@ -72,6 +73,7 @@ cc_library(
     "robustness.h",
     "shader_io.h",
     "std140.h",
+    "vectorize_scalar_matrix_constructors.h",
     "zero_init_workgroup_memory.h",
   ],
   deps = [
@@ -118,6 +120,7 @@ cc_library(
     "preserve_padding_test.cc",
     "robustness_test.cc",
     "std140_test.cc",
+    "vectorize_scalar_matrix_constructors_test.cc",
     "zero_init_workgroup_memory_test.cc",
   ] + select({
     "//conditions:default": [],
