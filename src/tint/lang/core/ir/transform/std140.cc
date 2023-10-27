@@ -112,7 +112,14 @@ struct State {
 
     /// @param mat the matrix type to check
     /// @returns true if @p mat needs to be decomposed
-    static bool NeedsDecomposing(const core::type::Matrix* mat) { return mat->ColumnStride() & 15; }
+    static bool NeedsDecomposing(const core::type::Matrix* mat) {
+        // Std140 layout rules only require us to do this transform for matrices whose column
+        // strides are not a multiple of 16 bytes.
+        //
+        // Due to a bug on Qualcomm devices, we also do this when the *size* of the column vector is
+        // not a multiple of 16 bytes (e.g. matCx3 types). See crbug.com/tint/2074.
+        return mat->ColumnType()->Size() & 15;
+    }
 
     /// Rewrite a type if necessary, decomposing contained matrices.
     /// @param type the type to rewrite

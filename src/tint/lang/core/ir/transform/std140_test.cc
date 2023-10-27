@@ -60,50 +60,6 @@ TEST_F(IR_Std140Test, NoRootBlock) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_Std140Test, NoModify_Mat2x3) {
-    auto* mat = ty.mat2x3<f32>();
-    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
-                                                                 {mod.symbols.New("a"), mat},
-                                                             });
-    structure->SetStructFlag(core::type::kBlock);
-
-    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
-    buffer->SetBindingPoint(0, 0);
-    mod.root_block->Append(buffer);
-
-    auto* func = b.Function("foo", mat);
-    b.Append(func->Block(), [&] {
-        auto* access = b.Access(ty.ptr(uniform, mat), buffer, 0_u);
-        auto* load = b.Load(access);
-        b.Return(func, load);
-    });
-
-    auto* src = R"(
-MyStruct = struct @align(16), @block {
-  a:mat2x3<f32> @offset(0)
-}
-
-%b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
-}
-
-%foo = func():mat2x3<f32> -> %b2 {
-  %b2 = block {
-    %3:ptr<uniform, mat2x3<f32>, read_write> = access %buffer, 0u
-    %4:mat2x3<f32> = load %3
-    ret %4
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = src;
-
-    Run(Std140);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(IR_Std140Test, NoModify_Mat2x4) {
     auto* mat = ty.mat2x4<f32>();
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
@@ -1444,6 +1400,80 @@ MyStruct_std140 = struct @align(128), @block {
     %17:i32 = load %16
     %b:i32 = let %17
     ret
+  }
+}
+)";
+
+    Run(Std140);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_Std140Test, Mat4x3_LoadMatrix) {
+    auto* mat = ty.mat4x3<f32>();
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("a"), mat},
+                                                             });
+    structure->SetStructFlag(core::type::kBlock);
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", mat);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr(uniform, mat), buffer, 0_u);
+        auto* load = b.Load(access);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(16), @block {
+  a:mat4x3<f32> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():mat4x3<f32> -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, mat4x3<f32>, read_write> = access %buffer, 0u
+    %4:mat4x3<f32> = load %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(16), @block {
+  a:mat4x3<f32> @offset(0)
+}
+
+MyStruct_std140 = struct @align(16), @block {
+  a_col0:vec3<f32> @offset(0)
+  a_col1:vec3<f32> @offset(16)
+  a_col2:vec3<f32> @offset(32)
+  a_col3:vec3<f32> @offset(48)
+}
+
+%b1 = block {  # root
+  %buffer:ptr<uniform, MyStruct_std140, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():mat4x3<f32> -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u
+    %4:vec3<f32> = load %3
+    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 1u
+    %6:vec3<f32> = load %5
+    %7:ptr<uniform, vec3<f32>, read_write> = access %buffer, 2u
+    %8:vec3<f32> = load %7
+    %9:ptr<uniform, vec3<f32>, read_write> = access %buffer, 3u
+    %10:vec3<f32> = load %9
+    %11:mat4x3<f32> = construct %4, %6, %8, %10
+    ret %11
   }
 }
 )";

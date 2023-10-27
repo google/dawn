@@ -1603,6 +1603,243 @@ fn main() {
     EXPECT_BUFFER_FLOAT_RANGE_EQ(expected.data(), buffer, 0, expected.size());
 }
 
+// Test that robustness works correctly on uniform buffers that contain mat4x3 types, which can
+// cause issues on Qualcomm devices. See crbug.com/tint/2074.
+TEST_P(ShaderTests, Robustness_Uniform_Mat4x3) {
+    // Note: Using non-zero values would make the test more robust, but this involves small changes
+    // to the shader which stop the miscompile in the original bug from happening.
+    std::vector<float> inputs{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    std::vector<uint32_t> constantData{0};
+    std::vector<uint32_t> outputs{0xDEADBEEFu};
+    uint64_t bufferSize = static_cast<uint64_t>(inputs.size() * sizeof(float));
+    wgpu::Buffer buffer =
+        utils::CreateBufferFromData(device, inputs.data(), bufferSize, wgpu::BufferUsage::Uniform);
+    wgpu::Buffer constants =
+        utils::CreateBufferFromData(device, constantData.data(), 4, wgpu::BufferUsage::Uniform);
+    wgpu::Buffer output = utils::CreateBufferFromData(
+        device, outputs.data(), 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+
+    // Note: This shader was lifted from WebGPU CTS, and triggers a miscompile for the second case.
+    // The miscompile disappears when too much of the unrelated code is deleted or changed, so the
+    // shader is left in it's original form.
+    std::string shader = R"(
+    struct Constants {
+      zero: u32
+    };
+    @group(0) @binding(2) var<uniform> constants: Constants;
+
+    struct Result {
+      value: u32
+    };
+    @group(0) @binding(1) var<storage, read_write> result: Result;
+
+    struct TestData {
+      data: mat4x3<f32>,
+    };
+    @group(0) @binding(0) var<uniform> s: TestData;
+
+    fn runTest() -> u32 {
+      {
+        let index = (0u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1001u; }
+      }
+      {
+        let index = (4u - 1u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1002u; }
+      }
+      {
+        let index = (4u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1003u; }
+      }
+      {
+        let index = (1000000u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1004u; }
+      }
+      {
+        let index = (4294967295u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1005u; }
+      }
+      {
+        let index = (2147483647u);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1006u; }
+      }
+      {
+        let index = (0u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1007u; }
+      }
+      {
+        let index = (4u - 1u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1008u; }
+      }
+      {
+        let index = (4u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1009u; }
+      }
+      {
+        let index = (1000000u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x100au; }
+      }
+      {
+        let index = (4294967295u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x100bu; }
+      }
+      {
+        let index = (2147483647u) + 0u;
+        if (any(s.data[index] != vec3<f32>())) { return 0x100cu; }
+      }
+      {
+        let index = (0u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x100du; }
+      }
+      {
+        let index = (4u - 1u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x100eu; }
+      }
+      {
+        let index = (4u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x100fu; }
+      }
+      {
+        let index = (1000000u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1010u; }
+      }
+      {
+        let index = (4294967295u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1011u; }
+      }
+      {
+        let index = (2147483647u) + u32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1012u; }
+      }
+      {
+        let index = (0);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1013u; }
+      }
+      {
+        let index = (4 - 1);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1014u; }
+      }
+      {
+        let index = (-1);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1015u; }
+      }
+      {
+        let index = (4);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1016u; }
+      }
+      {
+        let index = (-1000000);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1017u; }
+      }
+      {
+        let index = (1000000);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1018u; }
+      }
+      {
+        let index = (-2147483648);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1019u; }
+      }
+      {
+        let index = (2147483647);
+        if (any(s.data[index] != vec3<f32>())) { return 0x101au; }
+      }
+      {
+        let index = (0) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x101bu; }
+      }
+      {
+        let index = (4 - 1) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x101cu; }
+      }
+      {
+        let index = (-1) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x101du; }
+      }
+      {
+        let index = (4) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x101eu; }
+      }
+      {
+        let index = (-1000000) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x101fu; }
+      }
+      {
+        let index = (1000000) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1020u; }
+      }
+      {
+        let index = (-2147483648) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1021u; }
+      }
+      {
+        let index = (2147483647) + 0;
+        if (any(s.data[index] != vec3<f32>())) { return 0x1022u; }
+      }
+      {
+        let index = (0) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1023u; }
+      }
+      {
+        let index = (4 - 1) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1024u; }
+      }
+      {
+        let index = (-1) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1025u; }
+      }
+      {
+        let index = (4) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1026u; }
+      }
+      {
+        let index = (-1000000) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1027u; }
+      }
+      {
+        let index = (1000000) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1028u; }
+      }
+      {
+        let index = (-2147483648) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x1029u; }
+      }
+      {
+        let index = (2147483647) + i32(constants.zero);
+        if (any(s.data[index] != vec3<f32>())) { return 0x102au; }
+      }
+      return 0u;
+    }
+
+    @compute @workgroup_size(1)
+    fn main() {
+      result.value = runTest();
+    }
+)";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, buffer}, {1, output}, {2, constants}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    outputs[0] = 0u;
+    EXPECT_BUFFER_U32_RANGE_EQ(outputs.data(), output, 0, outputs.size());
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),
