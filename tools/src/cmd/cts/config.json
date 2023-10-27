@@ -58,10 +58,7 @@
     }
   },
   "Tag": {
-    "Remove": [
-      // crbug.com/dawn/1401
-      "release-x64",
-    ],
+    "Remove": [],
   },
   "Sheets": {
     // Spreadsheet to export results data to
