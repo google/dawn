@@ -100,13 +100,13 @@ class RenderPassBuilder {
     D3D12_RENDER_PASS_FLAGS mRenderPassFlags = D3D12_RENDER_PASS_FLAG_NONE;
     D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;
     ityp::array<ColorAttachmentIndex, D3D12_RENDER_PASS_RENDER_TARGET_DESC, kMaxColorAttachments>
-        mRenderPassRenderTargetDescriptors;
+        mRenderPassRenderTargetDescriptors{};
     ityp::array<ColorAttachmentIndex, D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments>
-        mRenderTargetViews;
+        mRenderTargetViews{};
     ityp::array<ColorAttachmentIndex,
                 D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS,
                 kMaxColorAttachments>
-        mSubresourceParams;
+        mSubresourceParams{};
 };
 }  // namespace dawn::native::d3d12
 

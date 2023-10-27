@@ -127,6 +127,12 @@ void RenderPassBuilder::SetRenderTargetView(ColorAttachmentIndex attachmentIndex
         mHighestColorAttachmentIndexPlusOne = std::max(
             mHighestColorAttachmentIndexPlusOne,
             ColorAttachmentIndex{static_cast<uint8_t>(static_cast<uint8_t>(attachmentIndex) + 1u)});
+    } else {
+        // Null views should not be accessed
+        mRenderPassRenderTargetDescriptors[attachmentIndex].BeginningAccess.Type =
+            D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_NO_ACCESS;
+        mRenderPassRenderTargetDescriptors[attachmentIndex].EndingAccess.Type =
+            D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_NO_ACCESS;
     }
 }
 
