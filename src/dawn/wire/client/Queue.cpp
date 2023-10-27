@@ -51,24 +51,18 @@ class WorkDoneEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(EventCompletionType completionType) override {
-        WGPUQueueWorkDoneStatus status = completionType == EventCompletionType::Shutdown
-                                             ? WGPUQueueWorkDoneStatus_DeviceLost
-                                             : WGPUQueueWorkDoneStatus_Success;
-        if (mStatus) {
-            // TODO(crbug.com/dawn/2021): Pretend things success when the device is lost.
-            status = *mStatus == WGPUQueueWorkDoneStatus_DeviceLost
-                         ? WGPUQueueWorkDoneStatus_Success
-                         : *mStatus;
+        if (mStatus == WGPUQueueWorkDoneStatus_DeviceLost) {
+            mStatus = WGPUQueueWorkDoneStatus_Success;
         }
         if (mCallback) {
-            mCallback(status, mUserdata);
+            mCallback(mStatus, mUserdata);
         }
     }
 
     WGPUQueueWorkDoneCallback mCallback;
     void* mUserdata;
 
-    std::optional<WGPUQueueWorkDoneStatus> mStatus;
+    WGPUQueueWorkDoneStatus mStatus = WGPUQueueWorkDoneStatus_Success;
 };
 
 }  // anonymous namespace

@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "dawn/common/Log.h"
 #include "dawn/mock_webgpu.h"
 #include "gtest/gtest.h"
 
@@ -104,6 +105,16 @@ class StringMessageMatcher : public testing::MatcherInterface<const char*> {
 inline testing::Matcher<const char*> ValidStringMessage() {
     return MakeMatcher(new StringMessageMatcher());
 }
+
+// Skip a test when the given condition is satisfied.
+#define DAWN_SKIP_TEST_IF(condition)                            \
+    do {                                                        \
+        if (condition) {                                        \
+            dawn::InfoLog() << "Test skipped: " #condition "."; \
+            GTEST_SKIP();                                       \
+            return;                                             \
+        }                                                       \
+    } while (0)
 
 namespace dawn::wire {
 class WireClient;

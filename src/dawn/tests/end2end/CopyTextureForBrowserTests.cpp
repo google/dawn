@@ -35,6 +35,19 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+// TODO: Remove these stream operators if we move them to a standard location.
+namespace wgpu {
+std::ostream& operator<<(std::ostream& o, Origin3D origin) {
+    o << origin.x << ", " << origin.y << ", " << origin.z;
+    return o;
+}
+
+std::ostream& operator<<(std::ostream& o, Extent3D copySize) {
+    o << copySize.width << ", " << copySize.height << ", " << copySize.depthOrArrayLayers;
+    return o;
+}
+}  // namespace wgpu
+
 namespace dawn {
 namespace {
 
@@ -59,16 +72,6 @@ using SrcColorSpace = ColorSpace;
 using DstColorSpace = ColorSpace;
 using SrcAlphaMode = wgpu::AlphaMode;
 using DstAlphaMode = wgpu::AlphaMode;
-
-std::ostream& operator<<(std::ostream& o, wgpu::Origin3D origin) {
-    o << origin.x << ", " << origin.y << ", " << origin.z;
-    return o;
-}
-
-std::ostream& operator<<(std::ostream& o, wgpu::Extent3D copySize) {
-    o << copySize.width << ", " << copySize.height << ", " << copySize.depthOrArrayLayers;
-    return o;
-}
 
 std::ostream& operator<<(std::ostream& o, ColorSpace space) {
     o << static_cast<uint32_t>(space);

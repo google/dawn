@@ -782,11 +782,6 @@ using DawnTest = DawnTestWithParams<>;
         DawnTestBase::PrintToStringParamName(#testName));                                    \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
-// Implementation for DAWN_TEST_PARAM_STRUCT to declare/print struct fields.
-#define DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD(Type) Type DAWN_PP_CONCATENATE(m, Type);
-#define DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD(Type) \
-    o << "; " << #Type << "=" << param.DAWN_PP_CONCATENATE(m, Type);
-
 // Usage: DAWN_TEST_PARAM_STRUCT(Foo, TypeA, TypeB, ...)
 // Generate a test param struct called Foo which extends AdapterTestParam and generated
 // struct _Dawn_Foo. _Dawn_Foo has members of types TypeA, TypeB, etc. which are named mTypeA,
@@ -797,29 +792,8 @@ using DawnTest = DawnTestWithParams<>;
 // Example:
 //   using MyParam = unsigned int;
 //   DAWN_TEST_PARAM_STRUCT(FooParams, MyParam);
-#define DAWN_TEST_PARAM_STRUCT(StructName, ...)                                                    \
-    struct DAWN_PP_CONCATENATE(_Dawn_, StructName) {                                               \
-        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD,  \
-                                                        __VA_ARGS__))                              \
-    };                                                                                             \
-    inline std::ostream& operator<<(std::ostream& o,                                               \
-                                    const DAWN_PP_CONCATENATE(_Dawn_, StructName) & param) {       \
-        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD, \
-                                                        __VA_ARGS__))                              \
-        return o;                                                                                  \
-    }                                                                                              \
-    struct StructName : AdapterTestParam, DAWN_PP_CONCATENATE(_Dawn_, StructName) {                \
-        template <typename... Args>                                                                \
-        StructName(const AdapterTestParam& param, Args&&... args)                                  \
-            : AdapterTestParam(param),                                                             \
-              DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {}              \
-    };                                                                                             \
-    inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
-        o << static_cast<const AdapterTestParam&>(param);                                          \
-        o << "; " << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);           \
-        return o;                                                                                  \
-    }                                                                                              \
-    static_assert(true, "require semicolon")
+#define DAWN_TEST_PARAM_STRUCT(StructName, ...) \
+    DAWN_TEST_PARAM_STRUCT_BASE(AdapterTestParam, StructName, __VA_ARGS__)
 
 namespace detail {
 // Helper functions used for DAWN_INSTANTIATE_TEST
@@ -900,5 +874,20 @@ class CustomTextureExpectation : public Expectation {
 };
 
 }  // namespace detail
+
+template <typename Param, typename... Params>
+auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
+                        std::initializer_list<Params>&&... params) {
+    return ParamGenerator<Param, AdapterTestParam, Params...>(
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        std::forward<std::initializer_list<Params>&&>(params)...);
+}
+template <typename Param, typename... Params>
+auto MakeParamGenerator(std::vector<BackendTestConfig>&& first, std::vector<Params>&&... params) {
+    return ParamGenerator<Param, AdapterTestParam, Params...>(
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        std::forward<std::vector<Params>&&>(params)...);
+}
+
 }  // namespace dawn
 #endif  // SRC_DAWN_TESTS_DAWNTEST_H_
