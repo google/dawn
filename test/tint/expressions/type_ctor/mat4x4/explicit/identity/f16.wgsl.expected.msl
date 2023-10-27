@@ -5,8 +5,10 @@ struct tint_private_vars_struct {
   half4x4 m;
 };
 
-half4x4 f(thread tint_private_vars_struct* const tint_private_vars) {
-  half4x4 const m_1 = half4x4((*(tint_private_vars)).m);
-  return m_1;
+kernel void f(device half4x4* tint_symbol [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.m = half4x4(half4(0.0h, 1.0h, 2.0h, 3.0h), half4(4.0h, 5.0h, 6.0h, 7.0h), half4(8.0h, 9.0h, 10.0h, 11.0h), half4(12.0h, 13.0h, 14.0h, 15.0h));
+  *(tint_symbol) = half4x4(tint_private_vars.m);
+  return;
 }
 

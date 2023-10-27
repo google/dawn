@@ -1,8 +1,9 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void f() {
+kernel void f(device half4x2* tint_symbol [[buffer(0)]]) {
   half4x2 m = half4x2(half2(0.0h), half2(0.0h), half2(0.0h), half2(0.0h));
-  half4x2 const m_1 = half4x2(m);
+  *(tint_symbol) = half4x2(m);
+  return;
 }
 

@@ -1,8 +1,9 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void f() {
+kernel void f(device float3x2* tint_symbol [[buffer(0)]]) {
   float3x2 m = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
-  float3x2 const m_1 = float3x2(m);
+  *(tint_symbol) = float3x2(m);
+  return;
 }
 

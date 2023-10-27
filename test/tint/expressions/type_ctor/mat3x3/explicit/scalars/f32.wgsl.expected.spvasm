@@ -1,14 +1,25 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 23
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
                OpName %m "m"
-               OpName %unused_entry_point "unused_entry_point"
+               OpName %out_block "out_block"
+               OpMemberName %out_block 0 "inner"
+               OpName %out "out"
+               OpName %assign_and_preserve_padding_out "assign_and_preserve_padding_out"
+               OpName %value "value"
+               OpName %f "f"
+               OpDecorate %out_block Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpMemberDecorate %out_block 0 ColMajor
+               OpMemberDecorate %out_block 0 MatrixStride 16
+               OpDecorate %out DescriptorSet 0
+               OpDecorate %out Binding 0
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3
@@ -27,9 +38,39 @@
          %16 = OpConstantComposite %mat3v3float %7 %11 %15
 %_ptr_Private_mat3v3float = OpTypePointer Private %mat3v3float
           %m = OpVariable %_ptr_Private_mat3v3float Private %16
+  %out_block = OpTypeStruct %mat3v3float
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+        %out = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
-         %19 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %19
-         %22 = OpLabel
+         %22 = OpTypeFunction %void %mat3v3float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %30 = OpConstantNull %int
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+         %33 = OpConstantNull %uint
+      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
+      %int_2 = OpConstant %int 2
+     %uint_2 = OpConstant %uint 2
+         %43 = OpTypeFunction %void
+%assign_and_preserve_padding_out = OpFunction %void None %22
+      %value = OpFunctionParameter %mat3v3float
+         %26 = OpLabel
+         %32 = OpAccessChain %_ptr_StorageBuffer_v3float %out %uint_0 %30
+         %34 = OpCompositeExtract %v3float %value 0
+               OpStore %32 %34
+         %36 = OpAccessChain %_ptr_StorageBuffer_v3float %out %uint_0 %int_1
+         %38 = OpCompositeExtract %v3float %value 1
+               OpStore %36 %38
+         %40 = OpAccessChain %_ptr_StorageBuffer_v3float %out %uint_0 %int_2
+         %42 = OpCompositeExtract %v3float %value 2
+               OpStore %40 %42
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %43
+         %45 = OpLabel
+         %47 = OpLoad %mat3v3float %m
+         %46 = OpFunctionCall %void %assign_and_preserve_padding_out %47
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 23
+; Bound: 31
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -9,10 +9,19 @@
                OpCapability StorageBuffer16BitAccess
                OpCapability StorageInputOutput16
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
                OpName %m "m"
-               OpName %unused_entry_point "unused_entry_point"
+               OpName %out_block "out_block"
+               OpMemberName %out_block 0 "inner"
+               OpName %out "out"
+               OpName %f "f"
+               OpDecorate %out_block Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpMemberDecorate %out_block 0 ColMajor
+               OpMemberDecorate %out_block 0 MatrixStride 4
+               OpDecorate %out DescriptorSet 0
+               OpDecorate %out Binding 0
        %half = OpTypeFloat 16
      %v2half = OpTypeVector %half 2
  %mat4v2half = OpTypeMatrix %v2half 4
@@ -31,9 +40,18 @@
          %16 = OpConstantComposite %mat4v2half %6 %9 %12 %15
 %_ptr_Private_mat4v2half = OpTypePointer Private %mat4v2half
           %m = OpVariable %_ptr_Private_mat4v2half Private %16
+  %out_block = OpTypeStruct %mat4v2half
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+        %out = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
-         %19 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %19
-         %22 = OpLabel
+         %22 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_mat4v2half = OpTypePointer StorageBuffer %mat4v2half
+          %f = OpFunction %void None %22
+         %25 = OpLabel
+         %29 = OpAccessChain %_ptr_StorageBuffer_mat4v2half %out %uint_0
+         %30 = OpLoad %mat4v2half %m
+               OpStore %29 %30
                OpReturn
                OpFunctionEnd
