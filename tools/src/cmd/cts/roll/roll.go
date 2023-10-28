@@ -662,14 +662,8 @@ func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, err
 // * webtest file sources
 func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 	// Run 'npm ci' to fetch modules and tsc
-	{
-		log.Printf("fetching npm modules with 'npm ci'...")
-		cmd := exec.CommandContext(ctx, r.flags.npmPath, "ci")
-		cmd.Dir = r.ctsDir
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return nil, fmt.Errorf("failed to run 'npm ci': %w\n%v", err, string(out))
-		}
+	if err := common.InstallCTSDeps(ctx, r.ctsDir, r.flags.npmPath); err != nil {
+		return nil, err
 	}
 
 	log.Printf("generating files for changelist...")

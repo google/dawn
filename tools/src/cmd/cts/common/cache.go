@@ -56,6 +56,8 @@ const gcpBucket = "dawn-webgpu-cts-cache"
 
 // BuildCache builds the CTS case cache and uploads it to gcpBucket.
 // Returns the cache file list
+// Note: InstallCTSDeps() should be called before this function to ensure all
+// CTS dependencies are installed
 func BuildCache(ctx context.Context, ctsDir, nodePath, npmPath string, authFlags authcli.Flags) (string, error) {
 	ctsHash, err := gitHashOf(ctsDir)
 	if err != nil {
@@ -80,14 +82,6 @@ func BuildCache(ctx context.Context, ctsDir, nodePath, npmPath string, authFlags
 		return "", err
 	}
 	defer os.RemoveAll(cacheDir)
-
-	{ // Ensure CTS dependencies are up to date
-		cmd := exec.CommandContext(ctx, npmPath, "ci")
-		cmd.Dir = ctsDir
-		if out, err := cmd.CombinedOutput(); err != nil {
-			return "", fmt.Errorf("'npm ci' errored: %v\n\n%v", err, string(out))
-		}
-	}
 
 	// Build the case cache .json files with numCPUs concurrent processes
 	errs := make(chan error, 8)
