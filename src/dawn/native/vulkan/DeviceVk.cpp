@@ -738,7 +738,9 @@ void Device::DestroyImpl() {
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
-    GetQueue()->Destroy();
+    if (GetQueue() != nullptr) {
+        GetQueue()->Destroy();
+    }
 
     for (Ref<DescriptorSetAllocator>& allocator :
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(kMaxExecutionSerial)) {
