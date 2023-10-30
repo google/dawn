@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,64 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// run-cts is a tool used to run the WebGPU CTS using either dawn.node module
-// for NodeJS or with Chrome.
-package main
+package common
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"os"
-
-	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/chrome"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/node"
+	"sort"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := common.Config{}
+// Results is a map of test to status
+type Results map[TestCase]Status
 
-	if err := subcmd.Run(ctx, cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		os.Exit(1)
+// Load loads the results from path
+func (e *Results) Load(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("failed to open expectations file: %w", err)
 	}
+	defer f.Close()
+
+	statuses := []testcaseStatus{}
+	if err := json.NewDecoder(f).Decode(&statuses); err != nil {
+		return fmt.Errorf("failed to read expectations file: %w", err)
+	}
+
+	*e = make(Results, len(statuses))
+	for _, s := range statuses {
+		(*e)[s.TestCase] = s.Status
+	}
+	return nil
+}
+
+// Save saves the results to path
+func (e Results) Save(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to create expectations file: %w", err)
+	}
+	defer f.Close()
+
+	statuses := make([]testcaseStatus, 0, len(e))
+	for testcase, status := range e {
+		statuses = append(statuses, testcaseStatus{testcase, status})
+	}
+	sort.Slice(statuses, func(i, j int) bool { return statuses[i].TestCase < statuses[j].TestCase })
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(&statuses); err != nil {
+		return fmt.Errorf("failed to save expectations file: %w", err)
+	}
+
+	return nil
+}
+
+// testcaseStatus is a pair of testcase name and result status
+// Intended to be serialized for expectations files.
+type testcaseStatus struct {
+	TestCase TestCase
+	Status   Status
 }

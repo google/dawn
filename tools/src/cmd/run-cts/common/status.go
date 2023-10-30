@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// run-cts is a tool used to run the WebGPU CTS using either dawn.node module
-// for NodeJS or with Chrome.
-package main
+package common
 
-import (
-	"context"
-	"fmt"
-	"os"
+// Status is an enumerator of test result Status
+type Status string
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/chrome"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/node"
+const (
+	Pass    Status = "pass"
+	Warn    Status = "warn"
+	Fail    Status = "fail"
+	Skip    Status = "skip"
+	Timeout Status = "timeout"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := common.Config{}
-
-	if err := subcmd.Run(ctx, cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		os.Exit(1)
-	}
-}
+// All the status types
+var AllStatuses = []Status{Pass, Warn, Fail, Skip, Timeout}

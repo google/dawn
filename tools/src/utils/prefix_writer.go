@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// run-cts is a tool used to run the WebGPU CTS using either dawn.node module
-// for NodeJS or with Chrome.
-package main
+package utils
 
 import (
-	"context"
-	"fmt"
-	"os"
-
-	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/chrome"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/node"
+	"io"
+	"strings"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := common.Config{}
+// PrefixWriter is an io.Writer that prefixes each write with a prefix string
+type PrefixWriter struct {
+	Prefix string
+	Writer io.Writer
+}
 
-	if err := subcmd.Run(ctx, cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
+func (p *PrefixWriter) Write(data []byte) (int, error) {
+	lines := strings.Split(string(data), "\n")
+	buf := strings.Builder{}
+	for i, line := range lines {
+		if line == "" && i == len(lines)-1 {
+			break
 		}
-		os.Exit(1)
+		buf.WriteString(p.Prefix)
+		buf.WriteString(line)
+		buf.WriteString("\n")
 	}
+	if _, err := p.Writer.Write([]byte(buf.String())); err != nil {
+		return 0, err
+	}
+	return len(data), nil
 }

@@ -110,6 +110,20 @@ For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout,
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
 
+### Testing with Chrome instead of dawn.node
+
+`run-cts` can also run CTS using a Chrome instance. Just add `chrome` after `run-cts`:
+
+```sh
+./tools/run run-cts chrome [WebGPU CTS query]
+```
+
+To see additional options, run:
+
+```sh
+./tools/run run-cts help chrome
+```
+
 ### Testing against a `run-cts` expectations file
 
 You can write out an expectations file with the `--output <path>` command line flag, and then compare this snapshot to a later run with `--expect <path>`.

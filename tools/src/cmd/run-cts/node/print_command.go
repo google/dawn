@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,57 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// run-cts is a tool used to run the WebGPU CTS using either dawn.node module
-// for NodeJS or with Chrome.
-package main
+package node
 
 import (
-	"context"
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"os"
-
-	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/chrome"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/node"
+	"os/exec"
+	"strings"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := common.Config{}
-
-	if err := subcmd.Run(ctx, cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
+func PrintCommand(cmd *exec.Cmd) {
+	maybeQuote := func(s string) string {
+		if strings.ContainsAny(s, ` ,()"`) {
+			s = strings.ReplaceAll(s, `"`, `\"`)
+			s = fmt.Sprintf("\"%v\"", s)
 		}
-		os.Exit(1)
+		return s
 	}
+
+	output := &strings.Builder{}
+	fmt.Fprintln(output, "Running:")
+	fmt.Fprintf(output, "  Cmd: %v ", maybeQuote(cmd.Path))
+	for i, arg := range cmd.Args[1:] {
+		if i > 0 {
+			fmt.Fprint(output, " ")
+		}
+		fmt.Fprint(output, maybeQuote(arg))
+	}
+	fmt.Fprintln(output)
+	fmt.Fprintf(output, "  Dir: %v\n\n", cmd.Dir)
+
+	fmt.Fprint(output, "  For VS Code launch.json:\n")
+	launchCmd := struct {
+		Program string   `json:"program"`
+		Args    []string `json:"args"`
+		Cwd     string   `json:"cwd"`
+	}{
+		Program: cmd.Path,
+		Args:    cmd.Args[1:],
+		Cwd:     cmd.Dir,
+	}
+
+	b := &bytes.Buffer{}
+	e := json.NewEncoder(b)
+	e.SetIndent("", "    ")
+	e.Encode(launchCmd)
+	s := b.String()
+	// Remove object braces and add trailing comma
+	s = strings.TrimPrefix(s, "{\n")
+	s = strings.TrimSuffix(s, "\n}\n") + ",\n"
+	fmt.Fprintln(output, s)
+
+	fmt.Print(output.String())
 }

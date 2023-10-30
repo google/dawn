@@ -119,3 +119,21 @@ func NodePath() string {
 
 	return ""
 }
+
+// IsDir returns true if the path resolves to a directory
+func IsDir(path string) bool {
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return s.IsDir()
+}
+
+// IsFile returns true if the path resolves to a file
+func IsFile(path string) bool {
+	s, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return !s.IsDir()
+}

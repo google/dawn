@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,39 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// run-cts is a tool used to run the WebGPU CTS using either dawn.node module
-// for NodeJS or with Chrome.
-package main
+package common
 
 import (
-	"context"
 	"fmt"
-	"os"
+	"io"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/chrome"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/run-cts/node"
+	"github.com/mattn/go-colorable"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := common.Config{}
+type Logger struct {
+	writer        io.Writer
+	lastIndex     int
+	resultByIndex map[int]Result
+}
 
-	if err := subcmd.Run(ctx, cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
+// NewLogger creates a new logger instance.
+func NewLogger(writer io.Writer) Logger {
+	return Logger{colorable.NewNonColorable(writer), 0, map[int]Result{}}
+}
+
+// logResult writes the test results to the log file in sequential order.
+// logResult should be called whenever a new test result becomes available.
+func (l *Logger) logResults(res Result) {
+	if l.writer == nil {
+		return
+	}
+	l.resultByIndex[res.Index] = res
+	for {
+		logRes, ok := l.resultByIndex[l.lastIndex]
+		if !ok {
+			break
 		}
-		os.Exit(1)
+		fmt.Fprintf(l.writer, "%v [%v]\n%v", logRes.TestCase, logRes.Status, logRes.Message)
+		l.lastIndex++
 	}
 }
