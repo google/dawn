@@ -67,7 +67,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Fetch dependencies
-      run: python ./tools/fetch_dawn_dependencies.py
+      run: python ./tools/fetch_dawn_dependencies.py --use-test-deps --shallow
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
