@@ -60,6 +60,7 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "build-node-output-dir=${{ github.workspace }}/build-node" >> "$GITHUB_OUTPUT"
 
     - name: Install Ubuntu build dependencies
       if: matrix.os == 'ubuntu-latest'
@@ -102,5 +103,27 @@ jobs:
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+
+    - name: Configure CMake for dawn.node
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake -G Ninja -B ${{ steps.strings.outputs.build-node-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCMAKE_C_COMPILER_LAUNCHER=sccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+        -DDAWN_BUILD_NODE_BINDINGS=1
+        -DDAWN_ENABLE_PIC=1
+        -S ${{ github.workspace }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+
+    - name: Build dawn.node
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+      run: cmake --build ${{ steps.strings.outputs.build-node-output-dir }} --config ${{ matrix.build_type }} dawn.node
       env:
         SCCACHE_GHA_ENABLED: "true"
