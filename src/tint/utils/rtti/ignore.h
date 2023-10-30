@@ -29,6 +29,8 @@
 #ifndef SRC_TINT_UTILS_RTTI_IGNORE_H_
 #define SRC_TINT_UTILS_RTTI_IGNORE_H_
 
+#include <type_traits>
+
 namespace tint {
 
 /// Ignore is used as a special type used for skipping over types for trait helper functions.
