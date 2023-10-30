@@ -66,6 +66,13 @@ type Command[Data any] interface {
 	Run(context.Context, Data) error
 }
 
+// DefaultCommand is the interface for a command that should be used as the
+// default if no command is specified on the command line. Only one command can
+// be the default command.
+type DefaultCommand interface {
+	IsDefaultCommand()
+}
+
 // Run handles the parses the command line arguments, possibly invoking one of
 // the provided commands.
 // If the command line arguments are invalid, then an error message is printed
@@ -80,7 +87,12 @@ func Run[Data any](ctx context.Context, data Data, cmds ...Command[Data]) error 
 		fmt.Fprintln(tw)
 		fmt.Fprintln(tw, "Commands:")
 		for _, cmd := range cmds {
-			fmt.Fprintln(tw, "  ", cmd.Name(), "\t-", cmd.Desc())
+			name := cmd.Name()
+			_, isDefault := cmd.(DefaultCommand)
+			if isDefault {
+				name += " (default)"
+			}
+			fmt.Fprintln(tw, "  ", name, "\t-", cmd.Desc())
 		}
 		fmt.Fprintln(tw)
 		fmt.Fprintln(tw, "Common flags:")
@@ -93,52 +105,90 @@ func Run[Data any](ctx context.Context, data Data, cmds ...Command[Data]) error 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/profile", pprof.Profile)
 
-	if len(os.Args) < 2 {
-		return InvalidCLA()
-	}
-	help := os.Args[1] == "help"
-	if help {
-		copy(os.Args[1:], os.Args[2:])
-		os.Args = os.Args[:len(os.Args)-1]
-	}
-
+	// Look for a default command
+	var defaultCmd Command[Data]
 	for _, cmd := range cmds {
-		if cmd.Name() == os.Args[1] {
-			out := flag.CommandLine.Output()
-			mandatory, err := cmd.RegisterFlags(ctx, data)
-			if err != nil {
-				return err
+		_, isDefault := cmd.(DefaultCommand)
+		if isDefault {
+			if defaultCmd != nil {
+				panic(fmt.Sprintf("both commands %v and %v implement DefaultCommand", defaultCmd.Name(), cmd.Name()))
 			}
-			flag.Usage = func() {
-				flagsAndArgs := append([]string{"<flags>"}, mandatory...)
-				fmt.Fprintln(out, exe, cmd.Name(), strings.Join(flagsAndArgs, " "))
-				fmt.Fprintln(out)
-				fmt.Fprintln(out, cmd.Desc())
-				fmt.Fprintln(out)
-				fmt.Fprintln(out, "flags:")
-				flag.PrintDefaults()
-			}
-			if help {
-				flag.Usage()
-				return nil
-			}
-			args := os.Args[2:] // all arguments after the exe and command
-			if err := flag.CommandLine.Parse(args); err != nil {
-				return err
-			}
-			if nonFlagArgs := flag.Args(); len(nonFlagArgs) < len(mandatory) {
-				fmt.Fprintln(out, "missing argument", mandatory[len(nonFlagArgs)])
-				fmt.Fprintln(out)
-				return InvalidCLA()
-			}
-			if profile {
-				fmt.Println("download profile at: localhost:8080/profile")
-				fmt.Println("then run: 'go tool pprof <file>'")
-				go http.ListenAndServe(":8080", mux)
-			}
-			return cmd.Run(ctx, data)
+			defaultCmd = cmd
 		}
 	}
 
-	return InvalidCLA()
+	var cmdName string
+	if len(os.Args) > 1 {
+		cmdName = os.Args[1]
+	}
+
+	args := os.Args[1:] // Skip executable name
+
+	// Find the requested command
+	cmd := findCmd(cmdName, cmds)
+	if cmd != nil {
+		args = args[1:] // Skip command name
+	}
+
+	help := strings.TrimLeft(cmdName, "-") == "help"
+	if help {
+		if len(args) > 1 { // help cmd ...
+			cmdName = args[1]
+			cmd = findCmd(cmdName, cmds)
+		}
+		if cmd == nil {
+			flag.Usage()
+			return nil
+		}
+	}
+
+	if cmd == nil { // Command not found
+		if defaultCmd == nil {
+			return InvalidCLA() // No default
+		}
+		cmd = defaultCmd // Use default command
+	}
+
+	out := flag.CommandLine.Output()
+	mandatory, err := cmd.RegisterFlags(ctx, data)
+	if err != nil {
+		return err
+	}
+	flag.Usage = func() {
+		flagsAndArgs := append([]string{"<flags>"}, mandatory...)
+		fmt.Fprintln(out, exe, cmd.Name(), strings.Join(flagsAndArgs, " "))
+		fmt.Fprintln(out)
+		fmt.Fprintln(out, cmd.Desc())
+		fmt.Fprintln(out)
+		fmt.Fprintln(out, "flags:")
+		flag.PrintDefaults()
+	}
+	if help {
+		flag.Usage()
+		return nil
+	}
+	if err := flag.CommandLine.Parse(args); err != nil {
+		return err
+	}
+	if nonFlagArgs := flag.Args(); len(nonFlagArgs) < len(mandatory) {
+		fmt.Fprintln(out, "missing argument", mandatory[len(nonFlagArgs)])
+		fmt.Fprintln(out)
+		return InvalidCLA()
+	}
+	if profile {
+		fmt.Println("download profile at: localhost:8080/profile")
+		fmt.Println("then run: 'go tool pprof <file>'")
+		go http.ListenAndServe(":8080", mux)
+	}
+
+	return cmd.Run(ctx, data)
+}
+
+func findCmd[Data any](name string, cmds []Command[Data]) Command[Data] {
+	for _, c := range cmds {
+		if c.Name() == name {
+			return c
+		}
+	}
+	return nil
 }

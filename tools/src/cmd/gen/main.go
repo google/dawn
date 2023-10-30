@@ -32,7 +32,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/build"
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
@@ -45,11 +44,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-
-	if len(os.Args) == 1 || strings.HasPrefix(os.Args[1], "-") {
-		os.Args = append([]string{os.Args[0], "all"}, os.Args[1:]...)
-	}
-
 	cfg := &common.Config{}
 	cfg.RegisterFlags()
 
@@ -67,6 +61,8 @@ func init() {
 
 type cmdAll struct {
 }
+
+func (cmdAll) IsDefaultCommand() {}
 
 func (cmdAll) Name() string {
 	return "all"
