@@ -62,7 +62,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT
 
     - name: Install Ubuntu build dependencies
-      if: matrix.os == 'ubuntu-latest
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt update
         sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
