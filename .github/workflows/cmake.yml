@@ -79,7 +79,7 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Set up Visual Studio x64 environment
-      if: matrix.is == 'windows-latest'
+      if: matrix.os == 'windows-latest'
       run: |
         call "C:/Program Files (x86)/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsall.bat" x64
 
