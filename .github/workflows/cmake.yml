@@ -59,7 +59,13 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT
+
+    - name: Install Ubuntu build dependencies
+      if: matrix.os == 'ubuntu-latest
+      run: |
+        sudo apt update
+        sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
