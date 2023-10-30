@@ -57,9 +57,17 @@ def cts_hash():
 
 def download_from_bucket(name, dst):
     gsutil = os.path.join(find_depot_tools.DEPOT_TOOLS_PATH, 'gsutil.py')
-    subprocess.check_output(
-        ['python3', gsutil, 'cp', 'gs://{}/{}'.format(bucket, name), dst],
-        cwd=script_root)
+    try:
+        cmd = subprocess.run(
+            ['python3', gsutil, 'cp', 'gs://{}/{}'.format(bucket, name), dst],
+            cwd=script_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as ex:
+        output = ex.stdout.decode('utf-8')
+        print('gsutil.py cp failed: {}'.format(output), file=sys.stderr)
+        raise
 
 
 def gen_cache(out_dir):
