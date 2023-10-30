@@ -65,7 +65,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt update
-        sudo apt install libgl-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
+        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
