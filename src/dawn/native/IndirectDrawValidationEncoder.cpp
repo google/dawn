@@ -409,6 +409,10 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                 } else {
                     outputParamsOffset += kDrawIndirectSize;
                 }
+                if (pass.flags & kDuplicateBaseVertexInstance) {
+                    // Add the extra offset for the duplicated base vertex and instance.
+                    outputParamsOffset += 2 * sizeof(uint32_t);
+                }
             }
         }
     }
