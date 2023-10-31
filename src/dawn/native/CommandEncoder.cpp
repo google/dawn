@@ -1185,7 +1185,17 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             FindInChain(descriptor->nextInChain, &pls);
             if (pls != nullptr) {
                 for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-                    usageTracker.TextureViewUsedAs(pls->storageAttachments[i].storage,
+                    const RenderPassStorageAttachment& apiAttachment = pls->storageAttachments[i];
+                    RenderPassStorageAttachmentInfo* attachmentInfo =
+                        &cmd->storageAttachments[apiAttachment.offset / kPLSSlotByteSize];
+
+                    attachmentInfo->storage = apiAttachment.storage;
+                    attachmentInfo->loadOp = apiAttachment.loadOp;
+                    attachmentInfo->storeOp = apiAttachment.storeOp;
+                    attachmentInfo->clearColor = ClampClearColorValueToLegalRange(
+                        apiAttachment.clearValue, apiAttachment.storage->GetFormat());
+
+                    usageTracker.TextureViewUsedAs(apiAttachment.storage,
                                                    wgpu::TextureUsage::StorageAttachment);
                 }
             }

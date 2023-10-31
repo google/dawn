@@ -392,7 +392,8 @@ MaybeError RenderPipeline::Initialize() {
         ShaderModule::MetalFunctionData fragmentData;
         DAWN_TRY(ToBackend(fragmentStage.module.Get())
                      ->CreateFunction(SingleShaderStage::Fragment, fragmentStage,
-                                      ToBackend(GetLayout()), &fragmentData, GetSampleMask()));
+                                      ToBackend(GetLayout()), &fragmentData, GetSampleMask(),
+                                      this));
 
         descriptorMTL.fragmentFunction = fragmentData.function.Get();
         if (fragmentData.needsStorageBufferLength) {
@@ -406,6 +407,25 @@ MaybeError RenderPipeline::Initialize() {
             const ColorTargetState* descriptor = GetColorTargetState(i);
             ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
                              fragmentOutputsWritten[i]);
+        }
+
+        if (GetAttachmentState()->HasPixelLocalStorage()) {
+            const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
+                GetAttachmentState()->GetStorageAttachmentSlots();
+            std::vector<ColorAttachmentIndex> storageAttachmentPacking =
+                GetAttachmentState()->ComputeStorageAttachmentPackingInColorAttachments();
+
+            for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
+                uint8_t index = static_cast<uint8_t>(storageAttachmentPacking[i]);
+
+                if (storageAttachmentSlots[i] == wgpu::TextureFormat::Undefined) {
+                    descriptorMTL.colorAttachments[index].pixelFormat =
+                        MetalPixelFormat(GetDevice(), kImplicitPLSSlotFormat);
+                } else {
+                    descriptorMTL.colorAttachments[index].pixelFormat =
+                        MetalPixelFormat(GetDevice(), storageAttachmentSlots[i]);
+                }
+            }
         }
     }
 

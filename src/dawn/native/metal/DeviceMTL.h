@@ -60,7 +60,7 @@ class Device final : public DeviceBase {
 
     MaybeError TickImpl() override;
 
-    id<MTLDevice> GetMTLDevice();
+    id<MTLDevice> GetMTLDevice() const;
 
     // TODO(dawn:1413) Use the metal::Queue directly instead of this proxy method.
     CommandRecordingContext* GetPendingCommandContext(

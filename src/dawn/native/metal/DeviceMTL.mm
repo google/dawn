@@ -305,7 +305,7 @@ MaybeError Device::TickImpl() {
     return {};
 }
 
-id<MTLDevice> Device::GetMTLDevice() {
+id<MTLDevice> Device::GetMTLDevice() const {
     return mMtlDevice.Get();
 }
 

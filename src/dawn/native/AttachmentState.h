@@ -68,6 +68,7 @@ class AttachmentState final : public ObjectBase,
     bool IsMSAARenderToSingleSampledEnabled() const;
     bool HasPixelLocalStorage() const;
     const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
+    std::vector<ColorAttachmentIndex> ComputeStorageAttachmentPackingInColorAttachments() const;
 
     struct EqualityFunc {
         bool operator()(const AttachmentState* a, const AttachmentState* b) const;

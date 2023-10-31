@@ -189,6 +189,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
 
+    tint::PixelLocalOptions pixelLocal;
+    if (stage == SingleShaderStage::Fragment && layout->HasPixelLocalStorage()) {
+        const AttachmentState* attachmentState = renderPipeline->GetAttachmentState();
+        const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
+            attachmentState->GetStorageAttachmentSlots();
+        std::vector<ColorAttachmentIndex> storageAttachmentPacking =
+            attachmentState->ComputeStorageAttachmentPackingInColorAttachments();
+
+        for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
+            pixelLocal.attachments[i] = uint8_t(storageAttachmentPacking[i]);
+        }
+    }
+
     MslCompilationRequest req = {};
     req.stage = stage;
     req.inputProgram = programmableStage.module->GetTintProgram();
@@ -208,6 +221,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
     req.tintOptions.binding_remapper_options = std::move(bindingRemapper);
     req.tintOptions.external_texture_options = BuildExternalTextureTransformBindings(layout);
+    req.tintOptions.pixel_local_options = std::move(pixelLocal);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);

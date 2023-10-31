@@ -70,6 +70,11 @@ MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage
         result |= MTLTextureUsageRenderTarget;
     }
 
+    if (usage & wgpu::TextureUsage::StorageAttachment) {
+        // TODO(dawn:1704): Support PLS on non-tiler Metal devices.
+        result |= MTLTextureUsageRenderTarget;
+    }
+
     return result;
 }
 
@@ -98,8 +103,9 @@ bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                     const TextureViewDescriptor* textureViewDescriptor) {
     constexpr wgpu::TextureUsage kShaderUsageNeedsView =
         wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
-    constexpr wgpu::TextureUsage kUsageNeedsView =
-        kShaderUsageNeedsView | wgpu::TextureUsage::RenderAttachment;
+    constexpr wgpu::TextureUsage kUsageNeedsView = kShaderUsageNeedsView |
+                                                   wgpu::TextureUsage::RenderAttachment |
+                                                   wgpu::TextureUsage::StorageAttachment;
     if ((texture->GetInternalUsage() & kUsageNeedsView) == 0) {
         return false;
     }
@@ -1369,7 +1375,8 @@ id<MTLTexture> TextureView::GetMTLTexture() const {
 }
 
 TextureView::AttachmentInfo TextureView::GetAttachmentInfo() const {
-    DAWN_ASSERT(GetTexture()->GetInternalUsage() & wgpu::TextureUsage::RenderAttachment);
+    DAWN_ASSERT(GetTexture()->GetInternalUsage() &
+                (wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageAttachment));
     // Use our own view if the formats do not match.
     // If the formats do not match, format reinterpretation will be required.
     // Note: Depth/stencil formats don't support reinterpretation.

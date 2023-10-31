@@ -463,7 +463,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     // DAWN_ASSERT(device.IsLockedByCurrentThread())
     bool IsLockedByCurrentThreadIfNeeded() const;
 
-    // TODO(dawn:XXX): remove this enum forwarding once no longer necessary.
+    // TODO(dawn:1413): remove this enum forwarding once no longer necessary.
     using SubmitMode = ExecutionQueueBase::SubmitMode;
 
     // TODO(dawn:1413): Remove this proxy methods in favor of using the ExecutionQueue directly.

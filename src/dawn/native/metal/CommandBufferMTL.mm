@@ -328,6 +328,80 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
         }
     }
 
+    if (renderPass->attachmentState->HasPixelLocalStorage()) {
+        const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
+            renderPass->attachmentState->GetStorageAttachmentSlots();
+        std::vector<ColorAttachmentIndex> storageAttachmentPacking =
+            renderPass->attachmentState->ComputeStorageAttachmentPackingInColorAttachments();
+
+        for (size_t attachment = 0; attachment < storageAttachmentSlots.size(); attachment++) {
+            uint8_t i = static_cast<uint8_t>(storageAttachmentPacking[attachment]);
+            MTLRenderPassColorAttachmentDescriptor* mtlAttachment = descriptor.colorAttachments[i];
+
+            // For implicit pixel local storage slots use transient memoryless textures.
+            if (storageAttachmentSlots[attachment] == wgpu::TextureFormat::Undefined) {
+                NSRef<MTLTextureDescriptor> texDescRef = AcquireNSRef([MTLTextureDescriptor new]);
+                MTLTextureDescriptor* texDesc = texDescRef.Get();
+                texDesc.textureType = MTLTextureType2D;
+                texDesc.width = renderPass->width;
+                texDesc.height = renderPass->height;
+                texDesc.usage = MTLTextureUsageRenderTarget;
+                if (@available(macOS 11.0, iOS 10.0, *)) {
+                    texDesc.storageMode = MTLStorageModeMemoryless;
+                } else {
+                    DAWN_UNREACHABLE();
+                }
+                texDesc.pixelFormat =
+                    MetalPixelFormat(device, RenderPipeline::kImplicitPLSSlotFormat);
+
+                NSPRef<id<MTLTexture>> implicitAttachment =
+                    AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:texDesc]);
+
+                mtlAttachment.loadAction = MTLLoadActionClear;
+                mtlAttachment.clearColor = MTLClearColorMake(0, 0, 0, 0);
+                mtlAttachment.storeAction = MTLStoreActionDontCare;
+                mtlAttachment.texture = *implicitAttachment;
+                continue;
+            }
+
+            auto& attachmentInfo = renderPass->storageAttachments[attachment];
+
+            switch (attachmentInfo.loadOp) {
+                case wgpu::LoadOp::Clear:
+                    mtlAttachment.loadAction = MTLLoadActionClear;
+                    mtlAttachment.clearColor =
+                        MTLClearColorMake(attachmentInfo.clearColor.r, attachmentInfo.clearColor.g,
+                                          attachmentInfo.clearColor.b, attachmentInfo.clearColor.a);
+                    break;
+
+                case wgpu::LoadOp::Load:
+                    mtlAttachment.loadAction = MTLLoadActionLoad;
+                    break;
+
+                case wgpu::LoadOp::Undefined:
+                    DAWN_UNREACHABLE();
+                    break;
+            }
+
+            switch (attachmentInfo.storeOp) {
+                case wgpu::StoreOp::Store:
+                    mtlAttachment.storeAction = MTLStoreActionStore;
+                    break;
+                case wgpu::StoreOp::Discard:
+                    mtlAttachment.storeAction = MTLStoreActionDontCare;
+                    break;
+                case wgpu::StoreOp::Undefined:
+                    DAWN_UNREACHABLE();
+                    break;
+            }
+
+            auto storageAttachment = ToBackend(attachmentInfo.storage)->GetAttachmentInfo();
+            mtlAttachment.texture = storageAttachment.texture.Get();
+            mtlAttachment.level = storageAttachment.baseMipLevel;
+            mtlAttachment.slice = storageAttachment.baseArrayLayer;
+        }
+    }
+
     return descriptorRef;
 }
 
@@ -746,12 +820,13 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
         for (size_t i = 0; i < scope.textures.size(); ++i) {
             Texture* texture = ToBackend(scope.textures[i]);
 
-            // Clear subresources that are not render attachments. Render attachments will be
-            // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
-            // subresource has not been initialized before the render pass.
+            // Clear subresources that are not attachments. Attachments will be cleared in
+            // RecordBeginRenderPass by setting the loadop to clear when the texture subresource
+            // has not been initialized before the render pass.
             DAWN_TRY(scope.textureUsages[i].Iterate([&](const SubresourceRange& range,
                                                         wgpu::TextureUsage usage) -> MaybeError {
-                if (usage & ~wgpu::TextureUsage::RenderAttachment) {
+                if (usage & ~(wgpu::TextureUsage::RenderAttachment |
+                              wgpu::TextureUsage::StorageAttachment)) {
                     DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
                 }
                 return {};

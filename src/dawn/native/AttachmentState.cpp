@@ -279,4 +279,25 @@ bool AttachmentState::HasPixelLocalStorage() const {
 const std::vector<wgpu::TextureFormat>& AttachmentState::GetStorageAttachmentSlots() const {
     return mStorageAttachmentSlots;
 }
+
+std::vector<ColorAttachmentIndex>
+AttachmentState::ComputeStorageAttachmentPackingInColorAttachments() const {
+    // TODO(dawn:1704): Consider caching this on AttachmentState creation, but does it become part
+    // of the hashing and comparison operators? Fill with garbage data to more easily detect cases
+    // where an incorrect slot is accessed.
+    std::vector<ColorAttachmentIndex> result(
+        mStorageAttachmentSlots.size(), ColorAttachmentIndex(uint8_t(kMaxColorAttachments + 1)));
+
+    // Iterate over the empty bits of mColorAttachmentsSet to pack storage attachment in them.
+    auto availableSlots = ~mColorAttachmentsSet;
+    for (size_t i = 0; i < mStorageAttachmentSlots.size(); i++) {
+        DAWN_ASSERT(!availableSlots.none());
+        auto slot = ColorAttachmentIndex(uint8_t(ScanForward(availableSlots.to_ulong())));
+        availableSlots.reset(slot);
+        result[i] = slot;
+    }
+
+    return result;
+}
+
 }  // namespace dawn::native

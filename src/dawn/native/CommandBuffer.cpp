@@ -224,6 +224,41 @@ void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
         view->GetTexture()->SetIsSubresourceContentInitialized(
             attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store, stencilRange);
     }
+
+    if (renderPass->attachmentState->HasPixelLocalStorage()) {
+        for (auto& attachmentInfo : renderPass->storageAttachments) {
+            TextureViewBase* view = attachmentInfo.storage.Get();
+
+            if (view == nullptr) {
+                continue;
+            }
+
+            DAWN_ASSERT(view->GetLayerCount() == 1);
+            DAWN_ASSERT(view->GetLevelCount() == 1);
+            const SubresourceRange& range = view->GetSubresourceRange();
+
+            // If the loadOp is Load, but the subresource is not initialized, use Clear instead.
+            if (attachmentInfo.loadOp == wgpu::LoadOp::Load &&
+                !view->GetTexture()->IsSubresourceContentInitialized(range)) {
+                attachmentInfo.loadOp = wgpu::LoadOp::Clear;
+                attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
+            }
+
+            switch (attachmentInfo.storeOp) {
+                case wgpu::StoreOp::Store:
+                    view->GetTexture()->SetIsSubresourceContentInitialized(true, range);
+                    break;
+
+                case wgpu::StoreOp::Discard:
+                    view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
+                    break;
+
+                case wgpu::StoreOp::Undefined:
+                    DAWN_UNREACHABLE();
+                    break;
+            }
+        }
+    }
 }
 
 bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy) {
