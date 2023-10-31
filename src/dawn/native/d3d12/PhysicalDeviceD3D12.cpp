@@ -375,15 +375,18 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     return {};
 }
 
-MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
+FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
     // shader-f16 feature and chromium-experimental-dp4a feature require DXC 1.4 or higher for
     // D3D12. Note that DXC version is checked in InitializeSupportedFeaturesImpl.
     if (feature == wgpu::FeatureName::ShaderF16 ||
         feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
-        DAWN_INVALID_IF(!toggles.IsEnabled(Toggle::UseDXC), "Feature %s requires DXC for D3D12.",
-                        GetInstance()->GetFeatureInfo(feature)->name);
+        if (!toggles.IsEnabled(Toggle::UseDXC)) {
+            return FeatureValidationResult(
+                absl::StrFormat("Feature %s requires DXC for D3D12.",
+                                GetInstance()->GetFeatureInfo(feature)->name));
+        }
     }
     return {};
 }

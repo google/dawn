@@ -69,8 +69,9 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
-    MaybeError ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
-                                                       const TogglesState& toggles) const override;
+    FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
+        wgpu::FeatureName feature,
+        const TogglesState& toggles) const override;
 
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
