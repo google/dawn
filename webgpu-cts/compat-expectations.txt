@@ -76,8 +76,8 @@
 
 # Last rolled: 2023-08-10 10:50:58AM
 
-# Offscreen copy issue
-crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";* [ Failure ]
+# GPU context canvas copy issue
+crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
 
 # snorm / stencil8 issues
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
@@ -286,8 +286,8 @@ crbug.com/dawn/0000 webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:
 crbug.com/dawn/2113 webgpu:shader,execution,memory_model,* [ Failure ]
 crbug.com/dawn/2113 webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
 
-# The multiple_frames variant of getCurrentTexture tests is failing
-crbug.com/dawn/2114 webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
+# getCurrentTexture failures
+crbug.com/dawn/2114 webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 
 # Instancing issues on NVidia GL
 # count=[1-9].*first_instance=[1-9].*instance_count=[1-9]
