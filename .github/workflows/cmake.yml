@@ -37,6 +37,9 @@ jobs:
         exclude:
           - os: windows-latest
             c_compiler: clang
+          - os: windows-latest
+            c_compiler: cl
+            build_type: Debug
           - os: ubuntu-latest
             c_compiler: cl
           - os: macos-latest
