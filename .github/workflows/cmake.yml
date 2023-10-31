@@ -1,4 +1,4 @@
-name: CMake build
+name: CMake
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release]
         c_compiler: [gcc, clang, cl]
-        python-version: ["3.11"]
         include:
           - os: windows-latest
             c_compiler: cl
@@ -67,10 +66,10 @@ jobs:
         sudo apt update
         sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.11
 
     - name: Fetch dependencies
       run: python ./tools/fetch_dawn_dependencies.py --use-test-deps --shallow
@@ -82,7 +81,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       uses: seanmiddleditch/gha-setup-vsdevenv@master
 
-    - name: Setup sccache
+    - name: Set up sccache
       uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Configure CMake
