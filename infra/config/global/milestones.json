@@ -77,5 +77,15 @@
             "mac",
             "win"
         ]
+    },
+    "120": {
+        "name": "m120",
+        "chromium_project": "chromium-m120",
+        "ref": "refs/heads/chromium/6099",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
