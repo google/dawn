@@ -113,6 +113,9 @@ crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,validation,resource_usages,textu
 # Video test failing due to mismatched interstage variables
 crbug.com/dawn/2196 [ angle-opengl ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
+# external_texture causing device loss on CI
+crbug.com/dawn/2200 [ angle-opengl ] webgpu:web_platform,external_texture,* [ Failure ]
+
 # precision issues
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=-0.125 [ Failure ]
 crbug.com/dawn/2076 [ angle-opengl ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
