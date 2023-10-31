@@ -93,78 +93,107 @@ class RenderPipelineAndPassCompatibilityTests : public ValidationTest {
     }
 };
 
-// Test depthWrite/stencilWrite in DepthStencilState in render pipeline vs
-// depthReadOnly/stencilReadOnly in DepthStencilAttachment in render pass.
-TEST_F(RenderPipelineAndPassCompatibilityTests, WriteAndReadOnlyConflictForDepthStencil) {
-    for (bool depthStencilReadOnlyInPass : {true, false}) {
+// Test depthReadOnly compatibility between pipelines and render passes.
+TEST_F(RenderPipelineAndPassCompatibilityTests, PipelineAndRenderPassDepthReadOnly) {
+    for (bool depthReadOnlyInPass : {true, false}) {
         for (bool depthWriteInPipeline : {true, false}) {
-            for (bool stencilWriteInPipeline : {true, false}) {
-                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                utils::ComboRenderPassDescriptor passDescriptor = CreateRenderPassDescriptor(
-                    kFormat, depthStencilReadOnlyInPass, depthStencilReadOnlyInPass);
-                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
-                wgpu::RenderPipeline pipeline =
-                    CreatePipeline(kFormat, depthWriteInPipeline, stencilWriteInPipeline);
-                pass.SetPipeline(pipeline);
-                pass.Draw(3);
-                pass.End();
-                if (depthStencilReadOnlyInPass &&
-                    (depthWriteInPipeline || stencilWriteInPipeline)) {
-                    ASSERT_DEVICE_ERROR(encoder.Finish());
-                } else {
-                    encoder.Finish();
-                }
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            utils::ComboRenderPassDescriptor passDescriptor =
+                CreateRenderPassDescriptor(kFormat, depthReadOnlyInPass, false);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+            wgpu::RenderPipeline pipeline = CreatePipeline(kFormat, depthWriteInPipeline, false);
+            pass.SetPipeline(pipeline);
+            pass.Draw(3);
+            pass.End();
+            if (depthReadOnlyInPass && depthWriteInPipeline) {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            } else {
+                encoder.Finish();
             }
         }
     }
 }
 
-// Test depthWrite/stencilWrite in DepthStencilState in render pipeline vs
-// depthReadOnly/stencilReadOnly in RenderBundleEncoderDescriptor in render bundle.
-TEST_F(RenderPipelineAndPassCompatibilityTests,
-       WriteAndReadOnlyConflictForDepthStencilBetweenPipelineAndBundle) {
-    for (bool depthStencilReadOnlyInBundle : {true, false}) {
+// Test stencilReadOnly compatibility between pipelines and render passes.
+TEST_F(RenderPipelineAndPassCompatibilityTests, PipelineAndRenderPassStencilReadOnly) {
+    for (bool stencilReadOnlyInPass : {true, false}) {
+        for (bool stencilWriteInPipeline : {true, false}) {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            utils::ComboRenderPassDescriptor passDescriptor =
+                CreateRenderPassDescriptor(kFormat, false, stencilReadOnlyInPass);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+            wgpu::RenderPipeline pipeline = CreatePipeline(kFormat, false, stencilWriteInPipeline);
+            pass.SetPipeline(pipeline);
+            pass.Draw(3);
+            pass.End();
+            if (stencilReadOnlyInPass && stencilWriteInPipeline) {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            } else {
+                encoder.Finish();
+            }
+        }
+    }
+}
+
+// Test depthReadOnly compatibility between pipelines and render bundles.
+TEST_F(RenderPipelineAndPassCompatibilityTests, PipelineAndBundleDepthReadOnly) {
+    for (bool depthReadOnlyInBundle : {true, false}) {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
         desc.depthStencilFormat = kFormat;
-        desc.depthReadOnly = depthStencilReadOnlyInBundle;
-        desc.stencilReadOnly = depthStencilReadOnlyInBundle;
+        desc.depthReadOnly = depthReadOnlyInBundle;
+        desc.stencilReadOnly = false;
 
         for (bool depthWriteInPipeline : {true, false}) {
-            for (bool stencilWriteInPipeline : {true, false}) {
-                wgpu::RenderBundleEncoder renderBundleEncoder =
-                    device.CreateRenderBundleEncoder(&desc);
-                wgpu::RenderPipeline pipeline =
-                    CreatePipeline(kFormat, depthWriteInPipeline, stencilWriteInPipeline);
-                renderBundleEncoder.SetPipeline(pipeline);
-                renderBundleEncoder.Draw(3);
-                if (depthStencilReadOnlyInBundle &&
-                    (depthWriteInPipeline || stencilWriteInPipeline)) {
-                    ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
-                } else {
-                    renderBundleEncoder.Finish();
-                }
+            wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+            wgpu::RenderPipeline pipeline = CreatePipeline(kFormat, depthWriteInPipeline, false);
+            renderBundleEncoder.SetPipeline(pipeline);
+            renderBundleEncoder.Draw(3);
+            if (depthReadOnlyInBundle && depthWriteInPipeline) {
+                ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+            } else {
+                renderBundleEncoder.Finish();
             }
         }
     }
 }
 
-// Test depthReadOnly/stencilReadOnly in RenderBundleEncoderDescriptor in render bundle vs
-// depthReadOnly/stencilReadOnly in DepthStencilAttachment in render pass.
-TEST_F(RenderPipelineAndPassCompatibilityTests,
-       WriteAndReadOnlyConflictForDepthStencilBetweenBundleAndPass) {
-    for (bool depthStencilReadOnlyInPass : {true, false}) {
-        for (bool depthStencilReadOnlyInBundle : {true, false}) {
+// Test stencilReadOnly compatibility between pipelines and render bundles.
+TEST_F(RenderPipelineAndPassCompatibilityTests, PipelineAndBundleStencilReadOnly) {
+    for (bool stencilReadOnlyInBundle : {true, false}) {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.depthStencilFormat = kFormat;
+        desc.depthReadOnly = false;
+        desc.stencilReadOnly = stencilReadOnlyInBundle;
+
+        for (bool stencilWriteInPipeline : {true, false}) {
+            wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+            wgpu::RenderPipeline pipeline = CreatePipeline(kFormat, false, stencilWriteInPipeline);
+            renderBundleEncoder.SetPipeline(pipeline);
+            renderBundleEncoder.Draw(3);
+            if (stencilReadOnlyInBundle && stencilWriteInPipeline) {
+                ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+            } else {
+                renderBundleEncoder.Finish();
+            }
+        }
+    }
+}
+
+// Test depthReadOnly compatibility between render passes and render bundles.
+TEST_F(RenderPipelineAndPassCompatibilityTests, BundleAndPassDepthReadOnly) {
+    for (bool depthReadOnlyInPass : {true, false}) {
+        for (bool depthReadOnlyInBundle : {true, false}) {
             for (bool emptyBundle : {true, false}) {
                 // Create render bundle, with or without a pipeline
                 utils::ComboRenderBundleEncoderDescriptor desc = {};
                 desc.depthStencilFormat = kFormat;
-                desc.depthReadOnly = depthStencilReadOnlyInBundle;
-                desc.stencilReadOnly = depthStencilReadOnlyInBundle;
+                desc.depthReadOnly = depthReadOnlyInBundle;
+                desc.stencilReadOnly = false;
                 wgpu::RenderBundleEncoder renderBundleEncoder =
                     device.CreateRenderBundleEncoder(&desc);
                 if (!emptyBundle) {
-                    wgpu::RenderPipeline pipeline = CreatePipeline(
-                        kFormat, !depthStencilReadOnlyInBundle, !depthStencilReadOnlyInBundle);
+                    wgpu::RenderPipeline pipeline =
+                        CreatePipeline(kFormat, !depthReadOnlyInBundle, false);
                     renderBundleEncoder.SetPipeline(pipeline);
                     renderBundleEncoder.Draw(3);
                 }
@@ -172,15 +201,52 @@ TEST_F(RenderPipelineAndPassCompatibilityTests,
 
                 // Create render pass and call ExecuteBundles()
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                utils::ComboRenderPassDescriptor passDescriptor = CreateRenderPassDescriptor(
-                    kFormat, depthStencilReadOnlyInPass, depthStencilReadOnlyInPass);
+                utils::ComboRenderPassDescriptor passDescriptor =
+                    CreateRenderPassDescriptor(kFormat, depthReadOnlyInPass, false);
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
                 pass.ExecuteBundles(1, &bundle);
                 pass.End();
-                if (!depthStencilReadOnlyInPass || depthStencilReadOnlyInBundle) {
-                    encoder.Finish();
-                } else {
+                if (depthReadOnlyInPass && !depthReadOnlyInBundle) {
                     ASSERT_DEVICE_ERROR(encoder.Finish());
+                } else {
+                    encoder.Finish();
+                }
+            }
+        }
+    }
+}
+
+// Test stencilReadOnly compatibility between render passes and render bundles.
+TEST_F(RenderPipelineAndPassCompatibilityTests, BundleAndPassStencilReadOnly) {
+    for (bool stencilReadOnlyInPass : {true, false}) {
+        for (bool stencilReadOnlyInBundle : {true, false}) {
+            for (bool emptyBundle : {true, false}) {
+                // Create render bundle, with or without a pipeline
+                utils::ComboRenderBundleEncoderDescriptor desc = {};
+                desc.depthStencilFormat = kFormat;
+                desc.depthReadOnly = false;
+                desc.stencilReadOnly = stencilReadOnlyInBundle;
+                wgpu::RenderBundleEncoder renderBundleEncoder =
+                    device.CreateRenderBundleEncoder(&desc);
+                if (!emptyBundle) {
+                    wgpu::RenderPipeline pipeline =
+                        CreatePipeline(kFormat, false, !stencilReadOnlyInBundle);
+                    renderBundleEncoder.SetPipeline(pipeline);
+                    renderBundleEncoder.Draw(3);
+                }
+                wgpu::RenderBundle bundle = renderBundleEncoder.Finish();
+
+                // Create render pass and call ExecuteBundles()
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                utils::ComboRenderPassDescriptor passDescriptor =
+                    CreateRenderPassDescriptor(kFormat, false, stencilReadOnlyInPass);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+                pass.ExecuteBundles(1, &bundle);
+                pass.End();
+                if (stencilReadOnlyInPass && !stencilReadOnlyInBundle) {
+                    ASSERT_DEVICE_ERROR(encoder.Finish());
+                } else {
+                    encoder.Finish();
                 }
             }
         }

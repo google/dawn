@@ -70,8 +70,8 @@ TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
     )"));
 }
 
-// Check that separate depth-stencil readonlyness is validated as unsafe.
-TEST_F(UnsafeAPIValidationTest, SeparateDepthStencilReadOnlyness) {
+// Check that separate depth-stencil readonlyness is validated as unsafe for render passes.
+TEST_F(UnsafeAPIValidationTest, SeparateRenderPassDepthStencilReadOnlyness) {
     wgpu::TextureDescriptor tDesc;
     tDesc.size = {1, 1};
     tDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -95,7 +95,7 @@ TEST_F(UnsafeAPIValidationTest, SeparateDepthStencilReadOnlyness) {
         encoder.Finish();
     }
 
-    // Error case: only one readonly is valid.
+    // Error case: only one readonly is invalid.
     {
         wgpu::RenderPassDepthStencilAttachment ds;
         ds.view = t.CreateView();
@@ -112,6 +112,26 @@ TEST_F(UnsafeAPIValidationTest, SeparateDepthStencilReadOnlyness) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp);
         pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Check that separate depth-stencil readonlyness is validated as unsafe for render bundles.
+TEST_F(UnsafeAPIValidationTest, SeparateRenderBundleDepthStencilReadOnlyness) {
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
+
+    // Control case: both readonly is valid.
+    {
+        desc.depthReadOnly = true;
+        desc.stencilReadOnly = true;
+        device.CreateRenderBundleEncoder(&desc);
+    }
+
+    // Error case: only one readonly is invalid.
+    {
+        desc.depthReadOnly = true;
+        desc.stencilReadOnly = false;
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
     }
 }
 
