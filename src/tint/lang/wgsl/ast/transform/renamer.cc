@@ -1265,6 +1265,8 @@ Renamer::Data::Data(const Data&) = default;
 Renamer::Data::~Data() = default;
 
 Renamer::Config::Config(Target t, bool pu) : target(t), preserve_unicode(pu) {}
+Renamer::Config::Config(Target t, bool pu, Remappings&& remappings)
+    : target(t), preserve_unicode(pu), requested_names(std::move(remappings)) {}
 Renamer::Config::Config(const Config&) = default;
 Renamer::Config::~Config() = default;
 
@@ -1342,10 +1344,12 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
 
     Target target = Target::kAll;
     bool preserve_unicode = false;
+    const Remappings* requested_names = nullptr;
 
     if (auto* cfg = inputs.Get<Config>()) {
         target = cfg->target;
         preserve_unicode = cfg->preserve_unicode;
+        requested_names = &(cfg->requested_names);
     }
 
     // Returns true if the symbol should be renamed based on the input configuration settings.
@@ -1394,7 +1398,17 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         }
 
         // Create a replacement for this symbol, if we haven't already.
-        auto replacement = remappings.GetOrCreate(symbol, [&] { return b.Symbols().New(); });
+        auto replacement = remappings.GetOrCreate(symbol, [&] {
+            if (requested_names) {
+                auto iter = requested_names->find(symbol.Name());
+                if (iter != requested_names->end()) {
+                    // Use the explicitly given name for renaming this symbol
+                    // if the extra is given in the config.
+                    return b.Symbols().New(iter->second);
+                }
+            }
+            return b.Symbols().New();
+        });
 
         // Reconstruct the identifier
         if (auto* tmpl_ident = ident->As<TemplatedIdentifier>()) {
@@ -1407,7 +1421,7 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
 
     ctx.Clone();
 
-    Data::Remappings out;
+    Remappings out;
     for (auto it : remappings) {
         out[it.key.Name()] = it.value.Name();
     }

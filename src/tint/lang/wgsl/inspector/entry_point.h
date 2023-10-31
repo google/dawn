@@ -82,8 +82,10 @@ struct StageVariable {
     /// Destructor
     ~StageVariable();
 
-    /// Name of the variable in the shader.
+    /// Name of the variable in the shader. (including struct nested accessing, e.g. 'struct.var')
     std::string name;
+    /// Name of the variable itself. (e.g. 'var')
+    std::string variable_name;
     /// Is location attribute present
     bool has_location_attribute = false;
     /// Value of the location attribute, only valid if #has_location_attribute is

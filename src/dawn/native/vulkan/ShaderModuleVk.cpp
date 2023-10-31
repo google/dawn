@@ -378,6 +378,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             // Get the entry point name after the renamer pass.
+            // TODO(dawn:2180): refactor out.
             std::string remappedEntryPoint;
             if (r.disableSymbolRenaming) {
                 remappedEntryPoint = r.entryPointName;

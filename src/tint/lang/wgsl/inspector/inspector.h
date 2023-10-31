@@ -170,12 +170,14 @@ class Inspector {
     /// Recursively add entry point IO variables.
     /// If `type` is a struct, recurse into members, appending the member name.
     /// Otherwise, add the variable unless it is a builtin.
-    /// @param name the name of the variable being added
+    /// @param name the name of the variable being added, including struct nested accessings.
+    /// @param variable_name the name of the variable being added
     /// @param type the type of the variable
     /// @param attributes the variable attributes
     /// @param location the location value if provided
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
+                                     std::string variable_name,
                                      const core::type::Type* type,
                                      VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,

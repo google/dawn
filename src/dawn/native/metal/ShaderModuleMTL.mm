@@ -270,6 +270,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                               &transformOutputs, nullptr));
             }
 
+            // TODO(dawn:2180): refactor out.
             std::string remappedEntryPointName;
             if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
                 auto it = data->remappings.find(r.entryPointName);

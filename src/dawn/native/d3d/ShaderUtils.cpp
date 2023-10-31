@@ -203,6 +203,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                                       &transformOutputs, nullptr));
     }
 
+    // TODO(dawn:2180): refactor out.
     if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
         auto it = data->remappings.find(r.entryPointName.data());
         if (it != data->remappings.end()) {

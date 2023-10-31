@@ -639,6 +639,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         uint32_t totalInterStageShaderComponents = 0;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
+            variable.name = outputVar.variable_name;
             DAWN_TRY_ASSIGN(variable.baseType,
                             TintComponentTypeToInterStageComponentType(outputVar.component_type));
             DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
@@ -675,6 +676,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         uint32_t totalInterStageShaderComponents = 0;
         for (const auto& inputVar : entryPoint.input_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
+            variable.name = inputVar.variable_name;
             DAWN_TRY_ASSIGN(variable.baseType,
                             TintComponentTypeToInterStageComponentType(inputVar.component_type));
             DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(

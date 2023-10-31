@@ -175,7 +175,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     }
 
     for (auto* param : sem->Parameters()) {
-        AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(), param->Type(),
+        AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(),
+                                    param->Declaration()->name->symbol.Name(), param->Type(),
                                     param->Declaration()->attributes, param->Location(),
                                     entry_point.input_variables);
 
@@ -196,7 +197,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     }
 
     if (!sem->ReturnType()->Is<core::type::Void>()) {
-        AddEntryPointInOutVariables("<retval>", sem->ReturnType(), func->return_type_attributes,
+        AddEntryPointInOutVariables("<retval>", "", sem->ReturnType(), func->return_type_attributes,
                                     sem->ReturnLocation(), entry_point.output_variables);
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
@@ -575,6 +576,7 @@ const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 }
 
 void Inspector::AddEntryPointInOutVariables(std::string name,
+                                            std::string variable_name,
                                             const core::type::Type* type,
                                             VectorRef<const ast::Attribute*> attributes,
                                             std::optional<uint32_t> location,
@@ -589,8 +591,8 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
         // Recurse into members.
         for (auto* member : struct_ty->Members()) {
-            AddEntryPointInOutVariables(name + "." + member->Name().Name(), member->Type(),
-                                        member->Declaration()->attributes,
+            AddEntryPointInOutVariables(name + "." + member->Name().Name(), member->Name().Name(),
+                                        member->Type(), member->Declaration()->attributes,
                                         member->Attributes().location, variables);
         }
         return;
@@ -600,6 +602,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
 
     StageVariable stage_variable;
     stage_variable.name = name;
+    stage_variable.variable_name = variable_name;
     std::tie(stage_variable.component_type, stage_variable.composition_type) =
         CalculateComponentAndComposition(type);
 

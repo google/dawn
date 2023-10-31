@@ -221,6 +221,7 @@ struct EntryPointMetadata {
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
 
     struct InterStageVariableInfo {
+        std::string name;
         InterStageComponentType baseType;
         uint32_t componentCount;
         InterpolationType interpolationType;

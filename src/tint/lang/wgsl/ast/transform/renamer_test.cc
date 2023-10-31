@@ -95,10 +95,78 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(positio
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"vert_idx", "tint_symbol_1"},
         {"test", "tint_symbol"},
         {"entry", "tint_symbol_2"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
+TEST_F(RenamerTest, RequestedNames) {
+    auto* src = R"(
+struct ShaderIO {
+    @location(1) var1: f32,
+    @location(3) @interpolate(flat) var3: u32,
+    @builtin(position) pos: vec4f,
+}
+
+@vertex fn main(@builtin(vertex_index) vert_idx : u32)
+     -> ShaderIO {
+  var pos = array(
+      vec2f(-1.0, 3.0),
+      vec2f(-1.0, -3.0),
+      vec2f(3.0, 0.0));
+
+  var shaderIO: ShaderIO;
+  shaderIO.var1 = 0.0;
+  shaderIO.var3 = 1u;
+  shaderIO.pos = vec4f(pos[vert_idx], 0.0, 1.0);
+
+  return shaderIO;
+}
+)";
+
+    auto* expect = R"(
+struct tint_symbol {
+  @location(1)
+  user_var1 : f32,
+  @location(3) @interpolate(flat)
+  user_var3 : u32,
+  @builtin(position)
+  tint_symbol_1 : vec4f,
+}
+
+@vertex
+fn tint_symbol_2(@builtin(vertex_index) tint_symbol_3 : u32) -> tint_symbol {
+  var tint_symbol_1 = array(vec2f(-(1.0), 3.0), vec2f(-(1.0), -(3.0)), vec2f(3.0, 0.0));
+  var tint_symbol_4 : tint_symbol;
+  tint_symbol_4.user_var1 = 0.0;
+  tint_symbol_4.user_var3 = 1u;
+  tint_symbol_4.tint_symbol_1 = vec4f(tint_symbol_1[tint_symbol_3], 0.0, 1.0);
+  return tint_symbol_4;
+}
+)";
+
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(Renamer::Target::kAll,
+                                /* preserve_unicode */ false,
+                                /* remappings */
+                                Renamer::Remappings{
+                                    {"var1", "user_var1"},
+                                    {"var3", "user_var3"},
+                                });
+    auto got = Run<Renamer>(src, inputs);
+
+    EXPECT_EQ(expect, str(got));
+
+    auto* data = got.data.Get<Renamer::Data>();
+
+    ASSERT_NE(data, nullptr);
+    Renamer::Remappings expected_remappings = {
+        {"pos", "tint_symbol_1"},      {"vert_idx", "tint_symbol_3"}, {"ShaderIO", "tint_symbol"},
+        {"shaderIO", "tint_symbol_4"}, {"main", "tint_symbol_2"},     {"var1", "user_var1"},
+        {"var3", "user_var3"},
     };
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
@@ -133,7 +201,7 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"entry", "tint_symbol"},  {"v", "tint_symbol_1"}, {"rgba", "tint_symbol_2"},
         {"xyzw", "tint_symbol_3"}, {"z", "tint_symbol_4"},
     };
@@ -164,7 +232,7 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"entry", "tint_symbol"},
         {"blah", "tint_symbol_1"},
     };
@@ -199,7 +267,7 @@ fn tint_symbol() {
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"entry", "tint_symbol"}, {"a", "tint_symbol_1"}, {"b", "tint_symbol_2"},
         {"c", "tint_symbol_3"},   {"d", "tint_symbol_4"},
     };
@@ -241,7 +309,7 @@ fn tint_symbol(@location(0) tint_symbol_1 : f32) -> @location(0) f32 {
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"entry", "tint_symbol"},
         {"value", "tint_symbol_1"},
     };
@@ -319,7 +387,7 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto* data = got.data.Get<Renamer::Data>();
 
     ASSERT_NE(data, nullptr);
-    Renamer::Data::Remappings expected_remappings = {
+    Renamer::Remappings expected_remappings = {
         {"entry", "tint_symbol"},
         {"tint_symbol", "tint_symbol_1"},
         {"tint_symbol_2", "tint_symbol_2"},

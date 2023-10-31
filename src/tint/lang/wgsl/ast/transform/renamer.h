@@ -38,12 +38,12 @@ namespace tint::ast::transform {
 /// Renamer is a Transform that renames all the symbols in a program.
 class Renamer final : public Castable<Renamer, Transform> {
   public:
+    /// Remappings is a map of old symbol name to new symbol name
+    using Remappings = std::unordered_map<std::string, std::string>;
+
     /// Data is outputted by the Renamer transform.
     /// Data holds information about shader usage and constant buffer offsets.
     struct Data final : public Castable<Data, transform::Data> {
-        /// Remappings is a map of old symbol name to new symbol name
-        using Remappings = std::unordered_map<std::string, std::string>;
-
         /// Constructor
         /// @param remappings the symbol remappings
         explicit Data(Remappings&& remappings);
@@ -79,6 +79,12 @@ class Renamer final : public Castable<Renamer, Transform> {
         /// renamed
         explicit Config(Target tgt, bool keep_unicode = false);
 
+        /// Constructor
+        /// @param tgt the targets to rename
+        /// @param keep_unicode if false, symbols with non-ascii code-points are renamed
+        /// @param remappings requested old to new name map
+        explicit Config(Target tgt, bool keep_unicode, Remappings&& remappings);
+
         /// Copy constructor
         Config(const Config&);
 
@@ -90,6 +96,9 @@ class Renamer final : public Castable<Renamer, Transform> {
 
         /// If false, symbols with non-ascii code-points are renamed.
         bool preserve_unicode = false;
+
+        /// Requested renaming rules
+        const Remappings requested_names = {};
     };
 
     /// Constructor using a the configuration provided in the input Data
