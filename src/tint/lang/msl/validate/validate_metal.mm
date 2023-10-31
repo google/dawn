@@ -25,67 +25,52 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/validate/val.h"
+// GEN_BUILD:CONDITION(is_mac)
 
-#include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/utils/command/command.h"
-#include "src/tint/utils/file/tmpfile.h"
+#import <Metal/Metal.h>
+
+#include "src/tint/lang/msl/validate/validate.h"
 
 namespace tint::msl::validate {
 
-Result Msl(const std::string& xcrun_path, const std::string& source, MslVersion version) {
+Result ValidateUsingMetal(const std::string& src, MslVersion version) {
     Result result;
 
-    auto xcrun = tint::Command(xcrun_path);
-    if (!xcrun.Found()) {
-        result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
+    NSError* error = nil;
+
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    if (!device) {
+        result.output = "MTLCreateSystemDefaultDevice returned null";
         result.failed = true;
         return result;
     }
 
-    tint::TmpFile file(".metal");
-    file << source;
+    NSString* source = [NSString stringWithCString:src.c_str() encoding:NSUTF8StringEncoding];
 
-    const char* version_str = nullptr;
+    MTLCompileOptions* compileOptions = [MTLCompileOptions new];
+    compileOptions.fastMathEnabled = true;
     switch (version) {
         case MslVersion::kMsl_1_2:
-            version_str = "-std=macos-metal1.2";
+            compileOptions.languageVersion = MTLLanguageVersion1_2;
             break;
         case MslVersion::kMsl_2_1:
-            version_str = "-std=macos-metal2.1";
+            compileOptions.languageVersion = MTLLanguageVersion2_1;
             break;
         case MslVersion::kMsl_2_3:
-            version_str = "-std=macos-metal2.3";
+            if (@available(macOS 11.0, *)) {
+                compileOptions.languageVersion = MTLLanguageVersion2_3;
+            }
             break;
     }
 
-#ifdef _WIN32
-    // On Windows, we should actually be running metal.exe from the Metal
-    // Developer Tools for Windows
-    auto res = xcrun("-x", "metal",  //
-                     "-o", "NUL",    //
-                     version_str,    //
-                     "-c", file.Path());
-#else
-    auto res = xcrun("-sdk", "macosx", "metal",  //
-                     "-o", "/dev/null",          //
-                     version_str,                //
-                     "-c", file.Path());
-#endif
-    if (!res.out.empty()) {
-        if (!result.output.empty()) {
-            result.output += "\n";
-        }
-        result.output += res.out;
+    id<MTLLibrary> library = [device newLibraryWithSource:source
+                                                  options:compileOptions
+                                                    error:&error];
+    if (!library) {
+        NSString* output = [error localizedDescription];
+        result.output = [output UTF8String];
+        result.failed = true;
     }
-    if (!res.err.empty()) {
-        if (!result.output.empty()) {
-            result.output += "\n";
-        }
-        result.output += res.err;
-    }
-    result.failed = (res.error_code != 0);
 
     return result;
 }

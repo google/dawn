@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include "src/tint/lang/hlsl/validate/val.h"
+#include "src/tint/lang/hlsl/validate/validate.h"
 
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/file/tmpfile.h"
@@ -44,10 +44,10 @@ using Microsoft::WRL::ComPtr;
 
 namespace tint::hlsl::validate {
 
-Result UsingDXC(const std::string& dxc_path,
-                const std::string& source,
-                const EntryPointList& entry_points,
-                bool require_16bit_types) {
+Result ValidateUsingDXC(const std::string& dxc_path,
+                        const std::string& source,
+                        const EntryPointList& entry_points,
+                        bool require_16bit_types) {
     Result result;
 
     auto dxc = tint::Command(dxc_path);
@@ -121,9 +121,9 @@ Result UsingDXC(const std::string& dxc_path,
 }
 
 #ifdef _WIN32
-Result UsingFXC(const std::string& fxc_path,
-                const std::string& source,
-                const EntryPointList& entry_points) {
+Result ValidateUsingFXC(const std::string& fxc_path,
+                        const std::string& source,
+                        const EntryPointList& entry_points) {
     Result result;
 
     // This library leaks if an error happens in this function, but it is ok

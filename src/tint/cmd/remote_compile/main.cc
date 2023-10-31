@@ -37,7 +37,7 @@
 #include <vector>
 
 #if TINT_BUILD_MSL_WRITER
-#include "src/tint/lang/msl/validate/val.h"
+#include "src/tint/lang/msl/validate/validate.h"
 #endif
 
 #include "src/tint/utils/macros/compiler.h"
@@ -446,7 +446,7 @@ bool RunServer(std::string port) {
                     if (req.version_major == 2 && req.version_minor == 3) {
                         version = tint::msl::validate::MslVersion::kMsl_2_3;
                     }
-                    auto result = tint::msl::validate::UsingMetalAPI(req.source, version);
+                    auto result = tint::msl::validate::ValidateUsingMetal(req.source, version);
                     CompileResponse resp;
                     if (result.failed) {
                         resp.error = result.output;

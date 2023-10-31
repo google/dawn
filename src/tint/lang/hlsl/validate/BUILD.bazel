@@ -39,10 +39,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "validate",
   srcs = [
-    "hlsl.cc",
+    "validate.cc",
   ],
   hdrs = [
-    "val.h",
+    "validate.h",
   ],
   deps = [
     "//src/tint/lang/wgsl/ast",

@@ -41,8 +41,8 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_validate lib
-  lang/msl/validate/msl.cc
-  lang/msl/validate/val.h
+  lang/msl/validate/validate.cc
+  lang/msl/validate/validate.h
 )
 
 tint_target_add_dependencies(tint_lang_msl_validate lib
@@ -71,7 +71,7 @@ tint_target_add_dependencies(tint_lang_msl_validate lib
 
 if(IS_MAC)
   tint_target_add_sources(tint_lang_msl_validate lib
-    "lang/msl/validate/msl_metal.mm"
+    "lang/msl/validate/validate_metal.mm"
   )
   tint_target_add_external_dependencies(tint_lang_msl_validate lib
     "metal"

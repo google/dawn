@@ -39,15 +39,15 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "validate",
   srcs = [
-    "msl.cc",
+    "validate.cc",
   ] + select({
     ":is_mac": [
-      "msl_metal.mm",
+      "validate_metal.mm",
     ],
     "//conditions:default": [],
   }),
   hdrs = [
-    "val.h",
+    "validate.h",
   ],
   deps = [
     "//src/tint/lang/core",

@@ -25,12 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_VALIDATE_VAL_H_
-#define SRC_TINT_LANG_HLSL_VALIDATE_VAL_H_
+#ifndef SRC_TINT_LANG_MSL_VALIDATE_VALIDATE_H_
+#define SRC_TINT_LANG_MSL_VALIDATE_VALIDATE_H_
 
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
@@ -39,44 +38,46 @@ namespace tint {
 class Program;
 }  // namespace tint
 
-namespace tint::hlsl::validate {
+namespace tint::msl::validate {
 
-using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
+/// The version of MSL to validate against.
+/// Note: these must kept be in ascending order
+enum class MslVersion {
+    kMsl_1_2,
+    kMsl_2_1,
+    kMsl_2_3,
+};
 
-/// Name of the FXC compiler DLL
-static constexpr const char kFxcDLLName[] = "d3dcompiler_47.dll";
+/// MslVersion less-than operator
+inline bool operator<(MslVersion a, MslVersion b) {
+    return static_cast<int>(a) < static_cast<int>(b);
+}
 
 /// The return structure of Validate()
 struct Result {
     /// True if validation passed
     bool failed = false;
-    /// Output of DXC.
+    /// Output of Metal compiler.
     std::string output;
 };
 
-/// Hlsl attempts to compile the shader with DXC, verifying that the shader
-/// compiles successfully.
-/// @param dxc_path path to DXC
-/// @param source the generated HLSL source
-/// @param entry_points the list of entry points to validate
+/// Msl attempts to compile the shader with the Metal Shader Compiler,
+/// verifying that the shader compiles successfully.
+/// @param xcrun_path path to xcrun
+/// @param source the generated MSL source
+/// @param version the version of MSL to validate against
 /// @return the result of the compile
-Result UsingDXC(const std::string& dxc_path,
-                const std::string& source,
-                const EntryPointList& entry_points,
-                bool require_16bit_types);
+Result Validate(const std::string& xcrun_path, const std::string& source, MslVersion version);
 
-#ifdef _WIN32
-/// Hlsl attempts to compile the shader with FXC, verifying that the shader
-/// compiles successfully.
-/// @param fxc_path path to the FXC DLL
-/// @param source the generated HLSL source
-/// @param entry_points the list of entry points to validate
+#ifdef __APPLE__
+/// Msl attempts to compile the shader with the runtime Metal Shader Compiler
+/// API, verifying that the shader compiles successfully.
+/// @param source the generated MSL source
+/// @param version the version of MSL to validate against
 /// @return the result of the compile
-Result UsingFXC(const std::string& fxc_path,
-                const std::string& source,
-                const EntryPointList& entry_points);
-#endif  // _WIN32
+Result ValidateUsingMetal(const std::string& source, MslVersion version);
+#endif  // __APPLE__
 
-}  // namespace tint::hlsl::validate
+}  // namespace tint::msl::validate
 
-#endif  // SRC_TINT_LANG_HLSL_VALIDATE_VAL_H_
+#endif  // SRC_TINT_LANG_MSL_VALIDATE_VALIDATE_H_

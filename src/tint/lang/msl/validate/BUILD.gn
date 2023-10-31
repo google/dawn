@@ -40,8 +40,8 @@ import("${tint_src_dir}/tint.gni")
 if (tint_build_msl_writer) {
   libtint_source_set("validate") {
     sources = [
-      "msl.cc",
-      "val.h",
+      "validate.cc",
+      "validate.h",
     ]
     deps = [
       "${tint_src_dir}/lang/core",
@@ -68,7 +68,7 @@ if (tint_build_msl_writer) {
     ]
 
     if (is_mac) {
-      sources += [ "msl_metal.mm" ]
+      sources += [ "validate_metal.mm" ]
       deps += [ "${tint_src_dir}:metal" ]
     }
   }

@@ -41,8 +41,8 @@ if(TINT_BUILD_HLSL_WRITER)
 # Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_validate lib
-  lang/hlsl/validate/hlsl.cc
-  lang/hlsl/validate/val.h
+  lang/hlsl/validate/validate.cc
+  lang/hlsl/validate/validate.h
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_validate lib
