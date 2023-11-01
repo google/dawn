@@ -125,12 +125,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Fetch the table column names
 	columns, err := fetchRow[string](s, spreadsheet, dataSheet, 0)
 
-	// Grab the results
-	results, err := c.flags.results.GetResults(ctx, cfg, auth)
+	// Grab the resultsByExecutionMode
+	resultsByExecutionMode, err := c.flags.results.GetResults(ctx, cfg, auth)
 	if err != nil {
 		return err
 	}
-	if len(results) == 0 {
+	if len(resultsByExecutionMode) == 0 {
 		return fmt.Errorf("no results found")
 	}
 	ps := c.flags.results.Patchset
@@ -157,46 +157,48 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Generate a new set of counts of test by status
 	log.Printf("exporting results from cl %v ps %v...", ps.Change, ps.Patchset)
-	counts := map[result.Status]int{}
-	for _, r := range results {
-		counts[r.Status] = counts[r.Status] + 1
-	}
-
-	// Generate new cell data based on the table column names
-	data := []any{}
-	for _, column := range columns {
-		switch strings.ToLower(column) {
-		case "date":
-			data = append(data, time.Now().UTC().Format("2006-01-02"))
-		case "change":
-			data = append(data, ps.Change)
-		case "unimplemented":
-			data = append(data, numUnimplemented)
-		default:
-			count, ok := counts[result.Status(column)]
-			if !ok {
-				log.Println("no results with status", column)
-			}
-			data = append(data, count)
+	for _, results := range resultsByExecutionMode {
+		counts := map[result.Status]int{}
+		for _, r := range results {
+			counts[r.Status] = counts[r.Status] + 1
 		}
-	}
 
-	// Insert a blank row under the column header row
-	if err := insertBlankRows(s, spreadsheet, dataSheet, 1, 1); err != nil {
-		return err
-	}
+		// Generate new cell data based on the table column names
+		data := []any{}
+		for _, column := range columns {
+			switch strings.ToLower(column) {
+			case "date":
+				data = append(data, time.Now().UTC().Format("2006-01-02"))
+			case "change":
+				data = append(data, ps.Change)
+			case "unimplemented":
+				data = append(data, numUnimplemented)
+			default:
+				count, ok := counts[result.Status(column)]
+				if !ok {
+					log.Println("no results with status", column)
+				}
+				data = append(data, count)
+			}
+		}
 
-	// Add a new row to the spreadsheet
-	_, err = s.Spreadsheets.Values.BatchUpdate(spreadsheet.SpreadsheetId,
-		&sheets.BatchUpdateValuesRequest{
-			ValueInputOption: "RAW",
-			Data: []*sheets.ValueRange{{
-				Range:  rowRange(1, dataSheet),
-				Values: [][]any{data},
-			}},
-		}).Do()
-	if err != nil {
-		return fmt.Errorf("failed to update spreadsheet: %v", err)
+		// Insert a blank row under the column header row
+		if err := insertBlankRows(s, spreadsheet, dataSheet, 1, 1); err != nil {
+			return err
+		}
+
+		// Add a new row to the spreadsheet
+		_, err = s.Spreadsheets.Values.BatchUpdate(spreadsheet.SpreadsheetId,
+			&sheets.BatchUpdateValuesRequest{
+				ValueInputOption: "RAW",
+				Data: []*sheets.ValueRange{{
+					Range:  rowRange(1, dataSheet),
+					Values: [][]any{data},
+				}},
+			}).Do()
+		if err != nil {
+			return fmt.Errorf("failed to update spreadsheet: %v", err)
+		}
 	}
 
 	return nil

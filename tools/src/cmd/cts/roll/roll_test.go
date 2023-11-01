@@ -73,6 +73,7 @@ func TestRollCommitMessage(t *testing.T) {
 
 Regenerated:
  - expectations.txt
+ - compat-expectations.txt
  - ts_sources.txt
  - test_list.txt
  - cache_list.txt

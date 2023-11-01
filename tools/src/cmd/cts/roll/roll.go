@@ -242,27 +242,52 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 	ctsLog = ctsLog[:len(ctsLog)-1] // Don't include the oldest change in the log
 
-	// Download and parse the expectations file
-	expectationsFile, err := r.dawn.DownloadFile(ctx, refMain, common.RelativeExpectationsPath)
-	if err != nil {
-		return err
-	}
-	ex, err := expectations.Parse(common.RelativeExpectationsPath, expectationsFile)
-	if err != nil {
-		return fmt.Errorf("failed to load expectations: %v", err)
+	type ExpectationsFileInfo struct {
+		path            string
+		expectations    expectations.Content
+		newExpectations expectations.Content
+		executionMode   result.ExecutionMode
+		results         result.List
 	}
 
-	// If the user requested a full rebuild of the expectations, strip out
-	// everything but comment chunks.
-	if r.flags.rebuild {
-		rebuilt := ex.Clone()
-		rebuilt.Chunks = rebuilt.Chunks[:0]
-		for _, c := range ex.Chunks {
-			if c.IsCommentOnly() {
-				rebuilt.Chunks = append(rebuilt.Chunks, c)
-			}
+	var exInfos = []*ExpectationsFileInfo{
+		{
+			path:          common.RelativeExpectationsPath,
+			executionMode: "core",
+			results:       result.List{},
+		},
+		{
+			path:          common.RelativeCompatExpectationsPath,
+			executionMode: "compat",
+			results:       result.List{},
+		},
+	}
+
+	// Download and parse the expectations files
+	for _, exInfo := range exInfos {
+		expectationsFile, err := r.dawn.DownloadFile(ctx, refMain, exInfo.path)
+		if err != nil {
+			return err
 		}
-		ex = rebuilt
+		ex, err := expectations.Parse(exInfo.path, expectationsFile)
+		if err != nil {
+			return fmt.Errorf("failed to load expectations: %v", err)
+		}
+
+		// If the user requested a full rebuild of the expectations, strip out
+		// everything but comment chunks.
+		if r.flags.rebuild {
+			rebuilt := ex.Clone()
+			rebuilt.Chunks = rebuilt.Chunks[:0]
+			for _, c := range ex.Chunks {
+				if c.IsCommentOnly() {
+					rebuilt.Chunks = append(rebuilt.Chunks, c)
+				}
+			}
+			ex = rebuilt
+		}
+
+		exInfo.expectations = ex
 	}
 
 	generatedFiles, err := r.generateFiles(ctx)
@@ -333,10 +358,12 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 
 	// Update the DEPS, expectations, and other generated files.
-	updateExpectationUpdateTimestamp(&ex)
+	for _, exInfo := range exInfos {
+		updateExpectationUpdateTimestamp(&exInfo.expectations)
+		generatedFiles[exInfo.path] = exInfo.expectations.String()
+	}
 	generatedFiles[depsRelPath] = updatedDEPS
 	generatedFiles[gitLinkPath] = newCTSHash
-	generatedFiles[common.RelativeExpectationsPath] = ex.String()
 
 	msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, changeID)
 	ps, err := r.gerrit.EditFiles(changeID, msg, generatedFiles, deletedFiles)
@@ -345,7 +372,6 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 
 	// Begin main roll loop
-	results := result.List{}
 	for attempt := 0; ; attempt++ {
 		// Kick builds
 		log.Printf("building (attempt %v)...\n", attempt)
@@ -368,29 +394,31 @@ func (r *roller) roll(ctx context.Context) error {
 
 		// Gather the build results
 		log.Println("gathering results...")
-		psResults, err := common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.rdb, builds)
+		psResultsByExecutionMode, err := common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.rdb, builds)
 		if err != nil {
 			return err
 		}
-
-		// Merge the new results into the accumulated results
-		log.Println("merging results...")
-		results = result.Merge(results, psResults)
 
 		// Rebuild the expectations with the accumulated results
 		log.Println("building new expectations...")
 		// Note: The new expectations are not used if the last attempt didn't
 		// fail, but we always want to post the diagnostics
-		newExpectations := ex.Clone()
-		diags, err := newExpectations.Update(results, testlist)
-		if err != nil {
-			return err
-		}
+		for _, exInfo := range exInfos {
+			// Merge the new results into the accumulated results
+			log.Printf("merging results for %s ...\n", exInfo.executionMode)
+			exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
 
-		// Post statistics and expectation diagnostics
-		log.Println("posting stats & diagnostics...")
-		if err := r.postComments(ps, diags, results); err != nil {
-			return err
+			exInfo.newExpectations = exInfo.expectations.Clone()
+			diags, err := exInfo.newExpectations.Update(exInfo.results, testlist)
+			if err != nil {
+				return err
+			}
+
+			// Post statistics and expectation diagnostics
+			log.Printf("posting stats & diagnostics for %s...\n", exInfo.executionMode)
+			if err := r.postComments(ps, exInfo.path, diags, exInfo.results); err != nil {
+				return err
+			}
 		}
 
 		// If all the builds attempted, then we're done!
@@ -400,10 +428,13 @@ func (r *roller) roll(ctx context.Context) error {
 
 		// Otherwise, push the updated expectations, and try again
 		log.Println("updating expectations...")
-		updateExpectationUpdateTimestamp(&newExpectations)
-		ps, err = r.gerrit.EditFiles(changeID, msg, map[string]string{
-			common.RelativeExpectationsPath: newExpectations.String(),
-		}, nil)
+
+		editedFiles := map[string]string{}
+		for _, exInfo := range exInfos {
+			updateExpectationUpdateTimestamp(&exInfo.newExpectations)
+			editedFiles[exInfo.path] = exInfo.newExpectations.String()
+		}
+		ps, err = r.gerrit.EditFiles(changeID, msg, editedFiles, nil)
 		if err != nil {
 			return fmt.Errorf("failed to update change '%v': %v", changeID, err)
 		}
@@ -436,7 +467,7 @@ func (r *roller) roll(ctx context.Context) error {
 			return err
 		}
 		if len(jsonRes.Emails) < 1 {
-			return fmt.Errorf("Expected at least one email in JSON response %s", jsonRes)
+			return fmt.Errorf("expected at least one email in JSON response %s", jsonRes)
 		}
 		reviewer = jsonRes.Emails[0]
 	}
@@ -498,6 +529,7 @@ func (r *roller) rollCommitMessage(
 	msg.WriteString("\n\n")
 	msg.WriteString("Regenerated:\n")
 	msg.WriteString(" - expectations.txt\n")
+	msg.WriteString(" - compat-expectations.txt\n")
 	msg.WriteString(" - ts_sources.txt\n")
 	msg.WriteString(" - test_list.txt\n")
 	msg.WriteString(" - cache_list.txt\n")
@@ -551,7 +583,7 @@ func (r *roller) rollCommitMessage(
 	return msg.String()
 }
 
-func (r *roller) postComments(ps gerrit.Patchset, diags []expectations.Diagnostic, results result.List) error {
+func (r *roller) postComments(ps gerrit.Patchset, path string, diags []expectations.Diagnostic, results result.List) error {
 	fc := make([]gerrit.FileComment, len(diags))
 	for i, d := range diags {
 		var prefix string
@@ -564,7 +596,7 @@ func (r *roller) postComments(ps gerrit.Patchset, diags []expectations.Diagnosti
 			prefix = "🟦"
 		}
 		fc[i] = gerrit.FileComment{
-			Path:    common.RelativeExpectationsPath,
+			Path:    path,
 			Side:    gerrit.Left,
 			Line:    d.Line,
 			Message: fmt.Sprintf("%v %v: %v", prefix, d.Severity, d.Message),

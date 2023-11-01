@@ -34,6 +34,7 @@ import (
 	"io/ioutil"
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
+	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"github.com/tidwall/jsonc"
 )
 
@@ -42,7 +43,9 @@ import (
 // tools/src/cmd/cts/config.json.
 type Config struct {
 	// Test holds configuration data for test results.
-	Test struct {
+	Tests []struct {
+		// Mode used to refer to tests
+		ExecutionMode result.ExecutionMode
 		// The ResultDB string prefix for CTS tests.
 		Prefixes []string
 	}

@@ -84,7 +84,7 @@ func TestStringAndParse(t *testing.T) {
 			t.Errorf("'%v'.String() was not as expected:\n%v", test.result, diff)
 			continue
 		}
-		parsed, err := result.Parse(test.expect)
+		_, parsed, err := result.Parse(test.expect)
 		if err != nil {
 			t.Errorf("Parse('%v') returned %v", test.expect, err)
 			continue
@@ -100,11 +100,11 @@ func TestParseError(t *testing.T) {
 		in, expect string
 	}{
 		{``, `unable to parse result ''`},
-		{`a`, `unable to parse result 'a'`},
+		{`a b`, `unable to parse result 'a b'`},
 		{`a b c d e`, `unable to parse result 'a b c d e': time: invalid duration "d"`},
 		{`a b c 10s e`, `unable to parse result 'a b c 10s e': strconv.ParseBool: parsing "e": invalid syntax`},
 	} {
-		_, err := result.Parse(test.in)
+		_, _, err := result.Parse(test.in)
 		got := ""
 		if err != nil {
 			got = err.Error()
@@ -1054,13 +1054,19 @@ func TestStatusTree(t *testing.T) {
 }
 
 func TestReadWrite(t *testing.T) {
-	in := result.List{
-		{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
-		{Query: Q(`suite:b,*`), Tags: T(`y`), Status: result.Failure},
-		{Query: Q(`suite:a:b:*`), Tags: T(`x`, `y`), Status: result.Skip},
-		{Query: Q(`suite:a:c,*`), Tags: T(`y`, `x`), Status: result.Failure},
-		{Query: Q(`suite:a,b:c,*`), Tags: T(`y`, `x`), Status: result.Crash},
-		{Query: Q(`suite:a,b:c:*`), Status: result.Slow},
+	in := result.ResultsByExecutionMode{
+		"bar": result.List{
+			{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:b,*`), Tags: T(`y`), Status: result.Failure},
+			{Query: Q(`suite:a:b:*`), Tags: T(`x`, `y`), Status: result.Skip},
+			{Query: Q(`suite:a:c,*`), Tags: T(`y`, `x`), Status: result.Failure},
+			{Query: Q(`suite:a,b:c,*`), Tags: T(`y`, `x`), Status: result.Crash},
+			{Query: Q(`suite:a,b:c:*`), Status: result.Slow},
+		},
+		"foo": result.List{
+			{Query: Q(`suite:d:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:e,*`), Tags: T(`y`), Status: result.Failure},
+		},
 	}
 	buf := &bytes.Buffer{}
 	if err := result.Write(buf, in); err != nil {

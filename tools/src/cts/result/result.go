@@ -110,7 +110,12 @@ func (r Result) Compare(o Result) int {
 //	<query> <tags> <status>
 //
 // <tags> may be omitted if there were no tags.
-func Parse(in string) (Result, error) {
+//
+// Tests are separated into sections where the section name
+// appears at the end of the list as just a line with
+//
+//	<section-name>
+func Parse(in string) (ExecutionMode, Result, error) {
 	line := in
 	token := func() string {
 		for i, c := range line {
@@ -136,8 +141,12 @@ func Parse(in string) (Result, error) {
 	c := token()
 	d := token()
 	e := token()
+
+	if a != "" && b == "" && token() == "" {
+		return ExecutionMode(a), Result{}, nil
+	}
 	if a == "" || b == "" || c == "" || d == "" || token() != "" {
-		return Result{}, fmt.Errorf("unable to parse result '%v'", in)
+		return "", Result{}, fmt.Errorf("unable to parse result '%v'", in)
 	}
 
 	query := query.Parse(a)
@@ -146,30 +155,36 @@ func Parse(in string) (Result, error) {
 		status := Status(b)
 		duration, err := time.ParseDuration(c)
 		if err != nil {
-			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+			return "", Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
 		}
 		mayExonerate, err := strconv.ParseBool(d)
 		if err != nil {
-			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+			return "", Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
 		}
-		return Result{query, nil, status, duration, mayExonerate}, nil
+		return "", Result{query, nil, status, duration, mayExonerate}, nil
 	} else {
 		tags := StringToTags(b)
 		status := Status(c)
 		duration, err := time.ParseDuration(d)
 		if err != nil {
-			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+			return "", Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
 		}
 		mayExonerate, err := strconv.ParseBool(e)
 		if err != nil {
-			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+			return "", Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
 		}
-		return Result{query, tags, status, duration, mayExonerate}, nil
+		return "", Result{query, tags, status, duration, mayExonerate}, nil
 	}
 }
 
 // List is a list of results
 type List []Result
+
+// The mode the tests were run in, "core" or" "compat"
+type ExecutionMode string
+
+// Lists of test results by execution mode.
+type ResultsByExecutionMode map[ExecutionMode]List
 
 // Variant is a collection of tags that uniquely identify a test
 // configuration (e.g the combination of OS, GPU, validation-modes, etc).
@@ -359,7 +374,7 @@ func (l List) StatusTree() (StatusTree, error) {
 }
 
 // Load loads the result list from the file with the given path
-func Load(path string) (List, error) {
+func Load(path string) (ResultsByExecutionMode, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -374,7 +389,7 @@ func Load(path string) (List, error) {
 }
 
 // Save saves the result list to the file with the given path
-func Save(path string, results List) error {
+func Save(path string, results ResultsByExecutionMode) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0777); err != nil {
 		return err
@@ -388,23 +403,34 @@ func Save(path string, results List) error {
 }
 
 // Read reads a result list from the given reader
-func Read(r io.Reader) (List, error) {
+func Read(r io.Reader) (ResultsByExecutionMode, error) {
 	scanner := bufio.NewScanner(r)
+	results := ResultsByExecutionMode{}
 	l := List{}
 	for scanner.Scan() {
-		r, err := Parse(scanner.Text())
+		section, r, err := Parse(scanner.Text())
 		if err != nil {
 			return nil, err
 		}
-		l = append(l, r)
+		if section != "" {
+			results[section] = l
+			l = List{}
+		} else {
+			l = append(l, r)
+		}
 	}
-	return l, nil
+	return results, nil
 }
 
 // Write writes a result list to the given writer
-func Write(w io.Writer, l List) error {
-	for _, r := range l {
-		if _, err := fmt.Fprintln(w, r); err != nil {
+func Write(w io.Writer, r ResultsByExecutionMode) error {
+	for name, l := range r {
+		for _, r := range l {
+			if _, err := fmt.Fprintln(w, r); err != nil {
+				return err
+			}
+		}
+		if _, err := fmt.Fprintln(w, name); err != nil {
 			return err
 		}
 	}
