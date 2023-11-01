@@ -5,9 +5,9 @@ name: Go
 
 on:
   push:
-    branches: [ "workflows" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "workflows" ]
+    branches: [ "main" ]
 
 jobs:
 
