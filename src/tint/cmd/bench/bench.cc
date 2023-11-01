@@ -144,7 +144,9 @@ Result<Source::File> LoadInputFile(std::string name) {
 
         auto spirv = ReadFile<uint32_t>(path);
         if (spirv) {
-            auto program = tint::spirv::reader::Read(spirv.Get(), {});
+            tint::spirv::reader::Options spirv_opts;
+            spirv_opts.allow_non_uniform_derivatives = true;
+            auto program = tint::spirv::reader::Read(spirv.Get(), spirv_opts);
             if (!program.IsValid()) {
                 return Failure{program.Diagnostics()};
             }
