@@ -47,9 +47,16 @@ struct ProgramFuzzer {
     Fn* fn = nullptr;
 };
 
+/// Options for Run()
+struct Options {
+    /// If true, the fuzzers will be run concurrently on separate threads.
+    bool run_concurrently = false;
+};
+
 /// Runs all the registered WGSL fuzzers with the supplied WGSL
 /// @param wgsl the input WGSL
-void Run(std::string_view wgsl);
+/// @param options the options for running the fuzzers
+void Run(std::string_view wgsl, const Options& options);
 
 /// Registers the fuzzer function with the WGSL fuzzer executable.
 /// @param fuzzer the fuzzer

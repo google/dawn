@@ -159,6 +159,28 @@ TEST_F(CLITest, ShowHelp_MixedValues) {
 )");
 }
 
+TEST_F(CLITest, UnknownFlag) {
+    OptionSet opts;
+    opts.Add<BoolOption>("my_option", "a boolean value");
+
+    auto res = opts.Parse(Split("--myoption false", " "));
+    ASSERT_FALSE(res) << res;
+    EXPECT_EQ(res.Failure().reason.str(), R"(error: unknown flag: --myoption
+Did you mean '--my_option'?)");
+}
+
+TEST_F(CLITest, UnknownFlag_Ignored) {
+    OptionSet opts;
+    auto& opt = opts.Add<BoolOption>("my_option", "a boolean value");
+
+    ParseOptions parse_opts;
+    parse_opts.ignore_unknown = true;
+
+    auto res = opts.Parse(Split("--myoption false", " "), parse_opts);
+    ASSERT_TRUE(res) << res;
+    EXPECT_EQ(opt.value, std::nullopt);
+}
+
 TEST_F(CLITest, ParseBool_Flag) {
     OptionSet opts;
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value");

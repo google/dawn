@@ -37,6 +37,7 @@
 
 namespace tint::cli {
 
+Option::Option() = default;
 Option::~Option() = default;
 
 void OptionSet::ShowHelp(std::ostream& s_out) {
@@ -131,7 +132,8 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
     }
 }
 
-Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> arguments_raw) {
+Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> arguments_raw,
+                                               const ParseOptions& parse_options /* = {} */) {
     // Build a map of name to option, and set defaults
     Hashmap<std::string, Option*, 32> options_by_name;
     for (auto* opt : options.Objects()) {
@@ -171,7 +173,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
             if (auto err = (*opt)->Parse(arguments); !err.empty()) {
                 return Failure{err};
             }
-        } else {
+        } else if (!parse_options.ignore_unknown) {
             StringStream err;
             err << "unknown flag: " << arg << std::endl;
             auto names = options_by_name.Keys();

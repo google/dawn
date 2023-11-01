@@ -28,6 +28,7 @@
 #include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
 
 #include <iostream>
+#include <thread>
 
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"
@@ -38,7 +39,7 @@ namespace tint::fuzz::wgsl {
 namespace {
 
 Vector<ProgramFuzzer, 32> fuzzers;
-std::string_view currently_running;
+thread_local std::string_view currently_running;
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
     std::cerr << "ICE while running fuzzer: '" << currently_running << "'" << std::endl;
@@ -52,7 +53,7 @@ void Register(const ProgramFuzzer& fuzzer) {
     fuzzers.Push(fuzzer);
 }
 
-void Run(std::string_view wgsl) {
+void Run(std::string_view wgsl, const Options& options) {
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
@@ -69,10 +70,26 @@ void Run(std::string_view wgsl) {
     }
 
     // Run each of the program fuzzer functions
-    TINT_DEFER(currently_running = "");
-    for (auto& fuzzer : fuzzers) {
-        currently_running = fuzzer.name;
-        fuzzer.fn(program);
+    if (options.run_concurrently) {
+        size_t n = fuzzers.Length();
+        tint::Vector<std::thread, 32> threads;
+        threads.Resize(n);
+        for (size_t i = 0; i < n; i++) {
+            threads[i] = std::thread([i, &program] {
+                auto& fuzzer = fuzzers[i];
+                currently_running = fuzzer.name;
+                fuzzer.fn(program);
+            });
+        }
+        for (auto& thread : threads) {
+            thread.join();
+        }
+    } else {
+        TINT_DEFER(currently_running = "");
+        for (auto& fuzzer : fuzzers) {
+            currently_running = fuzzer.name;
+            fuzzer.fn(program);
+        }
     }
 }
 

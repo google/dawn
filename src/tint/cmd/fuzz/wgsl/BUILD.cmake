@@ -53,6 +53,7 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_fuzz
+  tint_utils_cli
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -62,6 +63,7 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_utils_memory
   tint_utils_result
   tint_utils_rtti
+  tint_utils_strconv
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
@@ -111,6 +113,10 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz
+  "thread"
 )
 
 if(TINT_BUILD_WGSL_READER)

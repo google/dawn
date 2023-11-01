@@ -101,6 +101,9 @@ class Option {
     /// An alias to std::string, used to hold error messages.
     using Error = std::string;
 
+    /// Constructor
+    Option();
+
     /// Destructor
     virtual ~Option();
 
@@ -162,6 +165,18 @@ class Option {
         }
         return err;
     }
+
+  private:
+    Option(const Option&) = delete;
+    Option& operator=(const Option&) = delete;
+    Option(Option&&) = delete;
+    Option& operator=(Option&&) = delete;
+};
+
+/// Options for OptionSet::Parse
+struct ParseOptions {
+    /// If true, then unknown flags will be ignored instead of treated as an error
+    bool ignore_unknown = false;
 };
 
 /// OptionSet is a set of Options, which can parse the command line arguments.
@@ -186,8 +201,10 @@ class OptionSet {
 
     /// Parses all the options in @p options.
     /// @param arguments the command line arguments, excluding the initial executable name
+    /// @param parse_options the optional parser options
     /// @return a Result holding a list of arguments that were not consumed as options
-    Result<Unconsumed> Parse(VectorRef<std::string_view> arguments);
+    Result<Unconsumed> Parse(VectorRef<std::string_view> arguments,
+                             const ParseOptions& parse_options = {});
 
   private:
     /// The list of options to parse
