@@ -73,7 +73,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 }
 
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
-	if err := common.InstallCTSDeps(ctx, c.flags.ctsDir, fileutils.NodePath()); err != nil {
+	if err := common.InstallCTSDeps(ctx, c.flags.ctsDir, c.flags.npmPath); err != nil {
 		return err
 	}
 	list, err := common.BuildCache(ctx, c.flags.ctsDir, c.flags.nodePath, c.flags.npmPath, c.flags.authFlags)
