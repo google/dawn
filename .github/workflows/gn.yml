@@ -1,0 +1,93 @@
+# Workflow to build Dawn using GN
+name: GN
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "gclient-cache-dir=${RUNNER_TEMP}/.gclient_cache" >> "$GITHUB_OUTPUT"
+
+    - name: Install Ubuntu build dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt update
+        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
+
+    - name: Install depot_tools
+      uses: newkdev/setup-depot-tools@v1.0.1
+
+    - uses: actions/checkout@v3
+
+    - name: Set up checkout
+      run: |
+        cp ./scripts/standalone.gclient .gclient
+        mkdir -p ${{ steps.strings.outputs.gclient-cache-dir }}
+
+    - name: gclient restore cache
+      id: gclient-restore
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ steps.strings.outputs.gclient-cache-dir }}
+        key: ${{ runner.os }}-${{ hashFiles('DEPS') }}
+        restore-keys: ${{ runner.os }}-
+
+    - name: gclient sync --no-history --shallow
+      run: gclient sync --no-history --shallow
+      env:
+        GIT_CACHE_PATH: ${{ steps.strings.outputs.gclient-cache-dir }}
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+    - name: gclient save cache
+      id: gclient-save
+      uses: actions/cache/save@v3
+      if: steps.gclient-save.outputs.cache-hit != 'true'
+      with:
+        path: ${{ steps.strings.outputs.gclient-cache-dir }}
+        key: ${{ steps.gclient-restore.outputs.cache-primary-key }}
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.3
+
+    - name: Generate build files
+      shell: bash
+      run: |
+        mkdir -p out/build
+        touch out/build/args.gn
+        echo "cc_wrapper=\"sccache\"" >> out/build/args.gn
+        echo "is_debug=true" >> out/build/args.gn
+        echo "is_component_build=true" >> out/build/args.gn
+        echo "is_clang=true" >> out/build/args.gn
+        gn gen out/build
+
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+    - name: Build
+      run: autoninja -C out/build
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
