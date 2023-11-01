@@ -64,7 +64,6 @@ func (f *Flags) Register() {
 	flag.StringVar(&f.CTS, "cts", defaultCtsPath(), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(), "path to node executable")
 	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable (optional)")
-
 }
 
 // Process processes the flags, returning a State.
@@ -96,8 +95,8 @@ func (f *Flags) Process() (*State, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to open log '%v': %w", f.Log, err)
 		}
-		defer writer.Close()
 		s.Log = NewLogger(writer)
+		s.logWriter = writer
 	}
 
 	// If an expectations file was specified, load it.
@@ -124,9 +123,10 @@ type State struct {
 	Expectations Results
 	CTS          CTS
 	resultsPath  string
+	logWriter    io.WriteCloser
 }
 
-// Closes s.Stdout and saves the results to the results path (if set)
+// Close closes s.Stdout and saves the results to the results path (if set)
 func (s *State) Close(results Results) error {
 	if err := s.Stdout.Close(); err != nil {
 		return err
@@ -136,6 +136,12 @@ func (s *State) Close(results Results) error {
 	if s.resultsPath != "" {
 		if err := results.Save(s.resultsPath); err != nil {
 			return err
+		}
+	}
+
+	if s.logWriter != nil {
+		if err := s.logWriter.Close(); err != nil {
+			return fmt.Errorf("failed to close log file: %w", err)
 		}
 	}
 
