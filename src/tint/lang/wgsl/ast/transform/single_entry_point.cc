@@ -128,6 +128,10 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
                 }
             },
             [&](const Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
+            [&](const Requires*) {
+                // Drop requires directives as they are optional, and it's non-trivial to determine
+                // which features are needed for which entry points.
+            },
             [&](const DiagnosticDirective* d) { b.AST().AddDiagnosticDirective(ctx.Clone(d)); },  //
             TINT_ICE_ON_NO_MATCH);
     }

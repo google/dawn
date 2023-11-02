@@ -644,5 +644,30 @@ fn main() {
     EXPECT_EQ(src, str(got));
 }
 
+TEST_F(SingleEntryPointTest, Requires) {
+    // Make sure that requires are handled (and dropped).
+    auto* src = R"(
+requires readonly_and_readwrite_storage_textures;
+
+@compute @workgroup_size(1)
+fn main() {
+}
+)";
+
+    auto* expect = R"(
+@compute @workgroup_size(1)
+fn main() {
+}
+)";
+
+    SingleEntryPoint::Config cfg("main");
+
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform
