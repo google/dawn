@@ -4,6 +4,13 @@ on:
   status
 
 jobs:
+  debug:
+    name: debug
+    runs-on: ubuntu-latest
+    steps:
+      name: Dump Github Context
+      run: echo '${{ toJSON(github) }}'
+
   comment:
     name: comment
     if: github.event.state == 'success' && github.event.context == 'import/copybara'
