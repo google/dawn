@@ -370,7 +370,8 @@ bool ASTPrinter::Generate() {
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
-        if (decl->IsAnyOf<ast::Alias, ast::DiagnosticDirective, ast::Enable, ast::ConstAssert>()) {
+        if (decl->IsAnyOf<ast::Alias, ast::DiagnosticDirective, ast::Enable, ast::Requires,
+                          ast::ConstAssert>()) {
             continue;  // These are not emitted.
         }
 

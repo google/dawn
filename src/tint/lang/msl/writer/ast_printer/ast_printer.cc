@@ -325,6 +325,10 @@ bool ASTPrinter::Generate() {
                 // Do nothing for enabling extension in MSL
                 return true;
             },
+            [&](const ast::Requires*) {
+                // Do nothing for requiring language features in MSL.
+                return true;
+            },
             [&](const ast::ConstAssert*) {
                 return true;  // Not emitted
             },                //

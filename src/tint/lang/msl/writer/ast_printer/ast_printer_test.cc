@@ -58,6 +58,18 @@ TEST_F(MslASTPrinterTest, UnsupportedExtension) {
               R"(12:34 error: MSL backend does not support extension 'undefined')");
 }
 
+TEST_F(MslASTPrinterTest, RequiresDirective) {
+    Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+
+    ASTPrinter& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+)");
+}
+
 TEST_F(MslASTPrinterTest, Generate) {
     Func("my_func", tint::Empty, ty.void_(), tint::Empty,
          Vector{

@@ -319,6 +319,9 @@ bool ASTPrinter::Generate() {
                 // Record the required extension for generating extension directive later
                 RecordExtension(enable);
             },  //
+            [&](const ast::Requires*) {
+                // Do nothing for requiring language features in GLSL.
+            },  //
             TINT_ICE_ON_NO_MATCH);
     }
 

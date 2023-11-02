@@ -53,5 +53,13 @@ TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
               R"(12:34 error: SPIR-V backend does not support extension 'undefined')");
 }
 
+TEST_F(SpirvASTPrinterTest, RequiresDirective) {
+    Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+
+    auto program = resolver::Resolve(*this);
+    auto result = Generate(program, Options{});
+    EXPECT_TRUE(result);
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

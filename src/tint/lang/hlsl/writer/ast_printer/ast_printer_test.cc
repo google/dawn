@@ -54,6 +54,15 @@ TEST_F(HlslASTPrinterTest, UnsupportedExtension) {
               R"(12:34 error: HLSL backend does not support extension 'undefined')");
 }
 
+TEST_F(HlslASTPrinterTest, RequiresDirective) {
+    Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+
+    ASTPrinter& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), "");
+}
+
 TEST_F(HlslASTPrinterTest, Generate) {
     Func("my_func", {}, ty.void_(), {});
 

@@ -131,5 +131,16 @@ TEST_F(GlslASTPrinterTest, UnsupportedExtension) {
               R"(12:34 error: GLSL backend does not support extension 'undefined')");
 }
 
+TEST_F(GlslASTPrinterTest, RequiresDirective) {
+    Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+
+    ASTPrinter& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
