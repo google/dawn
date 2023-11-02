@@ -49,7 +49,6 @@ libtint_source_set("options") {
   ]
   deps = [
     "${tint_src_dir}/api/common",
-    "${tint_src_dir}/lang/core",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/reflection",
