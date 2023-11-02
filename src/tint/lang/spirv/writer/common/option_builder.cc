@@ -32,31 +32,41 @@
 namespace tint::spirv::writer {
 
 bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
-    tint::Hashset<tint::BindingPoint, 8> seen_wgsl_bindings{};
-    tint::Hashset<binding::BindingInfo, 8> seen_spirv_bindings{};
+    tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
+    tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_spirv_bindings{};
 
-    auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& info) -> bool {
-        if (seen_wgsl_bindings.Contains(info)) {
-            std::stringstream str;
-            str << "found duplicate WGSL binding point: " << info;
+    // Both wgsl_seen and spirv_seen check to see if the pair of [src, dst] are unique. If we have
+    // multiple entries that map the same [src, dst] pair, that's fine. We treat it as valid as it's
+    // possible for multiple entry points to use the remapper at the same time. If the pair doesn't
+    // match, then we report an error about a duplicate binding point.
 
-            diagnostics.add_error(diag::System::Writer, str.str());
-            return true;
+    auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
+                                                         const binding::BindingInfo& dst) -> bool {
+        if (auto binding = seen_wgsl_bindings.Find(src)) {
+            if (*binding != dst) {
+                std::stringstream str;
+                str << "found duplicate WGSL binding point: " << src;
+
+                diagnostics.add_error(diag::System::Writer, str.str());
+                return true;
+            }
         }
-        seen_wgsl_bindings.Add(info);
+        seen_wgsl_bindings.Add(src, dst);
         return false;
     };
 
-    auto spirv_seen = [&diagnostics,
-                       &seen_spirv_bindings](const binding::BindingInfo& info) -> bool {
-        if (seen_spirv_bindings.Contains(info)) {
-            std::stringstream str;
-            str << "found duplicate SPIR-V binding point: [group: " << info.group
-                << ", binding: " << info.binding << "]";
-            diagnostics.add_error(diag::System::Writer, str.str());
-            return true;
+    auto spirv_seen = [&diagnostics, &seen_spirv_bindings](const binding::BindingInfo& src,
+                                                           const tint::BindingPoint& dst) -> bool {
+        if (auto binding = seen_spirv_bindings.Find(src)) {
+            if (*binding != dst) {
+                std::stringstream str;
+                str << "found duplicate SPIR-V binding point: [group: " << src.group
+                    << ", binding: " << src.binding << "]";
+                diagnostics.add_error(diag::System::Writer, str.str());
+                return true;
+            }
         }
-        seen_spirv_bindings.Add(info);
+        seen_spirv_bindings.Add(src, dst);
         return false;
     };
 
@@ -65,11 +75,11 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
             const auto& src_binding = it.first;
             const auto& dst_binding = it.second;
 
-            if (wgsl_seen(src_binding)) {
+            if (wgsl_seen(src_binding, dst_binding)) {
                 return false;
             }
 
-            if (spirv_seen(dst_binding)) {
+            if (spirv_seen(dst_binding, src_binding)) {
                 return false;
             }
         }
@@ -104,20 +114,20 @@ bool ValidateBindingOptions(const Options& options, diag::List& diagnostics) {
         const auto& metadata = it.second.metadata;
 
         // Validate with the actual source regardless of what the remapper will do
-        if (wgsl_seen(src_binding)) {
+        if (wgsl_seen(src_binding, plane0)) {
             diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
 
-        if (spirv_seen(plane0)) {
+        if (spirv_seen(plane0, src_binding)) {
             diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
-        if (spirv_seen(plane1)) {
+        if (spirv_seen(plane1, src_binding)) {
             diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }
-        if (spirv_seen(metadata)) {
+        if (spirv_seen(metadata, src_binding)) {
             diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
             return false;
         }

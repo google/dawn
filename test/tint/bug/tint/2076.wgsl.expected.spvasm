@@ -1,0 +1,96 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 25
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %ext_tex_plane_1 "ext_tex_plane_1"
+               OpName %ext_tex_params_block_std140 "ext_tex_params_block_std140"
+               OpMemberName %ext_tex_params_block_std140 0 "inner"
+               OpName %ExternalTextureParams_std140 "ExternalTextureParams_std140"
+               OpMemberName %ExternalTextureParams_std140 0 "numPlanes"
+               OpMemberName %ExternalTextureParams_std140 1 "doYuvToRgbConversionOnly"
+               OpMemberName %ExternalTextureParams_std140 2 "yuvToRgbConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 3 "gammaDecodeParams"
+               OpName %GammaTransferParams "GammaTransferParams"
+               OpMemberName %GammaTransferParams 0 "G"
+               OpMemberName %GammaTransferParams 1 "A"
+               OpMemberName %GammaTransferParams 2 "B"
+               OpMemberName %GammaTransferParams 3 "C"
+               OpMemberName %GammaTransferParams 4 "D"
+               OpMemberName %GammaTransferParams 5 "E"
+               OpMemberName %GammaTransferParams 6 "F"
+               OpMemberName %GammaTransferParams 7 "padding"
+               OpMemberName %ExternalTextureParams_std140 4 "gammaEncodeParams"
+               OpMemberName %ExternalTextureParams_std140 5 "gamutConversionMatrix"
+               OpMemberName %ExternalTextureParams_std140 6 "coordTransformationMatrix_0"
+               OpMemberName %ExternalTextureParams_std140 7 "coordTransformationMatrix_1"
+               OpMemberName %ExternalTextureParams_std140 8 "coordTransformationMatrix_2"
+               OpName %ext_tex_params "ext_tex_params"
+               OpName %Sampler "Sampler"
+               OpName %randomTexture "randomTexture"
+               OpName %depthTexture "depthTexture"
+               OpName %unused_entry_point "unused_entry_point"
+               OpDecorate %ext_tex_plane_1 DescriptorSet 0
+               OpDecorate %ext_tex_plane_1 Binding 3
+               OpDecorate %ext_tex_params_block_std140 Block
+               OpMemberDecorate %ext_tex_params_block_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 0 Offset 0
+               OpMemberDecorate %ExternalTextureParams_std140 1 Offset 4
+               OpMemberDecorate %ExternalTextureParams_std140 2 Offset 16
+               OpMemberDecorate %ExternalTextureParams_std140 2 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 2 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 3 Offset 64
+               OpMemberDecorate %GammaTransferParams 0 Offset 0
+               OpMemberDecorate %GammaTransferParams 1 Offset 4
+               OpMemberDecorate %GammaTransferParams 2 Offset 8
+               OpMemberDecorate %GammaTransferParams 3 Offset 12
+               OpMemberDecorate %GammaTransferParams 4 Offset 16
+               OpMemberDecorate %GammaTransferParams 5 Offset 20
+               OpMemberDecorate %GammaTransferParams 6 Offset 24
+               OpMemberDecorate %GammaTransferParams 7 Offset 28
+               OpMemberDecorate %ExternalTextureParams_std140 4 Offset 96
+               OpMemberDecorate %ExternalTextureParams_std140 5 Offset 128
+               OpMemberDecorate %ExternalTextureParams_std140 5 ColMajor
+               OpMemberDecorate %ExternalTextureParams_std140 5 MatrixStride 16
+               OpMemberDecorate %ExternalTextureParams_std140 6 Offset 176
+               OpMemberDecorate %ExternalTextureParams_std140 7 Offset 184
+               OpMemberDecorate %ExternalTextureParams_std140 8 Offset 192
+               OpDecorate %ext_tex_params NonWritable
+               OpDecorate %ext_tex_params DescriptorSet 0
+               OpDecorate %ext_tex_params Binding 4
+               OpDecorate %Sampler DescriptorSet 0
+               OpDecorate %Sampler Binding 1
+               OpDecorate %randomTexture DescriptorSet 0
+               OpDecorate %randomTexture Binding 1
+               OpDecorate %depthTexture DescriptorSet 0
+               OpDecorate %depthTexture Binding 2
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+%ext_tex_plane_1 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %uint = OpTypeInt 32 0
+    %v4float = OpTypeVector %float 4
+%mat3v4float = OpTypeMatrix %v4float 3
+%GammaTransferParams = OpTypeStruct %float %float %float %float %float %float %float %uint
+    %v3float = OpTypeVector %float 3
+%mat3v3float = OpTypeMatrix %v3float 3
+    %v2float = OpTypeVector %float 2
+%ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %v2float %v2float %v2float
+%ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
+%_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
+%ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
+         %18 = OpTypeSampler
+%_ptr_UniformConstant_18 = OpTypePointer UniformConstant %18
+    %Sampler = OpVariable %_ptr_UniformConstant_18 UniformConstant
+%randomTexture = OpVariable %_ptr_UniformConstant_3 UniformConstant
+%depthTexture = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+%unused_entry_point = OpFunction %void None %21
+         %24 = OpLabel
+               OpReturn
+               OpFunctionEnd

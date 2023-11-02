@@ -49,6 +49,10 @@ struct BindingInfo {
     inline bool operator==(const BindingInfo& rhs) const {
         return group == rhs.group && binding == rhs.binding;
     }
+    /// Inequality operator
+    /// @param rhs the BindingInfo to compare against
+    /// @returns true if this BindingInfo is not equal to `rhs`
+    inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(group, binding);
