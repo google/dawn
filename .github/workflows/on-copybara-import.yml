@@ -1,0 +1,16 @@
+name: On copybara import
+
+on:
+  check_run:
+    type: ['completed']
+
+jobs:
+  comment:
+    name: Comment after successful copybara import
+    if: github.event.check_run.name == 'import/copybara' && github.event.check_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Comment on PR
+      shell: bash
+      run: |
+        echo "${{ github.event.check_run.details_url }}"
