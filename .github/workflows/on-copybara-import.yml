@@ -1,6 +1,7 @@
 name: On copybara import
 
 on:
+  workflow_dispatch:
   check_run:
     type: ['completed']
 
