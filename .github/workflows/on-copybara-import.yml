@@ -1,30 +1,11 @@
 name: On copybara import
 
 on:
-  pull_request:
-    branches: [ "main" ]
   check_run:
     types:
       - completed
-  check_suite:
-    types:
-      - completed
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  comment2:
-    name: comment2
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/github-script@v6
-      name: Test check_suite event
-      with:
-        script: |
-          console.log(github.event.check_suite)
-
   comment:
     name: comment
     if: github.event.check_run.name == 'import/copybara' && github.event.check_run.conclusion == 'success' && github.event.check_run.pull_requests[0]
