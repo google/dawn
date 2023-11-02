@@ -1,7 +1,9 @@
 name: On copybara import
 
 on:
-  status
+  status:
+  push:
+    branches: [ "status-check" ]
 
 jobs:
   debug:
