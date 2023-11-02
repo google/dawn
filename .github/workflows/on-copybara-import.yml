@@ -8,7 +8,7 @@ jobs:
     name: debug
     runs-on: ubuntu-latest
     steps:
-      name: Dump Github Context
+    - name: Dump Github Context
       run: echo '${{ toJSON(github) }}'
 
   comment:
