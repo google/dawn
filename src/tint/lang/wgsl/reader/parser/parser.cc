@@ -456,6 +456,7 @@ Maybe<Void> Parser::enable_directive() {
 //  : require identifier (COMMA identifier)* COMMA? SEMICOLON
 Maybe<Void> Parser::requires_directive() {
     return sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
+        MultiTokenSource decl_source(this);
         if (!match(Token::Type::kRequires)) {
             return Failure::kNoMatch;
         }
@@ -473,34 +474,43 @@ Maybe<Void> Parser::requires_directive() {
             return add_error(t.source(), "requires directives don't take parenthesis");
         }
 
+        wgsl::LanguageFeatures features;
         while (continue_parsing()) {
-            auto& t2 = peek();
-
-            // Match the require name.
+            auto& t2 = next();
             if (handle_error(t2)) {
                 // The token might itself be an error.
                 return Failure::kErrored;
             }
 
+            // Match the require name.
             if (t2.IsIdentifier()) {
-                // TODO(dsinclair): When there are actual values for a requires directive they
-                // should be checked here.
-
-                // Any identifer is a valid feature name, so we correctly handle new feature
-                // names getting added in the future, they just all get flagged as not supported.
-                return add_error(t2.source(), "feature '" + t2.to_str() + "' is not supported");
-            }
-            if (t2.Is(Token::Type::kSemicolon)) {
-                break;
-            }
-            if (!match(Token::Type::kComma)) {
+                auto feature = wgsl::ParseLanguageFeature(t2.to_str_view());
+                if (feature == LanguageFeature::kUndefined) {
+                    // Any identifier is a valid feature name, so we correctly handle new feature
+                    // names getting added in the future, they just all get flagged as not
+                    // supported.
+                    return add_error(t2.source(), "feature '" + t2.to_str() + "' is not supported");
+                }
+                features.Add(feature);
+            } else {
                 return add_error(t2.source(), "invalid feature name for requires");
             }
+
+            if (!match(Token::Type::kComma)) {
+                break;
+            }
+            if (peek_is(Token::Type::kSemicolon)) {
+                break;
+            }
         }
-        // TODO(dsinclair): When there are actual values for a requires directive then the
-        // `while` will need to keep track if any were seen, and this needs to become
-        // conditional.
-        return add_error(t.source(), "missing feature names in requires directive");
+
+        if (!expect("requires directive", Token::Type::kSemicolon)) {
+            return Failure::kErrored;
+        }
+
+        builder_.AST().AddRequires(
+            create<ast::Requires>(decl_source.Source(), std::move(features)));
+        return kSuccess;
     });
 }
 

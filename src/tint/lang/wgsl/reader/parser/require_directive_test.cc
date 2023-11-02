@@ -33,11 +33,64 @@ namespace {
 using RequiresDirectiveTest = WGSLParserTest;
 
 // Test a valid require directive.
-// There currently are no valid require directives
-TEST_F(RequiresDirectiveTest, DISABLED_Valid) {
-    auto p = parser("requires <sometime>;");
+TEST_F(RequiresDirectiveTest, Single) {
+    auto p = parser("requires readonly_and_readwrite_storage_textures;");
     p->requires_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Requires().Length(), 1u);
+    auto* req = ast.Requires()[0];
+    EXPECT_EQ(req->source.range.begin.line, 1u);
+    EXPECT_EQ(req->source.range.begin.column, 1u);
+    EXPECT_EQ(req->source.range.end.line, 1u);
+    EXPECT_EQ(req->source.range.end.column, 50u);
+    ASSERT_EQ(req->features.Length(), 1u);
+    EXPECT_EQ(req->features[0], wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], req);
+}
+
+// Test a valid require directive with a trailing comma.
+TEST_F(RequiresDirectiveTest, Single_TrailingComma) {
+    auto p = parser("requires readonly_and_readwrite_storage_textures,;");
+    p->requires_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Requires().Length(), 1u);
+    auto* req = ast.Requires()[0];
+    EXPECT_EQ(req->source.range.begin.line, 1u);
+    EXPECT_EQ(req->source.range.begin.column, 1u);
+    EXPECT_EQ(req->source.range.end.line, 1u);
+    EXPECT_EQ(req->source.range.end.column, 51u);
+    ASSERT_EQ(req->features.Length(), 1u);
+    EXPECT_EQ(req->features[0], wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], req);
+}
+
+TEST_F(RequiresDirectiveTest, Multiple_Repeated) {
+    auto p = parser(
+        "requires readonly_and_readwrite_storage_textures, "
+        "readonly_and_readwrite_storage_textures;");
+    p->requires_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    auto& ast = program.AST();
+    ASSERT_EQ(ast.Requires().Length(), 1u);
+    auto* req = ast.Requires()[0];
+    EXPECT_EQ(req->source.range.begin.line, 1u);
+    EXPECT_EQ(req->source.range.begin.column, 1u);
+    EXPECT_EQ(req->source.range.end.line, 1u);
+    EXPECT_EQ(req->source.range.end.column, 91u);
+    ASSERT_EQ(req->features.Length(), 1u);
+    EXPECT_EQ(req->features[0], wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], req);
 }
 
 // Test an unknown require identifier.
@@ -76,7 +129,7 @@ TEST_F(RequiresDirectiveTest, InvalidTokens) {
         auto p = parser("requires;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
-        EXPECT_EQ(p->error(), R"(1:9: missing feature names in requires directive)");
+        EXPECT_EQ(p->error(), R"(1:9: invalid feature name for requires)");
     }
 }
 
