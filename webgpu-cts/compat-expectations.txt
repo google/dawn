@@ -179,15 +179,12 @@ crbug.com/dawn/2170 [ angle-opengl ] webgpu:api,validation,image_copy,buffer_tex
 # Shader issues
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,binary,f32_matrix_vector_multiplication:matrix_vector:inputSource="const";cols=4;rows=4 [ Failure ]
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:* [ Failure ]
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
+crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const"* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const"* [ Failure ]
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="const"* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,refract:f32_vec2:inputSource="const" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Failure ]
 
-crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="storage";storageMode="read_write";* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:alias_name:ident="bitcast" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:function_const_name:ident="bitcast" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,validation,parse,identifiers:function_let_name:ident="bitcast" [ Failure ]
@@ -202,6 +199,7 @@ crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="i32" [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
+crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,clamp:i32:* [ Failure ]
 crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,builtin,clamp:u32:* [ Failure ]
 
@@ -238,24 +236,6 @@ crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,text
 
 # maxTextureDimension2D
 crbug.com/dawn/2136 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:* [ Failure ]
-
-# maxSampledTexturesPerShaderStage
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
-crbug.com/dawn/2161 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow"* [ Failure ]
 
 # maxStorageBuffersPerShaderStage
 crbug.com/dawn/2165 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
