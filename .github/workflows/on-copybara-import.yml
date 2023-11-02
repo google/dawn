@@ -1,38 +1,16 @@
 name: On copybara import
 
 on:
-  check_run:
-    types:
-      - completed
-  status:
+  status
 
 jobs:
-  log_event:
-    name: log event
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/github-script@v6
-      name: Log Event
-      with:
-        script: console.log(github.event)
-
   comment:
     name: comment
-    if: github.event.check_run.name == 'import/copybara' && github.event.check_run.conclusion == 'success' && github.event.check_run.pull_requests[0]
+    if: github.event.state == 'success' && github.event.context == 'import/copybara'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/github-script@v6
       name: Comment on PR
       with:
         script: |
-          console.log(github.event.check_run)
-          github.rest.issues.createComment({
-            issue_number: github.event.check_run.pull_requests[0].number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: |
-              👋 Thanks for your contribution! Your PR has been imported to Gerrit.
-              Please visit ${{ github.event.check_run.details_url }} to see it and CC yourself on the change.
-              All comments are handled within Gerrit. Any comments on the GitHub PR may be ignored.
-              You can continue to upload commits to the PR in order to address feedback from Gerrit.
-          })
+          console.log(github.event)
