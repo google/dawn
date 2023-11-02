@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-11-01 02:48:19AM
+# Last rolled: 2023-11-02 06:42:34PM
 
 # GPU context canvas copy issue
 crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
