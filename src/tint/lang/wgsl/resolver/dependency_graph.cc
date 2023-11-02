@@ -201,6 +201,9 @@ class DependencyScanner {
             [&](const ast::Enable*) {
                 // Enable directives do not affect the dependency graph.
             },
+            [&](const ast::Requires*) {
+                // Requires directives do not affect the dependency graph.
+            },
             [&](const ast::ConstAssert* assertion) {
                 TraverseExpression(assertion->condition);
             },  //
@@ -611,6 +614,7 @@ struct DependencyAnalysis {
             [&](const ast::Variable* var) { return var->name->symbol; },
             [&](const ast::DiagnosticDirective*) { return Symbol(); },
             [&](const ast::Enable*) { return Symbol(); },
+            [&](const ast::Requires*) { return Symbol(); },
             [&](const ast::ConstAssert*) { return Symbol(); },  //
             TINT_ICE_ON_NO_MATCH);
     }
@@ -714,13 +718,13 @@ struct DependencyAnalysis {
 
         // Make sure all directives go before any other global declarations.
         for (auto* global : declaration_order_) {
-            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
+            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable, ast::Requires>()) {
                 sorted_.Add(global->node);
             }
         }
 
         for (auto* global : declaration_order_) {
-            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
+            if (global->node->IsAnyOf<ast::DiagnosticDirective, ast::Enable, ast::Requires>()) {
                 // Skip directives here, as they are already added.
                 continue;
             }

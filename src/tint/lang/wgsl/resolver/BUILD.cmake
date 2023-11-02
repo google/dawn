@@ -121,6 +121,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/inferred_type_test.cc
   lang/wgsl/resolver/is_host_shareable_test.cc
   lang/wgsl/resolver/is_storeable_test.cc
+  lang/wgsl/resolver/language_features_test.cc
   lang/wgsl/resolver/load_test.cc
   lang/wgsl/resolver/materialize_test.cc
   lang/wgsl/resolver/override_test.cc

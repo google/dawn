@@ -466,8 +466,12 @@ class Resolver {
     bool DiagnosticControl(const ast::DiagnosticControl& control);
 
     /// @param enable the enable declaration
-    /// @returns the resolved extension
+    /// @returns true on success, false on failure
     bool Enable(const ast::Enable* enable);
+
+    /// @param req the requires declaration
+    /// @returns true on success, false on failure
+    bool Requires(const ast::Requires* req);
 
     /// @param named_type the named type to resolve
     /// @returns the resolved semantic type

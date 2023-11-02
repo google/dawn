@@ -123,6 +123,7 @@ if (tint_build_unittests) {
       "inferred_type_test.cc",
       "is_host_shareable_test.cc",
       "is_storeable_test.cc",
+      "language_features_test.cc",
       "load_test.cc",
       "materialize_test.cc",
       "override_test.cc",

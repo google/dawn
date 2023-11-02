@@ -189,6 +189,7 @@ bool Resolver::ResolveInternal() {
                     return DiagnosticControl(d->control);
                 },
                 [&](const ast::Enable* e) { return Enable(e); },
+                [&](const ast::Requires* r) { return Requires(r); },
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
@@ -3955,6 +3956,11 @@ bool Resolver::Enable(const ast::Enable* enable) {
         Mark(ext);
         enabled_extensions_.Add(ext->name);
     }
+    return true;
+}
+
+bool Resolver::Requires(const ast::Requires*) {
+    // TODO(crbug.com/tint/2081): Check that all features are allowed.
     return true;
 }
 
