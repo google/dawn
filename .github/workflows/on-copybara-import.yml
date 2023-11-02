@@ -4,8 +4,18 @@ on:
   check_run:
     types:
       - completed
+  status:
 
 jobs:
+  log_event:
+    name: log event
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/github-script@v6
+      name: Log Event
+      with:
+        script: console.log(github.event)
+
   comment:
     name: comment
     if: github.event.check_run.name == 'import/copybara' && github.event.check_run.conclusion == 'success' && github.event.check_run.pull_requests[0]
