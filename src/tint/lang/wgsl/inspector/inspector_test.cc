@@ -3126,11 +3126,9 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
             expectedResourceType = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
             break;
         case core::Access::kRead:
-            Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
             expectedResourceType = ResourceBinding::ResourceType::kReadOnlyStorageTexture;
             break;
         case core::Access::kReadWrite:
-            Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
             expectedResourceType = ResourceBinding::ResourceType::kReadWriteStorageTexture;
             break;
         case core::Access::kUndefined:

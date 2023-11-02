@@ -91,63 +91,6 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_True) {
     EXPECT_EQ(program.Diagnostics().count(), 0u) << errs;
 }
 
-constexpr auto kShaderWithReadWriteStorageTexture = R"(
-               OpCapability Shader
-               OpCapability StorageImageExtendedFormats
-               OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %100 "main"
-               OpExecutionMode %100 LocalSize 8 8 1
-               OpSource HLSL 600
-               OpName %type_2d_image "type.2d.image"
-               OpName %RWTexture2D "RWTexture2D"
-               OpName %100 "main"
-               OpDecorate %RWTexture2D DescriptorSet 0
-               OpDecorate %RWTexture2D Binding 0
-      %float = OpTypeFloat 32
-    %float_0 = OpConstant %float 0
-    %v4float = OpTypeVector %float 4
-       %uint = OpTypeInt 32 0
-     %uint_1 = OpConstant %uint 1
-     %v2uint = OpTypeVector %uint 2
-      %coord = OpConstantComposite %v2uint %uint_1 %uint_1
-%type_2d_image = OpTypeImage %float 2D 2 0 0 2 Rgba32f
-%_ptr_UniformConstant_type_2d_image = OpTypePointer UniformConstant %type_2d_image
-       %void = OpTypeVoid
-         %20 = OpTypeFunction %void
-%RWTexture2D = OpVariable %_ptr_UniformConstant_type_2d_image UniformConstant
-        %100 = OpFunction %void None %20
-         %22 = OpLabel
-         %30 = OpLoad %type_2d_image %RWTexture2D
-         %31 = OpImageRead %v4float %30 %coord None
-         %32 = OpFAdd %v4float %31 %31
-               OpImageWrite %30 %coord %32 None
-               OpReturn
-               OpFunctionEnd
-  )";
-
-TEST_F(ParserTest, AllowChromiumExtensions_False) {
-    auto spv = test::Assemble(kShaderWithReadWriteStorageTexture);
-    Options options;
-    options.allow_chromium_extensions = false;
-    auto program = Parse(spv, options);
-    auto errs = program.Diagnostics().str();
-    EXPECT_FALSE(program.IsValid()) << errs;
-    EXPECT_THAT(errs,
-                ::testing::HasSubstr(
-                    "error: module requires chromium_experimental_read_write_storage_texture, but "
-                    "'allow-chromium-extensions' was not passed"));
-}
-
-TEST_F(ParserTest, AllowChromiumExtensions_True) {
-    auto spv = test::Assemble(kShaderWithReadWriteStorageTexture);
-    Options options;
-    options.allow_chromium_extensions = true;
-    auto program = Parse(spv, options);
-    auto errs = program.Diagnostics().str();
-    EXPECT_TRUE(program.IsValid()) << errs;
-    EXPECT_EQ(program.Diagnostics().count(), 0u) << errs;
-}
-
 // TODO(dneto): uint32 vec, valid SPIR-V
 // TODO(dneto): uint32 vec, invalid SPIR-V
 

@@ -333,25 +333,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
     switch (t->access()) {
         case core::Access::kRead:
-            if (!enabled_extensions_.Contains(
-                    wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture)) {
-                AddError(
-                    "read-only storage textures require the "
-                    "chromium_experimental_read_write_storage_texture extension to be enabled",
-                    source);
-                return false;
-            }
-            break;
         case core::Access::kReadWrite:
-            if (!enabled_extensions_.Contains(
-                    wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture)) {
-                AddError(
-                    "read-write storage textures require the "
-                    "chromium_experimental_read_write_storage_texture extension to be enabled",
-                    source);
-                return false;
-            }
-            break;
         case core::Access::kWrite:
             break;
         case core::Access::kUndefined:

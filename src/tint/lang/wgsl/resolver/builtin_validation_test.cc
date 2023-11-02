@@ -809,24 +809,8 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeConst) {
         R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be a const-expression)");
 }
 
-TEST_F(ResolverBuiltinValidationTest, TextureBarrierWithoutExtension) {
+TEST_F(ResolverBuiltinValidationTest, TextureBarrier) {
     // fn func { textureBarrier(); }
-    Func("func", tint::Empty, ty.void_(),
-         Vector{
-             CallStmt(Call(Source{Source::Location{12, 34}}, "textureBarrier")),
-         });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: cannot call built-in function 'textureBarrier' without extension chromium_experimental_read_write_storage_texture)");
-}
-
-TEST_F(ResolverBuiltinValidationTest, TextureBarrierWithExtension) {
-    // enable chromium_experimental_read_write_storage_texture;
-    // fn func { textureBarrier(); }
-    Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
-
     Func("func", tint::Empty, ty.void_(),
          Vector{
              CallStmt(Call(Source{Source::Location{12, 34}}, "textureBarrier")),

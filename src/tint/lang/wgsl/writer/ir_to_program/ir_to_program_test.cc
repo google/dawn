@@ -3212,55 +3212,6 @@ fn y() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// chromium_experimental_read_write_storage_texture
-////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramTest, Enable_ChromiumExperimentalReadWriteStorageTexture_TextureBarrier) {
-    auto* fn = b.Function("f", ty.void_());
-    b.Append(fn->Block(), [&] {
-        b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
-            b.InstructionResult(ty.void_()), wgsl::BuiltinFn::kTextureBarrier, Empty));
-        b.Return(fn);
-    });
-
-    EXPECT_WGSL(R"(
-enable chromium_experimental_read_write_storage_texture;
-
-fn f() {
-  textureBarrier();
-}
-)");
-}
-
-TEST_F(IRToProgramTest, Enable_ChromiumExperimentalReadWriteStorageTexture_ReadOnlyStorageTexture) {
-    auto* T = b.Var("T", ty.ptr<handle>(ty.Get<core::type::StorageTexture>(
-                             core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
-                             core::Access::kRead, ty.f32())));
-    T->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(T);
-
-    EXPECT_WGSL(R"(
-enable chromium_experimental_read_write_storage_texture;
-
-@group(0) @binding(0) var T : texture_storage_2d<r32float, read>;
-)");
-}
-
-TEST_F(IRToProgramTest,
-       Enable_ChromiumExperimentalReadWriteStorageTexture_ReadWriteOnlyStorageTexture) {
-    auto* T = b.Var("T", ty.ptr<handle>(ty.Get<core::type::StorageTexture>(
-                             core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
-                             core::Access::kReadWrite, ty.f32())));
-    T->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(T);
-
-    EXPECT_WGSL(R"(
-enable chromium_experimental_read_write_storage_texture;
-
-@group(0) @binding(0) var T : texture_storage_2d<r32float, read_write>;
-)");
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // chromium_experimental_subgroups
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_SubgroupBallot) {

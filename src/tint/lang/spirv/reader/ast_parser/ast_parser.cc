@@ -2583,9 +2583,6 @@ const Type* ASTParser::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruct
         } else {
             const auto access =
                 usage.IsStorageReadWriteTexture() ? core::Access::kReadWrite : core::Access::kWrite;
-            if (access == core::Access::kReadWrite) {
-                Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
-            }
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
             if (format == core::TexelFormat::kUndefined) {
                 return nullptr;

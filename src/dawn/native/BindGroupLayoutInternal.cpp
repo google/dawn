@@ -83,13 +83,10 @@ MaybeError ValidateReadWriteStorageTextureAccess(
     switch (storageTextureBindingLayout.access) {
         case wgpu::StorageTextureAccess::ReadOnly:
         case wgpu::StorageTextureAccess::ReadWrite:
-            if (!device->APIHasFeature(
-                    wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture)) {
+            if (!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
                 return DAWN_VALIDATION_ERROR(
-                    "storage texture access %s cannot be used without feature "
-                    "%s",
-                    storageTextureBindingLayout.access,
-                    wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture);
+                    "storage texture access %s is guarded by toggle allow_unsafe_apis",
+                    storageTextureBindingLayout.access);
             }
             break;
 

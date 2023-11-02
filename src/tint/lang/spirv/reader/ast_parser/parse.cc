@@ -71,7 +71,6 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
                     case wgsl::Extension::kChromiumExperimentalFullPtrParameters:
                     case wgsl::Extension::kChromiumExperimentalPixelLocal:
                     case wgsl::Extension::kChromiumExperimentalPushConstant:
-                    case wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture:
                     case wgsl::Extension::kChromiumExperimentalSubgroups:
                     case wgsl::Extension::kChromiumInternalDualSourceBlending:
                     case wgsl::Extension::kChromiumInternalRelaxedUniformLayout: {
@@ -82,6 +81,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
                         return Program(std::move(builder));
                     }
                     case wgsl::Extension::kF16:
+                    case wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture:
                         break;
                 }
             }

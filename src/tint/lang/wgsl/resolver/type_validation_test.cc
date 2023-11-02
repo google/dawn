@@ -1196,27 +1196,10 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(StorageTextureAccessTest, ReadOnlyAccess_WithoutExtension_Fail) {
+TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read>;
 
-    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
-                                 core::TexelFormat::kR32Uint, core::Access::kRead);
-
-    GlobalVar("a", st, Group(0_a), Binding(0_a));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: read-only storage textures require the "
-              "chromium_experimental_read_write_storage_texture extension to be enabled");
-}
-
-TEST_F(StorageTextureAccessTest, ReadOnlyAccess_WithExtension_Pass) {
-    // enable chromium_experimental_read_write_storage_texture;
-    // @group(0) @binding(0)
-    // var a : texture_storage_1d<r32uint, read>;
-
-    Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
     auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
                                  core::TexelFormat::kR32Uint, core::Access::kRead);
 
@@ -1225,27 +1208,10 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_WithExtension_Pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(StorageTextureAccessTest, RWAccess_WithoutExtension_Fail) {
+TEST_F(StorageTextureAccessTest, RWAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read_write>;
 
-    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
-                                 core::TexelFormat::kR32Uint, core::Access::kReadWrite);
-
-    GlobalVar("a", st, Group(0_a), Binding(0_a));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: read-write storage textures require the "
-              "chromium_experimental_read_write_storage_texture extension to be enabled");
-}
-
-TEST_F(StorageTextureAccessTest, RWAccess_WithExtension_Pass) {
-    // enable chromium_experimental_read_write_storage_texture;
-    // @group(0) @binding(0)
-    // var a : texture_storage_1d<r32uint, read_write>;
-
-    Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
     auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
                                  core::TexelFormat::kR32Uint, core::Access::kReadWrite);
 

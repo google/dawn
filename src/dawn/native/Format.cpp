@@ -437,7 +437,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
     // 4 bytes color formats
     SampleTypeBit sampleTypeFor32BitFloatFormats = device->HasFeature(Feature::Float32Filterable) ? kAnyFloat : SampleTypeBit::UnfilterableFloat;
-    auto supportsReadWriteStorageUsage = device->HasFeature(Feature::ChromiumExperimentalReadWriteStorageTexture) ? Cap::StorageRW : Cap::None;
+    auto supportsReadWriteStorageUsage = device->IsToggleEnabled(Toggle::AllowUnsafeAPIs) ? Cap::StorageRW : Cap::None;
     auto supportsPLS = device->HasFeature(Feature::PixelLocalStorageCoherent) || device->HasFeature(Feature::PixelLocalStorageNonCoherent) ? Cap::PLS : Cap::None;
 
     AddColorFormat(wgpu::TextureFormat::R32Uint, Cap::Renderable | Cap::StorageW | supportsReadWriteStorageUsage | supportsPLS, ByteSize(4), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(4));

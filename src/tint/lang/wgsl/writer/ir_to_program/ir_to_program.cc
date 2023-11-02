@@ -605,9 +605,6 @@ class State {
                 }
 
                 switch (c->Func()) {
-                    case wgsl::BuiltinFn::kTextureBarrier:
-                        Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
-                        break;
                     case wgsl::BuiltinFn::kSubgroupBallot:
                     case wgsl::BuiltinFn::kSubgroupBroadcast:
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
@@ -942,9 +939,6 @@ class State {
                 return b.ty.sampled_texture(t->dim(), el);
             },
             [&](const core::type::StorageTexture* t) {
-                if (t->access() == core::Access::kRead || t->access() == core::Access::kReadWrite) {
-                    Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
-                }
                 return b.ty.storage_texture(t->dim(), t->texel_format(), t->access());
             },
             [&](const core::type::Sampler* s) { return b.ty.sampler(s->kind()); },
