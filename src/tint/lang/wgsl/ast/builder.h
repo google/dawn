@@ -97,6 +97,7 @@
 #include "src/tint/lang/wgsl/ast/override.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
+#include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
@@ -1615,6 +1616,25 @@ class Builder {
         auto* enable = create<ast::Enable>(source, Vector{ext});
         AST().AddEnable(enable);
         return enable;
+    }
+
+    /// Adds the language feature to the list of requires directives at the top of the module.
+    /// @param feature the feature to require
+    /// @return a `ast::Requires` requiring the given language feature.
+    const ast::Requires* Require(wgsl::LanguageFeature feature) {
+        auto* req = create<ast::Requires>(wgsl::LanguageFeatures({feature}));
+        AST().AddRequires(req);
+        return req;
+    }
+
+    /// Adds the language feature to the list of requires directives at the top of the module.
+    /// @param source the requires source
+    /// @param feature the feature to require
+    /// @return a `ast::Requires` requiring the given language feature.
+    const ast::Requires* Require(const Source& source, wgsl::LanguageFeature feature) {
+        auto* req = create<ast::Requires>(source, wgsl::LanguageFeatures({feature}));
+        AST().AddRequires(req);
+        return req;
     }
 
     /// @param name the variable name

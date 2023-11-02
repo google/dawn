@@ -158,6 +158,8 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/phony_expression.h
   lang/wgsl/ast/pipeline_stage.cc
   lang/wgsl/ast/pipeline_stage.h
+  lang/wgsl/ast/requires.cc
+  lang/wgsl/ast/requires.h
   lang/wgsl/ast/return_statement.cc
   lang/wgsl/ast/return_statement.h
   lang/wgsl/ast/stage_attribute.cc
@@ -271,6 +273,7 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/member_accessor_expression_test.cc
   lang/wgsl/ast/module_test.cc
   lang/wgsl/ast/phony_expression_test.cc
+  lang/wgsl/ast/requires_test.cc
   lang/wgsl/ast/return_statement_test.cc
   lang/wgsl/ast/stage_attribute_test.cc
   lang/wgsl/ast/stride_attribute_test.cc

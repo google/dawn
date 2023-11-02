@@ -34,6 +34,7 @@
 #include "src/tint/lang/wgsl/ast/diagnostic_directive.h"
 #include "src/tint/lang/wgsl/ast/enable.h"
 #include "src/tint/lang/wgsl/ast/function.h"
+#include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/utils/containers/vector.h"
 
 namespace tint::ast {
@@ -110,11 +111,18 @@ class Module final : public Castable<Module, Node> {
     /// @param ext the enable directive to add
     void AddEnable(const Enable* ext);
 
+    /// Add a requires directive to the module
+    /// @param req the requires directive to add
+    void AddRequires(const Requires* req);
+
     /// @returns the diagnostic directives for the module
     const auto& DiagnosticDirectives() const { return diagnostic_directives_; }
 
     /// @returns the extension set for the module
     const auto& Enables() const { return enables_; }
+
+    /// @returns the requires directives for the module
+    const auto& Requires() const { return requires_; }
 
     /// Add a global const assertion to the module
     /// @param assertion the const assert to add
@@ -168,6 +176,7 @@ class Module final : public Castable<Module, Node> {
     tint::Vector<const Variable*, 32> global_variables_;
     tint::Vector<const DiagnosticDirective*, 8> diagnostic_directives_;
     tint::Vector<const Enable*, 8> enables_;
+    tint::Vector<const ast::Requires*, 8> requires_;
     tint::Vector<const ConstAssert*, 8> const_asserts_;
 };
 

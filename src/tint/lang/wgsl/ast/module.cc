@@ -89,6 +89,10 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl) {
             TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(enable, generation_id);
             enables_.Push(enable);
         },
+        [&](const ast::Requires* req) {
+            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(req, generation_id);
+            requires_.Push(req);
+        },
         [&](const ConstAssert* assertion) {
             TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(assertion, generation_id);
             const_asserts_.Push(assertion);
@@ -108,6 +112,13 @@ void Module::AddEnable(const Enable* enable) {
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(enable, generation_id);
     global_declarations_.Push(enable);
     enables_.Push(enable);
+}
+
+void Module::AddRequires(const ast::Requires* req) {
+    TINT_ASSERT(req);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(req, generation_id);
+    global_declarations_.Push(req);
+    requires_.Push(req);
 }
 
 void Module::AddGlobalVariable(const Variable* var) {
