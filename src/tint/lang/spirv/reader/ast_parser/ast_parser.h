@@ -759,6 +759,14 @@ class ASTParser {
         }
     }
 
+    /// Require a WGSL language feature, if not already required.
+    /// @param feature the language feature to require
+    void Require(wgsl::LanguageFeature feature) {
+        if (required_features_.Add(feature)) {
+            builder_.Require(feature);
+        }
+    }
+
   private:
     /// Converts a specific SPIR-V type to a Tint type. Integer case
     const Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -948,6 +956,8 @@ class ASTParser {
 
     /// Set of WGSL extensions that have been enabled.
     Hashset<wgsl::Extension, 4> enabled_extensions_;
+    /// Set of WGSL language features that have been required.
+    Hashset<wgsl::LanguageFeature, 4> required_features_;
 };
 
 }  // namespace tint::spirv::reader::ast_parser

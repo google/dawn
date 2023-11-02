@@ -5325,6 +5325,7 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
         if (memory != uint32_t(spv::Scope::Workgroup)) {
             return Fail() << "textureBarrier requires workgroup memory scope";
         }
+        parser_impl_.Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
         AddStatement(builder_.CallStmt(builder_.Call("textureBarrier")));
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::ImageMemory);
     }
