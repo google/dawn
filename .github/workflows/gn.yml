@@ -23,13 +23,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "gclient-cache-dir=${RUNNER_TEMP}/.gclient_cache" >> "$GITHUB_OUTPUT"
-
     - name: Install Ubuntu build dependencies
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -44,29 +37,11 @@ jobs:
     - name: Set up checkout
       run: |
         cp ./scripts/standalone.gclient .gclient
-        mkdir -p ${{ steps.strings.outputs.gclient-cache-dir }}
-
-    - name: gclient restore cache
-      id: gclient-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: ${{ steps.strings.outputs.gclient-cache-dir }}
-        key: ${{ runner.os }}-${{ hashFiles('DEPS') }}
-        restore-keys: ${{ runner.os }}-
 
     - name: gclient sync --no-history --shallow
       run: gclient sync --no-history --shallow
       env:
-        GIT_CACHE_PATH: ${{ steps.strings.outputs.gclient-cache-dir }}
         DEPOT_TOOLS_WIN_TOOLCHAIN: 0
-
-    - name: gclient save cache
-      id: gclient-save
-      uses: actions/cache/save@v3
-      if: steps.gclient-save.outputs.cache-hit != 'true'
-      with:
-        path: ${{ steps.strings.outputs.gclient-cache-dir }}
-        key: ${{ steps.gclient-restore.outputs.cache-primary-key }}
 
     - name: Set up sccache
       uses: mozilla-actions/sccache-action@v0.0.3
@@ -75,11 +50,12 @@ jobs:
       shell: bash
       run: |
         mkdir -p out/build
-        touch out/build/args.gn
-        echo "cc_wrapper=\"sccache\"" >> out/build/args.gn
-        echo "is_debug=true" >> out/build/args.gn
-        echo "is_component_build=true" >> out/build/args.gn
-        echo "is_clang=true" >> out/build/args.gn
+        cat << EOF >> out/build/args.gn
+        cc_wrapper="sccache"
+        is_debug=false
+        is_component_build=true
+        is_clang=true
+        EOF
         gn gen out/build
 
       env:
