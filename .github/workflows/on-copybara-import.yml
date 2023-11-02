@@ -1,10 +1,12 @@
 name: On copybara import
 
 on:
-  workflow_dispatch:
   pull_request:
     branches: [ "main" ]
   check_run:
+    types:
+      - completed
+  check_suite:
     types:
       - completed
 
@@ -13,32 +15,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  comment_test:
-    name: comment test
-    if: github.event.pull_request.number
+  comment2:
+    name: comment2
     runs-on: ubuntu-latest
     steps:
-    - name: Wait for import/copybara
-      uses: lewagon/wait-on-check-action@v1.3.1
-      with:
-        ref: ${{ github.ref }}
-        check-name: 'import/copybara'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        wait-interval: 10
     - uses: actions/github-script@v6
-      name: Comment on PR
+      name: Test check_suite event
       with:
         script: |
-          github.rest.issues.createComment({
-            issue_number: github.event.pull_request.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: |
-              👋 Thanks for your contribution! Your PR has been imported to Gerrit.
-              Please visit Gerrit to see it and CC yourself on the change.
-              All comments are handled within Gerrit. Any comments on the GitHub PR may be ignored.
-              You can continue to upload commits to the PR in order to address feedback from Gerrit.
-          })
+          console.log(github.event.check_suite)
 
   comment:
     name: comment
