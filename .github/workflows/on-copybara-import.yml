@@ -1,0 +1,37 @@
+name: On copybara import
+
+on:
+  status
+
+jobs:
+  debug:
+    name: debug
+    runs-on: ubuntu-latest
+    steps:
+      name: Dump Github Context
+      run: echo '${{ toJSON(github) }}'
+
+  comment:
+    name: comment
+    if: github.event.state == 'success' && github.event.context == 'import/copybara'
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Find PR
+      uses: sharesight/find-github-pull-request@1.2.0
+      with:
+        commitSha: ${{ github.event.sha }}
+        allowClosed: false
+        failIfNotFound: false
+
+    - name: Comment on PR
+      if: steps.find-pr.outputs.number != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        number: ${{ steps.find-pr.outputs.number }}
+        header: pr_was_imported # key to reuse the same comment
+        message: |
+          👋 Thanks for your contribution! Your PR has been imported to Gerrit.
+          Please visit ${{ github.event.target_url }} to see it and CC yourself on the change.
+          All comments are handled within Gerrit. Any comments on the GitHub PR may be ignored.
+          You can continue to upload commits to the PR in order to address feedback from Gerrit.
