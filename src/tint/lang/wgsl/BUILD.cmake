@@ -58,6 +58,8 @@ tint_add_target(tint_lang_wgsl lib
   lang/wgsl/diagnostic_severity.h
   lang/wgsl/extension.cc
   lang/wgsl/extension.h
+  lang/wgsl/language_feature.cc
+  lang/wgsl/language_feature.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl lib
@@ -80,6 +82,7 @@ tint_add_target(tint_lang_wgsl_test test
   lang/wgsl/diagnostic_rule_test.cc
   lang/wgsl/diagnostic_severity_test.cc
   lang/wgsl/extension_test.cc
+  lang/wgsl/language_feature_test.cc
   lang/wgsl/wgsl_test.cc
 )
 

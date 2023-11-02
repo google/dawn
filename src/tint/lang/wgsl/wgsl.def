@@ -90,6 +90,11 @@ enum extension {
   chromium_experimental_pixel_local
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
+enum language_feature {
+  readonly_and_readwrite_storage_textures
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
 // Types may be decorated with @precedence(N) to prioritize which type        //

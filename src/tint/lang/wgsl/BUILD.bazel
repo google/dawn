@@ -43,12 +43,14 @@ cc_library(
     "diagnostic_rule.cc",
     "diagnostic_severity.cc",
     "extension.cc",
+    "language_feature.cc",
   ],
   hdrs = [
     "builtin_fn.h",
     "diagnostic_rule.h",
     "diagnostic_severity.h",
     "extension.h",
+    "language_feature.h",
   ],
   deps = [
     "//src/tint/utils/containers",
@@ -71,6 +73,7 @@ cc_library(
     "diagnostic_rule_test.cc",
     "diagnostic_severity_test.cc",
     "extension_test.cc",
+    "language_feature_test.cc",
     "wgsl_test.cc",
   ] + select({
     "//conditions:default": [],
