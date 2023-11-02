@@ -67,6 +67,7 @@ class IndexAccessorExpression;
 class LiteralExpression;
 class LoopStatement;
 class MemberAccessorExpression;
+class Requires;
 class ReturnStatement;
 class Statement;
 class Statement;
@@ -104,6 +105,9 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles generating an enable directive
     /// @param enable the enable node
     void EmitEnable(const ast::Enable* enable);
+    /// Handles generating a requires directive
+    /// @param req the requires node
+    void EmitRequires(const ast::Requires* req);
     /// Handles generating a declared type
     /// @param ty the declared type to generate
     void EmitTypeDecl(const ast::TypeDecl* ty);

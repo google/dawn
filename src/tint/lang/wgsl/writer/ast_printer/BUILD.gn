@@ -101,6 +101,7 @@ if (tint_build_unittests) {
         "literal_test.cc",
         "loop_test.cc",
         "member_accessor_test.cc",
+        "requires_test.cc",
         "return_test.cc",
         "switch_test.cc",
         "type_test.cc",

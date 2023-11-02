@@ -102,6 +102,10 @@ bool ASTPrinter::Generate() {
         EmitEnable(enable);
         has_directives = true;
     }
+    for (auto req : program_.AST().Requires()) {
+        EmitRequires(req);
+        has_directives = true;
+    }
     for (auto diagnostic : program_.AST().DiagnosticDirectives()) {
         auto out = Line();
         EmitDiagnosticControl(out, diagnostic->control);
@@ -113,7 +117,7 @@ bool ASTPrinter::Generate() {
     }
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_.AST().GlobalDeclarations()) {
-        if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
+        if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable, ast::Requires>()) {
             continue;
         }
         Switch(
@@ -144,6 +148,20 @@ void ASTPrinter::EmitEnable(const ast::Enable* enable) {
             out << ", ";
         }
         out << ext->name;
+    }
+    out << ";";
+}
+
+void ASTPrinter::EmitRequires(const ast::Requires* req) {
+    auto out = Line();
+    out << "requires ";
+    bool first = true;
+    for (auto feature : req->features) {
+        if (!first) {
+            out << ", ";
+        }
+        out << feature;
+        first = false;
     }
     out << ";";
 }
