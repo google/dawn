@@ -1142,5 +1142,27 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 )");
 }
 
+TEST_F(IR_FromProgramTest, Requires) {
+    Require(wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+    Func("f", tint::Empty, ty.void_(), tint::Empty);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << m;
+
+    ASSERT_EQ(1u, m->functions.Length());
+
+    auto* f = m->functions[0];
+    ASSERT_NE(f->Block(), nullptr);
+
+    EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

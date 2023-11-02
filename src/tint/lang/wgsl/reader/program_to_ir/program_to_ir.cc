@@ -86,6 +86,7 @@
 #include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/override.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
+#include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/statement.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
@@ -257,6 +258,9 @@ class Impl {
                     // Evaluated by the resolver, drop from the IR.
                 },
                 [&](const ast::DiagnosticDirective*) {
+                    // Ignored for now.
+                },  //
+                [&](const ast::Requires*) {
                     // Ignored for now.
                 },  //
                 TINT_ICE_ON_NO_MATCH);
