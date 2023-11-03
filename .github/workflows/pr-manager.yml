@@ -29,8 +29,10 @@ jobs:
         message: |
           👋 Thanks for your contribution! Your PR has been imported to Gerrit.
           Please visit ${{ inputs.targetUrl }} to see it and CC yourself on the change.
-          All comments are handled within Gerrit. Any comments on the GitHub PR may be ignored.
-          You can continue to upload commits to the PR in order to address feedback from Gerrit.
+          After iterating on feedback, please comment on the Gerrit review to notify reviewers.
+          All reviews are handled within Gerrit, any comments on the GitHub PR may be missed.
+          You can continue to upload commits to this PR, and they will be automatically imported
+          into Gerrit.
 
   merged:
     name: PR Merged
@@ -44,7 +46,7 @@ jobs:
         number: ${{ inputs.pullNumber }}
         header: pr_was_merged # key to reuse the same comment
         skip_unchanged: true
-        message: PR was merged in ${{ inputs.targetUrl }} 🚀
+        message: 🚀 PR was merged in ${{ inputs.targetUrl }}!
 
     - name: Close PR
       uses: actions/github-script@v6
