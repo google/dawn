@@ -76,10 +76,6 @@
 
 # Last rolled: 2023-11-02 06:42:34PM
 
-# GPU context canvas copy issue
-crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
-crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl";dstColorFormat="r8unorm";srcPremultiplied=false;dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
-
 # snorm / stencil8 issues
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
@@ -208,15 +204,6 @@ crbug.com/dawn/2077 [ angle-opengl ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="_undef_";forceFallbackAdapter=true [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=true [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="low-power";forceFallbackAdapter=true [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_microtask:sourceType="VideoElement" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_microtask:sourceType="VideoFrame" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoElement" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_from_different_video_frame: [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_multiple_times_in_same_task_scope:sourceType="VideoElement" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:import_multiple_times_in_same_task_scope:sourceType="VideoFrame" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:use_import_to_refresh: [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:webcodec_video_frame_close_expire_immediately: [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rg11b10ufloat" [ Failure ]
@@ -226,7 +213,6 @@ crbug.com/dawn/2086 [ angle-opengl ] webgpu:util,texture,texel_data:unorm_texel_
 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
 
 # Memory Sync
-crbug.com/dawn/2083 [ angle-opengl ] webgpu:api,operation,memory_sync,buffer,single_buffer:wr:boundary="command-buffer";readOp="storage-read";readContext="compute-pass-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
@@ -234,9 +220,6 @@ crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,buff
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ angle-opengl intel ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
-
-# maxTextureDimension2D
-crbug.com/dawn/2136 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:* [ Failure ]
 
 # maxStorageBuffersPerShaderStage
 crbug.com/dawn/2165 [ angle-opengl ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow"* [ Failure ]
@@ -371,8 +354,6 @@ crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,des
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=true [ Failure ]
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
 crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
-crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";* [ Failure ]
-crbug.com/dawn/2087 [ angle-opengl ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoFrame";* [ Failure ]
 
 # Flaky
 crbug.com/dawn/0000 webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ RetryOnFailure ]
@@ -383,7 +364,6 @@ crbug.com/dawn/2113 webgpu:shader,execution,shader_io,compute_builtins:inputs:* 
 
 # getCurrentTexture failures
 crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
-crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:expiry:* [ Failure ]
 crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
 
 # Instancing issues on NVidia GL
