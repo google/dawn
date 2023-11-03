@@ -521,10 +521,14 @@ config("common_config") {
     cflags_cc += [
       "/EHsc",  # DXC uses exceptions
       "/Zc:__cplusplus",
-      "/Zc:twoPhase-",  # DXC source relies on MSVC's non-conforming
-                        # two-phase lookup
       "/Zc:sizedDealloc-",  # Disable sized allocation
     ]
+    if (!is_clang) {
+      cflags_cc += [
+        "/Zc:twoPhase-",  # DXC source relies on MSVC's non-conforming
+                          # two-phase lookup
+      ]
+    }
 
     cflags_c += [
       "/EHsc",  # DXC uses exceptions
