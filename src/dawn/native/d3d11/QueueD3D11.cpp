@@ -48,10 +48,14 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
     // context.
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_TRY(ToBackend(commands[i])->Execute());
+    {
+        auto commandContext =
+            device->GetScopedSwapStatePendingCommandContext(Device::SubmitMode::Normal);
+        for (uint32_t i = 0; i < commandCount; ++i) {
+            DAWN_TRY(ToBackend(commands[i])->Execute(&commandContext));
+        }
+        DAWN_TRY(device->ExecutePendingCommandContext());
     }
-    DAWN_TRY(device->ExecutePendingCommandContext());
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
 
     DAWN_TRY(device->NextSerial());
@@ -68,8 +72,9 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
         return {};
     }
 
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-    return ToBackend(buffer)->Write(commandContext, bufferOffset, data, size);
+    Device* device = ToBackend(GetDevice());
+    auto commandContext = device->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    return ToBackend(buffer)->Write(&commandContext, bufferOffset, data, size);
 }
 
 MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
@@ -81,8 +86,8 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
         return {};
     }
 
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-
+    Device* device = ToBackend(GetDevice());
+    auto commandContext = device->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
     TextureCopy textureCopy;
     textureCopy.texture = destination.texture;
     textureCopy.mipLevel = destination.mipLevel;
@@ -93,7 +98,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
 
     Texture* texture = ToBackend(destination.texture);
 
-    return texture->Write(commandContext, subresources, destination.origin, writeSizePixel,
+    return texture->Write(&commandContext, subresources, destination.origin, writeSizePixel,
                           static_cast<const uint8_t*>(data) + dataLayout.offset,
                           dataLayout.bytesPerRow, dataLayout.rowsPerImage);
 }

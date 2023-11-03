@@ -37,13 +37,15 @@
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::d3d11 {
+
+class ScopedCommandRecordingContext;
+
 namespace {
 
 constexpr wgpu::BufferUsage kD3D11AllowedUniformBufferUsages =
@@ -148,13 +150,16 @@ size_t D3D11BufferSizeAlignment(wgpu::BufferUsage usage) {
 }  // namespace
 
 // static
-ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
+ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
+                                          const BufferDescriptor* descriptor,
+                                          const ScopedCommandRecordingContext* commandContext) {
     Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
-    DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
+    DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation, commandContext));
     return buffer;
 }
 
-MaybeError Buffer::Initialize(bool mappedAtCreation) {
+MaybeError Buffer::Initialize(bool mappedAtCreation,
+                              const ScopedCommandRecordingContext* commandContext) {
     // TODO(dawn:1705): handle mappedAtCreation for NonzeroClearResourcesOnCreationForTesting
 
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
@@ -217,7 +222,14 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     if (!mappedAtCreation) {
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            DAWN_TRY(ClearInternal(ToBackend(GetDevice())->GetPendingCommandContext(), 1u));
+            if (commandContext) {
+                DAWN_TRY(ClearInternal(commandContext, 1u));
+            } else {
+                auto tmpCommandContext =
+                    ToBackend(GetDevice())
+                        ->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+                DAWN_TRY(ClearInternal(&tmpCommandContext, 1u));
+            }
         }
 
         // Initialize the padding bytes to zero.
@@ -226,8 +238,15 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             if (paddingBytes > 0) {
                 uint32_t clearSize = paddingBytes;
                 uint64_t clearOffset = GetSize();
-                DAWN_TRY(ClearInternal(ToBackend(GetDevice())->GetPendingCommandContext(), 0,
-                                       clearOffset, clearSize));
+                if (commandContext) {
+                    DAWN_TRY(ClearInternal(commandContext, 0, clearOffset, clearSize));
+
+                } else {
+                    auto tmpCommandContext =
+                        ToBackend(GetDevice())
+                            ->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+                    DAWN_TRY(ClearInternal(&tmpCommandContext, 0, clearOffset, clearSize));
+                }
             }
         }
     }
@@ -241,48 +260,47 @@ bool Buffer::IsCPUWritableAtCreation() const {
     return IsMappable(GetUsage());
 }
 
-MaybeError Buffer::MapInternal() {
+MaybeError Buffer::MapInternal(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(IsMappable(GetUsage()));
     DAWN_ASSERT(!mMappedData);
-
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
 
     // Always map buffer with D3D11_MAP_READ_WRITE even for mapping wgpu::MapMode:Read, because we
     // need write permission to initialize the buffer.
     // TODO(dawn:1705): investigate the performance impact of mapping with D3D11_MAP_READ_WRITE.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    DAWN_TRY(CheckHRESULT(
-        commandContext->GetD3D11DeviceContext4()->Map(mD3d11NonConstantBuffer.Get(),
-                                                      /*Subresource=*/0, D3D11_MAP_READ_WRITE,
-                                                      /*MapFlags=*/0, &mappedResource),
-        "ID3D11DeviceContext::Map"));
+    DAWN_TRY(CheckHRESULT(commandContext->Map(mD3d11NonConstantBuffer.Get(),
+                                              /*Subresource=*/0, D3D11_MAP_READ_WRITE,
+                                              /*MapFlags=*/0, &mappedResource),
+                          "ID3D11DeviceContext::Map"));
     mMappedData = reinterpret_cast<uint8_t*>(mappedResource.pData);
 
     return {};
 }
 
-void Buffer::UnmapInternal() {
+void Buffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(mMappedData);
-
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-    commandContext->GetD3D11DeviceContext4()->Unmap(mD3d11NonConstantBuffer.Get(),
-                                                    /*Subresource=*/0);
+    commandContext->Unmap(mD3d11NonConstantBuffer.Get(),
+                          /*Subresource=*/0);
     mMappedData = nullptr;
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
     DAWN_ASSERT(IsMappable(GetUsage()));
-    return MapInternal();
+    auto commandContext =
+        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    return MapInternal(&commandContext);
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
 
-    // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
-    DAWN_TRY(MapInternal());
+    auto commandContext =
+        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
 
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-    DAWN_TRY(EnsureDataInitialized(commandContext));
+    // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
+    DAWN_TRY(MapInternal(&commandContext));
+
+    DAWN_TRY(EnsureDataInitialized(&commandContext));
 
     return {};
 }
@@ -290,7 +308,9 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
 void Buffer::UnmapImpl() {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
     DAWN_ASSERT(mMappedData);
-    UnmapInternal();
+    auto commandContext =
+        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    UnmapInternal(&commandContext);
 }
 
 void* Buffer::GetMappedPointer() {
@@ -309,7 +329,7 @@ void Buffer::DestroyImpl() {
     //   other threads using the buffer since there are no other live refs.
     BufferBase::DestroyImpl();
     if (mMappedData) {
-        UnmapInternal();
+        UnmapImpl();
     }
     mD3d11NonConstantBuffer = nullptr;
 }
@@ -320,7 +340,7 @@ void Buffer::SetLabelImpl() {
                  GetLabel());
 }
 
-MaybeError Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext) {
+MaybeError Buffer::EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext) {
     if (!NeedsInitialization()) {
         return {};
     }
@@ -329,9 +349,10 @@ MaybeError Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext
     return {};
 }
 
-MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
-                                                      uint64_t offset,
-                                                      uint64_t size) {
+MaybeError Buffer::EnsureDataInitializedAsDestination(
+    const ScopedCommandRecordingContext* commandContext,
+    uint64_t offset,
+    uint64_t size) {
     if (!NeedsInitialization()) {
         return {};
     }
@@ -345,8 +366,9 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
     return {};
 }
 
-MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
-                                                      const CopyTextureToBufferCmd* copy) {
+MaybeError Buffer::EnsureDataInitializedAsDestination(
+    const ScopedCommandRecordingContext* commandContext,
+    const CopyTextureToBufferCmd* copy) {
     if (!NeedsInitialization()) {
         return {};
     }
@@ -360,7 +382,7 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
     return {};
 }
 
-MaybeError Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
+MaybeError Buffer::InitializeToZero(const ScopedCommandRecordingContext* commandContext) {
     DAWN_ASSERT(NeedsInitialization());
 
     DAWN_TRY(ClearInternal(commandContext, uint8_t(0u)));
@@ -374,15 +396,14 @@ void Buffer::MarkMutated() {
     mConstantBufferIsUpdated = false;
 }
 
-void Buffer::EnsureConstantBufferIsUpdated(CommandRecordingContext* commandContext) {
+void Buffer::EnsureConstantBufferIsUpdated(const ScopedCommandRecordingContext* commandContext) {
     if (mConstantBufferIsUpdated) {
         return;
     }
 
     DAWN_ASSERT(mD3d11NonConstantBuffer);
     DAWN_ASSERT(mD3d11ConstantBuffer);
-    commandContext->GetD3D11DeviceContext4()->CopyResource(mD3d11ConstantBuffer.Get(),
-                                                           mD3d11NonConstantBuffer.Get());
+    commandContext->CopyResource(mD3d11ConstantBuffer.Get(), mD3d11NonConstantBuffer.Get());
     mConstantBufferIsUpdated = true;
 }
 
@@ -435,7 +456,7 @@ ResultOrError<ComPtr<ID3D11UnorderedAccessView1>> Buffer::CreateD3D11UnorderedAc
     return uav;
 }
 
-MaybeError Buffer::Clear(CommandRecordingContext* commandContext,
+MaybeError Buffer::Clear(const ScopedCommandRecordingContext* commandContext,
                          uint8_t clearValue,
                          uint64_t offset,
                          uint64_t size) {
@@ -448,14 +469,14 @@ MaybeError Buffer::Clear(CommandRecordingContext* commandContext,
     // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and ClearInternal()
     // can write the mapped memory directly.
     ScopedMap scopedMap;
-    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(this));
+    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this));
 
     // For non-staging buffers, we can use UpdateSubresource to write the data.
     DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
     return ClearInternal(commandContext, clearValue, offset, size);
 }
 
-MaybeError Buffer::ClearInternal(CommandRecordingContext* commandContext,
+MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandContext,
                                  uint8_t clearValue,
                                  uint64_t offset,
                                  uint64_t size) {
@@ -477,7 +498,7 @@ MaybeError Buffer::ClearInternal(CommandRecordingContext* commandContext,
     return WriteInternal(commandContext, offset, clearData.data(), size);
 }
 
-MaybeError Buffer::Write(CommandRecordingContext* commandContext,
+MaybeError Buffer::Write(const ScopedCommandRecordingContext* commandContext,
                          uint64_t offset,
                          const void* data,
                          size_t size) {
@@ -487,14 +508,14 @@ MaybeError Buffer::Write(CommandRecordingContext* commandContext,
     // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and WriteInternal()
     // can write the mapped memory directly.
     ScopedMap scopedMap;
-    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(this));
+    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this));
 
     // For non-staging buffers, we can use UpdateSubresource to write the data.
     DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
     return WriteInternal(commandContext, offset, data, size);
 }
 
-MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
+MaybeError Buffer::WriteInternal(const ScopedCommandRecordingContext* commandContext,
                                  uint64_t offset,
                                  const void* data,
                                  size_t size) {
@@ -504,7 +525,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
 
     // Map the buffer if it is possible, so WriteInternal() can write the mapped memory directly.
     ScopedMap scopedMap;
-    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(this));
+    DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(commandContext, this));
 
     if (scopedMap.GetMappedData()) {
         memcpy(scopedMap.GetMappedData() + offset, data, size);
@@ -516,8 +537,6 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     // UpdateSubresource can only be used to update non-mappable buffers.
     DAWN_ASSERT(!IsMappable(GetUsage()));
 
-    auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
-
     if (mD3d11NonConstantBuffer) {
         D3D11_BOX box;
         box.left = offset;
@@ -526,10 +545,10 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         box.bottom = 1;
         box.front = 0;
         box.back = 1;
-        d3d11DeviceContext->UpdateSubresource(mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0,
-                                              &box, data,
-                                              /*SrcRowPitch=*/0,
-                                              /*SrcDepthPitch*/ 0);
+        commandContext->UpdateSubresource(mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0, &box,
+                                          data,
+                                          /*SrcRowPitch=*/0,
+                                          /*SrcDepthPitch*/ 0);
         if (!mD3d11ConstantBuffer) {
             return {};
         }
@@ -541,7 +560,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         }
 
         // Copy the modified part of the mD3d11NonConstantBuffer to mD3d11ConstantBuffer.
-        d3d11DeviceContext->CopySubresourceRegion(
+        commandContext->CopySubresourceRegion(
             mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0, /*DstX=*/offset,
             /*DstY=*/0,
             /*DstZ=*/0, mD3d11NonConstantBuffer.Get(), /*SrcSubresource=*/0, &box);
@@ -554,17 +573,17 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     // For a full size write, UpdateSubresource() can be used to update mD3d11ConstantBuffer.
     if (size == GetSize() && offset == 0) {
         if (size == mAllocatedSize) {
-            d3d11DeviceContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
-                                                  nullptr, data,
-                                                  /*SrcRowPitch=*/size,
-                                                  /*SrcDepthPitch*/ 0);
+            commandContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                              nullptr, data,
+                                              /*SrcRowPitch=*/size,
+                                              /*SrcDepthPitch*/ 0);
         } else {
             std::vector<uint8_t> allocatedData(mAllocatedSize, 0);
             std::memcpy(allocatedData.data(), data, size);
-            d3d11DeviceContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
-                                                  nullptr, allocatedData.data(),
-                                                  /*SrcRowPitch=*/mAllocatedSize,
-                                                  /*SrcDepthPitch*/ 0);
+            commandContext->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                              nullptr, allocatedData.data(),
+                                              /*SrcRowPitch=*/mAllocatedSize,
+                                              /*SrcDepthPitch*/ 0);
         }
         return {};
     }
@@ -577,7 +596,8 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     descriptor.mappedAtCreation = false;
     descriptor.label = "DawnWriteStagingBuffer";
     Ref<BufferBase> stagingBuffer;
-    DAWN_TRY_ASSIGN(stagingBuffer, GetDevice()->CreateBuffer(&descriptor));
+    DAWN_TRY_ASSIGN(stagingBuffer,
+                    Buffer::Create(ToBackend(GetDevice()), &descriptor, commandContext));
 
     DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
 
@@ -586,7 +606,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
 }
 
 // static
-MaybeError Buffer::Copy(CommandRecordingContext* commandContext,
+MaybeError Buffer::Copy(const ScopedCommandRecordingContext* commandContext,
                         Buffer* source,
                         uint64_t sourceOffset,
                         size_t size,
@@ -601,7 +621,7 @@ MaybeError Buffer::Copy(CommandRecordingContext* commandContext,
 }
 
 // static
-MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
+MaybeError Buffer::CopyInternal(const ScopedCommandRecordingContext* commandContext,
                                 Buffer* source,
                                 uint64_t sourceOffset,
                                 size_t size,
@@ -620,7 +640,7 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     DAWN_ASSERT(d3d11SourceBuffer);
 
     if (destination->mD3d11NonConstantBuffer) {
-        commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
+        commandContext->CopySubresourceRegion(
             destination->mD3d11NonConstantBuffer.Get(), /*DstSubresource=*/0,
             /*DstX=*/destinationOffset,
             /*DstY=*/0,
@@ -634,7 +654,7 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     }
 
     if (destination->mD3d11ConstantBuffer) {
-        commandContext->GetD3D11DeviceContext4()->CopySubresourceRegion(
+        commandContext->CopySubresourceRegion(
             destination->mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
             /*DstX=*/destinationOffset,
             /*DstY=*/0,
@@ -644,23 +664,27 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     return {};
 }
 
-ResultOrError<Buffer::ScopedMap> Buffer::ScopedMap::Create(Buffer* buffer) {
+ResultOrError<Buffer::ScopedMap> Buffer::ScopedMap::Create(
+    const ScopedCommandRecordingContext* commandContext,
+    Buffer* buffer) {
     if (!IsMappable(buffer->GetUsage())) {
-        return ScopedMap(nullptr, /*needsUnmap=*/false);
+        return ScopedMap();
     }
 
     if (buffer->mMappedData) {
-        return ScopedMap(buffer, /*needsUnmap=*/false);
+        return ScopedMap(commandContext, buffer, /*needsUnmap=*/false);
     }
 
-    DAWN_TRY(buffer->MapInternal());
-    return ScopedMap(buffer, /*needsUnmap=*/true);
+    DAWN_TRY(buffer->MapInternal(commandContext));
+    return ScopedMap(commandContext, buffer, /*needsUnmap=*/true);
 }
 
 Buffer::ScopedMap::ScopedMap() = default;
 
-Buffer::ScopedMap::ScopedMap(Buffer* buffer, bool needsUnmap)
-    : mBuffer(buffer), mNeedsUnmap(needsUnmap) {}
+Buffer::ScopedMap::ScopedMap(const ScopedCommandRecordingContext* commandContext,
+                             Buffer* buffer,
+                             bool needsUnmap)
+    : mCommandContext(commandContext), mBuffer(buffer), mNeedsUnmap(needsUnmap) {}
 
 Buffer::ScopedMap::~ScopedMap() {
     Reset();
@@ -672,6 +696,7 @@ Buffer::ScopedMap::ScopedMap(Buffer::ScopedMap&& other) {
 
 Buffer::ScopedMap& Buffer::ScopedMap::operator=(Buffer::ScopedMap&& other) {
     Reset();
+    mCommandContext = other.mCommandContext;
     mBuffer = other.mBuffer;
     mNeedsUnmap = other.mNeedsUnmap;
     other.mBuffer = nullptr;
@@ -681,8 +706,9 @@ Buffer::ScopedMap& Buffer::ScopedMap::operator=(Buffer::ScopedMap&& other) {
 
 void Buffer::ScopedMap::Reset() {
     if (mNeedsUnmap) {
-        mBuffer->UnmapInternal();
+        mBuffer->UnmapInternal(mCommandContext);
     }
+    mCommandContext = nullptr;
     mBuffer = nullptr;
     mNeedsUnmap = false;
 }

@@ -40,6 +40,15 @@ namespace dawn::native::d3d11 {
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D11Device> GetD3D11Device(WGPUDevice device);
 
+// May be chained on RequestAdapterOptions
+struct DAWN_NATIVE_EXPORT RequestAdapterOptionsD3D11Device : wgpu::ChainedStruct {
+    RequestAdapterOptionsD3D11Device() {
+        sType = static_cast<wgpu::SType>(WGPUSType_RequestAdapterOptionsD3D11Device);
+    }
+
+    Microsoft::WRL::ComPtr<ID3D11Device> device;
+};
+
 // May be chained on SharedTextureMemoryDescriptor
 struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D11Texture2DDescriptor : wgpu::ChainedStruct {
     SharedTextureMemoryD3D11Texture2DDescriptor() {

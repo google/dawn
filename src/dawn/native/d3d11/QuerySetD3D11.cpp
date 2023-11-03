@@ -86,7 +86,7 @@ void QuerySet::EndQuery(ID3D11DeviceContext* d3d11DeviceContext, uint32_t query)
     d3d11DeviceContext->End(mPredicates[query].Get());
 }
 
-MaybeError QuerySet::Resolve(CommandRecordingContext* commandContext,
+MaybeError QuerySet::Resolve(const ScopedSwapStateCommandRecordingContext* commandContext,
                              uint32_t firstQuery,
                              uint32_t queryCount,
                              Buffer* destination,

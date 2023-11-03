@@ -44,7 +44,7 @@
 namespace dawn::native::d3d11 {
 namespace {
 
-bool CheckAllSlotsAreEmpty(CommandRecordingContext* commandContext) {
+bool CheckAllSlotsAreEmpty(const ScopedSwapStateCommandRecordingContext* commandContext) {
     auto* deviceContext = commandContext->GetD3D11DeviceContext4();
 
     // Reserve one slot for builtin constants.
@@ -101,7 +101,7 @@ bool CheckAllSlotsAreEmpty(CommandRecordingContext* commandContext) {
     return true;
 }
 
-void ResetAllRenderSlots(CommandRecordingContext* commandContext) {
+void ResetAllRenderSlots(const ScopedSwapStateCommandRecordingContext* commandContext) {
     auto* deviceContext = commandContext->GetD3D11DeviceContext4();
 
     // Reserve one slot for builtin constants.
@@ -130,12 +130,13 @@ void ResetAllRenderSlots(CommandRecordingContext* commandContext) {
 
 }  // namespace
 
-BindGroupTracker::BindGroupTracker(CommandRecordingContext* commandContext, bool isRenderPass)
+BindGroupTracker::BindGroupTracker(const ScopedSwapStateCommandRecordingContext* commandContext,
+                                   bool isRenderPass)
     : mCommandContext(commandContext),
       mIsRenderPass(isRenderPass),
       mVisibleStages(isRenderPass ? wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment
                                   : wgpu::ShaderStage::Compute) {
-    mLastAppliedPipelineLayout = commandContext->GetDevice()->GetEmptyPipelineLayout();
+    mLastAppliedPipelineLayout = mCommandContext->GetDevice()->GetEmptyPipelineLayout();
 }
 
 BindGroupTracker::~BindGroupTracker() {

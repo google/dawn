@@ -76,8 +76,12 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
 
 }  // namespace
 
-PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
-    : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11) {}
+PhysicalDevice::PhysicalDevice(Backend* backend,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
+                               ComPtr<ID3D11Device> d3d11Device)
+    : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11),
+      mIsSharedD3D11Device(!!d3d11Device),
+      mD3D11Device(std::move(d3d11Device)) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
 
@@ -102,7 +106,12 @@ const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
 }
 
 ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
-    ComPtr<ID3D11Device> device = std::move(mD3d11Device);
+    ComPtr<ID3D11Device> device = mD3D11Device;
+
+    if (!mIsSharedD3D11Device) {
+        mD3D11Device = nullptr;
+    }
+
     if (!device) {
         const PlatformFunctions* functions = static_cast<Backend*>(GetBackend())->GetFunctions();
         const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
@@ -123,6 +132,7 @@ ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
             DAWN_TRY(InitializeDebugLayerFilters(device));
         }
     }
+
     return device;
 }
 
@@ -131,10 +141,10 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // D3D11 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
-    DAWN_TRY_ASSIGN(mD3d11Device, CreateD3D11Device());
+    DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device());
 
-    mFeatureLevel = mD3d11Device->GetFeatureLevel();
-    DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(mD3d11Device));
+    mFeatureLevel = mD3D11Device->GetFeatureLevel();
+    DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(mD3D11Device));
 
     // Base::InitializeImpl() cannot distinguish between discrete and integrated GPUs, so we need to
     // overwrite it.
@@ -274,7 +284,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* ada
 // and the subequent call to CreateDevice will return a handle the existing device instead of
 // creating a new one.
 MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
-    [[maybe_unused]] auto refCount = mD3d11Device.Reset();
+    [[maybe_unused]] auto refCount = mD3D11Device.Reset();
     DAWN_ASSERT(refCount == 0);
     DAWN_TRY(Initialize());
 

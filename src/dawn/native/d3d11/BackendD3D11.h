@@ -43,11 +43,17 @@ class Backend : public d3d::Backend {
     MaybeError Initialize();
     const PlatformFunctions* GetFunctions() const;
 
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
+        const RequestAdapterOptions* options) override;
+
   protected:
     ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDeviceFromIDXGIAdapter(
         ComPtr<IDXGIAdapter> dxgiAdapter) override;
 
   private:
+    ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDevice(ComPtr<IDXGIAdapter> dxgiAdapter,
+                                                                ComPtr<ID3D11Device> d3d11Device);
+
     using Base = d3d::Backend;
 };
 

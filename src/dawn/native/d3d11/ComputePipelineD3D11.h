@@ -34,8 +34,8 @@
 
 namespace dawn::native::d3d11 {
 
-class CommandRecordingContext;
 class Device;
+class ScopedSwapStateCommandRecordingContext;
 
 class ComputePipeline final : public ComputePipelineBase {
   public:
@@ -45,7 +45,7 @@ class ComputePipeline final : public ComputePipelineBase {
                                 WGPUCreateComputePipelineAsyncCallback callback,
                                 void* userdata);
 
-    void ApplyNow(CommandRecordingContext* commandContext);
+    void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
 
     MaybeError Initialize() override;
 

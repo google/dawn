@@ -38,33 +38,34 @@ struct DispatchCmd;
 
 namespace dawn::native::d3d11 {
 
-class CommandRecordingContext;
 class ComputePipeline;
 class RenderPipeline;
+class ScopedSwapStateCommandRecordingContext;
 
 class CommandBuffer final : public CommandBufferBase {
   public:
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
-    MaybeError Execute();
+    MaybeError Execute(const ScopedSwapStateCommandRecordingContext* commandContext);
 
   private:
     using CommandBufferBase::CommandBufferBase;
 
-    MaybeError ExecuteComputePass(CommandRecordingContext* commandContext);
+    MaybeError ExecuteComputePass(const ScopedSwapStateCommandRecordingContext* commandContext);
     MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                 CommandRecordingContext* commandContext);
-    void HandleDebugCommands(CommandRecordingContext* commandContext,
+                                 const ScopedSwapStateCommandRecordingContext* commandContext);
+    void HandleDebugCommands(const ScopedSwapStateCommandRecordingContext* commandContext,
                              CommandIterator* iter,
                              Command command);
 
     MaybeError RecordFirstIndexOffset(RenderPipeline* renderPipeline,
-                                      CommandRecordingContext* commandContext,
+                                      const ScopedSwapStateCommandRecordingContext* commandContext,
                                       uint32_t firstVertex,
                                       uint32_t firstInstance);
-    MaybeError RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
-                                              CommandRecordingContext* commandContext,
-                                              DispatchCmd* dispatchCmd);
+    MaybeError RecordNumWorkgroupsForDispatch(
+        ComputePipeline* computePipeline,
+        const ScopedSwapStateCommandRecordingContext* commandContext,
+        DispatchCmd* dispatchCmd);
 };
 
 }  // namespace dawn::native::d3d11

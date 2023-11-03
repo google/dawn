@@ -41,43 +41,22 @@ class Device;
 class CommandRecordingContext {
   public:
     MaybeError Intialize(Device* device);
-
     void Release();
-    bool IsOpen() const;
-    bool NeedsSubmit() const;
-    void SetNeedsSubmit();
-
     MaybeError ExecuteCommandList(Device* device);
 
-    ID3D11Device* GetD3D11Device() const;
-    ID3D11DeviceContext4* GetD3D11DeviceContext4() const;
-    ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
-    Buffer* GetUniformBuffer() const;
-    Device* GetDevice() const;
-
-    struct ScopedCriticalSection : NonMovable {
-        explicit ScopedCriticalSection(ComPtr<ID3D11Multithread>);
-        ~ScopedCriticalSection();
-
-      private:
-        ComPtr<ID3D11Multithread> mD3D11Multithread;
-    };
-    // Returns a scoped object that marks a critical section using the
-    // ID3D11Multithread Enter and Leave methods. This allows minimizing the
-    // cost of D3D11 multithread protection by allowing a single mutex Acquire
-    // and Release call for an entire set of operations on the immediate context
-    // e.g. when executing command buffers. This only has an effect if the
-    // ImplicitDeviceSynchronization feature is enabled.
-    ScopedCriticalSection EnterScopedCriticalSection();
-
-    // Write the built-in variable value to the uniform buffer.
-    void WriteUniformBuffer(uint32_t offset, uint32_t element);
-    MaybeError FlushUniformBuffer();
+    bool IsOpen() const { return mIsOpen; }
+    bool NeedsSubmit() const { return mNeedsSubmit; }
+    void SetNeedsSubmit() { mNeedsSubmit = true; }
 
   private:
+    friend class ScopedCommandRecordingContext;
+    friend class ScopedSwapStateCommandRecordingContext;
+
+    bool mScopedAccessed = false;
     bool mIsOpen = false;
     bool mNeedsSubmit = false;
     ComPtr<ID3D11Device> mD3D11Device;
+    ComPtr<ID3DDeviceContextState> mD3D11DeviceContextState;
     ComPtr<ID3D11DeviceContext4> mD3D11DeviceContext4;
     ComPtr<ID3D11Multithread> mD3D11Multithread;
     ComPtr<ID3DUserDefinedAnnotation> mD3DUserDefinedAnnotation;
@@ -90,6 +69,71 @@ class CommandRecordingContext {
     bool mUniformBufferDirty = true;
 
     Ref<Device> mDevice;
+};
+
+// For using ID3D11DeviceContext methods which don't change device context state.
+class ScopedCommandRecordingContext : NonMovable {
+  public:
+    explicit ScopedCommandRecordingContext(CommandRecordingContext* commandContext);
+    ~ScopedCommandRecordingContext();
+
+    Device* GetDevice() const;
+
+    // Wrapper method which don't depend on context state.
+    void UpdateSubresource(ID3D11Resource* pDstResource,
+                           UINT DstSubresource,
+                           const D3D11_BOX* pDstBox,
+                           const void* pSrcData,
+                           UINT SrcRowPitch,
+                           UINT SrcDepthPitch) const;
+    void CopyResource(ID3D11Resource* pDstResource, ID3D11Resource* pSrcResource) const;
+    void CopySubresourceRegion(ID3D11Resource* pDstResource,
+                               UINT DstSubresource,
+                               UINT DstX,
+                               UINT DstY,
+                               UINT DstZ,
+                               ID3D11Resource* pSrcResource,
+                               UINT SrcSubresource,
+                               const D3D11_BOX* pSrcBox) const;
+    void ClearRenderTargetView(ID3D11RenderTargetView* pRenderTargetView,
+                               const FLOAT ColorRGBA[4]) const;
+    void ClearDepthStencilView(ID3D11DepthStencilView* pDepthStencilView,
+                               UINT ClearFlags,
+                               FLOAT Depth,
+                               UINT8 Stencil) const;
+    HRESULT Map(ID3D11Resource* pResource,
+                UINT Subresource,
+                D3D11_MAP MapType,
+                UINT MapFlags,
+                D3D11_MAPPED_SUBRESOURCE* pMappedResource) const;
+    void Unmap(ID3D11Resource* pResource, UINT Subresource) const;
+    HRESULT Signal(ID3D11Fence* pFence, UINT64 Value) const;
+    HRESULT Wait(ID3D11Fence* pFence, UINT64 Value) const;
+
+    // Write the built-in variable value to the uniform buffer.
+    void WriteUniformBuffer(uint32_t offset, uint32_t element) const;
+    MaybeError FlushUniformBuffer() const;
+
+  protected:
+    CommandRecordingContext* const mCommandContext;
+    ComPtr<ID3D11Multithread> mD3D11Multithread;
+};
+
+// For using ID3D11DeviceContext directly. It swaps and resets ID3DDeviceContextState of
+// ID3D11DeviceContext for a scope. It is needed for sharing ID3D11Device between dawn and ANGLE.
+class ScopedSwapStateCommandRecordingContext : public ScopedCommandRecordingContext {
+  public:
+    explicit ScopedSwapStateCommandRecordingContext(CommandRecordingContext* commandContext);
+    ~ScopedSwapStateCommandRecordingContext();
+
+    ID3D11Device* GetD3D11Device() const;
+    ID3D11DeviceContext4* GetD3D11DeviceContext4() const;
+    ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
+    Buffer* GetUniformBuffer() const;
+
+  private:
+    const bool mSwapContextState;
+    ComPtr<ID3DDeviceContextState> mPreviousState;
 };
 
 }  // namespace dawn::native::d3d11

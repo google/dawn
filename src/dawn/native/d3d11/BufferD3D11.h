@@ -36,19 +36,23 @@
 
 namespace dawn::native::d3d11 {
 
-class CommandRecordingContext;
 class Device;
+class ScopedCommandRecordingContext;
 
 class Buffer final : public BufferBase {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
+    static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                             const BufferDescriptor* descriptor,
+                                             const ScopedCommandRecordingContext* commandContext);
 
-    MaybeError EnsureDataInitialized(CommandRecordingContext* commandContext);
-    MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
-                                                  uint64_t offset,
-                                                  uint64_t size);
-    MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
-                                                  const CopyTextureToBufferCmd* copy);
+    MaybeError EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext);
+    MaybeError EnsureDataInitializedAsDestination(
+        const ScopedCommandRecordingContext* commandContext,
+        uint64_t offset,
+        uint64_t size);
+    MaybeError EnsureDataInitializedAsDestination(
+        const ScopedCommandRecordingContext* commandContext,
+        const CopyTextureToBufferCmd* copy);
 
     // Dawn API
     void SetLabelImpl() override;
@@ -59,23 +63,23 @@ class Buffer final : public BufferBase {
     // it will be synced with mD3d11NonConstantBuffer before binding it to the constant buffer slot.
     void MarkMutated();
     // Update content of the mD3d11ConstantBuffer from mD3d11NonConstantBuffer if needed.
-    void EnsureConstantBufferIsUpdated(CommandRecordingContext* commandContext);
+    void EnsureConstantBufferIsUpdated(const ScopedCommandRecordingContext* commandContext);
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceView(
         uint64_t offset,
         uint64_t size) const;
     ResultOrError<ComPtr<ID3D11UnorderedAccessView1>> CreateD3D11UnorderedAccessView1(
         uint64_t offset,
         uint64_t size) const;
-    MaybeError Clear(CommandRecordingContext* commandContext,
+    MaybeError Clear(const ScopedCommandRecordingContext* commandContext,
                      uint8_t clearValue,
                      uint64_t offset,
                      uint64_t size);
-    MaybeError Write(CommandRecordingContext* commandContext,
+    MaybeError Write(const ScopedCommandRecordingContext* commandContext,
                      uint64_t offset,
                      const void* data,
                      size_t size);
 
-    static MaybeError Copy(CommandRecordingContext* commandContext,
+    static MaybeError Copy(const ScopedCommandRecordingContext* commandContext,
                            Buffer* source,
                            uint64_t sourceOffset,
                            size_t size,
@@ -86,7 +90,8 @@ class Buffer final : public BufferBase {
       public:
         // Map buffer and return a ScopedMap object. If the buffer is not mappable,
         // scopedMap.GetMappedData() will return nullptr.
-        static ResultOrError<ScopedMap> Create(Buffer* buffer);
+        static ResultOrError<ScopedMap> Create(const ScopedCommandRecordingContext* commandContext,
+                                               Buffer* buffer);
 
         ScopedMap();
         ~ScopedMap();
@@ -99,10 +104,12 @@ class Buffer final : public BufferBase {
         void Reset();
 
       private:
-        ScopedMap(Buffer* buffer, bool needsUnmap);
+        ScopedMap(const ScopedCommandRecordingContext* commandContext,
+                  Buffer* buffer,
+                  bool needsUnmap);
 
+        const ScopedCommandRecordingContext* mCommandContext = nullptr;
         Buffer* mBuffer = nullptr;
-
         // Whether the buffer needs to be unmapped when the ScopedMap object is destroyed.
         bool mNeedsUnmap = false;
     };
@@ -112,7 +119,8 @@ class Buffer final : public BufferBase {
 
     ~Buffer() override;
 
-    MaybeError Initialize(bool mappedAtCreation);
+    MaybeError Initialize(bool mappedAtCreation,
+                          const ScopedCommandRecordingContext* commandContext);
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
     void DestroyImpl() override;
@@ -120,22 +128,22 @@ class Buffer final : public BufferBase {
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointer() override;
 
-    MaybeError MapInternal();
-    void UnmapInternal();
+    MaybeError MapInternal(const ScopedCommandRecordingContext* commandContext);
+    void UnmapInternal(const ScopedCommandRecordingContext* commandContext);
 
-    MaybeError InitializeToZero(CommandRecordingContext* commandContext);
+    MaybeError InitializeToZero(const ScopedCommandRecordingContext* commandContext);
     // Clear the buffer without checking if the buffer is initialized.
-    MaybeError ClearInternal(CommandRecordingContext* commandContext,
+    MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
                              uint8_t clearValue,
                              uint64_t offset = 0,
                              uint64_t size = 0);
     // Write the buffer without checking if the buffer is initialized.
-    MaybeError WriteInternal(CommandRecordingContext* commandContext,
+    MaybeError WriteInternal(const ScopedCommandRecordingContext* commandContext,
                              uint64_t bufferOffset,
                              const void* data,
                              size_t size);
     // Copy the buffer without checking if the buffer is initialized.
-    static MaybeError CopyInternal(CommandRecordingContext* commandContext,
+    static MaybeError CopyInternal(const ScopedCommandRecordingContext* commandContext,
                                    Buffer* source,
                                    uint64_t sourceOffset,
                                    size_t size,

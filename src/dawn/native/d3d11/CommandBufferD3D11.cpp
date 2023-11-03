@@ -41,6 +41,7 @@
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d11/BindGroupTrackerD3D11.h"
 #include "dawn/native/d3d11/BufferD3D11.h"
+#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
@@ -67,7 +68,7 @@ DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
 
 class VertexBufferTracker {
   public:
-    explicit VertexBufferTracker(CommandRecordingContext* commandContext)
+    explicit VertexBufferTracker(const ScopedSwapStateCommandRecordingContext* commandContext)
         : mCommandContext(commandContext) {}
 
     ~VertexBufferTracker() {
@@ -100,14 +101,16 @@ class VertexBufferTracker {
     }
 
   private:
-    CommandRecordingContext* const mCommandContext;
+    const ScopedSwapStateCommandRecordingContext* mCommandContext;
     const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
     ityp::array<VertexBufferSlot, ID3D11Buffer*, kMaxVertexBuffers> mD3D11Buffers = {};
     ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mStrides = {};
     ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mOffsets = {};
 };
 
-MaybeError SynchronizeTextureBeforeUse(Texture* texture, CommandRecordingContext* commandContext) {
+MaybeError SynchronizeTextureBeforeUse(
+    Texture* texture,
+    const ScopedSwapStateCommandRecordingContext* commandContext) {
     SharedTextureMemoryBase::PendingFenceList fences;
     SharedTextureMemoryContents* contents = texture->GetSharedTextureMemoryContents();
     if (contents == nullptr) {
@@ -133,14 +136,8 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
     return AcquireRef(new CommandBuffer(encoder, descriptor));
 }
 
-MaybeError CommandBuffer::Execute() {
-    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
-
-    // Mark a critical section for this entire scope to minimize the cost of mutex acquire/release
-    // when ID3D11Multithread protection is enabled.
-    auto scopedCriticalSection = commandContext->EnterScopedCriticalSection();
-
-    auto LazyClearSyncScope = [commandContext](const SyncScopeResourceUsage& scope) -> MaybeError {
+MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* commandContext) {
+    auto LazyClearSyncScope = [&commandContext](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);
 
@@ -252,7 +249,8 @@ MaybeError CommandBuffer::Execute() {
                                     ComputeRequiredBytesInCopy(blockInfo, copy->copySize,
                                                                src.bytesPerRow, src.rowsPerImage));
                     desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
-                    DAWN_TRY_ASSIGN(stagingBuffer, GetDevice()->CreateBuffer(&desc));
+                    DAWN_TRY_ASSIGN(stagingBuffer,
+                                    Buffer::Create(ToBackend(GetDevice()), &desc, commandContext));
 
                     DAWN_TRY(Buffer::Copy(commandContext, buffer, src.offset,
                                           stagingBuffer->GetSize(), ToBackend(stagingBuffer.Get()),
@@ -262,7 +260,7 @@ MaybeError CommandBuffer::Execute() {
                 }
 
                 Buffer::ScopedMap scopedMap;
-                DAWN_TRY_ASSIGN(scopedMap, Buffer::ScopedMap::Create(buffer));
+                DAWN_TRY_ASSIGN(scopedMap, Buffer::ScopedMap::Create(commandContext, buffer));
                 DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
                 Texture* texture = ToBackend(dst.texture.Get());
@@ -297,7 +295,7 @@ MaybeError CommandBuffer::Execute() {
 
                 Buffer* buffer = ToBackend(dst.buffer.Get());
                 Buffer::ScopedMap scopedDstMap;
-                DAWN_TRY_ASSIGN(scopedDstMap, Buffer::ScopedMap::Create(buffer));
+                DAWN_TRY_ASSIGN(scopedDstMap, Buffer::ScopedMap::Create(commandContext, buffer));
 
                 DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
 
@@ -392,7 +390,8 @@ MaybeError CommandBuffer::Execute() {
     return {};
 }
 
-MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::ExecuteComputePass(
+    const ScopedSwapStateCommandRecordingContext* commandContext) {
     ComputePipeline* lastPipeline = nullptr;
     BindGroupTracker bindGroupTracker(commandContext, /*isRenderPass=*/false);
 
@@ -478,8 +477,9 @@ MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandCon
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                            CommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::ExecuteRenderPass(
+    BeginRenderPassCmd* renderPass,
+    const ScopedSwapStateCommandRecordingContext* commandContext) {
     auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
 
     // Hold ID3D11RenderTargetView ComPtr to make attachments alive.
@@ -814,9 +814,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
     DAWN_UNREACHABLE();
 }
 
-void CommandBuffer::HandleDebugCommands(CommandRecordingContext* commandContext,
-                                        CommandIterator* iter,
-                                        Command command) {
+void CommandBuffer::HandleDebugCommands(
+    const ScopedSwapStateCommandRecordingContext* commandContext,
+    CommandIterator* iter,
+    Command command) {
     switch (command) {
         case Command::InsertDebugMarker: {
             InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
@@ -842,10 +843,11 @@ void CommandBuffer::HandleDebugCommands(CommandRecordingContext* commandContext,
     }
 }
 
-MaybeError CommandBuffer::RecordFirstIndexOffset(RenderPipeline* renderPipeline,
-                                                 CommandRecordingContext* commandContext,
-                                                 uint32_t firstVertex,
-                                                 uint32_t firstInstance) {
+MaybeError CommandBuffer::RecordFirstIndexOffset(
+    RenderPipeline* renderPipeline,
+    const ScopedSwapStateCommandRecordingContext* commandContext,
+    uint32_t firstVertex,
+    uint32_t firstInstance) {
     constexpr uint32_t kFirstVertexOffset = 0;
     constexpr uint32_t kFirstInstanceOffset = 1;
 
@@ -859,9 +861,10 @@ MaybeError CommandBuffer::RecordFirstIndexOffset(RenderPipeline* renderPipeline,
     return commandContext->FlushUniformBuffer();
 }
 
-MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
-                                                         CommandRecordingContext* commandContext,
-                                                         DispatchCmd* dispatchCmd) {
+MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(
+    ComputePipeline* computePipeline,
+    const ScopedSwapStateCommandRecordingContext* commandContext,
+    DispatchCmd* dispatchCmd) {
     if (!computePipeline->UsesNumWorkgroups()) {
         // Workgroup size is not used in shader, so we don't need to update the uniform buffer. The
         // original value in the uniform buffer will not be used, so we don't need to clear it.

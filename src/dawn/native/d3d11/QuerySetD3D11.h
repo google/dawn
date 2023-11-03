@@ -37,7 +37,7 @@ namespace dawn::native::d3d11 {
 
 class Device;
 class Buffer;
-class CommandRecordingContext;
+class ScopedSwapStateCommandRecordingContext;
 
 class QuerySet final : public QuerySetBase {
   public:
@@ -46,7 +46,7 @@ class QuerySet final : public QuerySetBase {
 
     void BeginQuery(ID3D11DeviceContext* d3d11DeviceContext, uint32_t query);
     void EndQuery(ID3D11DeviceContext* d3d11DeviceContext, uint32_t query);
-    MaybeError Resolve(CommandRecordingContext* commandContext,
+    MaybeError Resolve(const ScopedSwapStateCommandRecordingContext* commandContext,
                        uint32_t firstQuery,
                        uint32_t queryCount,
                        Buffer* destination,

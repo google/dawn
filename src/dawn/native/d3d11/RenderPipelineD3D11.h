@@ -36,9 +36,9 @@
 
 namespace dawn::native::d3d11 {
 
-class CommandRecordingContext;
 class Device;
 class PersistentPipelineState;
+class ScopedSwapStateCommandRecordingContext;
 
 class RenderPipeline final : public RenderPipelineBase {
   public:
@@ -49,12 +49,13 @@ class RenderPipeline final : public RenderPipelineBase {
                                 WGPUCreateRenderPipelineAsyncCallback callback,
                                 void* userdata);
 
-    void ApplyNow(CommandRecordingContext* commandContext,
+    void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext,
                   const std::array<float, 4>& blendColor,
                   uint32_t stencilReference);
-    void ApplyBlendState(CommandRecordingContext* commandContext,
+    void ApplyBlendState(const ScopedSwapStateCommandRecordingContext* commandContext,
                          const std::array<float, 4>& blendColor);
-    void ApplyDepthStencilState(CommandRecordingContext* commandContext, uint32_t stencilReference);
+    void ApplyDepthStencilState(const ScopedSwapStateCommandRecordingContext* commandContext,
+                                uint32_t stencilReference);
 
     bool UsesVertexIndex() const { return mUsesVertexIndex; }
     bool UsesInstanceIndex() const { return mUsesInstanceIndex; }
