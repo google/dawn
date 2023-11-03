@@ -386,6 +386,13 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer = False):
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ",
             builder = "dawn:try/" + name,
+            location_filters = [
+                cq.location_filter(path_regexp = ".*"),
+                cq.location_filter(
+                    path_regexp = "\\.github/.+",
+                    exclude = True,
+                ),
+            ],
         )
 
         # These builders run fine unbranched on branch CLs, so add them to the
@@ -439,6 +446,13 @@ def chromium_dawn_tryjob(os, arch = None):
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ",
             builder = "chromium:try/{os}-dawn-{arch}-rel".format(os = os, arch = arch),
+            location_filters = [
+                cq.location_filter(path_regexp = ".*"),
+                cq.location_filter(
+                    path_regexp = "\\.github/.+",
+                    exclude = True,
+                ),
+            ],
         )
         _add_branch_verifiers(
             _os_arch_to_branch_builder["{os}-{arch}".format(os = os, arch = arch)],
@@ -449,6 +463,13 @@ def chromium_dawn_tryjob(os, arch = None):
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ",
             builder = "chromium:try/{}-dawn-rel".format(os),
+            location_filters = [
+                cq.location_filter(path_regexp = ".*"),
+                cq.location_filter(
+                    path_regexp = "\\.github/.+",
+                    exclude = True,
+                ),
+            ],
         )
         _add_branch_verifiers(_os_arch_to_branch_builder[os], os)
 
