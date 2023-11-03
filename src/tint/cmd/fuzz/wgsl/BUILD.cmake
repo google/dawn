@@ -77,6 +77,12 @@ if(TINT_BUILD_WGSL_READER)
   )
 endif(TINT_BUILD_WGSL_READER)
 
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
+    tint_lang_wgsl_writer_ast_printer_fuzz
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
 tint_target_set_output_name(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd "tint_wgsl_fuzzer")
 
 endif(TINT_BUILD_WGSL_READER)

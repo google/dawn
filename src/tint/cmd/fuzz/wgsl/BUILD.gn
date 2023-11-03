@@ -110,5 +110,9 @@ if (tint_build_wgsl_reader) {
         "${tint_src_dir}/lang/wgsl/ast/transform:fuzz",
       ]
     }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer:fuzz" ]
+    }
   }
 }

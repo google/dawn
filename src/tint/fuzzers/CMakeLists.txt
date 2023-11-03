@@ -55,10 +55,6 @@ function(add_tint_fuzzer NAME)
   target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)
 endfunction()
 
-if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
-  add_tint_fuzzer(tint_wgsl_reader_wgsl_writer_fuzzer)
-endif()
-
 if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_all_transforms_fuzzer)
   add_tint_fuzzer(tint_binding_remapper_fuzzer)
