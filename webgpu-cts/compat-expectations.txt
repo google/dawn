@@ -78,6 +78,7 @@
 
 # GPU context canvas copy issue
 crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
+crbug.com/dawn/2137 [ angle-opengl ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";contextName="webgl";dstColorFormat="r8unorm";srcPremultiplied=false;dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 
 # snorm / stencil8 issues
 crbug.com/dawn/2080 [ angle-opengl ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
@@ -217,9 +218,9 @@ crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:use_import_to_refresh: [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:api,validation,gpu_external_texture_expiration:webcodec_video_frame_close_expire_immediately: [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
+crbug.com/dawn/2086 [ angle-opengl ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rg11b10ufloat" [ Failure ]
 crbug.com/dawn/2086 [ angle-opengl ] webgpu:util,texture,texel_data:unorm_texel_data_in_shader:format="rgba8unorm-srgb" [ Failure ]
-crbug.com/dawn/2086 [ angle-opengl ] webgpu:web_platform,canvas,configure:* [ Failure ]
 
 # Usage does not include Texture Binding
 [ angle-opengl ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
@@ -381,7 +382,9 @@ crbug.com/dawn/2113 webgpu:shader,execution,memory_model,* [ Failure ]
 crbug.com/dawn/2113 webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
 
 # getCurrentTexture failures
-crbug.com/dawn/2114 webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
+crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
+crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:expiry:* [ Failure ]
+crbug.com/dawn/2114 [ angle-opengl ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
 
 # Instancing issues on NVidia GL
 # count=[1-9].*first_instance=[1-9].*instance_count=[1-9]
