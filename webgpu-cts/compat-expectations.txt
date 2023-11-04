@@ -96,12 +96,6 @@ crbug.com/dawn/2079 webgpu:api,operation,resource_init,texture_zero:uninitialize
 crbug.com/dawn/2079 webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rg11b10ufloat" [ Failure ]
 crbug.com/dawn/2079 webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rgb9e5ufloat" [ Failure ]
 
-# 2 incompatible texture views issue
-crbug.com/dawn/2080 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,color_attachment_and_bind_group:* [ Failure ]
-crbug.com/dawn/2080 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,multiple_bind_groups:* [ Failure ]
-crbug.com/dawn/2080 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_bind_group_on_same_index_color_texture:useDifferentTextureAsTexture2=false;baseLayer2=1;view2Binding="storage";hasConflict=false [ Failure ]
-crbug.com/dawn/2080 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_bind_group_on_same_index_color_texture:useDifferentTextureAsTexture2=false;baseLayer2=1;view2Binding="storage";hasConflict=true [ Failure ]
-
 # Video test failing due to mismatched interstage variables
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 

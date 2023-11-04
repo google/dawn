@@ -215,7 +215,6 @@ GLenum Device::GetBGRAInternalFormat(const OpenGLFunctions& gl) const {
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
     const BindGroupDescriptor* descriptor) {
-    DAWN_TRY(ValidateGLBindGroupDescriptor(descriptor));
     return BindGroup::Create(this, descriptor);
 }
 ResultOrError<Ref<BindGroupLayoutInternalBase>> Device::CreateBindGroupLayoutImpl(

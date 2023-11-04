@@ -35,8 +35,6 @@ namespace dawn::native::opengl {
 
 class Device;
 
-MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor);
-
 class BindGroup final : public BindGroupBase, public PlacementAllocated {
   public:
     static Ref<BindGroup> Create(Device* device, const BindGroupDescriptor* descriptor);
