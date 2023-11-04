@@ -57,7 +57,7 @@ import (
 // Note: Validate() should be called before attempting to update the
 // expectations. If Validate() returns errors, then Update() behaviour is
 // undefined.
-func (c *Content) Update(results result.List, testlist []query.Query) (Diagnostics, error) {
+func (c *Content) Update(results result.List, testlist []query.Query, verbose bool) (Diagnostics, error) {
 	// Make a copy of the results. This code mutates the list.
 	results = append(result.List{}, results...)
 
@@ -76,6 +76,13 @@ func (c *Content) Update(results result.List, testlist []query.Query) (Diagnosti
 	// Scan the full result list to obtain all the test variants
 	// (unique tag combinations).
 	variants := results.Variants()
+
+	if verbose {
+		fmt.Println("result variants:")
+		for i, tags := range variants {
+			fmt.Printf(" (%.2d) %v\n", i, tags.List())
+		}
+	}
 
 	// Add 'consumed' results for tests that were skipped.
 	// This ensures that skipped results are not included in reduced trees.
@@ -514,7 +521,8 @@ func (u *updater) addNewExpectations() error {
 		}
 
 		// Build a tree from the results matching the given variant.
-		tree, err := u.qt.results.FilterByVariant(variant).StatusTree()
+		filtered := u.qt.results.FilterByVariant(variant)
+		tree, err := filtered.StatusTree()
 		if err != nil {
 			return fmt.Errorf("while building tree for tags '%v': %w", variant, err)
 		}
@@ -522,8 +530,10 @@ func (u *updater) addNewExpectations() error {
 		tree.Reduce(treeReducer)
 		// Add all the reduced leaf nodes to 'roots'.
 		for _, qd := range tree.List() {
-			// Use Split() to ensure that only the leaves have data (true) in the tree
-			roots.Split(qd.Query, true)
+			if qd.Data != result.Pass {
+				// Use Split() to ensure that only the leaves have data (true) in the tree
+				roots.Split(qd.Query, true)
+			}
 		}
 	}
 
@@ -597,7 +607,7 @@ func (u *updater) expectationsForRoot(
 	// Using the full list of unfiltered tests, generate the minimal set of
 	// variants (tags) that uniquely classify the results with differing status.
 	minimalVariants := u.
-		cleanupTags(results).
+		removeUnknownTags(results).
 		MinimalVariantTags(u.tagSets)
 
 	// For each minimized variant...
@@ -659,7 +669,7 @@ func (u *updater) resultsToExpectations(results result.List, bug, comment string
 		}
 		out[i] = Expectation{
 			Bug:     bug,
-			Tags:    r.Tags,
+			Tags:    u.in.Tags.RemoveLowerPriorityTags(r.Tags),
 			Query:   q,
 			Status:  []string{string(r.Status)},
 			Comment: comment,
@@ -669,32 +679,17 @@ func (u *updater) resultsToExpectations(results result.List, bug, comment string
 	return out
 }
 
-// cleanupTags returns a copy of the provided results with:
-//   - All tags not found in the expectations list removed
-//   - All but the highest priority tag for any tag-set.
-//     The tag sets are defined by the `BEGIN TAG HEADER` / `END TAG HEADER`
-//     section at the top of the expectations file.
-func (u *updater) cleanupTags(results result.List) result.List {
+// removeUnknownTags returns a copy of the provided results with all tags not
+// found in the expectations list removed
+func (u *updater) removeUnknownTags(results result.List) result.List {
 	return results.TransformTags(func(t result.Tags) result.Tags {
-		type HighestPrioritySetTag struct {
-			tag      string
-			priority int
-		}
-		// Set name to highest priority tag for that set
-		best := map[string]HighestPrioritySetTag{}
+		filtered := result.NewTags()
 		for tag := range t {
-			sp, ok := u.in.Tags.ByName[tag]
-			if ok {
-				if set := best[sp.Set]; sp.Priority >= set.priority {
-					best[sp.Set] = HighestPrioritySetTag{tag, sp.Priority}
-				}
+			if _, ok := u.in.Tags.ByName[tag]; ok {
+				filtered.Add(tag)
 			}
 		}
-		t = result.NewTags()
-		for _, ts := range best {
-			t.Add(ts.tag)
-		}
-		return t
+		return filtered
 	})
 }
 

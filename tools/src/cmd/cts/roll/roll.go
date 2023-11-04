@@ -91,6 +91,7 @@ type rollerFlags struct {
 	rebuild             bool // Rebuild the expectations file from scratch
 	preserve            bool // If false, abandon past roll changes
 	sendToGardener      bool // If true, automatically send to the gardener for review
+	verbose             bool
 	parentSwarmingRunID string
 	maxAttempts         int
 }
@@ -119,6 +120,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
+	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
 	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil
@@ -374,7 +376,11 @@ func (r *roller) roll(ctx context.Context) error {
 	// Begin main roll loop
 	for attempt := 0; ; attempt++ {
 		// Kick builds
-		log.Printf("building (attempt %v)...\n", attempt)
+		if attempt == 0 {
+			log.Println("building...")
+		} else {
+			log.Printf("building (retry %v)...\n", attempt)
+		}
 		builds, err := common.GetOrStartBuildsAndWait(ctx, r.cfg, ps, r.bb, r.parentSwarmingRunID, false)
 		if err != nil {
 			return err
@@ -409,7 +415,7 @@ func (r *roller) roll(ctx context.Context) error {
 			exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
 
 			exInfo.newExpectations = exInfo.expectations.Clone()
-			diags, err := exInfo.newExpectations.Update(exInfo.results, testlist)
+			diags, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
 			if err != nil {
 				return err
 			}
@@ -440,7 +446,7 @@ func (r *roller) roll(ctx context.Context) error {
 		}
 
 		if attempt >= r.flags.maxAttempts {
-			err := fmt.Errorf("CTS failed after %v attempts.\nGiving up", attempt)
+			err := fmt.Errorf("CTS failed after %v retries.\nGiving up", attempt)
 			r.gerrit.Comment(ps, err.Error(), nil)
 			return err
 		}
