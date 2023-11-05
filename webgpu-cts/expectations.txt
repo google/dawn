@@ -189,9 +189,9 @@ crbug.com/tint/1753 [ target-cpu-32 webgpu-dxc-disabled win10 ] webgpu:shader,ex
 # but often fail without validation and on Intel as well
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
-crbug.com/dawn/0000 [ webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
-crbug.com/dawn/0000 [ webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
 
 ################################################################################
 # Abstract matrix by matrix operations
@@ -212,7 +212,6 @@ crbug.com/dawn/1550 [ android arm ] webgpu:api,operation,render_pipeline,sample_
 # Shader validation failures
 # KEEP
 ################################################################################
-crbug.com/dawn/2174 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,sinh:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
 crbug.com/tint/2030 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
 crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f16" [ Failure ]
 crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f16" [ Failure ]
@@ -253,7 +252,6 @@ crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 dawn-backend-validation
 crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 dawn-no-backend-validation ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ dawn-backend-validation intel-0x3e9b ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
 crbug.com/1467566 [ dawn-no-backend-validation intel-0x3e9b ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ dawn-no-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
@@ -652,11 +650,6 @@ crbug.com/dawn/1968 webgpu:api,validation,buffer,mapping:getMappedRange,state,ma
 crbug.com/dawn/1968 webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/1968 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
 
-################################################################################
-# Copy subrect from ImageData fails on Android Qualcomm (Pixel 4)
-################################################################################
-crbug.com/dawn/1969 [ android-r webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=true [ RetryOnFailure ]
-crbug.com/dawn/1969 [ android-r webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=true;dstPremultiplied=true [ RetryOnFailure ]
 
 ################################################################################
 # Out-of-Memory error scope tests fail on linux
@@ -710,7 +703,6 @@ crbug.com/dawn/1020 webgpu:api,validation,createTexture:texture_usage:dimension=
 # Shader corr failing flakily on Android ARM (Pixel 6)
 ################################################################################
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
 
 ################################################################################
 # Shader f32 matrix tests failing on Android Qualcomm (Pixel 4)
@@ -741,7 +733,6 @@ crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builti
 crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=16;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-crbug.com/tint/2033 [ android-r dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,faceForward:f32_vec3:inputSource="const" [ RetryOnFailure ]
 
 ################################################################################
 # DXC failures
@@ -793,7 +784,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="r8unorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:sourceType="VideoFrame";videoName="four-colors-h264-bt601.mp4" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoElement";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoFrame";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
 
