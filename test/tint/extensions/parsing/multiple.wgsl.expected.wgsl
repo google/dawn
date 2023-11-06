@@ -1,4 +1,4 @@
-enable chromium_experimental_push_constant, f16;
+enable chromium_experimental_full_ptr_parameters, f16;
 
 @fragment
 fn main() -> @location(0) vec4<f32> {

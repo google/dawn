@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
@@ -96,7 +97,8 @@ class Resolver {
   public:
     /// Constructor
     /// @param builder the program builder
-    explicit Resolver(ProgramBuilder* builder);
+    /// @param allowed_features the extensions and features that are allowed to be used
+    explicit Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed_features);
 
     /// Destructor
     ~Resolver();
@@ -689,6 +691,7 @@ class Resolver {
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
+    wgsl::AllowedFeatures allowed_features_;
     wgsl::Extensions enabled_extensions_;
     Vector<sem::Function*, 8> entry_points_;
     Hashmap<const core::type::Type*, const Source*, 8> atomic_composite_info_;

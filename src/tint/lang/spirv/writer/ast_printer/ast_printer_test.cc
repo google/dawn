@@ -44,13 +44,14 @@ TEST_F(SpirvASTPrinterTest, InvalidProgram) {
 }
 
 TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, wgsl::Extension::kUndefined);
+    Enable(Source{{12, 34}}, wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     auto program = resolver::Resolve(*this);
     auto result = Generate(program, Options{});
     EXPECT_FALSE(result);
-    EXPECT_EQ(result.Failure().reason.str(),
-              R"(12:34 error: SPIR-V backend does not support extension 'undefined')");
+    EXPECT_EQ(
+        result.Failure().reason.str(),
+        R"(12:34 error: SPIR-V backend does not support extension 'chromium_internal_relaxed_uniform_layout')");
 }
 
 TEST_F(SpirvASTPrinterTest, RequiresDirective) {

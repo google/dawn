@@ -36,14 +36,14 @@
 
 namespace tint::wgsl::reader {
 
-Program Parse(const Source::File* file) {
+Program Parse(const Source::File* file, const Options& options) {
     Parser parser(file);
     parser.Parse();
-    return resolver::Resolve(parser.builder());
+    return resolver::Resolve(parser.builder(), options.allowed_features);
 }
 
-Result<core::ir::Module> WgslToIR(const Source::File* file) {
-    Program program = Parse(file);
+Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
+    Program program = Parse(file, options);
     auto module = ProgramToIR(program);
     if (!module) {
         return module.Failure();

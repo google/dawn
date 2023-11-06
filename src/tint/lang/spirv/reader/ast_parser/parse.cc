@@ -60,41 +60,13 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
         builder.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "derivative_uniformity");
     }
 
-    if (!options.allow_chromium_extensions) {
-        // Check if any Chromium extensions were used.
-        for (auto* enable : builder.AST().Enables()) {
-            for (auto* extension : enable->extensions) {
-                switch (extension->name) {
-                    case wgsl::Extension::kUndefined:
-                    case wgsl::Extension::kChromiumDisableUniformityAnalysis:
-                    case wgsl::Extension::kChromiumExperimentalDp4A:
-                    case wgsl::Extension::kChromiumExperimentalFullPtrParameters:
-                    case wgsl::Extension::kChromiumExperimentalPixelLocal:
-                    case wgsl::Extension::kChromiumExperimentalPushConstant:
-                    case wgsl::Extension::kChromiumExperimentalSubgroups:
-                    case wgsl::Extension::kChromiumInternalDualSourceBlending:
-                    case wgsl::Extension::kChromiumInternalRelaxedUniformLayout: {
-                        StringStream ss;
-                        ss << "module requires " << ToString(extension->name)
-                           << ", but 'allow-chromium-extensions' was not passed";
-                        builder.Diagnostics().add_error(diag::System::Reader, ss.str());
-                        return Program(std::move(builder));
-                    }
-                    case wgsl::Extension::kF16:
-                    case wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture:
-                        break;
-                }
-            }
-        }
-    }
-
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.
     Program program_with_disjoint_ast(std::move(builder));
 
     ProgramBuilder output;
     program::CloneContext(&output, &program_with_disjoint_ast, false).Clone();
-    auto program = Program(resolver::Resolve(output));
+    auto program = Program(resolver::Resolve(output, options.allowed_features));
     if (!program.IsValid()) {
         return program;
     }

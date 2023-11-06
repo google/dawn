@@ -165,12 +165,14 @@ Validator::Validator(
     ProgramBuilder* builder,
     SemHelper& sem,
     const wgsl::Extensions& enabled_extensions,
+    const wgsl::AllowedFeatures& allowed_features,
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts)
     : symbols_(builder->Symbols()),
       diagnostics_(builder->Diagnostics()),
       sem_(sem),
       enabled_extensions_(enabled_extensions),
+      allowed_features_(allowed_features),
       atomic_composite_info_(atomic_composite_info),
       valid_type_storage_layouts_(valid_type_storage_layouts) {
     // Set default severities for filterable diagnostic rules.
@@ -333,7 +335,27 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
     switch (t->access()) {
         case core::Access::kRead:
+            if (!allowed_features_.features.count(
+                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
+                AddError(
+                    "read-only storage textures require the "
+                    "readonly_and_readwrite_storage_textures language feature, which is not "
+                    "allowed in the current environment",
+                    source);
+                return false;
+            }
+            break;
         case core::Access::kReadWrite:
+            if (!allowed_features_.features.count(
+                    wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
+                AddError(
+                    "read-write storage textures require the "
+                    "readonly_and_readwrite_storage_textures language feature, which is not "
+                    "allowed in the current environment",
+                    source);
+                return false;
+            }
+            break;
         case core::Access::kWrite:
             break;
         case core::Access::kUndefined:
@@ -1729,22 +1751,31 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
     return true;
 }
 
-bool Validator::RequiredExtensionForBuiltinFn(const sem::Call* call) const {
+bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
     const auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
         return true;
     }
 
     const auto extension = builtin->RequiredExtension();
-    if (extension == wgsl::Extension::kUndefined) {
-        return true;
+    if (extension != wgsl::Extension::kUndefined) {
+        if (!enabled_extensions_.Contains(extension)) {
+            AddError("cannot call built-in function '" + std::string(builtin->str()) +
+                         "' without extension " + tint::ToString(extension),
+                     call->Declaration()->source);
+            return false;
+        }
     }
 
-    if (!enabled_extensions_.Contains(extension)) {
-        AddError("cannot call built-in function '" + std::string(builtin->str()) +
-                     "' without extension " + tint::ToString(extension),
-                 call->Declaration()->source);
-        return false;
+    const auto feature = builtin->RequiredLanguageFeature();
+    if (feature != wgsl::LanguageFeature::kUndefined) {
+        if (!allowed_features_.features.count(feature)) {
+            AddError("built-in function '" + std::string(builtin->str()) + "' requires the " +
+                         tint::ToString(feature) +
+                         " language feature, which is not allowed in the current environment",
+                     call->Declaration()->source);
+            return false;
+        }
     }
 
     return true;

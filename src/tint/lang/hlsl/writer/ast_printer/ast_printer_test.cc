@@ -45,13 +45,14 @@ TEST_F(HlslASTPrinterTest, InvalidProgram) {
 }
 
 TEST_F(HlslASTPrinterTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, wgsl::Extension::kUndefined);
+    Enable(Source{{12, 34}}, wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     ASTPrinter& gen = Build();
 
     ASSERT_FALSE(gen.Generate());
-    EXPECT_EQ(gen.Diagnostics().str(),
-              R"(12:34 error: HLSL backend does not support extension 'undefined')");
+    EXPECT_EQ(
+        gen.Diagnostics().str(),
+        R"(12:34 error: HLSL backend does not support extension 'chromium_internal_relaxed_uniform_layout')");
 }
 
 TEST_F(HlslASTPrinterTest, RequiresDirective) {

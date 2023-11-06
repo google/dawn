@@ -35,6 +35,7 @@
 ################################################################################
 
 include(lang/wgsl/ast/BUILD.cmake)
+include(lang/wgsl/common/BUILD.cmake)
 include(lang/wgsl/helpers/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
 include(lang/wgsl/intrinsic/BUILD.cmake)
@@ -94,6 +95,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
@@ -180,6 +182,7 @@ tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_helpers
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower

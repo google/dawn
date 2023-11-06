@@ -1192,38 +1192,7 @@ TEST_F(ReadWriteStorageTextureDisallowUnsafeAPITests, ReadWriteStorageTextureInP
         for (wgpu::ShaderStage shaderStage : kShaderStages) {
             std::string shader = CreateShaderWithStorageTexture(
                 access, wgpu::TextureFormat::R32Float, "texture_storage_2d", shaderStage);
-            wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
-
-            switch (shaderStage) {
-                case wgpu::ShaderStage::Vertex: {
-                    utils::ComboRenderPipelineDescriptor renderDescriptor;
-                    renderDescriptor.vertex.module = shaderModule;
-                    renderDescriptor.cFragment.module = mDefaultFSModule;
-                    renderDescriptor.layout = nullptr;
-                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&renderDescriptor));
-                    break;
-                }
-                case wgpu::ShaderStage::Fragment: {
-                    utils::ComboRenderPipelineDescriptor renderDescriptor;
-                    renderDescriptor.vertex.module = mDefaultVSModule;
-                    renderDescriptor.cFragment.module = shaderModule;
-                    renderDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
-                    renderDescriptor.layout = nullptr;
-                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&renderDescriptor));
-                    break;
-                }
-                case wgpu::ShaderStage::Compute: {
-                    wgpu::ComputePipelineDescriptor computeDescriptor;
-                    computeDescriptor.compute.module = shaderModule;
-                    computeDescriptor.compute.entryPoint = "main";
-                    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computeDescriptor));
-                    break;
-                }
-                case wgpu::ShaderStage::None:
-                default: {
-                    DAWN_UNREACHABLE();
-                }
-            }
+            ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
         }
     }
 }

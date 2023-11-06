@@ -42,6 +42,7 @@ cc_library(
     "reader.cc",
   ],
   hdrs = [
+    "options.h",
     "reader.h",
   ],
   deps = [
@@ -52,6 +53,7 @@ cc_library(
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
+    "//src/tint/lang/wgsl/common",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/resolver",
@@ -94,6 +96,7 @@ cc_library(
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
+    "//src/tint/lang/wgsl/common",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",

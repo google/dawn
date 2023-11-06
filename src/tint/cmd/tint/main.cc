@@ -321,14 +321,6 @@ violations that may be produced)",
             opts->spirv_reader_options.allow_non_uniform_derivatives = true;
         }
     });
-    auto& allow_chromium_extensions = options.Add<BoolOption>(
-        "allow-chromium-extensions",
-        "When using SPIR-V input, allow the use of Chromium-specific extensions", Default{false});
-    TINT_DEFER({
-        if (allow_chromium_extensions.value.value_or(false)) {
-            opts->spirv_reader_options.allow_chromium_extensions = true;
-        }
-    });
 #endif
 
     auto& disable_wg_init = options.Add<BoolOption>(
@@ -668,8 +660,10 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
 #if TINT_BUILD_WGSL_READER
     if (options.validate && options.skip_hash.count(hash) == 0) {
         // Attempt to re-parse the output program with Tint's WGSL reader.
+        tint::wgsl::reader::Options parser_options;
+        parser_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
-        auto reparsed_program = tint::wgsl::reader::Parse(source.get());
+        auto reparsed_program = tint::wgsl::reader::Parse(source.get(), parser_options);
         if (!reparsed_program.IsValid()) {
             auto diag_printer = tint::diag::Printer::create(stderr, true);
             tint::diag::Formatter diag_formatter;

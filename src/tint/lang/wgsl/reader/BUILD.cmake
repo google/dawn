@@ -45,6 +45,7 @@ if(TINT_BUILD_WGSL_READER)
 # Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader lib
+  lang/wgsl/reader/options.h
   lang/wgsl/reader/reader.cc
   lang/wgsl/reader/reader.h
 )
@@ -57,6 +58,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
   tint_lang_wgsl_resolver
@@ -103,6 +105,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers

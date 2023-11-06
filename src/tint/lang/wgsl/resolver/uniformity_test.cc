@@ -72,8 +72,10 @@ class UniformityAnalysisTestBase {
     /// @param src the WGSL source code
     /// @param should_pass true if `src` should pass the analysis, otherwise false
     void RunTest(std::string src, bool should_pass) {
+        wgsl::reader::Options options;
+        options.allowed_features = wgsl::AllowedFeatures::Everything();
         auto file = std::make_unique<Source::File>("test", src);
-        auto program = wgsl::reader::Parse(file.get());
+        auto program = wgsl::reader::Parse(file.get(), options);
         return RunTest(std::move(program), should_pass);
     }
 

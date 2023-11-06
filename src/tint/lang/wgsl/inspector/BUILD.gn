@@ -96,6 +96,7 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/lang/wgsl/common",
         "${tint_src_dir}/lang/wgsl/inspector",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/resolver",

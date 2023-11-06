@@ -59,8 +59,10 @@ static constexpr DirectVariableAccessOptions kTransformFunction = {
 class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
   public:
     std::string Run(std::string in, const DirectVariableAccessOptions& options = {}) {
+        wgsl::reader::Options parser_options;
+        parser_options.allowed_features = wgsl::AllowedFeatures::Everything();
         Source::File file{"test", in};
-        auto program = wgsl::reader::Parse(&file);
+        auto program = wgsl::reader::Parse(&file, parser_options);
         if (!program.IsValid()) {
             return "wgsl::reader::Parse() failed: \n" + program.Diagnostics().str();
         }

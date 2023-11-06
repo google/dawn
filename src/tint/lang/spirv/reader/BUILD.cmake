@@ -56,6 +56,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader lib
   tint_lang_spirv_reader_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -65,6 +66,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
+  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol

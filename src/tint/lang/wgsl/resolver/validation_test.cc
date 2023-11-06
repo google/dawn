@@ -169,7 +169,7 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
         {
             ProgramBuilder b;
             b.WrapInFunction(b.create<FakeExpr>());
-            Resolver(&b).Resolve();
+            Resolver(&b, {}).Resolve();
         },
         "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeExpr");
 }

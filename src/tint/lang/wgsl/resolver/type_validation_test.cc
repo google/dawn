@@ -1208,6 +1208,23 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(StorageTextureAccessTest, ReadOnlyAccess_FeatureDisallowed) {
+    // @group(0) @binding(0)
+    // var a : texture_storage_1d<r32uint, read>;
+
+    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
+                                 core::TexelFormat::kR32Uint, core::Access::kRead);
+
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
+
+    auto resolver = Resolver(this, {});
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(resolver.error(),
+              "12:34 error: read-only storage textures require the "
+              "readonly_and_readwrite_storage_textures language feature, which is not allowed in "
+              "the current environment");
+}
+
 TEST_F(StorageTextureAccessTest, RWAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read_write>;
@@ -1218,6 +1235,23 @@ TEST_F(StorageTextureAccessTest, RWAccess_Pass) {
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StorageTextureAccessTest, RWAccess_FeatureDisallowed) {
+    // @group(0) @binding(0)
+    // var a : texture_storage_1d<r32uint, read_write>;
+
+    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
+                                 core::TexelFormat::kR32Uint, core::Access::kReadWrite);
+
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
+
+    auto resolver = Resolver(this, {});
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(resolver.error(),
+              "12:34 error: read-write storage textures require the "
+              "readonly_and_readwrite_storage_textures language feature, which is not allowed in "
+              "the current environment");
 }
 
 }  // namespace StorageTextureTests

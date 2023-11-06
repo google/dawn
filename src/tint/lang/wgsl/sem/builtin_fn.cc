@@ -115,6 +115,13 @@ wgsl::Extension BuiltinFn::RequiredExtension() const {
     return wgsl::Extension::kUndefined;
 }
 
+wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
+    if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
+        return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;
+    }
+    return wgsl::LanguageFeature::kUndefined;
+}
+
 }  // namespace tint::sem
 
 //! @endcond

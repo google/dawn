@@ -123,7 +123,7 @@ constexpr size_t kMaxNestDepthOfCompositeType = 255;
 
 }  // namespace
 
-Resolver::Resolver(ProgramBuilder* builder)
+Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed_features)
     : b(*builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
@@ -132,8 +132,10 @@ Resolver::Resolver(ProgramBuilder* builder)
       validator_(builder,
                  sem_,
                  enabled_extensions_,
+                 allowed_features_,
                  atomic_composite_info_,
-                 valid_type_storage_layouts_) {}
+                 valid_type_storage_layouts_),
+      allowed_features_(allowed_features) {}
 
 Resolver::~Resolver() = default;
 
@@ -2420,7 +2422,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         current_function_->AddDirectCall(call);
     }
 
-    if (!validator_.RequiredExtensionForBuiltinFn(call)) {
+    if (!validator_.RequiredFeaturesForBuiltinFn(call)) {
         return nullptr;
     }
 
@@ -3955,12 +3957,25 @@ bool Resolver::Enable(const ast::Enable* enable) {
     for (auto* ext : enable->extensions) {
         Mark(ext);
         enabled_extensions_.Add(ext->name);
+        if (!allowed_features_.extensions.count(ext->name)) {
+            StringStream ss;
+            ss << "extension '" << ext->name << "' is not allowed in the current environment";
+            AddError(ss.str(), ext->source);
+            return false;
+        }
     }
     return true;
 }
 
-bool Resolver::Requires(const ast::Requires*) {
-    // TODO(crbug.com/tint/2081): Check that all features are allowed.
+bool Resolver::Requires(const ast::Requires* req) {
+    for (auto feature : req->features) {
+        if (!allowed_features_.features.count(feature)) {
+            StringStream ss;
+            ss << "language feature '" << feature << "' is not allowed in the current environment";
+            AddError(ss.str(), req->source);
+            return false;
+        }
+    }
     return true;
 }
 

@@ -1449,34 +1449,43 @@ bool DeviceBase::HasFeature(Feature feature) const {
 }
 
 void DeviceBase::SetWGSLExtensionAllowList() {
-    // Set the WGSL extensions allow list based on device's enabled features and other
-    // properties.
+    // Set the WGSL extensions and language features allow list based on device's enabled features
+    // and other properties.
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalDp4a)) {
-        mWGSLExtensionAllowList.insert("chromium_experimental_dp4a");
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kChromiumExperimentalDp4A);
     }
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
-        mWGSLExtensionAllowList.insert("f16");
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kF16);
     }
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroups)) {
-        mWGSLExtensionAllowList.insert("chromium_experimental_subgroups");
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumExperimentalSubgroups);
     }
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalReadWriteStorageTexture)) {
-        mWGSLExtensionAllowList.insert("chromium_experimental_read_write_storage_texture");
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
     }
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
-        mWGSLExtensionAllowList.insert("chromium_disable_uniformity_analysis");
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumDisableUniformityAnalysis);
+
+        // Allow language features that are still under development.
+        mWGSLAllowedFeatures.features.insert(
+            tint::wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
     }
     if (mEnabledFeatures.IsEnabled(Feature::DualSourceBlending)) {
-        mWGSLExtensionAllowList.insert("chromium_internal_dual_source_blending");
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumInternalDualSourceBlending);
     }
     if (mEnabledFeatures.IsEnabled(Feature::PixelLocalStorageNonCoherent) ||
         mEnabledFeatures.IsEnabled(Feature::PixelLocalStorageCoherent)) {
-        mWGSLExtensionAllowList.insert("chromium_experimental_pixel_local");
+        mWGSLAllowedFeatures.extensions.insert(
+            tint::wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
 }
 
-WGSLExtensionSet DeviceBase::GetWGSLExtensionAllowList() const {
-    return mWGSLExtensionAllowList;
+const tint::wgsl::AllowedFeatures& DeviceBase::GetWGSLAllowedFeatures() const {
+    return mWGSLAllowedFeatures;
 }
 
 bool DeviceBase::IsValidationEnabled() const {

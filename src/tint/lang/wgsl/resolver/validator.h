@@ -34,6 +34,7 @@
 
 #include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
+#include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -113,11 +114,13 @@ class Validator {
     /// @param builder the program builder
     /// @param helper the SEM helper to validate with
     /// @param enabled_extensions all the extensions declared in current module
+    /// @param allowed_features the allowed extensions and features
     /// @param atomic_composite_info atomic composite info of the module
     /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const wgsl::Extensions& enabled_extensions,
+              const wgsl::AllowedFeatures& allowed_features,
               const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
               Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
@@ -482,10 +485,10 @@ class Validator {
     /// @returns true on success, false otherwise
     bool SubgroupBroadcast(const sem::Call* call) const;
 
-    /// Validates an optional builtin function and its required extension.
+    /// Validates an optional builtin function and its required extensions and language features.
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise
-    bool RequiredExtensionForBuiltinFn(const sem::Call* call) const;
+    bool RequiredFeaturesForBuiltinFn(const sem::Call* call) const;
 
     /// Validates that 'f16' extension is enabled for f16 usage at @p source
     /// @param source the source of the f16 usage
@@ -583,6 +586,7 @@ class Validator {
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
     const wgsl::Extensions& enabled_extensions_;
+    const wgsl::AllowedFeatures& allowed_features_;
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info_;
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };

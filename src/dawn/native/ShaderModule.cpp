@@ -334,9 +334,12 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
 }
 
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
+                                       const tint::wgsl::AllowedFeatures& allowedFeatures,
                                        OwnedCompilationMessages* outMessages) {
 #if TINT_BUILD_WGSL_READER
-    tint::Program program = tint::wgsl::reader::Parse(file);
+    tint::wgsl::reader::Options options;
+    options.allowed_features = allowedFeatures;
+    tint::Program program = tint::wgsl::reader::Parse(file, options);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
@@ -352,12 +355,14 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
 
 #if TINT_BUILD_SPV_READER
 ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
+                                        const tint::wgsl::AllowedFeatures& allowedFeatures,
                                         OwnedCompilationMessages* outMessages,
                                         const DawnShaderModuleSPIRVOptionsDescriptor* optionsDesc) {
     tint::spirv::reader::Options options;
     if (optionsDesc) {
         options.allow_non_uniform_derivatives = optionsDesc->allowNonUniformDerivatives;
     }
+    options.allowed_features = allowedFeatures;
     tint::Program program = tint::spirv::reader::Read(spirv, options);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
@@ -851,34 +856,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     return std::move(metadata);
 }
 
-MaybeError ValidateWGSLProgramExtension(const DeviceBase* device,
-                                        const WGSLExtensionSet* enabledExtensions,
-                                        OwnedCompilationMessages* outMessages) {
-    const WGSLExtensionSet& extensionAllowList = device->GetWGSLExtensionAllowList();
-
-    bool hasDisallowedExtension = false;
-    tint::diag::List messages;
-
-    for (const std::string& extension : *enabledExtensions) {
-        if (extensionAllowList.count(extension)) {
-            continue;
-        }
-        hasDisallowedExtension = true;
-        messages.add_error(tint::diag::System::Program,
-                           "Extension " + extension + " is not allowed on the Device.");
-    }
-
-    if (hasDisallowedExtension) {
-        if (outMessages != nullptr) {
-            DAWN_TRY(outMessages->AddMessages(messages));
-        }
-        return DAWN_MAKE_ERROR(InternalErrorType::Validation,
-                               "Shader module uses extension(s) not enabled for its device.");
-    }
-
-    return {};
-}
-
 MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                   const tint::Program* program,
                                   OwnedCompilationMessages* compilationMessages,
@@ -887,13 +864,6 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
     DAWN_ASSERT(program->IsValid());
 
     tint::inspector::Inspector inspector(*program);
-
-    DAWN_ASSERT(enabledWGSLExtensions->empty());
-    auto usedExtensionNames = inspector.GetUsedExtensionNames();
-    for (std::string name : usedExtensionNames) {
-        enabledWGSLExtensions->insert(name);
-    }
-    DAWN_TRY(ValidateWGSLProgramExtension(device, enabledWGSLExtensions, compilationMessages));
 
     std::vector<tint::inspector::EntryPoint> entryPoints = inspector.GetEntryPoints();
     DAWN_INVALID_IF(inspector.has_error(), "Tint Reflection failure: Inspector: %s\n",
@@ -1022,7 +992,8 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
             DAWN_TRY(ValidateSpirv(device, spirv.data(), spirv.size(), dumpSpirv));
 #endif  // DAWN_ENABLE_SPIRV_VALIDATION
             tint::Program program;
-            DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages, spirvOptions));
+            DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, device->GetWGSLAllowedFeatures(),
+                                                outMessages, spirvOptions));
             parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
 
             return {};
@@ -1046,7 +1017,8 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
     }
 
     tint::Program program;
-    DAWN_TRY_ASSIGN(program, ParseWGSL(&tintSource->file, outMessages));
+    DAWN_TRY_ASSIGN(program,
+                    ParseWGSL(&tintSource->file, device->GetWGSLAllowedFeatures(), outMessages));
     parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
     parseResult->tintSource = std::move(tintSource);
 

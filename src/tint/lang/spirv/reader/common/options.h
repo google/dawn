@@ -28,14 +28,17 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 
+#include "src/tint/lang/wgsl/common/allowed_features.h"
+
 namespace tint::spirv::reader {
 
 /// Options that control how the SPIR-V parser should behave.
 struct Options {
     /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
     bool allow_non_uniform_derivatives = false;
-    /// Set to `true` to allow use of Chromium-specific extensions.
-    bool allow_chromium_extensions = false;
+    // TODO(jrprice): Remove this when SPIR-V -> IR and IR -> WGSL are separate steps.
+    /// The extensions and language features that are allowed to be used in the generated WGSL.
+    wgsl::AllowedFeatures allowed_features = {};
 };
 
 }  // namespace tint::spirv::reader

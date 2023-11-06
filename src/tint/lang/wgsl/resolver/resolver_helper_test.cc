@@ -31,7 +31,8 @@
 
 namespace tint::resolver {
 
-TestHelper::TestHelper() : resolver_(std::make_unique<Resolver>(this)) {}
+TestHelper::TestHelper()
+    : resolver_(std::make_unique<Resolver>(this, wgsl::AllowedFeatures::Everything())) {}
 
 TestHelper::~TestHelper() = default;
 

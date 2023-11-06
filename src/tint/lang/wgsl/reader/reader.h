@@ -30,6 +30,7 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/reader/options.h"
 
 namespace tint::wgsl::reader {
 
@@ -38,13 +39,15 @@ namespace tint::wgsl::reader {
 /// `program.Diagnostics.contains_errors()` will be true, and the
 /// `program.Diagnostics()` will describe the error.
 /// @param file the source file
+/// @param options the configuration options to use when parsing WGSL
 /// @returns the parsed program
-Program Parse(const Source::File* file);
+Program Parse(const Source::File* file, const Options& options = {});
 
 /// Parse a WGSL program from source, and return an IR module.
 /// @param file the input WGSL file
+/// @param options the configuration options to use when parsing WGSL
 /// @returns the resulting IR module, or failure
-Result<core::ir::Module> WgslToIR(const Source::File* file);
+Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options = {});
 
 }  // namespace tint::wgsl::reader
 

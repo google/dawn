@@ -819,5 +819,20 @@ TEST_F(ResolverBuiltinValidationTest, TextureBarrier) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverBuiltinValidationTest, TextureBarrier_FeatureDisallowed) {
+    // fn func { textureBarrier(); }
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
+             CallStmt(Call(Source{Source::Location{12, 34}}, "textureBarrier")),
+         });
+
+    auto resolver = Resolver(this, {});
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(resolver.error(),
+              "12:34 error: built-in function 'textureBarrier' requires the "
+              "readonly_and_readwrite_storage_textures language feature, which is not allowed in "
+              "the current environment");
+}
+
 }  // namespace
 }  // namespace tint::resolver

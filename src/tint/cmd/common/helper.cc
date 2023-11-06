@@ -157,11 +157,14 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
                     exit(1);
                 }
 
+                tint::wgsl::reader::Options options;
+                options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
+
                 auto file = std::make_unique<tint::Source::File>(
                     opts.filename, std::string(data.begin(), data.end()));
 
                 return ProgramInfo{
-                    /* program */ tint::wgsl::reader::Parse(file.get()),
+                    /* program */ tint::wgsl::reader::Parse(file.get(), options),
                     /* source_file */ std::move(file),
                 };
 #else

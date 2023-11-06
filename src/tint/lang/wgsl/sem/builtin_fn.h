@@ -33,6 +33,7 @@
 
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/language_feature.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
 #include "src/tint/utils/math/hash.h"
@@ -114,8 +115,12 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     bool HasSideEffects() const;
 
     /// @returns the required extension of this builtin function. Returns
-    /// wgsl::Extension::kNone if no extension is required.
+    /// wgsl::Extension::kUndefined if no extension is required.
     wgsl::Extension RequiredExtension() const;
+
+    /// @returns the required language feature of this builtin function. Returns
+    /// wgsl::LanguageFeature::kUndefined if no language feature is required.
+    wgsl::LanguageFeature RequiredLanguageFeature() const;
 
     /// @return the hash code for this object
     std::size_t HashCode() const {

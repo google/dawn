@@ -42,9 +42,11 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class IRToProgramRoundtripTest : public helpers::IRProgramTest {
   public:
     void Test(std::string_view input_wgsl, std::string_view expected_wgsl) {
+        wgsl::reader::Options options;
+        options.allowed_features = wgsl::AllowedFeatures::Everything();
         auto input = tint::TrimSpace(input_wgsl);
         Source::File file("test.wgsl", std::string(input));
-        auto ir_module = wgsl::reader::WgslToIR(&file);
+        auto ir_module = wgsl::reader::WgslToIR(&file, options);
         ASSERT_TRUE(ir_module) << ir_module;
 
         auto disassembly = tint::core::ir::Disassemble(ir_module.Get());

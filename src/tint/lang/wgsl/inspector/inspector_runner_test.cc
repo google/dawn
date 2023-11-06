@@ -38,8 +38,10 @@ Inspector& InspectorRunner::Initialize(std::string shader) {
         return *inspector_;
     }
 
+    wgsl::reader::Options options;
+    options.allowed_features = wgsl::AllowedFeatures::Everything();
     file_ = std::make_unique<Source::File>("test", shader);
-    program_ = std::make_unique<Program>(wgsl::reader::Parse(file_.get()));
+    program_ = std::make_unique<Program>(wgsl::reader::Parse(file_.get(), options));
     if (!program_->IsValid()) {
         ADD_FAILURE() << program_->Diagnostics();
     }
