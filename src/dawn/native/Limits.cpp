@@ -86,9 +86,9 @@
 // These limits aren't really tiered and could probably be grouped better.
 // All Chrome platforms support 64 (iOS is 32) so there's no fingerprinting hazard in
 // extra additional buckets.
-//                                                             compat      tier0       tier1
+//                                                             compat  tier0  tier1  tier2
 #define LIMITS_ATTACHMENTS(X)   \
-    X(Maximum,            maxColorAttachmentBytesPerSample,       32,         32,         64)
+    X(Maximum,            maxColorAttachmentBytesPerSample,       32,     32,    64,   128)
 
 // Tiers for limits related to inter-stage shader variables.
 //                                                             compat      tier0       tier1
