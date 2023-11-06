@@ -374,8 +374,8 @@ void DeviceBase::WillDropLastExternalRef() {
     // references, they can no longer get the queue from APIGetQueue().
     mQueue = nullptr;
 
-    // Reset callbacks since after this, since after dropping the last external reference, the
-    // application may have freed any device-scope memory needed to run the callback.
+    // Reset callbacks since after dropping the last external reference, the application may have
+    // freed any device-scope memory needed to run the callback.
     mUncapturedErrorCallback = [](WGPUErrorType, char const* message, void*) {
         dawn::WarningLog() << "Uncaptured error after last external device reference dropped.\n"
                            << message;
@@ -450,7 +450,7 @@ void DeviceBase::Destroy() {
     // inside which the application may destroy the device. Thus, we should be careful not
     // to delete objects that are needed inside Tick after callbacks have been called.
     //  - mCallbackTaskManager is not deleted since we flush the callback queue at the end
-    // of Tick(). Note: that flush should always be emtpy since all callbacks are drained
+    // of Tick(). Note: that flush should always be empty since all callbacks are drained
     // inside Destroy() so there should be no outstanding tasks holding objects alive.
     //  - Similiarly, mAsyncTaskManager is not deleted since we use it to return a status
     // from Tick() whether or not there is any more pending work.

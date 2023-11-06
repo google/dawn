@@ -36,6 +36,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -164,6 +165,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     explicit InstanceBase(const TogglesState& instanceToggles);
     ~InstanceBase() override;
 
+    void DeleteThis() override;
     void WillDropLastExternalRef() override;
 
     InstanceBase(const InstanceBase& other) = delete;
@@ -215,8 +217,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     Ref<CallbackTaskManager> mCallbackTaskManager;
     EventManager mEventManager;
 
-    std::set<DeviceBase*> mDevicesList;
-    mutable std::mutex mDevicesListMutex;
+    MutexProtected<std::set<DeviceBase*>> mDevicesList;
 };
 
 }  // namespace dawn::native

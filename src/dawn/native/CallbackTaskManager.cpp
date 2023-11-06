@@ -49,10 +49,10 @@ struct GenericFunctionTask : CallbackTask {
 
 void CallbackTask::Execute() {
     switch (mState) {
-        case State::HandleDeviceLoss:
+        case CallbackState::DeviceLoss:
             HandleDeviceLossImpl();
             break;
-        case State::HandleShutDown:
+        case CallbackState::ShutDown:
             HandleShutDownImpl();
             break;
         default:
@@ -62,17 +62,17 @@ void CallbackTask::Execute() {
 
 void CallbackTask::OnShutDown() {
     // Only first state change will have effects in final Execute().
-    if (mState != State::Normal) {
+    if (mState != CallbackState::Normal) {
         return;
     }
-    mState = State::HandleShutDown;
+    mState = CallbackState::ShutDown;
 }
 
 void CallbackTask::OnDeviceLoss() {
-    if (mState != State::Normal) {
+    if (mState != CallbackState::Normal) {
         return;
     }
-    mState = State::HandleDeviceLoss;
+    mState = CallbackState::DeviceLoss;
 }
 
 CallbackTaskManager::CallbackTaskManager() = default;
@@ -80,13 +80,23 @@ CallbackTaskManager::CallbackTaskManager() = default;
 CallbackTaskManager::~CallbackTaskManager() = default;
 
 bool CallbackTaskManager::IsEmpty() {
-    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
-    return mCallbackTaskQueue.empty();
+    return mStateAndQueue.Use([](auto stateAndQueue) { return stateAndQueue->mTaskQueue.empty(); });
 }
 
 void CallbackTaskManager::AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask) {
-    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
-    mCallbackTaskQueue.push_back(std::move(callbackTask));
+    mStateAndQueue.Use([&](auto stateAndQueue) {
+        switch (stateAndQueue->mState) {
+            case CallbackState::ShutDown:
+                callbackTask->OnShutDown();
+                break;
+            case CallbackState::DeviceLoss:
+                callbackTask->OnDeviceLoss();
+                break;
+            default:
+                break;
+        }
+        stateAndQueue->mTaskQueue.push_back(std::move(callbackTask));
+    });
 }
 
 void CallbackTaskManager::AddCallbackTask(std::function<void()> callback) {
@@ -94,22 +104,31 @@ void CallbackTaskManager::AddCallbackTask(std::function<void()> callback) {
 }
 
 void CallbackTaskManager::HandleDeviceLoss() {
-    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
-    for (auto& task : mCallbackTaskQueue) {
-        task->OnDeviceLoss();
-    }
+    mStateAndQueue.Use([&](auto stateAndQueue) {
+        if (stateAndQueue->mState != CallbackState::Normal) {
+            return;
+        }
+        stateAndQueue->mState = CallbackState::DeviceLoss;
+        for (auto& task : stateAndQueue->mTaskQueue) {
+            task->OnDeviceLoss();
+        }
+    });
 }
 
 void CallbackTaskManager::HandleShutDown() {
-    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
-    for (auto& task : mCallbackTaskQueue) {
-        task->OnShutDown();
-    }
+    mStateAndQueue.Use([&](auto stateAndQueue) {
+        if (stateAndQueue->mState != CallbackState::Normal) {
+            return;
+        }
+        stateAndQueue->mState = CallbackState::ShutDown;
+        for (auto& task : stateAndQueue->mTaskQueue) {
+            task->OnShutDown();
+        }
+    });
 }
 
 void CallbackTaskManager::Flush() {
-    std::unique_lock<std::mutex> lock(mCallbackTaskQueueMutex);
-    if (mCallbackTaskQueue.empty()) {
+    if (IsEmpty()) {
         return;
     }
 
@@ -118,10 +137,9 @@ void CallbackTaskManager::Flush() {
     // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
     // update mCallbackTaskManager, then call all the callbacks.
     std::vector<std::unique_ptr<CallbackTask>> allTasks;
-    allTasks.swap(mCallbackTaskQueue);
-    lock.unlock();
+    mStateAndQueue.Use([&](auto stateAndQueue) { allTasks.swap(stateAndQueue->mTaskQueue); });
 
-    for (std::unique_ptr<CallbackTask>& callbackTask : allTasks) {
+    for (auto& callbackTask : allTasks) {
         callbackTask->Execute();
     }
 }

@@ -47,6 +47,9 @@ class RefCountedWithExternalCount : private RefCounted {
     void APIReference();
     void APIRelease();
 
+  protected:
+    using RefCounted::DeleteThis;
+
   private:
     virtual void WillDropLastExternalRef() = 0;
 

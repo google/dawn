@@ -79,7 +79,8 @@ class Guard {
     const ReturnType& operator*() const { return *Traits::GetObj(mObj); }
 
   private:
-    friend class MutexProtected<T>;
+    using NonConstT = typename std::remove_const<T>::type;
+    friend class MutexProtected<NonConstT>;
 
     Guard(T* obj, typename Traits::MutexType& mutex) : mLock(Traits::GetMutex(mutex)), mObj(obj) {}
 
@@ -142,12 +143,16 @@ class MutexProtected {
     auto Use(Fn&& fn) {
         return fn(Use());
     }
+    template <typename Fn>
+    auto Use(Fn&& fn) const {
+        return fn(Use());
+    }
 
   private:
     Usage Use() { return Usage(&mObj, mMutex); }
     ConstUsage Use() const { return ConstUsage(&mObj, mMutex); }
 
-    typename Traits::MutexType mMutex;
+    mutable typename Traits::MutexType mMutex;
     T mObj;
 };
 
