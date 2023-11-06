@@ -84,8 +84,8 @@
 
 // TODO(crbug.com/dawn/685):
 // These limits aren't really tiered and could probably be grouped better.
-// All Chrome platforms support 64 (iOS is 32) so there's no fingerprinting hazard in
-// extra additional buckets.
+// All Chrome platforms support 64 (iOS is 32) so there's are really only two exposed
+// buckets: 64 and 128.
 //                                                             compat  tier0  tier1  tier2
 #define LIMITS_ATTACHMENTS(X)   \
     X(Maximum,            maxColorAttachmentBytesPerSample,       32,     32,    64,   128)
