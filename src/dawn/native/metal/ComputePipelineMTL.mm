@@ -35,6 +35,7 @@
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 
 namespace dawn::native::metal {
 
@@ -69,6 +70,7 @@ MaybeError ComputePipeline::Initialize() {
     descriptor.computeFunction = computeData.function.Get();
     descriptor.label = label.Get();
 
+    platform::metrics::DawnHistogramTimer timer(GetDevice()->GetPlatform());
     mMtlComputePipelineState.Acquire([mtlDevice
         newComputePipelineStateWithDescriptor:descriptor
                                       options:MTLPipelineOptionNone
@@ -79,6 +81,7 @@ MaybeError ComputePipeline::Initialize() {
                                    std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(mMtlComputePipelineState != nil);
+    timer.RecordMicroseconds("Metal.newComputePipelineStateWithDescriptor");
 
     // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
     mLocalWorkgroupSize = computeData.localWorkgroupSize;

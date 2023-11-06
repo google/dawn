@@ -36,6 +36,7 @@
 #include "dawn/native/metal/ShaderModuleMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 
 namespace dawn::native::metal {
 
@@ -456,6 +457,7 @@ MaybeError RenderPipeline::Initialize() {
     descriptorMTL.rasterSampleCount = GetSampleCount();
     descriptorMTL.alphaToCoverageEnabled = IsAlphaToCoverageEnabled();
 
+    platform::metrics::DawnHistogramTimer timer(GetDevice()->GetPlatform());
     NSError* error = nullptr;
     mMtlRenderPipelineState =
         AcquireNSPRef([mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL error:&error]);
@@ -464,6 +466,7 @@ MaybeError RenderPipeline::Initialize() {
                                    [error.localizedDescription UTF8String]);
     }
     DAWN_ASSERT(mMtlRenderPipelineState != nil);
+    timer.RecordMicroseconds("Metal.newRenderPipelineStateWithDescriptor");
 
     // Create depth stencil state and cache it, fetch the cached depth stencil state when we
     // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order

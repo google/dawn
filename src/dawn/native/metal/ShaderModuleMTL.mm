@@ -375,6 +375,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     NSError* error = nullptr;
 
     NSPRef<id<MTLLibrary>> library;
+    platform::metrics::DawnHistogramTimer timer(GetDevice()->GetPlatform());
     {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "MTLDevice::newLibraryWithSource");
         library = AcquireNSPRef([mtlDevice newLibraryWithSource:mslSource.Get()
@@ -388,6 +389,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                         [error.localizedDescription UTF8String]);
     }
     DAWN_ASSERT(library != nil);
+    timer.RecordMicroseconds("Metal.newLibraryWithSource");
 
     NSRef<NSString> name = AcquireNSRef(
         [[NSString alloc] initWithUTF8String:mslCompilation->remappedEntryPointName.c_str()]);
