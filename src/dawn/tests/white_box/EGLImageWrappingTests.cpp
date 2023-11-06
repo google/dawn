@@ -27,6 +27,7 @@
 
 #include <EGL/egl.h>
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -57,6 +58,7 @@ class EGLFunctions {
             reinterpret_cast<PFNEGLGETCURRENTCONTEXTPROC>(LoadProc("eglGetCurrentContext"));
         GetCurrentDisplay =
             reinterpret_cast<PFNEGLGETCURRENTDISPLAYPROC>(LoadProc("eglGetCurrentDisplay"));
+        QueryString = reinterpret_cast<PFNEGLQUERYSTRINGPROC>(LoadProc("eglQueryString"));
     }
 
   private:
@@ -71,6 +73,7 @@ class EGLFunctions {
     PFNEGLDESTROYIMAGEPROC DestroyImage;
     PFNEGLGETCURRENTCONTEXTPROC GetCurrentContext;
     PFNEGLGETCURRENTDISPLAYPROC GetCurrentDisplay;
+    PFNEGLQUERYSTRINGPROC QueryString;
 
   private:
     DynamicLib mlibEGL;
@@ -128,6 +131,16 @@ class EGLImageTestBase : public DawnTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::DawnInternalUsages};
+    }
+
+    bool HasExtension(const char* string) {
+        return strstr(egl.QueryString(egl.GetCurrentDisplay(), EGL_EXTENSIONS), string) != nullptr;
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        // TODO(crbug.com/dawn/2206): remove this check if possible.
+        DAWN_TEST_UNSUPPORTED_IF(!HasExtension("KHR_gl_texture_2D_image"));
     }
 
   public:
