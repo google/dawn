@@ -117,9 +117,15 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
                                  HasToggleEnabled("disable_stencil_read"));
 
-        // GL may support the feature, but reading data back is not implemented.
-        DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                                 (IsOpenGL() || IsOpenGLES()));
+        // You can't read compressed textures in compat mode.
+        DAWN_TEST_UNSUPPORTED_IF(utils::IsCompressedTextureFormat(GetParam().mFormat) &&
+                                 IsCompatibilityMode());
+
+        // TODO(crbug.com/dawn/2182): dawn/native needs to make compat compatible texture views when
+        // using a compute shader to blit.
+        DAWN_TEST_UNSUPPORTED_IF((GetParam().mFormat == wgpu::TextureFormat::Stencil8 ||
+                                  GetParam().mFormat == wgpu::TextureFormat::Depth32Float) &&
+                                 IsCompatibilityMode());
 
         // TODO(crbug.com/dawn/1637): Failures with ANGLE only with some format/aspect
         DAWN_SUPPRESS_TEST_IF(IsWindows() && IsANGLE() &&
@@ -139,6 +145,17 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         descriptor.format = GetParam().mFormat;
         descriptor.usage = GetParam().mUsage;
         descriptor.mipLevelCount = GetParam().mMipCount;
+
+        // Only set the textureBindingViewDimension in compat mode. It's not needed
+        // nor used in non-compat.
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode()) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension =
+                descriptor.dimension == wgpu::TextureDimension::e3D
+                    ? wgpu::TextureViewDimension::e3D
+                    : wgpu::TextureViewDimension::e2D;
+            descriptor.nextInChain = &textureBindingViewDimensionDesc;
+        }
 
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 

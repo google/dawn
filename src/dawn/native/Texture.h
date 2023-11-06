@@ -81,6 +81,7 @@ class TextureBase : public ApiObjectBase {
     ObjectType GetType() const override;
 
     wgpu::TextureDimension GetDimension() const;
+    wgpu::TextureViewDimension GetCompatibilityTextureBindingViewDimension() const;
     const Format& GetFormat() const;
     const FormatSet& GetViewFormats() const;
 
@@ -175,6 +176,8 @@ class TextureBase : public ApiObjectBase {
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
     wgpu::TextureDimension mDimension;
+    wgpu::TextureViewDimension
+        mCompatibilityTextureBindingViewDimension;  // only used for compatibility mode
     const Format& mFormat;
     FormatSet mViewFormats;
     Extent3D mBaseSize;

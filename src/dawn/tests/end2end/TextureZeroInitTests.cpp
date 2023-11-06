@@ -68,6 +68,7 @@ class TextureZeroInitTest : public DawnTest {
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
         descriptor.usage = usage;
+
         return descriptor;
     }
     wgpu::TextureViewDescriptor CreateTextureViewDescriptor(
@@ -1088,6 +1089,16 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
                     wgpu::TextureUsage::CopySrc;
     texDesc.size = {1, 1, 2};
     texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Only set the textureBindingViewDimension in compat mode. It's not needed nor used in
+    // non-compat.
+    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    if (IsCompatibilityMode()) {
+        textureBindingViewDimensionDesc.textureBindingViewDimension =
+            wgpu::TextureViewDimension::e2D;
+        texDesc.nextInChain = &textureBindingViewDimensionDesc;
+    }
+
     wgpu::Texture texture = device.CreateTexture(&texDesc);
 
     wgpu::TextureViewDescriptor viewDesc;
@@ -1524,6 +1535,16 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                     wgpu::TextureUsage::TextureBinding,
                                 kColorFormat);
+
+    // Only set the textureBindingViewDimension in compat mode. It's not needed
+    // nor used in non-compat.
+    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    if (IsCompatibilityMode()) {
+        textureBindingViewDimensionDesc.textureBindingViewDimension =
+            wgpu::TextureViewDimension::e2D;
+        sampleTextureDescriptor.nextInChain = &textureBindingViewDimensionDesc;
+    }
+
     wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDescriptor);
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(

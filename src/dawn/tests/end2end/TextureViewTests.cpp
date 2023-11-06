@@ -44,37 +44,50 @@ constexpr static unsigned int kRTSize = 64;
 constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr uint32_t kBytesPerTexel = 4;
 
-wgpu::Texture Create2DTexture(wgpu::Device device,
-                              uint32_t width,
-                              uint32_t height,
-                              uint32_t arrayLayerCount,
-                              uint32_t mipLevelCount,
-                              wgpu::TextureUsage usage) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.size.width = width;
-    descriptor.size.height = height;
-    descriptor.size.depthOrArrayLayers = arrayLayerCount;
-    descriptor.sampleCount = 1;
-    descriptor.format = kDefaultFormat;
-    descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = usage;
-    return device.CreateTexture(&descriptor);
-}
+class TextureViewTestBase : public DawnTest {
+  protected:
+    wgpu::Texture Create2DTexture(uint32_t width,
+                                  uint32_t height,
+                                  uint32_t arrayLayerCount,
+                                  uint32_t mipLevelCount,
+                                  wgpu::TextureUsage usage,
+                                  wgpu::TextureViewDimension textureBindingViewDimension =
+                                      wgpu::TextureViewDimension::e2DArray) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.size.width = width;
+        descriptor.size.height = height;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
+        descriptor.sampleCount = 1;
+        descriptor.format = kDefaultFormat;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
 
-wgpu::Texture Create3DTexture(wgpu::Device device,
-                              wgpu::Extent3D size,
-                              uint32_t mipLevelCount,
-                              wgpu::TextureUsage usage) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e3D;
-    descriptor.size = size;
-    descriptor.sampleCount = 1;
-    descriptor.format = kDefaultFormat;
-    descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = usage;
-    return device.CreateTexture(&descriptor);
-}
+        // Only set the textureBindingViewDimension in compat mode. It's not needed
+        // nor used in non-compat.
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode()) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension =
+                textureBindingViewDimension;
+            descriptor.nextInChain = &textureBindingViewDimensionDesc;
+        }
+
+        return device.CreateTexture(&descriptor);
+    }
+
+    wgpu::Texture Create3DTexture(wgpu::Extent3D size,
+                                  uint32_t mipLevelCount,
+                                  wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.size = size;
+        descriptor.sampleCount = 1;
+        descriptor.format = kDefaultFormat;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
+        return device.CreateTexture(&descriptor);
+    }
+};
 
 wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
     return utils::CreateShaderModule(device, R"(
@@ -107,7 +120,7 @@ wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
         )");
 }
 
-class TextureViewSamplingTest : public DawnTest {
+class TextureViewSamplingTest : public TextureViewTestBase {
   protected:
     // Generates an arbitrary pixel value per-layer-per-level, used for the "actual" uploaded
     // textures and the "expected" results.
@@ -136,15 +149,18 @@ class TextureViewSamplingTest : public DawnTest {
         mVSModule = CreateDefaultVertexShaderModule(device);
     }
 
-    void InitTexture(uint32_t arrayLayerCount, uint32_t mipLevelCount) {
+    void InitTexture(uint32_t arrayLayerCount,
+                     uint32_t mipLevelCount,
+                     wgpu::TextureViewDimension textureBindingViewDimension =
+                         wgpu::TextureViewDimension::e2DArray) {
         DAWN_ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
 
         const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
         const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
-        mTexture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount,
-                                   mipLevelCount, kUsage);
+        mTexture = Create2DTexture(textureWidthLevel0, textureHeightLevel0, arrayLayerCount,
+                                   mipLevelCount, kUsage, textureBindingViewDimension);
 
         mDefaultTextureViewDescriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         mDefaultTextureViewDescriptor.format = kDefaultFormat;
@@ -225,7 +241,7 @@ class TextureViewSamplingTest : public DawnTest {
         DAWN_ASSERT(textureViewBaseLayer < textureArrayLayers);
         DAWN_ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
-        InitTexture(textureArrayLayers, textureMipLevels);
+        InitTexture(textureArrayLayers, textureMipLevels, wgpu::TextureViewDimension::e2D);
 
         wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = wgpu::TextureViewDimension::e2D;
@@ -261,7 +277,7 @@ class TextureViewSamplingTest : public DawnTest {
         constexpr uint32_t kTextureViewLayerCount = 3;
         DAWN_ASSERT(textureArrayLayers >= textureViewBaseLayer + kTextureViewLayerCount);
 
-        InitTexture(textureArrayLayers, textureMipLevels);
+        InitTexture(textureArrayLayers, textureMipLevels, wgpu::TextureViewDimension::e2DArray);
 
         wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
@@ -334,14 +350,14 @@ class TextureViewSamplingTest : public DawnTest {
         // TODO(crbug.com/dawn/1300): OpenGLES does not support cube map arrays.
         DAWN_TEST_UNSUPPORTED_IF(isCubeMapArray && IsCompatibilityMode());
 
-        constexpr uint32_t kMipLevels = 1u;
-        InitTexture(textureArrayLayers, kMipLevels);
-
         ASSERT_TRUE((textureViewLayerCount == 6) ||
                     (isCubeMapArray && textureViewLayerCount % 6 == 0));
         wgpu::TextureViewDimension dimension = (isCubeMapArray)
                                                    ? wgpu::TextureViewDimension::CubeArray
                                                    : wgpu::TextureViewDimension::Cube;
+
+        constexpr uint32_t kMipLevels = 1u;
+        InitTexture(textureArrayLayers, kMipLevels, dimension);
 
         wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = dimension;
@@ -589,7 +605,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewSingleCubeMap) {
     TextureCubeMapTest(20, 7, 6, true);
 }
 
-class TextureViewRenderingTest : public DawnTest {
+class TextureViewRenderingTest : public TextureViewTestBase {
   protected:
     void TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension dimension,
                                            uint32_t layerCount,
@@ -605,8 +621,8 @@ class TextureViewRenderingTest : public DawnTest {
 
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-        wgpu::Texture texture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0,
-                                                layerCount, levelCount, kUsage);
+        wgpu::Texture texture = Create2DTexture(textureWidthLevel0, textureHeightLevel0, layerCount,
+                                                levelCount, kUsage, dimension);
 
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = kDefaultFormat;
@@ -1060,12 +1076,11 @@ DAWN_INSTANTIATE_TEST(TextureViewTest,
                       OpenGLESBackend(),
                       VulkanBackend());
 
-class TextureView3DTest : public DawnTest {};
+class TextureView3DTest : public TextureViewTestBase {};
 
 // Test that 3D textures and 3D texture views can be created successfully
 TEST_P(TextureView3DTest, BasicTest) {
-    wgpu::Texture texture =
-        Create3DTexture(device, {4, 4, 4}, 3, wgpu::TextureUsage::TextureBinding);
+    wgpu::Texture texture = Create3DTexture({4, 4, 4}, 3, wgpu::TextureUsage::TextureBinding);
     wgpu::TextureView view = texture.CreateView();
 }
 

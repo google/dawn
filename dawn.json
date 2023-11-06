@@ -3236,6 +3236,7 @@
             {"value": 14, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
             {"value": 15, "name": "render pass descriptor max draw count"},
             {"value": 16, "name": "depth stencil state depth write defined dawn", "tags": ["dawn"]},
+            {"value": 17, "name": "texture binding view dimension descriptor"},
             {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
@@ -3378,6 +3379,14 @@
             {"name": "sample count", "type": "uint32_t", "default": 1},
             {"name": "view format count", "type": "size_t", "default": 0},
             {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count"}
+        ]
+    },
+    "texture binding view dimension descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["texture descriptor"],
+        "members": [
+            {"name": "texture binding view dimension", "type": "texture view dimension", "default": "undefined"}
         ]
     },
     "texture dimension": {

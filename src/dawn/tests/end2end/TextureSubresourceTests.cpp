@@ -48,13 +48,25 @@ class TextureSubresourceTest : public DawnTest {
         texDesc.mipLevelCount = mipLevelCount;
         texDesc.usage = usage;
         texDesc.format = kFormat;
+
+        // Only set the textureBindingViewDimension in compat mode. It's not needed
+        // nor used in non-compat.
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode()) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension =
+                wgpu::TextureViewDimension::e2D;
+            texDesc.nextInChain = &textureBindingViewDimensionDesc;
+        }
+
         return device.CreateTexture(&texDesc);
     }
 
-    wgpu::TextureView CreateTextureView(wgpu::Texture texture,
+    wgpu::TextureView CreateTextureView(const char* label,
+                                        wgpu::Texture texture,
                                         uint32_t baseMipLevel,
                                         uint32_t baseArrayLayer) {
         wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.label = label;
         viewDesc.format = kFormat;
         viewDesc.baseArrayLayer = baseArrayLayer;
         viewDesc.arrayLayerCount = 1;
@@ -161,8 +173,8 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
                           wgpu::TextureUsage::CopySrc);
 
     // Create two views on different mipmap levels.
-    wgpu::TextureView samplerView = CreateTextureView(texture, 0, 0);
-    wgpu::TextureView renderView = CreateTextureView(texture, 1, 0);
+    wgpu::TextureView samplerView = CreateTextureView("samplerView", texture, 0, 0);
+    wgpu::TextureView renderView = CreateTextureView("renderView", texture, 1, 0);
 
     // Draw a red triangle at the bottom-left half
     DrawTriangle(samplerView);
@@ -187,8 +199,8 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
                           wgpu::TextureUsage::CopySrc);
 
     // Create two views on different layers
-    wgpu::TextureView samplerView = CreateTextureView(texture, 0, 0);
-    wgpu::TextureView renderView = CreateTextureView(texture, 0, 1);
+    wgpu::TextureView samplerView = CreateTextureView("samplerView", texture, 0, 0);
+    wgpu::TextureView renderView = CreateTextureView("renderView", texture, 0, 1);
 
     // Draw a red triangle at the bottom-left half
     DrawTriangle(samplerView);

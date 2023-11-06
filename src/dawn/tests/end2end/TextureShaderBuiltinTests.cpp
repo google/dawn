@@ -42,30 +42,44 @@ namespace {
 
 constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-wgpu::Texture Create2DTexture(wgpu::Device device,
-                              uint32_t width,
-                              uint32_t height,
-                              uint32_t arrayLayerCount,
-                              uint32_t mipLevelCount,
-                              uint32_t sampleCount,
-                              wgpu::TextureUsage usage) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.size.width = width;
-    descriptor.size.height = height;
-    descriptor.size.depthOrArrayLayers = arrayLayerCount;
-    descriptor.sampleCount = sampleCount;
-    descriptor.format = kDefaultFormat;
-    descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = usage;
-    return device.CreateTexture(&descriptor);
-}
-
 class TextureShaderBuiltinTests : public DawnTest {
   protected:
-    wgpu::Texture CreateTexture(uint32_t arrayLayerCount,
+    wgpu::Texture Create2DTexture(const char* label,
+                                  uint32_t width,
+                                  uint32_t height,
+                                  uint32_t arrayLayerCount,
+                                  uint32_t mipLevelCount,
+                                  uint32_t sampleCount,
+                                  wgpu::TextureUsage usage,
+                                  wgpu::TextureViewDimension textureBindingViewDimension) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.label = label;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.size.width = width;
+        descriptor.size.height = height;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
+        descriptor.sampleCount = sampleCount;
+        descriptor.format = kDefaultFormat;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
+
+        // Only set the textureBindingViewDimension in compat mode. It's not needed
+        // nor used in non-compat.
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode()) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension =
+                textureBindingViewDimension;
+            descriptor.nextInChain = &textureBindingViewDimensionDesc;
+        }
+
+        return device.CreateTexture(&descriptor);
+    }
+
+    wgpu::Texture CreateTexture(const char* label,
+                                uint32_t arrayLayerCount,
                                 uint32_t mipLevelCount,
-                                uint32_t sampleCount) {
+                                uint32_t sampleCount,
+                                wgpu::TextureViewDimension textureBindingViewDimension) {
         DAWN_ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
         DAWN_ASSERT(sampleCount == 1 || sampleCount == 4);
 
@@ -74,15 +88,26 @@ class TextureShaderBuiltinTests : public DawnTest {
         constexpr wgpu::TextureUsage kUsage = wgpu::TextureUsage::CopyDst |
                                               wgpu::TextureUsage::TextureBinding |
                                               wgpu::TextureUsage::RenderAttachment;
-        return Create2DTexture(device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount,
-                               mipLevelCount, sampleCount, kUsage);
+        return Create2DTexture(label, textureWidthLevel0, textureHeightLevel0, arrayLayerCount,
+                               mipLevelCount, sampleCount, kUsage, textureBindingViewDimension);
+    }
+
+    wgpu::Texture CreateTexture(const char* label,
+                                uint32_t arrayLayerCount,
+                                uint32_t mipLevelCount,
+                                uint32_t sampleCount) {
+        return CreateTexture(label, arrayLayerCount, mipLevelCount, sampleCount,
+                             arrayLayerCount == 1 ? wgpu::TextureViewDimension::e2D
+                                                  : wgpu::TextureViewDimension::e2DArray);
     }
 
     wgpu::TextureView CreateTextureView(const wgpu::Texture& tex,
+                                        const char* label,
                                         wgpu::TextureViewDimension dimension,
                                         uint32_t baseMipLevel = 0,
                                         uint32_t mipLevelCount = wgpu::kMipLevelCountUndefined) {
         wgpu::TextureViewDescriptor descriptor;
+        descriptor.label = label;
         descriptor.dimension = dimension;
         // textureNumLevels return texture view levels
         descriptor.baseMipLevel = baseMipLevel;
@@ -99,17 +124,19 @@ class TextureShaderBuiltinTests : public DawnTest {
 TEST_P(TextureShaderBuiltinTests, Basic) {
     constexpr uint32_t kLayers = 3;
     constexpr uint32_t kMipLevels = 2;
-    wgpu::Texture tex1 = CreateTexture(kLayers, kMipLevels, 1);
-    wgpu::TextureView texView1 = CreateTextureView(tex1, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1 = CreateTexture("tex1", kLayers, kMipLevels, 1);
+    wgpu::TextureView texView1 =
+        CreateTextureView(tex1, "texView1", wgpu::TextureViewDimension::e2DArray);
 
     constexpr uint32_t kSampleCount = 4;
-    wgpu::Texture tex2 = CreateTexture(1, 1, kSampleCount);
+    wgpu::Texture tex2 = CreateTexture("tex2", 1, 1, kSampleCount);
     wgpu::TextureView texView2 = tex2.CreateView();
 
     constexpr uint32_t kMipLevelsView = 1;
-    wgpu::Texture tex3 = CreateTexture(kLayers, kMipLevels, 1);
+    wgpu::Texture tex3 =
+        CreateTexture("tex3", kLayers, kMipLevels, 1, wgpu::TextureViewDimension::e2D);
     wgpu::TextureView texView3 =
-        CreateTextureView(tex3, wgpu::TextureViewDimension::e2D, 1, kMipLevelsView);
+        CreateTextureView(tex3, "texView3", wgpu::TextureViewDimension::e2D, 1, kMipLevelsView);
 
     const uint32_t expected[] = {
         kLayers,
@@ -170,11 +197,14 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
 TEST_P(TextureShaderBuiltinTests, BuiltinCallInFunction) {
     constexpr uint32_t kLayers = 3;
     constexpr uint32_t kMipLevels1 = 2;
-    wgpu::Texture tex1 = CreateTexture(kLayers, kMipLevels1, 1);
-    wgpu::TextureView texView1 = CreateTextureView(tex1, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1 = CreateTexture("tex1", kLayers, kMipLevels1, 1);
+    wgpu::TextureView texView1 =
+        CreateTextureView(tex1, "texView1", wgpu::TextureViewDimension::e2DArray);
     constexpr uint32_t kMipLevels2 = 5;
-    wgpu::Texture tex2 = CreateTexture(1, kMipLevels2, 1);
-    wgpu::TextureView texView2 = CreateTextureView(tex2, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex2 =
+        CreateTexture("tex2", 1, kMipLevels2, 1, wgpu::TextureViewDimension::e2DArray);
+    wgpu::TextureView texView2 =
+        CreateTextureView(tex2, "texView2", wgpu::TextureViewDimension::e2DArray);
 
     const uint32_t expected[] = {
         kLayers, kMipLevels1, kMipLevels1, kMipLevels2, kMipLevels1 + 100u,
@@ -250,28 +280,30 @@ TEST_P(TextureShaderBuiltinTests, OnePipelineMultipleDispatches) {
 
     constexpr uint32_t kLayers_1 = 3;
     constexpr uint32_t kMipLevels_1 = 2;
-    wgpu::Texture tex1_1 = CreateTexture(kLayers_1, kMipLevels_1, 1);
-    wgpu::TextureView texView1_1 = CreateTextureView(tex1_1, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1_1 = CreateTexture("tex1_1", kLayers_1, kMipLevels_1, 1);
+    wgpu::TextureView texView1_1 =
+        CreateTextureView(tex1_1, "texView1_1", wgpu::TextureViewDimension::e2DArray);
     constexpr uint32_t kLayers_2 = 5;
     constexpr uint32_t kMipLevels_2 = 4;
-    wgpu::Texture tex1_2 = CreateTexture(kLayers_2, kMipLevels_2, 1);
-    wgpu::TextureView texView1_2 = CreateTextureView(tex1_2, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1_2 = CreateTexture("tex1_2", kLayers_2, kMipLevels_2, 1);
+    wgpu::TextureView texView1_2 =
+        CreateTextureView(tex1_2, "texView1_2", wgpu::TextureViewDimension::e2DArray);
 
     constexpr uint32_t kSampleCount_1 = 4;
-    wgpu::Texture tex2_1 = CreateTexture(1, 1, kSampleCount_1);
+    wgpu::Texture tex2_1 = CreateTexture("tex2_1", 1, 1, kSampleCount_1);
     wgpu::TextureView texView2_1 = tex2_1.CreateView();
     constexpr uint32_t kSampleCount_2 = 4;
-    wgpu::Texture tex2_2 = CreateTexture(1, 1, kSampleCount_2);
+    wgpu::Texture tex2_2 = CreateTexture("tex2_2", 1, 1, kSampleCount_2);
     wgpu::TextureView texView2_2 = tex2_2.CreateView();
 
     constexpr uint32_t kMipLevelsView_1 = 1;
-    wgpu::Texture tex3_1 = CreateTexture(kLayers_1, kMipLevels_1, 1);
-    wgpu::TextureView texView3_1 =
-        CreateTextureView(tex3_1, wgpu::TextureViewDimension::e2DArray, 0, kMipLevelsView_1);
+    wgpu::Texture tex3_1 = CreateTexture("tex3_1", kLayers_1, kMipLevels_1, 1);
+    wgpu::TextureView texView3_1 = CreateTextureView(
+        tex3_1, "texView3_1", wgpu::TextureViewDimension::e2DArray, 0, kMipLevelsView_1);
     constexpr uint32_t kMipLevelsView_2 = 2;
-    wgpu::Texture tex3_2 = CreateTexture(kLayers_2, kMipLevels_2, 1);
-    wgpu::TextureView texView3_2 =
-        CreateTextureView(tex3_2, wgpu::TextureViewDimension::e2DArray, 0, kMipLevelsView_2);
+    wgpu::Texture tex3_2 = CreateTexture("tex3_2", kLayers_2, kMipLevels_2, 1);
+    wgpu::TextureView texView3_2 = CreateTextureView(
+        tex3_2, "texView3_2", wgpu::TextureViewDimension::e2DArray, 0, kMipLevelsView_2);
 
     constexpr uint32_t expected_1[] = {
         // Output from first dispatch
@@ -389,29 +421,33 @@ TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
 
     constexpr uint32_t kLayers_1 = 3;
     constexpr uint32_t kMipLevels_1 = 2;
-    wgpu::Texture tex1_1 = CreateTexture(kLayers_1, kMipLevels_1, 1);
-    wgpu::TextureView texView1_1 = CreateTextureView(tex1_1, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1_1 = CreateTexture("tex1_1", kLayers_1, kMipLevels_1, 1);
+    wgpu::TextureView texView1_1 =
+        CreateTextureView(tex1_1, "tex1_1", wgpu::TextureViewDimension::e2DArray);
     constexpr uint32_t kLayers_2 = 5;
     constexpr uint32_t kMipLevels_2 = 4;
-    wgpu::Texture tex1_2 = CreateTexture(kLayers_2, kMipLevels_2, 1);
-    wgpu::TextureView texView1_2 = CreateTextureView(tex1_2, wgpu::TextureViewDimension::e2DArray);
+    wgpu::Texture tex1_2 = CreateTexture("tex1_2", kLayers_2, kMipLevels_2, 1);
+    wgpu::TextureView texView1_2 =
+        CreateTextureView(tex1_2, "tex1_2", wgpu::TextureViewDimension::e2DArray);
 
     constexpr uint32_t kSampleCount_1 = 4;
-    wgpu::Texture tex2_1 = CreateTexture(1, 1, kSampleCount_1);
+    wgpu::Texture tex2_1 = CreateTexture("tex2_1", 1, 1, kSampleCount_1);
     wgpu::TextureView texView2_1 = tex2_1.CreateView();
     // constexpr uint32_t kSampleCount_2 = 1;
     constexpr uint32_t kSampleCount_2 = 4;
-    wgpu::Texture tex2_2 = CreateTexture(1, 1, kSampleCount_2);
+    wgpu::Texture tex2_2 = CreateTexture("tex2_2", 1, 1, kSampleCount_2);
     wgpu::TextureView texView2_2 = tex2_2.CreateView();
 
     constexpr uint32_t kMipLevelsView_1 = 1;
-    wgpu::Texture tex3_1 = CreateTexture(kLayers_1, kMipLevels_1, 1);
+    wgpu::Texture tex3_1 =
+        CreateTexture("tex3_1", kLayers_1, kMipLevels_1, 1, wgpu::TextureViewDimension::e2D);
     wgpu::TextureView texView3_1 =
-        CreateTextureView(tex3_1, wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_1);
+        CreateTextureView(tex3_1, "tex3_1", wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_1);
     constexpr uint32_t kMipLevelsView_2 = 1;
-    wgpu::Texture tex3_2 = CreateTexture(kLayers_2, kMipLevels_2, 1);
+    wgpu::Texture tex3_2 =
+        CreateTexture("tex3_2", kLayers_2, kMipLevels_2, 1, wgpu::TextureViewDimension::e2D);
     wgpu::TextureView texView3_2 =
-        CreateTextureView(tex3_2, wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_2);
+        CreateTextureView(tex3_2, "tex3_2", wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_2);
 
     constexpr uint32_t expected_1[] = {
         // Output from first dispatch

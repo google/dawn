@@ -134,6 +134,11 @@ bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat) {
     }
 }
 
+bool IsCompressedTextureFormat(wgpu::TextureFormat textureFormat) {
+    return IsASTCTextureFormat(textureFormat) || IsBCTextureFormat(textureFormat) ||
+           IsETC2TextureFormat(textureFormat);
+}
+
 bool IsNorm16TextureFormat(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
         case wgpu::TextureFormat::R16Unorm:
