@@ -64,8 +64,8 @@ jobs:
         workflow_conclusion: success
         name: workspace-${{ steps.strings.outputs.build-key }}
         search_artifacts: true
-        path: ${{ github.workspace }}
-        if_no_artifact_found: "warn"
+        path: ${{ steps.strings.outputs.build-output-dir }}
+        if_no_artifact_found: warn
 
     - name: Install Ubuntu build dependencies
       if: matrix.os == 'ubuntu-latest'
@@ -113,5 +113,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: workspace-${{ steps.strings.outputs.build-key }}
-        path: ${{ github.workspace }}
+        path: ${{ steps.strings.outputs.build-output-dir }}
         retention-days: 7

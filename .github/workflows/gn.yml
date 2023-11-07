@@ -51,8 +51,8 @@ jobs:
         workflow_conclusion: success
         name: workspace-${{ steps.strings.outputs.build-key }}
         search_artifacts: true
-        path: ${{ github.workspace }}
-        if_no_artifact_found: "warn"
+        path: ${{ github.workspace }}/${{ steps.strings.outputs.build-output-dir }}
+        if_no_artifact_found: warn
 
     - name: Set up checkout
       run: |
@@ -93,5 +93,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: workspace-${{ steps.strings.outputs.build-key }}
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/${{ steps.strings.outputs.build-output-dir }}
         retention-days: 7
