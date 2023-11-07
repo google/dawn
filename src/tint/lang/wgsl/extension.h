@@ -83,7 +83,21 @@ constexpr const char* kExtensionStrings[] = {
     "chromium_internal_relaxed_uniform_layout",  "f16",
 };
 
-// A unique vector of extensions
+/// All extensions
+static constexpr Extension kAllExtensions[] = {
+    Extension::kChromiumDisableUniformityAnalysis,
+    Extension::kChromiumExperimentalDp4A,
+    Extension::kChromiumExperimentalFullPtrParameters,
+    Extension::kChromiumExperimentalPixelLocal,
+    Extension::kChromiumExperimentalPushConstant,
+    Extension::kChromiumExperimentalReadWriteStorageTexture,
+    Extension::kChromiumExperimentalSubgroups,
+    Extension::kChromiumInternalDualSourceBlending,
+    Extension::kChromiumInternalRelaxedUniformLayout,
+    Extension::kF16,
+};
+
+/// A unique vector of extensions
 using Extensions = UniqueVector<Extension, 4>;
 
 }  // namespace tint::wgsl

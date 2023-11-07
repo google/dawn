@@ -50,21 +50,14 @@ struct AllowedFeatures {
         AllowedFeatures allowed_features;
 
         // Allow all extensions.
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumDisableUniformityAnalysis);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumExperimentalDp4A);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumExperimentalPixelLocal);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumExperimentalPushConstant);
-        allowed_features.extensions.insert(
-            wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumExperimentalSubgroups);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumInternalDualSourceBlending);
-        allowed_features.extensions.insert(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
-        allowed_features.extensions.insert(wgsl::Extension::kF16);
+        for (auto extension : wgsl::kAllExtensions) {
+            allowed_features.extensions.insert(extension);
+        }
 
         // Allow all language features.
-        allowed_features.features.insert(
-            wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
+        for (auto feature : wgsl::kAllLanguageFeatures) {
+            allowed_features.features.insert(feature);
+        }
 
         return allowed_features;
     }

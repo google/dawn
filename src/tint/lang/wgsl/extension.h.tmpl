@@ -24,7 +24,14 @@ namespace tint::wgsl {
 /// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
 {{ Eval "DeclareEnum" $enum}}
 
-// A unique vector of extensions
+/// All extensions
+static constexpr Extension kAllExtensions[] = {
+{{-   range $entry := $enum.Entries }}
+    Extension::k{{PascalCase $entry.Name}},
+{{-   end }}
+};
+
+/// A unique vector of extensions
 using Extensions = UniqueVector<Extension, 4>;
 
 }  // namespace tint::wgsl
