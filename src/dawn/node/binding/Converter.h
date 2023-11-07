@@ -82,8 +82,8 @@ using ImplOf = typename ImplOfTraits<T>::type;
 class Converter {
   public:
     explicit Converter(Napi::Env e) : env(e) {}
-    Converter(Napi::Env e, wgpu::Device extensionDevice)
-        : env(e), device(std::move(extensionDevice)) {}
+    Converter(Napi::Env e, wgpu::Device extensionDevice, bool retainExceptionIn = false)
+        : env(e), device(std::move(extensionDevice)), retainException(retainExceptionIn) {}
     ~Converter();
 
     // Conversion function. Converts the interop type IN to the Dawn type OUT.
@@ -107,6 +107,10 @@ class Converter {
 
     // Returns the Env that this Converter was constructed with.
     inline Napi::Env Env() const { return env; }
+
+    // Returns the Napi::Error stored from previous conversion and clears it. (Converter checks any
+    // retained exception is acquired)
+    Napi::Error AcquireException();
 
     // BufferSource is the converted type of interop::BufferSource.
     struct BufferSource {
@@ -288,7 +292,7 @@ class Converter {
     [[nodiscard]] bool Convert(interop::GPUFeatureName& out, wgpu::FeatureName in);
 
     // std::string to C string
-    inline bool Convert(const char*& out, const std::string& in) {
+    [[nodiscard]] inline bool Convert(const char*& out, const std::string& in) {
         out = in.c_str();
         return true;
     }
@@ -307,38 +311,36 @@ class Converter {
     inline bool Convert(OUT& out, const IN& in) {
         out = static_cast<OUT>(in);
         if (static_cast<IN>(out) != in) {
-            Napi::Error::New(env, "Integer value (" + std::to_string(in) +
-                                      ") cannot be converted to the Dawn data type without "
-                                      "truncation of the value")
-                .ThrowAsJavaScriptException();
-            return false;
+            return Throw("Integer value (" + std::to_string(in) +
+                         ") cannot be converted to the Dawn data type without "
+                         "truncation of the value");
         }
         return true;
     }
 
     // ClampedInteger<T>
     template <typename T>
-    inline bool Convert(T& out, const interop::ClampedInteger<T>& in) {
+    [[nodiscard]] inline bool Convert(T& out, const interop::ClampedInteger<T>& in) {
         out = in;
         return true;
     }
 
     // EnforceRangeInteger<T>
     template <typename T>
-    inline bool Convert(T& out, const interop::EnforceRangeInteger<T>& in) {
+    [[nodiscard]] inline bool Convert(T& out, const interop::EnforceRangeInteger<T>& in) {
         out = in;
         return true;
     }
 
     template <typename OUT, typename... IN_TYPES>
-    inline bool Convert(OUT& out, const std::variant<IN_TYPES...>& in) {
+    [[nodiscard]] inline bool Convert(OUT& out, const std::variant<IN_TYPES...>& in) {
         return std::visit([&](auto&& i) { return Convert(out, i); }, in);
     }
 
     // If the std::optional does not have a value, then Convert() simply returns true and 'out'
     // is not assigned a new value.
     template <typename OUT, typename IN>
-    inline bool Convert(OUT& out, const std::optional<IN>& in) {
+    [[nodiscard]] inline bool Convert(OUT& out, const std::optional<IN>& in) {
         if (in.has_value()) {
             return Convert(out, in.value());
         }
@@ -351,7 +353,7 @@ class Converter {
     template <typename OUT,
               typename IN,
               typename _ = std::enable_if_t<!std::is_same_v<IN, std::string>>>
-    inline bool Convert(OUT*& out, const std::optional<IN>& in) {
+    [[nodiscard]] inline bool Convert(OUT*& out, const std::optional<IN>& in) {
         if (in.has_value()) {
             auto* el = Allocate<std::remove_const_t<OUT>>();
             if (!Convert(*el, in.value())) {
@@ -366,7 +368,7 @@ class Converter {
 
     // interop::Interface -> Dawn object
     template <typename OUT, typename IN>
-    inline bool Convert(OUT& out, const interop::Interface<IN>& in) {
+    [[nodiscard]] inline bool Convert(OUT& out, const interop::Interface<IN>& in) {
         using Impl = ImplOf<IN>;
         out = *in.template As<Impl>();
         if (!out) {
@@ -378,7 +380,7 @@ class Converter {
 
     // vector -> raw pointer + count
     template <typename OUT, typename IN>
-    inline bool Convert(OUT*& out_els, size_t& out_count, const std::vector<IN>& in) {
+    [[nodiscard]] inline bool Convert(OUT*& out_els, size_t& out_count, const std::vector<IN>& in) {
         if (in.size() == 0) {
             out_els = nullptr;
             out_count = 0;
@@ -396,9 +398,9 @@ class Converter {
 
     // unordered_map -> raw pointer + count
     template <typename OUT, typename IN_KEY, typename IN_VALUE>
-    inline bool Convert(OUT*& out_els,
-                        size_t& out_count,
-                        const std::unordered_map<IN_KEY, IN_VALUE>& in) {
+    [[nodiscard]] inline bool Convert(OUT*& out_els,
+                                      size_t& out_count,
+                                      const std::unordered_map<IN_KEY, IN_VALUE>& in) {
         if (in.size() == 0) {
             out_els = nullptr;
             out_count = 0;
@@ -417,7 +419,9 @@ class Converter {
 
     // std::optional<T> -> raw pointer + count
     template <typename OUT, typename IN>
-    inline bool Convert(OUT*& out_els, size_t& out_count, const std::optional<IN>& in) {
+    [[nodiscard]] inline bool Convert(OUT*& out_els,
+                                      size_t& out_count,
+                                      const std::optional<IN>& in) {
         if (!in.has_value()) {
             out_els = nullptr;
             out_count = 0;
@@ -429,7 +433,23 @@ class Converter {
     Napi::Env env;
     wgpu::Device device = nullptr;
 
+    bool retainException = false;
+    Napi::Error exception;
+
     bool HasFeature(wgpu::FeatureName feature);
+
+    // Function to be used when throwing a JavaScript exception because of issues during the
+    // conversion. Because the conversion should stop immediately, this method returns false,
+    // so the pattern is:
+    //
+    //    if (some error case) {
+    //        return Throw("Some error case description");
+    //    }
+    //
+    // A variant also exists that doesn't take a string_view, so that more specific error types
+    // can be thrown.
+    [[nodiscard]] bool Throw(std::string&& message);
+    [[nodiscard]] bool Throw(Napi::Error&& error);
 
     // Allocate() allocates and constructs an array of 'n' elements, and returns a pointer to
     // the first element. The array is freed when the Converter is destructed.
