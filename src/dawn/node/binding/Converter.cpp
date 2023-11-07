@@ -905,6 +905,11 @@ bool Converter::Convert(wgpu::ColorTargetState& out, const interop::GPUColorTarg
 
 bool Converter::Convert(wgpu::DepthStencilState& out, const interop::GPUDepthStencilState& in) {
     out = {};
+
+    auto depthWriteDefined = Allocate<wgpu::DepthStencilStateDepthWriteDefinedDawn>();
+    depthWriteDefined->depthWriteDefined = in.depthWriteEnabled.has_value();
+    out.nextInChain = depthWriteDefined;
+
     return Convert(out.format, in.format) && Convert(out.depthWriteEnabled, in.depthWriteEnabled) &&
            Convert(out.depthCompare, in.depthCompare) &&
            Convert(out.stencilFront, in.stencilFront) && Convert(out.stencilBack, in.stencilBack) &&
@@ -1223,6 +1228,7 @@ bool Converter::Convert(wgpu::RenderPassColorAttachment& out,
                         const interop::GPURenderPassColorAttachment& in) {
     out = {};
     return Convert(out.view, in.view) &&                    //
+           Convert(out.depthSlice, in.depthSlice) &&        //
            Convert(out.resolveTarget, in.resolveTarget) &&  //
            Convert(out.clearValue, in.clearValue) &&        //
            Convert(out.loadOp, in.loadOp) &&                //
@@ -1408,6 +1414,12 @@ bool Converter::Convert(wgpu::StorageTextureAccess& out,
     switch (in) {
         case interop::GPUStorageTextureAccess::kWriteOnly:
             out = wgpu::StorageTextureAccess::WriteOnly;
+            return true;
+        case interop::GPUStorageTextureAccess::kReadOnly:
+            out = wgpu::StorageTextureAccess::ReadOnly;
+            return true;
+        case interop::GPUStorageTextureAccess::kReadWrite:
+            out = wgpu::StorageTextureAccess::ReadWrite;
             return true;
     }
     Napi::Error::New(env, "invalid value for GPUStorageTextureAccess").ThrowAsJavaScriptException();
