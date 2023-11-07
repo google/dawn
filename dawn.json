@@ -482,6 +482,18 @@
                 ]
             },
             {
+                "name": "map async f",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "mode", "type": "map mode"},
+                    {"name": "offset", "type": "size_t"},
+                    {"name": "size", "type": "size_t"},
+                    {"name": "callback info", "type": "buffer map callback info"}
+                ]
+            },
+            {
                 "name": "get mapped range",
                 "returns": "void *",
                 "args": [

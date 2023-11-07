@@ -50,7 +50,7 @@ class WorkDoneEvent : public TrackedEvent {
     void ReadyHook(WGPUQueueWorkDoneStatus status) { mStatus = status; }
 
   private:
-    void CompleteImpl(EventCompletionType completionType) override {
+    void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (mStatus == WGPUQueueWorkDoneStatus_DeviceLost) {
             mStatus = WGPUQueueWorkDoneStatus_Success;
         }

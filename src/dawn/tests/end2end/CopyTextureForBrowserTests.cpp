@@ -35,7 +35,7 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-// TODO: Remove these stream operators if we move them to a standard location.
+// TODO(dawn:2205) Remove these stream operators if we move them to a standard location.
 namespace wgpu {
 std::ostream& operator<<(std::ostream& o, Origin3D origin) {
     o << origin.x << ", " << origin.y << ", " << origin.z;

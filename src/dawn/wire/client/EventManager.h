@@ -64,10 +64,10 @@ class TrackedEvent : NonMovable {
     bool IsReady() const;
 
     void SetReady();
-    void Complete(EventCompletionType type);
+    void Complete(FutureID futureID, EventCompletionType type);
 
   protected:
-    virtual void CompleteImpl(EventCompletionType type) = 0;
+    virtual void CompleteImpl(FutureID futureID, EventCompletionType type) = 0;
 
     const WGPUCallbackMode mMode;
     enum class EventState {
@@ -138,7 +138,7 @@ class EventManager final : NonMovable {
 
         // Handle spontaneous completions.
         if (spontaneousEvent) {
-            spontaneousEvent->Complete(EventCompletionType::Ready);
+            spontaneousEvent->Complete(futureID, EventCompletionType::Ready);
         }
         return WireResult::Success;
     }

@@ -32,6 +32,8 @@
 #include <optional>
 
 #include "dawn/common/FutureUtils.h"
+#include "dawn/common/Ref.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
@@ -39,6 +41,28 @@
 namespace dawn::wire::client {
 
 class Device;
+
+enum class MapRequestType { None, Read, Write };
+
+enum class MapState {
+    Unmapped,
+    MappedForRead,
+    MappedForWrite,
+    MappedAtCreation,
+};
+
+struct MapRequestData {
+    FutureID futureID = kNullFutureID;
+    size_t offset = 0;
+    size_t size = 0;
+    MapRequestType type = MapRequestType::None;
+};
+
+struct MapStateData : public RefCounted {
+    // Up to only one request can exist at a single time. Other requests are rejected.
+    std::optional<MapRequestData> pendingRequest = std::nullopt;
+    MapState mapState = MapState::Unmapped;
+};
 
 class Buffer final : public ObjectBase {
   public:
@@ -73,7 +97,9 @@ class Buffer final : public ObjectBase {
     WGPUBufferMapState GetMapState() const;
 
   private:
-    bool InvokeAndClearCallback(WGPUBufferMapAsyncStatus status);
+    // Prepares the callbacks to be called and potentially calls them
+    bool SetFutureStatus(WGPUBufferMapAsyncStatus status);
+    void SetFutureStatusAndClearPending(WGPUBufferMapAsyncStatus status);
 
     bool IsMappedForReading() const;
     bool IsMappedForWriting() const;
@@ -81,23 +107,11 @@ class Buffer final : public ObjectBase {
 
     void FreeMappedData();
 
-    enum class MapRequestType { None, Read, Write };
-
-    enum class MapState {
-        Unmapped,
-        MappedForRead,
-        MappedForWrite,
-        MappedAtCreation,
-    };
-
-    // Up to only one request can exist at a single time. Other requests are rejected.
-    struct MapRequestData {
-        FutureID futureID = kNullFutureID;
-        size_t offset = 0;
-        size_t size = 0;
-        MapRequestType type = MapRequestType::None;
-    };
-    std::optional<MapRequestData> mPendingMapRequest;
+    // The map state is a shared resource with the TrackedEvent so that it is updated only when the
+    // callback is actually called. This is important for WaitAny and ProcessEvents cases where the
+    // server may have responded, but due to an early Unmap or Destroy before the corresponding
+    // WaitAny or ProcessEvents call, we need to update the callback result.
+    Ref<MapStateData> mMapStateData;
 
     uint64_t mSize = 0;
     WGPUBufferUsage mUsage;
@@ -106,7 +120,6 @@ class Buffer final : public ObjectBase {
     // TODO(enga): Use a tagged pointer to save space.
     std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
     std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
-    MapState mMapState = MapState::Unmapped;
     bool mDestructWriteHandleOnUnmap = false;
 
     void* mMappedData = nullptr;

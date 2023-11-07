@@ -101,6 +101,10 @@ class BufferBase : public ApiObjectBase {
                      size_t size,
                      WGPUBufferMapCallback callback,
                      void* userdata);
+    Future APIMapAsyncF(wgpu::MapMode mode,
+                        size_t offset,
+                        size_t size,
+                        const BufferMapCallbackInfo& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
     void APIUnmap();

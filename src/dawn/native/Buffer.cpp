@@ -487,6 +487,14 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     GetDevice()->GetQueue()->TrackTask(std::move(request), mLastUsageSerial);
 }
 
+Future BufferBase::APIMapAsyncF(wgpu::MapMode mode,
+                                size_t offset,
+                                size_t size,
+                                const BufferMapCallbackInfo& callbackInfo) {
+    // TODO(dawn:1987) Implement this.
+    DAWN_CHECK(false);
+}
+
 void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {
     return GetMappedRange(offset, size, true);
 }
