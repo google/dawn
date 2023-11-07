@@ -96,7 +96,7 @@ class Texture final : public d3d::Texture {
 
     void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                 std::vector<D3D12_RESOURCE_BARRIER>* barrier,
-                                                const TextureSubresourceUsage& textureUsages);
+                                                const TextureSubresourceSyncInfo& textureSyncInfos);
     void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                               std::vector<D3D12_RESOURCE_BARRIER>* barrier,
                                               wgpu::TextureUsage usage,

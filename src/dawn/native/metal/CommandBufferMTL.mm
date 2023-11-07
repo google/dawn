@@ -823,14 +823,15 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
             // Clear subresources that are not attachments. Attachments will be cleared in
             // RecordBeginRenderPass by setting the loadop to clear when the texture subresource
             // has not been initialized before the render pass.
-            DAWN_TRY(scope.textureUsages[i].Iterate([&](const SubresourceRange& range,
-                                                        wgpu::TextureUsage usage) -> MaybeError {
-                if (usage & ~(wgpu::TextureUsage::RenderAttachment |
-                              wgpu::TextureUsage::StorageAttachment)) {
-                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
-                }
-                return {};
-            }));
+            DAWN_TRY(scope.textureSyncInfos[i].Iterate(
+                [&](const SubresourceRange& range, const TextureSyncInfo& syncInfo) -> MaybeError {
+                    if (syncInfo.usage & ~(wgpu::TextureUsage::RenderAttachment |
+                                           wgpu::TextureUsage::StorageAttachment)) {
+                        DAWN_TRY(
+                            texture->EnsureSubresourceContentInitialized(commandContext, range));
+                    }
+                    return {};
+                }));
         }
         for (BufferBase* bufferBase : scope.buffers) {
             ToBackend(bufferBase)->EnsureDataInitialized(commandContext);

@@ -57,6 +57,13 @@ static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
 static constexpr wgpu::BufferUsage kMappableBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
 
+static constexpr wgpu::BufferUsage kShaderBufferUsages =
+    wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | kInternalStorageBuffer |
+    kReadOnlyStorageBuffer;
+
+static constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
+    kShaderBufferUsages & kReadOnlyBufferUsages;
+
 class BufferBase : public ApiObjectBase {
   public:
     enum class BufferState {

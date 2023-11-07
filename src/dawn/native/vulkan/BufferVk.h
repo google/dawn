@@ -51,9 +51,12 @@ class Buffer final : public BufferBase {
     // Transitions the buffer to be used as `usage`, recording any necessary barrier in
     // `commands`.
     // TODO(crbug.com/dawn/851): coalesce barriers and do them early when possible.
-    void TransitionUsageNow(CommandRecordingContext* recordingContext, wgpu::BufferUsage usage);
+    void TransitionUsageNow(CommandRecordingContext* recordingContext,
+                            wgpu::BufferUsage usage,
+                            wgpu::ShaderStage shaderStage = wgpu::ShaderStage::None);
     bool TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
                                          wgpu::BufferUsage usage,
+                                         wgpu::ShaderStage shaderStage,
                                          VkBufferMemoryBarrier* barrier,
                                          VkPipelineStageFlags* srcStages,
                                          VkPipelineStageFlags* dstStages);
@@ -101,7 +104,13 @@ class Buffer final : public BufferBase {
     wgpu::Callback mHostMappedDisposeCallback = nullptr;
     void* mHostMappedDisposeUserdata = nullptr;
 
-    wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
+    // Track which usage was the last to write to the buffer.
+    wgpu::BufferUsage mLastWriteUsage = wgpu::BufferUsage::None;
+    wgpu::ShaderStage mLastWriteShaderStage = wgpu::ShaderStage::None;
+
+    // Track which usages have read the buffer since the last write.
+    wgpu::BufferUsage mReadUsage = wgpu::BufferUsage::None;
+    wgpu::ShaderStage mReadShaderStages = wgpu::ShaderStage::None;
 };
 
 }  // namespace dawn::native::vulkan

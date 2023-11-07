@@ -630,9 +630,10 @@ void Texture::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* comm
     });
 }
 
-void Texture::TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
-                                                     std::vector<D3D12_RESOURCE_BARRIER>* barriers,
-                                                     const TextureSubresourceUsage& textureUsages) {
+void Texture::TrackUsageAndGetResourceBarrierForPass(
+    CommandRecordingContext* commandContext,
+    std::vector<D3D12_RESOURCE_BARRIER>* barriers,
+    const TextureSubresourceSyncInfo& textureSyncInfos) {
     if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
         // Track the underlying heap to ensure residency.
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
@@ -644,14 +645,14 @@ void Texture::TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* co
     const ExecutionSerial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
 
     mSubresourceStateAndDecay.Merge(
-        textureUsages,
-        [&](const SubresourceRange& mergeRange, StateAndDecay* state, wgpu::TextureUsage usage) {
+        textureSyncInfos, [&](const SubresourceRange& mergeRange, StateAndDecay* state,
+                              const TextureSyncInfo& syncInfo) {
             // Skip if this subresource is not used during the current pass
-            if (usage == wgpu::TextureUsage::None) {
+            if (syncInfo.usage == wgpu::TextureUsage::None) {
                 return;
             }
 
-            D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
+            D3D12_RESOURCE_STATES newState = D3D12TextureUsage(syncInfo.usage, GetFormat());
             TransitionSubresourceRange(barriers, mergeRange, state, newState, pendingCommandSerial);
         });
 }

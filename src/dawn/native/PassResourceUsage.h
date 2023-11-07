@@ -45,18 +45,33 @@ class BufferBase;
 class QuerySetBase;
 class TextureBase;
 
+// Info about how a buffer is used and in which shader stages
+struct BufferSyncInfo {
+    wgpu::BufferUsage usage = wgpu::BufferUsage::None;
+    wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None;
+};
+
+// Info about how a texture is used and in which shader stages
+// TODO(crbug.com/dawn/851): Optimize by merging into one u32?
+struct TextureSyncInfo {
+    wgpu::TextureUsage usage = wgpu::TextureUsage::None;
+    wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None;
+};
+
+bool operator==(const TextureSyncInfo& a, const TextureSyncInfo& b);
+
 // The texture usage inside passes must be tracked per-subresource.
-using TextureSubresourceUsage = SubresourceStorage<wgpu::TextureUsage>;
+using TextureSubresourceSyncInfo = SubresourceStorage<TextureSyncInfo>;
 
 // Which resources are used by a synchronization scope and how they are used. The command
 // buffer validation pre-computes this information so that backends with explicit barriers
 // don't have to re-compute it.
 struct SyncScopeResourceUsage {
     std::vector<BufferBase*> buffers;
-    std::vector<wgpu::BufferUsage> bufferUsages;
+    std::vector<BufferSyncInfo> bufferSyncInfos;
 
     std::vector<TextureBase*> textures;
-    std::vector<TextureSubresourceUsage> textureUsages;
+    std::vector<TextureSubresourceSyncInfo> textureSyncInfos;
 
     std::vector<ExternalTextureBase*> externalTextures;
 };

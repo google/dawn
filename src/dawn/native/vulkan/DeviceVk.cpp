@@ -522,7 +522,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
     // texture.
     ToBackend(dst.texture)
-        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
+        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, wgpu::ShaderStage::None,
+                             range);
     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
     // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the

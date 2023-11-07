@@ -378,9 +378,9 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         requiredBatchDataBufferSize = std::max(requiredBatchDataBufferSize, pass.batchDataSize);
     }
     DAWN_TRY(batchDataBuffer.EnsureCapacity(requiredBatchDataBufferSize));
-    usageTracker->BufferUsedAs(batchDataBuffer.GetBuffer(), wgpu::BufferUsage::Storage);
 
     DAWN_TRY(outputParamsBuffer.EnsureCapacity(outputParamsSize));
+    // We swap the indirect buffer used so we need to explicitly add the usage.
     usageTracker->BufferUsedAs(outputParamsBuffer.GetBuffer(), wgpu::BufferUsage::Indirect);
 
     // Now we allocate and populate host-side batch data to be copied to the GPU.

@@ -53,8 +53,8 @@ namespace dawn::native {
 // Performs validation of the "synchronization scope" rules of WebGPU.
 MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     // Buffers can only be used as single-write or multiple read.
-    for (size_t i = 0; i < scope.bufferUsages.size(); ++i) {
-        const wgpu::BufferUsage usage = scope.bufferUsages[i];
+    for (size_t i = 0; i < scope.bufferSyncInfos.size(); ++i) {
+        const wgpu::BufferUsage usage = scope.bufferSyncInfos[i].usage;
         bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
         bool singleUse = wgpu::HasZeroOrOneBits(usage);
 
@@ -66,12 +66,12 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
 
     // Check that every single subresource is used as either a single-write usage or a
     // combination of readonly usages.
-    for (size_t i = 0; i < scope.textureUsages.size(); ++i) {
-        const TextureSubresourceUsage& textureUsage = scope.textureUsages[i];
-        DAWN_TRY(textureUsage.Iterate(
-            [&](const SubresourceRange&, const wgpu::TextureUsage& usage) -> MaybeError {
-                bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
-                bool singleUse = wgpu::HasZeroOrOneBits(usage);
+    for (size_t i = 0; i < scope.textureSyncInfos.size(); ++i) {
+        const TextureSubresourceSyncInfo& textureSyncInfo = scope.textureSyncInfos[i];
+        DAWN_TRY(textureSyncInfo.Iterate(
+            [&](const SubresourceRange&, const TextureSyncInfo& syncInfo) -> MaybeError {
+                bool readOnly = IsSubset(syncInfo.usage, kReadOnlyTextureUsages);
+                bool singleUse = wgpu::HasZeroOrOneBits(syncInfo.usage);
                 if (readOnly || singleUse) {
                     return {};
                 }
@@ -80,13 +80,13 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
                 // This is accepted because kResolveAttachmentLoadingUsage is an internal loading
                 // operation for blitting a resolve target to an MSAA attachment. And there won't be
                 // and read-after-write hazard.
-                if (usage == kResolveTextureLoadAndStoreUsages) {
+                if (syncInfo.usage == kResolveTextureLoadAndStoreUsages) {
                     return {};
                 }
                 return DAWN_VALIDATION_ERROR(
                     "%s usage (%s) includes writable usage and another usage in the same "
                     "synchronization scope.",
-                    scope.textures[i], usage);
+                    scope.textures[i], syncInfo.usage);
             }));
     }
     return {};

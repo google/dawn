@@ -89,9 +89,10 @@ class Texture final : public TextureBase {
     // TODO(crbug.com/dawn/851): coalesce barriers and do them early when possible.
     void TransitionUsageNow(CommandRecordingContext* recordingContext,
                             wgpu::TextureUsage usage,
+                            wgpu::ShaderStage shaderStages,
                             const SubresourceRange& range);
     void TransitionUsageForPass(CommandRecordingContext* recordingContext,
-                                const TextureSubresourceUsage& textureUsages,
+                                const TextureSubresourceSyncInfo& textureSyncInfos,
                                 std::vector<VkImageMemoryBarrier>* imageBarriers,
                                 VkPipelineStageFlags* srcStages,
                                 VkPipelineStageFlags* dstStages);
@@ -138,16 +139,18 @@ class Texture final : public TextureBase {
 
     // Implementation details of the barrier computations for the texture.
     void TransitionUsageAndGetResourceBarrier(wgpu::TextureUsage usage,
+                                              wgpu::ShaderStage shaderStages,
                                               const SubresourceRange& range,
                                               std::vector<VkImageMemoryBarrier>* imageBarriers,
                                               VkPipelineStageFlags* srcStages,
                                               VkPipelineStageFlags* dstStages);
     void TransitionUsageForPassImpl(CommandRecordingContext* recordingContext,
-                                    const SubresourceStorage<wgpu::TextureUsage>& subresourceUsages,
+                                    const SubresourceStorage<TextureSyncInfo>& subresourceSyncInfos,
                                     std::vector<VkImageMemoryBarrier>* imageBarriers,
                                     VkPipelineStageFlags* srcStages,
                                     VkPipelineStageFlags* dstStages);
     void TransitionUsageAndGetResourceBarrierImpl(wgpu::TextureUsage usage,
+                                                  wgpu::ShaderStage shaderStages,
                                                   const SubresourceRange& range,
                                                   std::vector<VkImageMemoryBarrier>* imageBarriers,
                                                   VkPipelineStageFlags* srcStages,
@@ -155,7 +158,10 @@ class Texture final : public TextureBase {
     void TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
                                          std::vector<VkImageMemoryBarrier>* barriers,
                                          size_t transitionBarrierStart);
-    bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::TextureUsage usage);
+    bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
+                                wgpu::TextureUsage usage,
+                                wgpu::ShaderStage lastShaderStage,
+                                wgpu::ShaderStage shaderStage);
 
     VkImage mHandle = VK_NULL_HANDLE;
     bool mOwnsHandle = false;
@@ -200,7 +206,7 @@ class Texture final : public TextureBase {
     //
     // This variable, if not Aspect::None, is the combined aspect to use for all transitions.
     const Aspect mCombinedAspect;
-    SubresourceStorage<wgpu::TextureUsage> mSubresourceLastUsages;
+    SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
 
     bool UseCombinedAspects() const;
 };

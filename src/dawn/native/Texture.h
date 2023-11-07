@@ -72,6 +72,10 @@ static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
 static constexpr wgpu::TextureUsage kResolveTextureLoadAndStoreUsages =
     kResolveAttachmentLoadingUsage | wgpu::TextureUsage::RenderAttachment;
 
+static constexpr wgpu::TextureUsage kShaderTextureUsages =
+    wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture |
+    wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture;
+
 class TextureBase : public ApiObjectBase {
   public:
     enum class ClearValue { Zero, NonZero };
