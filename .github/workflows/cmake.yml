@@ -60,7 +60,6 @@ jobs:
       uses: dawidd6/action-download-artifact@v2
       if: ${{ github.event_name == 'pull_request' }}
       with:
-        workflow: ${{ github.workflow }}
         workflow_conclusion: success
         name: workspace-${{ steps.strings.outputs.build-key }}
         search_artifacts: true
