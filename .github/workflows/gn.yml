@@ -52,6 +52,7 @@ jobs:
         name: workspace-${{ steps.strings.outputs.build-key }}
         search_artifacts: true
         path: ${{ github.workspace }}/${{ steps.strings.outputs.build-output-dir }}
+        if_no_artifact_found: warn
       continue-on-error: true
 
     - name: Set up checkout
