@@ -240,6 +240,12 @@ void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
     }
 }
 
+Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
+                                        const RequestAdapterCallbackInfo& callbackInfo) {
+    // TODO(dawn:1987) Implement this.
+    DAWN_UNREACHABLE();
+}
+
 Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
                                              FeatureLevel featureLevel,
                                              const DawnTogglesDescriptor* requiredAdapterToggles,

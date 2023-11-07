@@ -72,6 +72,24 @@
             {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
+    "request adapter callback": {
+        "category": "function pointer",
+        "args": [
+            {"name": "status", "type": "request adapter status"},
+            {"name": "adapter", "type": "adapter", "optional": true},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "request adapter callback info": {
+         "category": "structure",
+         "extensible": "in",
+         "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "request adapter callback"},
+            {"name": "userdata", "type": "void *"}
+         ]
+    },
     "request adapter status": {
         "category": "enum",
         "emscripten_no_enum_table": true,
@@ -80,15 +98,6 @@
             {"value": 1, "name": "unavailable"},
             {"value": 2, "name": "error"},
             {"value": 3, "name": "unknown"}
-        ]
-    },
-    "request adapter callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "request adapter status"},
-            {"name": "adapter", "type": "adapter", "optional": true},
-            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "userdata", "type": "void *"}
         ]
     },
     "adapter": {
@@ -578,7 +587,7 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "buffer map callback"},
             {"name": "userdata", "type": "void *"}
-	]
+        ]
     },
     "buffer map async status": {
         "category": "enum",
@@ -2008,6 +2017,16 @@
                     {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback", "type": "request adapter callback"},
                     {"name": "userdata", "type": "void *"}
+                ]
+            },
+            {
+                "name": "request adapter f",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
+                    {"name": "callback info", "type": "request adapter callback info"}
                 ]
             }
         ]

@@ -76,6 +76,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     void APIRequestAdapter(const RequestAdapterOptions* options,
                            WGPURequestAdapterCallback callback,
                            void* userdata);
+    Future APIRequestAdapterF(const RequestAdapterOptions* options,
+                              const RequestAdapterCallbackInfo& callbackInfo);
 
     // Discovers and returns a vector of adapters.
     // All systems adapters that can be found are returned if no options are passed.

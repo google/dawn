@@ -144,7 +144,7 @@ struct RequestAdapterUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle instance;
-    uint64_t requestSerial;
+    WGPUFuture future;
     ObjectId adapterObjectId;
 };
 

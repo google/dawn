@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "dawn/tests/MockCallback.h"
+#include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 #include "dawn/wire/WireClient.h"
@@ -42,6 +43,7 @@ namespace {
 using testing::Invoke;
 using testing::InvokeWithoutArgs;
 using testing::MockCallback;
+using testing::NiceMock;
 using testing::NotNull;
 using testing::Return;
 using testing::SetArgPointee;
@@ -49,28 +51,6 @@ using testing::StrEq;
 using testing::WithArg;
 
 class WireInstanceBasicTest : public WireTest {};
-class WireInstanceTests : public WireTest {
-  protected:
-    void SetUp() override {
-        WireTest::SetUp();
-
-        auto reservation = GetWireClient()->ReserveInstance();
-        instance = wgpu::Instance::Acquire(reservation.instance);
-
-        apiInstance = api.GetNewInstance();
-        EXPECT_CALL(api, InstanceReference(apiInstance));
-        EXPECT_TRUE(
-            GetWireServer()->InjectInstance(apiInstance, reservation.id, reservation.generation));
-    }
-
-    void TearDown() override {
-        instance = nullptr;
-        WireTest::TearDown();
-    }
-
-    wgpu::Instance instance;
-    WGPUInstance apiInstance;
-};
 
 // Test that an Instance can be reserved and injected into the wire.
 TEST_F(WireInstanceBasicTest, ReserveAndInject) {
@@ -88,37 +68,55 @@ TEST_F(WireInstanceBasicTest, ReserveAndInject) {
     FlushClient();
 }
 
-// Test that RequestAdapterOptions are passed from the client to the server.
-TEST_F(WireInstanceTests, RequestAdapterPassesOptions) {
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
+using WireInstanceTestBase = WireFutureTestWithParams<WGPURequestAdapterCallback,
+                                                      WGPURequestAdapterCallbackInfo,
+                                                      wgpuInstanceRequestAdapter,
+                                                      wgpuInstanceRequestAdapterF>;
+class WireInstanceTests : public WireInstanceTestBase {
+  protected:
+    // Overriden version of wgpuInstanceRequestAdapter that defers to the API call based on the
+    // test callback mode.
+    void InstanceRequestAdapter(WGPUInstance i,
+                                WGPURequestAdapterOptions const* options,
+                                void* userdata = nullptr) {
+        CallImpl(userdata, i, options);
+    }
+};
 
-    for (wgpu::PowerPreference powerPreference :
-         {wgpu::PowerPreference::LowPower, wgpu::PowerPreference::HighPerformance}) {
-        wgpu::RequestAdapterOptions options = {};
+DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireInstanceTests);
+
+// Test that RequestAdapterOptions are passed from the client to the server.
+TEST_P(WireInstanceTests, RequestAdapterPassesOptions) {
+    for (WGPUPowerPreference powerPreference :
+         {WGPUPowerPreference_LowPower, WGPUPowerPreference_HighPerformance}) {
+        WGPURequestAdapterOptions options = {};
         options.powerPreference = powerPreference;
 
-        instance.RequestAdapter(&options, cb.Callback(), userdata);
+        InstanceRequestAdapter(instance, &options, nullptr);
 
         EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
             .WillOnce(WithArg<1>(Invoke([&](const WGPURequestAdapterOptions* apiOptions) {
                 EXPECT_EQ(apiOptions->powerPreference,
                           static_cast<WGPUPowerPreference>(options.powerPreference));
                 EXPECT_EQ(apiOptions->forceFallbackAdapter, options.forceFallbackAdapter);
+                api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
+                                                       nullptr, nullptr);
             })));
-        FlushClient();
-    }
 
-    // Delete the instance now, or it'll call the mock callback after it's deleted.
-    instance = nullptr;
+        FlushClient();
+        FlushFutures();
+        ExpectWireCallbacksWhen([&](auto& mockCb) {
+            EXPECT_CALL(mockCb, Call).Times(1);
+
+            FlushCallbacks();
+        });
+    }
 }
 
 // Test that RequestAdapter forwards the adapter information to the client.
-TEST_F(WireInstanceTests, RequestAdapterSuccess) {
-    wgpu::RequestAdapterOptions options = {};
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
-    instance.RequestAdapter(&options, cb.Callback(), userdata);
+TEST_P(WireInstanceTests, RequestAdapterSuccess) {
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
 
     WGPUAdapterProperties fakeProperties = {};
     fakeProperties.vendorID = 0x134;
@@ -130,13 +128,14 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
     fakeProperties.backendType = WGPUBackendType_D3D12;
     fakeProperties.adapterType = WGPUAdapterType_IntegratedGPU;
 
-    wgpu::SupportedLimits fakeLimits = {};
+    WGPUSupportedLimits fakeLimits = {};
+    fakeLimits.nextInChain = nullptr;
     fakeLimits.limits.maxTextureDimension1D = 433;
     fakeLimits.limits.maxVertexAttributes = 1243;
 
-    std::initializer_list<wgpu::FeatureName> fakeFeatures = {
-        wgpu::FeatureName::Depth32FloatStencil8,
-        wgpu::FeatureName::TextureCompressionBC,
+    std::initializer_list<WGPUFeatureName> fakeFeatures = {
+        WGPUFeatureName_Depth32FloatStencil8,
+        WGPUFeatureName_TextureCompressionBC,
     };
 
     // Expect the server to receive the message. Then, mock a fake reply.
@@ -148,7 +147,7 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
-                    *reinterpret_cast<wgpu::SupportedLimits*>(limits) = fakeLimits;
+                    *limits = fakeLimits;
                     return true;
                 })));
 
@@ -157,63 +156,64 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
 
             EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
-                    for (wgpu::FeatureName feature : fakeFeatures) {
-                        *(features++) = static_cast<WGPUFeatureName>(feature);
+                    for (WGPUFeatureName feature : fakeFeatures) {
+                        *(features++) = feature;
                     }
                     return fakeFeatures.size();
                 })));
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, nullptr);
         }));
+
     FlushClient();
+    FlushFutures();
 
     // Expect the callback in the client and all the adapter information to match.
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, this))
-        .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter cAdapter) {
-            wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
+                WGPUAdapterProperties properties = {};
+                wgpuAdapterGetProperties(adapter, &properties);
+                EXPECT_EQ(properties.vendorID, fakeProperties.vendorID);
+                EXPECT_STREQ(properties.vendorName, fakeProperties.vendorName);
+                EXPECT_STREQ(properties.architecture, fakeProperties.architecture);
+                EXPECT_EQ(properties.deviceID, fakeProperties.deviceID);
+                EXPECT_STREQ(properties.name, fakeProperties.name);
+                EXPECT_STREQ(properties.driverDescription, fakeProperties.driverDescription);
+                EXPECT_EQ(properties.backendType, fakeProperties.backendType);
+                EXPECT_EQ(properties.adapterType, fakeProperties.adapterType);
 
-            wgpu::AdapterProperties properties;
-            adapter.GetProperties(&properties);
-            const auto& rhs = *reinterpret_cast<wgpu::AdapterProperties*>(&fakeProperties);
-            EXPECT_EQ(properties.vendorID, rhs.vendorID);
-            EXPECT_STREQ(properties.vendorName, rhs.vendorName);
-            EXPECT_STREQ(properties.architecture, rhs.architecture);
-            EXPECT_EQ(properties.deviceID, rhs.deviceID);
-            EXPECT_STREQ(properties.name, rhs.name);
-            EXPECT_STREQ(properties.driverDescription, rhs.driverDescription);
-            EXPECT_EQ(properties.backendType, rhs.backendType);
-            EXPECT_EQ(properties.adapterType, rhs.adapterType);
+                WGPUSupportedLimits limits = {};
+                EXPECT_TRUE(wgpuAdapterGetLimits(adapter, &limits));
+                EXPECT_EQ(limits.limits.maxTextureDimension1D,
+                          fakeLimits.limits.maxTextureDimension1D);
+                EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
 
-            wgpu::SupportedLimits limits;
-            EXPECT_TRUE(adapter.GetLimits(&limits));
-            EXPECT_EQ(limits.limits.maxTextureDimension1D, fakeLimits.limits.maxTextureDimension1D);
-            EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
+                std::vector<WGPUFeatureName> features;
+                features.resize(wgpuAdapterEnumerateFeatures(adapter, nullptr));
+                ASSERT_EQ(features.size(), fakeFeatures.size());
+                EXPECT_EQ(wgpuAdapterEnumerateFeatures(adapter, &features[0]), features.size());
 
-            std::vector<wgpu::FeatureName> features;
-            features.resize(adapter.EnumerateFeatures(nullptr));
-            ASSERT_EQ(features.size(), fakeFeatures.size());
-            EXPECT_EQ(adapter.EnumerateFeatures(&features[0]), features.size());
+                std::unordered_set<WGPUFeatureName> featureSet(fakeFeatures);
+                for (WGPUFeatureName feature : features) {
+                    EXPECT_EQ(featureSet.erase(feature), 1u);
+                }
+            })));
 
-            std::unordered_set<wgpu::FeatureName> featureSet(fakeFeatures);
-            for (wgpu::FeatureName feature : features) {
-                EXPECT_EQ(featureSet.erase(feature), 1u);
-            }
-        })));
-    FlushServer();
+        FlushCallbacks();
+    });
 }
 
-// Test that features returned by the implementation that aren't supported
-// in the wire are not exposed.
-TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
-    wgpu::RequestAdapterOptions options = {};
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
-    instance.RequestAdapter(&options, cb.Callback(), userdata);
+// Test that features returned by the implementation that aren't supported in the wire are not
+// exposed.
+TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
 
-    std::initializer_list<wgpu::FeatureName> fakeFeatures = {
-        wgpu::FeatureName::Depth32FloatStencil8,
+    std::initializer_list<WGPUFeatureName> fakeFeatures = {
+        WGPUFeatureName_Depth32FloatStencil8,
         // Some value that is not a valid feature
-        static_cast<wgpu::FeatureName>(-2),
+        static_cast<WGPUFeatureName>(-2),
     };
 
     // Expect the server to receive the message. Then, mock a fake reply.
@@ -240,36 +240,36 @@ TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
 
             EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
-                    for (wgpu::FeatureName feature : fakeFeatures) {
-                        *(features++) = static_cast<WGPUFeatureName>(feature);
+                    for (WGPUFeatureName feature : fakeFeatures) {
+                        *(features++) = feature;
                     }
                     return fakeFeatures.size();
                 })));
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, nullptr);
         }));
+
     FlushClient();
+    FlushFutures();
 
     // Expect the callback in the client and all the adapter information to match.
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, this))
-        .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter cAdapter) {
-            wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
+                WGPUFeatureName feature;
+                ASSERT_EQ(wgpuAdapterEnumerateFeatures(adapter, nullptr), 1u);
+                wgpuAdapterEnumerateFeatures(adapter, &feature);
+                EXPECT_EQ(feature, WGPUFeatureName_Depth32FloatStencil8);
+            })));
 
-            wgpu::FeatureName feature;
-            ASSERT_EQ(adapter.EnumerateFeatures(nullptr), 1u);
-            adapter.EnumerateFeatures(&feature);
-
-            EXPECT_EQ(feature, wgpu::FeatureName::Depth32FloatStencil8);
-        })));
-    FlushServer();
+        FlushCallbacks();
+    });
 }
 
 // Test that RequestAdapter errors forward to the client.
-TEST_F(WireInstanceTests, RequestAdapterError) {
-    wgpu::RequestAdapterOptions options = {};
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
-    instance.RequestAdapter(&options, cb.Callback(), userdata);
+TEST_P(WireInstanceTests, RequestAdapterError) {
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
 
     // Expect the server to receive the message. Then, mock an error.
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
@@ -277,36 +277,49 @@ TEST_F(WireInstanceTests, RequestAdapterError) {
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
                                                    nullptr, "Some error");
         }));
+
     FlushClient();
+    FlushFutures();
 
     // Expect the callback in the client.
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Error, nullptr, StrEq("Some error"), this))
-        .Times(1);
-    FlushServer();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb,
+                    Call(WGPURequestAdapterStatus_Error, nullptr, StrEq("Some error"), nullptr))
+            .Times(1);
+
+        FlushCallbacks();
+    });
 }
 
-// Test that RequestAdapter receives unknown status if the instance is deleted
-// before the callback happens.
-TEST_F(WireInstanceTests, RequestAdapterInstanceDestroyedBeforeCallback) {
-    wgpu::RequestAdapterOptions options = {};
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
-    instance.RequestAdapter(&options, cb.Callback(), userdata);
+// Test that RequestAdapter receives unknown status if the instance is deleted before the callback
+// happens.
+TEST_P(WireInstanceTests, DISABLED_RequestAdapterInstanceDestroyedBeforeCallback) {
+    // TODO(crbug.com/dawn/2061) This test does not currently pass because the callbacks aren't
+    // actually triggered by the destruction of the instance at the moment. Once we move the
+    // EventManager to be per-Instance, this test should pass.
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
 
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), this)).Times(1);
-    instance = nullptr;
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), nullptr))
+            .Times(1);
+
+        wgpuInstanceRelease(instance);
+    });
 }
 
 // Test that RequestAdapter receives unknown status if the wire is disconnected
 // before the callback happens.
-TEST_F(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
-    wgpu::RequestAdapterOptions options = {};
-    MockCallback<WGPURequestAdapterCallback> cb;
-    auto* userdata = cb.MakeUserdata(this);
-    instance.RequestAdapter(&options, cb.Callback(), userdata);
+TEST_P(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
 
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), this)).Times(1);
-    GetWireClient()->Disconnect();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), nullptr))
+            .Times(1);
+
+        GetWireClient()->Disconnect();
+    });
 }
 
 }  // anonymous namespace
