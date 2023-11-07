@@ -389,7 +389,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                         [error.localizedDescription UTF8String]);
     }
     DAWN_ASSERT(library != nil);
-    timer.RecordMicroseconds("Metal.newLibraryWithSource");
+    timer.RecordMicroseconds("Metal.newLibraryWithSource.CacheMiss");
 
     NSRef<NSString> name = AcquireNSRef(
         [[NSString alloc] initWithUTF8String:mslCompilation->remappedEntryPointName.c_str()]);

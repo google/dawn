@@ -81,7 +81,7 @@ MaybeError ComputePipeline::Initialize() {
                                    std::string([error.localizedDescription UTF8String]));
     }
     DAWN_ASSERT(mMtlComputePipelineState != nil);
-    timer.RecordMicroseconds("Metal.newComputePipelineStateWithDescriptor");
+    timer.RecordMicroseconds("Metal.newComputePipelineStateWithDescriptor.CacheMiss");
 
     // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
     mLocalWorkgroupSize = computeData.localWorkgroupSize;

@@ -466,7 +466,7 @@ MaybeError RenderPipeline::Initialize() {
                                    [error.localizedDescription UTF8String]);
     }
     DAWN_ASSERT(mMtlRenderPipelineState != nil);
-    timer.RecordMicroseconds("Metal.newRenderPipelineStateWithDescriptor");
+    timer.RecordMicroseconds("Metal.newRenderPipelineStateWithDescriptor.CacheMiss");
 
     // Create depth stencil state and cache it, fetch the cached depth stencil state when we
     // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order
