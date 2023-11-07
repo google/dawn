@@ -34,6 +34,21 @@ jobs:
 
     - uses: actions/checkout@v3
 
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=out/build" >> "$GITHUB_OUTPUT"
+        echo "build-key=${{ runner.os }}-${{github.workflow}}" >> "$GITHUB_OUTPUT"
+
+    # Only download workspace artifacts on pull requests. CI builds should start from a fresh state.
+    - uses: actions/download-artifact@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        name: workspace-${{ steps.strings.outputs.build-key }}
+        path: ${{ github.workspace }}
+
     - name: Set up checkout
       run: |
         cp ./scripts/standalone.gclient .gclient
@@ -49,21 +64,28 @@ jobs:
     - name: Generate build files
       shell: bash
       run: |
-        mkdir -p out/build
-        cat << EOF >> out/build/args.gn
+        mkdir -p ${{ steps.strings.outputs.build-output-dir }}
+        cat << EOF >> ${{ steps.strings.outputs.build-output-dir }}/args.gn
         cc_wrapper="sccache"
         is_debug=false
         is_component_build=true
         is_clang=true
         EOF
-        gn gen out/build
+        gn gen ${{ steps.strings.outputs.build-output-dir }}
 
       env:
         SCCACHE_GHA_ENABLED: "true"
         DEPOT_TOOLS_WIN_TOOLCHAIN: 0
 
     - name: Build
-      run: autoninja -C out/build
+      run: autoninja -C ${{ steps.strings.outputs.build-output-dir }}
       env:
         SCCACHE_GHA_ENABLED: "true"
         DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+    # Always upload workspace artifacts. Eventually only do this for pushes to main.
+    - uses: actions/upload-artifact@v3
+      with:
+        name: workspace-${{ steps.strings.outputs.build-key }}
+        path: ${{ github.workspace }}
+        retention-days: 7

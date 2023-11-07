@@ -53,6 +53,14 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "build-key=${{ runner.os }}-${{github.workflow}}-${{ matrix.build_type }}-${{ matrix.c_compiler }}" >> "$GITHUB_OUTPUT"
+
+    # Only download workspace artifacts on pull requests. CI builds should start from a fresh state.
+    - uses: actions/download-artifact@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        name: workspace-${{ steps.strings.outputs.build-key }}
+        path: ${{ github.workspace }}
 
     - name: Install Ubuntu build dependencies
       if: matrix.os == 'ubuntu-latest'
@@ -94,3 +102,10 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       env:
         SCCACHE_GHA_ENABLED: "true"
+
+    # Always upload workspace artifacts. Eventually only do this for pushes to main.
+    - uses: actions/upload-artifact@v3
+      with:
+        name: workspace-${{ steps.strings.outputs.build-key }}
+        path: ${{ github.workspace }}
+        retention-days: 7
