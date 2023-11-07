@@ -58,6 +58,7 @@ jobs:
     # Only download workspace artifacts on pull requests. CI builds should start from a fresh state.
     - uses: actions/download-artifact@v3
       if: ${{ github.event_name == 'pull_request' }}
+      continue-on-error: true
       with:
         name: workspace-${{ steps.strings.outputs.build-key }}
         path: ${{ github.workspace }}
