@@ -40,19 +40,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=out/build" >> "$GITHUB_OUTPUT"
-        echo "build-key=${{ runner.os }}-${{github.workflow}}" >> "$GITHUB_OUTPUT"
-
-    # Only download workspace artifacts on pull requests. CI builds should start from a fresh state.
-    - name: Download workspace artifacts
-      uses: dawidd6/action-download-artifact@v2
-      if: ${{ github.event_name == 'pull_request' }}
-      with:
-        workflow_conclusion: success
-        name: workspace-${{ steps.strings.outputs.build-key }}
-        search_artifacts: true
-        path: ${{ github.workspace }}/${{ steps.strings.outputs.build-output-dir }}
-        if_no_artifact_found: warn
-      continue-on-error: true
 
     - name: Set up checkout
       run: |
@@ -87,11 +74,3 @@ jobs:
       env:
         SCCACHE_GHA_ENABLED: "true"
         DEPOT_TOOLS_WIN_TOOLCHAIN: 0
-
-    # Always upload workspace artifacts. Eventually only do this for pushes to main.
-    - name: Upload workspace artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: workspace-${{ steps.strings.outputs.build-key }}
-        path: ${{ github.workspace }}/${{ steps.strings.outputs.build-output-dir }}
-        retention-days: 7
