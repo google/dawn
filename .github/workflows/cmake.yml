@@ -52,7 +52,7 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ github.workspace }}/out/build" >> "$GITHUB_OUTPUT"
         echo "build-key=${{ runner.os }}-${{github.workflow}}-${{ matrix.build_type }}-${{ matrix.c_compiler }}" >> "$GITHUB_OUTPUT"
 
     # Only download workspace artifacts on pull requests. CI builds should start from a fresh state.
