@@ -144,11 +144,14 @@ constexpr SkippedMessage kSkippedMessages[] = {
 
     // http://crbug.com/1499919
     {"VUID-vkCmdCopyBufferToImage-pRegions-00173",
-     "Dawn_InternalTexture, type = VK_OBJECT_TYPE_IMAGE; | "
-     "MessageID = 0x4bfcc971 | vkCmdCopyBufferToImage(): pRegions[0]"},
+     "type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x4bfcc971 | vkCmdCopyBufferToImage(): "
+     "pRegions[0]"},
     {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
-     "Dawn_InternalTexture, type = VK_OBJECT_TYPE_IMAGE; | "
-     "MessageID = 0x45ef177c | vkCmdCopyImageToBuffer(): pRegions[0]"},
+     "type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x45ef177c | vkCmdCopyImageToBuffer(): "
+     "pRegions[0]"},
+    {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
+     "type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x45ef177c | vkCmdCopyImageToBuffer(): "
+     "pRegions[0]"},
 };
 
 namespace dawn::native::vulkan {
