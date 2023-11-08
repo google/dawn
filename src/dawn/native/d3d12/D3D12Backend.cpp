@@ -41,6 +41,10 @@
 
 namespace dawn::native::d3d12 {
 
+Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device) {
+    return ToBackend(FromAPI(device))->GetD3D12Device();
+}
+
 uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                       uint64_t requestedReservationSize,
                                       MemorySegment memorySegment) {
