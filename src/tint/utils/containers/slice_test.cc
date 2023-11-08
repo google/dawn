@@ -194,5 +194,33 @@ TEST(TintSliceTest, Truncate_PastEnd) {
     EXPECT_EQ(truncated[2], 3);
 }
 
+TEST(TintSliceTest, Equality) {
+    int elements[] = {1, 2, 3};
+    auto a = Slice{elements};
+    {
+        auto b = a;
+        EXPECT_TRUE(a == b);
+        EXPECT_FALSE(a != b);
+    }
+    {
+        auto b = a;
+        b.data++;
+        EXPECT_FALSE(a == b);
+        EXPECT_TRUE(a != b);
+    }
+    {
+        auto b = a;
+        b.len++;
+        EXPECT_FALSE(a == b);
+        EXPECT_TRUE(a != b);
+    }
+    {
+        auto b = a;
+        b.cap++;
+        EXPECT_FALSE(a == b);
+        EXPECT_TRUE(a != b);
+    }
+}
+
 }  // namespace
 }  // namespace tint

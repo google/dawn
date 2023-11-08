@@ -913,8 +913,9 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
                                  Slice<const std::string_view> strings,
                                  std::string_view use) {
     auto& t = peek();
+    auto ident = t.to_str();
     if (t.IsIdentifier()) {
-        auto val = parse(t.to_str());
+        auto val = parse(ident);
         if (val != ENUM::kUndefined) {
             synchronized_ = true;
             next();
@@ -936,7 +937,20 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
     err << "\n";
 
-    tint::SuggestAlternatives(t.to_str(), strings, err);
+    if (strings == wgsl::kExtensionStrings && !HasPrefix(ident, "chromium")) {
+        // Filter out 'chromium' prefixed extensions. We don't want to advertise experimental
+        // extensions to end users (unless it looks like they've actually mis-typed a chromium
+        // extension name)
+        Vector<std::string_view, 8> filtered;
+        for (auto str : strings) {
+            if (!HasPrefix(str, "chromium")) {
+                filtered.Push(str);
+            }
+        }
+        tint::SuggestAlternatives(ident, filtered.Slice(), err);
+    } else {
+        tint::SuggestAlternatives(ident, strings, err);
+    }
 
     synchronized_ = false;
     return add_error(t.source(), err.str());
