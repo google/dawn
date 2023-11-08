@@ -135,6 +135,13 @@ struct IsResultOrError<ResultOrError<T>> {
 #define DAWN_FORMAT_INTERNAL_ERROR(...) \
     DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
 
+#define DAWN_INTERNAL_ERROR_IF(EXPR, ...)                                                  \
+    if (DAWN_UNLIKELY(EXPR)) {                                                             \
+        return DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__)); \
+    }                                                                                      \
+    for (;;)                                                                               \
+    break
+
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
     DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
 

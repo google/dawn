@@ -31,6 +31,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/SystemHandle.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
@@ -41,21 +42,16 @@ ResultOrError<Ref<Fence>> Fence::CreateFromHandle(ID3D11Device5* device,
                                                   HANDLE unownedHandle,
                                                   UINT64 fenceValue) {
     DAWN_ASSERT(unownedHandle != nullptr);
-    HANDLE ownedHandle = nullptr;
-    if (!::DuplicateHandle(::GetCurrentProcess(), unownedHandle, ::GetCurrentProcess(),
-                           &ownedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-        return DAWN_DEVICE_LOST_ERROR("D3D11 fence dup handle");
-    }
+    SystemHandle handle;
+    DAWN_TRY_ASSIGN(handle, SystemHandle::Duplicate(unownedHandle));
     ComPtr<ID3D11Fence> d3d11Fence;
-    DAWN_TRY_WITH_CLEANUP(
-        CheckHRESULT(device->OpenSharedFence(ownedHandle, IID_PPV_ARGS(&d3d11Fence)),
-                     "D3D11 fence open handle"),
-        { ::CloseHandle(ownedHandle); });
-    return AcquireRef(new Fence(std::move(d3d11Fence), fenceValue, ownedHandle));
+    DAWN_TRY(CheckHRESULT(device->OpenSharedFence(handle.Get(), IID_PPV_ARGS(&d3d11Fence)),
+                          "D3D11 fence open handle"));
+    return AcquireRef(new Fence(std::move(d3d11Fence), fenceValue, std::move(handle)));
 }
 
-Fence::Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, HANDLE sharedHandle)
-    : Base(fenceValue, sharedHandle), mD3D11Fence(std::move(d3d11Fence)) {}
+Fence::Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, SystemHandle sharedHandle)
+    : Base(fenceValue, std::move(sharedHandle)), mD3D11Fence(std::move(d3d11Fence)) {}
 
 Fence::~Fence() = default;
 

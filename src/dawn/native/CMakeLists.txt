@@ -157,6 +157,8 @@ target_sources(dawn_native
     "Limits.h"
     "SystemEvent.cpp"
     "SystemEvent.h"
+    "SystemHandle.cpp"
+    "SystemHandle.h"
     "ObjectBase.cpp"
     "ObjectBase.h"
     "PassResourceUsage.cpp"

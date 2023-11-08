@@ -367,6 +367,8 @@ source_set("sources") {
     "SwapChain.h",
     "SystemEvent.cpp",
     "SystemEvent.h",
+    "SystemHandle.cpp",
+    "SystemHandle.h",
     "Texture.cpp",
     "Texture.h",
     "TintUtils.cpp",

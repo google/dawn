@@ -47,7 +47,7 @@ class Fence : public d3d::Fence {
   private:
     using Base = d3d::Fence;
 
-    Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, HANDLE sharedHandle);
+    Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, SystemHandle sharedHandle);
     ~Fence() override;
 
     ComPtr<ID3D11Fence> mD3D11Fence;

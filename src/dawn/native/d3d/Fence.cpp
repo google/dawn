@@ -35,14 +35,8 @@
 
 namespace dawn::native::d3d {
 
-Fence::Fence(UINT64 fenceValue, HANDLE sharedHandle)
-    : mFenceValue(fenceValue), mSharedHandle(sharedHandle) {}
-
-Fence::~Fence() {
-    if (mSharedHandle != nullptr) {
-        ::CloseHandle(mSharedHandle);
-    }
-}
+Fence::Fence(UINT64 fenceValue, SystemHandle sharedHandle)
+    : mFenceValue(fenceValue), mSharedHandle(std::move(sharedHandle)) {}
 
 UINT64 Fence::GetFenceValue() const {
     return mFenceValue;

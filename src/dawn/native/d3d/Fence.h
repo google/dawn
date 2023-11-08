@@ -31,6 +31,7 @@
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/SystemHandle.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d {
@@ -40,11 +41,10 @@ class Fence : public RefCounted {
     UINT64 GetFenceValue() const;
 
   protected:
-    Fence(UINT64 fenceValue, HANDLE sharedHandle);
-    ~Fence() override;
+    Fence(UINT64 fenceValue, SystemHandle sharedHandle);
 
     const UINT64 mFenceValue;
-    const HANDLE mSharedHandle;
+    const SystemHandle mSharedHandle;
 };
 
 }  // namespace dawn::native::d3d

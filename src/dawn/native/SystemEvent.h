@@ -33,33 +33,12 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/SystemHandle.h"
 
 namespace dawn::native {
 
 struct TrackedFutureWaitInfo;
 class SystemEventPipeSender;
-
-// Either a Win32 HANDLE or a POSIX fd (int) depending on OS, represented as a uintptr_t with
-// necessary conversions.
-class SystemEventPrimitive : NonCopyable {
-  public:
-    SystemEventPrimitive() = default;
-    // void* is the typedef of HANDLE in Win32.
-    explicit SystemEventPrimitive(void* win32Handle);
-    explicit SystemEventPrimitive(int posixFd);
-    ~SystemEventPrimitive();
-
-    SystemEventPrimitive(SystemEventPrimitive&&);
-    SystemEventPrimitive& operator=(SystemEventPrimitive&&);
-
-    bool IsValid() const;
-    void Close();
-
-    static constexpr uintptr_t kInvalid = 0;
-    // The underlying primitive, either a Win32 HANDLE (void*) or a POSIX fd (int), cast to
-    // uintptr_t. We treat 0 as the "invalid" value, even for POSIX.
-    uintptr_t value = kInvalid;
-};
 
 // SystemEventReceiver holds an OS event primitive (Win32 Event Object or POSIX file descriptor (fd)
 // that will be signalled by some other thing: either an OS integration like SetEventOnCompletion(),
@@ -80,7 +59,7 @@ class SystemEventReceiver final : NonCopyable {
   private:
     friend bool WaitAnySystemEvent(size_t, TrackedFutureWaitInfo*, Nanoseconds);
     friend std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
-    SystemEventPrimitive mPrimitive;
+    SystemHandle mPrimitive;
 };
 
 // See CreateSystemEventPipe.
@@ -95,7 +74,7 @@ class SystemEventPipeSender final : NonCopyable {
 
   private:
     friend std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
-    SystemEventPrimitive mPrimitive;
+    SystemHandle mPrimitive;
 };
 
 // Implementation of WaitAny when backed by SystemEventReceiver.
