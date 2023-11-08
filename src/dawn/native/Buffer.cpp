@@ -343,13 +343,16 @@ MaybeError BufferBase::MapAtCreation() {
     }
 
     DeviceBase* device = GetDevice();
-    if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
+    if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+        !device->IsToggleEnabled(Toggle::DisableLazyClearForMappedAtCreationBuffer)) {
         memset(ptr, uint8_t(0u), size);
-        SetIsDataInitialized();
         device->IncrementLazyClearCountForTesting();
     } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         memset(ptr, uint8_t(1u), size);
     }
+    // Mark the buffer as initialized since we don't want to later clear it using the GPU since that
+    // would overwrite what the client wrote using the CPU.
+    SetIsDataInitialized();
 
     return {};
 }

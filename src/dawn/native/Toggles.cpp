@@ -71,6 +71,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Clears resource to zero on first usage. This initializes the resource so that no dirty bits "
       "from recycled memory is present in the new resource.",
       "https://crbug.com/dawn/145", ToggleStage::Device}},
+    {Toggle::DisableLazyClearForMappedAtCreationBuffer,
+     {"disable_lazy_clear_for_mapped_at_creation_buffer",
+      "Disable clearing buffers to zero for buffers which are mapped at creation.",
+      "https://crbug.com/dawn/145", ToggleStage::Device}},
     {Toggle::TurnOffVsync,
      {"turn_off_vsync",
       "Turn off vsync when rendering. In order to do performance test or run perf tests, turn off "

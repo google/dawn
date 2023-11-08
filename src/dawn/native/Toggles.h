@@ -45,6 +45,7 @@ enum class Toggle {
     NonzeroClearResourcesOnCreationForTesting,
     AlwaysResolveIntoZeroLevelAndLayer,
     LazyClearResourceOnFirstUse,
+    DisableLazyClearForMappedAtCreationBuffer,
     TurnOffVsync,
     UseTemporaryBufferInCompressedTextureToTextureCopy,
     UseD3D12ResourceHeapTier2,
