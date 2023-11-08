@@ -75,7 +75,7 @@ auto& operator<<(STREAM& out, AddressSpace value) {
 /// @returns the parsed enum, or AddressSpace::kUndefined if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str);
 
-constexpr const char* kAddressSpaceStrings[] = {
+constexpr std::string_view kAddressSpaceStrings[] = {
     "__in",          "__out",   "function", "pixel_local", "private",
     "push_constant", "storage", "uniform",  "workgroup",
 };

@@ -278,7 +278,7 @@ class SemHelper {
     /// @param suggestions suggested valid identifiers
     void ErrorUnexpectedExprKind(const sem::Expression* expr,
                                  std::string_view wanted,
-                                 tint::Slice<char const* const> suggestions = Empty) const;
+                                 tint::Slice<const std::string_view> suggestions = Empty) const;
 
     /// If @p node is a module-scope type, variable or function declaration, then appends a note
     /// diagnostic where this declaration was declared, otherwise the function does nothing.

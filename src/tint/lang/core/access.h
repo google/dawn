@@ -68,7 +68,7 @@ auto& operator<<(STREAM& out, Access value) {
 /// @returns the parsed enum, or Access::kUndefined if the string could not be parsed.
 Access ParseAccess(std::string_view str);
 
-constexpr const char* kAccessStrings[] = {
+constexpr std::string_view kAccessStrings[] = {
     "read",
     "read_write",
     "write",

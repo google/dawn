@@ -80,7 +80,7 @@ auto& operator<<(STREAM& out, BuiltinValue value) {
 /// @returns the parsed enum, or BuiltinValue::kUndefined if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
-constexpr const char* kBuiltinValueStrings[] = {
+constexpr std::string_view kBuiltinValueStrings[] = {
     "__point_size",           "frag_depth",     "front_facing",
     "global_invocation_id",   "instance_index", "local_invocation_id",
     "local_invocation_index", "num_workgroups", "position",

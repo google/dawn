@@ -70,7 +70,7 @@ auto& operator<<(STREAM& out, InterpolationSampling value) {
 /// parsed.
 InterpolationSampling ParseInterpolationSampling(std::string_view str);
 
-constexpr const char* kInterpolationSamplingStrings[] = {
+constexpr std::string_view kInterpolationSamplingStrings[] = {
     "center",
     "centroid",
     "sample",

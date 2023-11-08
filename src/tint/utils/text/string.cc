@@ -63,15 +63,7 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
 }
 
 void SuggestAlternatives(std::string_view got,
-                         Slice<char const* const> strings,
-                         StringStream& ss,
-                         const SuggestAlternativeOptions& options /* = {} */) {
-    auto views = Transform<8>(strings, [](char const* const str) { return std::string_view(str); });
-    SuggestAlternatives(got, views.Slice(), ss, options);
-}
-
-void SuggestAlternatives(std::string_view got,
-                         Slice<std::string_view> strings,
+                         Slice<const std::string_view> strings,
                          StringStream& ss,
                          const SuggestAlternativeOptions& options /* = {} */) {
     // If the string typed was within kSuggestionDistance of one of the possible enum values,

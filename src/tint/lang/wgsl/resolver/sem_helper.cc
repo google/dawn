@@ -136,21 +136,21 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
 void SemHelper::ErrorUnexpectedExprKind(
     const sem::Expression* expr,
     std::string_view wanted,
-    tint::Slice<char const* const> suggestions /* = Empty */) const {
+    tint::Slice<const std::string_view> suggestions /* = Empty */) const {
     if (auto* ui = expr->As<UnresolvedIdentifier>()) {
         auto* ident = ui->Identifier();
         auto name = ident->identifier->symbol.Name();
         AddError("unresolved " + std::string(wanted) + " '" + name + "'", ident->source);
         if (!suggestions.IsEmpty()) {
             // Filter out suggestions that have a leading underscore.
-            Vector<const char*, 8> filtered;
-            for (auto* str : suggestions) {
+            Vector<std::string_view, 8> filtered;
+            for (auto str : suggestions) {
                 if (str[0] != '_') {
                     filtered.Push(str);
                 }
             }
             StringStream msg;
-            tint::SuggestAlternatives(name, filtered.Slice().Reinterpret<char const* const>(), msg);
+            tint::SuggestAlternatives(name, filtered.Slice(), msg);
             AddNote(msg.str(), ident->source);
         }
         return;

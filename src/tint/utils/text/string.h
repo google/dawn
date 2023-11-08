@@ -52,6 +52,20 @@ namespace tint {
     return str;
 }
 
+/// @copydoc ReplaceAll(std::string, std::string_view, std::string_view)
+[[nodiscard]] inline std::string ReplaceAll(std::string_view str,
+                                            std::string_view substr,
+                                            std::string_view replacement) {
+    return ReplaceAll(std::string(str), substr, replacement);
+}
+
+/// @copydoc ReplaceAll(std::string, std::string_view, std::string_view)
+[[nodiscard]] inline std::string ReplaceAll(const char* str,
+                                            std::string_view substr,
+                                            std::string_view replacement) {
+    return ReplaceAll(std::string(str), substr, replacement);
+}
+
 /// @param value the boolean value to be printed as a string
 /// @returns value printed as a string via the stream `<<` operator
 inline std::string ToString(bool value) {
@@ -109,17 +123,7 @@ struct SuggestAlternativeOptions {
 /// @param ss the stream to write the suggest and list of possible values to
 /// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
-                         Slice<char const* const> strings,
-                         StringStream& ss,
-                         const SuggestAlternativeOptions& options = {});
-
-/// Suggest alternatives for an unrecognized string from a list of possible values.
-/// @param got the unrecognized string
-/// @param strings the list of possible values
-/// @param ss the stream to write the suggest and list of possible values to
-/// @param options options for the suggestion
-void SuggestAlternatives(std::string_view got,
-                         Slice<std::string_view> strings,
+                         Slice<const std::string_view> strings,
                          StringStream& ss,
                          const SuggestAlternativeOptions& options = {});
 

@@ -94,20 +94,20 @@ TEST(StringTest, Distance) {
 
 TEST(StringTest, SuggestAlternatives) {
     {
-        const char* alternatives[] = {"hello world", "Hello World"};
+        std::string_view alternatives[] = {"hello world", "Hello World"};
         StringStream ss;
         SuggestAlternatives("hello wordl", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?
 Possible values: 'hello world', 'Hello World')");
     }
     {
-        const char* alternatives[] = {"foobar", "something else"};
+        std::string_view alternatives[] = {"foobar", "something else"};
         StringStream ss;
         SuggestAlternatives("hello world", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
     }
     {
-        const char* alternatives[] = {"hello world", "Hello World"};
+        std::string_view alternatives[] = {"hello world", "Hello World"};
         StringStream ss;
         SuggestAlternativeOptions opts;
         opts.prefix = "$";
@@ -116,7 +116,7 @@ Possible values: 'hello world', 'Hello World')");
 Possible values: '$hello world', '$Hello World')");
     }
     {
-        const char* alternatives[] = {"hello world", "Hello World"};
+        std::string_view alternatives[] = {"hello world", "Hello World"};
         StringStream ss;
         SuggestAlternativeOptions opts;
         opts.list_possible_values = false;

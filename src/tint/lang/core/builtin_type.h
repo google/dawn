@@ -161,7 +161,7 @@ auto& operator<<(STREAM& out, BuiltinType value) {
 /// @returns the parsed enum, or BuiltinType::kUndefined if the string could not be parsed.
 BuiltinType ParseBuiltinType(std::string_view str);
 
-constexpr const char* kBuiltinTypeStrings[] = {
+constexpr std::string_view kBuiltinTypeStrings[] = {
     "__atomic_compare_exchange_result_i32",
     "__atomic_compare_exchange_result_u32",
     "__frexp_result_abstract",

@@ -1233,7 +1233,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_builtin_type {
 
 using ResolverDependencyGraphResolveToBuiltinType =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1272,7 +1272,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_access {
 
 using ResolverDependencyGraphResolveToAccess =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToAccess, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1311,7 +1311,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_address_space {
 
 using ResolverDependencyGraphResolveToAddressSpace =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToAddressSpace, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1350,7 +1350,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_builtin_value {
 
 using ResolverDependencyGraphResolveToBuiltinValue =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinValue, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1389,7 +1389,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_interpolation_sampling {
 
 using ResolverDependencyGraphResolveToInterpolationSampling =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToInterpolationSampling, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1429,7 +1429,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_interpolation_sampling {
 
 using ResolverDependencyGraphResolveToInterpolationType =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToInterpolationType, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1469,7 +1469,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_texel_format {
 
 using ResolverDependencyGraphResolveToTexelFormat =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphResolveToTexelFormat, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1546,7 +1546,7 @@ INSTANTIATE_TEST_SUITE_P(NestedLocalShadowLocal,
                                                           SymbolDeclKind::NestedLocalLet)));
 
 using ResolverDependencyGraphShadowKindTest =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, const char*>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, std::string_view>>;
 
 TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByGlobalVar) {
     const auto use = std::get<0>(GetParam());
@@ -1667,10 +1667,10 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     Vector<SymbolUse, 64> symbol_uses;
 
-    auto add_use = [&](const ast::Node* decl, auto use, int line, const char* kind) {
-        symbol_uses.Push(
-            SymbolUse{decl, IdentifierOf(use),
-                      std::string(__FILE__) + ":" + std::to_string(line) + ": " + kind});
+    auto add_use = [&](const ast::Node* decl, auto use, int line, std::string_view kind) {
+        symbol_uses.Push(SymbolUse{
+            decl, IdentifierOf(use),
+            std::string(__FILE__) + ":" + std::to_string(line) + ": " + std::string(kind)});
         return use;
     };
 

@@ -907,10 +907,10 @@ Maybe<ast::Type> Parser::type_specifier() {
     return builder_.ty(builder_.Ident(source.Source(), ident.to_str(), std::move(args.value)));
 }
 
-template <typename ENUM, size_t N>
+template <typename ENUM>
 Expect<ENUM> Parser::expect_enum(std::string_view name,
                                  ENUM (*parse)(std::string_view str),
-                                 const char* const (&strings)[N],
+                                 Slice<const std::string_view> strings,
                                  std::string_view use) {
     auto& t = peek();
     if (t.IsIdentifier()) {

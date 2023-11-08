@@ -75,7 +75,7 @@ auto& operator<<(STREAM& out, Extension value) {
 /// @returns the parsed enum, or Extension::kUndefined if the string could not be parsed.
 Extension ParseExtension(std::string_view str);
 
-constexpr const char* kExtensionStrings[] = {
+constexpr std::string_view kExtensionStrings[] = {
     "chromium_disable_uniformity_analysis",      "chromium_experimental_dp4a",
     "chromium_experimental_full_ptr_parameters", "chromium_experimental_pixel_local",
     "chromium_experimental_push_constant",       "chromium_experimental_read_write_storage_texture",

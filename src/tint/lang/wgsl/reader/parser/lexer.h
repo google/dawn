@@ -87,7 +87,7 @@ class Lexer {
     void end_source(Source&) const;
 
     /// @returns view of current line
-    const std::string_view line() const;
+    std::string_view line() const;
     /// @returns position in current line
     size_t pos() const;
     /// @returns length of current line

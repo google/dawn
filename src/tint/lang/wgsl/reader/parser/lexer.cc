@@ -132,7 +132,7 @@ std::vector<Token> Lexer::Lex() {
     return tokens;
 }
 
-const std::string_view Lexer::line() const {
+std::string_view Lexer::line() const {
     if (file_->content.lines.size() == 0) {
         static const char* empty_string = "";
         return empty_string;

@@ -213,7 +213,7 @@ std::string_view Token::TypeToName(Type type) {
 
 Token::Token() : type_(Type::kUninitialized) {}
 
-Token::Token(Type type, const Source& source, const std::string_view& view)
+Token::Token(Type type, const Source& source, std::string_view view)
     : type_(type), source_(source), value_(view) {}
 
 Token::Token(Type type, const Source& source, const std::string& str)

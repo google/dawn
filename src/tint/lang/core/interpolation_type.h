@@ -69,7 +69,7 @@ auto& operator<<(STREAM& out, InterpolationType value) {
 /// @returns the parsed enum, or InterpolationType::kUndefined if the string could not be parsed.
 InterpolationType ParseInterpolationType(std::string_view str);
 
-constexpr const char* kInterpolationTypeStrings[] = {
+constexpr std::string_view kInterpolationTypeStrings[] = {
     "flat",
     "linear",
     "perspective",

@@ -868,10 +868,10 @@ class Parser {
     /// @param parse the optimized function used to parse the enum
     /// @param strings the list of possible strings in the enum
     /// @param use an optional description of what was being parsed if an error was raised.
-    template <typename ENUM, size_t N>
+    template <typename ENUM>
     Expect<ENUM> expect_enum(std::string_view name,
                              ENUM (*parse)(std::string_view str),
-                             const char* const (&strings)[N],
+                             Slice<const std::string_view> strings,
                              std::string_view use = "");
 
     Expect<ast::Type> expect_type(std::string_view use);

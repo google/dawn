@@ -72,7 +72,7 @@ auto& operator<<(STREAM& out, DiagnosticSeverity value) {
 /// @returns the parsed enum, or DiagnosticSeverity::kUndefined if the string could not be parsed.
 DiagnosticSeverity ParseDiagnosticSeverity(std::string_view str);
 
-constexpr const char* kDiagnosticSeverityStrings[] = {
+constexpr std::string_view kDiagnosticSeverityStrings[] = {
     "error",
     "info",
     "off",

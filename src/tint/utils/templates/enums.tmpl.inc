@@ -64,7 +64,7 @@ auto& operator<<(STREAM& out, {{$enum}} value) {
 /// @returns the parsed enum, or {{$enum}}::kUndefined if the string could not be parsed.
 {{$enum}} Parse{{$enum}}(std::string_view str);
 
-constexpr const char* k{{$enum}}Strings[] = {
+constexpr std::string_view k{{$enum}}Strings[] = {
 {{-   range $entry := $.Entries }}
 {{-     if not $entry.IsInternal}}
     "{{$entry.Name}}",

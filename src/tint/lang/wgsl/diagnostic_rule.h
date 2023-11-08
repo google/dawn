@@ -68,7 +68,7 @@ auto& operator<<(STREAM& out, CoreDiagnosticRule value) {
 /// @returns the parsed enum, or CoreDiagnosticRule::kUndefined if the string could not be parsed.
 CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str);
 
-constexpr const char* kCoreDiagnosticRuleStrings[] = {
+constexpr std::string_view kCoreDiagnosticRuleStrings[] = {
     "derivative_uniformity",
 };
 
@@ -96,7 +96,7 @@ auto& operator<<(STREAM& out, ChromiumDiagnosticRule value) {
 /// parsed.
 ChromiumDiagnosticRule ParseChromiumDiagnosticRule(std::string_view str);
 
-constexpr const char* kChromiumDiagnosticRuleStrings[] = {
+constexpr std::string_view kChromiumDiagnosticRuleStrings[] = {
     "unreachable_code",
 };
 

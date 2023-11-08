@@ -46,7 +46,7 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 // access
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverAccessUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverAccessUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverAccessUsedWithTemplateArgs, Test) {
     // @group(0) @binding(0) var t : texture_storage_2d<rgba8unorm, ACCESS<i32>>;
@@ -65,7 +65,7 @@ INSTANTIATE_TEST_SUITE_P(,
 ////////////////////////////////////////////////////////////////////////////////
 // address space
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverAddressSpaceUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverAddressSpaceUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
     // fn f(p : ptr<ADDRESS_SPACE<T>, f32) {}
@@ -85,7 +85,7 @@ INSTANTIATE_TEST_SUITE_P(,
 ////////////////////////////////////////////////////////////////////////////////
 // builtin value
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverBuiltinValueUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverBuiltinValueUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverBuiltinValueUsedWithTemplateArgs, Test) {
     // fn f(@builtin(BUILTIN<T>) p : vec4<f32>) {}
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(,
 ////////////////////////////////////////////////////////////////////////////////
 // interpolation sampling
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverInterpolationSamplingUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverInterpolationSamplingUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverInterpolationSamplingUsedWithTemplateArgs, Test) {
     // @fragment
@@ -132,7 +132,7 @@ INSTANTIATE_TEST_SUITE_P(,
 ////////////////////////////////////////////////////////////////////////////////
 // interpolation type
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverInterpolationTypeUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverInterpolationTypeUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverInterpolationTypeUsedWithTemplateArgs, Test) {
     // @fragment
@@ -160,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P(,
 ////////////////////////////////////////////////////////////////////////////////
 // texel format
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverTexelFormatUsedWithTemplateArgs = ResolverTestWithParam<const char*>;
+using ResolverTexelFormatUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
 
 TEST_P(ResolverTexelFormatUsedWithTemplateArgs, Test) {
     // @group(0) @binding(0) var t : texture_storage_2d<TEXEL_FORMAT<T>, write>

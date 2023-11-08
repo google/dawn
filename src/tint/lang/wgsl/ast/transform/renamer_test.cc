@@ -1791,22 +1791,21 @@ std::string ExpandBuiltinType(std::string_view name) {
     return std::string(name);
 }
 
-std::vector<const char*> ConstructableTypes() {
-    std::vector<const char*> out;
-    for (auto* ty : core::kBuiltinTypeStrings) {
-        std::string_view type(ty);
+std::vector<std::string_view> ConstructableTypes() {
+    std::vector<std::string_view> out;
+    for (auto type : core::kBuiltinTypeStrings) {
         if (type != "ptr" && type != "atomic" && !tint::HasPrefix(type, "sampler") &&
             !tint::HasPrefix(type, "texture") && !tint::HasPrefix(type, "__")) {
-            out.push_back(ty);
+            out.push_back(type);
         }
     }
     return out;
 }
 
-using RenamerBuiltinTypeTest = TransformTestWithParam<const char*>;
+using RenamerBuiltinTypeTest = TransformTestWithParam<std::string_view>;
 
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeUsage) {
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         return tint::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
@@ -1845,7 +1844,7 @@ struct tint_symbol_5 {
     EXPECT_EQ(expect, str(got));
 }
 TEST_P(RenamerBuiltinTypeTest, PreserveTypeInitializer) {
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         return tint::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
@@ -1877,7 +1876,7 @@ TEST_P(RenamerBuiltinTypeTest, PreserveTypeConversion) {
         return;  // Cannot value convert arrays.
     }
 
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         return tint::ReplaceAll(source, "$type", ExpandBuiltinType(GetParam()));
     };
 
@@ -1929,7 +1928,7 @@ fn tint_symbol() {
 }
 
 TEST_P(RenamerBuiltinTypeTest, RenameShadowedByAlias) {
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         std::string_view ty = GetParam();
         auto out = tint::ReplaceAll(source, "$name", ty);
         out = tint::ReplaceAll(out, "$type", ExpandBuiltinType(ty));
@@ -1961,7 +1960,7 @@ fn tint_symbol_1() {
 }
 
 TEST_P(RenamerBuiltinTypeTest, RenameShadowedByStruct) {
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         std::string_view ty = GetParam();
         auto out = tint::ReplaceAll(source, "$name", ty);
         out = tint::ReplaceAll(out, "$type", ExpandBuiltinType(ty));
@@ -2003,31 +2002,33 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
                          testing::ValuesIn(ConstructableTypes()));
 
 /// @return WGSL builtin identifier keywords
-std::vector<const char*> Identifiers() {
-    std::vector<const char*> out;
-    for (auto* ident : core::kBuiltinTypeStrings) {
+std::vector<std::string_view> Identifiers() {
+    std::vector<std::string_view> out;
+    for (auto ident : core::kBuiltinTypeStrings) {
         if (!tint::HasPrefix(ident, "__")) {
             out.push_back(ident);
         }
     }
-    for (auto* ident : core::kAddressSpaceStrings) {
+    for (auto ident : core::kAddressSpaceStrings) {
         if (!tint::HasPrefix(ident, "_")) {
             out.push_back(ident);
         }
     }
-    for (auto* ident : core::kTexelFormatStrings) {
+    for (auto ident : core::kTexelFormatStrings) {
         out.push_back(ident);
     }
-    for (auto* ident : core::kAccessStrings) {
+    for (auto ident : core::kAccessStrings) {
         out.push_back(ident);
     }
     return out;
 }
 
-using RenamerBuiltinIdentifierTest = TransformTestWithParam<const char*>;
+using RenamerBuiltinIdentifierTest = TransformTestWithParam<std::string_view>;
 
 TEST_P(RenamerBuiltinIdentifierTest, GlobalConstName) {
-    auto expand = [&](const char* source) { return tint::ReplaceAll(source, "$name", GetParam()); };
+    auto expand = [&](std::string_view source) {
+        return tint::ReplaceAll(source, "$name", GetParam());
+    };
 
     auto src = expand(R"(
 const $name = 42;
@@ -2051,7 +2052,9 @@ fn tint_symbol_1() {
 }
 
 TEST_P(RenamerBuiltinIdentifierTest, LocalVarName) {
-    auto expand = [&](const char* source) { return tint::ReplaceAll(source, "$name", GetParam()); };
+    auto expand = [&](std::string_view source) {
+        return tint::ReplaceAll(source, "$name", GetParam());
+    };
 
     auto src = expand(R"(
 fn f() {
@@ -2071,7 +2074,9 @@ fn tint_symbol() {
 }
 
 TEST_P(RenamerBuiltinIdentifierTest, FunctionName) {
-    auto expand = [&](const char* source) { return tint::ReplaceAll(source, "$name", GetParam()); };
+    auto expand = [&](std::string_view source) {
+        return tint::ReplaceAll(source, "$name", GetParam());
+    };
 
     auto src = expand(R"(
 fn $name() {
@@ -2097,7 +2102,7 @@ fn tint_symbol_1() {
 }
 
 TEST_P(RenamerBuiltinIdentifierTest, StructName) {
-    auto expand = [&](const char* source) {
+    auto expand = [&](std::string_view source) {
         std::string_view name = GetParam();
         auto out = tint::ReplaceAll(source, "$name", name);
         return tint::ReplaceAll(out, "$other_type", name == "i32" ? "u32" : "i32");

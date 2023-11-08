@@ -238,7 +238,7 @@ class Token {
     /// @param type the Token::Type of the token
     /// @param source the source of the token
     /// @param view the source string view for the token
-    Token(Type type, const Source& source, const std::string_view& view);
+    Token(Type type, const Source& source, std::string_view view);
     /// Create a string Token
     /// @param type the Token::Type of the token
     /// @param source the source of the token
