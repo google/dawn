@@ -96,15 +96,21 @@
     X(Maximum,               maxInterStageShaderComponents,       60,        60,        112) \
     X(Maximum,               maxInterStageShaderVariables,        16,        16,         28) \
 
+// Tiered limits for texture dimensions.
+// TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where some dimensions
+// offers slightly better than default limits.
+//                                                             compat      tier0       tier1
+#define LIMITS_TEXTURE_DIMENSIONS(X) \
+    X(Maximum,                       maxTextureDimension1D,      4096,      8192,      16384) \
+    X(Maximum,                       maxTextureDimension2D,      4096,      8192,      16384) \
+    X(Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
+    X(Maximum,                       maxTextureArrayLayers,       256,       256,        256)
+
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
 //                                                             compat      tier0       tier1
 #define LIMITS_OTHER(X)                                                                       \
-    X(Maximum,                       maxTextureDimension1D,      4096,      8192,       8192) \
-    X(Maximum,                       maxTextureDimension2D,      4096,      8192,       8192) \
-    X(Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
-    X(Maximum,                       maxTextureArrayLayers,       256,       256,        256) \
     X(Maximum,                               maxBindGroups,         4,         4,          4) \
     X(Maximum,              maxBindGroupsPlusVertexBuffers,        24,        24,         24) \
     X(Maximum,                     maxBindingsPerBindGroup,      1000,      1000,       1000) \
@@ -138,6 +144,7 @@
     LIMITS_STORAGE_BUFFER_BINDINGS(X)      \
     LIMITS_ATTACHMENTS(X)                  \
     LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
+    LIMITS_TEXTURE_DIMENSIONS(X)           \
     LIMITS_OTHER(X)
 
 namespace dawn::native {

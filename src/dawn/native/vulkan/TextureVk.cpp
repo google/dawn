@@ -860,7 +860,7 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     // also required for the implementation of robust resource initialization.
     createInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-    DAWN_TRY(CheckVkSuccess(
+    DAWN_TRY(CheckVkOOMThenSuccess(
         device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImage"));
     mOwnsHandle = true;
