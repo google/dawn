@@ -297,18 +297,26 @@ class Converter {
         return true;
     }
 
-    // Pass-through (no conversion)
-    template <typename T>
-    inline bool Convert(T& out, const T& in) {
+    // Floating point number conversion. IDL rules are that double/float that isn't "unrestricted"
+    // must be finite.
+    template <typename OUT,
+              typename IN,
+              std::enable_if_t<std::is_floating_point_v<IN> && std::is_floating_point_v<OUT>,
+                               bool> = true>
+    [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = in;
+        if (!std::isfinite(out)) {
+            return Throw(Napi::TypeError::New(
+                env, "Floating-point value (" + std::to_string(out) + ") is not finite"));
+        }
         return true;
     }
 
     // Integral number conversion, with dynamic limit checking
     template <typename OUT,
               typename IN,
-              typename = std::enable_if_t<std::is_integral_v<IN> && std::is_integral_v<OUT>>>
-    inline bool Convert(OUT& out, const IN& in) {
+              std::enable_if_t<std::is_integral_v<IN> && std::is_integral_v<OUT>, bool> = true>
+    [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = static_cast<OUT>(in);
         if (static_cast<IN>(out) != in) {
             return Throw("Integer value (" + std::to_string(in) +
