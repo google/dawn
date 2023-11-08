@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gn:
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    name: GN ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Install Ubuntu build dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt update
+        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
+
+    - name: Install depot_tools
+      uses: newkdev/setup-depot-tools@v1.0.1
+
+    - uses: actions/checkout@v3
+
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=out/build" >> "$GITHUB_OUTPUT"
+
+    - name: Set up checkout
+      run: |
+        cp ./scripts/standalone.gclient .gclient
+
+    - name: gclient sync --no-history --shallow
+      run: gclient sync --no-history --shallow
+      env:
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.3
+
+    - name: Generate build files
+      shell: bash
+      run: |
+        mkdir -p ${{ steps.strings.outputs.build-output-dir }}
+        cat << EOF >> ${{ steps.strings.outputs.build-output-dir }}/args.gn
+        cc_wrapper="sccache"
+        is_debug=false
+        is_component_build=true
+        is_clang=true
+        EOF
+        gn gen ${{ steps.strings.outputs.build-output-dir }}
+
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+    - name: Build
+      run: autoninja -C ${{ steps.strings.outputs.build-output-dir }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+
+  cmake:
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Debug, Release]
+        c_compiler: [clang, cl]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: clang
+          - os: windows-latest
+            c_compiler: cl
+            build_type: Debug
+          - os: ubuntu-latest
+            c_compiler: cl
+          - os: macos-latest
+            c_compiler: cl
+
+    name: CMake ${{ matrix.os }} ${{ matrix.build_type }} (${{ matrix.c_compiler }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/out/build" >> "$GITHUB_OUTPUT"
+
+    - name: Install Ubuntu build dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt update
+        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Fetch dependencies
+      run: python ./tools/fetch_dawn_dependencies.py --use-test-deps --shallow
+
+    - name: Set up Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Set up Visual Studio environment
+      if: matrix.os == 'windows-latest'
+      uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.3
+
+    - name: Configure CMake
+      run: >
+        cmake -G Ninja -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCMAKE_C_COMPILER_LAUNCHER=sccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+        -S ${{ github.workspace }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      env:
+        SCCACHE_GHA_ENABLED: "true"
+
+  golang:
+    name: Go Build and Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.18'
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
