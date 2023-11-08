@@ -769,19 +769,9 @@ bool Converter::Convert(wgpu::ProgrammableStageDescriptor& out,
     out = {};
     out.module = *in.module.As<GPUShaderModule>();
 
-    // Replace nulls in the entryPoint name with another character that's disallowed in
+    // Replace nulls in the entryPoint name with another character that's disallowed in WGSL
     // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
-    // TODO(dawn:1345): Replace with a way to size strings explicitly in webgpu.h
-    char* entryPoint = Allocate<char>(in.entryPoint.size() + 1);
-    entryPoint[in.entryPoint.size()] = '\0';
-    for (size_t i = 0; i < in.entryPoint.size(); i++) {
-        if (in.entryPoint[i] == '\0') {
-            entryPoint[i] = '#';
-        } else {
-            entryPoint[i] = in.entryPoint[i];
-        }
-    }
-    out.entryPoint = entryPoint;
+    out.entryPoint = ConvertStringReplacingNull(in.entryPoint);
 
     return Convert(out.constants, out.constantCount, in.constants);
 }
@@ -789,7 +779,11 @@ bool Converter::Convert(wgpu::ProgrammableStageDescriptor& out,
 bool Converter::Convert(wgpu::ConstantEntry& out,
                         const std::string& in_name,
                         wgpu::interop::GPUPipelineConstantValue in_value) {
-    return Convert(out.key, in_name) && Convert(out.value, in_value);
+    // Replace nulls in the key with another character that's disallowed in WGSL identifiers.
+    // This is so that using "c\0" doesn't match a constant named "c".
+    out.key = ConvertStringReplacingNull(in_name);
+
+    return Convert(out.value, in_value);
 }
 
 bool Converter::Convert(wgpu::BlendComponent& out, const interop::GPUBlendComponent& in) {
@@ -920,9 +914,13 @@ bool Converter::Convert(wgpu::MultisampleState& out, const interop::GPUMultisamp
 
 bool Converter::Convert(wgpu::FragmentState& out, const interop::GPUFragmentState& in) {
     out = {};
+
+    // Replace nulls in the entryPoint name with another character that's disallowed in WGSL
+    // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
+    out.entryPoint = ConvertStringReplacingNull(in.entryPoint);
+
     return Convert(out.targets, out.targetCount, in.targets) &&  //
            Convert(out.module, in.module) &&                     //
-           Convert(out.entryPoint, in.entryPoint) &&             //
            Convert(out.constants, out.constantCount, in.constants);
 }
 
@@ -1065,10 +1063,14 @@ bool Converter::Convert(wgpu::VertexBufferLayout& out, const interop::GPUVertexB
 
 bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& in) {
     out = {};
+
+    // Replace nulls in the entryPoint name with another character that's disallowed in WGSL
+    // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
+    out.entryPoint = ConvertStringReplacingNull(in.entryPoint);
+
     wgpu::VertexBufferLayout* outBuffers = nullptr;
     if (!Convert(out.module, in.module) ||                    //
         !Convert(outBuffers, out.bufferCount, in.buffers) ||  //
-        !Convert(out.entryPoint, in.entryPoint) ||            //
         !Convert(out.constants, out.constantCount, in.constants)) {
         return false;
     }
@@ -1623,6 +1625,21 @@ bool Converter::Convert(wgpu::PipelineLayout& out, const interop::GPUAutoLayoutM
 bool Converter::Convert(wgpu::Bool& out, const bool& in) {
     out = in;
     return true;
+}
+
+char* Converter::ConvertStringReplacingNull(std::string_view in) {
+    char* out = Allocate<char>(in.size() + 1);
+    out[in.size()] = '\0';
+
+    for (size_t i = 0; i < in.size(); i++) {
+        if (in[i] == '\0') {
+            out[i] = '#';
+        } else {
+            out[i] = in[i];
+        }
+    }
+
+    return out;
 }
 
 bool Converter::Throw(std::string&& message) {
