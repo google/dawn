@@ -1,11 +1,13 @@
-<img
-  title="Dawn's logo"
-  alt="Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo."
-  src="docs/imgs/dawn_logo_notext.png"
-  style="display:block; width:50%; margin-left: auto; margin-right: auto">
+<div align="center">
+  <img
+      title="Dawn's logo"
+      alt="Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo."
+      src="docs/imgs/dawn_logo_notext.png"
+      width="50%">
 
-![Build Status](https://github.com/google/dawn/actions/workflows/ci.yml/badge.svg?branch=main&event=push)
-[![Matrix Space](https://img.shields.io/static/v1?label=Space&message=%23webgpu-dawn&color=blue&logo=matrix)](https://matrix.to/#/#webgpu-dawn:matrix.org)
+  ![Build Status](https://github.com/google/dawn/actions/workflows/ci.yml/badge.svg?branch=main&event=push)
+  [![Matrix Space](https://img.shields.io/static/v1?label=Space&message=%23webgpu-dawn&color=blue&logo=matrix)](https://matrix.to/#/#webgpu-dawn:matrix.org)
+</div>
 
 # Dawn, a WebGPU implementation
 
