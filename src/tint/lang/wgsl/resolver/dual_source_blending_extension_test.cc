@@ -122,7 +122,7 @@ TEST_F(DualSourceBlendingExtensionTests, IndexWithMissingLocationAttribute) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: index attribute must only be used with @location");
+    EXPECT_EQ(r()->error(), "12:34 error: @index can only be used with @location");
 }
 
 // Using an index attribute on a struct member should pass.
@@ -155,7 +155,7 @@ TEST_F(DualSourceBlendingExtensionTests, IndexWithNonZeroLocation) {
               });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: index attribute must only be used with @location(0)");
+    EXPECT_EQ(r()->error(), "12:34 error: @index can only be used with @location(0)");
 }
 
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {

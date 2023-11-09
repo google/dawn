@@ -744,7 +744,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInterpolate, AttributeKind::kBuiltinPosition},
-            R"(1:2 error: interpolate attribute must only be used with @location)",
+            R"(1:2 error: @interpolate can only be used with @location)",
         },
         TestParams{
             {AttributeKind::kInterpolate, AttributeKind::kLocation},
@@ -855,7 +855,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInvariant, AttributeKind::kLocation},
-            R"(1:2 error: invariant attribute must only be applied to a position builtin)",
+            R"(1:2 error: @invariant must be applied to a position builtin)",
         },
         TestParams{
             {AttributeKind::kInvariant, AttributeKind::kBuiltinPosition},
@@ -1038,7 +1038,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInvariant, AttributeKind::kLocation},
-            R"(1:2 error: invariant attribute must only be applied to a position builtin)",
+            R"(1:2 error: @invariant must be applied to a position builtin)",
         },
         TestParams{
             {AttributeKind::kLocation},
@@ -1130,7 +1130,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInterpolate},
-            R"(1:2 error: interpolate attribute must only be used with @location)",
+            R"(1:2 error: @interpolate can only be used with @location)",
         },
         TestParams{
             {AttributeKind::kInvariant},
@@ -1297,91 +1297,90 @@ TEST_P(StructMemberAttributeTest, IsValid) {
 
     CHECK();
 }
-INSTANTIATE_TEST_SUITE_P(
-    ResolverAttributeValidationTest,
-    StructMemberAttributeTest,
-    testing::Values(
-        TestParams{
-            {AttributeKind::kAlign},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kBinding},
-            R"(1:2 error: @binding is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kBuiltinPosition},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kDiagnostic},
-            R"(1:2 error: @diagnostic is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kGroup},
-            R"(1:2 error: @group is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kId},
-            R"(1:2 error: @id is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: index attribute must only be used with @location)",
-        },
-        TestParams{
-            {AttributeKind::kInterpolate},
-            R"(1:2 error: interpolate attribute must only be used with @location)",
-        },
-        TestParams{
-            {AttributeKind::kInterpolate, AttributeKind::kLocation},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kInvariant},
-            R"(1:2 error: invariant attribute must only be applied to a position builtin)",
-        },
-        TestParams{
-            {AttributeKind::kInvariant, AttributeKind::kBuiltinPosition},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kLocation},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kMustUse},
-            R"(1:2 error: @must_use is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kSize},
-            Pass,
-        },
-        TestParams{
-            {AttributeKind::kStageCompute},
-            R"(1:2 error: @stage is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: @stride is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kWorkgroupSize},
-            R"(1:2 error: @workgroup_size is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kBinding, AttributeKind::kGroup},
-            R"(1:2 error: @binding is not valid for struct members)",
-        },
-        TestParams{
-            {AttributeKind::kAlign, AttributeKind::kAlign},
-            R"(3:4 error: duplicate align attribute
+INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
+                         StructMemberAttributeTest,
+                         testing::Values(
+                             TestParams{
+                                 {AttributeKind::kAlign},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kBinding},
+                                 R"(1:2 error: @binding is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kBuiltinPosition},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kDiagnostic},
+                                 R"(1:2 error: @diagnostic is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kGroup},
+                                 R"(1:2 error: @group is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kId},
+                                 R"(1:2 error: @id is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kIndex},
+                                 R"(1:2 error: @index can only be used with @location)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kInterpolate},
+                                 R"(1:2 error: @interpolate can only be used with @location)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kInterpolate, AttributeKind::kLocation},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kInvariant},
+                                 R"(1:2 error: @invariant must be applied to a position builtin)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kInvariant, AttributeKind::kBuiltinPosition},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kLocation},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kMustUse},
+                                 R"(1:2 error: @must_use is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kOffset},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kSize},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kStageCompute},
+                                 R"(1:2 error: @stage is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kStride},
+                                 R"(1:2 error: @stride is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kWorkgroupSize},
+                                 R"(1:2 error: @workgroup_size is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kBinding, AttributeKind::kGroup},
+                                 R"(1:2 error: @binding is not valid for struct members)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kAlign, AttributeKind::kAlign},
+                                 R"(3:4 error: duplicate align attribute
 1:2 note: first attribute declared here)",
-        }));
+                             }));
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Const) {
     GlobalConst("val", ty.i32(), Expr(1_i));
