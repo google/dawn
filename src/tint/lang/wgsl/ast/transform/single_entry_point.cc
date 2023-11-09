@@ -105,7 +105,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
                         // so that its allocated ID so that it won't be affected by other
                         // stripped away overrides
                         auto* global = sem.Get(override);
-                        const auto* id = b.Id(global->OverrideId());
+                        const auto* id = b.Id(global->Attributes().override_id.value());
                         ctx.InsertFront(override->attributes, id);
                     }
                     b.AST().AddGlobalVariable(ctx.Clone(override));

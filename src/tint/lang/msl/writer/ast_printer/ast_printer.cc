@@ -1970,10 +1970,9 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
             return kInvalidBindingIndex;
         }
         auto* param_sem = builder_.Sem().Get<sem::Parameter>(param);
-        auto bp = param_sem->BindingPoint();
+        auto bp = param_sem->Attributes().binding_point;
         if (TINT_UNLIKELY(bp->group != 0)) {
-            TINT_ICE() << "encountered non-zero resource group index (use "
-                          "BindingRemapper to fix)";
+            TINT_ICE() << "encountered non-zero resource group index (use BindingRemapper to fix)";
             return kInvalidBindingIndex;
         }
         return bp->binding;

@@ -87,7 +87,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
         Type ty = w->type ? ctx.Clone(w->type) : Type{};
 
         // No replacement provided, just clone the override node as a const.
-        auto iter = data->map.find(sem->OverrideId());
+        auto iter = data->map.find(sem->Attributes().override_id.value());
         if (iter == data->map.end()) {
             if (!w->initializer) {
                 b.Diagnostics().add_error(

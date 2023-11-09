@@ -65,7 +65,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     uint32_t next_binding_point = 0;
     for (auto* var : program.AST().GlobalVariables()) {
         if (auto* var_sem = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
-            if (auto bp = var_sem->BindingPoint()) {
+            if (auto bp = var_sem->Attributes().binding_point) {
                 gen_options.binding_remapper_options.binding_points[*bp] = BindingPoint{
                     0,                     // group
                     next_binding_point++,  // binding

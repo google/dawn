@@ -46,7 +46,7 @@ class ResolverOverrideTest : public ResolverTest {
         ASSERT_NE(sem, nullptr);
         EXPECT_EQ(sem->Declaration(), var);
         EXPECT_TRUE(sem->Declaration()->Is<ast::Override>());
-        EXPECT_EQ(sem->OverrideId().value, id);
+        EXPECT_EQ(sem->Attributes().override_id->value, id);
         EXPECT_FALSE(sem->ConstantValue());
     }
 };

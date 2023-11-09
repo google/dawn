@@ -699,11 +699,11 @@ struct Robustness::State {
         if (globalVariable == nullptr) {
             return false;
         }
-        if (!globalVariable->BindingPoint().has_value()) {
+        auto binding_point = globalVariable->Attributes().binding_point;
+        if (!binding_point.has_value()) {
             return false;
         }
-        BindingPoint bindingPoint = *globalVariable->BindingPoint();
-        return cfg.bindings_ignored.find(bindingPoint) != cfg.bindings_ignored.cend();
+        return cfg.bindings_ignored.find(*binding_point) != cfg.bindings_ignored.cend();
     }
 
     /// @returns true if expr is an IndexAccessorExpression whose object is a runtime-sized array.

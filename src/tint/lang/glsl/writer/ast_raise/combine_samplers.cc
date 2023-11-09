@@ -118,10 +118,10 @@ struct CombineSamplers::State {
                                               std::string name) {
         SamplerTexturePair bp_pair;
         bp_pair.texture_binding_point =
-            texture_var ? *texture_var->As<sem::GlobalVariable>()->BindingPoint()
+            texture_var ? *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point
                         : binding_info->placeholder_binding_point;
         bp_pair.sampler_binding_point =
-            sampler_var ? *sampler_var->As<sem::GlobalVariable>()->BindingPoint()
+            sampler_var ? *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point
                         : binding_info->placeholder_binding_point;
         auto it = binding_info->binding_map.find(bp_pair);
         if (it != binding_info->binding_map.end()) {
@@ -232,7 +232,7 @@ struct CombineSamplers::State {
             if (tint::IsAnyOf<core::type::Texture, core::type::Sampler>(type) &&
                 !type->Is<core::type::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
-            } else if (auto binding_point = global_sem->BindingPoint()) {
+            } else if (auto binding_point = global_sem->Attributes().binding_point) {
                 if (binding_point->group == 0 && binding_point->binding == 0) {
                     auto* attribute =
                         ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);

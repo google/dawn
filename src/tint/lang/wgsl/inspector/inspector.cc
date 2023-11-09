@@ -177,7 +177,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     for (auto* param : sem->Parameters()) {
         AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(),
                                     param->Declaration()->name->symbol.Name(), param->Type(),
-                                    param->Declaration()->attributes, param->Location(),
+                                    param->Declaration()->attributes, param->Attributes().location,
                                     entry_point.input_variables);
 
         entry_point.input_position_used |= ContainsBuiltin(
@@ -212,10 +212,10 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         auto name = decl->name->symbol.Name();
 
         auto* global = var->As<sem::GlobalVariable>();
-        if (global && global->Declaration()->Is<ast::Override>()) {
+        if (auto override_id = global->Attributes().override_id) {
             Override override;
             override.name = name;
-            override.id = global->OverrideId();
+            override.id = override_id.value();
             auto* type = var->Type();
             TINT_ASSERT(type->Is<core::type::Scalar>());
             if (type->is_bool_scalar_or_vector()) {
@@ -279,7 +279,7 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
         // WGSL, so the resolver should catch it. Thus here the inspector just
         // assumes all definitions of the override id are the same, so only needs
         // to find the first reference to override id.
-        OverrideId override_id = global->OverrideId();
+        auto override_id = global->Attributes().override_id.value();
         if (result.find(override_id) != result.end()) {
             continue;
         }
@@ -311,9 +311,9 @@ std::map<std::string, OverrideId> Inspector::GetNamedOverrideIds() {
     std::map<std::string, OverrideId> result;
     for (auto* var : program_.AST().GlobalVariables()) {
         auto* global = program_.Sem().Get<sem::GlobalVariable>(var);
-        if (global && global->Declaration()->Is<ast::Override>()) {
+        if (auto override_id = global->Attributes().override_id) {
             auto name = var->name->symbol.Name();
-            result[name] = global->OverrideId();
+            result[name] = override_id.value();
         }
     }
     return result;
@@ -527,8 +527,9 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::stri
         auto* texture = pair.first->As<sem::GlobalVariable>();
         auto* sampler = pair.second ? pair.second->As<sem::GlobalVariable>() : nullptr;
         SamplerTexturePair new_pair;
-        new_pair.sampler_binding_point = sampler ? *sampler->BindingPoint() : placeholder;
-        new_pair.texture_binding_point = *texture->BindingPoint();
+        new_pair.sampler_binding_point =
+            sampler ? *sampler->Attributes().binding_point : placeholder;
+        new_pair.texture_binding_point = *texture->Attributes().binding_point;
         new_pairs.push_back(new_pair);
     }
     return new_pairs;
@@ -818,18 +819,18 @@ void Inspector::GenerateSamplerTargets() {
         auto* t = c->args[static_cast<size_t>(texture_index)];
         auto* s = c->args[static_cast<size_t>(sampler_index)];
 
-        GetOriginatingResources(std::array<const ast::Expression*, 2>{t, s},
-                                [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                                    auto texture_binding_point = *globals[0]->BindingPoint();
-                                    auto sampler_binding_point = *globals[1]->BindingPoint();
+        GetOriginatingResources(
+            std::array<const ast::Expression*, 2>{t, s},
+            [&](std::array<const sem::GlobalVariable*, 2> globals) {
+                auto texture_binding_point = *globals[0]->Attributes().binding_point;
+                auto sampler_binding_point = *globals[1]->Attributes().binding_point;
 
-                                    for (auto* entry_point : entry_points) {
-                                        const auto& ep_name =
-                                            entry_point->Declaration()->name->symbol.Name();
-                                        (*sampler_targets_)[ep_name].Add(
-                                            {sampler_binding_point, texture_binding_point});
-                                    }
-                                });
+                for (auto* entry_point : entry_points) {
+                    const auto& ep_name = entry_point->Declaration()->name->symbol.Name();
+                    (*sampler_targets_)[ep_name].Add(
+                        {sampler_binding_point, texture_binding_point});
+                }
+            });
     }
 }
 

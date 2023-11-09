@@ -389,7 +389,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
                 }
 
                 auto o = OverrideId{static_cast<decltype(OverrideId::value)>(value)};
-                sem->SetOverrideId(o);
+                sem->Attributes().override_id = o;
 
                 // Track the constant IDs that are specified in the shader.
                 override_ids_.Add(o, sem);
@@ -626,7 +626,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     if (!value) {
                         return kErrored;
                     }
-                    global->SetLocation(value.Get());
+                    global->Attributes().location = value.Get();
                     return kSuccess;
                 },
                 [&](const ast::IndexAttribute* attr) {
@@ -637,7 +637,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     if (!value) {
                         return kErrored;
                     }
-                    global->SetIndex(value.Get());
+                    global->Attributes().index = value.Get();
                     return kSuccess;
                 },
                 [&](const ast::BuiltinAttribute* attr) {
@@ -675,7 +675,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         }
 
         if (group && binding) {
-            global->SetBindingPoint(BindingPoint{group.value(), binding.value()});
+            global->Attributes().binding_point = BindingPoint{group.value(), binding.value()};
         }
 
     } else {
@@ -720,7 +720,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                     if (TINT_UNLIKELY(!value)) {
                         return false;
                     }
-                    sem->SetLocation(value.Get());
+                    sem->Attributes().location = value.Get();
                     return true;
                 },
                 [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
@@ -766,7 +766,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
             }
         }
         if (group && binding) {
-            sem->SetBindingPoint(BindingPoint{group.value(), binding.value()});
+            sem->Attributes().binding_point = BindingPoint{group.value(), binding.value()};
         }
     } else {
         for (auto* attribute : param->attributes) {
@@ -862,8 +862,8 @@ bool Resolver::AllocateOverridableConstantIds() {
         auto* sem = sem_.Get(override);
 
         OverrideId id;
-        if (ast::HasAttribute<ast::IdAttribute>(override->attributes)) {
-            id = sem->OverrideId();
+        if (auto sem_id = sem->Attributes().override_id) {
+            id = *sem_id;
         } else {
             // No ID was specified, so allocate the next available ID.
             while (!ids_exhausted && override_ids_.Contains(next_id)) {
@@ -879,7 +879,7 @@ bool Resolver::AllocateOverridableConstantIds() {
             increment_next_id();
         }
 
-        const_cast<sem::GlobalVariable*>(sem)->SetOverrideId(id);
+        const_cast<sem::GlobalVariable*>(sem)->Attributes().override_id = id;
     }
     return true;
 }

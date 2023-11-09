@@ -151,6 +151,22 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     const CastableBase* shadows_ = nullptr;
 };
 
+/// Attributes that can be applied to global variables
+struct GlobalVariableAttributes {
+    /// the pipeline constant ID associated with the variable
+    std::optional<tint::OverrideId> override_id;
+    /// the resource binding point for the variable, if set.
+    std::optional<tint::BindingPoint> binding_point;
+    /// The `location` attribute value for the variable, if set
+    /// @note a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
+    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
+    std::optional<uint32_t> location;
+    /// The `index` attribute value for the variable, if set
+    /// @note a GlobalVariable generally doesn't have a `index` in WGSL, as it isn't allowed by
+    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
+    std::optional<uint32_t> index;
+};
+
 /// GlobalVariable is a module-scope variable
 class GlobalVariable final : public Castable<GlobalVariable, Variable> {
   public:
@@ -161,34 +177,6 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// Destructor
     ~GlobalVariable() override;
 
-    /// @param binding_point the resource binding point for the parameter
-    void SetBindingPoint(std::optional<tint::BindingPoint> binding_point) {
-        binding_point_ = binding_point;
-    }
-
-    /// @returns the resource binding point for the variable
-    std::optional<tint::BindingPoint> BindingPoint() const { return binding_point_; }
-
-    /// @param id the constant identifier to assign to this variable
-    void SetOverrideId(OverrideId id) { override_id_ = id; }
-
-    /// @returns the pipeline constant ID associated with the variable
-    tint::OverrideId OverrideId() const { return override_id_; }
-
-    /// @param location the location value for the parameter, if set
-    /// @note a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
-    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
-    void SetLocation(std::optional<uint32_t> location) { location_ = location; }
-
-    /// @returns the location value for the parameter, if set
-    std::optional<uint32_t> Location() const { return location_; }
-
-    /// @param index the index value for the parameter, if set
-    void SetIndex(std::optional<uint32_t> index) { index_ = index; }
-
-    /// @returns the index value for the parameter, if set
-    std::optional<uint32_t> Index() const { return index_; }
-
     /// Records that this variable (transitively) references the given override variable.
     /// @param var the module-scope override variable
     void AddTransitivelyReferencedOverride(const GlobalVariable* var);
@@ -198,12 +186,30 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
         return transitively_referenced_overrides_;
     }
 
+    /// @return the mutable attributes for the variable
+    GlobalVariableAttributes& Attributes() { return attributes_; }
+
+    /// @return the immutable attributes for the variable
+    const GlobalVariableAttributes& Attributes() const { return attributes_; }
+
   private:
     std::optional<tint::BindingPoint> binding_point_;
     tint::OverrideId override_id_;
-    std::optional<uint32_t> location_;
-    std::optional<uint32_t> index_;
     UniqueVector<const GlobalVariable*, 4> transitively_referenced_overrides_;
+    GlobalVariableAttributes attributes_;
+};
+
+/// Attributes that can be applied to parameters
+struct ParameterAttributes {
+    /// the resource binding point for the variable, if set.
+    /// @note a Parameter generally doesn't have a `group` or `binding` attribute in WGSL, as it
+    /// isn't allowed by the spec. The binding point maybe attached by transforms such as
+    /// CanonicalizeEntryPointIO.
+    std::optional<tint::BindingPoint> binding_point;
+    /// The `location` attribute value for the variable, if set
+    std::optional<uint32_t> location;
+    /// The `index` attribute value for the variable, if set
+    std::optional<uint32_t> index;
 };
 
 /// Parameter is a function parameter
@@ -227,9 +233,6 @@ class Parameter final : public Castable<Parameter, Variable> {
         return static_cast<const ast::Parameter*>(Variable::Declaration());
     }
 
-    /// @param index the index value for the parameter, if set
-    void SetIndex(uint32_t index) { index_ = index; }
-
     /// @return the index of the parameter in the function
     uint32_t Index() const { return index_; }
 
@@ -252,27 +255,18 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @returns the Type, Function or Variable that this local variable shadows
     const CastableBase* Shadows() const { return shadows_; }
 
-    /// @param binding_point the resource binding point for the parameter
-    void SetBindingPoint(std::optional<tint::BindingPoint> binding_point) {
-        binding_point_ = binding_point;
-    }
+    /// @return the mutable attributes for the parameter
+    ParameterAttributes& Attributes() { return attributes_; }
 
-    /// @returns the resource binding point for the parameter
-    std::optional<tint::BindingPoint> BindingPoint() const { return binding_point_; }
-
-    /// @param location the location value for the parameter, if set
-    void SetLocation(std::optional<uint32_t> location) { location_ = location; }
-
-    /// @returns the location value for the parameter, if set
-    std::optional<uint32_t> Location() const { return location_; }
+    /// @return the immutable attributes for the parameter
+    const ParameterAttributes& Attributes() const { return attributes_; }
 
   private:
-    uint32_t index_ = 0;
+    const uint32_t index_ = 0;
     core::ParameterUsage usage_ = core::ParameterUsage::kNone;
     CallTarget const* owner_ = nullptr;
     const CastableBase* shadows_ = nullptr;
-    std::optional<tint::BindingPoint> binding_point_;
-    std::optional<uint32_t> location_;
+    ParameterAttributes attributes_;
 };
 
 /// VariableUser holds the semantic information for an identifier expression

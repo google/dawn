@@ -896,9 +896,9 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
     EXPECT_EQ(func_sem->Parameters().Length(), 3u);
-    EXPECT_EQ(3u, func_sem->Parameters()[0]->Location());
-    EXPECT_FALSE(func_sem->Parameters()[1]->Location().has_value());
-    EXPECT_EQ(1u, func_sem->Parameters()[2]->Location());
+    EXPECT_EQ(3u, func_sem->Parameters()[0]->Attributes().location);
+    EXPECT_FALSE(func_sem->Parameters()[1]->Attributes().location.has_value());
+    EXPECT_EQ(1u, func_sem->Parameters()[2]->Attributes().location);
 }
 
 TEST_F(ResolverTest, Function_GlobalVariable_Location) {
@@ -910,7 +910,7 @@ TEST_F(ResolverTest, Function_GlobalVariable_Location) {
 
     auto* sem = Sem().Get<sem::GlobalVariable>(var);
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(3u, sem->Location());
+    EXPECT_EQ(3u, sem->Attributes().location);
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
@@ -1931,8 +1931,10 @@ TEST_F(ResolverTest, BindingPoint_SetForResources) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s1)->BindingPoint(), (BindingPoint{1u, 2u}));
-    EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s2)->BindingPoint(), (BindingPoint{3u, 4u}));
+    EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s1)->Attributes().binding_point,
+              (BindingPoint{1u, 2u}));
+    EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s2)->Attributes().binding_point,
+              (BindingPoint{3u, 4u}));
 }
 
 TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {

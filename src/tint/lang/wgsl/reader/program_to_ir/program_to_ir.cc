@@ -456,12 +456,8 @@ class Impl {
                         }
                     });
 
-                if (param_sem->Location().has_value()) {
-                    param->SetLocation(param_sem->Location().value(), interpolation);
-                }
-                if (param_sem->BindingPoint().has_value()) {
-                    param->SetBindingPoint(param_sem->BindingPoint()->group,
-                                           param_sem->BindingPoint()->binding);
+                if (param_sem->Attributes().location.has_value()) {
+                    param->SetLocation(param_sem->Attributes().location.value(), interpolation);
                 }
             }
 
@@ -1324,8 +1320,8 @@ class Impl {
                 current_block_->Append(val);
 
                 if (auto* gv = sem->As<sem::GlobalVariable>(); gv && var->HasBindingPoint()) {
-                    val->SetBindingPoint(gv->BindingPoint().value().group,
-                                         gv->BindingPoint().value().binding);
+                    val->SetBindingPoint(gv->Attributes().binding_point->group,
+                                         gv->Attributes().binding_point->binding);
                 }
 
                 // Store the declaration so we can get the instruction to store too

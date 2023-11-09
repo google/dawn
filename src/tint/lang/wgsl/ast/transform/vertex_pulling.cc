@@ -796,11 +796,11 @@ struct VertexPulling::State {
             auto* sem = src.Sem().Get<sem::Parameter>(param);
             info.type = sem->Type();
 
-            if (TINT_UNLIKELY(!sem->Location().has_value())) {
+            if (TINT_UNLIKELY(!sem->Attributes().location.has_value())) {
                 TINT_ICE() << "Location missing value";
                 return;
             }
-            location_info[sem->Location().value()] = info;
+            location_info[sem->Attributes().location.value()] = info;
         } else {
             auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes);
             if (TINT_UNLIKELY(!builtin_attr)) {

@@ -767,17 +767,14 @@ bool Validator::Override(const sem::GlobalVariable* v,
         return false;
     }
 
-    for (auto* attr : decl->attributes) {
-        if (attr->Is<ast::IdAttribute>()) {
-            auto id = v->OverrideId();
-            if (auto var = override_ids.Find(id); var && *var != v) {
-                AddError("@id values must be unique", attr->source);
-                AddNote(
-                    "a override with an ID of " + std::to_string(id.value) +
+    if (auto id = v->Attributes().override_id) {
+        if (auto var = override_ids.Find(*id); var && *var != v) {
+            auto* attr = ast::GetAttribute<ast::IdAttribute>(v->Declaration()->attributes);
+            AddError("@id values must be unique", attr->source);
+            AddNote("a override with an ID of " + std::to_string(id->value) +
                         " was previously declared here:",
                     ast::GetAttribute<ast::IdAttribute>((*var)->Declaration()->attributes)->source);
-                return false;
-            }
+            return false;
         }
     }
 
@@ -1335,7 +1332,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         auto* param_decl = param->Declaration();
         if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
                                              param_decl->source, ParamOrRetType::kParameter,
-                                             param->Location(), std::nullopt)) {
+                                             param->Attributes().location,
+                                             param->Attributes().index)) {
             return false;
         }
     }
@@ -1389,7 +1387,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         if (!var_decl) {
             continue;
         }
-        auto bp = global->BindingPoint();
+        auto bp = global->Attributes().binding_point;
         if (!bp) {
             continue;
         }

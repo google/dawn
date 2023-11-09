@@ -806,13 +806,13 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             [&](const ast::LocationAttribute*) {
                 module_.PushAnnot(spv::Op::OpDecorate,
                                   {Operand(var_id), U32Operand(SpvDecorationLocation),
-                                   Operand(sem->Location().value())});
+                                   Operand(sem->Attributes().location.value())});
                 return true;
             },
             [&](const ast::IndexAttribute*) {
                 module_.PushAnnot(spv::Op::OpDecorate,
                                   {Operand(var_id), U32Operand(SpvDecorationIndex),
-                                   Operand(sem->Index().value())});
+                                   Operand(sem->Attributes().index.value())});
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {
@@ -837,14 +837,14 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                 return true;
             },
             [&](const ast::BindingAttribute*) {
-                auto bp = sem->BindingPoint();
+                auto bp = sem->Attributes().binding_point;
                 module_.PushAnnot(
                     spv::Op::OpDecorate,
                     {Operand(var_id), U32Operand(SpvDecorationBinding), Operand(bp->binding)});
                 return true;
             },
             [&](const ast::GroupAttribute*) {
-                auto bp = sem->BindingPoint();
+                auto bp = sem->Attributes().binding_point;
                 module_.PushAnnot(
                     spv::Op::OpDecorate,
                     {Operand(var_id), U32Operand(SpvDecorationDescriptorSet), Operand(bp->group)});

@@ -81,18 +81,18 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
 
     auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[0]);
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->BindingPoint()->group, 0u);
-    EXPECT_EQ(sem->BindingPoint()->binding, 0u);
+    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+    EXPECT_EQ(sem->Attributes().binding_point->binding, 0u);
 
     sem = flattened->Sem().Get<sem::GlobalVariable>(vars[1]);
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->BindingPoint()->group, 0u);
-    EXPECT_EQ(sem->BindingPoint()->binding, 1u);
+    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+    EXPECT_EQ(sem->Attributes().binding_point->binding, 1u);
 
     sem = flattened->Sem().Get<sem::GlobalVariable>(vars[2]);
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->BindingPoint()->group, 0u);
-    EXPECT_EQ(sem->BindingPoint()->binding, 2u);
+    EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+    EXPECT_EQ(sem->Attributes().binding_point->binding, 2u);
 }
 
 TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
@@ -144,20 +144,20 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     for (size_t i = 0; i < num_buffers; ++i) {
         auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i]);
         ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->BindingPoint()->group, 0u);
-        EXPECT_EQ(sem->BindingPoint()->binding, i);
+        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
     }
     for (size_t i = 0; i < num_samplers; ++i) {
         auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers]);
         ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->BindingPoint()->group, 0u);
-        EXPECT_EQ(sem->BindingPoint()->binding, i);
+        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
     }
     for (size_t i = 0; i < num_textures; ++i) {
         auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers + num_samplers]);
         ASSERT_NE(sem, nullptr);
-        EXPECT_EQ(sem->BindingPoint()->group, 0u);
-        EXPECT_EQ(sem->BindingPoint()->binding, i);
+        EXPECT_EQ(sem->Attributes().binding_point->group, 0u);
+        EXPECT_EQ(sem->Attributes().binding_point->binding, i);
     }
 }
 

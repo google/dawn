@@ -3331,7 +3331,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
 }
 
 bool ASTPrinter::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
-    auto binding_point = *sem->As<sem::GlobalVariable>()->BindingPoint();
+    auto binding_point = *sem->As<sem::GlobalVariable>()->Attributes().binding_point;
     auto* type = sem->Type()->UnwrapRef();
     auto name = var->name->symbol.Name();
     Line() << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point) << " {";
@@ -3360,7 +3360,7 @@ bool ASTPrinter::EmitStorageVariable(const ast::Var* var, const sem::Variable* s
 
     auto* global_sem = sem->As<sem::GlobalVariable>();
     out << RegisterAndSpace(sem->Access() == core::Access::kRead ? 't' : 'u',
-                            *global_sem->BindingPoint())
+                            *global_sem->Attributes().binding_point)
         << ";";
 
     return true;
@@ -3389,7 +3389,7 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
     }
 
     if (register_space) {
-        auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
+        auto bp = sem->As<sem::GlobalVariable>()->Attributes().binding_point;
         out << " : register(" << register_space << bp->binding;
         // Omit the space if it's 0, as it's the default.
         // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better

@@ -428,7 +428,8 @@ struct CanonicalizeEntryPointIO::State {
         }
 
         auto name = param->Declaration()->name->symbol.Name();
-        auto* input_expr = AddInput(name, param->Type(), param->Location(), std::move(attributes));
+        auto* input_expr =
+            AddInput(name, param->Type(), param->Attributes().location, std::move(attributes));
         inner_call_parameters.Push(input_expr);
     }
 

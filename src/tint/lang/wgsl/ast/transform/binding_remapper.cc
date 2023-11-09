@@ -89,7 +89,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program& src,
             auto* func = src.Sem().Get(func_ast);
             std::unordered_map<BindingPoint, int> binding_point_counts;
             for (auto* global : func->TransitivelyReferencedGlobals()) {
-                if (auto from = global->BindingPoint()) {
+                if (auto from = global->Attributes().binding_point) {
                     auto bp_it = remappings->binding_points.find(*from);
                     if (bp_it != remappings->binding_points.end()) {
                         // Remapped
@@ -113,7 +113,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program& src,
             auto* global_sem = src.Sem().Get<sem::GlobalVariable>(var);
 
             // The original binding point
-            BindingPoint from = *global_sem->BindingPoint();
+            BindingPoint from = *global_sem->Attributes().binding_point;
 
             // The binding point after remapping
             BindingPoint bp = from;

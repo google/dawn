@@ -165,7 +165,7 @@ ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
 
                 for (auto* global : src.AST().GlobalVariables()) {
                     auto* global_sem = src.Sem().Get<sem::GlobalVariable>(global);
-                    if (auto bp = global_sem->BindingPoint()) {
+                    if (auto bp = global_sem->Attributes().binding_point) {
                         if (bp->group >= group) {
                             group = bp->group + 1;
                         }

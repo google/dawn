@@ -1879,15 +1879,15 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
 
     ASSERT_TRUE(result.count("a"));
     ASSERT_TRUE(program_->Sem().Get(a));
-    EXPECT_EQ(result["a"], program_->Sem().Get(a)->OverrideId());
+    EXPECT_EQ(result["a"], program_->Sem().Get(a)->Attributes().override_id);
 
     ASSERT_TRUE(result.count("b"));
     ASSERT_TRUE(program_->Sem().Get(b));
-    EXPECT_EQ(result["b"], program_->Sem().Get(b)->OverrideId());
+    EXPECT_EQ(result["b"], program_->Sem().Get(b)->Attributes().override_id);
 
     ASSERT_TRUE(result.count("c"));
     ASSERT_TRUE(program_->Sem().Get(c));
-    EXPECT_EQ(result["c"], program_->Sem().Get(c)->OverrideId());
+    EXPECT_EQ(result["c"], program_->Sem().Get(c)->Attributes().override_id);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {

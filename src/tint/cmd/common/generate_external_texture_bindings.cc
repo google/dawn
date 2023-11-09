@@ -48,7 +48,7 @@ ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Progra
     std::vector<tint::BindingPoint> ext_tex_bps;
     for (auto* var : program.AST().GlobalVariables()) {
         if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
-            if (auto bp = sem_var->BindingPoint()) {
+            if (auto bp = sem_var->Attributes().binding_point) {
                 auto& n = group_to_next_binding_number[bp->group];
                 n = std::max(n, bp->binding + 1);
 

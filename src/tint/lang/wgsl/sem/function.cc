@@ -81,7 +81,7 @@ Function::VariableBindings Function::TransitivelyReferencedUniformVariables() co
             continue;
         }
 
-        if (auto bp = global->BindingPoint()) {
+        if (auto bp = global->Attributes().binding_point) {
             ret.push_back({global, *bp});
         }
     }
@@ -96,7 +96,7 @@ Function::VariableBindings Function::TransitivelyReferencedStorageBufferVariable
             continue;
         }
 
-        if (auto bp = global->BindingPoint()) {
+        if (auto bp = global->Attributes().binding_point) {
             ret.push_back({global, *bp});
         }
     }
@@ -140,7 +140,7 @@ Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
         if (unwrapped_type->TypeInfo().Is(type)) {
-            if (auto bp = global->BindingPoint()) {
+            if (auto bp = global->Attributes().binding_point) {
                 ret.push_back({global, *bp});
             }
         }
@@ -168,7 +168,7 @@ Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
             continue;
         }
 
-        if (auto bp = global->BindingPoint()) {
+        if (auto bp = global->Attributes().binding_point) {
             ret.push_back({global, *bp});
         }
     }
@@ -193,7 +193,7 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
             continue;
         }
 
-        if (auto bp = global->BindingPoint()) {
+        if (auto bp = global->Attributes().binding_point) {
             ret.push_back({global, *bp});
         }
     }

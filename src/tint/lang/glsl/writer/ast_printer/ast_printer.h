@@ -317,10 +317,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles emitting attributes
     /// @param out the output of the expression stream
     /// @param var the global variable semantics
-    /// @param attrs the attributes
-    void EmitAttributes(StringStream& out,
-                        const sem::GlobalVariable* var,
-                        VectorRef<const ast::Attribute*> attrs);
+    void EmitAttributes(StringStream& out, const sem::GlobalVariable* var);
     /// Handles emitting the entry point function
     /// @param func the entry point
     void EmitEntryPointFunction(const ast::Function* func);

@@ -366,7 +366,7 @@ struct TextureBuiltinsFromUniform::State {
                 auto* global_sem = sem.Get<sem::GlobalVariable>(var);
 
                 // The original binding point
-                BindingPoint binding_point = *global_sem->BindingPoint();
+                BindingPoint binding_point = *global_sem->Attributes().binding_point;
 
                 if (binding_point == cfg->ubo_binding) {
                     // This ubo_binding struct already exists.
@@ -423,7 +423,7 @@ struct TextureBuiltinsFromUniform::State {
     /// @returns binding of the global variable.
     BindingPoint GetAndRecordGlobalBinding(const sem::GlobalVariable* global,
                                            TextureBuiltinsFromUniformOptions::Field field) {
-        auto binding = global->BindingPoint().value();
+        auto binding = global->Attributes().binding_point.value();
         auto iter = bindpoint_to_data.find(binding);
         if (iter == bindpoint_to_data.end()) {
             // First visit, recording the binding.
