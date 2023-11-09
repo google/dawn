@@ -128,7 +128,7 @@ bool Format::IsSnorm() const {
 }
 
 bool Format::IsMultiPlanar() const {
-    return aspects & (Aspect::Plane0 | Aspect::Plane1);
+    return aspects & (Aspect::Plane0 | Aspect::Plane1 | Aspect::Plane2);
 }
 
 bool Format::CopyCompatibleWith(const Format& otherFormat) const {
@@ -385,12 +385,13 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             AddFormat(internalFormat);
         };
 
-    auto AddMultiAspectFormat = [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
-                                                     wgpu::TextureFormat firstFormat,
-                                                     wgpu::TextureFormat secondFormat,
-                                                     Cap capabilites,
-                                                     UnsupportedReason unsupportedReason,
-                                                     ComponentCount componentCount) {
+    auto AddMultiAspectFormat = [&AddFormat, &table](
+                                    wgpu::TextureFormat format, Aspect aspects, Cap capabilites,
+                                    UnsupportedReason unsupportedReason,
+                                    ComponentCount componentCount, wgpu::TextureFormat firstFormat,
+                                    wgpu::TextureFormat secondFormat,
+                                    wgpu::TextureFormat thirdFormat =
+                                        wgpu::TextureFormat::Undefined) {
         Format internalFormat;
         internalFormat.format = format;
         internalFormat.baseFormat = format;
@@ -415,6 +416,10 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
         internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
         internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
+        if (thirdFormat != wgpu::TextureFormat::Undefined) {
+            const FormatIndex thirdFormatIndex = ComputeFormatIndex(thirdFormat);
+            internalFormat.aspectInfo[2] = table[thirdFormatIndex].aspectInfo[0];
+        }
 
         AddFormat(internalFormat);
     };
@@ -492,11 +497,11 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     // using 0 here to mean "unsized" and adding a backend-specific query for the block size.
     AddDepthFormat(wgpu::TextureFormat::Depth24Plus, 4, Format::supported);
     AddMultiAspectFormat(wgpu::TextureFormat::Depth24PlusStencil8,
-                          Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, Cap::Renderable | Cap::Multisample, Format::supported, ComponentCount(2));
+                          Aspect::Depth | Aspect::Stencil, Cap::Renderable | Cap::Multisample, Format::supported, ComponentCount(2), wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8);
     AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4, Format::supported);
     UnsupportedReason d32s8UnsupportedReason = device->HasFeature(Feature::Depth32FloatStencil8) ? Format::supported : RequiresFeature{wgpu::FeatureName::Depth32FloatStencil8};
     AddMultiAspectFormat(wgpu::TextureFormat::Depth32FloatStencil8,
-                          Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Stencil8, Cap::Renderable | Cap::Multisample, d32s8UnsupportedReason, ComponentCount(2));
+                          Aspect::Depth | Aspect::Stencil, Cap::Renderable | Cap::Multisample, d32s8UnsupportedReason, ComponentCount(2), wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Stencil8);
 
     // BC compressed formats
     UnsupportedReason bcFormatUnsupportedReason = device->HasFeature(Feature::TextureCompressionBC) ? Format::supported : RequiresFeature{wgpu::FeatureName::TextureCompressionBC};
@@ -563,11 +568,13 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     const UnsupportedReason multiPlanarFormatUnsupportedReason = device->HasFeature(Feature::DawnMultiPlanarFormats) ?  Format::supported : RequiresFeature{wgpu::FeatureName::DawnMultiPlanarFormats};
     auto multiPlanarCapabilities = device->HasFeature(Feature::MultiPlanarRenderTargets) ? Cap::Renderable : Cap::None;
     AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
-        wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, multiPlanarCapabilities, multiPlanarFormatUnsupportedReason, ComponentCount(3));
+        multiPlanarCapabilities, multiPlanarFormatUnsupportedReason, ComponentCount(3), wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm);
     const UnsupportedReason multiPlanarFormatP010UnsupportedReason = device->HasFeature(Feature::MultiPlanarFormatP010) ?  Format::supported : RequiresFeature{wgpu::FeatureName::MultiPlanarFormatP010};
     AddMultiAspectFormat(wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
-        wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm, multiPlanarCapabilities, multiPlanarFormatP010UnsupportedReason, ComponentCount(3));
-
+        multiPlanarCapabilities, multiPlanarFormatP010UnsupportedReason, ComponentCount(3), wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm);
+    const UnsupportedReason multiPlanarFormatNv12aUnsupportedReason = device->HasFeature(Feature::MultiPlanarFormatNv12a) ?  Format::supported : RequiresFeature{wgpu::FeatureName::MultiPlanarFormatNv12a};
+    AddMultiAspectFormat(wgpu::TextureFormat::R8BG8A8Triplanar420Unorm, Aspect::Plane0 | Aspect::Plane1 | Aspect::Plane2,
+        multiPlanarCapabilities, multiPlanarFormatNv12aUnsupportedReason, ComponentCount(4), wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::R8Unorm);
     // clang-format on
 
     // This checks that each format is set at least once, the second part of checking that all

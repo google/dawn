@@ -836,6 +836,7 @@ Extent3D TextureBase::GetSize(Aspect aspect) const {
         case Aspect::CombinedDepthStencil:
             return mBaseSize;
         case Aspect::Plane0:
+        case Aspect::Plane2:
             DAWN_ASSERT(GetFormat().IsMultiPlanar());
             return mBaseSize;
         case Aspect::Plane1: {
@@ -844,6 +845,7 @@ Extent3D TextureBase::GetSize(Aspect aspect) const {
             switch (GetFormat().format) {
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+                case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
                     if (planeSize.width > 1) {
                         planeSize.width >>= 1;
                     }

@@ -64,8 +64,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         bool isCheckerboard,
         bool initialized) override {
         IOSurfaceRef surface =
-            CreateMultiPlanarIOSurface(format, VideoViewsTestsBase::kYUVImageDataWidthInTexels,
-                                       VideoViewsTestsBase::kYUVImageDataHeightInTexels);
+            CreateMultiPlanarIOSurface(format, VideoViewsTestsBase::kYUVAImageDataWidthInTexels,
+                                       VideoViewsTestsBase::kYUVAImageDataHeightInTexels);
 
         if (initialized) {
             const size_t numPlanes = VideoViewsTestsBase::NumPlanes(format);
@@ -78,13 +78,15 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
                     std::vector<uint16_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint16_t>(
                             plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
+                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
+                            /*hasAlpha*/ false);
                     memcpy(pointer, data.data(), data.size() * 2);
                 } else {
                     std::vector<uint8_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
                             plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
+                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
+                            /*hasAlpha*/ format == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm);
                     memcpy(pointer, data.data(), data.size());
                 }
             }
@@ -95,8 +97,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
         textureDesc.usage = usage;
-        textureDesc.size = {VideoViewsTestsBase::kYUVImageDataWidthInTexels,
-                            VideoViewsTestsBase::kYUVImageDataHeightInTexels, 1};
+        textureDesc.size = {VideoViewsTestsBase::kYUVAImageDataWidthInTexels,
+                            VideoViewsTestsBase::kYUVAImageDataHeightInTexels, 1};
 
         wgpu::DawnTextureInternalUsageDescriptor internalDesc;
         internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
@@ -129,7 +131,8 @@ std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
 // static
 std::vector<Format> VideoViewsTestBackend::Formats() {
     return {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
-            wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm};
+            wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm,
+            wgpu::TextureFormat::R8BG8A8Triplanar420Unorm};
 }
 
 // static

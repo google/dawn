@@ -111,6 +111,9 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
             case Aspect::Plane1:
                 flags |= VK_IMAGE_ASPECT_PLANE_1_BIT;
                 break;
+            case Aspect::Plane2:
+                flags |= VK_IMAGE_ASPECT_PLANE_2_BIT;
+                break;
 
             case Aspect::None:
                 DAWN_UNREACHABLE();

@@ -342,6 +342,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                                 case Aspect::CombinedDepthStencil:
                                 case Aspect::Plane0:
                                 case Aspect::Plane1:
+                                case Aspect::Plane2:
                                     DAWN_UNREACHABLE();
                                 case Aspect::Depth:
                                     gl.TexParameteri(target, GL_DEPTH_STENCIL_TEXTURE_MODE,
@@ -725,6 +726,7 @@ MaybeError CommandBuffer::Execute() {
                     case Aspect::None:
                     case Aspect::Plane0:
                     case Aspect::Plane1:
+                    case Aspect::Plane2:
                         DAWN_UNREACHABLE();
                 }
 

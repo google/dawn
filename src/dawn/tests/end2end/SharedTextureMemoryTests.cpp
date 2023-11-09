@@ -640,7 +640,9 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
     if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
         ASSERT_DEVICE_ERROR_MSG(UseInRenderPass(device, texture),
                                 HasSubstr("without current access"));
-    } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm) {
+    } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm &&
+               properties.format != wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm &&
+               properties.format != wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {
         if (properties.usage & wgpu::TextureUsage::CopySrc) {
             ASSERT_DEVICE_ERROR_MSG(UseInCopy(device, texture),
                                     HasSubstr("without current access"));
@@ -676,7 +678,9 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
         // Use the texture on the GPU; it should not crash.
         if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
             UseInRenderPass(device, texture);
-        } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm) {
+        } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm &&
+                   properties.format != wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm &&
+                   properties.format != wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {
             DAWN_ASSERT(properties.usage & wgpu::TextureUsage::CopySrc);
             UseInCopy(device, texture);
         }

@@ -67,6 +67,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_DawnMultiPlanarFormats:
         case WGPUFeatureName_MultiPlanarFormatExtendedUsages:
         case WGPUFeatureName_MultiPlanarFormatP010:
+        case WGPUFeatureName_MultiPlanarFormatNv12a:
         case WGPUFeatureName_MultiPlanarRenderTargets:
         case WGPUFeatureName_ChromiumExperimentalDp4a:
         case WGPUFeatureName_ShaderF16:

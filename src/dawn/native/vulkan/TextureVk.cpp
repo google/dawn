@@ -310,10 +310,10 @@ Aspect ComputeCombinedAspect(Device* device, const Format& format) {
     }
 
     // Some multiplanar images cannot have planes transitioned separately and instead Vulkan
-    // requires that the "Color" aspect be used for barriers, so Plane0|Plane1 is promoted to just
-    // Color. The Vulkan spec requires: "If image has a single-plane color format or is not
+    // requires that the "Color" aspect be used for barriers, so Plane0|Plane1|Plane2 is promoted to
+    // just Color. The Vulkan spec requires: "If image has a single-plane color format or is not
     // disjoint, then the aspectMask member of subresourceRange must be VK_IMAGE_ASPECT_COLOR_BIT.".
-    if (format.aspects == (Aspect::Plane0 | Aspect::Plane1)) {
+    if (format.IsMultiPlanar()) {
         return Aspect::Color;
     }
 
@@ -555,7 +555,8 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
             return VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16;
-
+        // R8BG8A8Triplanar420Unorm format is only supported on macOS.
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::Undefined:
             break;
     }
@@ -1486,7 +1487,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         }
         // need to clear the texture with a copy from buffer
         DAWN_ASSERT(range.aspects == Aspect::Color || range.aspects == Aspect::Plane0 ||
-                    range.aspects == Aspect::Plane1);
+                    range.aspects == Aspect::Plane1 || range.aspects == Aspect::Plane2);
         const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
 
         Extent3D largestMipSize =

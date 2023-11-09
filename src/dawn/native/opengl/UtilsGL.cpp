@@ -131,6 +131,7 @@ void CopyImageSubData(const OpenGLFunctions& gl,
                 case Aspect::None:
                 case Aspect::Plane0:
                 case Aspect::Plane1:
+                case Aspect::Plane2:
                     DAWN_UNREACHABLE();
             }
             if (srcTarget == GL_TEXTURE_2D) {

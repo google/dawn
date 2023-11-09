@@ -346,9 +346,9 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
                               usageValidationMode));
 
-    // Plane0 and Plane1 aspects for multiplanar texture views should be allowed as color
+    // Plane0, Plane1, and Plane2 aspects for multiplanar texture views should be allowed as color
     // attachments.
-    Aspect kRenderableAspects = Aspect::Color | Aspect::Plane0 | Aspect::Plane1;
+    Aspect kRenderableAspects = Aspect::Color | Aspect::Plane0 | Aspect::Plane1 | Aspect::Plane2;
     DAWN_INVALID_IF(
         !(attachment->GetAspects() & kRenderableAspects) || !attachment->GetFormat().isRenderable,
         "The color attachment %s format (%s) is not color renderable.", attachment,

@@ -48,6 +48,8 @@ OSType ToCVFormat(wgpu::TextureFormat format) {
             return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange;
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+            return kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar;
         default:
             DAWN_UNREACHABLE();
             return 0;
@@ -59,6 +61,8 @@ uint32_t NumPlanes(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return 2;
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+            return 3;
         default:
             DAWN_UNREACHABLE();
             return 1;
@@ -69,7 +73,8 @@ size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-            return plane == 0 ? 1 : 2;
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+            return plane == 1 ? 2 : 1;
         default:
             DAWN_UNREACHABLE();
             return 0;
@@ -79,9 +84,10 @@ size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
 size_t BytesPerElement(wgpu::TextureFormat format, size_t plane) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-            return plane == 0 ? 1 : 2;
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+            return plane == 1 ? 2 : 1;
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-            return plane == 0 ? 2 : 4;
+            return plane == 1 ? 4 : 2;
         default:
             DAWN_UNREACHABLE();
             return 0;

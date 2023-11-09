@@ -457,6 +457,8 @@ ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture&
             return Aspect::Plane0;
         case wgpu::TextureAspect::Plane1Only:
             return Aspect::Plane1;
+        case wgpu::TextureAspect::Plane2Only:
+            return Aspect::Plane2;
     }
     DAWN_UNREACHABLE();
 }

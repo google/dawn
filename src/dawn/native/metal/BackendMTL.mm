@@ -555,6 +555,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::MultiPlanarFormatExtendedUsages);
         }
 
+        if (@available(macOS 10.15, iOS 13.0, *)) {
+            EnableFeature(Feature::MultiPlanarFormatNv12a);
+        }
+
         if (@available(macOS 11.0, iOS 10.0, *)) {
             // Memoryless storage mode for Metal textures is available only
             // from the Apple2 family of GPUs on.

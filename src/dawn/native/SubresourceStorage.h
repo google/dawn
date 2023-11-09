@@ -230,7 +230,7 @@ class SubresourceStorage {
 
     // Invariant: if an aspect is marked compressed, then all it's layers are marked as
     // compressed.
-    static constexpr size_t kMaxAspects = 2;
+    static constexpr size_t kMaxAspects = 3;
     std::array<bool, kMaxAspects> mAspectCompressed;
     std::array<T, kMaxAspects> mInlineAspectData;
 

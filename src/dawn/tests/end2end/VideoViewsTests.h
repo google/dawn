@@ -72,41 +72,47 @@ class VideoViewsTestBackend {
 
 class VideoViewsTestsBase : public DawnTestWithParams<Params> {
   public:
-    // The width and height in texels are 4 for all YUV formats.
-    static constexpr uint32_t kYUVImageDataWidthInTexels = 4;
-    static constexpr uint32_t kYUVImageDataHeightInTexels = 4;
+    // The width and height in texels are 4 for all YUVA formats.
+    static constexpr uint32_t kYUVAImageDataWidthInTexels = 4;
+    static constexpr uint32_t kYUVAImageDataHeightInTexels = 4;
 
-    static constexpr size_t kYUVLumaPlaneIndex = 0;
-    static constexpr size_t kYUVChromaPlaneIndex = 1;
+    static constexpr size_t kYUVALumaPlaneIndex = 0;
+    static constexpr size_t kYUVAChromaPlaneIndex = 1;
+    static constexpr size_t kYUVAAlphaPlaneIndex = 2;
 
-    // RGB colors converted into YUV (per plane), for testing.
-    // RGB colors are mapped to the BT.601 definition of luma.
+    // RGBA colors converted into YUVA (per plane), for testing.
+    // RGBA colors are mapped to the BT.601 definition of luma.
     // https://docs.microsoft.com/en-us/windows/win32/medfound/about-yuv-video
-    static constexpr std::array<dawn::utils::RGBA8, 2> kYellowYUVColor = {
-        dawn::utils::RGBA8{210, 0, 0, 0xFF},    // Y
-        dawn::utils::RGBA8{16, 146, 0, 0xFF}};  // UV
+    static constexpr std::array<dawn::utils::RGBA8, 3> kYellowYUVAColor = {
+        dawn::utils::RGBA8{210, 0, 0, 0xFF},   // Y
+        dawn::utils::RGBA8{16, 146, 0, 0xFF},  // UV
+        dawn::utils::RGBA8{63, 0, 0, 0xFF}};   // A
 
-    static constexpr std::array<dawn::utils::RGBA8, 2> kWhiteYUVColor = {
-        dawn::utils::RGBA8{235, 0, 0, 0xFF},     // Y
-        dawn::utils::RGBA8{128, 128, 0, 0xFF}};  // UV
+    static constexpr std::array<dawn::utils::RGBA8, 3> kWhiteYUVAColor = {
+        dawn::utils::RGBA8{235, 0, 0, 0xFF},    // Y
+        dawn::utils::RGBA8{128, 128, 0, 0xFF},  // UV
+        dawn::utils::RGBA8{127, 0, 0, 0xFF}};   // A
 
-    static constexpr std::array<dawn::utils::RGBA8, 2> kBlueYUVColor = {
-        dawn::utils::RGBA8{41, 0, 0, 0xFF},      // Y
-        dawn::utils::RGBA8{240, 110, 0, 0xFF}};  // UV
+    static constexpr std::array<dawn::utils::RGBA8, 3> kBlueYUVAColor = {
+        dawn::utils::RGBA8{41, 0, 0, 0xFF},     // Y
+        dawn::utils::RGBA8{240, 110, 0, 0xFF},  // UV
+        dawn::utils::RGBA8{191, 0, 0, 0xFF}};   // A
 
-    static constexpr std::array<dawn::utils::RGBA8, 2> kRedYUVColor = {
-        dawn::utils::RGBA8{81, 0, 0, 0xFF},     // Y
-        dawn::utils::RGBA8{90, 240, 0, 0xFF}};  // UV
+    static constexpr std::array<dawn::utils::RGBA8, 3> kRedYUVAColor = {
+        dawn::utils::RGBA8{81, 0, 0, 0xFF},    // Y
+        dawn::utils::RGBA8{90, 240, 0, 0xFF},  // UV
+        dawn::utils::RGBA8{255, 0, 0, 0xFF}};  // A
 
     static constexpr dawn::utils::RGBA8 kTolerance{1, 1, 1, 0};
 
     template <typename T>
-    static std::vector<T> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
+    static std::vector<T> GetTestTextureData(bool isMultiPlane, bool isCheckerboard, bool hasAlpha);
     template <typename T>
     static std::vector<T> GetTestTextureDataWithPlaneIndex(size_t planeIndex,
                                                            size_t bytesPerRow,
                                                            size_t height,
-                                                           bool isCheckerboard);
+                                                           bool isCheckerboard,
+                                                           bool hasAlpha);
     static uint32_t NumPlanes(wgpu::TextureFormat format);
     static std::array<Format, 2> PlaneFormats(Format textureFormat);
 
@@ -115,14 +121,17 @@ class VideoViewsTestsBase : public DawnTestWithParams<Params> {
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
     bool IsMultiPlanarFormatsSupported() const;
     bool IsMultiPlanarFormatP010Supported() const;
+    bool IsMultiPlanarFormatNv12aSupported() const;
     bool IsNorm16TextureFormatsSupported() const;
     wgpu::ShaderModule GetTestVertexShaderModule() const;
     wgpu::TextureFormat GetFormat() const;
     wgpu::TextureFormat GetPlaneFormat(int plane) const;
+    wgpu::TextureAspect GetPlaneAspect(int plane) const;
     bool IsFormatSupported() const;
 
     bool mIsMultiPlanarFormatsSupported = false;
     bool mIsMultiPlanarFormatP010Supported = false;
+    bool mIsMultiPlanarFormatNv12aSupported = false;
     bool mIsNorm16TextureFormatsSupported = false;
 };
 

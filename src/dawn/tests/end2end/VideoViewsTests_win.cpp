@@ -115,13 +115,13 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
         textureDesc.usage = usage;
-        textureDesc.size = {VideoViewsTestsBase::kYUVImageDataWidthInTexels,
-                            VideoViewsTestsBase::kYUVImageDataHeightInTexels, 1};
+        textureDesc.size = {VideoViewsTestsBase::kYUVAImageDataWidthInTexels,
+                            VideoViewsTestsBase::kYUVAImageDataHeightInTexels, 1};
 
         // Create a DX11 texture with data then wrap it in a shared handle.
         D3D11_TEXTURE2D_DESC d3dDescriptor;
-        d3dDescriptor.Width = VideoViewsTestsBase::kYUVImageDataWidthInTexels;
-        d3dDescriptor.Height = VideoViewsTestsBase::kYUVImageDataHeightInTexels;
+        d3dDescriptor.Width = VideoViewsTestsBase::kYUVAImageDataWidthInTexels;
+        d3dDescriptor.Height = VideoViewsTestsBase::kYUVAImageDataHeightInTexels;
         d3dDescriptor.MipLevels = 1;
         d3dDescriptor.ArraySize = 1;
         d3dDescriptor.Format = GetDXGITextureFormat(format);
@@ -133,15 +133,18 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         d3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED;
 
         D3D11_SUBRESOURCE_DATA subres;
-        subres.SysMemPitch = VideoViewsTestsBase::kYUVImageDataWidthInTexels;
+        subres.SysMemPitch = VideoViewsTestsBase::kYUVAImageDataWidthInTexels;
 
         std::variant<std::vector<uint8_t>, std::vector<uint16_t>> initialData;
         if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
-            initialData = VideoViewsTestsBase::GetTestTextureData<uint16_t>(format, isCheckerboard);
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint16_t>(
+                /*isMultiPlane*/ true, isCheckerboard, /*hasAlpha*/ false);
             subres.pSysMem = std::get<1>(initialData).data();
             subres.SysMemPitch *= 2;
         } else {
-            initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard);
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(
+                /*isMultiPlane*/ true, isCheckerboard,
+                /*hasAlpha*/ false);
             subres.pSysMem = std::get<0>(initialData).data();
         }
 

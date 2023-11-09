@@ -126,6 +126,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::MultiPlanarFormatP010,
      {"Import and use the P010 multi-planar texture format with per plane views",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=551", FeatureInfo::FeatureState::Stable}},
+    {Feature::MultiPlanarFormatNv12a,
+     {"Import and use the NV12A multi-planar texture format with per plane views",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "multi_planar_format_nv12a.md",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::MultiPlanarRenderTargets,
      {"Import and use multi-planar texture formats as render attachments",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1337", FeatureInfo::FeatureState::Stable}},

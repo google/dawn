@@ -45,15 +45,16 @@ enum class Aspect : uint8_t {
     // Aspects used to select individual planes in a multi-planar format.
     Plane0 = 0x8,
     Plane1 = 0x10,
+    Plane2 = 0x20,
 
     // An aspect for that represents the combination of both the depth and stencil aspects. It
     // can be ignored outside of the Vulkan backend.
-    CombinedDepthStencil = 0x20,
+    CombinedDepthStencil = 0x40,
 };
 
 template <>
 struct EnumBitmaskSize<Aspect> {
-    static constexpr unsigned value = 6;
+    static constexpr unsigned value = 7;
 };
 
 // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect

@@ -1918,6 +1918,7 @@
             {"value": 1021, "name": "multi planar format p010", "tags": ["dawn"]},
             {"value": 1022, "name": "host mapped pointer", "tags": ["dawn"]},
             {"value": 1023, "name": "multi planar render targets", "tags": ["dawn"]},
+            {"value": 1024, "name": "multi planar format nv12a", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3385,7 +3386,8 @@
             {"value": 1, "name": "stencil only"},
             {"value": 2, "name": "depth only"},
             {"value": 3, "name": "plane 0 only", "tags": ["dawn"]},
-            {"value": 4, "name": "plane 1 only", "tags": ["dawn"]}
+            {"value": 4, "name": "plane 1 only", "tags": ["dawn"]},
+            {"value": 5, "name": "plane 2 only", "tags": ["dawn"]}
         ]
     },
     "texture data layout": {
@@ -3545,7 +3547,8 @@
             {"value": 101, "name": "RGBA16 snorm", "tags": ["dawn"]},
 
             {"value": 102, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]},
-            {"value": 103, "name": "R10X6 BG10X6 Biplanar 420 unorm", "tags": ["dawn"]}
+            {"value": 103, "name": "R10X6 BG10X6 Biplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 104, "name": "R8 BG8 A8 Triplanar 420 unorm", "tags": ["dawn"]}
         ]
     },
     "texture usage": {

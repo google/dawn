@@ -53,6 +53,8 @@ Aspect ConvertViewAspect(const Format& format, wgpu::TextureAspect aspect) {
                 return Aspect::Plane0;
             case wgpu::TextureAspect::Plane1Only:
                 return Aspect::Plane1;
+            case wgpu::TextureAspect::Plane2Only:
+                return Aspect::Plane2;
             default:
                 break;
         }
@@ -68,6 +70,9 @@ Aspect GetPlaneAspect(const Format& format, uint32_t planeIndex) {
             break;
         case 1:
             textureAspect = wgpu::TextureAspect::Plane1Only;
+            break;
+        case 2:
+            textureAspect = wgpu::TextureAspect::Plane2Only;
             break;
         default:
             DAWN_UNREACHABLE();
@@ -88,6 +93,8 @@ Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect) {
             return format.aspects & Aspect::Plane0;
         case wgpu::TextureAspect::Plane1Only:
             return format.aspects & Aspect::Plane1;
+        case wgpu::TextureAspect::Plane2Only:
+            return format.aspects & Aspect::Plane2;
     }
     DAWN_UNREACHABLE();
 }
@@ -103,6 +110,8 @@ uint8_t GetAspectIndex(Aspect aspect) {
         case Aspect::Plane1:
         case Aspect::Stencil:
             return 1;
+        case Aspect::Plane2:
+            return 2;
         default:
             DAWN_UNREACHABLE();
     }
