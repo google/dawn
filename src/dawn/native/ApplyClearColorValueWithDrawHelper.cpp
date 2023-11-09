@@ -185,7 +185,7 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     DeviceBase* device,
     const RenderPassDescriptor* renderPassDescriptor,
     const KeyOfApplyClearColorValueWithDrawPipelines& key) {
-    std::array<uint8_t, sizeof(uint32_t)* 4 * kMaxColorAttachments> clearValues = {};
+    std::array<uint8_t, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
     uint32_t offset = 0;
     for (uint32_t i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
         const Format& format = renderPassDescriptor->colorAttachments[i].view->GetFormat();

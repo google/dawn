@@ -160,7 +160,7 @@ TEST_F(ITypBitsetTest, And) {
     Bitset bits = {1 << 1 | 1 << 2 | 1 << 7};
     ExpectBits(bits, {1, 2, 7});
 
-    Bitset bits2 = bits& Bitset{1 << 0 | 1 << 3 | 1 << 7};
+    Bitset bits2 = bits & Bitset{1 << 0 | 1 << 3 | 1 << 7};
     ExpectBits(bits2, {7});
     ExpectBits(bits, {1, 2, 7});
 

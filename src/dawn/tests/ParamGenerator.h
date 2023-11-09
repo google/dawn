@@ -98,8 +98,10 @@ void PrintParamStructField(std::ostream& o, const T& param, const char* type) {
     struct StructName : BaseStructName, DAWN_PP_CONCATENATE(_Dawn_, StructName) {                  \
         template <typename... Args>                                                                \
         StructName(const BaseStructName& param, Args&&... args)                                    \
-            : BaseStructName(param),                                                               \
-              DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {}              \
+            : BaseStructName(param), DAWN_PP_CONCATENATE(_Dawn_, StructName) {                     \
+            std::forward<Args>(args)...                                                            \
+        }                                                                                          \
+        {}                                                                                         \
     };                                                                                             \
     inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
         o << static_cast<const BaseStructName&>(param);                                            \
