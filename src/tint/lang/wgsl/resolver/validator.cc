@@ -984,8 +984,8 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
 
     if (is_stage_mismatch) {
         StringStream err;
-        err << "@builtin(" << builtin << ") cannot be used in "
-            << (is_input ? "input of " : "output of ") << stage_name.str() << " pipeline stage";
+        err << "@builtin(" << builtin << ") cannot be used for " << stage_name.str() << " shader "
+            << (is_input ? "input" : "output");
         AddError(err.str(), attr->source);
         return false;
     }
@@ -2214,8 +2214,8 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 [&](const ast::StructMemberSizeAttribute*) {
                     if (!member->Type()->HasCreationFixedFootprint()) {
                         AddError(
-                            "@size can only be applied to members where the member's type size "
-                            "can be fully determined at shader creation time",
+                            "@size can only be applied to members where the member's type size can "
+                            "be fully determined at shader creation time",
                             attr->source);
                         return false;
                     }
@@ -2311,8 +2311,7 @@ bool Validator::IndexAttribute(const ast::IndexAttribute* attr,
                                const std::optional<bool> is_input) const {
     if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
         AddError(
-            "use of '@index' attribute requires enabling extension "
-            "'chromium_internal_dual_source_blending'",
+            "use of @index requires enabling extension 'chromium_internal_dual_source_blending'",
             attr->source);
         return false;
     }
@@ -2321,7 +2320,7 @@ bool Validator::IndexAttribute(const ast::IndexAttribute* attr,
         stage != ast::PipelineStage::kNone && stage != ast::PipelineStage::kFragment;
     bool is_output = is_input.value_or(false);
     if (is_stage_non_fragment || is_output) {
-        AddError(AttrToStr(attr) + " can only be used as fragment shader output", attr->source);
+        AddError(AttrToStr(attr) + " can only be used for fragment shader output", attr->source);
         return false;
     }
 

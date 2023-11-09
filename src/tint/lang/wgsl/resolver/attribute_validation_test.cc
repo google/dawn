@@ -254,6 +254,7 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {
             Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
         }
     }
+
     void EnableRequiredExtensions() {
         for (auto attribute : GetParam().attributes) {
             EnableExtensionIfNecessary(attribute);
@@ -640,7 +641,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
-            R"(1:2 error: @builtin(position) cannot be used in input of compute pipeline stage)",
+            R"(1:2 error: @builtin(position) cannot be used for compute shader input)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -819,7 +820,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
-            R"(1:2 error: @builtin(position) cannot be used in input of vertex pipeline stage)",
+            R"(1:2 error: @builtin(position) cannot be used for vertex shader input)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -847,7 +848,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInterpolate, AttributeKind::kBuiltinPosition},
-            R"(3:4 error: @builtin(position) cannot be used in input of vertex pipeline stage)",
+            R"(3:4 error: @builtin(position) cannot be used for vertex shader input)",
         },
         TestParams{
             {AttributeKind::kInvariant},
@@ -859,7 +860,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInvariant, AttributeKind::kBuiltinPosition},
-            R"(3:4 error: @builtin(position) cannot be used in input of vertex pipeline stage)",
+            R"(3:4 error: @builtin(position) cannot be used for vertex shader input)",
         },
         TestParams{
             {AttributeKind::kLocation},
@@ -920,7 +921,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
-            R"(1:2 error: @builtin(position) cannot be used in output of compute pipeline stage)",
+            R"(1:2 error: @builtin(position) cannot be used for compute shader output)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -936,7 +937,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kIndex},
-            R"(1:2 error: @index can only be used as fragment shader output)",
+            R"(1:2 error: @index can only be used for fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1002,7 +1003,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
-            R"(1:2 error: @builtin(position) cannot be used in output of fragment pipeline stage)",
+            R"(1:2 error: @builtin(position) cannot be used for fragment shader output)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -1126,7 +1127,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kIndex},
-            R"(1:2 error: @index can only be used as fragment shader output)",
+            R"(1:2 error: @index can only be used for fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},

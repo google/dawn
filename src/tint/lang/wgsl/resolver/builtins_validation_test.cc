@@ -147,7 +147,7 @@ TEST_P(ResolverBuiltinsStageTest, All_input) {
     } else {
         StringStream err;
         err << "12:34 error: @builtin(" << params.builtin << ")";
-        err << " cannot be used in input of " << params.stage << " pipeline stage";
+        err << " cannot be used for " << params.stage << " shader input";
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(), err.str());
     }
@@ -179,9 +179,8 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
              Location(0_a),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        "12:34 error: @builtin(frag_depth) cannot be used in input of fragment pipeline stage");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: @builtin(frag_depth) cannot be used for fragment shader input");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
@@ -215,9 +214,8 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: @builtin(frag_depth) cannot be used in input of "
-              "fragment pipeline stage\n"
-              "note: while analyzing entry point 'fragShader'");
+              R"(12:34 error: @builtin(frag_depth) cannot be used for fragment shader input
+note: while analyzing entry point 'fragShader')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {

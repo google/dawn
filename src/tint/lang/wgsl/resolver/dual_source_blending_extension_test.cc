@@ -47,9 +47,9 @@ TEST_F(DualSourceBlendingExtensionTest, UseIndexAttribWithoutExtensionError) {
               });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: use of '@index' attribute requires enabling extension "
-              "'chromium_internal_dual_source_blending'");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of @index requires enabling extension 'chromium_internal_dual_source_blending')");
 }
 
 class DualSourceBlendingExtensionTests : public ResolverTest {
