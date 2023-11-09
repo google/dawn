@@ -1,8 +1,17 @@
-![Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo. The text "Dawn" is written below it.](docs/imgs/dawn_logo.png "Dawn's logo")
+<div align="center">
+  <img
+      title="Dawn's logo"
+      alt="Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo."
+      src="docs/imgs/dawn_logo_notext.png"
+      width="50%">
+
+  ![Build Status](https://github.com/google/dawn/actions/workflows/ci.yml/badge.svg?branch=main&event=push)
+  [![Matrix Space](https://img.shields.io/static/v1?label=Space&message=%23webgpu-dawn&color=blue&logo=matrix)](https://matrix.to/#/#webgpu-dawn:matrix.org)
+</div>
 
 # Dawn, a WebGPU implementation
 
-Dawn is an open-source and cross-platform implementation of the work-in-progress [WebGPU](https://webgpu.dev) standard.
+Dawn is an open-source and cross-platform implementation of the [WebGPU](https://webgpu.dev) standard.
 More precisely it implements [`webgpu.h`](https://github.com/webgpu-native/webgpu-headers/blob/main/webgpu.h) that is a one-to-one mapping with the WebGPU IDL.
 Dawn is meant to be integrated as part of a larger system and is the underlying implementation of WebGPU in Chromium.
 
@@ -41,10 +50,6 @@ Developer documentation:
 
 
 User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
-
-## Status
-
-(TODO)
 
 ## License
 
