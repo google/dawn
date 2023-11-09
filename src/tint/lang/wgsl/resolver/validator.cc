@@ -137,10 +137,7 @@ bool IsValidStorageTextureTexelFormat(core::TexelFormat format) {
 
 // Helper to stringify a pipeline IO attribute.
 std::string AttrToStr(const ast::Attribute* attr) {
-    return Switch(
-        attr,  //
-        [&](const ast::BuiltinAttribute*) { return "@builtin"; },
-        [&](const ast::LocationAttribute*) { return "@location"; });
+    return "@" + attr->Name();
 }
 
 template <typename CALLBACK>
@@ -1000,7 +997,13 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
 }
 
 bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
-                                     const core::type::Type* storage_ty) const {
+                                     const core::type::Type* storage_ty,
+                                     const ast::PipelineStage stage) const {
+    if (stage == ast::PipelineStage::kCompute) {
+        AddError(AttrToStr(attr) + " cannot be used by compute shaders", attr->source);
+        return false;
+    }
+
     auto* type = storage_ty->UnwrapRef();
 
     auto i_type = sem_.AsInterpolationType(sem_.Get(attr->type));
@@ -1019,6 +1022,15 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
         return false;
     }
 
+    return true;
+}
+
+bool Validator::InvariantAttribute(const ast::InvariantAttribute* attr,
+                                   const ast::PipelineStage stage) const {
+    if (stage == ast::PipelineStage::kCompute) {
+        AddError(AttrToStr(attr) + " cannot be used by compute shaders", attr->source);
+        return false;
+    }
     return true;
 }
 
@@ -1125,73 +1137,74 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         const ast::InterpolateAttribute* interpolate_attribute = nullptr;
         const ast::InvariantAttribute* invariant_attribute = nullptr;
         for (auto* attr : attrs) {
-            auto is_invalid_compute_shader_attribute = false;
+            bool ok = Switch(
+                attr,  //
+                [&](const ast::BuiltinAttribute* builtin_attr) {
+                    auto builtin = sem_.Get(builtin_attr)->Value();
 
-            if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
-                auto builtin = sem_.Get(builtin_attr)->Value();
+                    if (pipeline_io_attribute) {
+                        AddError("multiple entry point IO attributes", attr->source);
+                        AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
+                                pipeline_io_attribute->source);
+                        return false;
+                    }
+                    pipeline_io_attribute = attr;
 
-                if (pipeline_io_attribute) {
-                    AddError("multiple entry point IO attributes", attr->source);
-                    AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
-                            pipeline_io_attribute->source);
-                    return false;
-                }
-                pipeline_io_attribute = attr;
+                    if (builtins.Contains(builtin)) {
+                        StringStream err;
+                        err << "@builtin(" << builtin << ") appears multiple times as pipeline "
+                            << (param_or_ret == ParamOrRetType::kParameter ? "input" : "output");
+                        AddError(err.str(), decl->source);
+                        return false;
+                    }
 
-                if (builtins.Contains(builtin)) {
-                    StringStream err;
-                    err << "@builtin(" << builtin << ") appears multiple times as pipeline "
-                        << (param_or_ret == ParamOrRetType::kParameter ? "input" : "output");
-                    AddError(err.str(), decl->source);
-                    return false;
-                }
+                    if (!BuiltinAttribute(
+                            builtin_attr, ty, stage,
+                            /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
+                        return false;
+                    }
+                    builtins.Add(builtin);
+                    return true;
+                },
+                [&](const ast::LocationAttribute* loc_attr) {
+                    location_attribute = loc_attr;
+                    if (pipeline_io_attribute) {
+                        AddError("multiple entry point IO attributes", attr->source);
+                        AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
+                                pipeline_io_attribute->source);
+                        return false;
+                    }
+                    pipeline_io_attribute = attr;
 
-                if (!BuiltinAttribute(builtin_attr, ty, stage,
-                                      /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
-                    return false;
-                }
-                builtins.Add(builtin);
-            } else if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
-                location_attribute = loc_attr;
-                if (pipeline_io_attribute) {
-                    AddError("multiple entry point IO attributes", attr->source);
-                    AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
-                            pipeline_io_attribute->source);
-                    return false;
-                }
-                pipeline_io_attribute = attr;
+                    if (TINT_UNLIKELY(!location.has_value())) {
+                        TINT_ICE() << "@location has no value";
+                        return false;
+                    }
 
-                bool is_input = param_or_ret == ParamOrRetType::kParameter;
+                    return LocationAttribute(loc_attr, ty, stage, source);
+                },
+                [&](const ast::IndexAttribute* index_attr) {
+                    bool is_input = param_or_ret == ParamOrRetType::kParameter;
+                    index_attribute = index_attr;
 
-                if (TINT_UNLIKELY(!location.has_value())) {
-                    TINT_ICE() << "Location has no value";
-                    return false;
-                }
+                    if (TINT_UNLIKELY(!index.has_value())) {
+                        TINT_ICE() << "@index has no value";
+                        return false;
+                    }
 
-                if (!LocationAttribute(loc_attr, ty, stage, source, is_input)) {
-                    return false;
-                }
-            } else if (auto* index_attr = attr->As<ast::IndexAttribute>()) {
-                index_attribute = index_attr;
-                return IndexAttribute(index_attr, stage);
-            } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-                if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
-                    is_invalid_compute_shader_attribute = true;
-                } else if (!InterpolateAttribute(interpolate, ty)) {
-                    return false;
-                }
-                interpolate_attribute = interpolate;
-            } else if (auto* invariant = attr->As<ast::InvariantAttribute>()) {
-                if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
-                    is_invalid_compute_shader_attribute = true;
-                }
-                invariant_attribute = invariant;
-            }
-            if (is_invalid_compute_shader_attribute) {
-                std::string input_or_output =
-                    param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
-                AddError("@" + attr->Name() + " is not valid for compute shader " + input_or_output,
-                         attr->source);
+                    return IndexAttribute(index_attr, stage, is_input);
+                },
+                [&](const ast::InterpolateAttribute* interpolate) {
+                    interpolate_attribute = interpolate;
+                    return InterpolateAttribute(interpolate, ty, stage);
+                },
+                [&](const ast::InvariantAttribute* invariant) {
+                    invariant_attribute = invariant;
+                    return InvariantAttribute(invariant, stage);
+                },
+                [&](Default) { return true; });
+
+            if (!ok) {
                 return false;
             }
         }
@@ -1234,15 +1247,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             }
 
             if (index_attribute) {
-                if (Is<ast::LocationAttribute>(pipeline_io_attribute)) {
-                    AddError("@index can only be used with @location", index_attribute->source);
-                    return false;
-                }
-
                 // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we
-                // should restrict targets with index attributes to location 0 for easy translation
+                // should restrict targets with @index to location 0 for easy translation
                 // in the backend writers.
-                if (location.value() != 0) {
+                if (location.value_or(1) != 0) {
                     AddError("@index can only be used with @location(0)", index_attribute->source);
                     return false;
                 }
@@ -2177,16 +2185,13 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 attr,  //
                 [&](const ast::InvariantAttribute* invariant) {
                     invariant_attribute = invariant;
-                    return true;
+                    return InvariantAttribute(invariant, stage);
                 },
                 [&](const ast::LocationAttribute* location) {
                     location_attribute = location;
                     TINT_ASSERT(member->Attributes().location.has_value());
-                    if (!LocationAttribute(location, member->Type(), stage,
-                                           member->Declaration()->source)) {
-                        return false;
-                    }
-                    return true;
+                    return LocationAttribute(location, member->Type(), stage,
+                                             member->Declaration()->source);
                 },
                 [&](const ast::IndexAttribute* index) {
                     index_attribute = index;
@@ -2206,10 +2211,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 },
                 [&](const ast::InterpolateAttribute* interpolate) {
                     interpolate_attribute = interpolate;
-                    if (!InterpolateAttribute(interpolate, member->Type())) {
-                        return false;
-                    }
-                    return true;
+                    return InterpolateAttribute(interpolate, member->Type(), stage);
                 },
                 [&](const ast::StructMemberSizeAttribute*) {
                     if (!member->Type()->HasCreationFixedFootprint()) {
@@ -2234,15 +2236,10 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         }
 
         if (index_attribute) {
-            if (!location_attribute) {
-                AddError("@index can only be used with @location", index_attribute->source);
-                return false;
-            }
-
             // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we should
             // restrict targets with index attributes to location 0 for easy translation in the
             // backend writers.
-            if (member->Attributes().location.value() != 0) {
+            if (member->Attributes().location.value_or(1) != 0) {
                 AddError("@index can only be used with @location(0)", index_attribute->source);
                 return false;
             }
@@ -2289,15 +2286,12 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
     return true;
 }
 
-bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
+bool Validator::LocationAttribute(const ast::LocationAttribute* attr,
                                   const core::type::Type* type,
                                   ast::PipelineStage stage,
-                                  const Source& source,
-                                  const bool is_input) const {
-    std::string inputs_or_output = is_input ? "inputs" : "output";
+                                  const Source& source) const {
     if (stage == ast::PipelineStage::kCompute) {
-        AddError("@" + loc_attr->Name() + " is not valid for compute shader " + inputs_or_output,
-                 loc_attr->source);
+        AddError(AttrToStr(attr) + " cannot be used by compute shaders", attr->source);
         return false;
     }
 
@@ -2307,32 +2301,29 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
         AddNote(
             "@location must only be applied to declarations of numeric scalar or numeric vector "
             "type",
-            loc_attr->source);
+            attr->source);
         return false;
     }
 
     return true;
 }
 
-bool Validator::IndexAttribute(const ast::IndexAttribute* index_attr,
-                               ast::PipelineStage stage) const {
+bool Validator::IndexAttribute(const ast::IndexAttribute* attr,
+                               ast::PipelineStage stage,
+                               const std::optional<bool> is_input) const {
     if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
         AddError(
             "use of '@index' attribute requires enabling extension "
             "'chromium_internal_dual_source_blending'",
-            index_attr->source);
+            attr->source);
         return false;
     }
 
-    if (stage == ast::PipelineStage::kCompute) {
-        AddError("@" + index_attr->Name() + " is not valid for compute shader output",
-                 index_attr->source);
-        return false;
-    }
-
-    if (stage == ast::PipelineStage::kVertex) {
-        AddError("@" + index_attr->Name() + " is not valid for vertex shader output",
-                 index_attr->source);
+    bool is_stage_non_fragment =
+        stage != ast::PipelineStage::kNone && stage != ast::PipelineStage::kFragment;
+    bool is_output = is_input.value_or(false);
+    if (is_stage_non_fragment || is_output) {
+        AddError(AttrToStr(attr) + " can only be used as fragment shader output", attr->source);
         return false;
     }
 

@@ -315,11 +315,20 @@ class Validator {
     bool IncrementDecrementStatement(const ast::IncrementDecrementStatement* stmt) const;
 
     /// Validates an interpolate attribute
-    /// @param attr the interpolation attribute to validate
+    /// @param attr the attribute to validate
     /// @param storage_type the storage type of the attached variable
-    /// @returns true on succes, false otherwise
+    /// @param stage the current pipeline stage
+    /// @returns true on success, false otherwise
     bool InterpolateAttribute(const ast::InterpolateAttribute* attr,
-                              const core::type::Type* storage_type) const;
+                              const core::type::Type* storage_type,
+                              const ast::PipelineStage stage) const;
+
+    /// Validates an invariant attribute
+    /// @param attr the attribute to validate
+    /// @param stage the current pipeline stage
+    /// @returns true on success, false otherwise
+    bool InvariantAttribute(const ast::InvariantAttribute* attr,
+                            const ast::PipelineStage stage) const;
 
     /// Validates a builtin call
     /// @param call the builtin call to validate
@@ -332,23 +341,25 @@ class Validator {
     bool LocalVariable(const sem::Variable* v) const;
 
     /// Validates a location attribute
-    /// @param loc_attr the location attribute to validate
+    /// @param attr the attribute to validate
     /// @param type the variable type
     /// @param stage the current pipeline stage
     /// @param source the source of the attribute
-    /// @param is_input true if this is an input variable
     /// @returns true on success, false otherwise.
-    bool LocationAttribute(const ast::LocationAttribute* loc_attr,
+    bool LocationAttribute(const ast::LocationAttribute* attr,
                            const core::type::Type* type,
-                           ast::PipelineStage stage,
-                           const Source& source,
-                           const bool is_input = false) const;
+                           const ast::PipelineStage stage,
+                           const Source& source) const;
 
     /// Validates a index attribute
     /// @param index_attr the index attribute to validate
     /// @param stage the current pipeline stage
+    /// @param is_input true if is an input variable, false if output variable, std::nullopt is
+    /// unknown.
     /// @returns true on success, false otherwise.
-    bool IndexAttribute(const ast::IndexAttribute* index_attr, ast::PipelineStage stage) const;
+    bool IndexAttribute(const ast::IndexAttribute* index_attr,
+                        ast::PipelineStage stage,
+                        const std::optional<bool> is_input = {}) const;
 
     /// Validates a loop statement
     /// @param stmt the loop statement

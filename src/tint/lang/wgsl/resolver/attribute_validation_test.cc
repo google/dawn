@@ -660,15 +660,15 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kInterpolate},
-            R"(1:2 error: @interpolate is not valid for compute shader inputs)",
+            R"(1:2 error: @interpolate cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kInvariant},
-            R"(1:2 error: @invariant is not valid for compute shader inputs)",
+            R"(1:2 error: @invariant cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kLocation},
-            R"(1:2 error: @location is not valid for compute shader inputs)",
+            R"(1:2 error: @location cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kMustUse},
@@ -936,19 +936,19 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for compute shader output)",
+            R"(1:2 error: @index can only be used as fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
-            R"(1:2 error: @interpolate is not valid for compute shader output)",
+            R"(1:2 error: @interpolate cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kInvariant},
-            R"(1:2 error: @invariant is not valid for compute shader output)",
+            R"(1:2 error: @invariant cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kLocation},
-            R"(1:2 error: @location is not valid for compute shader output)",
+            R"(1:2 error: @location cannot be used by compute shaders)",
         },
         TestParams{
             {AttributeKind::kMustUse},
@@ -1018,7 +1018,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kIndex},
-            Pass,
+            R"(9:9 error: missing entry point IO attribute on return type)",
         },
         TestParams{
             {AttributeKind::kIndex, AttributeKind::kLocation},
@@ -1126,7 +1126,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for vertex shader output)",
+            R"(1:2 error: @index can only be used as fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1326,7 +1326,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              },
                              TestParams{
                                  {AttributeKind::kIndex},
-                                 R"(1:2 error: @index can only be used with @location)",
+                                 R"(1:2 error: @index can only be used with @location(0))",
                              },
                              TestParams{
                                  {AttributeKind::kInterpolate},
