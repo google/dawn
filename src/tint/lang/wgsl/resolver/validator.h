@@ -344,7 +344,7 @@ class Validator {
     /// @param attr the attribute to validate
     /// @param type the variable type
     /// @param stage the current pipeline stage
-    /// @param source the source of the attribute
+    /// @param source the source of declaration using the attribute
     /// @returns true on success, false otherwise.
     bool LocationAttribute(const ast::LocationAttribute* attr,
                            const core::type::Type* type,
@@ -359,7 +359,7 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool IndexAttribute(const ast::IndexAttribute* index_attr,
                         ast::PipelineStage stage,
-                        const std::optional<bool> is_input = {}) const;
+                        const std::optional<bool> is_input = std::nullopt) const;
 
     /// Validates a loop statement
     /// @param stmt the loop statement

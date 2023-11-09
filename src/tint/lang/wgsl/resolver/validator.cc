@@ -1113,7 +1113,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // TODO(jrprice): This state could be stored in sem::Function instead, and then passed to
     // sem::Function since it would be useful there too.
     Hashset<core::BuiltinValue, 4> builtins;
-    Hashset<std::pair<uint32_t, uint32_t>, 8> locationsAndIndexes;
+    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_indices;
+    const ast::LocationAttribute* first_nonzero_location = nullptr;
+    const ast::IndexAttribute* first_nonzero_index = nullptr;
     enum class ParamOrRetType {
         kParameter,
         kReturnType,
@@ -1181,15 +1183,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     return LocationAttribute(loc_attr, ty, stage, source);
                 },
                 [&](const ast::IndexAttribute* index_attr) {
-                    bool is_input = param_or_ret == ParamOrRetType::kParameter;
                     index_attribute = index_attr;
-
-                    if (TINT_UNLIKELY(!index.has_value())) {
-                        TINT_ICE() << "@index has no value";
-                        return false;
-                    }
-
-                    return IndexAttribute(index_attr, stage, is_input);
+                    return IndexAttribute(index_attr, stage);
                 },
                 [&](const ast::InterpolateAttribute* interpolate) {
                     interpolate_attribute = interpolate;
@@ -1254,20 +1249,28 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             }
 
             if (location_attribute) {
-                uint32_t idx = 0xffffffff;
-                if (index_attribute) {
-                    idx = index.value();
+                if (!first_nonzero_location && location > 0u) {
+                    first_nonzero_location = location_attribute;
+                }
+                if (!first_nonzero_index && index > 0u) {
+                    first_nonzero_index = index_attribute;
+                }
+                if (first_nonzero_location && first_nonzero_index) {
+                    AddError("pipeline cannot use both non-zero @index and non-zero @location",
+                             first_nonzero_index->source);
+                    AddNote("non-zero @location declared here", first_nonzero_location->source);
+                    return false;
                 }
 
-                std::pair<uint32_t, uint32_t> locationAndIndex(location.value(), idx);
-                if (!locationsAndIndexes.Add(locationAndIndex)) {
+                std::pair<uint32_t, uint32_t> location_and_index(location.value(),
+                                                                 index.value_or(0));
+                if (!locations_and_indices.Add(location_and_index)) {
                     StringStream err;
-                    if (!index_attribute) {
-                        err << "@location(" << location.value() << ") appears multiple times";
-                    } else {
-                        err << "@location(" << location.value() << ") @index(" << index.value()
-                            << ") appears multiple times";
+                    err << "@location(" << location.value() << ") ";
+                    if (index_attribute) {
+                        err << "@index(" << index.value() << ") ";
                     }
+                    err << "appears multiple times";
                     AddError(err.str(), location_attribute->source);
                     return false;
                 }
@@ -1330,10 +1333,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
     for (auto* param : func->Parameters()) {
         auto* param_decl = param->Declaration();
+        auto& attrs = param->Attributes();
         if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
                                              param_decl->source, ParamOrRetType::kParameter,
-                                             param->Attributes().location,
-                                             param->Attributes().index)) {
+                                             attrs.location, attrs.index)) {
             return false;
         }
     }
@@ -1341,7 +1344,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // Clear IO sets after parameter validation. Builtin and location attributes in return types
     // should be validated independently from those used in parameters.
     builtins.Clear();
-    locationsAndIndexes.Clear();
+    locations_and_indices.Clear();
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
@@ -2150,8 +2153,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
-    auto has_index = false;
-    Hashset<std::pair<uint32_t, uint32_t>, 8> locationsAndIndexes;
+    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_indices;
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<sem::Array>()) {
             if (r->Count()->Is<core::type::RuntimeArrayCount>()) {
@@ -2193,7 +2195,6 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 },
                 [&](const ast::IndexAttribute* index) {
                     index_attribute = index;
-                    has_index = true;
                     return IndexAttribute(index, stage);
                 },
                 [&](const ast::BuiltinAttribute* builtin_attr) {
@@ -2250,32 +2251,18 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
 
         // Ensure all locations and index pairs are unique
         if (location_attribute) {
-            uint32_t index = 0xffffffff;
-            if (index_attribute) {
-                index = member->Attributes().index.value();
-            }
             uint32_t location = member->Attributes().location.value();
-            if (has_index && location != 0) {
-                StringStream err;
-                err << "Multiple render targets are not allowed when using dual source blending. "
-                       "The output @location("
-                    << location << ") is not allowed as a render target.";
-                AddError(err.str(), location_attribute->source);
-                return false;
-            }
+            uint32_t index = member->Attributes().index.value_or(0);
 
-            std::pair<uint32_t, uint32_t> locationAndIndex(location, index);
-            if (!locationsAndIndexes.Add(locationAndIndex)) {
+            std::pair<uint32_t, uint32_t> location_and_index(location, index);
+            if (!locations_and_indices.Add(location_and_index)) {
                 StringStream err;
-                if (!index_attribute) {
-                    err << "@location(" << location << ") appears multiple times";
-                    AddError(err.str(), location_attribute->source);
-                } else {
-                    err << "@location(" << location << ") @index(" << index
-                        << ") appears multiple times";
-                    AddError(err.str(), index_attribute->source);
+                err << "@location(" << location << ") ";
+                if (index_attribute) {
+                    err << "@index(" << index << ") ";
                 }
-
+                err << "appears multiple times";
+                AddError(err.str(), location_attribute->source);
                 return false;
             }
         }
