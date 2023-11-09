@@ -1,7 +1,3 @@
-[submodule "build"]
-	path = build
-	url = https://chromium.googlesource.com/chromium/src/build
-	gclient-condition = dawn_standalone
 [submodule "buildtools"]
 	path = buildtools
 	url = https://chromium.googlesource.com/chromium/src/buildtools
@@ -18,10 +14,18 @@
 	path = third_party/libc++abi/src
 	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi.git
 	gclient-condition = dawn_standalone
+[submodule "build"]
+	path = build
+	url = https://chromium.googlesource.com/chromium/src/build
+	gclient-condition = dawn_standalone
 [submodule "tools/clang"]
 	path = tools/clang
 	url = https://chromium.googlesource.com/chromium/src/tools/clang
 	gclient-condition = dawn_standalone
+[submodule "tools/rust"]
+	path = tools/rust
+	url = https://chromium.googlesource.com/chromium/src/tools/rust
+	gclient-condition = dawn_standalone and checkout_rust
 [submodule "testing"]
 	path = testing
 	url = https://chromium.googlesource.com/chromium/src/testing
@@ -114,6 +118,3 @@
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git
 	gclient-condition = dawn_standalone
-[submodule "tools/rust"]
-	path = tools/rust
-	url = https://chromium.googlesource.com/chromium/src/tools/rust
