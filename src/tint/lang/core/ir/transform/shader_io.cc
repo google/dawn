@@ -119,7 +119,13 @@ struct State {
         if (func->Stage() == Function::PipelineStage::kVertex && backend->NeedsVertexPointSize()) {
             vertex_point_size_index =
                 backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
-                                   {{}, {}, {BuiltinValue::kPointSize}, {}, false});
+                                   core::type::StructMemberAttributes{
+                                       /* location */ {},
+                                       /* index */ {},
+                                       /* builtin */ core::BuiltinValue::kPointSize,
+                                       /* interpolation */ {},
+                                       /* invariant */ false,
+                                   });
         }
 
         auto new_params = backend->FinalizeInputs();

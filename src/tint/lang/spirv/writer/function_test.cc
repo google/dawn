@@ -347,11 +347,31 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
 }
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
-    auto* outputs = ty.Struct(mod.symbols.New("Outputs"),
-                              {
-                                  {mod.symbols.Register("a"), ty.f32(), {0u, 0u, {}, {}, false}},
-                                  {mod.symbols.Register("b"), ty.f32(), {0u, 1u, {}, {}, false}},
-                              });
+    auto* outputs =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.Register("a"),
+                                                      ty.f32(),
+                                                      core::type::StructMemberAttributes{
+                                                          /* location */ 0u,
+                                                          /* index */ 0u,
+                                                          /* builtin */ std::nullopt,
+                                                          /* interpolation */ std::nullopt,
+                                                          /* invariant */ false,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.Register("b"),
+                                                      ty.f32(),
+                                                      core::type::StructMemberAttributes{
+                                                          /* location */ 0u,
+                                                          /* index */ 1u,
+                                                          /* builtin */ std::nullopt,
+                                                          /* interpolation */ std::nullopt,
+                                                          /* invariant */ false,
+                                                      },
+                                                  },
+                                              });
 
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //

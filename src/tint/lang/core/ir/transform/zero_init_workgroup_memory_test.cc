@@ -1486,20 +1486,31 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
 TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
     auto* var = MakeVar("wgvar", ty.bool_());
 
-    auto* structure =
-        ty.Struct(mod.symbols.New("MyStruct"),
-                  {
-                      {
-                          mod.symbols.New("global_id"),
-                          ty.vec3<u32>(),
-                          {{}, {}, core::BuiltinValue::kGlobalInvocationId, {}, false},
-                      },
-                      {
-                          mod.symbols.New("index"),
-                          ty.u32(),
-                          {{}, {}, core::BuiltinValue::kLocalInvocationIndex, {}, false},
-                      },
-                  });
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"),
+                                {
+                                    {
+                                        mod.symbols.New("global_id"),
+                                        ty.vec3<u32>(),
+                                        core::type::StructMemberAttributes{
+                                            /* location */ {},
+                                            /* index */ {},
+                                            /* builtin */ core::BuiltinValue::kGlobalInvocationId,
+                                            /* interpolation */ {},
+                                            /* invariant */ false,
+                                        },
+                                    },
+                                    {
+                                        mod.symbols.New("index"),
+                                        ty.u32(),
+                                        core::type::StructMemberAttributes{
+                                            /* location */ {},
+                                            /* index */ {},
+                                            /* builtin */ core::BuiltinValue::kLocalInvocationIndex,
+                                            /* interpolation */ {},
+                                            /* invariant */ false,
+                                        },
+                                    },
+                                });
     auto* func = MakeEntryPoint("main", 1, 1, 1);
     func->SetParams({b.FunctionParam("params", structure)});
     b.Append(func->Block(), [&] {  //
