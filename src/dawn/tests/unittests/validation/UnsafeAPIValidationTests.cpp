@@ -135,5 +135,33 @@ TEST_F(UnsafeAPIValidationTest, SeparateRenderBundleDepthStencilReadOnlyness) {
     }
 }
 
+class TimestampQueryUnsafeAPIValidationTest : public ValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+        descriptor.nextInChain = &deviceTogglesDesc;
+        const char* toggle = "allow_unsafe_apis";
+        deviceTogglesDesc.disabledToggles = &toggle;
+        deviceTogglesDesc.disabledToggleCount = 1;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeatureCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Check write timestamp on command encoder is an unsafe API.
+TEST_F(TimestampQueryUnsafeAPIValidationTest, WriteTimestampOnCommandEncoder) {
+    wgpu::QuerySetDescriptor descriptor;
+    descriptor.type = wgpu::QueryType::Timestamp;
+    descriptor.count = 2;
+
+    wgpu::QuerySet timestampQuerySet = device.CreateQuerySet(&descriptor);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.WriteTimestamp(timestampQuerySet, 0);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 }  // anonymous namespace
 }  // namespace dawn

@@ -2004,6 +2004,9 @@ void CommandEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryInd
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
+            DAWN_INVALID_IF(!GetDevice()->IsToggleEnabled(Toggle::AllowUnsafeAPIs),
+                            "writeTimestamp requires enabling toggle allow_unsafe_apis.");
+
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateTimestampQuery(GetDevice(), querySet, queryIndex));
             }
