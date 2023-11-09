@@ -48,6 +48,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_dp4a") {
         return Extension::kChromiumExperimentalDp4A;
     }
+    if (str == "chromium_experimental_framebuffer_fetch") {
+        return Extension::kChromiumExperimentalFramebufferFetch;
+    }
     if (str == "chromium_experimental_full_ptr_parameters") {
         return Extension::kChromiumExperimentalFullPtrParameters;
     }
@@ -83,6 +86,8 @@ std::string_view ToString(Extension value) {
             return "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalDp4A:
             return "chromium_experimental_dp4a";
+        case Extension::kChromiumExperimentalFramebufferFetch:
+            return "chromium_experimental_framebuffer_fetch";
         case Extension::kChromiumExperimentalFullPtrParameters:
             return "chromium_experimental_full_ptr_parameters";
         case Extension::kChromiumExperimentalPixelLocal:

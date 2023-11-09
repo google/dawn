@@ -87,7 +87,11 @@ enum extension {
   // A Chromium-specific extension that enables dual source blending.
   chromium_internal_dual_source_blending
   // A Chromium-specific extension that enables pixel local storage.
+  // Cannot be used with chromium_experimental_framebuffer_fetch
   chromium_experimental_pixel_local
+  // A Chromium-specific extension that enables framebuffer fetching.
+  // Cannot be used with chromium_experimental_pixel_local
+  chromium_experimental_framebuffer_fetch
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
