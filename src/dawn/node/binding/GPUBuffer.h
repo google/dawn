@@ -71,7 +71,7 @@ class GPUBuffer final : public interop::GPUBuffer {
     void setLabel(Napi::Env, std::string value) override;
 
   private:
-    void DetachMappings();
+    void DetachMappings(Napi::Env env);
 
     struct Mapping {
         uint64_t start;
@@ -93,8 +93,9 @@ class GPUBuffer final : public interop::GPUBuffer {
     wgpu::BufferDescriptor const desc_;
     wgpu::Device const device_;
     std::shared_ptr<AsyncRunner> async_;
-    State state_ = State::Unmapped;
-    std::vector<Mapping> mapped_;
+    std::vector<Mapping> mappings_;
+    bool mapped_;
+    std::optional<interop::Promise<void>> pending_map_;
     std::string label_;
 };
 

@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/GPUBuffer.h"
 
+#include <cassert>
 #include <memory>
 #include <utility>
 
@@ -38,8 +39,6 @@ namespace wgpu::binding {
 
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUBuffer
-// TODO(crbug.com/dawn/1134): We may be doing more validation here than necessary. Once CTS is
-// robustly passing, pull out validation and see what / if breaks.
 ////////////////////////////////////////////////////////////////////////////////
 GPUBuffer::GPUBuffer(wgpu::Buffer buffer,
                      wgpu::BufferDescriptor desc,
@@ -49,95 +48,90 @@ GPUBuffer::GPUBuffer(wgpu::Buffer buffer,
       desc_(desc),
       device_(std::move(device)),
       async_(std::move(async)),
-      label_(desc.label ? desc.label : "") {
-    if (desc.mappedAtCreation) {
-        state_ = State::MappedAtCreation;
-    }
-}
+      mapped_(desc.mappedAtCreation),
+      label_(desc.label ? desc.label : "") {}
 
 interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
-                                           interop::GPUMapModeFlags mode,
+                                           interop::GPUMapModeFlags modeIn,
                                            interop::GPUSize64 offset,
                                            std::optional<interop::GPUSize64> size) {
-    wgpu::MapMode md{};
-    Converter conv(env);
-    if (!conv(md, mode)) {
-        interop::Promise<void> promise(env, PROMISE_INFO);
+    // Convert the mapMode and reject with the TypeError if it happens.
+    Converter conv(env, device_, true);
+    wgpu::MapMode mode;
+    if (!conv(mode, modeIn)) {
+        auto promise = interop::Promise<void>(env, PROMISE_INFO);
+        promise.Reject(conv.AcquireException());
+        return promise;
+    }
+
+    // Early rejection when there is already a mapping pending.
+    if (pending_map_) {
+        auto promise = interop::Promise<void>(env, PROMISE_INFO);
         promise.Reject(Errors::OperationError(env));
         return promise;
     }
 
-    if (state_ != State::Unmapped) {
-        interop::Promise<void> promise(env, PROMISE_INFO);
-        promise.Reject(Errors::OperationError(env));
-        device_.InjectError(wgpu::ErrorType::Validation,
-                            "mapAsync called on buffer that is not in the unmapped state");
-        return promise;
-    }
+    pending_map_.emplace(env, PROMISE_INFO);
+    uint64_t rangeSize = size.has_value() ? size.value().value : (desc_.size - offset);
 
     struct Context {
         Napi::Env env;
-        interop::Promise<void> promise;
+        GPUBuffer* self;
         AsyncTask task;
-        State& state;
+        interop::Promise<void> promise;
     };
-    auto ctx =
-        new Context{env, interop::Promise<void>(env, PROMISE_INFO), AsyncTask(async_), state_};
-    auto promise = ctx->promise;
-
-    uint64_t s = size.has_value() ? size.value().value : (desc_.size - offset);
-
-    state_ = State::MappingPending;
+    auto ctx = new Context{env, this, AsyncTask(async_), *pending_map_};
 
     buffer_.MapAsync(
-        md, offset, s,
+        mode, offset, rangeSize,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             auto c = std::unique_ptr<Context>(static_cast<Context*>(userdata));
-            c->state = State::Unmapped;
+
+            // The promise may already have been resolved with an AbortError if there was an early
+            // destroy() or early unmap().
+            if (c->promise.GetState() != interop::PromiseState::Pending) {
+                assert(c->promise.GetState() == interop::PromiseState::Rejected);
+                return;
+            }
+
             switch (status) {
                 case WGPUBufferMapAsyncStatus_Force32:
                     UNREACHABLE("WGPUBufferMapAsyncStatus_Force32");
                     break;
                 case WGPUBufferMapAsyncStatus_Success:
                     c->promise.Resolve();
-                    c->state = State::Mapped;
+                    c->self->mapped_ = true;
                     break;
                 case WGPUBufferMapAsyncStatus_ValidationError:
-                    c->promise.Reject(Errors::OperationError(c->env));
-                    break;
                 case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
                 case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
                 case WGPUBufferMapAsyncStatus_MappingAlreadyPending:
                 case WGPUBufferMapAsyncStatus_OffsetOutOfRange:
                 case WGPUBufferMapAsyncStatus_SizeOutOfRange:
-                    c->promise.Reject(Errors::AbortError(c->env));
-                    break;
-                case WGPUBufferMapAsyncStatus_Unknown:
                 case WGPUBufferMapAsyncStatus_DeviceLost:
-                    // TODO(dawn:1123): The spec is a bit vague around what the promise should
-                    // do here.
-                    c->promise.Reject(Errors::UnknownError(c->env));
+                case WGPUBufferMapAsyncStatus_Unknown:
+                    c->self->async_->Reject(c->promise, Errors::OperationError(c->env));
                     break;
             }
+
+            // This captured promise is the currently pending mapping, reset it so we can start new
+            // mappings.
+            assert(*c->self->pending_map_ == c->promise);
+            c->self->pending_map_.reset();
         },
         ctx);
 
-    return promise;
+    return pending_map_.value();
 }
 
 interop::ArrayBuffer GPUBuffer::getMappedRange(Napi::Env env,
                                                interop::GPUSize64 offset,
                                                std::optional<interop::GPUSize64> size) {
-    if (state_ != State::Mapped && state_ != State::MappedAtCreation) {
-        Errors::OperationError(env).ThrowAsJavaScriptException();
-        return {};
-    }
-
     uint64_t s = size.has_value() ? size.value().value : (desc_.size - offset);
 
     uint64_t start = offset;
     uint64_t end = offset + s;
-    for (auto& mapping : mapped_) {
+    for (auto& mapping : mappings_) {
         if (mapping.Intersects(start, end)) {
             Errors::OperationError(env).ThrowAsJavaScriptException();
             return {};
@@ -153,30 +147,18 @@ interop::ArrayBuffer GPUBuffer::getMappedRange(Napi::Env env,
     }
     auto array_buffer = Napi::ArrayBuffer::New(env, ptr, s);
     // TODO(crbug.com/dawn/1135): Ownership here is the wrong way around.
-    mapped_.emplace_back(Mapping{start, end, Napi::Persistent(array_buffer)});
+    mappings_.emplace_back(Mapping{start, end, Napi::Persistent(array_buffer)});
     return array_buffer;
 }
 
 void GPUBuffer::unmap(Napi::Env env) {
+    DetachMappings(env);
     buffer_.Unmap();
-
-    if (state_ != State::Destroyed && state_ != State::Unmapped) {
-        DetachMappings();
-        state_ = State::Unmapped;
-    }
 }
 
-void GPUBuffer::destroy(Napi::Env) {
-    if (state_ == State::Destroyed) {
-        return;
-    }
-
-    if (state_ != State::Unmapped) {
-        DetachMappings();
-    }
-
+void GPUBuffer::destroy(Napi::Env env) {
+    DetachMappings(env);
     buffer_.Destroy();
-    state_ = State::Destroyed;
 }
 
 interop::GPUSize64Out GPUBuffer::getSize(Napi::Env) {
@@ -184,16 +166,16 @@ interop::GPUSize64Out GPUBuffer::getSize(Napi::Env) {
 }
 
 interop::GPUBufferMapState GPUBuffer::getMapState(Napi::Env env) {
-    interop::GPUBufferMapState result;
-
-    Converter conv(env);
-    if (!conv(result, buffer_.GetMapState())) {
-        Napi::Error::New(env, "Couldn't convert usage to a JavaScript value.")
-            .ThrowAsJavaScriptException();
-        return interop::GPUBufferMapState::kUnmapped;
+    if (mapped_) {
+        return interop::GPUBufferMapState::kMapped;
     }
 
-    return result;
+    if (pending_map_) {
+        assert(pending_map_->GetState() == interop::PromiseState::Pending);
+        return interop::GPUBufferMapState::kPending;
+    }
+
+    return interop::GPUBufferMapState::kUnmapped;
 }
 
 interop::GPUFlagsConstant GPUBuffer::getUsage(Napi::Env env) {
@@ -209,11 +191,18 @@ interop::GPUFlagsConstant GPUBuffer::getUsage(Napi::Env env) {
     return result;
 }
 
-void GPUBuffer::DetachMappings() {
-    for (auto& mapping : mapped_) {
+void GPUBuffer::DetachMappings(Napi::Env env) {
+    mapped_ = false;
+
+    if (pending_map_) {
+        pending_map_->Reject(Errors::AbortError(env));
+        pending_map_.reset();
+    }
+
+    for (auto& mapping : mappings_) {
         mapping.buffer.Value().Detach();
     }
-    mapped_.clear();
+    mappings_.clear();
 }
 
 std::string GPUBuffer::getLabel(Napi::Env) {

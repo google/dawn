@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "dawn/webgpu_cpp.h"
+#include "src/dawn/node/interop/Core.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 
 namespace wgpu::binding {
@@ -53,6 +54,12 @@ class AsyncRunner {
     // End() should be called once the asynchronous task has finished.
     // Every call to Begin() should eventually result in a call to End().
     void End();
+
+    // Rejects the promise after the current task in the event loop. This is useful to preserve
+    // some of the semantics of WebGPU w.r.t. the JavaScript event loop. Reject() can be called
+    // any time, but callers need to make sure that the Promise is (rejected or resolved) only
+    // once.
+    void Reject(interop::Promise<void> promise, Napi::Error error);
 
   private:
     void QueueTick();

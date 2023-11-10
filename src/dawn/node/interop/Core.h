@@ -212,6 +212,10 @@ class PromiseBase {
     inline operator Napi::Value() const { return state_->deferred.Promise(); }
     inline operator Napi::Promise() const { return state_->deferred.Promise(); }
 
+    // Comparison operator between promises
+    bool operator==(const PromiseBase& other) { return state_ == other.state_; }
+    bool operator!=(const PromiseBase& other) { return !(*this == other); }
+
     // Reject() rejects the promise with the given failure value.
     void Reject(Napi::Value value) const {
         state_->deferred.Reject(value);

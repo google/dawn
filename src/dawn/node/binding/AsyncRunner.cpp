@@ -69,4 +69,12 @@ void AsyncRunner::QueueTick() {
         });
 }
 
+void AsyncRunner::Reject(interop::Promise<void> promise, Napi::Error error) {
+    env_.Global()
+        .Get("setImmediate")
+        .As<Napi::Function>()
+        .Call({Napi::Function::New(
+            env_, [promise, error](const Napi::CallbackInfo&) { promise.Reject(error); })});
+}
+
 }  // namespace wgpu::binding
