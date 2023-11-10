@@ -74,6 +74,11 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
                         "D3D11 InfoQueue pushing storage filter");
 }
 
+bool IsDebugLayerEnabled(const ComPtr<ID3D11Device>& d3d11Device) {
+    ComPtr<ID3D11Debug> d3d11Debug;
+    return SUCCEEDED(d3d11Device.As(&d3d11Debug));
+}
+
 }  // namespace
 
 PhysicalDevice::PhysicalDevice(Backend* backend,
@@ -106,34 +111,54 @@ const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
 }
 
 ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
-    ComPtr<ID3D11Device> device = mD3D11Device;
+    if (mIsSharedD3D11Device) {
+        DAWN_ASSERT(mD3D11Device);
+        // If the shared d3d11 device was created with debug layer, we have to initialize debug
+        // layer filters to avoid some unwanted warnings.
+        if (IsDebugLayerEnabled(mD3D11Device)) {
+            DAWN_TRY(InitializeDebugLayerFilters(mD3D11Device));
+        }
+        return ComPtr<ID3D11Device>(mD3D11Device);
+    }
 
-    if (!mIsSharedD3D11Device) {
+    // If there mD3D11Device which is used for collecting GPU info is not null, try to use it.
+    if (mD3D11Device) {
+        bool isDebugLayerEnabled = IsDebugLayerEnabled(mD3D11Device);
+        // Backend validation level doesn't match, recreate the d3d11 device.
+        if (GetInstance()->IsBackendValidationEnabled() == isDebugLayerEnabled) {
+            return std::move(mD3D11Device);
+        }
         mD3D11Device = nullptr;
     }
 
-    if (!device) {
-        const PlatformFunctions* functions = static_cast<Backend*>(GetBackend())->GetFunctions();
-        const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
+    const PlatformFunctions* functions = static_cast<Backend*>(GetBackend())->GetFunctions();
+    const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
 
-        UINT flags = 0;
-        if (GetInstance()->IsBackendValidationEnabled()) {
-            flags |= D3D11_CREATE_DEVICE_DEBUG;
-        }
+    ComPtr<ID3D11Device> d3d11Device;
 
-        DAWN_TRY(CheckHRESULT(functions->d3d11CreateDevice(
-                                  GetHardwareAdapter(), D3D_DRIVER_TYPE_UNKNOWN,
-                                  /*Software=*/nullptr, flags, featureLevels,
-                                  std::size(featureLevels), D3D11_SDK_VERSION, &device,
-                                  /*pFeatureLevel=*/nullptr, /*[out] ppImmediateContext=*/nullptr),
-                              "D3D11CreateDevice failed"));
+    if (GetInstance()->IsBackendValidationEnabled()) {
+        // Try create d3d11 device with debug layer.
+        HRESULT hr = functions->d3d11CreateDevice(
+            GetHardwareAdapter(), D3D_DRIVER_TYPE_UNKNOWN,
+            /*Software=*/nullptr, D3D11_CREATE_DEVICE_DEBUG, featureLevels,
+            std::size(featureLevels), D3D11_SDK_VERSION, &d3d11Device,
+            /*pFeatureLevel=*/nullptr, /*[out] ppImmediateContext=*/nullptr);
 
-        if (GetInstance()->IsBackendValidationEnabled()) {
-            DAWN_TRY(InitializeDebugLayerFilters(device));
+        if (SUCCEEDED(hr)) {
+            DAWN_ASSERT(IsDebugLayerEnabled(d3d11Device));
+            DAWN_TRY(InitializeDebugLayerFilters(d3d11Device));
+            return d3d11Device;
         }
     }
 
-    return device;
+    DAWN_TRY(CheckHRESULT(functions->d3d11CreateDevice(
+                              GetHardwareAdapter(), D3D_DRIVER_TYPE_UNKNOWN,
+                              /*Software=*/nullptr, /*Flags=*/0, featureLevels,
+                              std::size(featureLevels), D3D11_SDK_VERSION, &d3d11Device,
+                              /*pFeatureLevel=*/nullptr, /*[out] ppImmediateContext=*/nullptr),
+                          "D3D11CreateDevice failed"));
+
+    return d3d11Device;
 }
 
 MaybeError PhysicalDevice::InitializeImpl() {
@@ -141,7 +166,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // D3D11 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
-    DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device());
+    if (!mIsSharedD3D11Device) {
+        DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device());
+    }
 
     mFeatureLevel = mD3D11Device->GetFeatureLevel();
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(mD3D11Device));
