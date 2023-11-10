@@ -108,14 +108,9 @@ void EmitJson(const tint::Program& program) {
         std::cout << std::endl;
         std::cout << "{" << std::endl;
         std::cout << "\"name\": \"" << var.name << "\"";
-        if (var.has_location_attribute) {
-            std::cout << "," << std::endl;
-            std::cout << "\"location\": " << var.location_attribute << "," << std::endl;
-            std::cout << "\"component_type\": \""
-                      << tint::cmd::ComponentTypeToString(var.component_type) << "\"," << std::endl;
-            std::cout << "\"composition_type\": \""
-                      << tint::cmd::CompositionTypeToString(var.composition_type) << "\","
-                      << std::endl;
+        std::cout << "," << std::endl;
+        if (auto location = var.attributes.location) {
+            std::cout << "\"location\": " << location.value() << "," << std::endl;
             std::cout << "\"interpolation\": {" << std::endl;
             std::cout << "\"type\": \""
                       << tint::cmd::InterpolationTypeToString(var.interpolation_type) << "\","
@@ -123,8 +118,15 @@ void EmitJson(const tint::Program& program) {
             std::cout << "\"sampling\": \""
                       << tint::cmd::InterpolationSamplingToString(var.interpolation_sampling)
                       << "\"" << std::endl;
-            std::cout << "}" << std::endl;
+            std::cout << "}," << std::endl;
         }
+        if (auto color = var.attributes.color) {
+            std::cout << "\"color\": " << color.value() << "," << std::endl;
+        }
+        std::cout << "\"component_type\": \""
+                  << tint::cmd::ComponentTypeToString(var.component_type) << "\"," << std::endl;
+        std::cout << "\"composition_type\": \""
+                  << tint::cmd::CompositionTypeToString(var.composition_type) << "\"" << std::endl;
         std::cout << std::endl;
         std::cout << "}";
     };

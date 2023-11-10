@@ -178,7 +178,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(),
                                     param->Declaration()->name->symbol.Name(), param->Type(),
                                     param->Declaration()->attributes, param->Attributes().location,
-                                    entry_point.input_variables);
+                                    param->Attributes().color, entry_point.input_variables);
 
         entry_point.input_position_used |= ContainsBuiltin(
             core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
@@ -198,7 +198,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
 
     if (!sem->ReturnType()->Is<core::type::Void>()) {
         AddEntryPointInOutVariables("<retval>", "", sem->ReturnType(), func->return_type_attributes,
-                                    sem->ReturnLocation(), entry_point.output_variables);
+                                    sem->ReturnLocation(), /* @color */ std::nullopt,
+                                    entry_point.output_variables);
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
             core::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
@@ -581,6 +582,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
                                             const core::type::Type* type,
                                             VectorRef<const ast::Attribute*> attributes,
                                             std::optional<uint32_t> location,
+                                            std::optional<uint32_t> color,
                                             std::vector<StageVariable>& variables) const {
     // Skip builtins.
     if (ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -594,7 +596,8 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
         for (auto* member : struct_ty->Members()) {
             AddEntryPointInOutVariables(name + "." + member->Name().Name(), member->Name().Name(),
                                         member->Type(), member->Declaration()->attributes,
-                                        member->Attributes().location, variables);
+                                        member->Attributes().location, member->Attributes().color,
+                                        variables);
         }
         return;
     }
@@ -607,9 +610,8 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     std::tie(stage_variable.component_type, stage_variable.composition_type) =
         CalculateComponentAndComposition(type);
 
-    TINT_ASSERT(location.has_value());
-    stage_variable.has_location_attribute = true;
-    stage_variable.location_attribute = location.value();
+    stage_variable.attributes.location = location;
+    stage_variable.attributes.color = color;
 
     std::tie(stage_variable.interpolation_type, stage_variable.interpolation_sampling) =
         CalculateInterpolationData(type, attributes);

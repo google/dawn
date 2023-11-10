@@ -270,8 +270,12 @@ void PrintInspectorData(tint::inspector::Inspector& inspector) {
             for (const auto& var : entry_point.input_variables) {
                 std::cout << "\t";
 
-                if (var.has_location_attribute) {
-                    std::cout << "@location(" << var.location_attribute << ") ";
+                if (auto location = var.attributes.location) {
+                    std::cout << "@location(" << location.value() << ") ";
+                }
+
+                if (auto color = var.attributes.color) {
+                    std::cout << "@color(" << color.value() << ") ";
                 }
                 std::cout << var.name << std::endl;
             }
@@ -282,8 +286,8 @@ void PrintInspectorData(tint::inspector::Inspector& inspector) {
             for (const auto& var : entry_point.output_variables) {
                 std::cout << "\t";
 
-                if (var.has_location_attribute) {
-                    std::cout << "@location(" << var.location_attribute << ") ";
+                if (auto location = var.attributes.location) {
+                    std::cout << "@location(" << location.value() << ") ";
                 }
                 std::cout << var.name << std::endl;
             }

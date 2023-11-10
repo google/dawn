@@ -627,7 +627,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
     if (metadata->stage == SingleShaderStage::Vertex) {
         for (const auto& inputVar : entryPoint.input_variables) {
-            uint32_t unsanitizedLocation = inputVar.location_attribute;
+            uint32_t unsanitizedLocation = inputVar.attributes.location.value();
             if (DelayedInvalidIf(unsanitizedLocation >= maxVertexAttributes,
                                  "Vertex input variable \"%s\" has a location (%u) that "
                                  "exceeds the maximum (%u)",
@@ -656,7 +656,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                 outputVar.interpolation_sampling));
             totalInterStageShaderComponents += variable.componentCount;
 
-            uint32_t location = outputVar.location_attribute;
+            uint32_t location = outputVar.attributes.location.value();
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
                                  "Vertex output variable \"%s\" has a location (%u) that "
                                  "is greater than or equal to (%u).",
@@ -680,29 +680,33 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     if (metadata->stage == SingleShaderStage::Fragment) {
         uint32_t totalInterStageShaderComponents = 0;
         for (const auto& inputVar : entryPoint.input_variables) {
-            EntryPointMetadata::InterStageVariableInfo variable;
-            variable.name = inputVar.variable_name;
-            DAWN_TRY_ASSIGN(variable.baseType,
-                            TintComponentTypeToInterStageComponentType(inputVar.component_type));
-            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
-                                                         inputVar.composition_type));
-            DAWN_TRY_ASSIGN(variable.interpolationType,
-                            TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
-            DAWN_TRY_ASSIGN(variable.interpolationSampling,
-                            TintInterpolationSamplingToInterpolationSamplingType(
-                                inputVar.interpolation_sampling));
-            totalInterStageShaderComponents += variable.componentCount;
+            if (inputVar.attributes.location.has_value()) {
+                uint32_t location = inputVar.attributes.location.value();
+                EntryPointMetadata::InterStageVariableInfo variable;
+                variable.name = inputVar.variable_name;
+                DAWN_TRY_ASSIGN(variable.baseType, TintComponentTypeToInterStageComponentType(
+                                                       inputVar.component_type));
+                DAWN_TRY_ASSIGN(
+                    variable.componentCount,
+                    TintCompositionTypeToInterStageComponentCount(inputVar.composition_type));
+                DAWN_TRY_ASSIGN(
+                    variable.interpolationType,
+                    TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
+                DAWN_TRY_ASSIGN(variable.interpolationSampling,
+                                TintInterpolationSamplingToInterpolationSamplingType(
+                                    inputVar.interpolation_sampling));
+                totalInterStageShaderComponents += variable.componentCount;
 
-            uint32_t location = inputVar.location_attribute;
-            if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
-                                 "Fragment input variable \"%s\" has a location (%u) that "
-                                 "is greater than or equal to (%u).",
-                                 inputVar.name, location, maxInterStageShaderVariables)) {
-                continue;
+                if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
+                                     "Fragment input variable \"%s\" has a location (%u) that "
+                                     "is greater than or equal to (%u).",
+                                     inputVar.name, location, maxInterStageShaderVariables)) {
+                    continue;
+                }
+
+                metadata->usedInterStageVariables[location] = true;
+                metadata->interStageVariables[location] = variable;
             }
-
-            metadata->usedInterStageVariables[location] = true;
-            metadata->interStageVariables[location] = variable;
         }
 
         if (entryPoint.front_facing_used) {
@@ -731,7 +735,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                                          outputVar.composition_type));
             DAWN_ASSERT(variable.componentCount <= 4);
 
-            uint32_t unsanitizedAttachment = outputVar.location_attribute;
+            uint32_t unsanitizedAttachment = outputVar.attributes.location.value();
             if (DelayedInvalidIf(unsanitizedAttachment >= maxColorAttachments,
                                  "Fragment output variable \"%s\" has a location (%u) that "
                                  "exceeds the maximum (%u).",

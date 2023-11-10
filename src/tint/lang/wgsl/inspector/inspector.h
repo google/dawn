@@ -174,13 +174,15 @@ class Inspector {
     /// @param variable_name the name of the variable being added
     /// @param type the type of the variable
     /// @param attributes the variable attributes
-    /// @param location the location value if provided
+    /// @param location the location attribute value if provided
+    /// @param color the color attribute value if provided
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
                                      std::string variable_name,
                                      const core::type::Type* type,
                                      VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,
+                                     std::optional<uint32_t> color,
                                      std::vector<StageVariable>& variables) const;
 
     /// Recursively determine if the type contains builtin.
