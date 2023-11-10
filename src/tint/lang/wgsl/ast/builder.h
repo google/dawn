@@ -67,6 +67,7 @@
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/case_statement.h"
+#include "src/tint/lang/wgsl/ast/color_attribute.h"
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/const.h"
 #include "src/tint/lang/wgsl/ast/const_assert.h"
@@ -3165,6 +3166,23 @@ class Builder {
     template <typename EXPR>
     const ast::LocationAttribute* Location(const Source& source, EXPR&& location) {
         return create<ast::LocationAttribute>(source, Expr(std::forward<EXPR>(location)));
+    }
+
+    /// Creates an ast::ColorAttribute
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::ColorAttribute* Color(EXPR&& index) {
+        return create<ast::ColorAttribute>(source_, Expr(std::forward<EXPR>(index)));
+    }
+
+    /// Creates an ast::ColorAttribute
+    /// @param source the source information
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::ColorAttribute* Color(const Source& source, EXPR&& index) {
+        return create<ast::ColorAttribute>(source, Expr(std::forward<EXPR>(index)));
     }
 
     /// Creates an ast::LocationAttribute

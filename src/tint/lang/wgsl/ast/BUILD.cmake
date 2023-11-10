@@ -77,6 +77,8 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/case_statement.h
   lang/wgsl/ast/clone_context.cc
   lang/wgsl/ast/clone_context.h
+  lang/wgsl/ast/color_attribute.cc
+  lang/wgsl/ast/color_attribute.h
   lang/wgsl/ast/compound_assignment_statement.cc
   lang/wgsl/ast/compound_assignment_statement.h
   lang/wgsl/ast/const.cc
@@ -244,6 +246,7 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/case_selector_test.cc
   lang/wgsl/ast/case_statement_test.cc
   lang/wgsl/ast/clone_context_test.cc
+  lang/wgsl/ast/color_attribute_test.cc
   lang/wgsl/ast/compound_assignment_statement_test.cc
   lang/wgsl/ast/const_assert_test.cc
   lang/wgsl/ast/continue_statement_test.cc

@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,42 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/helper_test.h"
-#include "src/tint/lang/wgsl/reader/parser/helper_test.h"
+#include "gtest/gtest-spi.h"
 
-namespace tint::wgsl::reader {
+#include "src/tint/lang/wgsl/ast/color_attribute.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
+
+using namespace tint::core::number_suffixes;  // NOLINT
+
+namespace tint::ast {
 namespace {
 
-TEST_F(WGSLParserTest, AttributeList_Parses) {
-    auto p = parser(R"(@location(4) @builtin(position))");
-    auto attrs = p->attribute_list();
-    ASSERT_FALSE(p->has_error()) << p->error();
-    ASSERT_FALSE(attrs.errored);
-    ASSERT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.Length(), 2u);
+using ColorAttributeTest = TestHelper;
 
-    auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
-    auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
-    ASSERT_NE(attr_0, nullptr);
-    ASSERT_NE(attr_1, nullptr);
-
-    ASSERT_TRUE(attr_0->Is<ast::LocationAttribute>());
-
-    auto* loc = attr_0->As<ast::LocationAttribute>();
-    ASSERT_TRUE(loc->expr->Is<ast::IntLiteralExpression>());
-    auto* exp = loc->expr->As<ast::IntLiteralExpression>();
-    EXPECT_EQ(exp->value, 4u);
-
-    ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
-    ast::CheckIdentifier(attr_1->As<ast::BuiltinAttribute>()->builtin, "position");
+TEST_F(ColorAttributeTest, Creation) {
+    auto* expr = Expr(1_u);
+    auto* c = Color(expr);
+    EXPECT_EQ(c->expr, expr);
 }
 
-TEST_F(WGSLParserTest, AttributeList_Invalid) {
-    auto p = parser(R"(@invalid)");
-    auto attrs = p->attribute_list();
-    EXPECT_TRUE(p->has_error());
-    EXPECT_TRUE(attrs.errored);
-    EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.IsEmpty());
-    EXPECT_EQ(p->error(), R"(1:2: expected attribute
-Did you mean 'invariant'?
-Possible values: 'align', 'binding', 'builtin', 'color', 'compute', 'diagnostic', 'fragment', 'group', 'id', 'index', 'interpolate', 'invariant', 'location', 'must_use', 'size', 'vertex', 'workgroup_size')");
+TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Color(nullptr);
+        },
+        "internal compiler error");
+}
+
+TEST_F(ColorAttributeTest, Assert_DifferentGenerationID_Color) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.Color(b2.Expr(1_u));
+        },
+        "internal compiler error");
 }
 
 }  // namespace
-}  // namespace tint::wgsl::reader
+}  // namespace tint::ast

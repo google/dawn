@@ -51,6 +51,9 @@ Attribute ParseAttribute(std::string_view str) {
     if (str == "builtin") {
         return Attribute::kBuiltin;
     }
+    if (str == "color") {
+        return Attribute::kColor;
+    }
     if (str == "compute") {
         return Attribute::kCompute;
     }
@@ -103,6 +106,8 @@ std::string_view ToString(Attribute value) {
             return "binding";
         case Attribute::kBuiltin:
             return "builtin";
+        case Attribute::kColor:
+            return "color";
         case Attribute::kCompute:
             return "compute";
         case Attribute::kDiagnostic:
