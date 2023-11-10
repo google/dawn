@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-11-09 07:46:18AM
+# Last rolled: 2023-11-10 09:13:42AM
 
 # snorm / stencil8 issues
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="r8snorm";dimension="3d" [ Failure ]
@@ -160,13 +160,6 @@ crbug.com/dawn/2076 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2D
 crbug.com/dawn/2076 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
 crbug.com/dawn/2076 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
 crbug.com/dawn/2076 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-
-# Texture internal usage doesn't include TextureUsage::TextureBinding.
-# WebGPUTextureAlphaClearer usage doesn't include TextureUsage::RenderAttachment.
-crbug.com/dawn/2187 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl";upload="texImage2D" [ Failure ]
-crbug.com/dawn/2187 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl";upload="texSubImage2D" [ Failure ]
-crbug.com/dawn/2187 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl2";upload="texImage2D" [ Failure ]
-crbug.com/dawn/2187 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="bgra8unorm";alphaMode="opaque";webgl="webgl2";upload="texSubImage2D" [ Failure ]
 
 # View format reinterpretation is unsupported on OpenGLES
 crbug.com/dawn/1360 webgpu:api,operation,texture_view,format_reinterpretation:render_and_resolve_attachment:format="rgba8unorm";viewFormat="rgba8unorm-srgb";sampleCount=1 [ Failure ]
@@ -272,37 +265,30 @@ crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 
 # Usage does not include Texture Binding
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,* [ Failure ]
-[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,* [ Failure ]
-[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:* [ Failure ]
-[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:* [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";alphaMode="opaque";webgl="webgl";upload="texImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";alphaMode="opaque";webgl="webgl";upload="texSubImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";alphaMode="opaque";webgl="webgl2";upload="texImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";alphaMode="opaque";webgl="webgl2";upload="texSubImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="opaque";webgl="webgl";upload="texImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="opaque";webgl="webgl";upload="texSubImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="opaque";webgl="webgl2";upload="texImage2D" [ Failure ]
-webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="opaque";webgl="webgl2";upload="texSubImage2D" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="transferToImageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+[ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+[ intel-0x9bc5 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
 
 # Memory Sync
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ RetryOnFailure ]
 
 # maxStorageBuffersPerShaderStage (layout qualifiers issue)
 crbug.com/dawn/2203 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
@@ -625,7 +611,7 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rg8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba8snorm";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
+[ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r8snorm" [ Failure ]
@@ -872,8 +858,15 @@ crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc
 crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_usages_in_copy_and_render_pass:usage0="texture";usage1="copy-src" [ Failure ]
 
 ################################################################################
+# New flakes. Please triage:
+################################################################################
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
+
+################################################################################
 # New failures. Please triage:
 ################################################################################
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
