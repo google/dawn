@@ -154,6 +154,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kFrontFacing,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -165,6 +166,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ true,
@@ -176,6 +178,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -187,6 +190,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 1u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */
                                          core::Interpolation{
@@ -302,6 +306,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ true,
@@ -313,6 +318,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -514,6 +520,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ true,
@@ -525,6 +532,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -536,6 +544,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 1u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */
                                          core::Interpolation{
@@ -621,6 +630,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
                                                      core::type::StructMemberAttributes{
                                                          /* location */ 0u,
                                                          /* index */ 0u,
+                                                         /* color */ std::nullopt,
                                                          /* builtin */ std::nullopt,
                                                          /* interpolation */ std::nullopt,
                                                          /* invariant */ false,
@@ -632,6 +642,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
                                                      core::type::StructMemberAttributes{
                                                          /* location */ 0u,
                                                          /* index */ 1u,
+                                                         /* color */ std::nullopt,
                                                          /* builtin */ std::nullopt,
                                                          /* interpolation */ std::nullopt,
                                                          /* invariant */ false,
@@ -707,6 +718,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -718,6 +730,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -846,6 +859,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -857,6 +871,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -939,6 +954,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -950,6 +966,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kSampleMask,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -1033,6 +1050,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
                                                        core::type::StructMemberAttributes{
                                                            /* location */ 1u,
                                                            /* index */ std::nullopt,
+                                                           /* color */ std::nullopt,
                                                            /* builtin */ std::nullopt,
                                                            /* interpolation */
                                                            core::Interpolation{
@@ -1180,6 +1198,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,
@@ -1191,6 +1210,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
                                          /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kFragDepth,
                                          /* interpolation */ std::nullopt,
                                          /* invariant */ false,

@@ -1692,6 +1692,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
              Param(Sym(), T,
                    Vector{
                        Location(V),  // Parameter attributes
+                       Color(V),
                        Builtin(V),
                        Interpolate(V),
                        Interpolate(V, V),

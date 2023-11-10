@@ -168,6 +168,11 @@ class Validator {
     /// @returns true if the given type is host-shareable
     bool IsHostShareable(const core::type::Type* type) const;
 
+    /// Validates the enabled extensions
+    /// @param enables the extension enables
+    /// @returns true on success, false otherwise.
+    bool Enables(VectorRef<const ast::Enable*> enables) const;
+
     /// Validates pipeline stages
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
@@ -350,6 +355,20 @@ class Validator {
                            const core::type::Type* type,
                            const ast::PipelineStage stage,
                            const Source& source) const;
+
+    /// Validates a color attribute
+    /// @param attr the color attribute to validate
+    /// @param type the variable type
+    /// @param stage the current pipeline stage
+    /// @param source the source of declaration using the attribute
+    /// @param is_input true if is an input variable, false if output variable, std::nullopt is
+    /// unknown.
+    /// @returns true on success, false otherwise.
+    bool ColorAttribute(const ast::ColorAttribute* attr,
+                        const core::type::Type* type,
+                        ast::PipelineStage stage,
+                        const Source& source,
+                        const std::optional<bool> is_input = std::nullopt) const;
 
     /// Validates a index attribute
     /// @param index_attr the index attribute to validate

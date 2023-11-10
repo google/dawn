@@ -419,6 +419,10 @@ class Resolver {
     /// @returns the location value on success.
     tint::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
 
+    /// Resolves the `@color` attribute @p attr
+    /// @returns the color value on success.
+    tint::Result<uint32_t> ColorAttribute(const ast::ColorAttribute* attr);
+
     /// Resolves the `@index` attribute @p attr
     /// @returns the index value on success.
     tint::Result<uint32_t> IndexAttribute(const ast::IndexAttribute* attr);

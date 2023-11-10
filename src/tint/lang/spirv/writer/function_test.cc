@@ -355,6 +355,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 0u,
                                                           /* index */ 0u,
+                                                          /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,
                                                           /* invariant */ false,
@@ -366,6 +367,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 0u,
                                                           /* index */ 1u,
+                                                          /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,
                                                           /* invariant */ false,

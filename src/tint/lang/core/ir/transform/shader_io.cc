@@ -122,6 +122,7 @@ struct State {
                                    core::type::StructMemberAttributes{
                                        /* location */ {},
                                        /* index */ {},
+                                       /* color */ {},
                                        /* builtin */ core::BuiltinValue::kPointSize,
                                        /* interpolation */ {},
                                        /* invariant */ false,

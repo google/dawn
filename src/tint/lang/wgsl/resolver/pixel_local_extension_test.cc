@@ -38,6 +38,20 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 using ResolverPixelLocalExtensionTest = ResolverTest;
 
+TEST_F(ResolverPixelLocalExtensionTest, UseWithFramebufferFetch) {
+    // enable chromium_experimental_pixel_local;
+    // enable chromium_experimental_framebuffer_fetch;
+
+    Enable(Source{{12, 34}}, wgsl::Extension::kChromiumExperimentalPixelLocal);
+    Enable(Source{{56, 78}}, wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: extension 'chromium_experimental_pixel_local' cannot be used with extension 'chromium_experimental_framebuffer_fetch'
+56:78 note: 'chromium_experimental_framebuffer_fetch' enabled here)");
+}
+
 TEST_F(ResolverPixelLocalExtensionTest, AddressSpaceUsedWithExtension) {
     // enable chromium_experimental_pixel_local;
     // struct S { a : i32 }
@@ -308,6 +322,7 @@ Case Fail() {
 using ResolverPixelLocalExtensionTest_Types = ResolverTestWithParam<Case>;
 
 TEST_P(ResolverPixelLocalExtensionTest_Types, Direct) {
+    // enable chromium_experimental_pixel_local;
     // var<pixel_local> v : <type>;
 
     Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
@@ -319,6 +334,7 @@ TEST_P(ResolverPixelLocalExtensionTest_Types, Direct) {
 }
 
 TEST_P(ResolverPixelLocalExtensionTest_Types, Struct) {
+    // enable chromium_experimental_pixel_local;
     // struct S {
     //   a : i32,
     //   m : <type>,

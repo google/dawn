@@ -1969,7 +1969,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
             TINT_ICE() << "missing binding attributes for entry point parameter";
             return kInvalidBindingIndex;
         }
-        auto* param_sem = builder_.Sem().Get<sem::Parameter>(param);
+        auto* param_sem = builder_.Sem().Get(param);
         auto bp = param_sem->Attributes().binding_point;
         if (TINT_UNLIKELY(bp->group != 0)) {
             TINT_ICE() << "encountered non-zero resource group index (use BindingRemapper to fix)";
@@ -2836,6 +2836,10 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
                 TINT_ICE() << "invalid use of location decoration";
                 return false;
             }
+        }
+
+        if (auto color = attributes.color) {
+            out << " [[color(" + std::to_string(color.value()) + ")]]";
         }
 
         if (auto interpolation = attributes.interpolation) {

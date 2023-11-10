@@ -206,6 +206,8 @@ struct StructMemberAttributes {
     std::optional<uint32_t> location;
     /// The value of a `@index` attribute
     std::optional<uint32_t> index;
+    /// The value of a `@color` attribute
+    std::optional<uint32_t> color;
     /// The value of a `@builtin` attribute
     std::optional<core::BuiltinValue> builtin;
     /// The values of a `@interpolate` attribute

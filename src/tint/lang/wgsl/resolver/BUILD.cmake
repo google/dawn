@@ -116,6 +116,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/evaluation_stage_test.cc
   lang/wgsl/resolver/expression_kind_test.cc
   lang/wgsl/resolver/f16_extension_test.cc
+  lang/wgsl/resolver/framebuffer_fetch_extension_test.cc
   lang/wgsl/resolver/function_validation_test.cc
   lang/wgsl/resolver/host_shareable_validation_test.cc
   lang/wgsl/resolver/increment_decrement_validation_test.cc

@@ -60,6 +60,7 @@ enum class AttributeKind {
     kAlign,
     kBinding,
     kBuiltinPosition,
+    kColor,
     kDiagnostic,
     kGroup,
     kId,
@@ -82,6 +83,8 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@binding";
         case AttributeKind::kBuiltinPosition:
             return o << "@builtin(position)";
+        case AttributeKind::kColor:
+            return o << "@color";
         case AttributeKind::kDiagnostic:
             return o << "@diagnostic";
         case AttributeKind::kGroup:
@@ -142,6 +145,10 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
             TestParams{
                 {AttributeKind::kBuiltinPosition},
                 "1:2 error: @builtin is not valid for " + thing,
+            },
+            TestParams{
+                {AttributeKind::kColor},
+                "1:2 error: @color is not valid for " + thing,
             },
             TestParams{
                 {AttributeKind::kDiagnostic},
@@ -215,6 +222,8 @@ const ast::Attribute* CreateAttribute(const Source& source,
             return builder.Binding(source, 1_a);
         case AttributeKind::kBuiltinPosition:
             return builder.Builtin(source, core::BuiltinValue::kPosition);
+        case AttributeKind::kColor:
+            return builder.Color(source, 2_a);
         case AttributeKind::kDiagnostic:
             return builder.DiagnosticAttribute(source, wgsl::DiagnosticSeverity::kInfo, "chromium",
                                                "unreachable_code");
@@ -250,8 +259,15 @@ const ast::Attribute* CreateAttribute(const Source& source,
 
 struct TestWithParams : ResolverTestWithParam<TestParams> {
     void EnableExtensionIfNecessary(AttributeKind attribute) {
-        if (attribute == AttributeKind::kIndex) {
-            Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+        switch (attribute) {
+            case AttributeKind::kColor:
+                Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+                break;
+            case AttributeKind::kIndex:
+                Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+                break;
+            default:
+                break;
         }
     }
 
@@ -308,6 +324,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for functions)",
+        },
+        TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for functions)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -388,6 +408,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              TestParams{
                                  {AttributeKind::kBuiltinPosition},
                                  R"(1:2 error: @builtin is not valid for functions)",
+                             },
+                             TestParams{
+                                 {AttributeKind::kColor},
+                                 R"(1:2 error: @color is not valid for functions)",
                              },
                              TestParams{
                                  {AttributeKind::kDiagnostic},
@@ -477,6 +501,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @builtin is not valid for non-entry point function parameters)",
         },
         TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for function parameters)",
+        },
+        TestParams{
             {AttributeKind::kDiagnostic},
             R"(1:2 error: @diagnostic is not valid for function parameters)",
         },
@@ -556,6 +584,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for non-entry point function return types)",
+        },
+        TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for non-entry point function return types)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -644,6 +676,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @builtin(position) cannot be used for compute shader input)",
         },
         TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color can only be used for fragment shader input)",
+        },
+        TestParams{
             {AttributeKind::kDiagnostic},
             R"(1:2 error: @diagnostic is not valid for function parameters)",
         },
@@ -721,6 +757,10 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
+            Pass,
+        },
+        TestParams{
+            {AttributeKind::kColor},
             Pass,
         },
         TestParams{
@@ -821,6 +861,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for vertex shader input)",
+        },
+        TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color can only be used for fragment shader input)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -924,6 +968,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @builtin(position) cannot be used for compute shader output)",
         },
         TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for entry point return types)",
+        },
+        TestParams{
             {AttributeKind::kDiagnostic},
             R"(1:2 error: @diagnostic is not valid for entry point return types)",
         },
@@ -1004,6 +1052,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for fragment shader output)",
+        },
+        TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -1112,6 +1164,10 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBuiltinPosition},
             Pass,
+        },
+        TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kDiagnostic},
@@ -1239,6 +1295,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @diagnostic is not valid for struct declarations)",
         },
         TestParams{
+            {AttributeKind::kColor},
+            R"(1:2 error: @color is not valid for struct declarations)",
+        },
+        TestParams{
             {AttributeKind::kGroup},
             R"(1:2 error: @group is not valid for struct declarations)",
         },
@@ -1311,6 +1371,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              },
                              TestParams{
                                  {AttributeKind::kBuiltinPosition},
+                                 Pass,
+                             },
+                             TestParams{
+                                 {AttributeKind::kColor},
                                  Pass,
                              },
                              TestParams{

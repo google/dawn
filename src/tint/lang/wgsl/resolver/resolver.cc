@@ -160,6 +160,10 @@ bool Resolver::Resolve() {
         return false;
     }
 
+    if (!validator_.Enables(b.AST().Enables())) {
+        return false;
+    }
+
     // Create the semantic module. Don't be tempted to std::move() these, they're used below.
     auto* mod = b.create<sem::Module>(dependencies_.ordered_globals, enabled_extensions_);
     ApplyDiagnosticSeverities(mod);
@@ -640,6 +644,17 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     global->Attributes().index = value.Get();
                     return kSuccess;
                 },
+                [&](const ast::ColorAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    auto value = ColorAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    global->Attributes().color = value.Get();
+                    return kSuccess;
+                },
                 [&](const ast::BuiltinAttribute* attr) {
                     if (!has_io_address_space) {
                         return kInvalid;
@@ -721,6 +736,14 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                         return false;
                     }
                     sem->Attributes().location = value.Get();
+                    return true;
+                },
+                [&](const ast::ColorAttribute* attr) {
+                    auto value = ColorAttribute(attr);
+                    if (TINT_UNLIKELY(!value)) {
+                        return false;
+                    }
+                    sem->Attributes().color = value.Get();
                     return true;
                 },
                 [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
@@ -3709,6 +3732,29 @@ tint::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute*
     return static_cast<uint32_t>(value);
 }
 
+tint::Result<uint32_t> Resolver::ColorAttribute(const ast::ColorAttribute* attr) {
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@color value"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(ValueExpression(attr->expr));
+    if (!materialized) {
+        return Failure{};
+    }
+
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
+        AddError("@color must be an i32 or u32 value", attr->source);
+        return Failure{};
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->ValueAs<AInt>();
+    if (value < 0) {
+        AddError("@color value must be non-negative", attr->source);
+        return Failure{};
+    }
+
+    return static_cast<uint32_t>(value);
+}
 tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr) {
     ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@index value"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
@@ -4340,6 +4386,14 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         return false;
                     }
                     attributes.index = value.Get();
+                    return true;
+                },
+                [&](const ast::ColorAttribute* attr) {
+                    auto value = ColorAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    attributes.color = value.Get();
                     return true;
                 },
                 [&](const ast::BuiltinAttribute* attr) {

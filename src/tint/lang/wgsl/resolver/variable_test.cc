@@ -700,7 +700,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsParam) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
     auto* local = Sem().Get<sem::LocalVariable>(l);
 
     ASSERT_NE(param, nullptr);
@@ -898,7 +898,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsParam) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
     auto* local = Sem().Get<sem::LocalVariable>(c);
 
     ASSERT_NE(param, nullptr);
@@ -1222,7 +1222,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsFunction) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* func = Sem().Get(f);
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
 
     ASSERT_NE(func, nullptr);
     ASSERT_NE(param, nullptr);
@@ -1243,7 +1243,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* global = Sem().Get(g);
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
 
     ASSERT_NE(global, nullptr);
     ASSERT_NE(param, nullptr);
@@ -1264,7 +1264,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalConst) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* global = Sem().Get(g);
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
 
     ASSERT_NE(global, nullptr);
     ASSERT_NE(param, nullptr);
@@ -1285,7 +1285,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsAlias) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* alias = Sem().Get(a);
-    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* param = Sem().Get(p);
 
     ASSERT_NE(alias, nullptr);
     ASSERT_NE(param, nullptr);

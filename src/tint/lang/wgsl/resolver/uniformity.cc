@@ -210,7 +210,7 @@ struct FunctionInfo {
         for (size_t i = 0; i < func->params.Length(); i++) {
             auto* param = func->params[i];
             auto param_name = param->name->symbol.Name();
-            auto* sem = b.Sem().Get<sem::Parameter>(param);
+            auto* sem = b.Sem().Get(param);
             parameters[i].sem = sem;
 
             parameters[i].value = CreateNode({"param_", param_name});
@@ -543,7 +543,7 @@ class UniformityGraph {
             // we do not skip the `i==j` case.
             for (size_t j = 0; j < func->params.Length(); j++) {
                 auto tag = get_param_tag(reachable, j);
-                auto* source_param = sem_.Get<sem::Parameter>(func->params[j]);
+                auto* source_param = sem_.Get(func->params[j]);
                 if (tag == ParameterTag::ParameterContentsRequiredToBeUniform) {
                     param_info.ptr_output_source_param_contents.Push(source_param);
                 } else if (tag == ParameterTag::ParameterValueRequiredToBeUniform) {

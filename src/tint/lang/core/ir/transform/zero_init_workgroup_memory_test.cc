@@ -1494,6 +1494,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                         core::type::StructMemberAttributes{
                                             /* location */ {},
                                             /* index */ {},
+                                            /* color */ {},
                                             /* builtin */ core::BuiltinValue::kGlobalInvocationId,
                                             /* interpolation */ {},
                                             /* invariant */ false,
@@ -1505,6 +1506,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                         core::type::StructMemberAttributes{
                                             /* location */ {},
                                             /* index */ {},
+                                            /* color */ {},
                                             /* builtin */ core::BuiltinValue::kLocalInvocationIndex,
                                             /* interpolation */ {},
                                             /* invariant */ false,

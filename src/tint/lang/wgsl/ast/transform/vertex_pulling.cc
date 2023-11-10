@@ -793,7 +793,7 @@ struct VertexPulling::State {
             LocationInfo info;
             info.expr = [this, func_var] { return b.Expr(func_var); };
 
-            auto* sem = src.Sem().Get<sem::Parameter>(param);
+            auto* sem = src.Sem().Get(param);
             info.type = sem->Type();
 
             if (TINT_UNLIKELY(!sem->Attributes().location.has_value())) {

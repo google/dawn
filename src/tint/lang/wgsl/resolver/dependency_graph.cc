@@ -40,6 +40,7 @@
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/color_attribute.h"
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/const.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
@@ -386,6 +387,7 @@ class DependencyScanner {
             attr,  //
             [&](const ast::BindingAttribute* binding) { TraverseExpression(binding->expr); },
             [&](const ast::BuiltinAttribute* builtin) { TraverseExpression(builtin->builtin); },
+            [&](const ast::ColorAttribute* color) { TraverseExpression(color->expr); },
             [&](const ast::GroupAttribute* group) { TraverseExpression(group->expr); },
             [&](const ast::IdAttribute* id) { TraverseExpression(id->expr); },
             [&](const ast::IndexAttribute* index) { TraverseExpression(index->expr); },
