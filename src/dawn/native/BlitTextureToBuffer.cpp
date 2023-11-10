@@ -139,8 +139,7 @@ struct Params {
     // How many texel values one thread needs to pack (1, 2, or 4)
     packTexelCount: u32,
     srcExtent: vec3u,
-    pad1: u32,
-
+    mipLevel: u32,
     // GPUImageDataLayout
     indicesPerRow: u32,
     rowsPerImage: u32,
@@ -174,13 +173,13 @@ constexpr std::string_view kCommonEnd = R"(
 
 constexpr std::string_view kPackStencil8ToU32 = R"(
     // Storing stencil8 texel values
-    var result: u32 = 0xff & textureLoadGeneral(src_tex, coord0, 0).r;
+    var result: u32 = 0xff & textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
 
     if (coord0.x + 4u <= srcBoundary.x) {
         // All 4 texels for this thread are within texture bounds.
         for (var i = 1u; i < 4u; i += 1u) {
             let coordi = coord0 + vec3u(i, 0, 0);
-            let ri = 0xff & textureLoadGeneral(src_tex, coordi, 0).r;
+            let ri = 0xff & textureLoadGeneral(src_tex, coordi, params.mipLevel).r;
             result |= ri << (i * 8u);
         }
     } else {
@@ -194,7 +193,7 @@ constexpr std::string_view kPackStencil8ToU32 = R"(
             if (coordi.x >= srcBoundary.x) {
                 break;
             }
-            let ri = 0xff & textureLoadGeneral(src_tex, coordi, 0).r;
+            let ri = 0xff & textureLoadGeneral(src_tex, coordi, params.mipLevel).r;
             result |= ri << (i * 8u);
         }
     }
@@ -206,13 +205,13 @@ constexpr std::string_view kPackR8SnormToU32 = R"(
     // Storing snorm8 texel values
     // later called by pack4x8snorm to convert to u32.
     var v: vec4<f32>;
-    v[0] = textureLoadGeneral(src_tex, coord0, 0).r;
+    v[0] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
 
     if (coord0.x + 4u <= srcBoundary.x) {
         // All 4 texels for this thread are within texture bounds.
         for (var i = 1u; i < 4u; i += 1u) {
             let coordi = coord0 + vec3u(i, 0, 0);
-            v[i] = textureLoadGeneral(src_tex, coordi, 0).r;
+            v[i] = textureLoadGeneral(src_tex, coordi, params.mipLevel).r;
         }
         result = pack4x8snorm(v);
     } else {
@@ -226,7 +225,7 @@ constexpr std::string_view kPackR8SnormToU32 = R"(
             if (coordi.x >= srcBoundary.x) {
                 break;
             }
-            v[i] = textureLoadGeneral(src_tex, coordi, 0).r;
+            v[i] = textureLoadGeneral(src_tex, coordi, params.mipLevel).r;
         }
         let mask: u32 = 0xffffffffu << (i * 8u);
 
@@ -240,14 +239,14 @@ constexpr std::string_view kPackRG8SnormToU32 = R"(
     // Storing snorm8 texel values
     // later called by pack4x8snorm to convert to u32.
     var v: vec4<f32>;
-    let texel0 = textureLoadGeneral(src_tex, coord0, 0).rg;
+    let texel0 = textureLoadGeneral(src_tex, coord0, params.mipLevel).rg;
     v[0] = texel0.r;
     v[1] = texel0.g;
 
     let coord1 = coord0 + vec3u(1, 0, 0);
     if (coord1.x < srcBoundary.x) {
         // Make sure coord1 is still within the copy boundary.
-        let texel1 = textureLoadGeneral(src_tex, coord1, 0).rg;
+        let texel1 = textureLoadGeneral(src_tex, coord1, params.mipLevel).rg;
         v[2] = texel1.r;
         v[3] = texel1.g;
         result = pack4x8snorm(v);
@@ -272,12 +271,12 @@ constexpr std::string_view kPackDepth16UnormToU32 = R"(
     // Storing depth16unorm texel values
     // later called by pack2x16unorm to convert to u32.
     var v: vec2<f32>;
-    v[0] = textureLoadGeneral(src_tex, coord0, 0);
+    v[0] = textureLoadGeneral(src_tex, coord0, params.mipLevel);
 
     let coord1 = coord0 + vec3u(1, 0, 0);
     if (coord1.x < srcBoundary.x) {
         // Make sure coord1 is still within the copy boundary.
-        v[1] = textureLoadGeneral(src_tex, coord1, 0);
+        v[1] = textureLoadGeneral(src_tex, coord1, params.mipLevel);
         result = pack2x16unorm(v);
     } else {
         // Otherwise, srcExtent.x is not a multiple of 2 and this thread is at right edge of the texture
@@ -293,7 +292,7 @@ constexpr std::string_view kPackDepth16UnormToU32 = R"(
 // Storing snorm8 texel values
 // later called by pack4x8snorm to convert to u32.
 constexpr std::string_view kPackRGBA8SnormToU32 = R"(
-    let v = textureLoadGeneral(src_tex, coord0, 0);
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
     let result: u32 = pack4x8snorm(v);
 )";
 
@@ -302,7 +301,7 @@ constexpr std::string_view kPackRGBA8SnormToU32 = R"(
 constexpr std::string_view kPackBGRA8UnormToU32 = R"(
     var v: vec4<f32>;
 
-    let texel0 = textureLoadGeneral(src_tex, coord0, 0);
+    let texel0 = textureLoadGeneral(src_tex, coord0, params.mipLevel);
     v = texel0.bgra;
 
     let result: u32 = pack4x8unorm(v);
@@ -320,7 +319,7 @@ constexpr std::string_view kPackBGRA8UnormToU32 = R"(
 // [8.344650268554688e-7, 0.000015735626220703125, 0.000015497207641601562]
 // So the bytes copied via blit could be different.
 constexpr std::string_view kPackRGB9E5UfloatToU32 = R"(
-    let v = textureLoadGeneral(src_tex, coord0, 0);
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
 
     const n = 9; // number of mantissa bits
     const e_max = 31; // max exponent
@@ -354,7 +353,7 @@ constexpr std::string_view kPackRGB9E5UfloatToU32 = R"(
 // Directly loading depth32float values into dst_buf
 // No bit manipulation and packing is needed.
 constexpr std::string_view kLoadDepth32Float = R"(
-    dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, 0);
+    dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel);
 }
 )";
 
@@ -567,21 +566,25 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                const Extent3D& copyExtent) {
     wgpu::TextureViewDimension textureViewDimension;
     {
-        wgpu::TextureDimension dimension = src.texture->GetDimension();
-        switch (dimension) {
-            case wgpu::TextureDimension::e1D:
-                textureViewDimension = wgpu::TextureViewDimension::e1D;
-                break;
-            case wgpu::TextureDimension::e2D:
-                if (src.texture->GetArrayLayers() > 1) {
-                    textureViewDimension = wgpu::TextureViewDimension::e2DArray;
-                } else {
-                    textureViewDimension = wgpu::TextureViewDimension::e2D;
-                }
-                break;
-            case wgpu::TextureDimension::e3D:
-                textureViewDimension = wgpu::TextureViewDimension::e3D;
-                break;
+        if (device->IsCompatibilityMode()) {
+            textureViewDimension = src.texture->GetCompatibilityTextureBindingViewDimension();
+        } else {
+            wgpu::TextureDimension dimension = src.texture->GetDimension();
+            switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    textureViewDimension = wgpu::TextureViewDimension::e1D;
+                    break;
+                case wgpu::TextureDimension::e2D:
+                    if (src.texture->GetArrayLayers() > 1) {
+                        textureViewDimension = wgpu::TextureViewDimension::e2DArray;
+                    } else {
+                        textureViewDimension = wgpu::TextureViewDimension::e2D;
+                    }
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    textureViewDimension = wgpu::TextureViewDimension::e3D;
+                    break;
+            }
         }
     }
 
@@ -654,12 +657,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         // srcOrigin: vec3u
         params[0] = src.origin.x;
         params[1] = src.origin.y;
-        if (textureViewDimension == wgpu::TextureViewDimension::e2DArray) {
-            // src.origin.z is set at textureView.baseArrayLayer
-            params[2] = 0;
-        } else {
-            params[2] = src.origin.z;
-        }
+        params[2] = src.origin.z;
 
         // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst buffer
         params[3] = 4 / texelFormatByteSize;
@@ -695,13 +693,12 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     }
 
     viewDesc.dimension = textureViewDimension;
-    viewDesc.baseMipLevel = src.mipLevel;
-    viewDesc.mipLevelCount = 1;
+    viewDesc.baseMipLevel = 0;
+    viewDesc.mipLevelCount = src.texture->GetNumMipLevels();
+    viewDesc.baseArrayLayer = 0;
     if (viewDesc.dimension == wgpu::TextureViewDimension::e2DArray) {
-        viewDesc.baseArrayLayer = src.origin.z;
-        viewDesc.arrayLayerCount = copyExtent.depthOrArrayLayers;
+        viewDesc.arrayLayerCount = src.texture->GetArrayLayers();
     } else {
-        viewDesc.baseArrayLayer = 0;
         viewDesc.arrayLayerCount = 1;
     }
 

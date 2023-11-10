@@ -953,11 +953,6 @@ TEST_P(CopyTests_T2B, TextureMipAligned) {
 // Test that copying mips when one dimension is 256-byte aligned and another dimension reach one
 // works
 TEST_P(CopyTests_T2B, TextureMipDimensionReachOne) {
-    // TODO(dawn:1873): GL textureLoad result is incorrect.
-    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
-                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t mipLevelCount = 4;
     constexpr uint32_t kWidth = 256 << mipLevelCount;
     constexpr uint32_t kHeight = 2;
@@ -1514,11 +1509,6 @@ TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
 
 // Test that copying texture 3D array mips with 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, Texture3DMipAligned) {
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
-                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 64u;
@@ -1538,11 +1528,6 @@ TEST_P(CopyTests_T2B, Texture3DMipAligned) {
 
 // Test that copying texture 3D array mips with 256-byte unaligned sizes works
 TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
-                           GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t kWidth = 261;
     constexpr uint32_t kHeight = 123;
     constexpr uint32_t kDepth = 69u;
@@ -2511,10 +2496,6 @@ TEST_P(CopyTests_T2T, Texture3DFull) {
 
 // Test that copying from one mip level to another mip level within the same 3D texture works.
 TEST_P(CopyTests_T2T, Texture3DSameTextureDifferentMipLevels) {
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2551,9 +2532,6 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 TEST_P(CopyTests_T2T, Texture3DAnd2DArraySubRegion) {
     // TODO(crbug.com/dawn/1426): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows() && IsIntel());
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
 
     constexpr uint32_t kWidth = 8;
     constexpr uint32_t kHeight = 4;
@@ -2664,10 +2642,6 @@ TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
 
 // Test that copying texture 3D array mips in one texture-to-texture-copy works
 TEST_P(CopyTests_T2T, Texture3DMipAligned) {
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 64u;
@@ -2687,10 +2661,6 @@ TEST_P(CopyTests_T2T, Texture3DMipAligned) {
 
 // Test that copying texture 3D array mips in one texture-to-texture-copy works
 TEST_P(CopyTests_T2T, Texture3DMipUnaligned) {
-    // TODO(dawn:1872): GL textureLoad incorrectly for 3D texture with mipLevel > 0 and depth > 0
-    DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                          (IsOpenGL() || IsOpenGLES()));
-
     constexpr uint32_t kWidth = 261;
     constexpr uint32_t kHeight = 123;
     constexpr uint32_t kDepth = 69u;
