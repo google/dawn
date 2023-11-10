@@ -43,6 +43,12 @@ namespace tint::spirv::writer::raise {
 
 namespace {
 
+/// State that persists across the whole module and can be shared between entry points.
+struct PerModuleState {
+    /// The frag_depth clamp arguments.
+    core::ir::Value* frag_depth_clamp_args = nullptr;
+};
+
 /// PIMPL state for the parts of the shader IO transform specific to SPIR-V.
 /// For SPIR-V, we declare a global variable for each input and output. The wrapper entry point then
 /// loads from and stores to these variables. We also modify the type of the SampleMask builtin to
@@ -56,12 +62,15 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// The configuration options.
     const ShaderIOConfig& config;
 
-    /// The frag_depth clamp arguments.
-    core::ir::Value* frag_depth_clamp_args = nullptr;
+    /// The per-module state object.
+    PerModuleState& module_state;
 
     /// Constructor
-    StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& cfg)
-        : ShaderIOBackendState(mod, f), config(cfg) {}
+    StateImpl(core::ir::Module& mod,
+              core::ir::Function* f,
+              const ShaderIOConfig& cfg,
+              PerModuleState& mod_state)
+        : ShaderIOBackendState(mod, f), config(cfg), module_state(mod_state) {}
 
     /// Destructor
     ~StateImpl() override {}
@@ -172,7 +181,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
 
         // Create the clamp args struct and variable.
-        if (!frag_depth_clamp_args) {
+        if (!module_state.frag_depth_clamp_args) {
             // Check that there are no push constants in the module already.
             for (auto* inst : *ir.root_block) {
                 if (auto* var = inst->As<core::ir::Var>()) {
@@ -194,11 +203,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Declare the variable.
             auto* var = b.Var("tint_frag_depth_clamp_args", ty.ptr(push_constant, str));
             ir.root_block->Append(var);
-            frag_depth_clamp_args = var->Result();
+            module_state.frag_depth_clamp_args = var->Result();
         }
 
         // Clamp the value.
-        auto* args = builder.Load(frag_depth_clamp_args);
+        auto* args = builder.Load(module_state.frag_depth_clamp_args);
         auto* frag_depth_min = builder.Access(ty.f32(), args, 0_u);
         auto* frag_depth_max = builder.Access(ty.f32(), args, 1_u);
         return builder
@@ -217,8 +226,9 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config)
         return result;
     }
 
+    PerModuleState module_state;
     core::ir::transform::RunShaderIOBase(ir, [&](core::ir::Module& mod, core::ir::Function* func) {
-        return std::make_unique<StateImpl>(mod, func, config);
+        return std::make_unique<StateImpl>(mod, func, config, module_state);
     });
 
     return Success;
