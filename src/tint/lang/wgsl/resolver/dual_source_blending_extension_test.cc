@@ -190,6 +190,29 @@ TEST_F(DualSourceBlendingExtensionTests, IndexWithNonZeroLocation_ReturnValue) {
     EXPECT_EQ(r()->error(), "12:34 error: @index can only be used with @location(0)");
 }
 
+TEST_F(DualSourceBlendingExtensionTests, NoNonZeroCollisionsBetweenInAndOut) {
+    // struct NonZeroLocation {
+    //   @location(1) a : vec4<f32>,
+    // };
+    // struct NonZeroIndex {
+    //   @location(0) @index(1) a : vec4<f32>,
+    // };
+    // fn X(in : NonZeroLocation) -> NonZeroIndex { return NonZeroIndex(); }
+    // fn Y(in : NonZeroIndex) -> NonZeroLocation { return NonZeroLocation(); }
+    Structure("NonZeroLocation", Vector{
+                                     Member("a", ty.vec4<f32>(), Vector{Location(1_a)}),
+                                 });
+    Structure("NonZeroIndex", Vector{
+                                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), Index(1_a)}),
+                              });
+    Func("X", Vector{Param("in", ty("NonZeroLocation"))}, ty("NonZeroIndex"),
+         Vector{Return(Call("NonZeroIndex"))}, Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("Y", Vector{Param("in", ty("NonZeroIndex"))}, ty("NonZeroLocation"),
+         Vector{Return(Call("NonZeroLocation"))}, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {
   public:
     DualSourceBlendingExtensionTestWithParams() {
@@ -200,6 +223,12 @@ class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<i
 // Rendering to multiple render targets while using dual source blending should fail.
 TEST_P(DualSourceBlendingExtensionTestWithParams,
        MultipleRenderTargetsNotAllowed_IndexThenNonZeroLocation) {
+    // struct S {
+    //   @location(0) @index(0) a : vec4<f32>,
+    //   @location(0) @index(1) b : vec4<f32>,
+    //   @location(n)           c : vec4<f32>,
+    // };
+    // fn F() -> S { return S(); }
     Structure("S",
               Vector{
                   Member("a", ty.vec4<f32>(), Vector{Location(0_a), Index(0_a)}),
@@ -218,6 +247,12 @@ note: while analyzing entry point 'F')");
 
 TEST_P(DualSourceBlendingExtensionTestWithParams,
        MultipleRenderTargetsNotAllowed_NonZeroLocationThenIndex) {
+    // struct S {
+    //   @location(n)           a : vec4<f32>,
+    //   @location(0) @index(0) b : vec4<f32>,
+    //   @location(0) @index(1) c : vec4<f32>,
+    // };
+    // fn F() -> S { return S(); }
     Structure("S",
               Vector{
                   Member("a", ty.vec4<f32>(), Vector{Location(Source{{1, 2}}, AInt(GetParam()))}),

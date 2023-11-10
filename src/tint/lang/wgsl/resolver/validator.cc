@@ -1414,6 +1414,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // should be validated independently from those used in parameters.
     builtins.Clear();
     locations_and_indices.Clear();
+    first_nonzero_location = nullptr;
+    first_nonzero_index = nullptr;
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
