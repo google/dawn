@@ -120,11 +120,11 @@ struct State {
             vertex_point_size_index =
                 backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
                                    core::type::StructMemberAttributes{
-                                       /* location */ {},
-                                       /* index */ {},
-                                       /* color */ {},
+                                       /* location */ std::nullopt,
+                                       /* index */ std::nullopt,
+                                       /* color */ std::nullopt,
                                        /* builtin */ core::BuiltinValue::kPointSize,
-                                       /* interpolation */ {},
+                                       /* interpolation */ std::nullopt,
                                        /* invariant */ false,
                                    });
         }

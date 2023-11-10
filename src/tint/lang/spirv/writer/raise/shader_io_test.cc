@@ -1292,12 +1292,26 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
                                  {
                                      mod.symbols.New("color"),
                                      ty.f32(),
-                                     {0u, {}, {}, {}, false},
+                                     core::type::StructMemberAttributes{
+                                         /* location */ 0u,
+                                         /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ std::nullopt,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
                                  },
                                  {
                                      mod.symbols.New("depth"),
                                      ty.f32(),
-                                     {{}, {}, core::BuiltinValue::kFragDepth, {}, false},
+                                     core::type::StructMemberAttributes{
+                                         /* location */ std::nullopt,
+                                         /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kFragDepth,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
                                  },
                              });
 
