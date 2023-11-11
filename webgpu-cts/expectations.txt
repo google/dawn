@@ -673,7 +673,6 @@ crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence
 # Shader f32 matrix tests failing on Android Qualcomm (Pixel 4)
 ################################################################################
 crbug.com/dawn/1992 [ android-r ] webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:* [ RetryOnFailure ]
-crbug.com/dawn/1992 [ android-r ] webgpu:shader,execution,expression,binary,f32_matrix_subtraction:* [ RetryOnFailure ]
 
 ################################################################################
 # Tint unimplemented feature
