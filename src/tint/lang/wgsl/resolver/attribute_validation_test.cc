@@ -764,6 +764,11 @@ INSTANTIATE_TEST_SUITE_P(
             Pass,
         },
         TestParams{
+            {AttributeKind::kColor, AttributeKind::kLocation},
+            R"(3:4 error: multiple entry point IO attributes
+1:2 note: previously consumed @color)",
+        },
+        TestParams{
             {AttributeKind::kDiagnostic},
             R"(1:2 error: @diagnostic is not valid for function parameters)",
         },
