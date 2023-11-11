@@ -3088,6 +3088,8 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             return create<ast::BindingAttribute>(t.source(), args[0]);
         case core::Attribute::kBuiltin:
             return create<ast::BuiltinAttribute>(t.source(), args[0]);
+        case core::Attribute::kColor:
+            return create<ast::ColorAttribute>(t.source(), args[0]);
         case core::Attribute::kCompute:
             return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
         case core::Attribute::kFragment:

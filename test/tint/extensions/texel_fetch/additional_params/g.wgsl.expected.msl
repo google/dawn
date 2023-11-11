@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  float4 fbf [[color(3)]];
+};
+
+void g(float a, float b) {
+}
+
+void f_inner(float4 fbf, float4 pos) {
+  g(fbf[3], pos[0]);
+}
+
+fragment void f(float4 pos [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  f_inner(tint_symbol.fbf, pos);
+  return;
+}
+

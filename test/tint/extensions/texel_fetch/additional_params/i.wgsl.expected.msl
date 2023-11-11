@@ -1,0 +1,28 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct In {
+  float4 a;
+  float4 b;
+  int4 fbf;
+};
+
+struct tint_symbol_1 {
+  int4 fbf [[color(1)]];
+  float4 a [[user(locn0)]];
+  float4 b [[user(locn1)]] [[flat]];
+};
+
+void g(float a, float b, int c) {
+}
+
+void f_inner(In in) {
+  g(in.a[0], in.b[1], in.fbf[0]);
+}
+
+fragment void f(tint_symbol_1 tint_symbol [[stage_in]]) {
+  In const tint_symbol_2 = {.a=tint_symbol.a, .b=tint_symbol.b, .fbf=tint_symbol.fbf};
+  f_inner(tint_symbol_2);
+  return;
+}
+
