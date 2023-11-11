@@ -2,9 +2,9 @@
 
 using namespace metal;
 struct PixelLocal {
-  uint a [[color(1)]];
-  int b [[color(6)]];
-  float c [[color(3)]];
+  uint a;
+  int b;
+  float c;
 };
 
 struct tint_private_vars_struct {
@@ -12,18 +12,27 @@ struct tint_private_vars_struct {
 };
 
 struct f_res {
-  uint output_0 [[color(1)]];
-  int output_1 [[color(6)]];
-  float output_2 [[color(3)]];
-  float4 output_3 [[color(0)]];
-  float4 output_4 [[color(2)]];
-  float4 output_5 [[color(4)]];
+  uint output_0;
+  int output_1;
+  float output_2;
+  float4 output_3;
+  float4 output_4;
+  float4 output_5;
 };
 
-struct tint_symbol {
-  float4 x;
-  float4 y;
-  float4 z;
+struct tint_symbol_1 {
+  uint a [[color(1)]];
+  float c [[color(3)]];
+  int b [[color(6)]];
+};
+
+struct tint_symbol_2 {
+  float4 output_3 [[color(0)]];
+  uint output_0 [[color(1)]];
+  float4 output_4 [[color(2)]];
+  float output_2 [[color(3)]];
+  float4 output_5 [[color(4)]];
+  int output_1 [[color(6)]];
 };
 
 struct Out {
@@ -34,23 +43,28 @@ struct Out {
 
 Out f_inner(thread tint_private_vars_struct* const tint_private_vars) {
   (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + 42u);
-  Out const tint_symbol_1 = Out{.x=float4(10.0f), .y=float4(20.0f), .z=float4(30.0f)};
-  return tint_symbol_1;
+  Out const tint_symbol_5 = Out{.x=float4(10.0f), .y=float4(20.0f), .z=float4(30.0f)};
+  return tint_symbol_5;
 }
 
-tint_symbol f_inner_1(thread tint_private_vars_struct* const tint_private_vars) {
-  Out const inner_result = f_inner(tint_private_vars);
-  tint_symbol wrapper_result = {};
-  wrapper_result.x = inner_result.x;
-  wrapper_result.y = inner_result.y;
-  wrapper_result.z = inner_result.z;
-  return wrapper_result;
+f_res f_inner_1(PixelLocal pixel_local_1, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P = pixel_local_1;
+  Out const result = f_inner(tint_private_vars);
+  f_res const tint_symbol_4 = {.output_0=(*(tint_private_vars)).P.a, .output_1=(*(tint_private_vars)).P.b, .output_2=(*(tint_private_vars)).P.c, .output_3=result.x, .output_4=result.y, .output_5=result.z};
+  return tint_symbol_4;
 }
 
-fragment f_res f(PixelLocal pixel_local_1) {
+fragment tint_symbol_2 f(tint_symbol_1 tint_symbol [[stage_in]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.P = pixel_local_1;
-  tint_symbol const result = f_inner_1(&(tint_private_vars));
-  return {.output_0=tint_private_vars.P.a, .output_1=tint_private_vars.P.b, .output_2=tint_private_vars.P.c, .output_3=result.x, .output_4=result.y, .output_5=result.z};
+  PixelLocal const tint_symbol_3 = {.a=tint_symbol.a, .b=tint_symbol.b, .c=tint_symbol.c};
+  f_res const inner_result = f_inner_1(tint_symbol_3, &(tint_private_vars));
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.output_0 = inner_result.output_0;
+  wrapper_result.output_1 = inner_result.output_1;
+  wrapper_result.output_2 = inner_result.output_2;
+  wrapper_result.output_3 = inner_result.output_3;
+  wrapper_result.output_4 = inner_result.output_4;
+  wrapper_result.output_5 = inner_result.output_5;
+  return wrapper_result;
 }
 

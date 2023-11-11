@@ -103,7 +103,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     io.type->is_integer_scalar_or_vector()) {
                     io.attributes.interpolation = {core::InterpolationType::kFlat};
                 }
-            } else {
+            }
+            if (io.attributes.location) {
                 name << "_loc" << io.attributes.location.value();
                 if (io.attributes.index.has_value()) {
                     name << "_idx" << io.attributes.index.value();

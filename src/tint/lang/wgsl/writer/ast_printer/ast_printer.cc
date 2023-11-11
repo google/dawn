@@ -40,6 +40,7 @@
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/color_attribute.h"
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/const.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
@@ -503,6 +504,11 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
             [&](const ast::LocationAttribute* location) {
                 out << "location(";
                 EmitExpression(out, location->expr);
+                out << ")";
+            },
+            [&](const ast::ColorAttribute* color) {
+                out << "color(";
+                EmitExpression(out, color->expr);
                 out << ")";
             },
             [&](const ast::IndexAttribute* index) {

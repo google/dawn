@@ -39,7 +39,6 @@
 #include "src/tint/utils/containers/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::PixelLocal);
-TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::PixelLocal::Attachment);
 TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::PixelLocal::Config);
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -110,10 +109,10 @@ struct PixelLocal::State {
                     // Obtain struct of the pixel local.
                     auto* pixel_local_str = global->Type()->UnwrapRef()->As<sem::Struct>();
 
-                    // Add an attachment decoration to each member of the pixel_local structure.
+                    // Add an Color attribute to each member of the pixel_local structure.
                     for (auto* member : pixel_local_str->Members()) {
                         ctx.InsertBack(member->Declaration()->attributes,
-                                       Attachment(AttachmentIndex(member->Index())));
+                                       b.Color(u32(AttachmentIndex(member->Index()))));
                         ctx.InsertBack(member->Declaration()->attributes,
                                        b.Disable(ast::DisabledValidation::kEntryPointParameter));
                     }
@@ -128,6 +127,19 @@ struct PixelLocal::State {
 
         if (!made_changes) {
             return SkipTransform;
+        }
+
+        // At this point, the `var<pixel_local>` will have been replaced with `var<private>`, and
+        // the entry point will use `@color`, which requires the framebuffer fetch extension.
+        // Replace the `chromium_experimental_pixel_local` enable with
+        // `chromium_experimental_framebuffer_fetch`.
+        for (auto* enable : src.AST().Enables()) {
+            for (auto* ext : enable->extensions) {
+                if (ext->name == wgsl::Extension::kChromiumExperimentalPixelLocal) {
+                    ctx.Replace(ext, b.create<ast::Extension>(
+                                         wgsl::Extension::kChromiumExperimentalFramebufferFetch));
+                }
+            }
         }
 
         ctx.Clone();
@@ -240,12 +252,6 @@ struct PixelLocal::State {
                Vector{b.Stage(ast::PipelineStage::kFragment)});
     }
 
-    /// @returns a new Attachment attribute
-    /// @param index the index of the attachment
-    PixelLocal::Attachment* Attachment(uint32_t index) {
-        return b.ASTNodes().Create<PixelLocal::Attachment>(b.ID(), b.AllocateNodeID(), index);
-    }
-
     /// @returns the attachment index for the pixel local field with the given index
     /// @param field_index the pixel local field index
     uint32_t AttachmentIndex(uint32_t field_index) {
@@ -283,18 +289,5 @@ PixelLocal::Config::Config() = default;
 PixelLocal::Config::Config(const Config&) = default;
 
 PixelLocal::Config::~Config() = default;
-
-PixelLocal::Attachment::Attachment(GenerationID pid, ast::NodeID nid, uint32_t idx)
-    : Base(pid, nid, Empty), index(idx) {}
-
-PixelLocal::Attachment::~Attachment() = default;
-
-std::string PixelLocal::Attachment::InternalName() const {
-    return "attachment(" + std::to_string(index) + ")";
-}
-
-const PixelLocal::Attachment* PixelLocal::Attachment::Clone(ast::CloneContext& ctx) const {
-    return ctx.dst->ASTNodes().Create<Attachment>(ctx.dst->ID(), ctx.dst->AllocateNodeID(), index);
-}
 
 }  // namespace tint::msl::writer

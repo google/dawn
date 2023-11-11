@@ -39,6 +39,9 @@ namespace tint::msl::writer {
 /// PixelLocal transforms module-scope `var<pixel_local>`s and fragment entry point functions that
 /// use them:
 /// * `var<pixel_local>` will be transformed to `var<private>`.
+/// * All of the members of the pixel local struct will have an additional `@color` attribute added.
+/// * The chromium_experimental_pixel_local extension enable will be replaced with an enable for
+///   chromium_experimental_framebuffer_fetch.
 /// * The entry point function will be wrapped with another function ('outer') that calls the
 ///  'inner' function.
 /// * The outer function will have an additional parameter of the pixel local struct type, which is
@@ -61,32 +64,6 @@ class PixelLocal final : public Castable<PixelLocal, ast::transform::Transform> 
 
         /// Index of pixel_local structure member index to attachment index
         Hashmap<uint32_t, uint32_t, 8> attachments;
-    };
-
-    /// Intrinsic is an InternalAttribute that's used to decorate a pixel local attachment
-    /// parameter, return value or structure member.
-    class Attachment final : public Castable<Attachment, ast::InternalAttribute> {
-      public:
-        /// Constructor
-        /// @param pid the identifier of the program that owns this node
-        /// @param nid the unique node identifier
-        /// @param idx the attachment index
-        Attachment(GenerationID pid, ast::NodeID nid, uint32_t idx);
-
-        /// Destructor
-        ~Attachment() override;
-
-        /// @return a short description of the internal attribute which will be
-        /// displayed as `@internal(<name>)`
-        std::string InternalName() const override;
-
-        /// Performs a deep clone of this object using the program::CloneContext `ctx`.
-        /// @param ctx the clone context
-        /// @return the newly cloned object
-        const Attachment* Clone(ast::CloneContext& ctx) const override;
-
-        /// The attachment index
-        const uint32_t index;
     };
 
     /// Constructor

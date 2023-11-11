@@ -208,6 +208,15 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
+    {
+        PixelLocal::Config cfg;
+        for (auto it : options.pixel_local_options.attachments) {
+            cfg.attachments.Add(it.first, it.second);
+        }
+        data.Add<PixelLocal::Config>(cfg);
+        manager.Add<PixelLocal>();
+    }
+
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<ast::transform::CanonicalizeEntryPointIO>();
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
@@ -224,15 +233,6 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // SubgroupBallot() must come after CanonicalizeEntryPointIO.
     manager.Add<SubgroupBallot>();
-
-    {
-        PixelLocal::Config cfg;
-        for (auto it : options.pixel_local_options.attachments) {
-            cfg.attachments.Add(it.first, it.second);
-        }
-        data.Add<PixelLocal::Config>(cfg);
-        manager.Add<PixelLocal>();
-    }
 
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
@@ -275,6 +275,7 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
+                wgsl::Extension::kChromiumExperimentalFramebufferFetch,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumInternalRelaxedUniformLayout,
                 wgsl::Extension::kF16,
@@ -2005,20 +2006,8 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
 
             bool ok = Switch(
                 type,  //
-                [&](const core::type::Struct* str) {
-                    bool is_pixel_local = false;
-                    if (auto* sem_str = str->As<sem::Struct>()) {
-                        for (auto* member : sem_str->Members()) {
-                            if (ast::HasAttribute<PixelLocal::Attachment>(
-                                    member->Declaration()->attributes)) {
-                                is_pixel_local = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!is_pixel_local) {
-                        out << " [[stage_in]]";
-                    }
+                [&](const core::type::Struct*) {
+                    out << " [[stage_in]]";
                     return true;
                 },
                 [&](const core::type::Texture*) {
@@ -2854,13 +2843,6 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (attributes.invariant) {
             invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
             out << " " << invariant_define_name_;
-        }
-
-        if (auto* sem_mem = mem->As<sem::StructMember>()) {
-            if (auto* attachment =
-                    ast::GetAttribute<PixelLocal::Attachment>(sem_mem->Declaration()->attributes)) {
-                out << " [[color(" << attachment->index << ")]]";
-            }
         }
 
         out << ";";

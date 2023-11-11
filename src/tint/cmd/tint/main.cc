@@ -734,7 +734,8 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
         if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalSubgroups)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_1);
         }
-        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal)) {
+        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal) ||
+            enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
         }
     }
