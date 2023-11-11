@@ -70,28 +70,35 @@ fn comp_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Spirv) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
-             @builtin(position) coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+             @builtin(position) coord : vec4<f32>,
+             @color(3) color : vec4<f32>) {
+  var col : f32 = (coord.x * loc1) + color.g;
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @location(1) @internal(disable_validation__ignore_address_space) var<__in> loc1_1 : f32;
 
 @location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> loc2_1 : vec4<u32>;
 
 @builtin(position) @internal(disable_validation__ignore_address_space) var<__in> coord_1 : vec4<f32>;
 
-fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+@color(3) @internal(disable_validation__ignore_address_space) var<__in> color_1 : vec4<f32>;
+
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>, color : vec4<f32>) {
+  var col : f32 = ((coord.x * loc1) + color.g);
 }
 
 @fragment
 fn frag_main() {
-  frag_main_inner(loc1_1, loc2_1, coord_1);
+  frag_main_inner(loc1_1, loc2_1, coord_1, color_1);
 }
 )";
 
@@ -104,29 +111,36 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Msl) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
-             @builtin(position) coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+             @builtin(position) coord : vec4<f32>,
+             @color(3) color : vec4<f32>) {
+  var col : f32 = (coord.x * loc1) + color.g;
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct tint_symbol_1 {
+  @color(3)
+  color : vec4<f32>,
   @location(1)
   loc1 : f32,
   @location(2) @interpolate(flat)
   loc2 : vec4<u32>,
 }
 
-fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>, color : vec4<f32>) {
+  var col : f32 = ((coord.x * loc1) + color.g);
 }
 
 @fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord, tint_symbol.color);
 }
 )";
 
@@ -139,16 +153,23 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Hlsl) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
-             @builtin(position) coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+             @builtin(position) coord : vec4<f32>,
+             @color(3) color : vec4<f32>) {
+  var col : f32 = (coord.x * loc1) + color.g;
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct tint_symbol_1 {
+  @color(3)
+  color : vec4<f32>,
   @location(1)
   loc1 : f32,
   @location(2) @interpolate(flat)
@@ -157,13 +178,13 @@ struct tint_symbol_1 {
   coord : vec4<f32>,
 }
 
-fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
-  var col : f32 = (coord.x * loc1);
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>, color : vec4<f32>) {
+  var col : f32 = ((coord.x * loc1) + color.g);
 }
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord, tint_symbol.color);
 }
 )";
 
@@ -246,6 +267,8 @@ alias myf32 = f32;
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct FragBuiltins {
   @builtin(position) coord : vec4<f32>,
 };
@@ -253,16 +276,24 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @location(0) @internal(disable_validation__ignore_address_space) var<__in> loc0_1 : f32;
 
 @location(1) @internal(disable_validation__ignore_address_space) var<__in> loc1_1 : f32;
@@ -270,6 +301,12 @@ fn frag_main(@location(0) loc0 : f32,
 @location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> loc2_1 : vec4<u32>;
 
 @builtin(position) @internal(disable_validation__ignore_address_space) var<__in> coord_1 : vec4<f32>;
+
+@color(3) @internal(disable_validation__ignore_address_space) var<__in> col3_1 : vec4<f32>;
+
+@color(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> col1_1 : vec4<u32>;
+
+@color(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> col2_1 : vec4<i32>;
 
 struct FragBuiltins {
   coord : vec4<f32>,
@@ -280,13 +317,19 @@ struct FragLocations {
   loc2 : vec4<u32>,
 }
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
+}
+
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main() {
-  frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
+  frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1), FragColors(col3_1, col1_1, col2_1));
 }
 )";
 
@@ -299,11 +342,14 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv_OutOfOrder) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 struct FragBuiltins {
@@ -313,9 +359,16 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @location(0) @internal(disable_validation__ignore_address_space) var<__in> loc0_1 : f32;
 
 @location(1) @internal(disable_validation__ignore_address_space) var<__in> loc1_1 : f32;
@@ -324,13 +377,19 @@ struct FragLocations {
 
 @builtin(position) @internal(disable_validation__ignore_address_space) var<__in> coord_1 : vec4<f32>;
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+@color(3) @internal(disable_validation__ignore_address_space) var<__in> col3_1 : vec4<f32>;
+
+@color(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> col1_1 : vec4<u32>;
+
+@color(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<__in> col2_1 : vec4<i32>;
+
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main() {
-  frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
+  frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1), FragColors(col3_1, col1_1, col2_1));
 }
 
 struct FragBuiltins {
@@ -340,6 +399,12 @@ struct FragBuiltins {
 struct FragLocations {
   loc1 : f32,
   loc2 : vec4<u32>,
+}
+
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
 }
 )";
 
@@ -352,6 +417,8 @@ struct FragLocations {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct FragBuiltins {
   @builtin(position) coord : vec4<f32>,
 };
@@ -359,16 +426,24 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct FragBuiltins {
   coord : vec4<f32>,
 }
@@ -378,7 +453,19 @@ struct FragLocations {
   loc2 : vec4<u32>,
 }
 
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
+}
+
 struct tint_symbol_1 {
+  @color(1)
+  col1 : vec4<u32>,
+  @color(2)
+  col2 : vec4<i32>,
+  @color(3)
+  col3 : vec4<f32>,
   @location(0)
   loc0 : f32,
   @location(1)
@@ -387,13 +474,13 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>,
 }
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 )";
 
@@ -406,11 +493,14 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl_OutOfOrder) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 struct FragBuiltins {
@@ -420,10 +510,23 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct tint_symbol_1 {
+  @color(1)
+  col1 : vec4<u32>,
+  @color(2)
+  col2 : vec4<i32>,
+  @color(3)
+  col3 : vec4<f32>,
   @location(0)
   loc0 : f32,
   @location(1)
@@ -432,13 +535,13 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>,
 }
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 
 struct FragBuiltins {
@@ -448,6 +551,12 @@ struct FragBuiltins {
 struct FragLocations {
   loc1 : f32,
   loc2 : vec4<u32>,
+}
+
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
 }
 )";
 
@@ -460,6 +569,8 @@ struct FragLocations {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct FragBuiltins {
   @builtin(position) coord : vec4<f32>,
 };
@@ -467,16 +578,24 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct FragBuiltins {
   coord : vec4<f32>,
 }
@@ -486,7 +605,19 @@ struct FragLocations {
   loc2 : vec4<u32>,
 }
 
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
+}
+
 struct tint_symbol_1 {
+  @color(1)
+  col1 : vec4<u32>,
+  @color(2)
+  col2 : vec4<i32>,
+  @color(3)
+  col3 : vec4<f32>,
   @location(0)
   loc0 : f32,
   @location(1)
@@ -497,13 +628,13 @@ struct tint_symbol_1 {
   coord : vec4<f32>,
 }
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 )";
 
@@ -516,11 +647,14 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl_OutOfOrder) {
     auto* src = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 @fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
-             builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+             builtins : FragBuiltins,
+             colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 struct FragBuiltins {
@@ -530,10 +664,23 @@ struct FragLocations {
   @location(1) loc1 : f32,
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
+struct FragColors {
+  @color(3) col3 : vec4<f32>,
+  @color(1) col1 : vec4<u32>,
+  @color(2) col2 : vec4<i32>,
+};
 )";
 
     auto* expect = R"(
+enable chromium_experimental_framebuffer_fetch;
+
 struct tint_symbol_1 {
+  @color(1)
+  col1 : vec4<u32>,
+  @color(2)
+  col2 : vec4<i32>,
+  @color(3)
+  col3 : vec4<f32>,
   @location(0)
   loc0 : f32,
   @location(1)
@@ -544,13 +691,13 @@ struct tint_symbol_1 {
   coord : vec4<f32>,
 }
 
-fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins, colors : FragColors) {
+  var col : f32 = (((builtins.coord.x * locations.loc1) + loc0) + colors.col3.g);
 }
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 
 struct FragBuiltins {
@@ -560,6 +707,12 @@ struct FragBuiltins {
 struct FragLocations {
   loc1 : f32,
   loc2 : vec4<u32>,
+}
+
+struct FragColors {
+  col3 : vec4<f32>,
+  col1 : vec4<u32>,
+  col2 : vec4<i32>,
 }
 )";
 
