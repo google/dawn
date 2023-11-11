@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/spirv/writer/printer/printer.cc:1909 internal compiler error: unimplemented variable address space pixel_local
+../../src/tint/lang/spirv/writer/printer/printer.cc:2128 internal compiler error: unimplemented variable address space pixel_local
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *
