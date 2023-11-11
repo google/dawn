@@ -262,6 +262,7 @@ group("cmds") {
   deps = []
   if (tint_build_cmds) {
     deps += [
+      "${tint_src_dir}/cmd/info",
       "${tint_src_dir}/cmd/remote_compile",
       "${tint_src_dir}/cmd/tint",
     ]
