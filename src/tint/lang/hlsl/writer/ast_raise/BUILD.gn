@@ -52,6 +52,8 @@ if (tint_build_hlsl_writer) {
       "localize_struct_array_assignment.h",
       "num_workgroups_from_uniform.cc",
       "num_workgroups_from_uniform.h",
+      "pixel_local.cc",
+      "pixel_local.h",
       "remove_continue_in_switch.cc",
       "remove_continue_in_switch.h",
       "truncate_interstage_variables.cc",
@@ -94,6 +96,7 @@ if (tint_build_unittests) {
         "decompose_memory_access_test.cc",
         "localize_struct_array_assignment_test.cc",
         "num_workgroups_from_uniform_test.cc",
+        "pixel_local_test.cc",
         "remove_continue_in_switch_test.cc",
         "truncate_interstage_variables_test.cc",
       ]
