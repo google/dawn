@@ -2814,10 +2814,16 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             break;
         case wgsl::BuiltinFn::kTextureLoad:
             out << ".Load(";
-            // Multisampled textures do not support mip-levels.
-            if (!texture_type->Is<core::type::MultisampledTexture>()) {
-                pack_level_in_coords = true;
+            // Multisampled textures and read-write storage textures do not support mip-levels.
+            if (texture_type->Is<core::type::MultisampledTexture>()) {
+                break;
             }
+            if (auto* storage_texture_type = texture_type->As<core::type::StorageTexture>()) {
+                if (storage_texture_type->access() == core::Access::kReadWrite) {
+                    break;
+                }
+            }
+            pack_level_in_coords = true;
             break;
         case wgsl::BuiltinFn::kTextureGather:
             out << ".Gather";

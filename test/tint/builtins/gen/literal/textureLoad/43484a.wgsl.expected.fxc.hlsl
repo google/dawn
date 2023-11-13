@@ -2,7 +2,7 @@ RWTexture2DArray<float4> arg_0 : register(u0, space1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_43484a() {
-  float4 res = arg_0.Load(uint4(uint3((1u).xx, 1u), uint(0)));
+  float4 res = arg_0.Load(uint3((1u).xx, 1u));
   prevent_dce.Store4(0u, asuint(res));
 }
 

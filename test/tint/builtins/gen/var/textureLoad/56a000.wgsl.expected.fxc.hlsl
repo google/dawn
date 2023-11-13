@@ -3,7 +3,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureLoad_56a000() {
   int arg_1 = 1;
-  float4 res = arg_0.Load(int2(arg_1, 0));
+  float4 res = arg_0.Load(arg_1);
   prevent_dce.Store4(0u, asuint(res));
 }
 
