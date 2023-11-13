@@ -677,7 +677,7 @@ bool Converter::Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageF
 }
 
 bool Converter::Convert(interop::GPUTextureUsageFlags& out, wgpu::TextureUsage in) {
-    out = interop::GPUTextureUsageFlags(static_cast<uint32_t>(out));
+    out = interop::GPUTextureUsageFlags(static_cast<uint32_t>(in));
     return true;
 }
 
@@ -692,7 +692,7 @@ bool Converter::Convert(wgpu::BufferUsage& out, const interop::GPUBufferUsageFla
 }
 
 bool Converter::Convert(interop::GPUBufferUsageFlags& out, wgpu::BufferUsage in) {
-    out = interop::GPUBufferUsageFlags(static_cast<uint32_t>(out));
+    out = interop::GPUBufferUsageFlags(static_cast<uint32_t>(in));
     return true;
 }
 
