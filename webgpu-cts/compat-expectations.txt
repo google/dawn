@@ -249,7 +249,11 @@ crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,mul
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ RetryOnFailure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 
 # maxStorageBuffersPerShaderStage (layout qualifiers issue)
 crbug.com/dawn/2203 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
@@ -375,9 +379,6 @@ crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComput
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=true [ Failure ]
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
-
-# Flaky
-crbug.com/dawn/0000 webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ RetryOnFailure ]
 
 # These tests use 5 storage buffers; Compat only supports 4.
 crbug.com/dawn/2113 webgpu:shader,execution,memory_model,atomicity:* [ Failure ]
@@ -560,7 +561,6 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="1d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r8snorm" [ Failure ]
@@ -763,15 +763,10 @@ crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc
 crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_usages_in_copy_and_render_pass:usage0="texture";usage1="copy-dst" [ Failure ]
 crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_usages_in_copy_and_render_pass:usage0="texture";usage1="copy-src" [ Failure ]
 
-################################################################################
-# New flakes. Please triage:
-################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
