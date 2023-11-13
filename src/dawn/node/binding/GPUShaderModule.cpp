@@ -63,9 +63,9 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
             }
         }
         uint64_t getLineNum(Napi::Env) override { return message.lineNum; }
-        uint64_t getLinePos(Napi::Env) override { return message.linePos; }
-        uint64_t getOffset(Napi::Env) override { return message.offset; }
-        uint64_t getLength(Napi::Env) override { return message.length; }
+        uint64_t getLinePos(Napi::Env) override { return message.utf16LinePos; }
+        uint64_t getOffset(Napi::Env) override { return message.utf16Offset; }
+        uint64_t getLength(Napi::Env) override { return message.utf16Length; }
     };
 
     using Messages = std::vector<interop::Interface<interop::GPUCompilationMessage>>;
