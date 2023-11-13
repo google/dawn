@@ -154,6 +154,14 @@ reclient = struct(
 )
 
 
+luci.notifier(
+    name = "gardener-notifier",
+    notify_rotation_urls = [
+        "https://chrome-ops-rotation-proxy.appspot.com/current/grotation:webgpu-gardener",
+    ],
+    on_occurrence = ["FAILURE", "INFRA_FAILURE"],
+)
+
 # Recipes
 
 def get_builder_executable():
@@ -300,6 +308,7 @@ def add_ci_builder(name, os, clang, debug, cpu, fuzzer):
         properties = properties_ci,
         dimensions = dimensions_ci,
         caches = get_default_caches(os, clang),
+        notifies = ["gardener-notifier"],
         service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
 
@@ -532,18 +541,7 @@ luci.builder(
         swarming.cache("nodejs"),
         swarming.cache("npmcache"),
     ],
-    notifies = [
-        luci.notifier(
-            name = "cts-roller-notifier",
-            # TODO(dawn:1940): Switch to the rotation email when stable
-            # notify_rotation_urls = [
-            #     "https://chrome-ops-rotation-proxy.appspot.com/current/grotation:webgpu-gardener",
-            # ],
-            notify_emails = ["enga@chromium.org"],
-            # TODO(dawn:1940): Remove SUCCESS when stable
-            on_occurrence = ["SUCCESS", "FAILURE", "INFRA_FAILURE"],
-        )
-    ],
+    notifies = ["gardener-notifier"],
     service_account = "dawn-automated-expectations@chops-service-accounts.iam.gserviceaccount.com",
 )
 
