@@ -103,7 +103,10 @@ struct Hasher {
     /// @returns a hash of the value
     size_t operator()(const T& value) const {
         if constexpr (detail::HasHashCodeMember<T>::value) {
-            return value.HashCode();
+            auto hash = value.HashCode();
+            static_assert(std::is_same_v<decltype(hash), size_t>,
+                          "T::HashCode() must return size_t");
+            return hash;
         } else {
             return std::hash<T>()(value);
         }
