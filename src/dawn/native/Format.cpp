@@ -385,44 +385,43 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             AddFormat(internalFormat);
         };
 
-    auto AddMultiAspectFormat = [&AddFormat, &table](
-                                    wgpu::TextureFormat format, Aspect aspects, Cap capabilites,
-                                    UnsupportedReason unsupportedReason,
-                                    ComponentCount componentCount, wgpu::TextureFormat firstFormat,
-                                    wgpu::TextureFormat secondFormat,
-                                    wgpu::TextureFormat thirdFormat =
-                                        wgpu::TextureFormat::Undefined) {
-        Format internalFormat;
-        internalFormat.format = format;
-        internalFormat.baseFormat = format;
-        internalFormat.isRenderable = capabilites & Cap::Renderable;
-        internalFormat.isCompressed = false;
-        internalFormat.unsupportedReason = unsupportedReason;
-        internalFormat.supportsStorageUsage = false;
-        internalFormat.supportsMultisample = capabilites & Cap::Multisample;
-        internalFormat.supportsResolveTarget = false;
-        internalFormat.aspects = aspects;
-        internalFormat.componentCount = static_cast<uint32_t>(componentCount);
+    auto AddMultiAspectFormat =
+        [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects, Cap capabilites,
+                             UnsupportedReason unsupportedReason, ComponentCount componentCount,
+                             wgpu::TextureFormat firstFormat, wgpu::TextureFormat secondFormat,
+                             wgpu::TextureFormat thirdFormat = wgpu::TextureFormat::Undefined) {
+            Format internalFormat;
+            internalFormat.format = format;
+            internalFormat.baseFormat = format;
+            internalFormat.isRenderable = capabilites & Cap::Renderable;
+            internalFormat.isCompressed = false;
+            internalFormat.unsupportedReason = unsupportedReason;
+            internalFormat.supportsStorageUsage = false;
+            internalFormat.supportsMultisample = capabilites & Cap::Multisample;
+            internalFormat.supportsResolveTarget = false;
+            internalFormat.aspects = aspects;
+            internalFormat.componentCount = static_cast<uint32_t>(componentCount);
 
-        // Multi aspect formats just copy information about single-aspect formats. This
-        // means that the single-plane formats must have been added before multi-aspect
-        // ones. (it is ASSERTed below).
-        const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
-        const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
+            // Multi aspect formats just copy information about single-aspect formats. This
+            // means that the single-plane formats must have been added before multi-aspect
+            // ones. (it is ASSERTed below).
+            const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
+            const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
 
-        DAWN_ASSERT(table[firstFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
-        DAWN_ASSERT(table[secondFormatIndex].aspectInfo[0].format !=
-                    wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(table[firstFormatIndex].aspectInfo[0].format !=
+                        wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(table[secondFormatIndex].aspectInfo[0].format !=
+                        wgpu::TextureFormat::Undefined);
 
-        internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
-        internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
-        if (thirdFormat != wgpu::TextureFormat::Undefined) {
-            const FormatIndex thirdFormatIndex = ComputeFormatIndex(thirdFormat);
-            internalFormat.aspectInfo[2] = table[thirdFormatIndex].aspectInfo[0];
-        }
+            internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
+            internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
+            if (thirdFormat != wgpu::TextureFormat::Undefined) {
+                const FormatIndex thirdFormatIndex = ComputeFormatIndex(thirdFormat);
+                internalFormat.aspectInfo[2] = table[thirdFormatIndex].aspectInfo[0];
+            }
 
-        AddFormat(internalFormat);
-    };
+            AddFormat(internalFormat);
+        };
 
     // clang-format off
     // 1 byte color formats
