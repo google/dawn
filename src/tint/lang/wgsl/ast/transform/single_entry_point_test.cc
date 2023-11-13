@@ -669,5 +669,50 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SingleEntryPointTest, ConstAssert_ModuleScope) {
+    // module scope const_assert is preserved
+    auto* src = R"(
+const C = 42;
+
+const_assert (C == 42);
+
+@compute @workgroup_size(1)
+fn main() {
+}
+)";
+
+    auto* expect = src;
+
+    SingleEntryPoint::Config cfg("main");
+
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SingleEntryPointTest, ConstAssert_FnScope) {
+    // function scope const_assert is preserved
+    auto* src = R"(
+const C = 42;
+
+@compute @workgroup_size(1)
+fn main() {
+  const_assert (C == 42);
+}
+)";
+
+    auto* expect = src;
+
+    SingleEntryPoint::Config cfg("main");
+
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform

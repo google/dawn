@@ -132,6 +132,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
                 // Drop requires directives as they are optional, and it's non-trivial to determine
                 // which features are needed for which entry points.
             },
+            [&](const ConstAssert* ca) { b.AST().AddConstAssert(ctx.Clone(ca)); },
             [&](const DiagnosticDirective* d) { b.AST().AddDiagnosticDirective(ctx.Clone(d)); },  //
             TINT_ICE_ON_NO_MATCH);
     }
