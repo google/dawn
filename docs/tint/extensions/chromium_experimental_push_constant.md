@@ -22,7 +22,7 @@ It is an error for a entry point to statically use more than one `push_constant`
 ```
 var<push_constant> draw_id : u32;
 
-@fragment fn main() -> u32 {
+@fragment fn main() -> @location(0) u32 {
     return draw_id;
 }
 ```
