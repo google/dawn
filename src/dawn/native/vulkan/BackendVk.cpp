@@ -143,15 +143,11 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "fragment shader writes to output location 0 with no matching attachment"},
 
     // http://crbug.com/1499919
-    {"VUID-vkCmdCopyBufferToImage-pRegions-00173",
-     "type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x4bfcc971 | vkCmdCopyBufferToImage(): "
-     "pRegions[0]"},
-    {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
-     "type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x45ef177c | vkCmdCopyImageToBuffer(): "
-     "pRegions[0]"},
-    {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
-     "type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x45ef177c | vkCmdCopyImageToBuffer(): "
-     "pRegions[0]"},
+    {"VUID-VkMemoryAllocateInfo-allocationSize-01742",
+     "vkAllocateMemory(): pAllocateInfo->allocationSize allocationSize (4096) "
+     "does not match pAllocateInfo->pNext<VkImportMemoryFdInfoKHR>"},
+    {"VUID-VkMemoryDedicatedAllocateInfo-image-01878",
+     "vkAllocateMemory(): pAllocateInfo->pNext<VkMemoryDedicatedAllocateInfo>"},
 };
 
 namespace dawn::native::vulkan {
