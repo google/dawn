@@ -560,9 +560,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
         }
 
         if (@available(macOS 11.0, iOS 10.0, *)) {
-            // Memoryless storage mode for Metal textures is available only
-            // from the Apple2 family of GPUs on.
+            // Memoryless storage mode and programmable blending are available only from the Apple2
+            // family of GPUs on.
             if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
+                EnableFeature(Feature::FramebufferFetch);
                 EnableFeature(Feature::TransientAttachments);
             }
         }

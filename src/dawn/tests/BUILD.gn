@@ -560,6 +560,7 @@ source_set("end2end_tests_sources") {
     "end2end/ExternalTextureTests.cpp",
     "end2end/FirstIndexOffsetTests.cpp",
     "end2end/FragDepthTests.cpp",
+    "end2end/FramebufferFetchTests.cpp",
     "end2end/GpuMemorySynchronizationTests.cpp",
     "end2end/HistogramTests.cpp",
     "end2end/IndexFormatTests.cpp",
