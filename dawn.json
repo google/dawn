@@ -1919,6 +1919,7 @@
             {"value": 1022, "name": "host mapped pointer", "tags": ["dawn"]},
             {"value": 1023, "name": "multi planar render targets", "tags": ["dawn"]},
             {"value": 1024, "name": "multi planar format nv12a", "tags": ["dawn"]},
+            {"value": 1025, "name": "framebuffer fetch", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},

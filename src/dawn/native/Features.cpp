@@ -258,6 +258,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "host_mapped_pointer.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::FramebufferFetch,
+     {"Support loading the current framebuffer value in fragment shaders.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "framebuffer_fetch.md",
+      FeatureInfo::FeatureState::Experimental}},
 };
 
 }  // anonymous namespace

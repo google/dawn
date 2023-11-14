@@ -401,13 +401,13 @@ MaybeError RenderPipeline::Initialize() {
             mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Fragment;
         }
 
-        const auto& fragmentOutputsWritten = fragmentStage.metadata->fragmentOutputsWritten;
+        const auto& fragmentOutputMask = fragmentStage.metadata->fragmentOutputMask;
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
                 MetalPixelFormat(GetDevice(), GetColorAttachmentFormat(i));
             const ColorTargetState* descriptor = GetColorTargetState(i);
             ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
-                             fragmentOutputsWritten[i]);
+                             fragmentOutputMask[i]);
         }
 
         if (GetAttachmentState()->HasPixelLocalStorage()) {

@@ -488,13 +488,13 @@ MaybeError RenderPipeline::Initialize() {
             blend.colorWriteMask = 0;
         }
 
-        const auto& fragmentOutputsWritten =
-            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputsWritten;
+        const auto& fragmentOutputMask =
+            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputMask;
         ColorAttachmentIndex highestColorAttachmentIndexPlusOne =
             GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorTargetState* target = GetColorTargetState(i);
-            colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputsWritten[i]);
+            colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
         }
 
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

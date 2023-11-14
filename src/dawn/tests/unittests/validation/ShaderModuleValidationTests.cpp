@@ -784,20 +784,22 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
 };
 
 struct WGSLExtensionInfo {
-    const char* WGSLName;
+    const char* wgslName;
     // Is this WGSL extension experimental, i.e. guarded by AllowUnsafeAPIs toggle
     bool isExperimental;
     // The WebGPU feature that required to enable this extension, set to nullptr if no feature
     // required.
-    const char* RequiredFeatureName;
+    const char* requiredFeatureName;
 };
 
 constexpr struct WGSLExtensionInfo kExtensions[] = {
     {"f16", false, "shader-f16"},
     {"chromium_experimental_dp4a", true, "chromium-experimental-dp4a"},
     {"chromium_experimental_subgroups", true, "chromium-experimental-subgroups"},
+    {"chromium_experimental_pixel_local", true, "pixel-local-storage-coherent"},
     {"chromium_disable_uniformity_analysis", true, nullptr},
     {"chromium_internal_dual_source_blending", true, "dual-source-blending"},
+    {"chromium_experimental_framebuffer_fetch", true, "framebuffer-fetch"},
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
@@ -825,13 +827,13 @@ class ShaderModuleExtensionValidationTestSafeNoFeature
 TEST_F(ShaderModuleExtensionValidationTestSafeNoFeature,
        OnlyStableExtensionsRequiringNoFeatureAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.WGSLName + R"(;
+        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
         // On a safe device with no feature required, only stable extensions requiring no features
         // are allowed.
-        if (!extension.isExperimental && !extension.RequiredFeatureName) {
+        if (!extension.isExperimental && !extension.requiredFeatureName) {
             utils::CreateShaderModule(device, wgsl.c_str());
         } else {
             ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, wgsl.c_str()));
@@ -857,13 +859,13 @@ class ShaderModuleExtensionValidationTestUnsafeNoFeature
 TEST_F(ShaderModuleExtensionValidationTestUnsafeNoFeature,
        OnlyExtensionsRequiringNoFeatureAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.WGSLName + R"(;
+        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
         // On an unsafe device with no feature required, only extensions requiring no features are
         // allowed.
-        if (!extension.RequiredFeatureName) {
+        if (!extension.requiredFeatureName) {
             utils::CreateShaderModule(device, wgsl.c_str());
         } else {
             ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, wgsl.c_str()));
@@ -888,7 +890,7 @@ class ShaderModuleExtensionValidationTestSafeAllFeatures
 
 TEST_F(ShaderModuleExtensionValidationTestSafeAllFeatures, OnlyStableExtensionsAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.WGSLName + R"(;
+        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
@@ -918,7 +920,7 @@ class ShaderModuleExtensionValidationTestUnsafeAllFeatures
 
 TEST_F(ShaderModuleExtensionValidationTestUnsafeAllFeatures, AllExtensionsAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.WGSLName + R"(;
+        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 

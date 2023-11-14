@@ -31,6 +31,7 @@
 #include <cmath>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
@@ -420,69 +421,78 @@ bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
 
 MaybeError ValidateColorTargetState(
     DeviceBase* device,
-    const ColorTargetState* descriptor,
+    const ColorTargetState& descriptor,
+    const Format* format,
     bool fragmentWritten,
-    const EntryPointMetadata::FragmentOutputVariableInfo& fragmentOutputVariable) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
+    const EntryPointMetadata::FragmentRenderAttachmentInfo& fragmentOutputVariable) {
+    DAWN_INVALID_IF(descriptor.nextInChain != nullptr, "nextInChain must be nullptr.");
 
-    if (descriptor->blend) {
-        DAWN_TRY_CONTEXT(ValidateBlendState(device, descriptor->blend), "validating blend state.");
+    if (descriptor.blend) {
+        DAWN_TRY_CONTEXT(ValidateBlendState(device, descriptor.blend), "validating blend state.");
     }
 
-    DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
-
-    const Format* format;
-    DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+    DAWN_TRY(ValidateColorWriteMask(descriptor.writeMask));
     DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
-                    "Color format (%s) is not color renderable.", descriptor->format);
+                    "Color format (%s) is not color renderable.", format->format);
 
     DAWN_INVALID_IF(
-        descriptor->blend &&
+        descriptor.blend &&
             !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes & SampleTypeBit::Float),
-        "Blending is enabled but color format (%s) is not blendable.", descriptor->format);
+        "Blending is enabled but color format (%s) is not blendable.", format->format);
 
-    if (fragmentWritten) {
+    if (!fragmentWritten) {
         DAWN_INVALID_IF(
-            fragmentOutputVariable.baseType != format->GetAspectInfo(Aspect::Color).baseType,
-            "Color format (%s) base type (%s) doesn't match the fragment "
-            "module output type (%s).",
-            descriptor->format, format->GetAspectInfo(Aspect::Color).baseType,
-            fragmentOutputVariable.baseType);
-
-        DAWN_INVALID_IF(fragmentOutputVariable.componentCount < format->componentCount,
-                        "The fragment stage has fewer output components (%u) than the color format "
-                        "(%s) component count (%u).",
-                        fragmentOutputVariable.componentCount, descriptor->format,
-                        format->componentCount);
-
-        if (descriptor->blend) {
-            if (fragmentOutputVariable.componentCount < 4u) {
-                // No alpha channel output
-                // Make sure there's no alpha involved in the blending operation
-                DAWN_INVALID_IF(BlendFactorContainsSrcAlpha(descriptor->blend->color.srcFactor) ||
-                                    BlendFactorContainsSrcAlpha(descriptor->blend->color.dstFactor),
-                                "Color blending srcfactor (%s) or dstFactor (%s) is reading alpha "
-                                "but it is missing from fragment output.",
-                                descriptor->blend->color.srcFactor,
-                                descriptor->blend->color.dstFactor);
-            }
-        }
-    } else {
-        DAWN_INVALID_IF(
-            descriptor->writeMask != wgpu::ColorWriteMask::None,
+            descriptor.writeMask != wgpu::ColorWriteMask::None,
             "Color target has no corresponding fragment stage output but writeMask (%s) is "
             "not zero.",
-            descriptor->writeMask);
+            descriptor.writeMask);
+        return {};
+    }
+
+    DAWN_INVALID_IF(
+        fragmentOutputVariable.baseType != format->GetAspectInfo(Aspect::Color).baseType,
+        "Color format (%s) base type (%s) doesn't match the fragment "
+        "module output type (%s).",
+        format->format, format->GetAspectInfo(Aspect::Color).baseType,
+        fragmentOutputVariable.baseType);
+
+    DAWN_INVALID_IF(fragmentOutputVariable.componentCount < format->componentCount,
+                    "The fragment stage has fewer output components (%u) than the color format "
+                    "(%s) component count (%u).",
+                    fragmentOutputVariable.componentCount, format->format, format->componentCount);
+
+    if (descriptor.blend && fragmentOutputVariable.componentCount < 4u) {
+        // No alpha channel output, make sure there's no alpha involved in the blending operation.
+        DAWN_INVALID_IF(BlendFactorContainsSrcAlpha(descriptor.blend->color.srcFactor) ||
+                            BlendFactorContainsSrcAlpha(descriptor.blend->color.dstFactor),
+                        "Color blending srcFactor (%s) or dstFactor (%s) is reading alpha "
+                        "but it is missing from fragment output.",
+                        descriptor.blend->color.srcFactor, descriptor.blend->color.dstFactor);
     }
 
     return {};
 }
 
-MaybeError ValidateCompatibilityColorTargetState(
-    const uint8_t firstColorTargetIndex,
-    const ColorTargetState* const firstColorTargetState,
-    const uint8_t targetIndex,
-    const ColorTargetState* target) {
+MaybeError ValidateFramebufferInput(
+    DeviceBase* device,
+    const Format* format,
+    const EntryPointMetadata::FragmentRenderAttachmentInfo& inputVar) {
+    DAWN_INVALID_IF(inputVar.baseType != format->GetAspectInfo(Aspect::Color).baseType,
+                    "Color format (%s) base type (%s) doesn't match the fragment "
+                    "module input type (%s).",
+                    format->format, format->GetAspectInfo(Aspect::Color).baseType,
+                    inputVar.baseType);
+    DAWN_INVALID_IF(inputVar.componentCount != format->componentCount,
+                    "The fragment stage number of input components (%u) doesn't match the color "
+                    "format (%s) component count (%u).",
+                    inputVar.componentCount, format->format, format->componentCount);
+    return {};
+}
+
+MaybeError ValidateColorTargetStatesMatch(const uint8_t firstColorTargetIndex,
+                                          const ColorTargetState* const firstColorTargetState,
+                                          const uint8_t targetIndex,
+                                          const ColorTargetState* target) {
     DAWN_INVALID_IF(firstColorTargetState->writeMask != target->writeMask,
                     "targets[%u].writeMask (%s) does not match targets[%u].writeMask (%s).",
                     targetIndex, target->writeMask, firstColorTargetIndex,
@@ -537,7 +547,7 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                                  const FragmentState* descriptor,
                                  const PipelineLayoutBase* layout,
                                  const DepthStencilState* depthStencil,
-                                 bool alphaToCoverageEnabled) {
+                                 const MultisampleState& multisample) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
     DAWN_TRY_CONTEXT(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
@@ -545,11 +555,6 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                                                layout, SingleShaderStage::Fragment),
                      "validating fragment stage (%s, entryPoint: %s).", descriptor->module,
                      descriptor->entryPoint);
-
-    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
-    DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
-                    "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
-                    maxColorAttachments);
 
     const EntryPointMetadata& fragmentMetadata =
         descriptor->module->GetEntryPoint(descriptor->entryPoint);
@@ -569,41 +574,53 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                         depthStencil->format, descriptor->module, descriptor->entryPoint);
     }
 
-    uint8_t firstColorTargetIndex = 0;
-    const ColorTargetState* firstColorTargetState = nullptr;
-    ColorAttachmentFormats colorAttachmentFormats;
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
+    DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
+                    "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
+                    maxColorAttachments);
+    ityp::span<ColorAttachmentIndex, const ColorTargetState> targets(
+        descriptor->targets, ColorAttachmentIndex(uint8_t(descriptor->targetCount)));
 
-    for (ColorAttachmentIndex attachmentIndex(uint8_t(0));
-         attachmentIndex < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount));
-         ++attachmentIndex) {
-        const uint8_t i = static_cast<uint8_t>(attachmentIndex);
-        const ColorTargetState* target = &descriptor->targets[i];
-
-        if (target->format != wgpu::TextureFormat::Undefined) {
-            DAWN_TRY_CONTEXT(
-                ValidateColorTargetState(device, target,
-                                         fragmentMetadata.fragmentOutputsWritten[attachmentIndex],
-                                         fragmentMetadata.fragmentOutputVariables[attachmentIndex]),
-                "validating targets[%u].", i);
-            colorAttachmentFormats->push_back(&device->GetValidInternalFormat(target->format));
-            if (device->IsCompatibilityMode()) {
-                if (!firstColorTargetState) {
-                    firstColorTargetState = target;
-                    firstColorTargetIndex = i;
-                } else {
-                    DAWN_TRY_CONTEXT(ValidateCompatibilityColorTargetState(
-                                         firstColorTargetIndex, firstColorTargetState, i, target),
-                                     "validating targets[%u] in compatibility mode.", i);
-                }
-            }
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> targetMask;
+    for (ColorAttachmentIndex i{}; i < targets.size(); ++i) {
+        if (targets[i].format == wgpu::TextureFormat::Undefined) {
+            DAWN_INVALID_IF(targets[i].blend,
+                            "Color target[%u] blend state is set when the format is undefined.",
+                            static_cast<uint8_t>(i));
         } else {
-            DAWN_INVALID_IF(target->blend,
-                            "Color target[%u] blend state is set when the format is undefined.", i);
+            targetMask.set(i);
         }
     }
+
+    ColorAttachmentFormats colorAttachmentFormats;
+    for (ColorAttachmentIndex i : IterateBitSet(targetMask)) {
+        const Format* format;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(targets[i].format));
+
+        DAWN_TRY_CONTEXT(ValidateColorTargetState(device, targets[i], format,
+                                                  fragmentMetadata.fragmentOutputMask[i],
+                                                  fragmentMetadata.fragmentOutputVariables[i]),
+                         "validating targets[%u] framebuffer output.", static_cast<uint8_t>(i));
+        colorAttachmentFormats->push_back(&device->GetValidInternalFormat(targets[i].format));
+
+        if (fragmentMetadata.fragmentInputMask[i]) {
+            DAWN_TRY_CONTEXT(ValidateFramebufferInput(device, format,
+                                                      fragmentMetadata.fragmentInputVariables[i]),
+                             "validating targets[%u]'s framebuffer input.",
+                             static_cast<uint8_t>(i));
+        }
+    }
+
+    auto extraFramebufferInputs = fragmentMetadata.fragmentInputMask & ~targetMask;
+    DAWN_INVALID_IF(
+        extraFramebufferInputs.any(),
+        "Framebuffer input at index %u is used without a corresponding color target state.",
+        uint8_t(ityp::Sub(GetHighestBitIndexPlusOne(extraFramebufferInputs),
+                          ColorAttachmentIndex(uint8_t(1)))));
+
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 
-    if (alphaToCoverageEnabled) {
+    if (multisample.alphaToCoverageEnabled) {
         DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput,
                         "alphaToCoverageEnabled is true when the sample_mask builtin is a "
                         "pipeline output of fragment stage of %s.",
@@ -621,12 +638,34 @@ MaybeError ValidateFragmentState(DeviceBase* device,
             format->format);
     }
 
+    if (multisample.count != 1) {
+        DAWN_INVALID_IF(fragmentMetadata.fragmentInputMask.any(),
+                        "Framebuffer inputs are used when the sample count (%u) is not 1.",
+                        multisample.count);
+    }
+
     if (device->IsCompatibilityMode()) {
         DAWN_INVALID_IF(
             fragmentMetadata.usesSampleMaskOutput,
             "sample_mask is not supported in compatibility mode in the fragment stage (%s, "
             "entryPoint: %s)",
             descriptor->module, descriptor->entryPoint);
+
+        // Check that all the color target states match.
+        ColorAttachmentIndex firstColorTargetIndex{};
+        const ColorTargetState* firstColorTargetState = nullptr;
+        for (ColorAttachmentIndex i : IterateBitSet(targetMask)) {
+            if (!firstColorTargetState) {
+                firstColorTargetState = &targets[i];
+                firstColorTargetIndex = i;
+                continue;
+            }
+
+            DAWN_TRY_CONTEXT(ValidateColorTargetStatesMatch(
+                                 static_cast<uint8_t>(firstColorTargetIndex), firstColorTargetState,
+                                 static_cast<uint8_t>(i), &targets[i]),
+                             "validating targets in compatibility mode.");
+        }
     }
 
     return {};
@@ -735,8 +774,7 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
 
     if (descriptor->fragment != nullptr) {
         DAWN_TRY_CONTEXT(ValidateFragmentState(device, descriptor->fragment, descriptor->layout,
-                                               descriptor->depthStencil,
-                                               descriptor->multisample.alphaToCoverageEnabled),
+                                               descriptor->depthStencil, descriptor->multisample),
                          "validating fragment state.");
 
         bool hasStorageAttachments =

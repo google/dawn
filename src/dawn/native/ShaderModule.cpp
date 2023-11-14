@@ -625,7 +625,9 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     metadata->usedInterStageVariables.resize(maxInterStageShaderVariables);
     metadata->interStageVariables.resize(maxInterStageShaderVariables);
 
+    // Vertex shader specific reflection.
     if (metadata->stage == SingleShaderStage::Vertex) {
+        // Vertex input reflection.
         for (const auto& inputVar : entryPoint.input_variables) {
             uint32_t unsanitizedLocation = inputVar.attributes.location.value();
             if (DelayedInvalidIf(unsanitizedLocation >= maxVertexAttributes,
@@ -641,6 +643,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->usedVertexInputs.set(location);
         }
 
+        // Vertex ouput (inter-stage variables) reflection.
         uint32_t totalInterStageShaderComponents = 0;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
@@ -668,6 +671,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->interStageVariables[location] = variable;
         }
 
+        // Other vertex metadata.
         metadata->totalInterStageShaderComponents = totalInterStageShaderComponents;
         DelayedInvalidIf(totalInterStageShaderComponents > maxInterStageShaderComponents,
                          "Total vertex output components count (%u) exceeds the maximum (%u).",
@@ -677,38 +681,44 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         metadata->usesInstanceIndex = entryPoint.instance_index_used;
     }
 
+    // Fragment shader specific reflection.
     if (metadata->stage == SingleShaderStage::Fragment) {
         uint32_t totalInterStageShaderComponents = 0;
+
+        // Fragment input (inter-stage variables) reflection.
         for (const auto& inputVar : entryPoint.input_variables) {
-            if (inputVar.attributes.location.has_value()) {
-                uint32_t location = inputVar.attributes.location.value();
-                EntryPointMetadata::InterStageVariableInfo variable;
-                variable.name = inputVar.variable_name;
-                DAWN_TRY_ASSIGN(variable.baseType, TintComponentTypeToInterStageComponentType(
-                                                       inputVar.component_type));
-                DAWN_TRY_ASSIGN(
-                    variable.componentCount,
-                    TintCompositionTypeToInterStageComponentCount(inputVar.composition_type));
-                DAWN_TRY_ASSIGN(
-                    variable.interpolationType,
-                    TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
-                DAWN_TRY_ASSIGN(variable.interpolationSampling,
-                                TintInterpolationSamplingToInterpolationSamplingType(
-                                    inputVar.interpolation_sampling));
-                totalInterStageShaderComponents += variable.componentCount;
-
-                if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
-                                     "Fragment input variable \"%s\" has a location (%u) that "
-                                     "is greater than or equal to (%u).",
-                                     inputVar.name, location, maxInterStageShaderVariables)) {
-                    continue;
-                }
-
-                metadata->usedInterStageVariables[location] = true;
-                metadata->interStageVariables[location] = variable;
+            // Skip over @color framebuffer fetch, it is handled below.
+            if (!inputVar.attributes.location.has_value()) {
+                DAWN_ASSERT(inputVar.attributes.color.has_value());
+                continue;
             }
+
+            uint32_t location = inputVar.attributes.location.value();
+            EntryPointMetadata::InterStageVariableInfo variable;
+            variable.name = inputVar.variable_name;
+            DAWN_TRY_ASSIGN(variable.baseType,
+                            TintComponentTypeToInterStageComponentType(inputVar.component_type));
+            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
+                                                         inputVar.composition_type));
+            DAWN_TRY_ASSIGN(variable.interpolationType,
+                            TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
+            DAWN_TRY_ASSIGN(variable.interpolationSampling,
+                            TintInterpolationSamplingToInterpolationSamplingType(
+                                inputVar.interpolation_sampling));
+            totalInterStageShaderComponents += variable.componentCount;
+
+            if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
+                                 "Fragment input variable \"%s\" has a location (%u) that "
+                                 "is greater than or equal to (%u).",
+                                 inputVar.name, location, maxInterStageShaderVariables)) {
+                continue;
+            }
+
+            metadata->usedInterStageVariables[location] = true;
+            metadata->interStageVariables[location] = variable;
         }
 
+        // Other fragment metadata
         if (entryPoint.front_facing_used) {
             totalInterStageShaderComponents += 1;
         }
@@ -726,9 +736,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                          "Total fragment input components count (%u) exceeds the maximum (%u).",
                          totalInterStageShaderComponents, maxInterStageShaderComponents);
 
+        // Fragment output reflection.
         uint32_t maxColorAttachments = limits.v1.maxColorAttachments;
         for (const auto& outputVar : entryPoint.output_variables) {
-            EntryPointMetadata::FragmentOutputVariableInfo variable;
+            EntryPointMetadata::FragmentRenderAttachmentInfo variable;
             DAWN_TRY_ASSIGN(variable.baseType,
                             TintComponentTypeToTextureComponentType(outputVar.component_type));
             DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
@@ -745,9 +756,40 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
             ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
             metadata->fragmentOutputVariables[attachment] = variable;
-            metadata->fragmentOutputsWritten.set(attachment);
+            metadata->fragmentOutputMask.set(attachment);
         }
 
+        // Fragment input reflection.
+        for (const auto& inputVar : entryPoint.input_variables) {
+            if (!inputVar.attributes.color.has_value()) {
+                continue;
+            }
+
+            // Tint should disallow using @color(N) without the respective enable, which is gated
+            // on the extension.
+            DAWN_ASSERT(device->HasFeature(Feature::FramebufferFetch));
+
+            EntryPointMetadata::FragmentRenderAttachmentInfo variable;
+            DAWN_TRY_ASSIGN(variable.baseType,
+                            TintComponentTypeToTextureComponentType(inputVar.component_type));
+            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
+                                                         inputVar.composition_type));
+            DAWN_ASSERT(variable.componentCount <= 4);
+
+            uint32_t unsanitizedAttachment = inputVar.attributes.color.value();
+            if (DelayedInvalidIf(unsanitizedAttachment >= maxColorAttachments,
+                                 "Fragment input variable \"%s\" has a location (%u) that "
+                                 "exceeds the maximum (%u).",
+                                 inputVar.name, unsanitizedAttachment, maxColorAttachments)) {
+                continue;
+            }
+
+            ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
+            metadata->fragmentInputVariables[attachment] = variable;
+            metadata->fragmentInputMask.set(attachment);
+        }
+
+        // Fragment PLS reflection.
         if (!entryPoint.pixel_local_members.empty()) {
             metadata->usesPixelLocal = true;
             metadata->pixelLocalBlockSize =
@@ -762,6 +804,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
     }
 
+    // Generic resource binding reflection.
     for (const tint::inspector::ResourceBinding& resource :
          inspector->GetResourceBindings(entryPoint.name)) {
         ShaderBindingInfo info;
@@ -843,6 +886,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         resource.binding, resource.bind_group);
     }
 
+    // Reflection of combined sampler and texture uses.
     auto samplerTextureUses = inspector->GetSamplerTextureUses(entryPoint.name);
     metadata->samplerTexturePairs.reserve(samplerTextureUses.Length());
     std::transform(samplerTextureUses.begin(), samplerTextureUses.end(),

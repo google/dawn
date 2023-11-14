@@ -2511,5 +2511,120 @@ TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
     }
 }
 
+class FramebufferFetchFeatureTest : public RenderPipelineValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::FramebufferFetch};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeatureCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that the framebuffer input must have a corresponding color target.
+TEST_F(FramebufferFetchFeatureTest, FramebufferInputMustHaveColorTarget) {
+    uint32_t colorIndices[] = {0, 1, 2, kMaxColorAttachments - 1, kMaxColorAttachments};
+    for (uint32_t colorIndex : colorIndices) {
+        std::ostringstream fsStream;
+        fsStream << R"(
+            enable chromium_experimental_framebuffer_fetch;
+            @fragment fn main(@color()"
+                 << colorIndex << R"() in : vec4f) -> @location(1) vec4f {
+                return in;
+            }
+        )";
+
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = vsModule;
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module = utils::CreateShaderModule(device, fsStream.str().c_str());
+        desc.cFragment.entryPoint = "main";
+        desc.cFragment.targetCount = 2;
+        desc.cTargets[0].format = wgpu::TextureFormat::Undefined;
+        desc.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Only colorIndex 1 should work because it is the only index with a color target.
+        if (colorIndex == 1) {
+            device.CreateRenderPipeline(&desc);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+        }
+    }
+}
+
+// Test that the framebuffer fetch requires multisampling to be off.
+TEST_F(FramebufferFetchFeatureTest, MultisampleDisallowed) {
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.entryPoint = "main";
+    desc.vertex.module = vsModule;
+    desc.cFragment.entryPoint = "main";
+    desc.cFragment.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_framebuffer_fetch;
+        @fragment fn main(@color(0) in : vec4f) -> @location(0) vec4f {
+            return in;
+        }
+    )");
+
+    desc.multisample.count = 1;
+    device.CreateRenderPipeline(&desc);
+
+    desc.multisample.count = 4;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+}
+
+// Test that the framebuffer fetch type matches the texture format exactly.
+TEST_F(FramebufferFetchFeatureTest, InputMatchesFormat) {
+    struct ValidPair {
+        const char* type;
+        wgpu::TextureFormat format;
+    };
+
+    std::array<ValidPair, 9> validPairs = {{
+        {"f32", wgpu::TextureFormat::R32Float},
+        {"vec2f", wgpu::TextureFormat::RG16Float},
+        {"vec4f", wgpu::TextureFormat::RGBA8Unorm},
+        {"u32", wgpu::TextureFormat::R32Uint},
+        {"vec2u", wgpu::TextureFormat::RG16Uint},
+        {"vec4u", wgpu::TextureFormat::RGBA8Uint},
+        {"i32", wgpu::TextureFormat::R32Sint},
+        {"vec2i", wgpu::TextureFormat::RG16Sint},
+        {"vec4i", wgpu::TextureFormat::RGBA8Sint},
+    }};
+
+    for (size_t i = 0; i < validPairs.size(); i++) {
+        wgpu::TextureFormat format = validPairs[i].format;
+        const char* outputType = validPairs[i].type;
+
+        for (size_t j = 0; j < validPairs.size(); j++) {
+            const char* inputType = validPairs[j].type;
+
+            std::ostringstream fsStream;
+            fsStream << R"(
+                enable chromium_experimental_framebuffer_fetch;
+                @fragment fn main(@color(0) in : )"
+                     << inputType << R"() -> @location(0) )" << outputType << R"( {
+                    var res : )"
+                     << outputType << R"(;
+                    return res;
+                }
+            )";
+
+            utils::ComboRenderPipelineDescriptor desc;
+            desc.vertex.module = vsModule;
+            desc.vertex.entryPoint = "main";
+            desc.cFragment.module = utils::CreateShaderModule(device, fsStream.str().c_str());
+            desc.cFragment.entryPoint = "main";
+            desc.cTargets[0].format = format;
+
+            if (i == j) {
+                device.CreateRenderPipeline(&desc);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+            }
+        }
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

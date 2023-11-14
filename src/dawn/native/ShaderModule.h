@@ -211,14 +211,19 @@ struct EntryPointMetadata {
         vertexInputBaseTypes;
     ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> usedVertexInputs;
 
-    // An array to record the basic types (float, int and uint) of the fragment shader outputs.
-    struct FragmentOutputVariableInfo {
+    // An array to record the basic types (float, int and uint) of the fragment shader framebuffer
+    // input/outputs (inputs being "framebuffer fetch").
+    struct FragmentRenderAttachmentInfo {
         TextureComponentType baseType;
         uint8_t componentCount;
     };
-    ityp::array<ColorAttachmentIndex, FragmentOutputVariableInfo, kMaxColorAttachments>
+    ityp::array<ColorAttachmentIndex, FragmentRenderAttachmentInfo, kMaxColorAttachments>
         fragmentOutputVariables;
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputMask;
+
+    ityp::array<ColorAttachmentIndex, FragmentRenderAttachmentInfo, kMaxColorAttachments>
+        fragmentInputVariables;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentInputMask;
 
     struct InterStageVariableInfo {
         std::string name;
