@@ -191,8 +191,31 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
         device.CreateRenderPipeline(&descriptor);
     }
 
-    // TODO(dawn:666): Add tests for stencil-only format (Stencil8) with depth test or depth write
-    // enabled when Stencil8 format is implemented
+    // It is invalid if the texture format doesn't have depth aspect while depth test is
+    // enabled.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
+        depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
+        depthStencil->depthWriteEnabled = false;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // It is invalid if the texture format doesn't have depth aspect while depth write is
+    // enabled.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
+        depthStencil->depthCompare = wgpu::CompareFunction::Undefined;
+        depthStencil->depthWriteEnabled = true;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
 }
 
 // Tests that depth attachment is required when frag_depth is written in fragment stage.
