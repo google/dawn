@@ -44,6 +44,7 @@
 #include "dawn/native/opengl/Forward.h"
 #include "dawn/native/opengl/PersistentPipelineStateGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
+#include "dawn/native/opengl/QuerySetGL.h"
 #include "dawn/native/opengl/RenderPipelineGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/TextureGL.h"
@@ -825,8 +826,30 @@ MaybeError CommandBuffer::Execute() {
             }
 
             case Command::ResolveQuerySet: {
-                // TODO(crbug.com/dawn/434): Resolve non-precise occlusion query.
-                SkipCommand(&mCommands, type);
+                ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                Buffer* destination = ToBackend(cmd->destination.Get());
+
+                size_t size = cmd->queryCount * sizeof(uint64_t);
+                destination->EnsureDataInitializedAsDestination(cmd->destinationOffset, size);
+
+                std::vector<uint64_t> values(cmd->queryCount);
+                auto availability = querySet->GetQueryAvailability();
+
+                for (uint32_t i = 0; i < cmd->queryCount; ++i) {
+                    if (!availability[cmd->firstQuery + i]) {
+                        values[i] = 0;
+                        continue;
+                    }
+                    uint32_t query = querySet->Get(cmd->firstQuery + i);
+                    GLuint value;
+                    gl.GetQueryObjectuiv(query, GL_QUERY_RESULT, &value);
+                    values[i] = value;
+                }
+
+                gl.BindBuffer(GL_ARRAY_BUFFER, destination->GetHandle());
+                gl.BufferSubData(GL_ARRAY_BUFFER, cmd->destinationOffset, size, values.data());
+
                 break;
             }
 
@@ -1317,11 +1340,16 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
             }
 
             case Command::BeginOcclusionQuery: {
-                return DAWN_UNIMPLEMENTED_ERROR("BeginOcclusionQuery unimplemented.");
+                BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
+                QuerySet* querySet = ToBackend(renderPass->occlusionQuerySet.Get());
+                gl.BeginQuery(GL_ANY_SAMPLES_PASSED, querySet->Get(cmd->queryIndex));
+                break;
             }
 
             case Command::EndOcclusionQuery: {
-                return DAWN_UNIMPLEMENTED_ERROR("EndOcclusionQuery unimplemented.");
+                mCommands.NextCommand<EndOcclusionQueryCmd>();
+                gl.EndQuery(GL_ANY_SAMPLES_PASSED);
+                break;
             }
 
             case Command::WriteTimestamp:

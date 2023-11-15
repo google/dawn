@@ -32,8 +32,25 @@
 namespace dawn::native::opengl {
 
 QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
-    : QuerySetBase(device, descriptor) {}
+    : QuerySetBase(device, descriptor), mQueries(descriptor->count) {
+    if (mQueries.size() > 0) {
+        const OpenGLFunctions& gl = device->GetGL();
+        gl.GenQueries(descriptor->count, mQueries.data());
+    }
+}
 
 QuerySet::~QuerySet() = default;
+
+void QuerySet::DestroyImpl() {
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+    if (mQueries.size() > 0) {
+        gl.DeleteQueries(mQueries.size(), mQueries.data());
+    }
+    QuerySetBase::DestroyImpl();
+}
+
+GLuint QuerySet::Get(uint32_t index) const {
+    return mQueries[index];
+}
 
 }  // namespace dawn::native::opengl

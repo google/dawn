@@ -391,6 +391,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
     // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
+    // TODO(dawn:2247): Failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -474,6 +477,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
 TEST_P(OcclusionQueryTests, RewriteToZeroWithDraw) {
     // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
+    // TODO(dawn:2247): Failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
     constexpr uint32_t kQueryCount = 1;
 
@@ -1291,6 +1297,8 @@ DAWN_INSTANTIATE_TEST(OcclusionQueryTests,
                       D3D12Backend(),
                       MetalBackend(),
                       MetalBackend({"metal_fill_empty_occlusion_queries_with_zero"}),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 DAWN_INSTANTIATE_TEST(TimestampQueryTests,
                       D3D11Backend(),

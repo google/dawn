@@ -28,7 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_QUERYSETGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_QUERYSETGL_H_
 
+#include <vector>
+
 #include "dawn/native/QuerySet.h"
+#include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
 
@@ -37,9 +40,12 @@ class Device;
 class QuerySet final : public QuerySetBase {
   public:
     QuerySet(Device* device, const QuerySetDescriptor* descriptor);
+    GLuint Get(uint32_t index) const;
 
   private:
     ~QuerySet() override;
+    void DestroyImpl() override;
+    std::vector<GLuint> mQueries;
 };
 
 }  // namespace dawn::native::opengl
