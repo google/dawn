@@ -116,9 +116,9 @@ struct S {
   a : f32,
 }
 
-@group(1) @binding(2) var<storage, read> a : S;
+@internal(disable_validation__binding_point_collision) @group(1) @binding(2) var<storage, read> a : S;
 
-@group(3) @binding(2) var<storage, read> b : S;
+@internal(disable_validation__binding_point_collision) @group(3) @binding(2) var<storage, read> b : S;
 
 @compute @workgroup_size(1)
 fn f() {
@@ -160,11 +160,11 @@ struct S {
   a : f32,
 }
 
-@group(2) @binding(1) var<storage, read_write> a : S;
+@internal(disable_validation__binding_point_collision) @group(2) @binding(1) var<storage, read_write> a : S;
 
-@group(3) @binding(2) var<storage, read_write> b : S;
+@internal(disable_validation__binding_point_collision) @group(3) @binding(2) var<storage, read_write> b : S;
 
-@group(4) @binding(3) var<storage, read> c : S;
+@internal(disable_validation__binding_point_collision) @group(4) @binding(3) var<storage, read> c : S;
 
 @compute @workgroup_size(1)
 fn f() {
@@ -204,9 +204,9 @@ struct S {
   a : f32,
 }
 
-@group(4) @binding(5) var<storage, read_write> a : S;
+@internal(disable_validation__binding_point_collision) @group(4) @binding(5) var<storage, read_write> a : S;
 
-@group(6) @binding(7) var<storage, read_write> b : S;
+@internal(disable_validation__binding_point_collision) @group(6) @binding(7) var<storage, read_write> b : S;
 
 @compute @workgroup_size(1)
 fn f() {
@@ -310,13 +310,13 @@ struct S {
   i : i32,
 }
 
-@group(1) @binding(1) var<storage, read> a : S;
+@internal(disable_validation__binding_point_collision) @group(1) @binding(1) var<storage, read> a : S;
 
-@group(1) @binding(1) var<storage, read> b : S;
+@internal(disable_validation__binding_point_collision) @group(1) @binding(1) var<storage, read> b : S;
 
-@group(5) @binding(4) var<storage, read> c : S;
+@internal(disable_validation__binding_point_collision) @group(5) @binding(4) var<storage, read> c : S;
 
-@group(5) @binding(4) var<storage, read> d : S;
+@internal(disable_validation__binding_point_collision) @group(5) @binding(4) var<storage, read> d : S;
 
 @compute @workgroup_size(1)
 fn f1() {

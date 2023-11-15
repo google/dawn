@@ -27,10 +27,11 @@
 
 #include "dawn/native/metal/ShaderModuleMTL.h"
 
-#include "dawn/native/BindGroupLayoutInternal.h"
+#include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
+#include "dawn/native/metal/BindGroupLayoutMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/RenderPipelineMTL.h"
@@ -114,39 +115,30 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     const PipelineLayout* layout,
     ShaderModule::MetalFunctionData* out,
     uint32_t sampleMask,
-    const RenderPipeline* renderPipeline) {
+    const RenderPipeline* renderPipeline,
+    const BindingInfoArray& moduleBindingInfo) {
     ScopedTintICEHandler scopedICEHandler(device);
 
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:" << std::endl;
 
-    // Remap BindingNumber to BindingIndex in WGSL shader
-    using BindingPoint = tint::BindingPoint;
-
-    tint::BindingRemapperOptions bindingRemapper;
-
     tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {0, kBufferLengthBufferSlot};
 
+    tint::msl::writer::Bindings bindings;
+
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutInternalBase::BindingMap& bindingMap =
-            layout->GetBindGroupLayout(group)->GetBindingMap();
-        for (const auto [bindingNumber, bindingIndex] : bindingMap) {
-            const BindingInfo& bindingInfo =
-                layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-            if (!(bindingInfo.visibility & StageBit(stage))) {
-                continue;
-            }
+        for (const auto& [binding, bindingInfo] : moduleBindingInfo[group]) {
+            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
+                                               static_cast<uint32_t>(binding)};
 
-            uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
+            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
+            auto& bindingIndexInfo = layout->GetBindingIndexInfo(stage)[group];
+            uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
 
-            BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
-                                         static_cast<uint32_t>(bindingNumber)};
-            BindingPoint dstBindingPoint{0, shaderIndex};
-            if (srcBindingPoint != dstBindingPoint) {
-                bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
-            }
+            tint::BindingPoint dstBindingPoint{0, shaderIndex};
 
             // Use the ShaderIndex as the indices for the buffer size lookups in the array length
             // uniform transform. This is used to compute the size of variable length arrays in
@@ -156,6 +148,59 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 bindingInfo.buffer.type == kInternalStorageBufferBinding) {
                 arrayLengthFromUniform.bindpoint_to_size_index.emplace(dstBindingPoint,
                                                                        dstBindingPoint.binding);
+            }
+
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer:
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            bindings.uniform.emplace(
+                                srcBindingPoint,
+                                tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
+                            break;
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::Storage:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            bindings.storage.emplace(
+                                srcBindingPoint,
+                                tint::msl::writer::binding::Storage{dstBindingPoint.binding});
+                            break;
+                        case wgpu::BufferBindingType::Undefined:
+                            DAWN_UNREACHABLE();
+                            break;
+                    }
+                    break;
+                case BindingInfoType::Sampler:
+                    bindings.sampler.emplace(srcBindingPoint, tint::msl::writer::binding::Sampler{
+                                                                  dstBindingPoint.binding});
+                    break;
+                case BindingInfoType::Texture:
+                    bindings.texture.emplace(srcBindingPoint, tint::msl::writer::binding::Texture{
+                                                                  dstBindingPoint.binding});
+                    break;
+                case BindingInfoType::StorageTexture:
+                    bindings.storage_texture.emplace(
+                        srcBindingPoint,
+                        tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
+                    break;
+                case BindingInfoType::ExternalTexture: {
+                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                    const auto& expansion = etBindingMap.find(binding);
+                    DAWN_ASSERT(expansion != etBindingMap.end());
+
+                    const auto& bindingExpansion = expansion->second;
+                    tint::msl::writer::binding::BindingInfo plane0{
+                        static_cast<uint32_t>(shaderIndex)};
+                    tint::msl::writer::binding::BindingInfo plane1{
+                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                    tint::msl::writer::binding::BindingInfo metadata{
+                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+
+                    bindings.external_texture.emplace(
+                        srcBindingPoint,
+                        tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                    break;
+                }
             }
         }
     }
@@ -170,11 +215,12 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
 
             // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.
-            BindingPoint srcBindingPoint{static_cast<uint32_t>(kPullingBufferBindingSet),
-                                         static_cast<uint8_t>(slot)};
-            BindingPoint dstBindingPoint{0, metalIndex};
+            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(kPullingBufferBindingSet),
+                                               static_cast<uint8_t>(slot)};
+            tint::BindingPoint dstBindingPoint{0, metalIndex};
             if (srcBindingPoint != dstBindingPoint) {
-                bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
+                bindings.storage.emplace(
+                    srcBindingPoint, tint::msl::writer::binding::Storage{dstBindingPoint.binding});
             }
 
             // Use the ShaderIndex as the indices for the buffer size lookups in the array
@@ -219,9 +265,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         stage == SingleShaderStage::Vertex &&
         renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
     req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
-    req.tintOptions.binding_remapper_options = std::move(bindingRemapper);
-    req.tintOptions.external_texture_options = BuildExternalTextureTransformBindings(layout);
     req.tintOptions.pixel_local_options = std::move(pixelLocal);
+    req.tintOptions.bindings = std::move(bindings);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -352,8 +397,10 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     }
 
     CacheResult<MslCompilation> mslCompilation;
-    DAWN_TRY_ASSIGN(mslCompilation, TranslateToMSL(GetDevice(), programmableStage, stage, layout,
-                                                   out, sampleMask, renderPipeline));
+    DAWN_TRY_ASSIGN(mslCompilation,
+                    TranslateToMSL(GetDevice(), programmableStage, stage, layout, out, sampleMask,
+                                   renderPipeline, GetEntryPoint(entryPointName).bindings));
+
     out->needsStorageBufferLength = mslCompilation->needsStorageBufferLength;
     out->workgroupAllocations = std::move(mslCompilation->workgroupAllocations);
     out->localWorkgroupSize = MTLSizeMake(mslCompilation->localWorkgroupSize.width,

@@ -59,6 +59,7 @@
 #include "src/tint/lang/msl/writer/ast_raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/ast_raise/pixel_local.h"
 #include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
+#include "src/tint/lang/msl/writer/common/option_builder.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
@@ -191,16 +192,20 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         manager.Add<ast::transform::BuiltinPolyfill>();
     }
 
-    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        options.external_texture_options.bindings_map);
-    manager.Add<ast::transform::MultiplanarExternalTexture>();
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
 
-    // BindingRemapper must come after MultiplanarExternalTexture
     manager.Add<ast::transform::BindingRemapper>();
     data.Add<ast::transform::BindingRemapper::Remappings>(
-        options.binding_remapper_options.binding_points,
-        std::unordered_map<BindingPoint, core::Access>{}, /* allow_collisions */ true);
+        remapper_data, std::unordered_map<BindingPoint, core::Access>{},
+        /* allow_collisions */ true);
+
+    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+    // MultiplanarExternalTexture must come after BindingRemapper
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
+        external_texture_options.bindings_map, /* allow_collisions */ true);
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as

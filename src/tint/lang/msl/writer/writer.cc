@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/msl/writer/common/option_builder.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
 
@@ -44,6 +45,13 @@ namespace tint::msl::writer {
 Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {
         return Failure{program.Diagnostics()};
+    }
+
+    {
+        diag::List validation_diagnostics;
+        if (!ValidateBindingOptions(options, validation_diagnostics)) {
+            return Failure{validation_diagnostics};
+        }
     }
 
     Output output;

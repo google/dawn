@@ -101,6 +101,7 @@ tint_executable("tint") {
       "${tint_src_dir}/lang/msl/validate",
       "${tint_src_dir}/lang/msl/writer",
       "${tint_src_dir}/lang/msl/writer/common",
+      "${tint_src_dir}/lang/msl/writer/helpers",
     ]
   }
 

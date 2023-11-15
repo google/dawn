@@ -124,6 +124,7 @@ cc_library(
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer",
       "//src/tint/lang/msl/writer/common",
+      "//src/tint/lang/msl/writer/helpers",
     ],
     "//conditions:default": [],
   }),

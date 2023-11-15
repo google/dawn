@@ -28,13 +28,85 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 
+#include <unordered_map>
+
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/options/array_length_from_uniform.h"
-#include "src/tint/api/options/binding_remapper.h"
-#include "src/tint/api/options/external_texture.h"
 #include "src/tint/api/options/pixel_local.h"
 #include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::msl::writer {
+namespace binding {
+
+/// Generic binding point
+struct BindingInfo {
+    /// The binding
+    uint32_t binding = 0;
+
+    /// Equality operator
+    /// @param rhs the BindingInfo to compare against
+    /// /// @returns true if this BindingInfo is equal to `rhs`
+    inline bool operator==(const BindingInfo& rhs) const { return binding == rhs.binding; }
+    /// Inequality operator
+    /// @param rhs the BindingInfo to compare against
+    /// @returns true if this BindingInfo is not equal to `rhs`
+    inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
+
+    /// Reflect the fields of this class so taht it can be used by tint::ForeachField()
+    TINT_REFLECT(binding);
+};
+using Uniform = BindingInfo;
+using Storage = BindingInfo;
+using Texture = BindingInfo;
+using StorageTexture = BindingInfo;
+using Sampler = BindingInfo;
+
+/// An external texture
+struct ExternalTexture {
+    /// Metadata
+    BindingInfo metadata{};
+    /// Plane0 binding data
+    BindingInfo plane0{};
+    /// Plane1 binding data;
+    BindingInfo plane1{};
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(metadata, plane0, plane1);
+};
+
+}  // namespace binding
+
+/// Maps the WGSL binding point to the SPIR-V group,binding for uniforms
+using UniformBindings = std::unordered_map<BindingPoint, binding::Uniform>;
+/// Maps the WGSL binding point to the SPIR-V group,binding for storage
+using StorageBindings = std::unordered_map<BindingPoint, binding::Storage>;
+/// Maps the WGSL binding point to the SPIR-V group,binding for textures
+using TextureBindings = std::unordered_map<BindingPoint, binding::Texture>;
+/// Maps the WGSL binding point to the SPIR-V group,binding for storage textures
+using StorageTextureBindings = std::unordered_map<BindingPoint, binding::StorageTexture>;
+/// Maps the WGSL binding point to the SPIR-V group,binding for samplers
+using SamplerBindings = std::unordered_map<BindingPoint, binding::Sampler>;
+/// Maps the WGSL binding point to the plane0, plane1, and metadata for external textures
+using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::ExternalTexture>;
+
+/// Binding information
+struct Bindings {
+    /// Uniform bindings
+    UniformBindings uniform{};
+    /// Storage bindings
+    StorageBindings storage{};
+    /// Texture bindings
+    TextureBindings texture{};
+    /// Storage texture bindings
+    StorageTextureBindings storage_texture{};
+    /// Sampler bindings
+    SamplerBindings sampler{};
+    /// External bindings
+    ExternalTextureBindings external_texture{};
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(uniform, storage, texture, storage_texture, sampler, external_texture);
+};
 
 /// Configuration options used for generating MSL.
 struct Options {
@@ -76,11 +148,8 @@ struct Options {
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
-    /// Options used in the binding mappings for external textures
-    ExternalTextureOptions external_texture_options = {};
-
-    /// Options used in the bindings remapper
-    BindingRemapperOptions binding_remapper_options = {};
+    /// The bindings
+    Bindings bindings;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
@@ -91,8 +160,7 @@ struct Options {
                  fixed_sample_mask,
                  pixel_local_options,
                  array_length_from_uniform,
-                 external_texture_options,
-                 binding_remapper_options);
+                 bindings);
 };
 
 }  // namespace tint::msl::writer

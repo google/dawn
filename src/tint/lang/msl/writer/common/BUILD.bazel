@@ -39,10 +39,12 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "common",
   srcs = [
+    "option_builder.cc",
     "options.cc",
     "printer_support.cc",
   ],
   hdrs = [
+    "option_builder.h",
     "options.h",
     "printer_support.h",
   ],
@@ -52,6 +54,7 @@ cc_library(
     "//src/tint/lang/core",
     "//src/tint/lang/core/type",
     "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/id",
     "//src/tint/utils/macros",

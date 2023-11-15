@@ -151,12 +151,27 @@ struct MultiplanarExternalTexture::State {
             auto& syms = new_binding_symbols[sem_var];
             syms.plane_0 = ctx.Clone(global->name->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
-            b.GlobalVar(syms.plane_1,
-                        b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
-                        b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
+            if (new_binding_points->allow_collisions) {
+                b.GlobalVar(syms.plane_1,
+                            b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
+                            b.Disable(DisabledValidation::kBindingPointCollision),
+                            b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
+            } else {
+                b.GlobalVar(syms.plane_1,
+                            b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
+                            b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
+            }
             syms.params = b.Symbols().New("ext_tex_params");
-            b.GlobalVar(syms.params, b.ty("ExternalTextureParams"), core::AddressSpace::kUniform,
-                        b.Group(AInt(bps.params.group)), b.Binding(AInt(bps.params.binding)));
+            if (new_binding_points->allow_collisions) {
+                b.GlobalVar(syms.params, b.ty("ExternalTextureParams"),
+                            core::AddressSpace::kUniform,
+                            b.Disable(DisabledValidation::kBindingPointCollision),
+                            b.Group(AInt(bps.params.group)), b.Binding(AInt(bps.params.binding)));
+            } else {
+                b.GlobalVar(syms.params, b.ty("ExternalTextureParams"),
+                            core::AddressSpace::kUniform, b.Group(AInt(bps.params.group)),
+                            b.Binding(AInt(bps.params.binding)));
+            }
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.
             auto cloned_attributes = ctx.Clone(global->attributes);
@@ -511,8 +526,9 @@ struct MultiplanarExternalTexture::State {
     }
 };
 
-MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(BindingsMap inputBindingsMap)
-    : bindings_map(std::move(inputBindingsMap)) {}
+MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(BindingsMap inputBindingsMap,
+                                                               bool may_collide)
+    : bindings_map(std::move(inputBindingsMap)), allow_collisions(may_collide) {}
 
 MultiplanarExternalTexture::NewBindingPoints::~NewBindingPoints() = default;
 

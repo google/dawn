@@ -44,6 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_msl_writer) {
   libtint_source_set("common") {
     sources = [
+      "option_builder.cc",
+      "option_builder.h",
       "options.cc",
       "options.h",
       "printer_support.cc",
@@ -55,6 +57,7 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
       "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",

@@ -106,8 +106,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
   private:
     std::unique_ptr<ASTPrinter> gen_;
 };
+
+/// Test helper
 using TestHelper = TestHelperBase<testing::Test>;
 
+/// Param test helper
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 

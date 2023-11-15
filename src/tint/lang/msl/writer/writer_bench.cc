@@ -28,6 +28,7 @@
 #include <string>
 
 #include "src/tint/cmd/bench/bench.h"
+#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -61,18 +62,8 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
                                                                           6);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 7},
                                                                           7);
+    gen_options.bindings = tint::msl::writer::GenerateBindings(res->program);
 
-    uint32_t next_binding_point = 0;
-    for (auto* var : program.AST().GlobalVariables()) {
-        if (auto* var_sem = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
-            if (auto bp = var_sem->Attributes().binding_point) {
-                gen_options.binding_remapper_options.binding_points[*bp] = BindingPoint{
-                    0,                     // group
-                    next_binding_point++,  // binding
-                };
-            }
-        }
-    }
     for (auto _ : state) {
         auto gen_res = Generate(program, gen_options);
         if (!gen_res) {

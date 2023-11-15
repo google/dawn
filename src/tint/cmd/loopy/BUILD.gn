@@ -89,6 +89,7 @@ tint_executable("loopy") {
     deps += [
       "${tint_src_dir}/lang/msl/writer",
       "${tint_src_dir}/lang/msl/writer/common",
+      "${tint_src_dir}/lang/msl/writer/helpers",
     ]
   }
 

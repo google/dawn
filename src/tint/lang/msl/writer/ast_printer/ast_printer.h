@@ -87,7 +87,7 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating MSL.
-/// @program The program to sanitize
+/// @param program The program to sanitize
 /// @param options The MSL generator options.
 /// @returns the sanitized program and any supplementary information
 SanitizedResult Sanitize(const Program& program, const Options& options);

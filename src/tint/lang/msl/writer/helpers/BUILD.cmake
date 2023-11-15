@@ -34,84 +34,20 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/msl/writer/ast_printer/BUILD.cmake)
-include(lang/msl/writer/ast_raise/BUILD.cmake)
-include(lang/msl/writer/common/BUILD.cmake)
-include(lang/msl/writer/helpers/BUILD.cmake)
-include(lang/msl/writer/printer/BUILD.cmake)
-include(lang/msl/writer/raise/BUILD.cmake)
-
 if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# Target:    tint_lang_msl_writer
+# Target:    tint_lang_msl_writer_helpers
 # Kind:      lib
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target(tint_lang_msl_writer lib
-  lang/msl/writer/output.cc
-  lang/msl/writer/output.h
-  lang/msl/writer/writer.cc
-  lang/msl/writer/writer.h
+tint_add_target(tint_lang_msl_writer_helpers lib
+  lang/msl/writer/helpers/generate_bindings.cc
+  lang/msl/writer/helpers/generate_bindings.h
 )
 
-tint_target_add_dependencies(tint_lang_msl_writer lib
+tint_target_add_dependencies(tint_lang_msl_writer_helpers lib
   tint_api_common
   tint_api_options
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_ir
-  tint_lang_core_type
-  tint_lang_msl_writer_raise
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_program
-  tint_lang_wgsl_reader_lower
-  tint_lang_wgsl_sem
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_generator
-  tint_utils_ice
-  tint_utils_id
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-  tint_utils_traits
-)
-
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer lib
-    tint_lang_msl_writer_ast_printer
-    tint_lang_msl_writer_common
-    tint_lang_msl_writer_printer
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_lang_msl_writer lib
-    tint_lang_wgsl_reader_program_to_ir
-  )
-endif(TINT_BUILD_WGSL_READER)
-
-endif(TINT_BUILD_MSL_WRITER)
-if(TINT_BUILD_MSL_WRITER)
-################################################################################
-# Target:    tint_lang_msl_writer_bench
-# Kind:      bench
-# Condition: TINT_BUILD_MSL_WRITER
-################################################################################
-tint_add_target(tint_lang_msl_writer_bench bench
-  lang/msl/writer/writer_bench.cc
-)
-
-tint_target_add_dependencies(tint_lang_msl_writer_bench bench
-  tint_api_common
-  tint_api_options
-  tint_cmd_bench_bench
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
@@ -134,15 +70,9 @@ tint_target_add_dependencies(tint_lang_msl_writer_bench bench
   tint_utils_traits
 )
 
-tint_target_add_external_dependencies(tint_lang_msl_writer_bench bench
-  "google-benchmark"
-)
-
 if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer_bench bench
-    tint_lang_msl_writer
+  tint_target_add_dependencies(tint_lang_msl_writer_helpers lib
     tint_lang_msl_writer_common
-    tint_lang_msl_writer_helpers
   )
 endif(TINT_BUILD_MSL_WRITER)
 

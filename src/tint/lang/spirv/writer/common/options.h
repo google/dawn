@@ -107,7 +107,7 @@ struct Bindings {
     ExternalTextureBindings external_texture{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(uniform, storage, texture, sampler, external_texture);
+    TINT_REFLECT(uniform, storage, texture, storage_texture, sampler, external_texture);
 };
 
 /// Configuration options used for generating SPIR-V.
