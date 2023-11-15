@@ -146,6 +146,12 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"VUID-VkMemoryAllocateInfo-allocationSize-01742",
      "vkAllocateMemory(): pAllocateInfo->allocationSize allocationSize (4096) "
      "does not match pAllocateInfo->pNext<VkImportMemoryFdInfoKHR>"},
+    {"VUID-VkMemoryAllocateInfo-allocationSize-01742",
+     "vkAllocateMemory(): pAllocateInfo->allocationSize allocationSize (512) "
+     "does not match pAllocateInfo->pNext<VkImportMemoryFdInfoKHR>"},
+    {"VUID-VkMemoryAllocateInfo-allocationSize-01742",
+     "vkAllocateMemory(): pAllocateInfo->memoryTypeIndex memoryTypeIndex (7) "
+     "does not match pAllocateInfo->pNext<VkImportMemoryFdInfoKHR>"},
     {"VUID-VkMemoryDedicatedAllocateInfo-image-01878",
      "vkAllocateMemory(): pAllocateInfo->pNext<VkMemoryDedicatedAllocateInfo>"},
 };
