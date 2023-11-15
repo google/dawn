@@ -1,6 +1,27 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-extensions/texel_fetch/additional_params/c.wgsl:9:4 error: use of @color requires enabling extension 'chromium_experimental_framebuffer_fetch'
-  @color(0) fbf : vec4f,
-   ^^^^^
+using namespace metal;
+void g(float a, float b, float c) {
+}
+
+struct In {
+  float4 pos;
+  float4 uv;
+  float4 fbf;
+};
+
+struct tint_symbol_1 {
+  float4 fbf [[color(0)]];
+  float4 uv [[user(locn0)]];
+};
+
+void f_inner(In in) {
+  g(in.pos[0], in.uv[0], in.fbf[1]);
+}
+
+fragment void f(float4 pos [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  In const tint_symbol_2 = {.pos=pos, .uv=tint_symbol.uv, .fbf=tint_symbol.fbf};
+  f_inner(tint_symbol_2);
+  return;
+}
 
