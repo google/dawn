@@ -274,10 +274,11 @@ bool ASTPrinter::Generate() {
     if (!tint::wgsl::CheckSupportedExtensions(
             "MSL", builder_.AST(), diagnostics_,
             Vector{
+                // Note: kChromiumExperimentalPixelLocal should have been transformed into
+                // kChromiumExperimentalFramebufferFetch by the PixelLocal transform.
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
                 wgsl::Extension::kChromiumExperimentalDp4A,
                 wgsl::Extension::kChromiumExperimentalFullPtrParameters,
-                wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kChromiumExperimentalFramebufferFetch,
