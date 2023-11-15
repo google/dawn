@@ -54,8 +54,8 @@ if (tint_build_spv_writer) {
       "module.h",
       "operand.cc",
       "operand.h",
-      "option_builder.cc",
-      "option_builder.h",
+      "option_helper.cc",
+      "option_helpers.h",
       "options.h",
     ]
     deps = [

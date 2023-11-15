@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+/// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,23 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTION_BUILDER_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTION_BUILDER_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_OPTION_HELPERS_H_
+#define SRC_TINT_LANG_MSL_WRITER_COMMON_OPTION_HELPERS_H_
 
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/options/external_texture.h"
-#include "src/tint/lang/spirv/writer/common/options.h"
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
-namespace tint::spirv::writer {
+namespace tint::msl::writer {
 
+/// The remapper data
 using RemapperData = std::unordered_map<BindingPoint, BindingPoint>;
 
 /// @param options the options
+/// @param diagnostics the diagnostics
 /// @returns true if the binding points are valid
 bool ValidateBindingOptions(const Options& options, diag::List& diagnostics);
 
@@ -52,6 +54,6 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
                                            RemapperData& remapper_data,
                                            ExternalTextureOptions& external_texture);
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTION_BUILDER_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_COMMON_OPTION_HELPERS_H_

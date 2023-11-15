@@ -44,8 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_msl_writer) {
   libtint_source_set("common") {
     sources = [
-      "option_builder.cc",
-      "option_builder.h",
+      "option_helpers.cc",
+      "option_helpers.h",
       "options.cc",
       "options.h",
       "printer_support.cc",

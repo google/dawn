@@ -44,7 +44,7 @@ cc_library(
     "instruction.cc",
     "module.cc",
     "operand.cc",
-    "option_builder.cc",
+    "option_helper.cc",
   ],
   hdrs = [
     "binary_writer.h",
@@ -52,7 +52,7 @@ cc_library(
     "instruction.h",
     "module.h",
     "operand.h",
-    "option_builder.h",
+    "option_helpers.h",
     "options.h",
   ],
   deps = [

@@ -41,8 +41,8 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_common lib
-  lang/msl/writer/common/option_builder.cc
-  lang/msl/writer/common/option_builder.h
+  lang/msl/writer/common/option_helpers.cc
+  lang/msl/writer/common/option_helpers.h
   lang/msl/writer/common/options.cc
   lang/msl/writer/common/options.h
   lang/msl/writer/common/printer_support.cc

@@ -31,7 +31,7 @@
 #include <utility>
 
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
-#include "src/tint/lang/spirv/writer/common/option_builder.h"
+#include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"

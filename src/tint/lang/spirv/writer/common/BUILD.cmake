@@ -51,8 +51,8 @@ tint_add_target(tint_lang_spirv_writer_common lib
   lang/spirv/writer/common/module.h
   lang/spirv/writer/common/operand.cc
   lang/spirv/writer/common/operand.h
-  lang/spirv/writer/common/option_builder.cc
-  lang/spirv/writer/common/option_builder.h
+  lang/spirv/writer/common/option_helper.cc
+  lang/spirv/writer/common/option_helpers.h
   lang/spirv/writer/common/options.h
 )
 

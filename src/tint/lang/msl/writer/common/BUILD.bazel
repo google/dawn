@@ -39,12 +39,12 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "common",
   srcs = [
-    "option_builder.cc",
+    "option_helpers.cc",
     "options.cc",
     "printer_support.cc",
   ],
   hdrs = [
-    "option_builder.h",
+    "option_helpers.h",
     "options.h",
     "printer_support.h",
   ],

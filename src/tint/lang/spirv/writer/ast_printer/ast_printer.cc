@@ -37,7 +37,7 @@
 #include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
 #include "src/tint/lang/spirv/writer/ast_raise/vectorize_matrix_conversions.h"
 #include "src/tint/lang/spirv/writer/ast_raise/while_to_loop.h"
-#include "src/tint/lang/spirv/writer/common/option_builder.h"
+#include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/add_empty_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
