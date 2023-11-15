@@ -58,9 +58,9 @@ Result<Output> Generate(const Program& program, const Options& options) {
         !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
 
     {
-        diag::List validation_diagnostics;
-        if (!ValidateBindingOptions(options, validation_diagnostics)) {
-            return Failure{validation_diagnostics};
+        auto res = ValidateBindingOptions(options);
+        if (!res) {
+            return res.Failure();
         }
     }
 

@@ -34,14 +34,15 @@
 #include "src/tint/api/options/external_texture.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::writer {
 
 using RemapperData = std::unordered_map<BindingPoint, BindingPoint>;
 
 /// @param options the options
-/// @returns true if the binding points are valid
-bool ValidateBindingOptions(const Options& options, diag::List& diagnostics);
+/// @return success or failure
+Result<SuccessType> ValidateBindingOptions(const Options& options);
 
 /// Populates data from the writer options for the remapper and external texture.
 /// @param options the writer options

@@ -48,9 +48,9 @@ Result<Output> Generate(const Program& program, const Options& options) {
     }
 
     {
-        diag::List validation_diagnostics;
-        if (!ValidateBindingOptions(options, validation_diagnostics)) {
-            return Failure{validation_diagnostics};
+        auto res = ValidateBindingOptions(options);
+        if (!res) {
+            return res.Failure();
         }
     }
 

@@ -68,6 +68,7 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",

@@ -34,6 +34,7 @@
 #include "src/tint/api/options/external_texture.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::msl::writer {
 
@@ -41,9 +42,8 @@ namespace tint::msl::writer {
 using RemapperData = std::unordered_map<BindingPoint, BindingPoint>;
 
 /// @param options the options
-/// @param diagnostics the diagnostics
-/// @returns true if the binding points are valid
-bool ValidateBindingOptions(const Options& options, diag::List& diagnostics);
+/// @returns success or failure
+Result<SuccessType> ValidateBindingOptions(const Options& options);
 
 /// Populates data from the writer options for the remapper and external texture.
 /// @param options the writer options
