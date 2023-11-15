@@ -83,14 +83,14 @@ usage as client:
 constexpr uint32_t kProtocolVersion = 1;
 
 /// Supported shader source languages
-enum SourceLanguage {
+enum SourceLanguage : uint8_t {
     MSL,
 };
 
 /// Stream is a serialization wrapper around a socket
 struct Stream {
     /// The underlying socket
-    Socket* const socket;
+    tint::socket::Socket* const socket;
     /// Error state
     std::string error;
 
@@ -187,7 +187,7 @@ struct Stream {
 /// Base class for all messages
 struct Message {
     /// The type of the message
-    enum class Type {
+    enum class Type : uint8_t {
         ConnectionRequest,
         ConnectionResponse,
         CompileRequest,
@@ -384,8 +384,7 @@ int main(int argc, char* argv[]) {
                 file = args[1];
                 break;
             default:
-                std::cerr << "expected 1 or 2 arguments, got " << args.size() << std::endl
-                          << std::endl;
+                std::cerr << "expected 1 or 2 arguments, got " << args.size() << "\n\n";
                 ShowUsage();
         }
         if (address.empty() || file.empty()) {
@@ -402,12 +401,12 @@ int main(int argc, char* argv[]) {
 }
 
 bool RunServer(std::string port) {
-    auto server_socket = Socket::Listen("", port.c_str());
+    auto server_socket = tint::socket::Socket::Listen("", port.c_str());
     if (!server_socket) {
-        std::cout << "Failed to listen on port " << port << std::endl;
+        std::cout << "Failed to listen on port " << port << "\n";
         return false;
     }
-    std::cout << "Listening on port " << port.c_str() << "..." << std::endl;
+    std::cout << "Listening on port " << port.c_str() << "...\n";
     while (auto conn = server_socket->Accept()) {
         std::thread([=] {
             DEBUG("Client connected...");
@@ -472,16 +471,16 @@ bool RunClient(std::string address,
     // Read the file
     std::ifstream input(file, std::ios::binary);
     if (!input) {
-        std::cerr << "Couldn't open '" << file << "'" << std::endl;
+        std::cerr << "Couldn't open '" << file << "'\n";
         return false;
     }
     std::string source((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 
     constexpr const int timeout_ms = 10000;
     DEBUG("Connecting to %s:%s...", address.c_str(), port.c_str());
-    auto conn = Socket::Connect(address.c_str(), port.c_str(), timeout_ms);
+    auto conn = tint::socket::Socket::Connect(address.c_str(), port.c_str(), timeout_ms);
     if (!conn) {
-        std::cerr << "Connection failed" << std::endl;
+        std::cerr << "Connection failed\n";
         return false;
     }
 
@@ -490,22 +489,22 @@ bool RunClient(std::string address,
     DEBUG("Sending connection request...");
     auto conn_resp = Send(stream, ConnectionRequest{kProtocolVersion});
     if (!stream.error.empty()) {
-        std::cerr << stream.error << std::endl;
+        std::cerr << stream.error << "\n";
         return false;
     }
     if (!conn_resp.error.empty()) {
-        std::cerr << conn_resp.error << std::endl;
+        std::cerr << conn_resp.error << "\n";
         return false;
     }
     DEBUG("Connection established. Requesting compile...");
     auto comp_resp =
         Send(stream, CompileRequest{SourceLanguage::MSL, version_major, version_minor, source});
     if (!stream.error.empty()) {
-        std::cerr << stream.error << std::endl;
+        std::cerr << stream.error << "\n";
         return false;
     }
     if (!comp_resp.error.empty()) {
-        std::cerr << comp_resp.error << std::endl;
+        std::cerr << comp_resp.error << "\n";
         return false;
     }
     DEBUG("Compilation successful");

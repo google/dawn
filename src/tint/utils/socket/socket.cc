@@ -56,6 +56,7 @@ using SOCKET = int;
 }  // anonymous namespace
 #endif
 
+namespace tint::socket {
 namespace {
 constexpr SOCKET InvalidSocket = static_cast<SOCKET>(-1);
 void Init() {
@@ -333,3 +334,5 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
 
     return out->IsOpen() ? out : nullptr;
 }
+
+}  // namespace tint::socket

@@ -28,8 +28,9 @@
 #ifndef SRC_TINT_UTILS_SOCKET_SOCKET_H_
 #define SRC_TINT_UTILS_SOCKET_SOCKET_H_
 
-#include <atomic>
 #include <memory>
+
+namespace tint::socket {
 
 /// Socket provides an OS abstraction to a TCP socket.
 class Socket {
@@ -80,5 +81,7 @@ class Socket {
     /// @returns a pointer to the next established incoming connection
     virtual std::shared_ptr<Socket> Accept() = 0;
 };
+
+}  // namespace tint::socket
 
 #endif  // SRC_TINT_UTILS_SOCKET_SOCKET_H_

@@ -35,6 +35,8 @@
 // RWMutex
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace tint::socket {
+
 /// A RWMutex is a reader/writer mutual exclusion lock.
 /// The lock can be held by an arbitrary number of readers or a single writer.
 /// Also known as a shared mutex.
@@ -199,5 +201,7 @@ WLock& WLock::operator=(WLock&& other) {
     other.m = nullptr;
     return *this;
 }
+
+}  // namespace tint::socket
 
 #endif  // SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
