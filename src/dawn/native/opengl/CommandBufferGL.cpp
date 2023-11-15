@@ -1456,6 +1456,8 @@ void DoTexSubImage(const OpenGLFunctions& gl,
         uint32_t width = copySize.width;
         uint32_t height = copySize.height;
         if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
+            // Valid values for GL_UNPACK_ALIGNMENT are 1, 2, 4, 8
+            gl.PixelStorei(GL_UNPACK_ALIGNMENT, std::min(8u, blockInfo.byteSize));
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
                            dataLayout.bytesPerRow / blockInfo.byteSize * blockInfo.width);
             if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
@@ -1468,6 +1470,7 @@ void DoTexSubImage(const OpenGLFunctions& gl,
                 gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
             }
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            gl.PixelStorei(GL_UNPACK_ALIGNMENT, 4);  // Reset to default
         } else {
             if (texture->GetArrayLayers() == 1 && Is1DOr2D(texture->GetDimension())) {
                 const uint8_t* d = static_cast<const uint8_t*>(data);

@@ -227,10 +227,13 @@ DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
 // For MinimumDataSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
 
-class QueueWriteTextureTests : public DawnTest {
-  protected:
-    static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+namespace {
+using TextureFormat = wgpu::TextureFormat;
+DAWN_TEST_PARAM_STRUCT(WriteTextureFormatParams, TextureFormat);
+}  // namespace
 
+class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParams> {
+  protected:
     struct TextureSpec {
         wgpu::Origin3D copyOrigin;
         wgpu::Extent3D textureSize;
@@ -247,7 +250,8 @@ class QueueWriteTextureTests : public DawnTest {
     static DataSpec MinimumDataSpec(wgpu::Extent3D writeSize,
                                     uint32_t overrideBytesPerRow = kStrideComputeDefault,
                                     uint32_t overrideRowsPerImage = kStrideComputeDefault) {
-        uint32_t bytesPerRow = writeSize.width * utils::GetTexelBlockSizeInBytes(kTextureFormat);
+        uint32_t bytesPerRow =
+            writeSize.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
         if (overrideBytesPerRow != kStrideComputeDefault) {
             bytesPerRow = overrideBytesPerRow;
         }
@@ -256,8 +260,8 @@ class QueueWriteTextureTests : public DawnTest {
             rowsPerImage = overrideRowsPerImage;
         }
 
-        uint32_t totalDataSize =
-            utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, writeSize, kTextureFormat);
+        uint32_t totalDataSize = utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, writeSize,
+                                                            GetParam().mTextureFormat);
         return {totalDataSize, 0, bytesPerRow, rowsPerImage};
     }
 
@@ -265,15 +269,17 @@ class QueueWriteTextureTests : public DawnTest {
                                 uint32_t width,
                                 uint32_t height,
                                 uint32_t srcBytesPerRow,
-                                utils::RGBA8* dstData,
-                                uint32_t dstTexelPerRow,
-                                uint32_t texelBlockSize) {
+                                uint8_t* dstData,
+                                uint32_t dstBytesPerRow,
+                                uint32_t bytesPerTexel) {
         for (uint64_t y = 0; y < height; ++y) {
             for (uint64_t x = 0; x < width; ++x) {
-                uint64_t src = x * texelBlockSize + y * srcBytesPerRow;
-                uint64_t dst = x + y * dstTexelPerRow;
+                uint64_t src = x * bytesPerTexel + y * srcBytesPerRow;
+                uint64_t dst = x * bytesPerTexel + y * dstBytesPerRow;
 
-                dstData[dst] = {srcData[src], srcData[src + 1], srcData[src + 2], srcData[src + 3]};
+                for (uint64_t i = 0; i < bytesPerTexel; i++) {
+                    dstData[dst + i] = srcData[src + i];
+                }
             }
         }
     }
@@ -295,7 +301,7 @@ class QueueWriteTextureTests : public DawnTest {
         wgpu::TextureDescriptor descriptor = {};
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size = textureSpec.textureSize;
-        descriptor.format = kTextureFormat;
+        descriptor.format = GetParam().mTextureFormat;
         descriptor.mipLevelCount = textureSpec.level + 1;
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
@@ -309,7 +315,7 @@ class QueueWriteTextureTests : public DawnTest {
         queue.WriteTexture(&imageCopyTexture, data.data(), dataSpec.size, &textureDataLayout,
                            &copySize);
 
-        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kTextureFormat);
+        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
         wgpu::Extent3D mipSize = {textureSpec.textureSize.width >> textureSpec.level,
                                   textureSpec.textureSize.height >> textureSpec.level,
                                   textureSpec.textureSize.depthOrArrayLayers};
@@ -325,18 +331,21 @@ class QueueWriteTextureTests : public DawnTest {
         const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depthOrArrayLayers;
 
         uint64_t dataOffset = dataSpec.offset;
-        const uint32_t texelCountLastLayer =
-            (alignedBytesPerRow / bytesPerTexel) * (mipSize.height - 1) + mipSize.width;
+        const uint32_t byteSizeLastLayer =
+            alignedBytesPerRow * (mipSize.height - 1) + mipSize.width * bytesPerTexel;
+
         for (uint32_t slice = textureSpec.copyOrigin.z; slice < maxArrayLayer; ++slice) {
             // Pack the data in the specified copy region to have the same
             // format as the expected texture data.
-            std::vector<utils::RGBA8> expected(texelCountLastLayer);
+            std::vector<uint8_t> expected(byteSizeLastLayer, 0);
             PackTextureData(data.data() + dataOffset, copySize.width, copySize.height,
-                            dataSpec.bytesPerRow, expected.data(), copySize.width, bytesPerTexel);
+                            dataSpec.bytesPerRow, expected.data(), copySize.width * bytesPerTexel,
+                            bytesPerTexel);
 
             EXPECT_TEXTURE_EQ(expected.data(), texture,
                               {textureSpec.copyOrigin.x, textureSpec.copyOrigin.y, slice},
-                              {copySize.width, copySize.height}, textureSpec.level)
+                              {copySize.width, copySize.height, 1}, descriptor.format,
+                              static_cast<uint8_t>(0), textureSpec.level)
                 << "Write to texture failed copying " << dataSpec.size << "-byte data with offset "
                 << dataSpec.offset << " and bytes per row " << dataSpec.bytesPerRow << " to [("
                 << textureSpec.copyOrigin.x << ", " << textureSpec.copyOrigin.y << "), ("
@@ -551,7 +560,7 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
 
     for (unsigned int b : {1, 2, 3, 4}) {
         uint32_t bytesPerRow =
-            copyExtent.width * utils::GetTexelBlockSizeInBytes(kTextureFormat) + b;
+            copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
         DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow), copyExtent);
     }
 }
@@ -596,7 +605,7 @@ TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // Test with bytesPerRow divisible by blockWidth
     for (unsigned int b : {1, 2, 3, 65, 300}) {
         uint32_t bytesPerRow =
-            (copyExtent.width + b) * utils::GetTexelBlockSizeInBytes(kTextureFormat);
+            (copyExtent.width + b) * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
         uint32_t rowsPerImage = 23;
         DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
     }
@@ -604,7 +613,7 @@ TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // Test with bytesPerRow not divisible by blockWidth
     for (unsigned int b : {1, 2, 3, 19, 301}) {
         uint32_t bytesPerRow =
-            copyExtent.width * utils::GetTexelBlockSizeInBytes(kTextureFormat) + b;
+            copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
         uint32_t rowsPerImage = 23;
         DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
     }
@@ -807,17 +816,19 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCall
                       wgpu::TextureAspect::StencilOnly);
 }
 
-DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
-                                    "copy_with_non_zero_buffer_offset"}),
-                      MetalBackend(),
-                      MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
-                                    "use_blit_for_buffer_to_stencil_texture_copy"}),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend());
+DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
+                        {D3D11Backend(), D3D12Backend(),
+                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                       "copy_with_non_zero_buffer_offset"}),
+                         MetalBackend(),
+                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
+                                       "use_blit_for_buffer_to_stencil_texture_copy"}),
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                        {
+                            wgpu::TextureFormat::R8Unorm,
+                            wgpu::TextureFormat::RG8Unorm,
+                            wgpu::TextureFormat::RGBA8Unorm,
+                        });
 
 }  // anonymous namespace
 }  // namespace dawn
