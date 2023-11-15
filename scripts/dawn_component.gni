@@ -137,10 +137,29 @@ template("dawn_component") {
     }
   }
 
-  static_library("${prefix}static") {
+  if (dawn_complete_static_libs) {
+    # Use static_library if explicitly requested - this works even if there are
+    # no sources in the target by linking in sources from all dependencies.
+    _static_target_type = "static_library"
+  } else if (!defined(invoker.sources) || invoker.sources == []) {
+    # When there are no sources defined, use a source set to avoid creating
+    # an empty static library (which generally don't work).
+    _static_target_type = "source_set"
+  } else {
+    # Use static libraries for the static build rather than source sets because
+    # many of of our test binaries link many large dependencies but often don't
+    # use large portions of them. The static libraries are much more efficient
+    # in this situation since only the necessary object files are linked.
+    _static_target_type = "static_library"
+  }
+
+  target(_static_target_type, "${prefix}static") {
     output_name = "dawn_${name}_static"
 
-    complete_static_lib = dawn_complete_static_libs
+    if (dawn_complete_static_libs) {
+      assert(_static_target_type == "static_library")
+      complete_static_lib = true
+    }
 
     # Copy all variables except "configs", which has a default value
     forward_variables_from(invoker, "*", [ "configs" ])
