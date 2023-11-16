@@ -50,6 +50,7 @@
 #include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/localize_struct_array_assignment.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/num_workgroups_from_uniform.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/pixel_local.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -270,6 +271,34 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
+    {
+        PixelLocal::Config cfg;
+        for (auto it : options.pixel_local_options.attachments) {
+            cfg.pls_member_to_rov_reg.Add(it.first, it.second);
+        }
+        for (auto it : options.pixel_local_options.attachment_formats) {
+            core::TexelFormat format = core::TexelFormat::kUndefined;
+            switch (it.second) {
+                case PixelLocalOptions::TexelFormat::kR32Sint:
+                    format = core::TexelFormat::kR32Sint;
+                    break;
+                case PixelLocalOptions::TexelFormat::kR32Uint:
+                    format = core::TexelFormat::kR32Uint;
+                    break;
+                case PixelLocalOptions::TexelFormat::kR32Float:
+                    format = core::TexelFormat::kR32Float;
+                    break;
+                default:
+                    TINT_ICE() << "missing texel format for pixel local storage attachment";
+                    return SanitizedResult();
+            }
+            cfg.pls_member_to_rov_format.Add(it.first, format);
+        }
+        cfg.rov_group_index = options.pixel_local_options.pixel_local_group_index;
+        data.Add<PixelLocal::Config>(cfg);
+        manager.Add<PixelLocal>();
+    }
+
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<ast::transform::CanonicalizeEntryPointIO>();
 
@@ -361,6 +390,7 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kF16,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumExperimentalPixelLocal,
             })) {
         return false;
     }
@@ -3378,7 +3408,22 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
 
     auto name = var->name->symbol.Name();
     auto* type = sem->Type()->UnwrapRef();
-    if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), name)) {
+    if (ast::HasAttribute<PixelLocal::RasterizerOrderedView>(var->attributes)) {
+        TINT_ASSERT(!type->Is<core::type::MultisampledTexture>());
+        auto* storage = type->As<core::type::StorageTexture>();
+        if (!storage) {
+            TINT_ICE() << "Rasterizer Ordered View type isn't storage texture";
+            return false;
+        }
+        out << "RasterizerOrderedTexture2D";
+        auto* component = image_format_to_rwtexture_type(storage->texel_format());
+        if (TINT_UNLIKELY(!component)) {
+            TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
+                       << static_cast<int>(storage->texel_format());
+            return false;
+        }
+        out << "<" << component << "> " << name;
+    } else if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), name)) {
         return false;
     }
 

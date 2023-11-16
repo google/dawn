@@ -37,6 +37,7 @@
 #include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/api/options/binding_remapper.h"
 #include "src/tint/api/options/external_texture.h"
+#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/utils/reflection/reflection.h"
 
@@ -93,6 +94,9 @@ struct Options {
     /// AccessControls is a map of old binding point to new access control
     std::unordered_map<BindingPoint, core::Access> access_controls;
 
+    /// Options used to deal with pixel local storage variables
+    PixelLocalOptions pixel_local_options = {};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
@@ -104,7 +108,8 @@ struct Options {
                  external_texture_options,
                  binding_remapper_options,
                  binding_points_ignored_in_robustness_transform,
-                 access_controls);
+                 access_controls,
+                 pixel_local_options);
 };
 
 }  // namespace tint::hlsl::writer

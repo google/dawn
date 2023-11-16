@@ -375,6 +375,22 @@ index and ATTACHMENT_INDEX is the index of the emitted
 attachment.
 )");
 
+    auto& pixel_local_attachment_formats =
+        options.Add<StringOption>("pixel_local_attachment_formats",
+                                  R"(Pixel local storage attachment formats, comma-separated
+Each binding is of the form MEMBER_INDEX=ATTACHMENT_FORMAT,
+where MEMBER_INDEX is the pixel-local structure member
+index and ATTACHMENT_FORMAT is the format of the emitted
+attachment, which can only be one of the below value:
+R32Sint, R32Uint, R32Float.
+)");
+
+    auto& pixel_local_group_index = options.Add<ValueOption<uint32_t>>(
+        "pixel_local_group_index",
+        R"(The bind group index of the pixel local attachments (default 0).
+)",
+        Default{0});
+
     auto& skip_hash = options.Add<StringOption>(
         "skip-hash", R"(Skips validation if the hash of the output is equal to any
 of the hash codes in the comma separated list of hashes)");
@@ -478,6 +494,43 @@ Options:
             }
             opts->pixel_local_options.attachments.emplace(member_index.Get(),
                                                           attachment_index.Get());
+        }
+    }
+
+    if (pixel_local_group_index.value.has_value()) {
+        opts->pixel_local_options.pixel_local_group_index = *pixel_local_group_index.value;
+    }
+
+    if (pixel_local_attachment_formats.value.has_value()) {
+        auto binding_formats = tint::Split(*pixel_local_attachment_formats.value, ",");
+        for (auto& binding_format : binding_formats) {
+            auto values = tint::Split(binding_format, "=");
+            if (values.Length() != 2) {
+                std::cerr << "Invalid binding format " << pixel_local_attachment_formats.name
+                          << ": " << binding_format << std::endl;
+                return false;
+            }
+            auto member_index = tint::ParseUint32(values[0]);
+            if (!member_index) {
+                std::cerr << "Invalid member index for " << pixel_local_attachment_formats.name
+                          << ": " << values[0] << std::endl;
+                return false;
+            }
+            auto format = values[1];
+            tint::PixelLocalOptions::TexelFormat texel_format =
+                tint::PixelLocalOptions::TexelFormat::kUndefined;
+            if (format == "R32Sint") {
+                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Sint;
+            } else if (format == "R32Uint") {
+                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Uint;
+            } else if (format == "R32Float") {
+                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Float;
+            } else {
+                std::cerr << "Invalid texel format for " << pixel_local_attachments.name << ": "
+                          << format << std::endl;
+                return false;
+            }
+            opts->pixel_local_options.attachment_formats.emplace(member_index.Get(), texel_format);
         }
     }
 
@@ -782,6 +835,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
+    gen_options.pixel_local_options = options.pixel_local_options;
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (!result) {
         tint::cmd::PrintWGSL(std::cerr, program);

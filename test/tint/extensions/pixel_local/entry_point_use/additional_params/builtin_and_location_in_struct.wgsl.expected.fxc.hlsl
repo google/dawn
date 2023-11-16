@@ -1,27 +1,54 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_pixel_local;
+RasterizerOrderedTexture2D<uint4> pixel_local_a : register(u1);
+RasterizerOrderedTexture2D<int4> pixel_local_b : register(u6);
+RasterizerOrderedTexture2D<float4> pixel_local_c : register(u3);
 
 struct PixelLocal {
-  a : u32,
-  b : i32,
-  c : f32,
+  uint a;
+  int b;
+  float c;
+};
+
+static PixelLocal P = (PixelLocal)0;
+
+void load_from_pixel_local_storage(float4 my_input) {
+  const uint2 rov_texcoord = uint2(my_input.xy);
+  P.a = pixel_local_a.Load(rov_texcoord).x;
+  P.b = pixel_local_b.Load(rov_texcoord).x;
+  P.c = pixel_local_c.Load(rov_texcoord).x;
 }
 
-var<pixel_local> P : PixelLocal;
+void store_into_pixel_local_storage(float4 my_input) {
+  const uint2 rov_texcoord = uint2(my_input.xy);
+  pixel_local_a[rov_texcoord] = uint4((P.a).xxxx);
+  pixel_local_b[rov_texcoord] = int4((P.b).xxxx);
+  pixel_local_c[rov_texcoord] = float4((P.c).xxxx);
+}
 
+struct tint_symbol_2 {
+  float4 uv : TEXCOORD0;
+  float4 pos : SV_Position;
+};
 struct In {
-  @location(0)
-  uv : vec4f,
+  float4 uv;
+};
+
+uint tint_ftou(float v) {
+  return ((v < 4294967040.0f) ? ((v < 0.0f) ? 0u : uint(v)) : 4294967295u);
 }
 
-@fragment
-fn f(@builtin(position) pos : vec4f, tint_symbol : In) {
-  P.a += (u32(pos.x) + u32(tint_symbol.uv.x));
+void f_inner(float4 pos, In tint_symbol) {
+  P.a = (P.a + (tint_ftou(pos.x) + tint_ftou(tint_symbol.uv.x)));
 }
 
-Failed to generate: extensions/pixel_local/entry_point_use/additional_params/builtin_and_location_in_struct.wgsl:2:8 error: HLSL backend does not support extension 'chromium_experimental_pixel_local'
-enable chromium_experimental_pixel_local;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+void f_inner_1(float4 pos, In tint_symbol) {
+  const float4 hlsl_sv_position = pos;
+  load_from_pixel_local_storage(hlsl_sv_position);
+  f_inner(pos, tint_symbol);
+  store_into_pixel_local_storage(hlsl_sv_position);
+}
 
+void f(tint_symbol_2 tint_symbol_1) {
+  const In tint_symbol_3 = {tint_symbol_1.uv};
+  f_inner_1(tint_symbol_1.pos, tint_symbol_3);
+  return;
+}

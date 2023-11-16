@@ -1,44 +1,74 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_pixel_local;
+RasterizerOrderedTexture2D<uint4> pixel_local_a : register(u1);
 
 struct PixelLocal {
-  a : u32,
+  uint a;
+};
+
+static PixelLocal P = (PixelLocal)0;
+
+void load_from_pixel_local_storage(float4 my_input) {
+  const uint2 rov_texcoord = uint2(my_input.xy);
+  P.a = pixel_local_a.Load(rov_texcoord).x;
 }
 
-var<pixel_local> P : PixelLocal;
+void store_into_pixel_local_storage(float4 my_input) {
+  const uint2 rov_texcoord = uint2(my_input.xy);
+  pixel_local_a[rov_texcoord] = uint4((P.a).xxxx);
+}
 
+struct f_res {
+  float4 output_0;
+  float4 output_1;
+  float4 output_2;
+};
+struct tint_symbol_1 {
+  float4 my_pos : SV_Position;
+};
+struct tint_symbol_2 {
+  float4 output_0 : SV_Target0;
+  float4 output_1 : SV_Target2;
+  float4 output_2 : SV_Target3;
+};
 struct Out {
-  @location(0)
-  x : vec4f,
-  @location(2)
-  y : vec4f,
-  @location(3)
-  z : vec4f,
+  float4 x;
+  float4 y;
+  float4 z;
+};
+
+void f0() {
+  P.a = (P.a + 9u);
 }
 
-fn f0() {
-  P.a += 9;
-}
-
-fn f1() {
+void f1() {
   f0();
-  P.a += 8;
+  P.a = (P.a + 8u);
 }
 
-fn f2() {
-  P.a += 7;
+void f2() {
+  P.a = (P.a + 7u);
   f1();
 }
 
-@fragment
-fn f() -> Out {
+Out f_inner() {
   f2();
-  return Out(vec4f(10), vec4f(20), vec4f(30));
+  const Out tint_symbol_4 = {(10.0f).xxxx, (20.0f).xxxx, (30.0f).xxxx};
+  return tint_symbol_4;
 }
 
-Failed to generate: extensions/pixel_local/indirect_use/multiple_outputs/single_attachment.wgsl:2:8 error: HLSL backend does not support extension 'chromium_experimental_pixel_local'
-enable chromium_experimental_pixel_local;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+f_res f_inner_1(float4 my_pos) {
+  const float4 hlsl_sv_position = my_pos;
+  load_from_pixel_local_storage(hlsl_sv_position);
+  const Out result = f_inner();
+  store_into_pixel_local_storage(hlsl_sv_position);
+  const f_res tint_symbol_3 = {result.x, result.y, result.z};
+  return tint_symbol_3;
+}
 
+tint_symbol_2 f(tint_symbol_1 tint_symbol) {
+  const f_res inner_result = f_inner_1(tint_symbol.my_pos);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.output_0 = inner_result.output_0;
+  wrapper_result.output_1 = inner_result.output_1;
+  wrapper_result.output_2 = inner_result.output_2;
+  return wrapper_result;
+}
