@@ -117,9 +117,6 @@ class Module {
 
     /// The map of core::constant::Value to their ir::Constant.
     Hashmap<const core::constant::Value*, ir::Constant*, 16> constants;
-
-    /// If the module generated a validation error, will store the file for the disassembly text.
-    std::unique_ptr<Source::File> disassembly_file;
 };
 
 }  // namespace tint::core::ir
