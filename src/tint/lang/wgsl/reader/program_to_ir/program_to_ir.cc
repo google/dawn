@@ -205,11 +205,11 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
-    bool NeedTerminator() { return current_block_ && !current_block_->HasTerminator(); }
+    bool NeedTerminator() { return current_block_ && !current_block_->Terminator(); }
 
     void SetTerminator(core::ir::Terminator* terminator) {
         TINT_ASSERT(current_block_);
-        TINT_ASSERT(!current_block_->HasTerminator());
+        TINT_ASSERT(!current_block_->Terminator());
 
         current_block_->Append(terminator);
         current_block_ = nullptr;

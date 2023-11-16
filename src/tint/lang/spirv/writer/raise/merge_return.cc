@@ -178,8 +178,8 @@ struct State {
                 return b.InstructionResult(v->Type());
             };
 
-            if (inner_if->True()->HasTerminator()) {
-                if (auto* exit_if = inner_if->True()->Terminator()->As<core::ir::ExitIf>()) {
+            if (auto* terminator = inner_if->True()->Terminator()) {
+                if (auto* exit_if = terminator->As<core::ir::ExitIf>()) {
                     // Ensure the associated 'if' is updated.
                     exit_if->SetIf(inner_if);
 
@@ -198,10 +198,10 @@ struct State {
             // Loop over the 'if' instructions, starting with the inner-most, and add any missing
             // terminating instructions to the blocks holding the 'if'.
             for (auto* i = inner_if; i; i = tint::As<core::ir::If>(i->Block()->Parent())) {
-                if (!i->Block()->HasTerminator() && i->Block()->Parent()) {
+                if (!i->Block()->Terminator() && i->Block()->Parent()) {
                     // Append the exit instruction to the block holding the 'if'.
                     Vector<core::ir::InstructionResult*, 8> exit_args = i->Results();
-                    if (!i->HasResults()) {
+                    if (i->Results().IsEmpty()) {
                         i->SetResults(tint::Transform(exit_args, new_value_with_type));
                     }
                     auto* exit = b.Exit(i->Block()->Parent(), std::move(exit_args));

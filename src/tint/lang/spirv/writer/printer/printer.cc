@@ -975,11 +975,11 @@ class Printer {
         uint32_t true_label = merge_label;
         uint32_t false_label = merge_label;
         if (true_block->Length() > 1 || i->HasResults() ||
-            (true_block->HasTerminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
+            (true_block->Terminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
             true_label = Label(true_block);
         }
         if (false_block->Length() > 1 || i->HasResults() ||
-            (false_block->HasTerminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
+            (false_block->Terminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
             false_label = Label(false_block);
         }
 
@@ -1862,7 +1862,7 @@ class Printer {
         EmitBlockInstructions(loop->Body());
 
         // Emit the loop continuing block.
-        if (loop->Continuing()->HasTerminator()) {
+        if (loop->Continuing()->Terminator()) {
             EmitBlock(loop->Continuing());
         } else {
             // We still need to emit a continuing block with a back-edge, even if it is unreachable.

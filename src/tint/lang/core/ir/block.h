@@ -58,18 +58,9 @@ class Block : public Castable<Block> {
     /// @param out the block to clone into
     virtual void CloneInto(CloneContext& ctx, Block* out);
 
-    /// @returns true if this is block has a terminator instruction
-    bool HasTerminator() {
-        return instructions_.last != nullptr && instructions_.last->Is<ir::Terminator>();
-    }
-
-    /// @return the terminator instruction for this block
-    ir::Terminator* Terminator() {
-        if (!HasTerminator()) {
-            return nullptr;
-        }
-        return instructions_.last->As<ir::Terminator>();
-    }
+    /// @return the terminator instruction for this block, or nullptr if this block does not end in
+    /// a terminator.
+    ir::Terminator* Terminator() { return tint::As<ir::Terminator>(instructions_.last); }
 
     /// @returns the instructions in the block
     Instruction* Instructions() { return instructions_.first; }

@@ -451,7 +451,7 @@ void Validator::CheckFunction(Function* func) {
 void Validator::CheckBlock(Block* blk) {
     TINT_SCOPED_ASSIGNMENT(current_block_, blk);
 
-    if (!blk->HasTerminator()) {
+    if (!blk->Terminator()) {
         AddError(blk, "block: does not end in a terminator instruction");
     }
 

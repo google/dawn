@@ -85,7 +85,7 @@ void Loop::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
 }
 
 bool Loop::HasInitializer() {
-    return initializer_->HasTerminator();
+    return initializer_->Terminator() != nullptr;
 }
 
 }  // namespace tint::core::ir
