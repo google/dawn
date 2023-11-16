@@ -731,6 +731,7 @@ crbug.com/dawn/2131 webgpu:api,validation,resource_usages,texture,in_render_misc
 ################################################################################
 # New failures. Please triage:
 ################################################################################
+crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="forward";bindGroupTest="differentGroups" [ Failure ]
