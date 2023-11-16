@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors.
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,43 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package build
+package fileutils
 
-// TargetConfig holds configuration options for a single target of a directory
-type TargetConfig struct {
-	// Override for the output name of this target
-	OutputName string
-	// Conditionals for this target
-	Condition string
-	// Additional dependencies to add to this target
-	AdditionalDependencies struct {
-		// List of internal dependency patterns
-		Internal []string
-		// List of external dependencies
-		External []ExternalDependencyName
+import "strings"
+
+// SplitExt splits the file name at the last '.', returning the no-extension and
+// extension parts.
+func SplitExt(filename string) (noExt, ext string) {
+	noExt, ext = filename, ""
+	if i := strings.LastIndex(filename, "."); i >= 0 {
+		noExt = filename[:i]
+		ext = filename[i+1:]
 	}
-}
-
-// DirectoryConfig holds configuration options for a directory
-type DirectoryConfig struct {
-	// Condition for all targets in the directory
-	Condition string
-	// Configuration for the 'lib' target
-	Lib *TargetConfig
-	// Configuration for the 'proto' target
-	Proto *TargetConfig
-	// Configuration for the 'test' target
-	Test *TargetConfig
-	// Configuration for the 'test_cmd' target
-	TestCmd *TargetConfig `json:"test_cmd"`
-	// Configuration for the 'bench' target
-	Bench *TargetConfig
-	// Configuration for the 'bench_cmd' target
-	BenchCmd *TargetConfig `json:"bench_cmd"`
-	// Configuration for the 'fuzz' target
-	Fuzz *TargetConfig
-	// Configuration for the 'fuzz_cmd' target
-	FuzzCmd *TargetConfig `json:"fuzz_cmd"`
-	// Configuration for the 'cmd' target
-	Cmd *TargetConfig
+	return
 }

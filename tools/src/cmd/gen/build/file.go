@@ -38,6 +38,8 @@ type Include struct {
 
 // File holds information about a source file
 type File struct {
+	// The file is generated from a target
+	IsGenerated bool
 	// The directory that holds this source file
 	Directory *Directory
 	// The target that this source file belongs to

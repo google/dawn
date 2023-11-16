@@ -1,5 +1,6 @@
 {{- Eval "Includes"         $}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "lib")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "proto")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench_cmd")}}

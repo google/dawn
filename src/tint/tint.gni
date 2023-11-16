@@ -27,8 +27,13 @@
 
 import("//build_overrides/build.gni")
 
+import("//third_party/protobuf/proto_library.gni")
+
 import("../../scripts/tint_overrides_with_defaults.gni")
 
+###############################################################################
+# Tint library target
+###############################################################################
 template("libtint_source_set") {
   source_set(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -53,6 +58,18 @@ template("libtint_source_set") {
     }
 
     public_configs += [ "${tint_src_dir}:tint_public_config" ]
+  }
+}
+
+###############################################################################
+# Tint protobuf library target
+###############################################################################
+template("tint_proto_library") {
+  proto_library(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+    generate_cc = true
+    generate_python = false
+    use_protobuf_full = true
   }
 }
 

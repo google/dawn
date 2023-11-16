@@ -13,7 +13,9 @@ if (tint_build_unittests || tint_build_benchmarks) {
 }
 {{- end}}
 
+
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "lib")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "proto")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
@@ -55,6 +57,8 @@ if({{$.Condition}}) {
 
 {{  if      $.Kind.IsLib -}}
 libtint_source_set("{{$.Directory.Name}}") {
+{{- else if $.Kind.IsProto -}}
+tint_proto_library("proto") {
 {{- else if $.Kind.IsCmd -}}
 tint_executable("{{$.Directory.Name}}") {
 {{- else if $.Kind.IsTest -}}

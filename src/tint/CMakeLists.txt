@@ -177,6 +177,26 @@ function(tint_spvtools_compile_options TARGET)
   target_include_directories(${TARGET} PRIVATE "${TINT_SPIRV_TOOLS_DIR}/include")
 endfunction()
 
+function(tint_lib_compile_options TARGET)
+  if (TINT_ENABLE_INSTALL)
+    install(TARGETS ${TARGET}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+  endif()
+  tint_default_compile_options(${TARGET})
+endfunction()
+
+function(tint_proto_compile_options TARGET)
+  if (TINT_ENABLE_INSTALL)
+    install(TARGETS ${TARGET}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+  endif()
+  tint_core_compile_options(${TARGET})
+endfunction()
+
 function(tint_test_compile_options TARGET)
   tint_default_compile_options(${TARGET})
   set_target_properties(${TARGET} PROPERTIES FOLDER "Tests")
@@ -324,7 +344,7 @@ function(tint_check_target_is_enabled IS_ENABLED KIND)
     if(TINT_BUILD_CMD_TOOLS)
       set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
-  elseif(${KIND} STREQUAL lib)
+  elseif((${KIND} STREQUAL lib) OR (${KIND} STREQUAL proto))
     set(IS_ENABLED TRUE PARENT_SCOPE)
   elseif((${KIND} STREQUAL test) OR (${KIND} STREQUAL test_cmd))
     if(TINT_BUILD_TESTS)
@@ -363,13 +383,12 @@ function(tint_add_target TARGET KIND)
 
   if(${KIND} STREQUAL lib)
     add_library(${TARGET} STATIC EXCLUDE_FROM_ALL)
-    if (TINT_ENABLE_INSTALL)
-      install(TARGETS ${TARGET}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      )
-    endif()
-    tint_default_compile_options(${TARGET})
+    tint_lib_compile_options(${TARGET})
+  elseif(${KIND} STREQUAL proto)
+    add_library(${TARGET} STATIC EXCLUDE_FROM_ALL)
+    list(APPEND TINT_PROTO_TARGETS ${TARGET})
+    set(TINT_PROTO_TARGETS ${TINT_PROTO_TARGETS} PARENT_SCOPE)
+    tint_proto_compile_options(${TARGET})
   elseif(${KIND} STREQUAL cmd)
     add_executable(${TARGET})
     tint_default_compile_options(${TARGET})
@@ -608,6 +627,19 @@ else()
   # Fuzzers not enabled. Just include BUILD.cmake with the current flags.
   include("BUILD.cmake")
 endif(TINT_BUILD_FUZZERS)
+
+
+################################################################################
+# Generate protobuf sources
+################################################################################
+foreach(PROTO_TARGET ${TINT_PROTO_TARGETS})
+  generate_protos(
+    TARGET ${PROTO_TARGET}
+    PROTOC_OUT_DIR "${DAWN_BUILD_GEN_DIR}/src/tint/")
+  target_include_directories(${PROTO_TARGET} PRIVATE "${DAWN_BUILD_GEN_DIR}/src/tint/")
+  target_include_directories(${PROTO_TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
+  target_link_libraries(${PROTO_TARGET} libprotobuf)
+endforeach()
 
 
 ################################################################################

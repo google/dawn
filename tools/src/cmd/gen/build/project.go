@@ -71,15 +71,36 @@ func NewProject(root string, cfg *common.Config) *Project {
 }
 
 // AddFile gets or creates a File with the given project-relative path
-func (p *Project) AddFile(file string) *File {
-	return p.Files.GetOrCreate(file, func() *File {
-		dir, name := path.Split(file)
+func (p *Project) AddFile(filepath string) *File {
+	file := p.Files.GetOrCreate(filepath, func() *File {
+		dir, name := path.Split(filepath)
 		return &File{
 			Directory:              p.Directory(dir),
 			Name:                   name,
 			TransitiveDependencies: NewDependencies(p),
 		}
 	})
+	if file.IsGenerated {
+		panic("AddFile() called with path that already exists for generated file")
+	}
+	return file
+}
+
+// AddGeneratedFile gets or creates a generated File with the given project-relative path
+func (p *Project) AddGeneratedFile(filepath string) *File {
+	file := p.Files.GetOrCreate(filepath, func() *File {
+		dir, name := path.Split(filepath)
+		return &File{
+			IsGenerated:            true,
+			Directory:              p.Directory(dir),
+			Name:                   name,
+			TransitiveDependencies: NewDependencies(p),
+		}
+	})
+	if !file.IsGenerated {
+		panic("AddGeneratedFile() called with path that already exists for non-generated file")
+	}
+	return file
 }
 
 // File returns the File with the given project-relative path
@@ -92,11 +113,12 @@ func (p *Project) AddTarget(dir *Directory, kind TargetKind) *Target {
 	name := p.TargetName(dir, kind)
 	return p.Targets.GetOrCreate(name, func() *Target {
 		t := &Target{
-			Name:          name,
-			Directory:     dir,
-			Kind:          kind,
-			SourceFileSet: container.NewSet[string](),
-			Dependencies:  NewDependencies(p),
+			Name:             name,
+			Directory:        dir,
+			Kind:             kind,
+			SourceFileSet:    container.NewSet[string](),
+			GeneratedFileSet: container.NewSet[string](),
+			Dependencies:     NewDependencies(p),
 		}
 		dir.TargetNames.Add(name)
 		p.Targets.Add(name, t)

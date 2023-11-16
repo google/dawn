@@ -183,7 +183,8 @@ func populateSourceFiles(p *Project) error {
 					"*/**.cc",
 					"*/**.h",
 					"*/**.inl",
-					"*/**.mm"
+					"*/**.mm",
+					"*/**.proto"
 				]
 			},
 			{
@@ -201,7 +202,14 @@ func populateSourceFiles(p *Project) error {
 		dir, name := path.Split(filepath)
 		if kind := targetKindFromFilename(name); kind != targetInvalid {
 			directory := p.AddDirectory(dir)
-			p.AddTarget(directory, kind).AddSourceFile(p.AddFile(filepath))
+			target := p.AddTarget(directory, kind)
+			target.AddSourceFile(p.AddFile(filepath))
+
+			if kind == targetProto {
+				noExt, _ := fileutils.SplitExt(filepath)
+				target.AddGeneratedFile(p.AddGeneratedFile(noExt + ".pb.h"))
+				target.AddGeneratedFile(p.AddGeneratedFile(noExt + ".pb.cc"))
+			}
 		}
 	}
 
@@ -222,12 +230,17 @@ func scanSourceFiles(p *Project) error {
 	// parseFile parses the source file at 'path' represented by 'file'
 	// As this is run concurrently, it must not modify any shared state (including file)
 	parseFile := func(path string, file *File) (string, *ParsedFile, error) {
-		conditions := []Condition{}
+		if file.IsGenerated {
+			return "", nil, nil
+		}
 
 		body, err := os.ReadFile(file.AbsPath())
 		if err != nil {
 			return path, nil, err
 		}
+
+		conditions := []Condition{}
+
 		out := &ParsedFile{}
 		for i, line := range strings.Split(string(body), "\n") {
 			wrapErr := func(err error) error {
@@ -366,6 +379,7 @@ func applyDirectoryConfigs(p *Project) error {
 			kind TargetKind
 		}{
 			{cfg.Lib, targetLib},
+			{cfg.Proto, targetProto},
 			{cfg.Test, targetTest},
 			{cfg.TestCmd, targetTestCmd},
 			{cfg.Bench, targetBench},
