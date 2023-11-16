@@ -343,7 +343,7 @@ class Vector {
 
     /// Move constructor
     /// @param other the vector to move
-    Vector(Vector&& other) { MoveOrCopy(VectorRef<T>(std::move(other))); }
+    Vector(Vector&& other) { Move(std::move(other)); }
 
     /// Copy constructor (differing N length)
     /// @param other the vector to copy
@@ -356,7 +356,7 @@ class Vector {
     /// @param other the vector to move
     template <size_t N2>
     Vector(Vector<T, N2>&& other) {
-        MoveOrCopy(VectorRef<T>(std::move(other)));
+        Move(std::move(other));
     }
 
     /// Copy constructor with covariance / const conversion
@@ -378,7 +378,7 @@ class Vector {
               ReinterpretMode MODE,
               typename = std::enable_if_t<CanReinterpretSlice<MODE, T, U>>>
     Vector(Vector<U, N2>&& other) {  // NOLINT(runtime/explicit)
-        MoveOrCopy(VectorRef<T>(std::move(other)));
+        Move(std::move(other));
     }
 
     /// Move constructor from a mutable vector reference
@@ -391,7 +391,16 @@ class Vector {
 
     /// Copy constructor from an immutable slice
     /// @param other the slice to copy
-    Vector(const Slice<T>& other) { Copy(other); }  // NOLINT(runtime/explicit)
+    Vector(const Slice<T>& other) {  // NOLINT(runtime/explicit)
+        Copy(other);
+    }
+
+    /// Copy constructor from an immutable slice
+    /// @param other the slice to copy
+    template <typename U>
+    Vector(const Slice<U>& other) {  // NOLINT(runtime/explicit)
+        Copy(other);
+    }
 
     /// Destructor
     ~Vector() { ClearAndFree(); }
@@ -411,7 +420,7 @@ class Vector {
     /// @returns this vector so calls can be chained
     Vector& operator=(Vector&& other) {
         if (&other != this) {
-            MoveOrCopy(VectorRef<T>(std::move(other)));
+            Move(std::move(other));
         }
         return *this;
     }
@@ -430,7 +439,7 @@ class Vector {
     /// @returns this vector so calls can be chained
     template <size_t N2>
     Vector& operator=(Vector<T, N2>&& other) {
-        MoveOrCopy(VectorRef<T>(std::move(other)));
+        Move(std::move(other));
         return *this;
     }
 
@@ -824,6 +833,7 @@ class Vector {
     /// Moves 'other' to this vector, if possible, otherwise performs a copy.
     void MoveOrCopy(VectorRef<T>&& other) {
         if (other.can_move_) {
+            // Just steal the slice.
             ClearAndFree();
             impl_.slice = other.slice_;
             other.slice_ = {};
@@ -833,8 +843,9 @@ class Vector {
     }
 
     /// Copies all the elements from `other` to this vector, replacing the content of this vector.
-    /// @param other the
-    void Copy(const tint::Slice<T>& other) {
+    /// @param other the slice to copy
+    template <typename U>
+    void Copy(const tint::Slice<U>& other) {
         if (impl_.slice.cap < other.len) {
             ClearAndFree();
             impl_.Allocate(other.len);
@@ -846,6 +857,41 @@ class Vector {
         for (size_t i = 0; i < impl_.slice.len; i++) {
             new (&impl_.slice.data[i]) T{other.data[i]};
         }
+    }
+
+    /// Moves all the elements from `other` to this vector, replacing the content of this vector.
+    /// @param other the vector to move
+    template <typename U, size_t N2>
+    void Move(Vector<U, N2>&& other) {
+        auto& other_slice = other.impl_.slice;
+        if constexpr (std::is_same_v<T, U>) {
+            if (other.impl_.CanMove()) {
+                // Just steal the slice.
+                ClearAndFree();
+                impl_.slice = other_slice;
+                other_slice = {};
+                return;
+            }
+        }
+
+        // Can't steal the slice, so we have to move the elements instead.
+
+        // Ensure we have capacity for all the elements
+        if (impl_.slice.cap < other_slice.len) {
+            ClearAndFree();
+            impl_.Allocate(other_slice.len);
+        } else {
+            Clear();
+        }
+
+        // Move each of the elements.
+        impl_.slice.len = other_slice.len;
+        for (size_t i = 0; i < impl_.slice.len; i++) {
+            new (&impl_.slice.data[i]) T{std::move(other_slice.data[i])};
+        }
+
+        // Clear other
+        other.Clear();
     }
 
     /// Clears the vector, then frees the slice data.
@@ -1049,8 +1095,8 @@ class VectorRef {
     template <typename U,
               size_t N,
               typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
-    VectorRef(Vector<U, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(vector.impl_.slice.template Reinterpret<T>()) {}
+    VectorRef(const Vector<U, N>& vector)  // NOLINT(runtime/explicit)
+        : slice_(const_cast<tint::Slice<U>&>(vector.impl_.slice).template Reinterpret<T>()) {}
 
     /// Constructor from a moved Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
