@@ -176,8 +176,8 @@ class Disassembler {
 
     Hashmap<Block*, Source, 8> block_to_src_;
     Hashmap<Instruction*, Source, 8> instruction_to_src_;
-    Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
-    Hashmap<Usage, Source, 8, Usage::Hasher> result_to_src_;
+    Hashmap<Usage, Source, 8> operand_to_src_;
+    Hashmap<Usage, Source, 8> result_to_src_;
     Hashmap<If*, std::string, 8> if_names_;
     Hashmap<Loop*, std::string, 8> loop_names_;
     Hashmap<Switch*, std::string, 8> switch_names_;

@@ -47,14 +47,8 @@ struct Usage {
     /// The index of the operand that is the value being used.
     size_t operand_index = 0u;
 
-    /// A specialization of Hasher for Usage.
-    struct Hasher {
-        /// @param u the usage to hash
-        /// @returns a hash of the usage
-        inline std::size_t operator()(const Usage& u) const {
-            return Hash(u.instruction, u.operand_index);
-        }
-    };
+    /// @returns the hash code of the Usage
+    size_t HashCode() const { return Hash(instruction, operand_index); }
 
     /// An equality helper for Usage.
     /// @param other the usage to compare against
@@ -94,7 +88,7 @@ class Value : public Castable<Value> {
 
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
-    const Hashset<Usage, 4, Usage::Hasher>& Usages() { return uses_; }
+    const Hashset<Usage, 4>& Usages() { return uses_; }
 
     /// Apply a function to all uses of the value that exist prior to calling this method.
     /// @param func the function will be applied to each use
@@ -119,7 +113,7 @@ class Value : public Castable<Value> {
         kDead,
     };
 
-    Hashset<Usage, 4, Usage::Hasher> uses_;
+    Hashset<Usage, 4> uses_;
 
     /// Bitset of value flags
     tint::EnumSet<Flag> flags_;
