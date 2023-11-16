@@ -54,7 +54,7 @@ InternalCompilerError::~InternalCompilerError() {
 }
 
 std::string InternalCompilerError::Error() const {
-    return std::string(File()) + +":" + std::to_string(Line()) +
+    return std::string(File()) + ":" + std::to_string(Line()) +
            " internal compiler error: " + Message();
 }
 
