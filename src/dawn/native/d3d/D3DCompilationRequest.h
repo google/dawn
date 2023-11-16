@@ -76,22 +76,11 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(IDxcCompiler3*, dxcCompiler)                                                               \
     X(uint32_t, firstIndexOffsetShaderRegister)                                                  \
     X(uint32_t, firstIndexOffsetRegisterSpace)                                                   \
-    X(bool, usesNumWorkgroups)                                                                   \
-    X(uint32_t, numWorkgroupsShaderRegister)                                                     \
-    X(uint32_t, numWorkgroupsRegisterSpace)                                                      \
-    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
-    X(tint::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                               \
-    X(tint::BindingRemapperOptions, bindingRemapper)                                             \
-    X(AccessControl, accessControls)                                                             \
+    X(tint::hlsl::writer::Options, tintOptions)                                                  \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(InterStageShaderVariablesMask, interstageLocations)                                        \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(bool, disableSymbolRenaming)                                                               \
-    X(bool, isRobustnessEnabled)                                                                 \
-    X(bool, disableWorkgroupInit)                                                                \
-    X(bool, polyfillReflectVec2F32)                                                              \
-    X(bool, dumpShaders)                                                                         \
-    X(std::vector<tint::BindingPoint>, bindingPointsIgnoredInRobustnessTransform)
+    X(bool, dumpShaders)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
     X(bool, hasShaderF16Feature)                    \

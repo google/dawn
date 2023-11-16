@@ -236,39 +236,8 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
         }
     }
 
-    tint::hlsl::writer::Options options;
-    options.disable_robustness = !r.isRobustnessEnabled;
-    options.disable_workgroup_init = r.disableWorkgroupInit;
-    options.binding_remapper_options = r.bindingRemapper;
-    options.access_controls = r.accessControls;
-    options.external_texture_options = r.externalTextureOptions;
-
-    if (r.usesNumWorkgroups) {
-        options.root_constant_binding_point =
-            tint::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
-    }
-    // TODO(dawn:549): HLSL generation outputs the indices into the
-    // array_length_from_uniform buffer that were actually used. When the blob cache can
-    // store more than compiled shaders, we should reflect these used indices and store
-    // them as well. This would allow us to only upload root constants that are actually
-    // read by the shader.
-    options.array_length_from_uniform = r.arrayLengthFromUniform;
-
-    if (r.stage == SingleShaderStage::Vertex) {
-        // Now that only vertex shader can have interstage outputs.
-        // Pass in the actually used interstage locations for tint to potentially truncate unused
-        // outputs.
-        options.interstage_locations = r.interstageLocations;
-        options.truncate_interstage_variables = true;
-    }
-
-    options.polyfill_reflect_vec2_f32 = r.polyfillReflectVec2F32;
-
-    options.binding_points_ignored_in_robustness_transform =
-        std::move(r.bindingPointsIgnoredInRobustnessTransform);
-
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    auto result = tint::hlsl::writer::Generate(transformedProgram, options);
+    auto result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
     DAWN_INVALID_IF(!result, "An error occurred while generating HLSL:\n%s",
                     result.Failure().reason.str());
 
