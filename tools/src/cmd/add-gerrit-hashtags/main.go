@@ -78,7 +78,7 @@ func defaultUser() string {
 }
 
 func main() {
-	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions( /* needsCloudScopes */ false))
+	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions())
 
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()

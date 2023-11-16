@@ -28,6 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import glob
 import os
 import sys
 
@@ -57,7 +58,12 @@ def get_ts_sources():
 
 
 def get_resource_files():
-    files = os.listdir(os.path.join(webgpu_cts_root_dir, 'src', 'resources'))
+    dir = os.path.join(webgpu_cts_root_dir, 'src', 'resources')
+    all = glob.iglob(os.path.join(dir, '**'), recursive=True)
+    files = [
+        os.path.relpath(f, dir).replace(os.sep, '/') for f in all
+        if os.path.isfile(f)
+    ]
     files.sort()
     return files
 

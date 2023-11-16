@@ -76,7 +76,6 @@ Regenerated:
  - compat-expectations.txt
  - ts_sources.txt
  - test_list.txt
- - cache_list.txt
  - resource_files.txt
  - webtest .html files
 

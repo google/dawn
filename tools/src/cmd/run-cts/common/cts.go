@@ -28,119 +28,44 @@
 package common
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"dawn.googlesource.com/dawn/tools/src/fileutils"
 )
 
 type CTS struct {
-	path string                   // Path to the CTS directory
-	npx  string                   // Path to npx executable (optional)
-	node string                   // Path to node executable
-	eval func(main string) string // Returns JavaScript to run the given typescript tool
+	path       string // Path to the CTS directory
+	npx        string // Path to npx executable
+	node       string // Path to node executable
+	Standalone Builder
+	Node       Builder
 }
 
 func NewCTS(cts, npx, node string) CTS {
-	return CTS{path: cts, npx: npx, node: node, eval: evalScriptUsingJIT}
-}
-
-// Eval returns the JavaScript to run the given typescript tool
-func (c CTS) Eval(main string) string {
-	return c.eval(main)
-}
-
-// BuildIfRequired calls Build() if the CTS sources have been modified since the
-// last build.
-func (c CTS) BuildIfRequired(verbose bool) error {
-	if c.npx == "" {
-		fmt.Println("npx not found on PATH. Using runtime TypeScript transpilation (slow)")
-		c.eval = evalScriptUsingJIT
-		return nil
+	return CTS{
+		path: cts,
+		npx:  npx,
+		node: node,
+		Standalone: Builder{
+			Name: "standalone",
+			Out:  filepath.Join(cts, "out"),
+			CTS:  cts,
+			npx:  npx,
+		},
+		Node: Builder{
+			Name: "node",
+			Out:  filepath.Join(cts, "out-node"),
+			CTS:  cts,
+			npx:  npx,
+		},
 	}
-
-	// Scan the CTS source to determine the most recent change to the CTS source
-	mostRecentSourceChange, err := scanSourceTimestamps(filepath.Join(c.path, "src"), verbose)
-	if err != nil {
-		return fmt.Errorf("failed to scan source files for modified timestamps: %w", err)
-	}
-
-	type Cache struct {
-		BuildTimestamp time.Time
-	}
-
-	cachePath := ""
-	if home, err := os.UserHomeDir(); err == nil {
-		cacheDir := filepath.Join(home, ".cache/webgpu")
-		cachePath = filepath.Join(cacheDir, "run-cts.json")
-		os.MkdirAll(cacheDir, 0777)
-	}
-
-	needsRebuild := true
-	if cachePath != "" { // consult the cache to see if we need to rebuild
-		if cacheFile, err := os.Open(cachePath); err == nil {
-			cache := Cache{}
-			if err := json.NewDecoder(cacheFile).Decode(&cache); err == nil {
-				if fileutils.IsDir(filepath.Join(c.path, "out-node")) {
-					needsRebuild = mostRecentSourceChange.After(cache.BuildTimestamp)
-				}
-			}
-			cacheFile.Close()
-		}
-	}
-
-	if verbose {
-		fmt.Println("CTS needs rebuild:", needsRebuild)
-	}
-
-	if needsRebuild {
-		if err := c.Build(verbose); err != nil {
-			return fmt.Errorf("failed to build CTS: %w", err)
-		}
-	}
-
-	if cachePath != "" { // consult the cache to see if we need to rebuild
-		if cacheFile, err := os.Create(cachePath); err == nil {
-			c := Cache{BuildTimestamp: mostRecentSourceChange}
-			json.NewEncoder(cacheFile).Encode(&c)
-			cacheFile.Close()
-		}
-	}
-
-	return nil
-}
-
-// Build calls `npx grunt run:build-out-node` in the CTS directory to compile
-// the TypeScript files down to JavaScript. Doing this once ahead of time can be
-// much faster than dynamically transpiling when there are many tests to run.
-func (c CTS) Build(verbose bool) error {
-	if verbose {
-		start := time.Now()
-		fmt.Println("Building CTS...")
-		defer func() {
-			fmt.Println("completed in", time.Since(start))
-		}()
-	}
-
-	cmd := exec.Command(c.npx, "grunt", "run:build-out-node")
-	cmd.Dir = c.path
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%w: %v", err, string(out))
-	}
-
-	// Can evaluate with the faster .js pre-built
-	c.eval = evalUsingCompiled
-	return nil
 }
 
 // QueryTestCases returns all the test cases that match query.
-func (n *CTS) QueryTestCases(verbose bool, query string) ([]TestCase, error) {
+func (c *CTS) QueryTestCases(verbose bool, query string) ([]TestCase, error) {
 	if verbose {
 		start := time.Now()
 		fmt.Println("Gathering test cases...")
@@ -150,7 +75,7 @@ func (n *CTS) QueryTestCases(verbose bool, query string) ([]TestCase, error) {
 	}
 
 	args := append([]string{
-		"-e", n.Eval("cmdline"),
+		"-e", "require('./out-node/common/runtime/cmdline.js');",
 		"--", // Start of arguments
 		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
 		// and slices away the first two arguments. When running with '-e', args
@@ -159,11 +84,11 @@ func (n *CTS) QueryTestCases(verbose bool, query string) ([]TestCase, error) {
 		"--list",
 	}, query)
 
-	cmd := exec.Command(n.node, args...)
-	cmd.Dir = n.path
+	cmd := exec.Command(c.node, args...)
+	cmd.Dir = c.path
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("%w\n%v", err, string(out))
+		return nil, fmt.Errorf("%v %v\n%w\n%v", c.node, args, err, string(out))
 	}
 
 	lines := strings.Split(string(out), "\n")
@@ -174,14 +99,6 @@ func (n *CTS) QueryTestCases(verbose bool, query string) ([]TestCase, error) {
 		}
 	}
 	return list, nil
-}
-
-func evalUsingCompiled(main string) string {
-	return fmt.Sprintf(`require('./out-node/common/runtime/%v.js');`, main)
-}
-
-func evalScriptUsingJIT(main string) string {
-	return fmt.Sprintf(`require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/%v.ts');`, main)
 }
 
 // scanSourceTimestamps scans all the .js and .ts files in all subdirectories of

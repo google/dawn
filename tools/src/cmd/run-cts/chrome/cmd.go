@@ -41,6 +41,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 	"golang.org/x/net/websocket"
 )
@@ -91,7 +92,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return fmt.Errorf("only a single query can be provided")
 	}
 
-	if err := c.state.CTS.BuildIfRequired(c.flags.Verbose); err != nil {
+	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
+		return err
+	}
+	if err := c.state.CTS.Standalone.BuildIfRequired(c.flags.Verbose); err != nil {
 		return err
 	}
 
@@ -180,7 +184,7 @@ func (c *cmd) runChromeInstance(
 	type Response struct {
 		Type     string
 		Message  string
-		Log      string
+		Log      string `json:"log"`
 		Status   string
 		Duration float64 `json:"js_duration_ms"`
 	}
@@ -191,8 +195,8 @@ func (c *cmd) runChromeInstance(
 	handler := http.NewServeMux()
 	handler.HandleFunc("/test_page.html", serveFile("webgpu-cts/test_page.html"))
 	handler.HandleFunc("/test_runner.js", serveFile("webgpu-cts/test_runner.js"))
-	handler.HandleFunc("/third_party/webgpu-cts/cache/data/",
-		serveDir("/third_party/webgpu-cts/cache/data/", "third_party/webgpu-cts/out/data/"))
+	handler.HandleFunc("/third_party/webgpu-cts/resources/",
+		serveDir("/third_party/webgpu-cts/resources/", "third_party/webgpu-cts/out/resources/"))
 	handler.HandleFunc("/third_party/webgpu-cts/src/",
 		serveDir("/third_party/webgpu-cts/src/", "third_party/webgpu-cts/out/"))
 	handler.HandleFunc("/", websocket.Handler(func(ws *websocket.Conn) {
@@ -248,18 +252,39 @@ func (c *cmd) runChromeInstance(
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), execOpts...)
 	defer cancel()
 
-	runCtx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
+	runCtx, cancel := chromedp.NewContext(allocCtx,
+		chromedp.WithLogf(log.Printf),
+		chromedp.WithErrorf(log.Printf))
 	defer cancel()
+
+	if c.flags.Verbose {
+		chromedp.ListenTarget(runCtx, func(ev interface{}) {
+			// log.Printf("%T", ev)
+			switch ev := ev.(type) {
+			case *runtime.EventConsoleAPICalled:
+				args := make([]string, len(ev.Args))
+				for i := range ev.Args {
+					args[i] = string(ev.Args[i].Value)
+				}
+				log.Println(ev.Type, strings.Join(args, " "))
+			case *runtime.EventExceptionThrown:
+				log.Println(ev.ExceptionDetails.Error())
+			}
+		})
+	}
 	if err := chromedp.Run(runCtx,
 		chromedp.Navigate(origin+"/test_page.html"),
-		chromedp.Evaluate(fmt.Sprintf("window.setupWebsocket(%v);", port), nil),
-	); err != nil {
+		chromedp.Evaluate(fmt.Sprintf("window.setupWebsocket(%v);", port),
+			nil)); err != nil {
 		return err
 	}
 
 nextTestCase:
 	for idx := range testCaseIndices {
 		res := common.Result{Index: idx, TestCase: testCases[idx]}
+		if c.flags.Verbose {
+			fmt.Println("Starting", res.TestCase)
+		}
 		requests <- Request{Query: string(res.TestCase)}
 
 		for {
@@ -301,6 +326,10 @@ nextTestCase:
 func serveFile(relPath string) func(http.ResponseWriter, *http.Request) {
 	dawnRoot := fileutils.DawnRoot()
 	return func(w http.ResponseWriter, r *http.Request) {
+		fullPath := filepath.Join(dawnRoot, relPath)
+		if !fileutils.IsFile(fullPath) {
+			log.Printf("'%v' file does not exist", fullPath)
+		}
 		http.ServeFile(w, r, filepath.Join(dawnRoot, relPath))
 	}
 }
@@ -308,7 +337,10 @@ func serveFile(relPath string) func(http.ResponseWriter, *http.Request) {
 func serveDir(remote, local string) func(http.ResponseWriter, *http.Request) {
 	dawnRoot := fileutils.DawnRoot()
 	return func(w http.ResponseWriter, r *http.Request) {
-		path := filepath.Join(dawnRoot, local, strings.TrimPrefix(r.URL.Path, remote))
-		http.ServeFile(w, r, path)
+		fullPath := filepath.Join(dawnRoot, local, strings.TrimPrefix(r.URL.Path, remote))
+		if !fileutils.IsFile(fullPath) {
+			log.Printf("'%v' file does not exist", fullPath)
+		}
+		http.ServeFile(w, r, fullPath)
 	}
 }

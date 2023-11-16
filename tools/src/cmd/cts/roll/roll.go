@@ -57,6 +57,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"dawn.googlesource.com/dawn/tools/src/gitiles"
+	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"go.chromium.org/luci/auth"
 	"go.chromium.org/luci/auth/client/authcli"
@@ -73,8 +74,6 @@ const (
 	gitLinkPath          = "third_party/webgpu-cts"
 	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
 	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
-	cacheListRelPath     = "third_party/gn/webgpu-cts/cache_list.txt"
-	cacheTarGz           = "third_party/gn/webgpu-cts/cache.tar.gz"
 	resourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
 	webTestsPath         = "webgpu-cts/webtests"
 	refMain              = "refs/heads/main"
@@ -111,7 +110,7 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	gitPath, _ := exec.LookPath("git")
 	npmPath, _ := exec.LookPath("npm")
-	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions( /* needsCloudScopes */ true))
+	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions())
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
@@ -538,7 +537,6 @@ func (r *roller) rollCommitMessage(
 	msg.WriteString(" - compat-expectations.txt\n")
 	msg.WriteString(" - ts_sources.txt\n")
 	msg.WriteString(" - test_list.txt\n")
-	msg.WriteString(" - cache_list.txt\n")
 	msg.WriteString(" - resource_files.txt\n")
 	msg.WriteString(" - webtest .html files\n")
 	msg.WriteString("\n\n")
@@ -695,7 +693,6 @@ func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, err
 // file path to file content for the CTS roll's change. This includes:
 // * type-script source files
 // * CTS test list
-// * CTS cache list
 // * resource file list
 // * webtest file sources
 func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
@@ -733,9 +730,6 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 		tsSourcesRelPath:     r.genTSDepList,
 		testListRelPath:      r.genTestList,
 		resourceFilesRelPath: r.genResourceFilesList,
-		cacheListRelPath: func(context.Context) (string, error) {
-			return common.BuildCache(ctx, r.ctsDir, r.flags.nodePath, r.flags.npmPath, r.flags.auth)
-		},
 	} {
 		relPath, generator := relPath, generator // Capture values, not iterators
 		wg.Add(1)
@@ -853,7 +847,7 @@ func (r *roller) genTestList(ctx context.Context) (string, error) {
 // This list can be used to populate the resource_files.txt file.
 func (r *roller) genResourceFilesList(ctx context.Context) (string, error) {
 	dir := filepath.Join(r.ctsDir, "src", "resources")
-	files, err := filepath.Glob(filepath.Join(dir, "*"))
+	files, err := glob.Glob(filepath.Join(dir, "**"))
 	if err != nil {
 		return "", err
 	}

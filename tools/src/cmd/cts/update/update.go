@@ -77,7 +77,7 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.results.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions( /* needsCloudScopes */ false))
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
 	flag.Var(&c.flags.expectations, "expectations", "path to CTS expectations file(s) to update")
 	return nil, nil

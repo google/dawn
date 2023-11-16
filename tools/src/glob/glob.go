@@ -40,7 +40,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/match"
 )
 
-// Glob returns all the strings that match the given filepath glob
+// Glob returns all the paths that match the given filepath glob
 func Glob(str string) ([]string, error) {
 	abs, err := filepath.Abs(str)
 	if err != nil {

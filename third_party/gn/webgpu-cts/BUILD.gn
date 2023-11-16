@@ -35,7 +35,6 @@ group("webgpu-cts") {
   public_deps = [
     ":compile_src",
     ":copy_resources",
-    ":gen_cache",
     ":verify_gen_ts_dep_list",
   ]
   data = [ "test_list.txt" ]
@@ -89,19 +88,29 @@ foreach(file, list_from_resource_files_txt) {
   resource_file_inputs += [ "$file" ]
 }
 
-copy("copy_resources") {
-  sources = []
-  data = []
+action("copy_resources") {
+  src_dir = "../../webgpu-cts/src/resources/"
+  dst_dir = "$target_gen_dir/../../webgpu-cts/resources/"
+
+  inputs = []
+  outputs = [ "$target_out_dir/run_$target_name.stamp" ]
   foreach(resource_file, resource_file_inputs) {
-    sources += [ "../../webgpu-cts/src/resources/$resource_file" ]
-
-    # Copy into resources/, instead of src/resources/, because compile_src
-    # wipes src/ before running.
-    data += [ "$target_gen_dir/../../webgpu-cts/resources/$resource_file" ]
+    inputs += [ "$src_dir/$resource_file" ]
+    outputs += [ "$dst_dir/$resource_file" ]
   }
+  data = outputs
 
-  outputs =
-      [ "$target_gen_dir/../../webgpu-cts/resources/{{source_file_part}}" ]
+  script = "${dawn_root}/webgpu-cts/scripts/copy_files.py"
+  args = [
+    "--src_dir",
+    rebase_path(src_dir),
+    "--dst_dir",
+    rebase_path(dst_dir),
+    "--file_list",
+    rebase_path("resource_files.txt"),
+    "--stamp",
+    rebase_path(outputs[0], root_build_dir),
+  ]
 }
 
 action("verify_gen_ts_dep_list") {
@@ -117,24 +126,4 @@ action("verify_gen_ts_dep_list") {
     "--stamp",
     rebase_path(outputs[0], root_build_dir),
   ]
-}
-
-action("gen_cache") {
-  script = "${dawn_root}/webgpu-cts/scripts/gen_cache.py"
-
-  deps = [ ":compile_src" ]
-  _gen_cache_js =
-      "$target_gen_dir/../../webgpu-cts/src-node/common/tools/gen_cache.js"
-  inputs = get_target_outputs(":compile_src") + [ _gen_cache_js ]
-  args = [
-    rebase_path(_gen_cache_js, root_build_dir),
-    rebase_path("$target_gen_dir/../../webgpu-cts/cache", root_build_dir),
-  ]
-
-  _outputs = read_file("cache_list.txt", "list lines")
-  outputs = []
-  foreach(file, _outputs) {
-    outputs += [ "$target_gen_dir/../../webgpu-cts/cache/$file" ]
-  }
-  data = outputs
 }

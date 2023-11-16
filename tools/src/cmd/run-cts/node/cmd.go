@@ -166,7 +166,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
-	if err := c.state.CTS.BuildIfRequired(c.flags.Verbose); err != nil {
+	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
 		return err
 	}
 

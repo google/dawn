@@ -71,7 +71,7 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions( /* needsCloudScopes */ false))
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	c.flags.results.RegisterFlags(cfg)
 	return nil, nil
 }

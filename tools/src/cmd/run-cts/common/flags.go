@@ -51,7 +51,7 @@ type Flags struct {
 	ExpectationsPath string
 	CTS              string // Path to the CTS directory
 	Node             string // Path to the Node executable
-	Npx              string // Path to the npx executable (optional)
+	Npx              string // Path to the npx executable
 }
 
 func (f *Flags) Register() {
@@ -63,7 +63,7 @@ func (f *Flags) Register() {
 	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file")
 	flag.StringVar(&f.CTS, "cts", defaultCtsPath(), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(), "path to node executable")
-	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable (optional)")
+	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable")
 }
 
 // Process processes the flags, returning a State.
