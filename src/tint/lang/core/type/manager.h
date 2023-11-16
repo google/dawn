@@ -84,8 +84,8 @@ class Manager final {
     /// Wrap returns a new Manager created with the types of `inner`.
     /// The Manager returned by Wrap is intended to temporarily extend the types
     /// of an existing immutable Manager.
-    /// As the copied types are owned by `inner`, `inner` must not be destructed
-    /// or assigned while using the returned Manager.
+    /// @warning As the copied types are owned by `inner`, `inner` must not be destructed or
+    /// assigned while using the returned Manager.
     /// TODO(bclayton) - Evaluate whether there are safer alternatives to this
     /// function. See crbug.com/tint/460.
     /// @param inner the immutable Manager to extend

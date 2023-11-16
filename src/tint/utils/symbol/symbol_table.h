@@ -53,17 +53,19 @@ class SymbolTable {
     /// @returns the symbol table
     SymbolTable& operator=(SymbolTable&& other);
 
-    /// Wrap sets this symbol table to hold symbols which point to the allocated names in @p o.
-    /// The symbol table after Wrap is intended to temporarily extend the objects
-    /// of an existing immutable SymbolTable
-    /// As the copied objects are owned by @p o, @p o must not be destructed
-    /// or assigned while using this symbol table.
+    /// @returns a symbol table to hold symbols which point to the allocated names in @p o.
+    /// The symbol table after Wrap is intended to temporarily extend the objects of an existing
+    /// immutable SymbolTable.
+    /// @warning As the copied objects are owned by @p o, @p o must not be destructed or assigned
+    /// while using this symbol table.
     /// @param o the immutable SymbolTable to extend
-    void Wrap(const SymbolTable& o) {
-        next_symbol_ = o.next_symbol_;
-        name_to_symbol_ = o.name_to_symbol_;
-        last_prefix_to_index_ = o.last_prefix_to_index_;
-        generation_id_ = o.generation_id_;
+    static SymbolTable Wrap(const SymbolTable& o) {
+        SymbolTable out(o.generation_id_);
+        out.next_symbol_ = o.next_symbol_;
+        out.name_to_symbol_ = o.name_to_symbol_;
+        out.last_prefix_to_index_ = o.last_prefix_to_index_;
+        out.generation_id_ = o.generation_id_;
+        return out;
     }
 
     /// Registers a name into the symbol table, returning the Symbol.
