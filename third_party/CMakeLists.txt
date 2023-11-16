@@ -25,6 +25,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Needs to come before SPIR-V Tools
+include("protobuf.cmake")
+
 # Don't build testing in third_party dependencies
 set(BUILD_TESTING OFF)
 
@@ -55,14 +58,6 @@ if (NOT TARGET SPIRV-Headers)
 
     message(STATUS "Dawn: using SPIRV-Headers at ${DAWN_SPIRV_HEADERS_DIR}")
     add_subdirectory(${DAWN_SPIRV_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-headers")
-endif()
-
-# Needs to come before SPIR-V Tools
-if ((${TINT_BUILD_SPIRV_TOOLS_FUZZER} OR ${TINT_BUILD_AST_FUZZER}) AND
-        (NOT TARGET protobuf::libprotobuf OR NOT TARGET protobuf::protoc))
-    set(protobuf_BUILD_TESTS OFF CACHE BOOL "Controls whether protobuf tests are built" FORCE)
-    set(protobuf_MSVC_STATIC_RUNTIME OFF CACHE BOOL "Controls whether a protobuf static runtime is built" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/protobuf)
 endif()
 
 if (NOT TARGET SPIRV-Tools)

@@ -112,7 +112,11 @@
 	gclient-condition = dawn_node
 [submodule "third_party/protobuf"]
 	path = third_party/protobuf
-	url = https://chromium.googlesource.com/external/github.com/protocolbuffers/protobuf.git
+	url = https://chromium.googlesource.com/chromium/src/third_party/protobuf
+	gclient-condition = dawn_standalone
+[submodule "tools/protoc_wrapper"]
+	path = tools/protoc_wrapper
+	url = https://chromium.googlesource.com/chromium/src/tools/protoc_wrapper
 	gclient-condition = dawn_standalone
 [submodule "third_party/partition_alloc"]
 	path = third_party/partition_alloc
