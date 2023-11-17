@@ -42,6 +42,7 @@ if (!defined(tint_has_build)) {
 }
 
 tint_has_fuzzers = tint_has_build
+tint_has_protobuf = tint_standalone || build_with_chromium
 
 declare_args() {
   # Path to tint checkout
@@ -116,6 +117,11 @@ declare_args() {
   # Build the Syntax Tree writer
   if (!defined(tint_build_syntax_tree_writer)) {
     tint_build_syntax_tree_writer = false
+  }
+
+  # Build the Syntax Tree writer
+  if (!defined(tint_build_ir_binary)) {
+    tint_build_ir_binary = tint_has_protobuf
   }
 
   # Build unittests

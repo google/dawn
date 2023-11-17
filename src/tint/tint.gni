@@ -27,9 +27,11 @@
 
 import("//build_overrides/build.gni")
 
-import("//third_party/protobuf/proto_library.gni")
-
 import("../../scripts/tint_overrides_with_defaults.gni")
+
+if (tint_has_protobuf) {
+  import("//third_party/protobuf/proto_library.gni")
+}
 
 ###############################################################################
 # Tint library target
@@ -65,6 +67,9 @@ template("libtint_source_set") {
 # Tint protobuf library target
 ###############################################################################
 template("tint_proto_library") {
+  if (!tint_has_protobuf) {
+    error("Tint needs protobuf to build a proto library")
+  }
   proto_library(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
     generate_cc = true

@@ -35,7 +35,7 @@ set(protobuf_MSVC_STATIC_RUNTIME OFF CACHE BOOL "Controls whether a protobuf sta
 set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc compiler" FORCE)
 set(protobuf_DISABLE_RTTI ON CACHE BOOL "Remove runtime type information in the binaries" FORCE)
 
-add_subdirectory("protobuf/cmake")
+add_subdirectory("${DAWN_PROTOBUF_DIR}/cmake")
 
 target_compile_definitions(libprotobuf PUBLIC "-DGOOGLE_PROTOBUF_INTERNAL_DONATE_STEAL_INLINE=0")
 

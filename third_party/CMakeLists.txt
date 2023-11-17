@@ -25,9 +25,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Needs to come before SPIR-V Tools
-include("protobuf.cmake")
-
 # Don't build testing in third_party dependencies
 set(BUILD_TESTING OFF)
 
