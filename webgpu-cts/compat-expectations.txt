@@ -107,11 +107,6 @@ crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_z
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
 # Copy unsupported issue
-crbug.com/dawn/2079 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb9e5ufloat";dstFormat="rgb9e5ufloat";dimension="2d" [ Failure ]
-crbug.com/dawn/2079 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgb9e5ufloat";dstFormat="rgb9e5ufloat";dimension="3d" [ Failure ]
-crbug.com/dawn/2079 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgb9e5ufloat";dstFormat="rgb9e5ufloat";dimension="1d" [ Failure ]
-crbug.com/dawn/2079 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgb9e5ufloat";dstFormat="rgb9e5ufloat";dimension="2d" [ Failure ]
-crbug.com/dawn/2079 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgb9e5ufloat";dstFormat="rgb9e5ufloat";dimension="3d" [ Failure ]
 crbug.com/dawn/2079 webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rg11b10ufloat" [ Failure ]
 crbug.com/dawn/2079 webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:format="rgb9e5ufloat" [ Failure ]
 
@@ -564,24 +559,9 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
 # Intel failures (undiagnosed)
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="3d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16float";dstFormat="rg16float";dimension="3d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="3d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="1d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="1d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="3d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16float";dstFormat="rg16float";dimension="1d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16float";dstFormat="rg16float";dimension="3d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="1d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="1d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
-[ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="3d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="1d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
@@ -664,8 +644,6 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="uniform";vectorize=4 [ Failure ]
 
 # copyTextureToTexture failures
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r16float";dstFormat="r16float";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r16float";dstFormat="r16float";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
@@ -675,8 +653,6 @@ crbug.com/dawn/2208 webgpu:api,operation,command_buffer,copyTextureToTexture:col
 crbug.com/dawn/2208 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm";dimension="3d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r16float";dstFormat="r16float";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r16float";dstFormat="r16float";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
