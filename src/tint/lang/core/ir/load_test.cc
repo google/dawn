@@ -45,8 +45,8 @@ TEST_F(IR_LoadTest, Create) {
     auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
-    ASSERT_EQ(inst->From(), var->Result());
-    EXPECT_EQ(inst->Result()->Type(), store_type);
+    ASSERT_EQ(inst->From(), var->Result(0));
+    EXPECT_EQ(inst->Result(0)->Type(), store_type);
 
     auto* result = inst->From()->As<InstructionResult>();
     ASSERT_NE(result, nullptr);
@@ -66,10 +66,9 @@ TEST_F(IR_LoadTest, Results) {
     auto* var = b.Var(ty.ptr<function, i32>());
     auto* inst = b.Load(var);
 
-    EXPECT_TRUE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
-    EXPECT_TRUE(inst->Result()->Is<InstructionResult>());
-    EXPECT_EQ(inst->Result()->Source(), inst);
+    EXPECT_EQ(inst->Results().Length(), 1u);
+    EXPECT_TRUE(inst->Result(0)->Is<InstructionResult>());
+    EXPECT_EQ(inst->Result(0)->Source(), inst);
 }
 
 TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
@@ -90,10 +89,10 @@ TEST_F(IR_LoadTest, Clone) {
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
-    EXPECT_NE(nullptr, new_inst->Result());
-    EXPECT_NE(inst->Result(), new_inst->Result());
+    EXPECT_NE(nullptr, new_inst->Result(0));
+    EXPECT_NE(inst->Result(0), new_inst->Result(0));
 
-    EXPECT_EQ(new_var->Result(), new_inst->From());
+    EXPECT_EQ(new_var->Result(0), new_inst->From());
 }
 
 }  // namespace

@@ -42,17 +42,16 @@ TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* var = b.Var(ty.ptr<function, i32>());
     auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
 
-    EXPECT_THAT(var->Result()->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
+    EXPECT_THAT(var->Result(0)->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
 }
 
 TEST_F(IR_SwizzleTest, Results) {
     auto* var = b.Var(ty.ptr<function, i32>());
     auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
 
-    EXPECT_TRUE(a->HasResults());
-    EXPECT_FALSE(a->HasMultiResults());
-    EXPECT_TRUE(a->Result()->Is<InstructionResult>());
-    EXPECT_EQ(a->Result()->Source(), a);
+    EXPECT_EQ(a->Results().Length(), 1u);
+    EXPECT_TRUE(a->Result(0)->Is<InstructionResult>());
+    EXPECT_EQ(a->Result(0)->Source(), a);
 }
 
 TEST_F(IR_SwizzleTest, Fail_NullType) {
@@ -107,10 +106,10 @@ TEST_F(IR_SwizzleTest, Clone) {
     auto* new_s = clone_ctx.Clone(s);
 
     EXPECT_NE(s, new_s);
-    EXPECT_NE(nullptr, new_s->Result());
-    EXPECT_NE(s->Result(), new_s->Result());
+    EXPECT_NE(nullptr, new_s->Result(0));
+    EXPECT_NE(s->Result(0), new_s->Result(0));
 
-    EXPECT_EQ(new_var->Result(), new_s->Object());
+    EXPECT_EQ(new_var->Result(0), new_s->Object());
 
     EXPECT_EQ(1u, new_s->Indices().Length());
     EXPECT_EQ(2u, new_s->Indices().Front());

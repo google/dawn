@@ -55,7 +55,7 @@ void Run(core::ir::Module& ir) {
         if (auto* construct = inst->As<core::ir::Construct>()) {
             // A vector constructor with a single scalar argument needs to be modified to replicate
             // the argument N times.
-            auto* vec = construct->Result()->Type()->As<core::type::Vector>();
+            auto* vec = construct->Result(0)->Type()->As<core::type::Vector>();
             if (vec &&  //
                 construct->Args().Length() == 1 &&
                 construct->Args()[0]->Type()->Is<core::type::Scalar>()) {
@@ -66,7 +66,7 @@ void Run(core::ir::Module& ir) {
         } else if (auto* binary = inst->As<core::ir::Binary>()) {
             // A binary instruction that mixes vector and scalar operands needs to have the scalar
             // operand replaced with an explicit vector constructor.
-            if (binary->Result()->Type()->Is<core::type::Vector>()) {
+            if (binary->Result(0)->Type()->Is<core::type::Vector>()) {
                 if (binary->LHS()->Type()->Is<core::type::Scalar>() ||
                     binary->RHS()->Type()->Is<core::type::Scalar>()) {
                     binary_worklist.Push(binary);
@@ -76,7 +76,7 @@ void Run(core::ir::Module& ir) {
             // A mix builtin call that mixes vector and scalar operands needs to have the scalar
             // operand replaced with an explicit vector constructor.
             if (builtin->Func() == core::BuiltinFn::kMix) {
-                if (builtin->Result()->Type()->Is<core::type::Vector>()) {
+                if (builtin->Result(0)->Type()->Is<core::type::Vector>()) {
                     if (builtin->Args()[2]->Type()->Is<core::type::Scalar>()) {
                         builtin_worklist.Push(builtin);
                     }
@@ -88,19 +88,19 @@ void Run(core::ir::Module& ir) {
     // Helper to expand a scalar operand of an instruction by replacing it with an explicitly
     // constructed vector that matches the result type.
     auto expand_operand = [&](core::ir::Instruction* inst, size_t operand_idx) {
-        auto* vec = inst->Result()->Type()->As<core::type::Vector>();
+        auto* vec = inst->Result(0)->Type()->As<core::type::Vector>();
 
         Vector<core::ir::Value*, 4> args;
         args.Resize(vec->Width(), inst->Operands()[operand_idx]);
 
         auto* construct = b.Construct(vec, std::move(args));
         construct->InsertBefore(inst);
-        inst->SetOperand(operand_idx, construct->Result());
+        inst->SetOperand(operand_idx, construct->Result(0));
     };
 
     // Replace scalar operands to binary instructions that produce vectors.
     for (auto* binary : binary_worklist) {
-        auto* result_ty = binary->Result()->Type();
+        auto* result_ty = binary->Result(0)->Type();
         if (result_ty->is_float_vector() && binary->Op() == core::ir::BinaryOp::kMultiply) {
             // Use OpVectorTimesScalar for floating point multiply.
             auto* vts =
@@ -113,9 +113,9 @@ void Run(core::ir::Module& ir) {
                 vts->AppendArg(binary->RHS());
             }
             if (auto name = ir.NameOf(binary)) {
-                ir.SetName(vts->Result(), name);
+                ir.SetName(vts->Result(0), name);
             }
-            binary->Result()->ReplaceAllUsesWith(vts->Result());
+            binary->Result(0)->ReplaceAllUsesWith(vts->Result(0));
             binary->ReplaceWith(vts);
             binary->Destroy();
         } else {

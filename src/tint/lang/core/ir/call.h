@@ -38,8 +38,11 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
   public:
     ~Call() override;
 
+    /// @returns the offset of the arguments in Operands()
+    virtual size_t ArgsOperandOffset() const { return 0; }
+
     /// @returns the call arguments
-    virtual tint::Slice<Value*> Args() { return operands_.Slice(); }
+    tint::Slice<Value* const> Args() { return operands_.Slice().Offset(ArgsOperandOffset()); }
 
     /// Append a new argument to the argument list for this call instruction.
     /// @param arg the argument value to append

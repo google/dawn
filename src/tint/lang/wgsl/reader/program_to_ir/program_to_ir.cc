@@ -574,13 +574,13 @@ class Impl {
         auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<core::ir::Value*>(&lhs)) {
             auto* load = b.Load(*v);
-            auto* ty = load->Result()->Type();
-            auto* inst = current_block_->Append(BinaryOp(ty, load->Result(), rhs, op));
+            auto* ty = load->Result(0)->Type();
+            auto* inst = current_block_->Append(BinaryOp(ty, load->Result(0), rhs, op));
             b.Store(*v, inst);
         } else if (auto ref = std::get_if<VectorRefElementAccess>(&lhs)) {
             auto* load = b.LoadVectorElement(ref->vector, ref->index);
-            auto* ty = load->Result()->Type();
-            auto* inst = b.Append(BinaryOp(ty, load->Result(), rhs, op));
+            auto* ty = load->Result(0)->Type();
+            auto* inst = b.Append(BinaryOp(ty, load->Result(0), rhs, op));
             b.StoreVectorElement(ref->vector, ref->index, inst);
         }
     }
@@ -878,7 +878,7 @@ class Impl {
                 if (impl.program_.Sem().Get<sem::Load>(expr)) {
                     auto* load = impl.builder_.Load(value);
                     impl.current_block_->Append(load);
-                    value = load->Result();
+                    value = load->Result(0);
                 }
                 bindings_.Add(expr, value);
             }
@@ -888,7 +888,7 @@ class Impl {
                 if (impl.program_.Sem().Get<sem::Load>(expr)) {
                     auto* load = impl.builder_.LoadVectorElement(access.vector, access.index);
                     impl.current_block_->Append(load);
-                    bindings_.Add(expr, load->Result());
+                    bindings_.Add(expr, load->Result(0));
                 } else {
                     bindings_.Add(expr, access);
                 }
@@ -978,7 +978,7 @@ class Impl {
                         }
                         auto* val = impl.builder_.Swizzle(ty, obj, std::move(indices));
                         impl.current_block_->Append(val);
-                        Bind(expr, val->Result());
+                        Bind(expr, val->Result(0));
                         return nullptr;
                     },  //
                     TINT_ICE_ON_NO_MATCH);
@@ -993,14 +993,14 @@ class Impl {
                     if (auto* inst_res = obj->As<core::ir::InstructionResult>()) {
                         if (auto* access = inst_res->Source()->As<core::ir::Access>()) {
                             access->AddIndex(index);
-                            access->Result()->SetType(ty);
+                            access->Result(0)->SetType(ty);
                             bindings_.Remove(expr->object);
                             // Move the access after the index expression.
                             if (impl.current_block_->Back() != access) {
                                 impl.current_block_->Remove(access);
                                 impl.current_block_->Append(access);
                             }
-                            Bind(expr, access->Result());
+                            Bind(expr, access->Result(0));
                             return;
                         }
                     }
@@ -1009,7 +1009,7 @@ class Impl {
                 // Create a new access
                 auto* access = impl.builder_.Access(ty, obj, index);
                 impl.current_block_->Append(access);
-                Bind(expr, access->Result());
+                Bind(expr, access->Result(0));
             }
 
             void EmitBinary(const ast::BinaryExpression* b) {
@@ -1028,7 +1028,7 @@ class Impl {
                     return;
                 }
                 impl.current_block_->Append(inst);
-                Bind(b, inst->Result());
+                Bind(b, inst->Result(0));
             }
 
             void EmitUnary(const ast::UnaryOpExpression* expr) {
@@ -1057,7 +1057,7 @@ class Impl {
                         break;
                 }
                 impl.current_block_->Append(inst);
-                Bind(expr, inst->Result());
+                Bind(expr, inst->Result(0));
             }
 
             void EmitBitcast(const ast::BitcastExpression* b) {
@@ -1069,7 +1069,7 @@ class Impl {
                 auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                 auto* inst = impl.builder_.Bitcast(ty, val);
                 impl.current_block_->Append(inst);
-                Bind(b, inst->Result());
+                Bind(b, inst->Result(0));
             }
 
             void EmitCall(const ast::CallExpression* expr) {
@@ -1128,7 +1128,7 @@ class Impl {
                     return;
                 }
                 impl.current_block_->Append(inst);
-                Bind(expr, inst->Result());
+                Bind(expr, inst->Result(0));
             }
 
             void EmitIdentifier(const ast::IdentifierExpression* i) {
@@ -1328,7 +1328,7 @@ class Impl {
                 }
 
                 // Store the declaration so we can get the instruction to store too
-                scopes_.Set(v->name->symbol, val->Result());
+                scopes_.Set(v->name->symbol, val->Result(0));
 
                 // Record the original name of the var
                 builder_.ir.SetName(val, v->name->symbol.Name());
@@ -1348,7 +1348,7 @@ class Impl {
                     // let, and can be used by consumers of the IR to produce a variable or
                     // debug info.
                     auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), value));
-                    value = let->Result();
+                    value = let->Result(0);
                 } else {
                     // Record the original name of the let
                     builder_.ir.SetName(value, l->name->symbol.Name());

@@ -396,8 +396,9 @@ class Builder {
                 return in;  /// Pass-through
             } else if constexpr (is_instruction) {
                 /// Extract the first result from the instruction
-                TINT_ASSERT(in->HasResults() && !in->HasMultiResults());
-                return in->Result();
+                auto results = in->Results();
+                TINT_ASSERT(results.Length() == 1);
+                return results[0];
             }
         } else if constexpr (is_numeric) {
             /// Creates a value from the given number
@@ -820,7 +821,7 @@ class Builder {
         }
         auto* var = Var(name, ir.Types().ptr(SPACE, val->Type(), ACCESS));
         var->SetInitializer(val);
-        ir.SetName(var->Result(), name);
+        ir.SetName(var->Result(0), name);
         return var;
     }
 
@@ -857,7 +858,7 @@ class Builder {
             return nullptr;
         }
         auto* let = Append(ir.instructions.Create<ir::Let>(InstructionResult(val->Type()), val));
-        ir.SetName(let->Result(), name);
+        ir.SetName(let->Result(0), name);
         return let;
     }
 

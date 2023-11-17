@@ -476,21 +476,19 @@ void Validator::CheckInstruction(Instruction* inst) {
         AddError(inst, InstError(inst, "destroyed instruction found in instruction list"));
         return;
     }
-    if (inst->HasResults()) {
-        auto results = inst->Results();
-        for (size_t i = 0; i < results.Length(); ++i) {
-            auto* res = results[i];
-            if (!res) {
-                AddResultError(inst, i, InstError(inst, "instruction result is undefined"));
-                continue;
-            }
+    auto results = inst->Results();
+    for (size_t i = 0; i < results.Length(); ++i) {
+        auto* res = results[i];
+        if (!res) {
+            AddResultError(inst, i, InstError(inst, "instruction result is undefined"));
+            continue;
+        }
 
-            if (res->Source() == nullptr) {
-                AddResultError(inst, i, InstError(inst, "instruction result source is undefined"));
-            } else if (res->Source() != inst) {
-                AddResultError(inst, i,
-                               InstError(inst, "instruction result source has wrong instruction"));
-            }
+        if (res->Source() == nullptr) {
+            AddResultError(inst, i, InstError(inst, "instruction result source is undefined"));
+        } else if (res->Source() != inst) {
+            AddResultError(inst, i,
+                           InstError(inst, "instruction result source has wrong instruction"));
         }
     }
 
@@ -536,8 +534,8 @@ void Validator::CheckInstruction(Instruction* inst) {
 }
 
 void Validator::CheckVar(Var* var) {
-    if (var->Result() && var->Initializer()) {
-        if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
+    if (var->Result(0) && var->Initializer()) {
+        if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtr()) {
             AddError(var, InstError(var, "initializer has incorrect type"));
         }
     }
@@ -546,8 +544,8 @@ void Validator::CheckVar(Var* var) {
 void Validator::CheckLet(Let* let) {
     CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset);
 
-    if (let->Result() && let->Value()) {
-        if (let->Result()->Type() != let->Value()->Type()) {
+    if (let->Result(0) && let->Value()) {
+        if (let->Result(0)->Type() != let->Value()->Type()) {
             AddError(let, InstError(let, "result type does not match value type"));
         }
     }
@@ -574,7 +572,7 @@ void Validator::CheckBuiltinCall(BuiltinCall* call) {
     auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
                                             args, core::EvaluationStage::kRuntime, Source{});
     if (result) {
-        if (result->return_type != call->Result()->Type()) {
+        if (result->return_type != call->Result(0)->Type()) {
             AddError(call, InstError(call, "call result type does not match builtin return type"));
         }
     }
@@ -645,8 +643,8 @@ void Validator::CheckAccess(Access* a) {
         }
     }
 
-    auto* want_ty = a->Result()->Type()->UnwrapPtr();
-    bool want_ptr = a->Result()->Type()->Is<core::type::Pointer>();
+    auto* want_ty = a->Result(0)->Type()->UnwrapPtr();
+    bool want_ptr = a->Result(0)->Type()->Is<core::type::Pointer>();
     if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
         std::string want =
             want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();
@@ -663,8 +661,8 @@ void Validator::CheckBinary(Binary* b) {
 void Validator::CheckUnary(Unary* u) {
     CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset);
 
-    if (u->Result() && u->Val()) {
-        if (u->Result()->Type() != u->Val()->Type()) {
+    if (u->Result(0) && u->Val()) {
+        if (u->Result(0)->Type() != u->Val()->Type()) {
             AddError(u, InstError(u, "result type must match value type"));
         }
     }
@@ -860,7 +858,7 @@ void Validator::CheckLoadVectorElement(LoadVectorElement* l) {
                          LoadVectorElement::kFromOperandOffset,
                          LoadVectorElement::kIndexOperandOffset);
 
-    if (auto* res = l->Result()) {
+    if (auto* res = l->Result(0)) {
         if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
             if (res->Type() != el_ty) {
                 AddResultError(l, 0, "result type does not match vector pointer element type");

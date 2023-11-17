@@ -55,11 +55,10 @@ TEST_F(IR_LetTest, Fail_NullValue) {
 TEST_F(IR_LetTest, Results) {
     auto* value = b.Constant(1_f);
     auto* let = b.Let("l", value);
-    EXPECT_TRUE(let->HasResults());
-    EXPECT_FALSE(let->HasMultiResults());
-    EXPECT_TRUE(let->Result()->Is<InstructionResult>());
-    EXPECT_EQ(let->Result()->Source(), let);
-    EXPECT_EQ(let->Result()->Type(), value->Type());
+    EXPECT_EQ(let->Results().Length(), 1u);
+    EXPECT_TRUE(let->Result(0)->Is<InstructionResult>());
+    EXPECT_EQ(let->Result(0)->Source(), let);
+    EXPECT_EQ(let->Result(0)->Type(), value->Type());
 }
 
 TEST_F(IR_LetTest, Clone) {
@@ -69,15 +68,15 @@ TEST_F(IR_LetTest, Clone) {
     auto* new_let = clone_ctx.Clone(let);
 
     EXPECT_NE(let, new_let);
-    EXPECT_NE(nullptr, new_let->Result());
-    EXPECT_NE(let->Result(), new_let->Result());
+    EXPECT_NE(nullptr, new_let->Result(0));
+    EXPECT_NE(let->Result(0), new_let->Result(0));
 
     auto new_val = new_let->Value()->As<Constant>()->Value();
     ASSERT_TRUE(new_val->Is<core::constant::Scalar<f32>>());
     EXPECT_FLOAT_EQ(4_f, new_val->As<core::constant::Scalar<f32>>()->ValueAs<f32>());
 
     EXPECT_EQ(std::string("l"), mod.NameOf(new_let).Name());
-    EXPECT_EQ(std::string("l"), mod.NameOf(new_let->Result()).Name());
+    EXPECT_EQ(std::string("l"), mod.NameOf(new_let->Result(0)).Name());
 }
 
 }  // namespace

@@ -360,8 +360,8 @@ void Disassembler::EmitFunction(Function* func) {
 
 void Disassembler::EmitValueWithType(Instruction* val) {
     SourceMarker sm(this);
-    if (val->Result()) {
-        EmitValueWithType(val->Result());
+    if (val->Result(0)) {
+        EmitValueWithType(val->Result(0));
     } else {
         out_ << "undef";
     }
@@ -573,9 +573,9 @@ void Disassembler::EmitInstruction(Instruction* inst) {
 }
 
 void Disassembler::EmitOperand(Instruction* inst, size_t index) {
-    SourceMarker condMarker(this);
+    SourceMarker marker(this);
     EmitValue(inst->Operands()[index]);
-    condMarker.Store(Usage{inst, static_cast<uint32_t>(index)});
+    marker.Store(Usage{inst, static_cast<uint32_t>(index)});
 }
 
 void Disassembler::EmitOperandList(Instruction* inst, size_t start_index /* = 0 */) {
@@ -589,14 +589,13 @@ void Disassembler::EmitOperandList(Instruction* inst, size_t start_index /* = 0 
 
 void Disassembler::EmitIf(If* if_) {
     SourceMarker sm(this);
-    if (if_->HasResults()) {
-        auto res = if_->Results();
-        for (size_t i = 0; i < res.Length(); ++i) {
+    if (auto results = if_->Results(); !results.IsEmpty()) {
+        for (size_t i = 0; i < results.Length(); ++i) {
             if (i > 0) {
                 out_ << ", ";
             }
             SourceMarker rs(this);
-            EmitValueWithType(res[i]);
+            EmitValueWithType(results[i]);
             rs.StoreResult(Usage{if_, i});
         }
         out_ << " = ";
@@ -625,7 +624,7 @@ void Disassembler::EmitIf(If* if_) {
     if (has_false) {
         ScopedIndent si(indent_size_);
         EmitBlock(if_->False(), "false");
-    } else if (if_->HasResults()) {
+    } else if (auto results = if_->Results(); !results.IsEmpty()) {
         ScopedIndent si(indent_size_);
         Indent();
         out_ << "# implicit false block: exit_if undef";
@@ -650,14 +649,13 @@ void Disassembler::EmitLoop(Loop* l) {
         parts.Push("c: %b" + std::to_string(IdOf(l->Continuing())));
     }
     SourceMarker sm(this);
-    if (l->HasResults()) {
-        auto res = l->Results();
-        for (size_t i = 0; i < res.Length(); ++i) {
+    if (auto results = l->Results(); !results.IsEmpty()) {
+        for (size_t i = 0; i < results.Length(); ++i) {
             if (i > 0) {
                 out_ << ", ";
             }
             SourceMarker rs(this);
-            EmitValueWithType(res[i]);
+            EmitValueWithType(results[i]);
             rs.StoreResult(Usage{l, i});
         }
         out_ << " = ";
@@ -690,14 +688,13 @@ void Disassembler::EmitLoop(Loop* l) {
 
 void Disassembler::EmitSwitch(Switch* s) {
     SourceMarker sm(this);
-    if (s->HasResults()) {
-        auto res = s->Results();
-        for (size_t i = 0; i < res.Length(); ++i) {
+    if (auto results = s->Results(); !results.IsEmpty()) {
+        for (size_t i = 0; i < results.Length(); ++i) {
             if (i > 0) {
                 out_ << ", ";
             }
             SourceMarker rs(this);
-            EmitValueWithType(res[i]);
+            EmitValueWithType(results[i]);
             rs.StoreResult(Usage{s, i});
         }
         out_ << " = ";
@@ -745,7 +742,7 @@ void Disassembler::EmitTerminator(Terminator* b) {
         b,
         [&](ir::Return*) {
             out_ << "ret";
-            args_offset = ir::Return::kArgOperandOffset;
+            args_offset = ir::Return::kArgsOperandOffset;
         },
         [&](ir::Continue* cont) {
             out_ << "continue %b" << IdOf(cont->Loop()->Continuing());

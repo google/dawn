@@ -48,8 +48,7 @@ TEST_F(IR_NextIterationTest, Fail_NullLoop) {
 TEST_F(IR_NextIterationTest, Result) {
     auto* inst = b.NextIteration(b.Loop());
 
-    EXPECT_FALSE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
+    EXPECT_TRUE(inst->Results().IsEmpty());
 }
 
 TEST_F(IR_NextIterationTest, Clone) {

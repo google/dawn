@@ -43,7 +43,7 @@ Return::Return(Function* func) {
 
 Return::Return(Function* func, ir::Value* arg) {
     AddOperand(Return::kFunctionOperandOffset, func);
-    AddOperand(Return::kArgOperandOffset, arg);
+    AddOperand(Return::kArgsOperandOffset, arg);
 }
 
 Return::~Return() = default;

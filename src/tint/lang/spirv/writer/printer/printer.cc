@@ -538,7 +538,7 @@ class Printer {
     /// Get the result ID of the instruction result `value`, emitting its instruction if necessary.
     /// @param inst the instruction to get the ID for
     /// @returns the result ID of the instruction
-    uint32_t Value(core::ir::Instruction* inst) { return Value(inst->Result()); }
+    uint32_t Value(core::ir::Instruction* inst) { return Value(inst->Result(0)); }
 
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
@@ -897,7 +897,7 @@ class Printer {
                 TINT_ICE_ON_NO_MATCH);
 
             // Set the name for the SPIR-V result ID if provided in the module.
-            if (inst->Result() && !inst->Is<core::ir::Var>()) {
+            if (inst->Result(0) && !inst->Is<core::ir::Var>()) {
                 if (auto name = ir_.NameOf(inst)) {
                     module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
                 }
@@ -974,11 +974,11 @@ class Printer {
 
         uint32_t true_label = merge_label;
         uint32_t false_label = merge_label;
-        if (true_block->Length() > 1 || i->HasResults() ||
+        if (true_block->Length() > 1 || !i->Results().IsEmpty() ||
             (true_block->Terminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
             true_label = Label(true_block);
         }
-        if (false_block->Length() > 1 || i->HasResults() ||
+        if (false_block->Length() > 1 || !i->Results().IsEmpty() ||
             (false_block->Terminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
             false_label = Label(false_block);
         }

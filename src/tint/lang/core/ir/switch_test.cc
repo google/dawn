@@ -47,8 +47,7 @@ TEST_F(IR_SwitchTest, Usage) {
 TEST_F(IR_SwitchTest, Results) {
     auto* cond = b.Constant(true);
     auto* switch_ = b.Switch(cond);
-    EXPECT_FALSE(switch_->HasResults());
-    EXPECT_FALSE(switch_->HasMultiResults());
+    EXPECT_TRUE(switch_->Results().IsEmpty());
 }
 
 TEST_F(IR_SwitchTest, Parent) {

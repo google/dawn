@@ -75,10 +75,9 @@ TEST_F(IR_UnaryTest, Usage) {
 
 TEST_F(IR_UnaryTest, Result) {
     auto* inst = b.Negation(mod.Types().i32(), 4_i);
-    EXPECT_TRUE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
-    EXPECT_TRUE(inst->Result()->Is<InstructionResult>());
-    EXPECT_EQ(inst->Result()->Source(), inst);
+    EXPECT_EQ(inst->Results().Length(), 1u);
+    EXPECT_TRUE(inst->Result(0)->Is<InstructionResult>());
+    EXPECT_EQ(inst->Result(0)->Source(), inst);
 }
 
 TEST_F(IR_UnaryTest, Fail_NullType) {
@@ -96,8 +95,8 @@ TEST_F(IR_UnaryTest, Clone) {
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
-    EXPECT_NE(nullptr, new_inst->Result());
-    EXPECT_NE(inst->Result(), new_inst->Result());
+    EXPECT_NE(nullptr, new_inst->Result(0));
+    EXPECT_NE(inst->Result(0), new_inst->Result(0));
 
     EXPECT_EQ(UnaryOp::kComplement, new_inst->Op());
 

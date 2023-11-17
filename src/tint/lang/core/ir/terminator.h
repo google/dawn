@@ -44,8 +44,11 @@ class Terminator : public Castable<Terminator, OperandInstruction<1, 0>> {
   public:
     ~Terminator() override;
 
-    /// @returns the terminator arguments
-    virtual tint::Slice<Value* const> Args() { return operands_.Slice(); }
+    /// @returns the offset of the arguments in Operands()
+    virtual size_t ArgsOperandOffset() const { return 0; }
+
+    /// @returns the call arguments
+    tint::Slice<Value* const> Args() { return operands_.Slice().Offset(ArgsOperandOffset()); }
 };
 
 }  // namespace tint::core::ir

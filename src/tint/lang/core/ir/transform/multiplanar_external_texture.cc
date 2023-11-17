@@ -84,7 +84,7 @@ struct State {
                 if (!var) {
                     continue;
                 }
-                auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
                 if (ptr->StoreType()->Is<core::type::ExternalTexture>()) {
                     ReplaceVar(var);
                     to_remove.Push(var);
@@ -148,8 +148,8 @@ struct State {
         }
 
         // Replace all uses of the old variable with the new ones.
-        ReplaceUses(old_var->Result(), plane_0->Result(), plane_1->Result(),
-                    external_texture_params->Result());
+        ReplaceUses(old_var->Result(0), plane_0->Result(0), plane_1->Result(0),
+                    external_texture_params->Result(0));
     }
 
     /// Replace an external texture function parameter.
@@ -208,11 +208,11 @@ struct State {
                     Value* plane_1_load = nullptr;
                     Value* params_load = nullptr;
                     b.InsertBefore(load, [&] {
-                        plane_0_load = b.Load(plane_0)->Result();
-                        plane_1_load = b.Load(plane_1)->Result();
-                        params_load = b.Load(params)->Result();
+                        plane_0_load = b.Load(plane_0)->Result(0);
+                        plane_1_load = b.Load(plane_1)->Result(0);
+                        params_load = b.Load(params)->Result(0);
                     });
-                    ReplaceUses(load->Result(), plane_0_load, plane_1_load, params_load);
+                    ReplaceUses(load->Result(0), plane_0_load, plane_1_load, params_load);
                     load->Destroy();
                 },
                 [&](CoreBuiltinCall* call) {
@@ -225,14 +225,14 @@ struct State {
                         if (coords->Type()->is_signed_integer_vector()) {
                             auto* convert = b.Convert(ty.vec2<u32>(), coords);
                             convert->InsertBefore(call);
-                            coords = convert->Result();
+                            coords = convert->Result(0);
                         }
 
                         // Call the `TextureLoadExternal()` helper function.
                         auto* helper = b.Call(ty.vec4<f32>(), TextureLoadExternal(), plane_0,
                                               plane_1, params, coords);
                         helper->InsertBefore(call);
-                        call->Result()->ReplaceAllUsesWith(helper->Result());
+                        call->Result(0)->ReplaceAllUsesWith(helper->Result(0));
                         call->Destroy();
                     } else if (call->Func() == core::BuiltinFn::kTextureSampleBaseClampToEdge) {
                         // Call the `TextureSampleExternal()` helper function.
@@ -241,7 +241,7 @@ struct State {
                         auto* helper = b.Call(ty.vec4<f32>(), TextureSampleExternal(), plane_0,
                                               plane_1, params, sampler, coords);
                         helper->InsertBefore(call);
-                        call->Result()->ReplaceAllUsesWith(helper->Result());
+                        call->Result(0)->ReplaceAllUsesWith(helper->Result(0));
                         call->Destroy();
                     } else {
                         TINT_ICE() << "unhandled texture_external builtin call: " << call->Func();

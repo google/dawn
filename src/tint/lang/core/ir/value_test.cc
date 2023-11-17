@@ -71,7 +71,7 @@ TEST_F(IR_ValueTest, Destroy_HasSource) {
         {
             Module mod;
             Builder b{mod};
-            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
+            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result(0);
             val->Destroy();
         },
         "");

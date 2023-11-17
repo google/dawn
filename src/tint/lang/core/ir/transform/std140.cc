@@ -79,7 +79,7 @@ struct State {
             if (!var || !var->Alive()) {
                 continue;
             }
-            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
             if (!ptr || ptr->AddressSpace() != core::AddressSpace::kUniform) {
                 continue;
             }
@@ -93,16 +93,16 @@ struct State {
         for (auto* var : buffer_variables) {
             // Create a new variable with the modified store type.
             const auto& bp = var->BindingPoint();
-            auto* store_type = var->Result()->Type()->As<core::type::Pointer>()->StoreType();
+            auto* store_type = var->Result(0)->Type()->As<core::type::Pointer>()->StoreType();
             auto* new_var = b.Var(ty.ptr(uniform, RewriteType(store_type)));
             new_var->SetBindingPoint(bp->group, bp->binding);
             if (auto name = ir.NameOf(var)) {
-                ir.SetName(new_var->Result(), name);
+                ir.SetName(new_var->Result(0), name);
             }
 
             // Replace every instruction that uses the original variable.
-            var->Result()->ForEachUse(
-                [&](Usage use) { Replace(use.instruction, new_var->Result()); });
+            var->Result(0)->ForEachUse(
+                [&](Usage use) { Replace(use.instruction, new_var->Result(0)); });
 
             // Replace the original variable with the new variable.
             var->ReplaceWith(new_var);
@@ -201,9 +201,9 @@ struct State {
         for (uint32_t i = 0; i < mat->columns(); i++) {
             indices.Back() = b.Constant(u32(first_column + i));
             auto* access = b.Access(ty.ptr(uniform, mat->ColumnType()), root, indices);
-            args.Push(b.Load(access->Result())->Result());
+            args.Push(b.Load(access->Result(0))->Result(0));
         }
-        return b.Construct(mat, std::move(args))->Result();
+        return b.Construct(mat, std::move(args))->Result(0);
     }
 
     /// Convert a value that may contain decomposed matrices to a value with the original type.
@@ -234,15 +234,15 @@ struct State {
                                 Vector<Value*, 4> columns;
                                 for (uint32_t i = 0; i < mat->columns(); i++) {
                                     auto* extract = b.Access(mat->ColumnType(), input, u32(index));
-                                    columns.Push(extract->Result());
+                                    columns.Push(extract->Result(0));
                                     index++;
                                 }
-                                args.Push(b.Construct(mat, std::move(columns))->Result());
+                                args.Push(b.Construct(mat, std::move(columns))->Result(0));
                             } else {
                                 // Extract and convert the member.
                                 auto* type = input_str->Element(index);
                                 auto* extract = b.Access(type, input, u32(index));
-                                args.Push(Convert(extract->Result(), member->Type()));
+                                args.Push(Convert(extract->Result(0), member->Type()));
                                 index++;
                             }
                         }
@@ -254,7 +254,7 @@ struct State {
                 });
 
                 // Call the helper function to convert the struct.
-                return b.Call(str, helper, source)->Result();
+                return b.Call(str, helper, source)->Result(0);
             },
             [&](const core::type::Array* arr) -> Value* {
                 // Create a loop that copies and converts each element of the array.
@@ -263,10 +263,10 @@ struct State {
                 b.LoopRange(ty, 0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
                     // Convert arr[idx] and store to new_arr[idx];
                     auto* to = b.Access(ty.ptr(function, arr->ElemType()), new_arr, idx);
-                    auto* from = b.Access(el_ty, source, idx)->Result();
+                    auto* from = b.Access(el_ty, source, idx)->Result(0);
                     b.Store(to, Convert(from, arr->ElemType()));
                 });
-                return b.Load(new_arr)->Result();
+                return b.Load(new_arr)->Result(0);
             },
             [&](Default) { return source; });
     }
@@ -309,23 +309,23 @@ struct State {
                             current_type = ty.ptr(uniform, RewriteType(current_type));
                         }
                         auto* new_access = b.Access(current_type, replacement, std::move(indices));
-                        replacement = new_access->Result();
+                        replacement = new_access->Result(0);
                     }
 
                     // Replace every instruction that uses the original access instruction.
-                    access->Result()->ForEachUse(
+                    access->Result(0)->ForEachUse(
                         [&](Usage use) { Replace(use.instruction, replacement); });
                     access->Destroy();
                 },
                 [&](Load* load) {
                     if (!replacement->Type()->Is<core::type::Pointer>()) {
                         // We have already loaded to a value type, so this load just folds away.
-                        load->Result()->ReplaceAllUsesWith(replacement);
+                        load->Result(0)->ReplaceAllUsesWith(replacement);
                     } else {
                         // Load the decomposed value and then convert it to the original type.
                         auto* decomposed = b.Load(replacement);
-                        auto* converted = Convert(decomposed->Result(), load->Result()->Type());
-                        load->Result()->ReplaceAllUsesWith(converted);
+                        auto* converted = Convert(decomposed->Result(0), load->Result(0)->Type());
+                        load->Result(0)->ReplaceAllUsesWith(converted);
                     }
                     load->Destroy();
                 },
@@ -333,8 +333,9 @@ struct State {
                     if (!replacement->Type()->Is<core::type::Pointer>()) {
                         // We have loaded a decomposed matrix and reconstructed it, so this is now
                         // extracting from a value type.
-                        auto* access = b.Access(load->Result()->Type(), replacement, load->Index());
-                        load->Result()->ReplaceAllUsesWith(access->Result());
+                        auto* access =
+                            b.Access(load->Result(0)->Type(), replacement, load->Index());
+                        load->Result(0)->ReplaceAllUsesWith(access->Result(0));
                         load->Destroy();
                     } else {
                         // There was no decomposed matrix on the path to this instruction so just
@@ -344,7 +345,7 @@ struct State {
                 },
                 [&](Let* let) {
                     // Let instructions just fold away.
-                    let->Result()->ForEachUse(
+                    let->Result(0)->ForEachUse(
                         [&](Usage use) { Replace(use.instruction, replacement); });
                     let->Destroy();
                 });

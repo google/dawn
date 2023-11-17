@@ -349,7 +349,7 @@ struct State {
                     }
                 });
             }
-            return sum->Result();
+            return sum->Result(0);
         }
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.

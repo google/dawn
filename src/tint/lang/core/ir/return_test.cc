@@ -64,14 +64,12 @@ TEST_F(IR_ReturnTest, Result) {
 
     {
         auto* ret1 = b.Return(vfunc);
-        EXPECT_FALSE(ret1->HasResults());
-        EXPECT_FALSE(ret1->HasMultiResults());
+        EXPECT_TRUE(ret1->Results().IsEmpty());
     }
 
     {
         auto* ret2 = b.Return(ifunc, b.Constant(42_i));
-        EXPECT_FALSE(ret2->HasResults());
-        EXPECT_FALSE(ret2->HasMultiResults());
+        EXPECT_TRUE(ret2->Results().IsEmpty());
     }
 }
 

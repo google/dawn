@@ -53,10 +53,9 @@ TEST_F(IR_UserCallTest, Results) {
     auto* arg2 = b.Constant(2_u);
     auto* e = b.Call(mod.Types().void_(), func, Vector{arg1, arg2});
 
-    EXPECT_TRUE(e->HasResults());
-    EXPECT_FALSE(e->HasMultiResults());
-    EXPECT_TRUE(e->Result()->Is<InstructionResult>());
-    EXPECT_EQ(e->Result()->Source(), e);
+    EXPECT_EQ(e->Results().Length(), 1u);
+    EXPECT_TRUE(e->Result(0)->Is<InstructionResult>());
+    EXPECT_EQ(e->Result(0)->Source(), e);
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {
@@ -77,8 +76,8 @@ TEST_F(IR_UserCallTest, Clone) {
     auto* new_e = clone_ctx.Clone(e);
 
     EXPECT_NE(e, new_e);
-    EXPECT_NE(nullptr, new_e->Result());
-    EXPECT_NE(e->Result(), new_e->Result());
+    EXPECT_NE(nullptr, new_e->Result(0));
+    EXPECT_NE(e->Result(0), new_e->Result(0));
 
     EXPECT_EQ(new_func, new_e->Target());
 

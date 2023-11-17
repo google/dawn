@@ -47,7 +47,7 @@ class Return final : public Castable<Return, Terminator> {
     static constexpr size_t kFunctionOperandOffset = 0;
 
     /// The offset in Operands() for the return argument
-    static constexpr size_t kArgOperandOffset = 1;
+    static constexpr size_t kArgsOperandOffset = 1;
 
     /// Constructor (no return value)
     /// @param func the function being returned
@@ -68,17 +68,15 @@ class Return final : public Castable<Return, Terminator> {
 
     /// @returns the return value, or nullptr
     ir::Value* Value() const {
-        return operands_.Length() > kArgOperandOffset ? operands_[kArgOperandOffset] : nullptr;
+        return operands_.Length() > kArgsOperandOffset ? operands_[kArgsOperandOffset] : nullptr;
     }
 
     /// Sets the return value
     /// @param val the new return value
-    void SetValue(ir::Value* val) { SetOperand(kArgOperandOffset, val); }
+    void SetValue(ir::Value* val) { SetOperand(kArgsOperandOffset, val); }
 
-    /// @returns the return arguments
-    tint::Slice<ir::Value* const> Args() override {
-        return operands_.Slice().Offset(kArgOperandOffset);
-    }
+    /// @returns the offset of the arguments in Operands()
+    size_t ArgsOperandOffset() const override { return kArgsOperandOffset; }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "return"; }

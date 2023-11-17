@@ -44,7 +44,7 @@ TEST_F(IR_ExitLoopTest, Usage) {
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
-    EXPECT_EQ(loop->Result(), nullptr);
+    EXPECT_EQ(loop->Result(0), nullptr);
 }
 
 TEST_F(IR_ExitLoopTest, Destroy) {

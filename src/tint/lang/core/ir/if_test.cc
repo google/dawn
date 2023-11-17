@@ -45,8 +45,7 @@ TEST_F(IR_IfTest, Usage) {
 TEST_F(IR_IfTest, Result) {
     auto* if_ = b.If(b.Constant(true));
 
-    EXPECT_FALSE(if_->HasResults());
-    EXPECT_FALSE(if_->HasMultiResults());
+    EXPECT_TRUE(if_->Results().IsEmpty());
 }
 
 TEST_F(IR_IfTest, Parent) {

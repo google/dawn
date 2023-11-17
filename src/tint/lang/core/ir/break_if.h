@@ -60,10 +60,8 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     /// @copydoc Instruction::Clone()
     BreakIf* Clone(CloneContext& ctx) override;
 
-    /// @returns the MultiInBlock arguments
-    tint::Slice<Value* const> Args() override {
-        return operands_.Slice().Offset(kArgsOperandOffset);
-    }
+    /// @returns the offset of the arguments in Operands()
+    size_t ArgsOperandOffset() const override { return kArgsOperandOffset; }
 
     /// @returns the break condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }

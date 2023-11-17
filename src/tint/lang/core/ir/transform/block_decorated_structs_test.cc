@@ -256,7 +256,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct_ArrayLengthViaLets) {
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
-        auto* let_root = b.Let("root", buffer->Result());
+        auto* let_root = b.Let("root", buffer->Result(0));
         auto* let_arr = b.Let("arr", b.Access(ty.ptr(storage, ty.array<i32>()), let_root, 1_u));
         auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, let_arr);
         b.Return(func, length);

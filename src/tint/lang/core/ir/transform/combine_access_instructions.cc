@@ -52,7 +52,7 @@ struct State {
             if (auto* access = inst->As<ir::Access>(); access && access->Alive()) {
                 // Look for places where the result of this access instruction is used as a base
                 // pointer for another access instruction.
-                access->Result()->ForEachUse([&](Usage use) {
+                access->Result(0)->ForEachUse([&](Usage use) {
                     auto* child = use.instruction->As<ir::Access>();
                     if (child && use.operand_index == ir::Access::kObjectOperandOffset) {
                         // Push the indices of the parent access instruction into the child.
@@ -69,7 +69,7 @@ struct State {
                 });
 
                 // If there are no other uses of the access instruction, remove it.
-                if (access->Result()->Usages().IsEmpty()) {
+                if (access->Result(0)->Usages().IsEmpty()) {
                     access->Destroy();
                 }
             }

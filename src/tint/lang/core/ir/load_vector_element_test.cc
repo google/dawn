@@ -44,7 +44,7 @@ TEST_F(IR_LoadVectorElementTest, Create) {
     auto* inst = b.LoadVectorElement(from, 2_i);
 
     ASSERT_TRUE(inst->Is<LoadVectorElement>());
-    ASSERT_EQ(inst->From(), from->Result());
+    ASSERT_EQ(inst->From(), from->Result(0));
 
     ASSERT_TRUE(inst->Index()->Is<Constant>());
     auto index = inst->Index()->As<Constant>()->Value();
@@ -67,8 +67,7 @@ TEST_F(IR_LoadVectorElementTest, Result) {
     auto* from = b.Var(ty.ptr<private_, vec3<i32>>());
     auto* inst = b.LoadVectorElement(from, 2_i);
 
-    EXPECT_TRUE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
+    EXPECT_EQ(inst->Results().Length(), 1u);
 }
 
 TEST_F(IR_LoadVectorElementTest, Clone) {
@@ -79,10 +78,10 @@ TEST_F(IR_LoadVectorElementTest, Clone) {
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
-    EXPECT_NE(nullptr, new_inst->Result());
-    EXPECT_NE(inst->Result(), new_inst->Result());
+    EXPECT_NE(nullptr, new_inst->Result(0));
+    EXPECT_NE(inst->Result(0), new_inst->Result(0));
 
-    EXPECT_EQ(new_from->Result(), new_inst->From());
+    EXPECT_EQ(new_from->Result(0), new_inst->From());
 
     auto new_idx = new_inst->Index()->As<Constant>()->Value();
     ASSERT_TRUE(new_idx->Is<core::constant::Scalar<i32>>());

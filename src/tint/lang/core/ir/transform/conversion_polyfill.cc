@@ -74,7 +74,7 @@ struct State {
             }
             if (auto* convert = inst->As<ir::Convert>()) {
                 auto* src_ty = convert->Args()[0]->Type();
-                auto* res_ty = convert->Result()->Type();
+                auto* res_ty = convert->Result(0)->Type();
                 if (config.ftoi &&                          //
                     src_ty->is_float_scalar_or_vector() &&  //
                     res_ty->is_integer_scalar_or_vector()) {
@@ -88,10 +88,10 @@ struct State {
             auto* replacement = ftoi(convert);
 
             // Replace the old conversion instruction result with the new value.
-            if (auto name = ir.NameOf(convert->Result())) {
+            if (auto name = ir.NameOf(convert->Result(0))) {
                 ir.SetName(replacement, name);
             }
-            convert->Result()->ReplaceAllUsesWith(replacement);
+            convert->Result(0)->ReplaceAllUsesWith(replacement);
             convert->Destroy();
         }
     }
@@ -101,7 +101,7 @@ struct State {
     /// @param convert the conversion instruction
     /// @returns the replacement value
     ir::Value* ftoi(ir::Convert* convert) {
-        auto* res_ty = convert->Result()->Type();
+        auto* res_ty = convert->Result(0)->Type();
         auto* src_ty = convert->Args()[0]->Type();
         auto* src_el_ty = src_ty->DeepestElement();
 
@@ -187,7 +187,7 @@ struct State {
                 auto* select_high = b.Call(res_ty, core::BuiltinFn::kSelect, limits.high_limit_i,
                                            select_low, high_cond);
 
-                b.Return(func, select_high->Result());
+                b.Return(func, select_high->Result(0));
             });
             return func;
         });
@@ -195,7 +195,7 @@ struct State {
         // Call the helper function, splatting the arguments to match the target vector width.
         auto* call = b.Call(res_ty, helper, convert->Args()[0]);
         call->InsertBefore(convert);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// Return a type with element type @p type that has the same number of vector components as

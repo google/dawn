@@ -43,8 +43,7 @@ TEST_F(IR_UnreachableTest, Unreachable) {
 TEST_F(IR_UnreachableTest, Result) {
     auto* inst = b.Unreachable();
 
-    EXPECT_FALSE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
+    EXPECT_TRUE(inst->Results().IsEmpty());
 }
 
 TEST_F(IR_UnreachableTest, Clone) {

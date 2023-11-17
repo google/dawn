@@ -1028,7 +1028,7 @@ class Printer : public tint::TextGenerator {
 
             // Instruction has a single result value.
             // Check to see if the result of this instruction is a candidate for inlining.
-            auto* result = inst->Result();
+            auto* result = inst->Result(0);
             // Only values with a single usage can be inlined.
             // Named values are not inlined, as we want to emit the name for a let.
             if (result->Usages().Count() == 1 && !ir_.NameOf(result).IsValid()) {

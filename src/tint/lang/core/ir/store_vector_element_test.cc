@@ -44,7 +44,7 @@ TEST_F(IR_StoreVectorElementTest, Create) {
     auto* inst = b.StoreVectorElement(to, 2_i, 4_i);
 
     ASSERT_TRUE(inst->Is<StoreVectorElement>());
-    ASSERT_EQ(inst->To(), to->Result());
+    ASSERT_EQ(inst->To(), to->Result(0));
 
     ASSERT_TRUE(inst->Index()->Is<Constant>());
     auto index = inst->Index()->As<Constant>()->Value();
@@ -75,8 +75,7 @@ TEST_F(IR_StoreVectorElementTest, Result) {
     auto* to = b.Var(ty.ptr<private_, vec3<i32>>());
     auto* inst = b.StoreVectorElement(to, 2_i, 4_i);
 
-    EXPECT_FALSE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
+    EXPECT_TRUE(inst->Results().IsEmpty());
 }
 
 TEST_F(IR_StoreVectorElementTest, Clone) {
@@ -87,7 +86,7 @@ TEST_F(IR_StoreVectorElementTest, Clone) {
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
-    EXPECT_EQ(new_to->Result(), new_inst->To());
+    EXPECT_EQ(new_to->Result(0), new_inst->To());
 
     auto new_idx = new_inst->Index()->As<Constant>()->Value();
     ASSERT_TRUE(new_idx->Is<core::constant::Scalar<i32>>());

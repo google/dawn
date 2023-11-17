@@ -1112,7 +1112,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullSource) {
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
-    v->Result()->SetSource(nullptr);
+    v->Result(0)->SetSource(nullptr);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
@@ -2916,7 +2916,7 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        b.Append(mod.instructions.Create<ir::Store>(var->Result(), nullptr));
+        b.Append(mod.instructions.Create<ir::Store>(var->Result(0), nullptr));
         b.Return(f);
     });
 
@@ -2946,7 +2946,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
-        b.Append(mod.instructions.Create<ir::Store>(var->Result(), b.Constant(42_u)));
+        b.Append(mod.instructions.Create<ir::Store>(var->Result(0), b.Constant(42_u)));
         b.Return(f);
     });
 
@@ -2977,7 +2977,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
-        b.Append(mod.instructions.Create<ir::LoadVectorElement>(nullptr, var->Result(),
+        b.Append(mod.instructions.Create<ir::LoadVectorElement>(nullptr, var->Result(0),
                                                                 b.Constant(1_i)));
         b.Return(f);
     });
@@ -3039,7 +3039,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
         b.Append(mod.instructions.Create<ir::LoadVectorElement>(b.InstructionResult(ty.f32()),
-                                                                var->Result(), nullptr));
+                                                                var->Result(0), nullptr));
         b.Return(f);
     });
 
@@ -3098,7 +3098,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
-        b.Append(mod.instructions.Create<ir::StoreVectorElement>(var->Result(), nullptr,
+        b.Append(mod.instructions.Create<ir::StoreVectorElement>(var->Result(0), nullptr,
                                                                  b.Constant(2_i)));
         b.Return(f);
     });
@@ -3137,7 +3137,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
 
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
-        b.Append(mod.instructions.Create<ir::StoreVectorElement>(var->Result(), b.Constant(1_i),
+        b.Append(mod.instructions.Create<ir::StoreVectorElement>(var->Result(0), b.Constant(1_i),
                                                                  nullptr));
         b.Return(f);
     });

@@ -44,7 +44,7 @@ TEST_F(IR_ExitIfTest, Usage) {
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
-    EXPECT_EQ(if_->Result(), nullptr);
+    EXPECT_EQ(if_->Result(0), nullptr);
 }
 
 TEST_F(IR_ExitIfTest, Result) {
@@ -53,8 +53,7 @@ TEST_F(IR_ExitIfTest, Result) {
     auto* if_ = b.If(true);
     auto* e = b.ExitIf(if_, arg1, arg2);
 
-    EXPECT_FALSE(e->HasResults());
-    EXPECT_FALSE(e->HasMultiResults());
+    EXPECT_TRUE(e->Results().IsEmpty());
 }
 
 TEST_F(IR_ExitIfTest, Destroy) {

@@ -55,8 +55,8 @@ class UserCall final : public Castable<UserCall, Call> {
     /// @copydoc Instruction::Clone()
     UserCall* Clone(CloneContext& ctx) override;
 
-    /// @returns the call arguments
-    tint::Slice<Value*> Args() override { return operands_.Slice().Offset(kArgsOperandOffset); }
+    /// @returns the offset of the arguments in Operands()
+    size_t ArgsOperandOffset() const override { return kArgsOperandOffset; }
 
     /// Replaces the call arguments to @p arguments
     /// @param arguments the new call arguments

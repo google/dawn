@@ -44,8 +44,7 @@ TEST_F(IR_LoopTest, Parent) {
 
 TEST_F(IR_LoopTest, Result) {
     auto* loop = b.Loop();
-    EXPECT_FALSE(loop->HasResults());
-    EXPECT_FALSE(loop->HasMultiResults());
+    EXPECT_TRUE(loop->Results().IsEmpty());
 }
 
 TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
@@ -83,7 +82,7 @@ TEST_F(IR_LoopTest, Clone) {
     auto* new_loop = clone_ctx.Clone(loop);
 
     EXPECT_NE(loop, new_loop);
-    EXPECT_FALSE(new_loop->HasResults());
+    EXPECT_TRUE(new_loop->Results().IsEmpty());
     EXPECT_EQ(0u, new_loop->Exits().Count());
     EXPECT_NE(nullptr, new_loop->Initializer());
     EXPECT_NE(loop->Initializer(), new_loop->Initializer());

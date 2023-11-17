@@ -57,8 +57,7 @@ TEST_F(IR_BreakIfTest, Results) {
     auto* arg2 = b.Constant(2_u);
 
     auto* brk = b.BreakIf(loop, cond, arg1, arg2);
-    EXPECT_FALSE(brk->HasResults());
-    EXPECT_FALSE(brk->HasMultiResults());
+    EXPECT_TRUE(brk->Results().IsEmpty());
 }
 
 TEST_F(IR_BreakIfTest, Fail_NullLoop) {

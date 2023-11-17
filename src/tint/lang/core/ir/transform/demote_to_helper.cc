@@ -145,11 +145,12 @@ struct State {
             // Move the original instruction into the if-true block.
             auto* result = ifelse->True()->Append(inst);
 
-            TINT_ASSERT(!inst->HasMultiResults());
-            if (inst->HasResults() && !inst->Result()->Type()->Is<core::type::Void>()) {
+            auto results = inst->Results();
+            TINT_ASSERT(results.Length() < 2);
+            if (!results.IsEmpty() && !results[0]->Type()->Is<core::type::Void>()) {
                 // The original instruction had a result, so return it from the if instruction.
-                ifelse->SetResults(Vector{b.InstructionResult(inst->Result()->Type())});
-                inst->Result()->ReplaceAllUsesWith(ifelse->Result());
+                ifelse->SetResults(Vector{b.InstructionResult(results[0]->Type())});
+                results[0]->ReplaceAllUsesWith(ifelse->Result(0));
                 ifelse->True()->Append(b.ExitIf(ifelse, result));
             } else {
                 ifelse->True()->Append(b.ExitIf(ifelse));

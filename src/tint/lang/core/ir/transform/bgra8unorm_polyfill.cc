@@ -63,7 +63,7 @@ struct State {
                 if (!var) {
                     continue;
                 }
-                auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
                 if (!ptr) {
                     continue;
                 }
@@ -108,7 +108,7 @@ struct State {
         }
 
         // Replace all uses of the old variable with the new one.
-        ReplaceUses(old_var->Result(), new_var->Result());
+        ReplaceUses(old_var->Result(0), new_var->Result(0));
     }
 
     /// Replace a function parameter with one that uses rgba8unorm instead of bgra8unorm.
@@ -147,7 +147,7 @@ struct State {
                     // Replace load instructions with new ones that have the updated type.
                     auto* new_load = b.Load(new_value);
                     new_load->InsertBefore(load);
-                    ReplaceUses(load->Result(), new_load->Result());
+                    ReplaceUses(load->Result(0), new_load->Result(0));
                     load->Destroy();
                 },
                 [&](CoreBuiltinCall* call) {
@@ -160,14 +160,14 @@ struct State {
                         auto* value = call->Args()[index];
                         auto* swizzle = b.Swizzle(value->Type(), value, Vector{2u, 1u, 0u, 3u});
                         swizzle->InsertBefore(call);
-                        call->SetOperand(index, swizzle->Result());
+                        call->SetOperand(index, swizzle->Result(0));
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
                         // Swizzle the result of a `textureLoad()` builtin.
                         auto* swizzle =
-                            b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u});
-                        call->Result()->ReplaceAllUsesWith(swizzle->Result());
+                            b.Swizzle(call->Result(0)->Type(), nullptr, Vector{2u, 1u, 0u, 3u});
+                        call->Result(0)->ReplaceAllUsesWith(swizzle->Result(0));
                         swizzle->InsertAfter(call);
-                        swizzle->SetOperand(Swizzle::kObjectOperandOffset, call->Result());
+                        swizzle->SetOperand(Swizzle::kObjectOperandOffset, call->Result(0));
                     }
                 },
                 [&](UserCall* call) {

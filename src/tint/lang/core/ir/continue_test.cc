@@ -55,8 +55,7 @@ TEST_F(IR_ContinueTest, Results) {
 
     auto* brk = b.Continue(loop, arg1, arg2);
 
-    EXPECT_FALSE(brk->HasResults());
-    EXPECT_FALSE(brk->HasMultiResults());
+    EXPECT_TRUE(brk->Results().IsEmpty());
 }
 
 TEST_F(IR_ContinueTest, Fail_NullLoop) {

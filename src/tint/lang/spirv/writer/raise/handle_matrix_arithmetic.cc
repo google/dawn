@@ -61,7 +61,7 @@ void Run(core::ir::Module& ir) {
                 binary_worklist.Push(binary);
             }
         } else if (auto* convert = inst->As<core::ir::Convert>()) {
-            if (convert->Result()->Type()->Is<core::type::Matrix>()) {
+            if (convert->Result(0)->Type()->Is<core::type::Matrix>()) {
                 convert_worklist.Push(convert);
             }
         }
@@ -73,14 +73,14 @@ void Run(core::ir::Module& ir) {
         auto* rhs = binary->RHS();
         auto* lhs_ty = lhs->Type();
         auto* rhs_ty = rhs->Type();
-        auto* ty = binary->Result()->Type();
+        auto* ty = binary->Result(0)->Type();
 
         // Helper to replace the instruction with a new one.
         auto replace = [&](core::ir::Instruction* inst) {
             if (auto name = ir.NameOf(binary)) {
-                ir.SetName(inst->Result(), name);
+                ir.SetName(inst->Result(0), name);
             }
-            binary->Result()->ReplaceAllUsesWith(inst->Result());
+            binary->Result(0)->ReplaceAllUsesWith(inst->Result(0));
             binary->ReplaceWith(inst);
             binary->Destroy();
         };
@@ -94,7 +94,7 @@ void Run(core::ir::Module& ir) {
                     auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
                     auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
                     auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
-                    args.Push(add->Result());
+                    args.Push(add->Result(0));
                 });
             }
             replace(b.Construct(ty, std::move(args)));
@@ -141,7 +141,7 @@ void Run(core::ir::Module& ir) {
     for (auto* convert : convert_worklist) {
         auto* arg = convert->Args()[core::ir::Convert::kValueOperandOffset];
         auto* in_mat = arg->Type()->As<core::type::Matrix>();
-        auto* out_mat = convert->Result()->Type()->As<core::type::Matrix>();
+        auto* out_mat = convert->Result(0)->Type()->As<core::type::Matrix>();
 
         // Extract and convert each column separately.
         Vector<core::ir::Value*, 4> args;
@@ -149,16 +149,16 @@ void Run(core::ir::Module& ir) {
             b.InsertBefore(convert, [&] {
                 auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
                 auto* new_col = b.Convert(out_mat->ColumnType(), col);
-                args.Push(new_col->Result());
+                args.Push(new_col->Result(0));
             });
         }
 
         // Reconstruct the result matrix from the converted columns.
         auto* construct = b.Construct(out_mat, std::move(args));
         if (auto name = ir.NameOf(convert)) {
-            ir.SetName(construct->Result(), name);
+            ir.SetName(construct->Result(0), name);
         }
-        convert->Result()->ReplaceAllUsesWith(construct->Result());
+        convert->Result(0)->ReplaceAllUsesWith(construct->Result(0));
         convert->ReplaceWith(construct);
         convert->Destroy();
     }

@@ -189,13 +189,13 @@ void Run(core::ir::Module& ir) {
 
         core::ir::Instruction* load = nullptr;
         if (to_replace.vector_access_type) {
-            load = builder.LoadVectorElement(new_access->Result(), vector_index);
+            load = builder.LoadVectorElement(new_access->Result(0), vector_index);
         } else {
             load = builder.Load(new_access);
         }
 
         // Replace all uses of the old access instruction with the loaded result.
-        access->Result()->ReplaceAllUsesWith(load->Result());
+        access->Result()->ReplaceAllUsesWith(load->Result(0));
         access->ReplaceWith(load);
         access->Destroy();
     }

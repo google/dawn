@@ -43,8 +43,7 @@ TEST_F(IR_DiscardTest, Discard) {
 TEST_F(IR_DiscardTest, Result) {
     auto* inst = b.Discard();
 
-    EXPECT_FALSE(inst->HasResults());
-    EXPECT_FALSE(inst->HasMultiResults());
+    EXPECT_TRUE(inst->Results().IsEmpty());
 }
 
 TEST_F(IR_DiscardTest, Clone) {

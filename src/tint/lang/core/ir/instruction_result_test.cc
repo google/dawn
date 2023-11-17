@@ -42,14 +42,14 @@ TEST_F(IR_InstructionResultTest, Destroy_HasSource) {
         {
             Module mod;
             Builder b{mod};
-            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
+            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result(0);
             val->Destroy();
         },
         "");
 }
 
 TEST_F(IR_InstructionResultTest, Clone) {
-    auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
+    auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result(0);
     auto* new_res = clone_ctx.Clone(val);
 
     EXPECT_NE(val, new_res);
