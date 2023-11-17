@@ -718,7 +718,7 @@ void Disassembler::EmitSwitch(Switch* s) {
                 EmitValue(selector.val);
             }
         }
-        out_ << ", %b" << IdOf(c.Block()) << ")";
+        out_ << ", %b" << IdOf(c.block) << ")";
     }
     out_ << "]";
     sm.Store(s);
@@ -728,7 +728,7 @@ void Disassembler::EmitSwitch(Switch* s) {
 
     for (auto& c : s->Cases()) {
         ScopedIndent si(indent_size_);
-        EmitBlock(c.Block(), "case");
+        EmitBlock(c.block, "case");
     }
 
     Indent();

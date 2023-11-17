@@ -771,12 +771,12 @@ class Impl {
 
         const auto* sem = program_.Sem().Get(stmt);
         for (const auto* c : sem->Cases()) {
-            Vector<core::ir::Switch::CaseSelector, 4> selectors;
+            Vector<core::ir::Constant*, 4> selectors;
             for (const auto* selector : c->Selectors()) {
                 if (selector->IsDefault()) {
-                    selectors.Push({nullptr});
+                    selectors.Push(nullptr);
                 } else {
-                    selectors.Push({builder_.Constant(selector->Value()->Clone(clone_ctx_))});
+                    selectors.Push(builder_.Constant(selector->Value()->Clone(clone_ctx_)));
                 }
             }
 

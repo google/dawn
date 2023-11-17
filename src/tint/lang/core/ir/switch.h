@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_SWITCH_H_
 
 #include <string>
+#include <utility>
 
 #include "src/tint/lang/core/ir/control_instruction.h"
 
@@ -64,7 +65,7 @@ class Switch final : public Castable<Switch, ControlInstruction> {
     /// A case selector
     struct CaseSelector {
         /// @returns true if this is a default selector
-        bool IsDefault() { return val == nullptr; }
+        bool IsDefault() const { return val == nullptr; }
 
         /// The selector value, or nullptr if this is the default selector
         Constant* val = nullptr;
@@ -74,11 +75,9 @@ class Switch final : public Castable<Switch, ControlInstruction> {
     struct Case {
         /// The case selector for this node
         Vector<CaseSelector, 4> selectors;
+
         /// The case block.
         ir::Block* block = nullptr;
-
-        /// @returns the case block
-        ir::Block* Block() { return block; }
     };
 
     /// Constructor

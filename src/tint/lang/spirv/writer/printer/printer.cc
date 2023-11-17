@@ -1885,7 +1885,7 @@ class Printer {
         for (auto& c : swtch->Cases()) {
             for (auto& sel : c.selectors) {
                 if (sel.IsDefault()) {
-                    default_label = Label(c.Block());
+                    default_label = Label(c.block);
                 }
             }
         }
@@ -1894,7 +1894,7 @@ class Printer {
         // Build the operands to the OpSwitch instruction.
         OperandList switch_operands = {Value(swtch->Condition()), default_label};
         for (auto& c : swtch->Cases()) {
-            auto label = Label(c.Block());
+            auto label = Label(c.block);
             for (auto& sel : c.selectors) {
                 if (sel.IsDefault()) {
                     continue;
@@ -1914,7 +1914,7 @@ class Printer {
 
         // Emit the cases.
         for (auto& c : swtch->Cases()) {
-            EmitBlock(c.Block());
+            EmitBlock(c.block);
         }
 
         // Emit the switch merge block.

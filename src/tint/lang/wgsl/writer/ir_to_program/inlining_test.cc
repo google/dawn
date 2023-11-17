@@ -934,7 +934,7 @@ TEST_F(IRToProgramInliningTest, UnsequencedOutsideSwitch) {
     b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(3_i);
-        auto* case_ = b.Case(switch_, {core::ir::Switch::CaseSelector{}});
+        auto* case_ = b.DefaultCase(switch_);
         b.Append(case_, [&] { b.Return(fn, v); });
         b.Return(fn, 0_i);
     });
@@ -959,7 +959,7 @@ TEST_F(IRToProgramInliningTest, SequencedOutsideSwitch) {
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* switch_ = b.Switch(3_i);
-        auto* case_ = b.Case(switch_, {core::ir::Switch::CaseSelector{}});
+        auto* case_ = b.DefaultCase(switch_);
         b.Append(case_, [&] { b.Return(fn, v_2); });
         b.Return(fn, 0_i);
     });
@@ -983,7 +983,7 @@ TEST_F(IRToProgramInliningTest, UnsequencedUsedBySwitchCondition) {
     b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(v);
-        auto* case_ = b.Case(switch_, {core::ir::Switch::CaseSelector{}});
+        auto* case_ = b.DefaultCase(switch_);
         b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
@@ -1007,7 +1007,7 @@ TEST_F(IRToProgramInliningTest, SequencedUsedBySwitchCondition) {
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* switch_ = b.Switch(v_1);
-        auto* case_ = b.Case(switch_, {core::ir::Switch::CaseSelector{}});
+        auto* case_ = b.DefaultCase(switch_);
         b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
@@ -1032,7 +1032,7 @@ TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInSwitch_ThenUseLoad) {
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* switch_ = b.Switch(1_i);
-        auto* case_ = b.Case(switch_, {core::ir::Switch::CaseSelector{}});
+        auto* case_ = b.DefaultCase(switch_);
         b.Append(case_, [&] {
             b.Store(var, 2_i);
             b.ExitSwitch(switch_);

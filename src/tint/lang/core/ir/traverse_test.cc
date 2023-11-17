@@ -71,10 +71,10 @@ TEST_F(IR_TraverseTest, Blocks) {
         auto* switch_ = b.Switch(1_i);
         expect.Push(switch_);
 
-        auto* case_0 = b.Case(switch_, {Switch::CaseSelector{b.Constant(0_i)}});
+        auto* case_0 = b.Case(switch_, {b.Constant(0_i)});
         b.Append(case_0, [&] { expect.Push(b.Var<function, i32>()); });
 
-        auto* case_1 = b.Case(switch_, {Switch::CaseSelector{b.Constant(1_i)}});
+        auto* case_1 = b.Case(switch_, {b.Constant(1_i)});
         b.Append(case_1, [&] { expect.Push(b.Var<function, i32>()); });
 
         expect.Push(b.Var<function, i32>());
@@ -113,10 +113,10 @@ TEST_F(IR_TraverseTest, Filtered) {
 
         auto* switch_ = b.Switch(1_i);
 
-        auto* case_0 = b.Case(switch_, {Switch::CaseSelector{b.Constant(0_i)}});
+        auto* case_0 = b.Case(switch_, {b.Constant(0_i)});
         b.Append(case_0, [&] { b.Var<function, i32>(); });
 
-        auto* case_1 = b.Case(switch_, {Switch::CaseSelector{b.Constant(1_i)}});
+        auto* case_1 = b.Case(switch_, {b.Constant(1_i)});
         b.Append(case_1, [&] { b.Var<function, i32>(); });
 
         b.Var<function, i32>();

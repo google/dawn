@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/core/ir/switch.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
@@ -45,7 +47,7 @@ Switch::~Switch() = default;
 
 void Switch::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     for (auto& c : cases_) {
-        cb(c.Block());
+        cb(c.block);
     }
 }
 
@@ -65,7 +67,7 @@ Switch* Switch::Clone(CloneContext& ctx) {
             auto* new_val = sel.val ? ctx.Clone(sel.val) : nullptr;
             new_case.selectors.Push(Switch::CaseSelector{new_val});
         }
-        new_switch->cases_.Push(new_case);
+        new_switch->cases_.Push(std::move(new_case));
     }
 
     new_switch->SetResults(ctx.Clone(results_));

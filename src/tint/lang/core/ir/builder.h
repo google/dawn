@@ -268,17 +268,22 @@ class Builder {
         return Append(ir.instructions.Create<ir::Switch>(cond_val));
     }
 
-    /// Creates a case for the switch @p s with the given selectors
+    /// Creates a default case for the switch @p s
     /// @param s the switch to create the case into
-    /// @param selectors the case selectors for the case statement
     /// @returns the start block for the case instruction
-    ir::Block* Case(ir::Switch* s, VectorRef<Switch::CaseSelector> selectors);
+    ir::Block* DefaultCase(ir::Switch* s);
 
     /// Creates a case for the switch @p s with the given selectors
     /// @param s the switch to create the case into
-    /// @param selectors the case selectors for the case statement
+    /// @param values the case selector values for the case statement
     /// @returns the start block for the case instruction
-    ir::Block* Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> selectors);
+    ir::Block* Case(ir::Switch* s, VectorRef<ir::Constant*> values);
+
+    /// Creates a case for the switch @p s with the given selectors
+    /// @param s the switch to create the case into
+    /// @param values the case selector values for the case statement
+    /// @returns the start block for the case instruction
+    ir::Block* Case(ir::Switch* s, std::initializer_list<ir::Constant*> values);
 
     /// Creates a new ir::Constant
     /// @param val the constant value

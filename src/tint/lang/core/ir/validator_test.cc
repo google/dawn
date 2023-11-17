@@ -1682,7 +1682,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
         b.ExitIf(if_outer);
     });
 
-    auto* c = b.Case(switch_inner, {Switch::CaseSelector{b.Constant(1_i)}});
+    auto* c = b.Case(switch_inner, {b.Constant(1_i)});
     b.Append(c, [&] { b.ExitIf(if_outer); });
 
     b.Append(f->Block(), [&] {
@@ -1779,7 +1779,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, ExitSwitch) {
     auto* switch_ = b.Switch(true);
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1794,7 +1794,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch) {
 TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
     auto* switch_ = b.Switch(true);
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(mod.instructions.Create<ExitSwitch>(nullptr));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1834,7 +1834,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_, 1_i));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1878,7 +1878,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_, 1_i, 2_f, 3_i));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1922,7 +1922,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_, 1_i, 2_f));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1940,7 +1940,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_, 1_i, 2_i));
 
     auto* f = b.Function("my_func", ty.void_());
@@ -1983,7 +1983,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
 
     auto* f = b.Function("my_func", ty.void_());
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     def->Append(b.Return(f));
 
     auto sb = b.Append(f->Block());
@@ -2037,7 +2037,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
 
     auto* f = b.Function("my_func", ty.void_());
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     b.Append(def, [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] {
@@ -2059,12 +2059,12 @@ TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
     auto* switch_ = b.Switch(true);
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     b.Append(def, [&] {
         auto* inner = b.Switch(false);
         b.ExitSwitch(switch_);
 
-        auto* inner_def = b.Case(inner, {Switch::CaseSelector{}});
+        auto* inner_def = b.DefaultCase(inner);
         b.Append(inner_def, [&] { b.ExitSwitch(switch_); });
     });
 
@@ -2112,7 +2112,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
     auto* switch_ = b.Switch(true);
 
-    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    auto* def = b.DefaultCase(switch_);
     b.Append(def, [&] {
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] { b.ExitSwitch(switch_); });
@@ -2458,7 +2458,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
         auto* inner = b.Switch(false);
         b.ExitLoop(loop);
 
-        auto* inner_def = b.Case(inner, {Switch::CaseSelector{}});
+        auto* inner_def = b.DefaultCase(inner);
         b.Append(inner_def, [&] { b.ExitLoop(loop); });
     });
 

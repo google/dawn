@@ -111,7 +111,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
 
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(in);
-        b.Append(b.Case(swtch, {core::ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(swtch); });
+        b.Append(b.DefaultCase(swtch), [&] { b.ExitSwitch(swtch); });
 
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
@@ -1649,9 +1649,8 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_UnconditionalReturnInCase) {
 
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{b.Constant(1_i)}}),
-                 [&] { b.Return(func, 42_i); });
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
+        b.Append(b.Case(sw, {b.Constant(1_i)}), [&] { b.Return(func, 42_i); });
+        b.Append(b.DefaultCase(sw), [&] { b.ExitSwitch(sw); });
 
         b.Return(func, 0_i);
     });
@@ -1716,7 +1715,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_ConditionalReturnInBody) {
 
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{b.Constant(1_i)}}), [&] {
+        b.Append(b.Case(sw, {b.Constant(1_i)}), [&] {
             auto* ifcond = b.Equal(ty.bool_(), cond, 1_i);
             auto* ifelse = b.If(ifcond);
             b.Append(ifelse->True(), [&] { b.Return(func, 42_i); });
@@ -1726,7 +1725,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_ConditionalReturnInBody) {
             b.ExitSwitch(sw);
         });
 
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
+        b.Append(b.DefaultCase(sw), [&] { b.ExitSwitch(sw); });
 
         b.Return(func, 0_i);
     });
@@ -1823,13 +1822,10 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
         sw->SetResults(b.InstructionResult(ty.i32()));  // NOLINT: false detection of std::tuple
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{b.Constant(1_i)}}),
-                 [&] { b.Return(func, 42_i); });
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{b.Constant(2_i)}}),
-                 [&] { b.Return(func, 99_i); });
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{b.Constant(3_i)}}),
-                 [&] { b.ExitSwitch(sw, 1_i); });
-        b.Append(b.Case(sw, {core::ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw, 0_i); });
+        b.Append(b.Case(sw, {b.Constant(1_i)}), [&] { b.Return(func, 42_i); });
+        b.Append(b.Case(sw, {b.Constant(2_i)}), [&] { b.Return(func, 99_i); });
+        b.Append(b.Case(sw, {b.Constant(3_i)}), [&] { b.ExitSwitch(sw, 1_i); });
+        b.Append(b.DefaultCase(sw), [&] { b.ExitSwitch(sw, 0_i); });
 
         b.Return(func, sw->Result(0));
     });

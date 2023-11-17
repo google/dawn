@@ -1579,7 +1579,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideNestedBlock) {
         auto* ifelse = b.If(true);
         b.Append(ifelse->True(), [&] {  //
             auto* sw = b.Switch(42_i);
-            auto* def_case = b.Case(sw, Vector{core::ir::Switch::CaseSelector()});
+            auto* def_case = b.DefaultCase(sw);
             b.Append(def_case, [&] {  //
                 auto* loop = b.Loop();
                 b.Append(loop->Body(), [&] {  //
@@ -1703,7 +1703,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
         auto* ifelse = b.If(true);
         b.Append(ifelse->True(), [&] {  //
             auto* sw = b.Switch(42_i);
-            auto* def_case = b.Case(sw, Vector{core::ir::Switch::CaseSelector()});
+            auto* def_case = b.DefaultCase(sw);
             b.Append(def_case, [&] {  //
                 auto* loop = b.Loop();
                 b.Append(loop->Body(), [&] {  //

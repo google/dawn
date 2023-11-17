@@ -476,8 +476,8 @@ class State {
 
                 const ast::BlockStatement* body = nullptr;
                 {
-                    TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.Block());
-                    body = Block(c.Block());
+                    TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.block);
+                    body = Block(c.block);
                 }
 
                 auto selectors = tint::Transform(c.selectors,  //
