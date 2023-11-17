@@ -330,12 +330,17 @@ struct State {
                     load->Destroy();
                 },
                 [&](LoadVectorElement* load) {
-                    // We should have loaded the decomposed matrix, reconstructed it, so this is now
-                    // extracting from a value type.
-                    TINT_ASSERT(!replacement->Type()->Is<core::type::Pointer>());
-                    auto* access = b.Access(load->Result()->Type(), replacement, load->Index());
-                    load->Result()->ReplaceAllUsesWith(access->Result());
-                    load->Destroy();
+                    if (!replacement->Type()->Is<core::type::Pointer>()) {
+                        // We have loaded a decomposed matrix and reconstructed it, so this is now
+                        // extracting from a value type.
+                        auto* access = b.Access(load->Result()->Type(), replacement, load->Index());
+                        load->Result()->ReplaceAllUsesWith(access->Result());
+                        load->Destroy();
+                    } else {
+                        // There was no decomposed matrix on the path to this instruction so just
+                        // update the source operand.
+                        load->SetOperand(LoadVectorElement::kFromOperandOffset, replacement);
+                    }
                 },
                 [&](Let* let) {
                     // Let instructions just fold away.
