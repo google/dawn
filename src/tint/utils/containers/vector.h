@@ -397,6 +397,14 @@ class Vector {
 
     /// Copy constructor from an immutable slice
     /// @param other the slice to copy
+    /// @note This overload only exists to keep MSVC happy. The compiler should be able to match
+    /// `Slice<U>`.
+    Vector(const Slice<const T>& other) {  // NOLINT(runtime/explicit)
+        Copy(other);
+    }
+
+    /// Copy constructor from an immutable slice
+    /// @param other the slice to copy
     template <typename U>
     Vector(const Slice<U>& other) {  // NOLINT(runtime/explicit)
         Copy(other);
