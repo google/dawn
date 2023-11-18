@@ -31,11 +31,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/block.h"
-
-// Forward declarations
-namespace tint::core::ir {
-class BlockParam;
-}
+#include "src/tint/lang/core/ir/block_param.h"
 
 namespace tint::core::ir {
 
@@ -63,7 +59,10 @@ class MultiInBlock : public Castable<MultiInBlock, Block> {
     void SetParams(std::initializer_list<BlockParam*> params);
 
     /// @returns the params to the block
-    const Vector<BlockParam*, 2>& Params() { return params_; }
+    VectorRef<BlockParam*> Params() { return params_; }
+
+    /// @returns the params to the block
+    VectorRef<const BlockParam*> Params() const { return params_; }
 
     /// @returns branches made to this block by sibling blocks
     const VectorRef<ir::Terminator*> InboundSiblingBranches() { return inbound_sibling_branches_; }

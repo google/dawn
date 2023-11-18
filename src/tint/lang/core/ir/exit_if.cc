@@ -59,4 +59,8 @@ ir::If* ExitIf::If() {
     return static_cast<ir::If*>(ControlInstruction());
 }
 
+const ir::If* ExitIf::If() const {
+    return static_cast<const ir::If*>(ControlInstruction());
+}
+
 }  // namespace tint::core::ir

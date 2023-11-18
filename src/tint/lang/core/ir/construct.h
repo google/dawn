@@ -51,7 +51,7 @@ class Construct final : public Castable<Construct, Call> {
     Construct* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "construct"; }
+    std::string FriendlyName() const override { return "construct"; }
 };
 
 }  // namespace tint::core::ir

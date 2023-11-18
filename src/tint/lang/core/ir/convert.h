@@ -52,7 +52,7 @@ class Convert final : public Castable<Convert, Call> {
     Convert* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "convert"; }
+    std::string FriendlyName() const override { return "convert"; }
 };
 
 }  // namespace tint::core::ir

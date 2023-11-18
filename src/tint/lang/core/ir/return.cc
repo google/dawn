@@ -56,7 +56,11 @@ Return* Return::Clone(CloneContext& ctx) {
     return ctx.ir.instructions.Create<Return>(fn);
 }
 
-Function* Return::Func() const {
+Function* Return::Func() {
+    return tint::As<Function>(operands_[kFunctionOperandOffset]);
+}
+
+const Function* Return::Func() const {
     return tint::As<Function>(operands_[kFunctionOperandOffset]);
 }
 

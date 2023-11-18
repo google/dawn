@@ -94,13 +94,26 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
     /// @returns the operands of the instruction
     VectorRef<ir::Value*> Operands() override { return operands_; }
 
+    /// @returns the operands of the instruction
+    VectorRef<const ir::Value*> Operands() const override { return operands_; }
+
     /// @returns the result values for this instruction
     VectorRef<InstructionResult*> Results() override { return results_; }
+
+    /// @returns the result values for this instruction
+    VectorRef<const InstructionResult*> Results() const override { return results_; }
 
     /// @param idx the index of the result
     /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
     /// out of bounds.
     InstructionResult* Result(size_t idx = 0) {
+        return idx < results_.Length() ? results_[idx] : nullptr;
+    }
+
+    /// @param idx the index of the result
+    /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
+    /// out of bounds.
+    const InstructionResult* Result(size_t idx = 0) const {
         return idx < results_.Length() ? results_[idx] : nullptr;
     }
 

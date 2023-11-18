@@ -64,7 +64,10 @@ class Return final : public Castable<Return, Terminator> {
     Return* Clone(CloneContext& ctx) override;
 
     /// @returns the function being returned
-    Function* Func() const;
+    Function* Func();
+
+    /// @returns the function being returned
+    const Function* Func() const;
 
     /// @returns the return value, or nullptr
     ir::Value* Value() const {
@@ -79,7 +82,7 @@ class Return final : public Castable<Return, Terminator> {
     size_t ArgsOperandOffset() const override { return kArgsOperandOffset; }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "return"; }
+    std::string FriendlyName() const override { return "return"; }
 };
 
 }  // namespace tint::core::ir

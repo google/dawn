@@ -44,6 +44,11 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
     /// @returns the call arguments
     tint::Slice<Value* const> Args() { return operands_.Slice().Offset(ArgsOperandOffset()); }
 
+    /// @returns the call arguments
+    tint::Slice<const Value* const> Args() const {
+        return operands_.Slice().Offset(ArgsOperandOffset());
+    }
+
     /// Append a new argument to the argument list for this call instruction.
     /// @param arg the argument value to append
     void AppendArg(ir::Value* arg) { AddOperand(operands_.Length(), arg); }

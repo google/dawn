@@ -53,7 +53,7 @@ class Module {
     GenerationID prog_id_;
 
     /// Map of value to name
-    Hashmap<Value*, Symbol, 32> value_to_name_;
+    Hashmap<const Value*, Symbol, 32> value_to_name_;
 
   public:
     /// Constructor
@@ -72,11 +72,11 @@ class Module {
     /// @param inst the instruction
     /// @return the name of the given instruction, or an invalid symbol if the instruction is not
     /// named or does not have a single return value.
-    Symbol NameOf(Instruction* inst);
+    Symbol NameOf(const Instruction* inst) const;
 
     /// @param value the value
     /// @return the name of the given value, or an invalid symbol if the value is not named.
-    Symbol NameOf(Value* value);
+    Symbol NameOf(const Value* value) const;
 
     /// @param inst the instruction to set the name of
     /// @param name the desired name of the value. May be suffixed on collision.
@@ -93,6 +93,9 @@ class Module {
 
     /// @return the type manager for the module
     core::type::Manager& Types() { return constant_values.types; }
+
+    /// @return the type manager for the module
+    const core::type::Manager& Types() const { return constant_values.types; }
 
     /// The block allocator
     BlockAllocator<Block> blocks;

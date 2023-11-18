@@ -54,16 +54,18 @@ class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     BuiltinCall* Clone(core::ir::CloneContext& ctx) override;
 
     /// @returns the builtin function
-    BuiltinFn Func() { return fn_; }
+    BuiltinFn Func() const { return fn_; }
 
     /// @returns the identifier for the function
-    size_t FuncId() override { return static_cast<size_t>(fn_); }
+    size_t FuncId() const override { return static_cast<size_t>(fn_); }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return std::string("wgsl.") + str(fn_); }
+    std::string FriendlyName() const override { return std::string("wgsl.") + str(fn_); }
 
     /// @returns the table data to validate this builtin
-    const core::intrinsic::TableData& TableData() override { return intrinsic::Dialect::kData; }
+    const core::intrinsic::TableData& TableData() const override {
+        return intrinsic::Dialect::kData;
+    }
 
   private:
     BuiltinFn fn_;

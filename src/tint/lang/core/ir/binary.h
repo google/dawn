@@ -79,16 +79,22 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
     Binary* Clone(CloneContext& ctx) override;
 
     /// @returns the binary operator
-    BinaryOp Op() { return op_; }
+    BinaryOp Op() const { return op_; }
 
     /// @returns the left-hand-side value for the instruction
     Value* LHS() { return operands_[kLhsOperandOffset]; }
 
+    /// @returns the left-hand-side value for the instruction
+    const Value* LHS() const { return operands_[kLhsOperandOffset]; }
+
     /// @returns the right-hand-side value for the instruction
     Value* RHS() { return operands_[kRhsOperandOffset]; }
 
+    /// @returns the right-hand-side value for the instruction
+    const Value* RHS() const { return operands_[kRhsOperandOffset]; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "binary"; }
+    std::string FriendlyName() const override { return "binary"; }
 
   private:
     BinaryOp op_;

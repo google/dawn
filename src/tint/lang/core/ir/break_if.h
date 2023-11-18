@@ -66,11 +66,17 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     /// @returns the break condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
+    /// @returns the break condition
+    const Value* Condition() const { return operands_[kConditionOperandOffset]; }
+
     /// @returns the loop containing the break-if
     ir::Loop* Loop() { return loop_; }
 
+    /// @returns the loop containing the break-if
+    const ir::Loop* Loop() const { return loop_; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "break_if"; }
+    std::string FriendlyName() const override { return "break_if"; }
 
   private:
     ir::Loop* loop_ = nullptr;

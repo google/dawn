@@ -53,8 +53,11 @@ class Bitcast final : public Castable<Bitcast, Call> {
     /// @returns the operand value
     Value* Val() { return operands_[kValueOperandOffset]; }
 
+    /// @returns the operand value
+    const Value* Val() const { return operands_[kValueOperandOffset]; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "bitcast"; }
+    std::string FriendlyName() const override { return "bitcast"; }
 };
 
 }  // namespace tint::core::ir

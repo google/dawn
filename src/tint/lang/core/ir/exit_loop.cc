@@ -60,4 +60,8 @@ ir::Loop* ExitLoop::Loop() {
     return static_cast<ir::Loop*>(ControlInstruction());
 }
 
+const ir::Loop* ExitLoop::Loop() const {
+    return static_cast<const ir::Loop*>(ControlInstruction());
+}
+
 }  // namespace tint::core::ir

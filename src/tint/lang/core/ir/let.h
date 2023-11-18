@@ -52,8 +52,11 @@ class Let final : public Castable<Let, OperandInstruction<1, 1>> {
     /// @returns the value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
 
+    /// @returns the value
+    const ir::Value* Value() const { return operands_[kValueOperandOffset]; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "let"; }
+    std::string FriendlyName() const override { return "let"; }
 };
 
 }  // namespace tint::core::ir

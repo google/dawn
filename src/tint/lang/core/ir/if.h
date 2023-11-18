@@ -76,14 +76,23 @@ class If final : public Castable<If, ControlInstruction> {
     /// @returns the if condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
+    /// @returns the if condition
+    const Value* Condition() const { return operands_[kConditionOperandOffset]; }
+
     /// @returns the true block
     ir::Block* True() { return true_; }
+
+    /// @returns the true block
+    const ir::Block* True() const { return true_; }
 
     /// @returns the false block
     ir::Block* False() { return false_; }
 
+    /// @returns the false block
+    const ir::Block* False() const { return false_; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "if"; }
+    std::string FriendlyName() const override { return "if"; }
 
   private:
     ir::Block* true_ = nullptr;

@@ -48,6 +48,9 @@ class Exit : public Castable<Exit, Terminator> {
     /// @return the control instruction that this exit is associated with
     ir::ControlInstruction* ControlInstruction() { return ctrl_inst_; }
 
+    /// @return the control instruction that this exit is associated with
+    const ir::ControlInstruction* ControlInstruction() const { return ctrl_inst_; }
+
   protected:
     /// Sets control instruction that this exit is associated with
     /// @param ctrl_inst the new ControlInstruction that this exit is associated with

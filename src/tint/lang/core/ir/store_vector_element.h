@@ -60,14 +60,23 @@ class StoreVectorElement final : public Castable<StoreVectorElement, OperandInst
     /// @returns the vector pointer value
     ir::Value* To() { return operands_[kToOperandOffset]; }
 
+    /// @returns the vector pointer value
+    const ir::Value* To() const { return operands_[kToOperandOffset]; }
+
     /// @returns the new vector element index
     ir::Value* Index() { return operands_[kIndexOperandOffset]; }
+
+    /// @returns the new vector element index
+    const ir::Value* Index() const { return operands_[kIndexOperandOffset]; }
 
     /// @returns the new vector element value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
 
+    /// @returns the new vector element value
+    const ir::Value* Value() const { return operands_[kValueOperandOffset]; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "store_vector_element"; }
+    std::string FriendlyName() const override { return "store_vector_element"; }
 };
 
 }  // namespace tint::core::ir

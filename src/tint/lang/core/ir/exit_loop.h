@@ -62,8 +62,11 @@ class ExitLoop final : public Castable<ExitLoop, Exit> {
     /// @returns the loop being exited
     ir::Loop* Loop();
 
+    /// @returns the loop being exited
+    const ir::Loop* Loop() const;
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "exit_loop"; }
+    std::string FriendlyName() const override { return "exit_loop"; }
 };
 
 }  // namespace tint::core::ir

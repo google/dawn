@@ -57,15 +57,21 @@ class Instruction : public Castable<Instruction> {
     /// @returns the operands of the instruction
     virtual VectorRef<ir::Value*> Operands() = 0;
 
+    /// @returns the operands of the instruction
+    virtual VectorRef<const ir::Value*> Operands() const = 0;
+
     /// @returns the result values for this instruction
     virtual VectorRef<InstructionResult*> Results() = 0;
+
+    /// @returns the result values for this instruction
+    virtual VectorRef<const InstructionResult*> Results() const = 0;
 
     /// Removes the instruction from the block, and destroys all the result values.
     /// The result values must not be in use.
     virtual void Destroy();
 
     /// @returns the friendly name for the instruction
-    virtual std::string FriendlyName() = 0;
+    virtual std::string FriendlyName() const = 0;
 
     /// @param ctx the CloneContext used to clone this instruction
     /// @returns a clone of this instruction
@@ -84,6 +90,9 @@ class Instruction : public Castable<Instruction> {
 
     /// @returns the block that owns this instruction
     ir::Block* Block() { return block_; }
+
+    /// @returns the block that owns this instruction
+    const ir::Block* Block() const { return block_; }
 
     /// Adds the new instruction before the given instruction in the owning block
     /// @param before the instruction to insert before
@@ -105,10 +114,26 @@ class Instruction : public Castable<Instruction> {
         return idx < res.Length() ? res[idx] : nullptr;
     }
 
+    /// @param idx the index of the operand
+    /// @returns the operand with index @p idx, or `nullptr` if there are no operands or the index
+    /// is out of bounds.
+    const Value* Operand(size_t idx = 0) const {
+        auto res = Operands();
+        return idx < res.Length() ? res[idx] : nullptr;
+    }
+
     /// @param idx the index of the result
     /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
     /// out of bounds.
     Value* Result(size_t idx) {
+        auto res = Results();
+        return idx < res.Length() ? res[idx] : nullptr;
+    }
+
+    /// @param idx the index of the result
+    /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
+    /// out of bounds.
+    const Value* Result(size_t idx = 0) const {
         auto res = Results();
         return idx < res.Length() ? res[idx] : nullptr;
     }

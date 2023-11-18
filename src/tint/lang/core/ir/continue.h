@@ -58,8 +58,11 @@ class Continue final : public Castable<Continue, Terminator> {
     /// @returns the loop owning the continue block
     ir::Loop* Loop() { return loop_; }
 
+    /// @returns the loop owning the continue block
+    const ir::Loop* Loop() const { return loop_; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "continue"; }
+    std::string FriendlyName() const override { return "continue"; }
 
   private:
     ir::Loop* loop_ = nullptr;

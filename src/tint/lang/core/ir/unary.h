@@ -60,11 +60,14 @@ class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
     /// @returns the value for the instruction
     Value* Val() { return operands_[kValueOperandOffset]; }
 
+    /// @returns the value for the instruction
+    const Value* Val() const { return operands_[kValueOperandOffset]; }
+
     /// @returns the unary operator
-    UnaryOp Op() { return op_; }
+    UnaryOp Op() const { return op_; }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "unary"; }
+    std::string FriendlyName() const override { return "unary"; }
 
   private:
     UnaryOp op_;

@@ -46,7 +46,7 @@ class Discard final : public Castable<Discard, Call> {
     Discard* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "discard"; }
+    std::string FriendlyName() const override { return "discard"; }
 };
 
 }  // namespace tint::core::ir

@@ -78,7 +78,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     ~FunctionParam() override;
 
     /// @returns the type of the var
-    const core::type::Type* Type() override { return type_; }
+    const core::type::Type* Type() const override { return type_; }
 
     /// @copydoc Value::Clone()
     FunctionParam* Clone(CloneContext& ctx) override;
@@ -90,7 +90,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
         builtin_ = val;
     }
     /// @returns the builtin set for the parameter
-    std::optional<FunctionParam::Builtin> Builtin() { return builtin_; }
+    std::optional<FunctionParam::Builtin> Builtin() const { return builtin_; }
     /// Clears the builtin attribute.
     void ClearBuiltin() { builtin_ = {}; }
 
@@ -98,7 +98,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param val the value to set for invariant
     void SetInvariant(bool val) { invariant_ = val; }
     /// @returns true if parameter is invariant
-    bool Invariant() { return invariant_; }
+    bool Invariant() const { return invariant_; }
 
     /// Sets the location
     /// @param loc the location value
@@ -107,7 +107,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
         location_ = {loc, interpolation};
     }
     /// @returns the location if `Attributes` contains `kLocation`
-    std::optional<struct Location> Location() { return location_; }
+    std::optional<struct Location> Location() const { return location_; }
     /// Clears the location attribute.
     void ClearLocation() { location_ = {}; }
 
@@ -116,7 +116,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param binding the binding
     void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
-    std::optional<struct BindingPoint>& BindingPoint() { return binding_point_; }
+    std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 
   private:
     const core::type::Type* type_ = nullptr;

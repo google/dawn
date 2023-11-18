@@ -42,7 +42,7 @@ class BlockParam : public Castable<BlockParam, Value> {
     ~BlockParam() override;
 
     /// @returns the type of the var
-    const core::type::Type* Type() override { return type_; }
+    const core::type::Type* Type() const override { return type_; }
 
     /// @copydoc Instruction::Clone()
     BlockParam* Clone(CloneContext& ctx) override;

@@ -65,12 +65,15 @@ class UserCall final : public Castable<UserCall, Call> {
     /// @returns the called function
     Function* Target() { return operands_[kFunctionOperandOffset]->As<ir::Function>(); }
 
+    /// @returns the called function
+    const Function* Target() const { return operands_[kFunctionOperandOffset]->As<ir::Function>(); }
+
     /// Sets called function
     /// @param target the new target of the call
     void SetTarget(Function* target) { SetOperand(kFunctionOperandOffset, target); }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "call"; }
+    std::string FriendlyName() const override { return "call"; }
 };
 
 }  // namespace tint::core::ir

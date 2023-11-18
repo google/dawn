@@ -59,4 +59,8 @@ ir::Switch* ExitSwitch::Switch() {
     return static_cast<ir::Switch*>(ControlInstruction());
 }
 
+const ir::Switch* ExitSwitch::Switch() const {
+    return static_cast<const ir::Switch*>(ControlInstruction());
+}
+
 }  // namespace tint::core::ir

@@ -54,16 +54,16 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     CoreBuiltinCall* Clone(CloneContext& ctx) override;
 
     /// @returns the builtin function
-    core::BuiltinFn Func() { return func_; }
+    core::BuiltinFn Func() const { return func_; }
 
     /// @returns the identifier for the function
-    size_t FuncId() override { return static_cast<size_t>(func_); }
+    size_t FuncId() const override { return static_cast<size_t>(func_); }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return core::str(func_); }
+    std::string FriendlyName() const override { return core::str(func_); }
 
     /// @returns the table data to validate this builtin
-    const core::intrinsic::TableData& TableData() override {
+    const core::intrinsic::TableData& TableData() const override {
         return core::intrinsic::Dialect::kData;
     }
 

@@ -43,7 +43,7 @@ class TerminateInvocation final : public Castable<TerminateInvocation, Terminato
     TerminateInvocation* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "terminate_invocation"; }
+    std::string FriendlyName() const override { return "terminate_invocation"; }
 };
 
 }  // namespace tint::core::ir

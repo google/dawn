@@ -62,20 +62,30 @@ class Block : public Castable<Block> {
     /// a terminator.
     ir::Terminator* Terminator() { return tint::As<ir::Terminator>(instructions_.last); }
 
+    /// @return the terminator instruction for this block, or nullptr if this block does not end in
+    /// a terminator.
+    const ir::Terminator* Terminator() const {
+        return tint::As<ir::Terminator>(instructions_.last);
+    }
+
     /// @returns the instructions in the block
     Instruction* Instructions() { return instructions_.first; }
 
+    /// @returns the instructions in the block
+    const Instruction* Instructions() const { return instructions_.first; }
+
     /// Iterator for the instructions inside a block
+    template <typename T>
     class Iterator {
       public:
         /// Constructor
         /// @param inst the instruction to start iterating from
-        explicit Iterator(Instruction* inst) : inst_(inst) {}
+        explicit Iterator(T* inst) : inst_(inst) {}
         ~Iterator() = default;
 
         /// Dereference operator
         /// @returns the instruction for this iterator
-        Instruction* operator*() const { return inst_; }
+        T* operator*() const { return inst_; }
 
         /// Comparison operator
         /// @param itr to compare against
@@ -95,20 +105,34 @@ class Block : public Castable<Block> {
         }
 
       private:
-        Instruction* inst_ = nullptr;
+        T* inst_ = nullptr;
     };
 
     /// @returns the iterator pointing to the start of the instruction list
-    Iterator begin() { return Iterator{instructions_.first}; }
+    Iterator<Instruction> begin() { return Iterator<Instruction>{instructions_.first}; }
 
     /// @returns the ending iterator
-    Iterator end() { return Iterator{nullptr}; }
+    Iterator<Instruction> end() { return Iterator<Instruction>{nullptr}; }
+
+    /// @returns the iterator pointing to the start of the instruction list
+    Iterator<const Instruction> begin() const {
+        return Iterator<const Instruction>{instructions_.first};
+    }
+
+    /// @returns the ending iterator
+    Iterator<const Instruction> end() const { return Iterator<const Instruction>{nullptr}; }
 
     /// @returns the first instruction in the instruction list
     Instruction* Front() { return instructions_.first; }
 
+    /// @returns the first instruction in the instruction list
+    const Instruction* Front() const { return instructions_.first; }
+
     /// @returns the last instruction in the instruction list
     Instruction* Back() { return instructions_.last; }
+
+    /// @returns the last instruction in the instruction list
+    const Instruction* Back() const { return instructions_.last; }
 
     /// Adds the instruction to the beginning of the block
     /// @param inst the instruction to add
@@ -135,13 +159,16 @@ class Block : public Castable<Block> {
     void Remove(Instruction* inst);
 
     /// @returns true if the block contains no instructions
-    bool IsEmpty() { return Length() == 0; }
+    bool IsEmpty() const { return Length() == 0; }
 
     /// @returns the number of instructions in the block
-    size_t Length() { return instructions_.count; }
+    size_t Length() const { return instructions_.count; }
 
     /// @return the parent instruction that owns this block
     ControlInstruction* Parent() { return parent_; }
+
+    /// @return the parent instruction that owns this block
+    const ControlInstruction* Parent() const { return parent_; }
 
     /// @param parent the parent instruction that owns this block
     void SetParent(ControlInstruction* parent) { parent_ = parent; }

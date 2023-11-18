@@ -54,8 +54,11 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     /// @returns the value being loaded from
     Value* From() { return operands_[kFromOperandOffset]; }
 
+    /// @returns the value being loaded from
+    const Value* From() const { return operands_[kFromOperandOffset]; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "load"; }
+    std::string FriendlyName() const override { return "load"; }
 };
 
 }  // namespace tint::core::ir

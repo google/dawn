@@ -42,10 +42,10 @@ class Constant : public Castable<Constant, Value> {
     ~Constant() override;
 
     /// @returns the constants value
-    const core::constant::Value* Value() { return value_; }
+    const core::constant::Value* Value() const { return value_; }
 
     /// @returns the type of the constant
-    const core::type::Type* Type() override { return value_->Type(); }
+    const core::type::Type* Type() const override { return value_->Type(); }
 
     /// @copydoc Value::Clone()
     Constant* Clone(CloneContext& ctx) override;

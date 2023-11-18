@@ -41,14 +41,14 @@ Module::~Module() = default;
 
 Module& Module::operator=(Module&&) = default;
 
-Symbol Module::NameOf(Instruction* inst) {
+Symbol Module::NameOf(const Instruction* inst) const {
     if (inst->Results().Length() != 1) {
         return Symbol{};
     }
     return NameOf(inst->Result(0));
 }
 
-Symbol Module::NameOf(Value* value) {
+Symbol Module::NameOf(const Value* value) const {
     return value_to_name_.Get(value).value_or(Symbol{});
 }
 

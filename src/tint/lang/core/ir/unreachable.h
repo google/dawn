@@ -43,7 +43,7 @@ class Unreachable final : public Castable<Unreachable, Terminator> {
     Unreachable* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "unreachable"; }
+    std::string FriendlyName() const override { return "unreachable"; }
 };
 
 }  // namespace tint::core::ir

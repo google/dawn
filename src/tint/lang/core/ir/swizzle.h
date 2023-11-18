@@ -54,11 +54,14 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }
 
+    /// @returns the object used for the access
+    const Value* Object() const { return operands_[kObjectOperandOffset]; }
+
     /// @returns the swizzle indices
-    VectorRef<uint32_t> Indices() { return indices_; }
+    VectorRef<uint32_t> Indices() const { return indices_; }
 
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "swizzle"; }
+    std::string FriendlyName() const override { return "swizzle"; }
 
   private:
     Vector<uint32_t, 4> indices_;

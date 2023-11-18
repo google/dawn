@@ -65,7 +65,7 @@ class Value : public Castable<Value> {
     ~Value() override;
 
     /// @returns the type of the value
-    virtual const core::type::Type* Type() { return nullptr; }
+    virtual const core::type::Type* Type() const { return nullptr; }
 
     /// Destroys the Value. Once called, the Value must not be used again.
     /// The Value must not be in use by any instruction.
@@ -89,6 +89,19 @@ class Value : public Castable<Value> {
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
     const Hashset<Usage, 4>& Usages() { return uses_; }
+
+    /// @returns true if this Value has any usages
+    bool IsUsed() const { return !uses_.IsEmpty(); }
+
+    /// @returns the number of usages of this Value
+    size_t NumUsages() const { return uses_.Count(); }
+
+    /// @returns true if the usages contains the instruction and operand index pair.
+    /// @param instruction the instruction
+    /// @param operand_index the in
+    bool HasUsage(const Instruction* instruction, size_t operand_index) const {
+        return uses_.Contains({const_cast<Instruction*>(instruction), operand_index});
+    }
 
     /// Apply a function to all uses of the value that exist prior to calling this method.
     /// @param func the function will be applied to each use

@@ -62,8 +62,11 @@ class ExitSwitch final : public Castable<ExitSwitch, Exit> {
     /// @returns the switch being exited
     ir::Switch* Switch();
 
+    /// @returns the switch being exited
+    const ir::Switch* Switch() const;
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "exit_switch"; }
+    std::string FriendlyName() const override { return "exit_switch"; }
 };
 
 }  // namespace tint::core::ir

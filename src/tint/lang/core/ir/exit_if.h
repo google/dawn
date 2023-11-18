@@ -62,8 +62,11 @@ class ExitIf final : public Castable<ExitIf, Exit> {
     /// @returns the if being exited
     ir::If* If();
 
+    /// @returns the if being exited
+    const ir::If* If() const;
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "exit_if"; }
+    std::string FriendlyName() const override { return "exit_if"; }
 };
 
 }  // namespace tint::core::ir

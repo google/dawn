@@ -87,6 +87,9 @@ class Loop final : public Castable<Loop, ControlInstruction> {
     /// @returns the switch initializer block
     ir::Block* Initializer() { return initializer_; }
 
+    /// @returns the switch initializer block
+    const ir::Block* Initializer() const { return initializer_; }
+
     /// @returns true if the loop uses an initializer block. If true, then the Loop first branches
     /// to the initializer block, otherwise it first branches to the body block.
     bool HasInitializer();
@@ -94,11 +97,17 @@ class Loop final : public Castable<Loop, ControlInstruction> {
     /// @returns the switch start block
     ir::MultiInBlock* Body() { return body_; }
 
+    /// @returns the switch start block
+    const ir::MultiInBlock* Body() const { return body_; }
+
     /// @returns the switch continuing block
     ir::MultiInBlock* Continuing() { return continuing_; }
 
+    /// @returns the switch continuing block
+    const ir::MultiInBlock* Continuing() const { return continuing_; }
+
     /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "loop"; }
+    std::string FriendlyName() const override { return "loop"; }
 
   private:
     ir::Block* initializer_ = nullptr;
