@@ -618,15 +618,6 @@ crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builti
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="i32" [ Failure ]
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
 
-################################################################################
-# matCx3 and array_of_matCx3...use_struct=2 causes device lost on DXC
-################################################################################
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=2;use_struct=true [ RetryOnFailure ]
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=3;use_struct=true [ RetryOnFailure ]
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:array_of_matCx3:columns=4;use_struct=true [ RetryOnFailure ]
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=2;use_struct=true [ RetryOnFailure ]
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=3;use_struct=true [ RetryOnFailure ]
-crbug.com/tint/2059 [ webgpu-dxc-enabled win10 ] webgpu:shader,execution,padding:matCx3:columns=4;use_struct=true [ RetryOnFailure ]
 
 ################################################################################
 # maxInterStageShaderComponents limit tests fail with CreateGraphicsPipelines fail with <Unknown VkResult> on Android Qualcomm (Pixel 4)
@@ -667,7 +658,6 @@ crbug.com/dawn/1960 [ android-r ] webgpu:api,validation,error_scope:parent_scope
 # Shader corr failing flakily on Android ARM (Pixel 6)
 ################################################################################
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
 
 ################################################################################
 # Shader f32 matrix tests failing on Android Qualcomm (Pixel 4)
@@ -749,14 +739,9 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-defau
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rg32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba16float" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba32uint" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8sint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="r8unorm" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoElement";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithRotationMetadata:sourceType="VideoFrame";videoName="four-colors-h264-bt601-rotate-270.mp4" [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
