@@ -46,6 +46,8 @@ libtint_source_set("raise") {
   sources = [
     "raise.cc",
     "raise.h",
+    "rename_conflicts.cc",
+    "rename_conflicts.h",
   ]
   deps = [
     "${tint_src_dir}/api/common",
@@ -74,7 +76,10 @@ libtint_source_set("raise") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [ "raise_test.cc" ]
+    sources = [
+      "raise_test.cc",
+      "rename_conflicts_test.cc",
+    ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",

@@ -79,7 +79,6 @@
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
@@ -105,15 +104,6 @@ class State {
     explicit State(core::ir::Module& m) : mod(m) {}
 
     Program Run() {
-        // Run transforms need to sanitize for WGSL.
-        {
-            auto result = RenameConflicts(&mod);
-            if (!result) {
-                b.Diagnostics().add(result.Failure().reason);
-                return Program(std::move(b));
-            }
-        }
-
         if (auto res = core::ir::Validate(mod); !res) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;

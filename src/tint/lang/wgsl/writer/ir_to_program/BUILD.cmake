@@ -41,8 +41,6 @@
 tint_add_target(tint_lang_wgsl_writer_ir_to_program lib
   lang/wgsl/writer/ir_to_program/ir_to_program.cc
   lang/wgsl/writer/ir_to_program/ir_to_program.h
-  lang/wgsl/writer/ir_to_program/rename_conflicts.cc
-  lang/wgsl/writer/ir_to_program/rename_conflicts.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
@@ -81,7 +79,6 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ir_to_program_test test
   lang/wgsl/writer/ir_to_program/ir_to_program_test.h
-  lang/wgsl/writer/ir_to_program/rename_conflicts_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test

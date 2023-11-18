@@ -40,9 +40,11 @@ cc_library(
   name = "raise",
   srcs = [
     "raise.cc",
+    "rename_conflicts.cc",
   ],
   hdrs = [
     "raise.h",
+    "rename_conflicts.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -76,6 +78,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "raise_test.cc",
+    "rename_conflicts_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

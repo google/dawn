@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
+#include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
 
 namespace tint::wgsl::writer {
 namespace {
@@ -228,6 +229,10 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
             }
         }
     }
+    if (auto result = RenameConflicts(&mod); !result) {
+        return result.Failure();
+    }
+
     return Success;
 }
 

@@ -42,7 +42,7 @@
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
+#include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/scope_stack.h"

@@ -40,11 +40,9 @@ cc_library(
   name = "ir_to_program",
   srcs = [
     "ir_to_program.cc",
-    "rename_conflicts.cc",
   ],
   hdrs = [
     "ir_to_program.h",
-    "rename_conflicts.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -83,7 +81,6 @@ cc_library(
   alwayslink = True,
   srcs = [
     "ir_to_program_test.h",
-    "rename_conflicts_test.cc",
   ] + select({
     ":tint_build_wgsl_writer": [
       "inlining_test.cc",
