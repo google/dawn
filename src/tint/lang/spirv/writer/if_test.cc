@@ -241,6 +241,34 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
 )");
 }
 
+TEST_F(SpirvWriterTest, If_Phi_SingleValue_ImplicitFalse) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* i = b.If(true);
+        i->SetResults(b.InstructionResult(ty.i32()));
+        b.Append(i->True(), [&] {  //
+            b.ExitIf(i, 10_i);
+        });
+        b.Return(func, i);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%12 = OpUndef %int");
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpSelectionMerge %5 None
+               OpBranchConditional %true %6 %7
+          %6 = OpLabel
+               OpBranch %5
+          %7 = OpLabel
+               OpBranch %5
+          %5 = OpLabel
+         %10 = OpPhi %int %int_10 %6 %12 %7
+               OpReturnValue %10
+               OpFunctionEnd
+)");
+}
+
 TEST_F(SpirvWriterTest, If_Phi_MultipleValue_0) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {

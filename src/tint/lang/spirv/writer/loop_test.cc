@@ -572,5 +572,54 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing) {
+    auto* func = b.Function("foo", ty.void_());
+
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop);
+        });
+
+        b.Append(loop->Continuing(), [&] {
+            auto* if_ = b.If(true);
+            auto* cond = b.InstructionResult(ty.bool_());
+            if_->SetResults(Vector{cond});
+            b.Append(if_->True(), [&] {  //
+                b.ExitIf(if_, true);
+            });
+            b.BreakIf(loop, cond);
+        });
+
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%15 = OpUndef %bool");
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %10 %11
+         %10 = OpLabel
+               OpBranch %9
+         %11 = OpLabel
+               OpBranch %9
+          %9 = OpLabel
+         %14 = OpPhi %bool %true %10 %15 %11
+               OpBranchConditional %14 %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

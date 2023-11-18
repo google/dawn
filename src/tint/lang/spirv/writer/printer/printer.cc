@@ -837,7 +837,11 @@ class Printer {
         // If there are no instructions in the block, it's a dead end, so we shouldn't be able to
         // get here to begin with.
         if (block->IsEmpty()) {
-            current_function_.push_inst(spv::Op::OpUnreachable, {});
+            if (!block->Parent()->Results().IsEmpty()) {
+                current_function_.push_inst(spv::Op::OpBranch, {GetMergeLabel(block->Parent())});
+            } else {
+                current_function_.push_inst(spv::Op::OpUnreachable, {});
+            }
             return;
         }
 
@@ -2162,6 +2166,13 @@ class Printer {
                 branches.Push(Branch{GetTerminatorBlockLabel(exit), exit->Args()[index]});
             }
             branches.Sort();  // Sort the branches by label to ensure deterministic output
+
+            // Also add phi nodes from implicit exit blocks.
+            inst->ForeachBlock([&](core::ir::Block* block) {
+                if (block->IsEmpty()) {
+                    branches.Push(Branch{Label(block), nullptr});
+                }
+            });
 
             OperandList ops{Type(ty), Value(result)};
             for (auto& branch : branches) {
