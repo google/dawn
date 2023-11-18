@@ -85,5 +85,61 @@ TEST_F(SpirvWriterTest, Discard) {
 )");
 }
 
+TEST_F(SpirvWriterTest, DiscardBeforeAtomic) {
+    auto* buffer = b.Var("buffer", ty.ptr(storage, ty.atomic<i32>()));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
+    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({front_facing});
+    ep->SetReturnLocation(0_u, {});
+
+    b.Append(ep->Block(), [&] {
+        auto* ifelse = b.If(front_facing);
+        b.Append(ifelse->True(), [&] {  //
+            b.Discard();
+            b.ExitIf(ifelse);
+        });
+        b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd, buffer, 1_i);
+        b.Return(ep, 0.5_f);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Function ep_inner
+   %ep_inner = OpFunction %float None %16
+%front_facing = OpFunctionParameter %bool
+         %17 = OpLabel
+               OpSelectionMerge %18 None
+               OpBranchConditional %front_facing %19 %18
+         %19 = OpLabel
+               OpStore %continue_execution %false
+               OpBranch %18
+         %18 = OpLabel
+         %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+         %25 = OpLoad %bool %continue_execution
+               OpSelectionMerge %26 None
+               OpBranchConditional %25 %27 %28
+         %27 = OpLabel
+         %29 = OpAtomicIAdd %int %21 %uint_1 %uint_0 %int_1
+               OpBranch %26
+         %28 = OpLabel
+               OpBranch %26
+         %26 = OpLabel
+         %32 = OpPhi %int %29 %27 %33 %28
+         %34 = OpLoad %bool %continue_execution
+         %35 = OpLogicalEqual %bool %34 %false
+               OpSelectionMerge %36 None
+               OpBranchConditional %35 %37 %36
+         %37 = OpLabel
+               OpKill
+         %36 = OpLabel
+               OpReturnValue %float_0_5
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

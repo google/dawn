@@ -204,6 +204,10 @@ struct State {
                 [&](ControlInstruction* ctrl) {
                     // Recurse into control instructions.
                     ctrl->ForeachBlock([&](Block* blk) { ProcessBlock(blk); });
+                },
+                [&](BuiltinCall*) {
+                    // TODO(crbug.com/tint/2102): Catch this with the validator instead.
+                    TINT_UNREACHABLE() << "unexpected non-core instruction";
                 });
         }
     }

@@ -133,8 +133,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // produce pointers to matrices.
     RUN_TRANSFORM(core::ir::transform::CombineAccessInstructions, module);
 
-    RUN_TRANSFORM(BuiltinPolyfill, module);
+    // DemoteToHelper must come before any transform that introduces non-core instructions.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+
+    RUN_TRANSFORM(BuiltinPolyfill, module);
     RUN_TRANSFORM(ExpandImplicitSplats, module);
     RUN_TRANSFORM(HandleMatrixArithmetic, module);
     RUN_TRANSFORM(MergeReturn, module);
