@@ -638,12 +638,6 @@ MaybeError ValidateFragmentState(DeviceBase* device,
             format->format);
     }
 
-    if (multisample.count != 1) {
-        DAWN_INVALID_IF(fragmentMetadata.fragmentInputMask.any(),
-                        "Framebuffer inputs are used when the sample count (%u) is not 1.",
-                        multisample.count);
-    }
-
     if (device->IsCompatibilityMode()) {
         DAWN_INVALID_IF(
             fragmentMetadata.usesSampleMaskOutput,

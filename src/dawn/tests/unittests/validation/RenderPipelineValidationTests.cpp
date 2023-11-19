@@ -2553,26 +2553,6 @@ TEST_F(FramebufferFetchFeatureTest, FramebufferInputMustHaveColorTarget) {
     }
 }
 
-// Test that the framebuffer fetch requires multisampling to be off.
-TEST_F(FramebufferFetchFeatureTest, MultisampleDisallowed) {
-    utils::ComboRenderPipelineDescriptor desc;
-    desc.vertex.entryPoint = "main";
-    desc.vertex.module = vsModule;
-    desc.cFragment.entryPoint = "main";
-    desc.cFragment.module = utils::CreateShaderModule(device, R"(
-        enable chromium_experimental_framebuffer_fetch;
-        @fragment fn main(@color(0) in : vec4f) -> @location(0) vec4f {
-            return in;
-        }
-    )");
-
-    desc.multisample.count = 1;
-    device.CreateRenderPipeline(&desc);
-
-    desc.multisample.count = 4;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
-}
-
 // Test that the framebuffer fetch type matches the texture format exactly.
 TEST_F(FramebufferFetchFeatureTest, InputMatchesFormat) {
     struct ValidPair {
