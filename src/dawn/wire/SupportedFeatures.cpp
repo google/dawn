@@ -80,7 +80,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ANGLETextureSharing:
         case WGPUFeatureName_ChromiumExperimentalSubgroups:
         case WGPUFeatureName_ChromiumExperimentalSubgroupUniformControlFlow:
-        case WGPUFeatureName_ChromiumExperimentalReadWriteStorageTexture:
         case WGPUFeatureName_PixelLocalStorageCoherent:
         case WGPUFeatureName_PixelLocalStorageNonCoherent:
         case WGPUFeatureName_Norm16TextureFormats:

@@ -103,10 +103,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "used to investigate the semantic of subgroups and should not be relied upon.",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
       FeatureInfo::FeatureState::Experimental}},
-    {Feature::ChromiumExperimentalReadWriteStorageTexture,
-     {"Experimental, supports ReadOnly and ReadWrite as storage texture access mode.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1972",
-      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnInternalUsages,
      {"Add internal usages to resources to affect how the texture is allocated, but not "
       "frontend validation. Other internal commands may access this usage.",

@@ -34,8 +34,6 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-
-enable chromium_experimental_read_write_storage_texture;
 @group(1) @binding(0) var arg_0: texture_storage_2d_array<rgba8uint, read>;
 
 // fn textureLoad(texture: texture_storage_2d_array<rgba8uint, read>, coords: vec2<u32>, array_index: u32) -> vec4<u32>

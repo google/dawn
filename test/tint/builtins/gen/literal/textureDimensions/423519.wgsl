@@ -34,8 +34,6 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-
-enable chromium_experimental_read_write_storage_texture;
 @group(1) @binding(0) var arg_0: texture_storage_3d<r32uint, read>;
 
 // fn textureDimensions(texture: texture_storage_3d<r32uint, read>) -> vec3<u32>

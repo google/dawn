@@ -35,8 +35,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-enable chromium_experimental_read_write_storage_texture;
-
 // fn textureBarrier()
 fn textureBarrier_3d0f7e() {
   textureBarrier();

@@ -1,5 +1,3 @@
-enable chromium_experimental_read_write_storage_texture;
-
 @binding(2) @group(0) var tex : texture_storage_2d<r32sint, read_write>;
 
 fn foo() {

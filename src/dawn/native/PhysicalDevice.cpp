@@ -55,7 +55,6 @@ MaybeError PhysicalDeviceBase::Initialize() {
     EnableFeature(Feature::DawnNative);
     EnableFeature(Feature::DawnInternalUsages);
     EnableFeature(Feature::ImplicitDeviceSynchronization);
-    EnableFeature(Feature::ChromiumExperimentalReadWriteStorageTexture);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(

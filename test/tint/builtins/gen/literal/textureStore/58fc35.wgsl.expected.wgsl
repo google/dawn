@@ -1,5 +1,3 @@
-enable chromium_experimental_read_write_storage_texture;
-
 @group(1) @binding(0) var arg_0 : texture_storage_1d<rgba16float, read_write>;
 
 fn textureStore_58fc35() {

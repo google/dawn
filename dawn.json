@@ -1910,7 +1910,6 @@
             {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]},
             {"value": 1014, "name": "chromium experimental subgroups", "tags": ["dawn"]},
             {"value": 1015, "name": "chromium experimental subgroup uniform control flow", "tags": ["dawn"]},
-            {"value": 1016, "name": "chromium experimental read write storage texture", "tags": ["dawn"]},
             {"value": 1017, "name": "pixel local storage coherent", "tags": ["dawn"]},
             {"value": 1018, "name": "pixel local storage non coherent", "tags": ["dawn"]},
             {"value": 1019, "name": "norm16 texture formats", "tags": ["dawn"]},
