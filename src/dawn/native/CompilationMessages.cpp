@@ -90,24 +90,23 @@ OwnedCompilationMessages::OwnedCompilationMessages() {
 
 OwnedCompilationMessages::~OwnedCompilationMessages() = default;
 
-void OwnedCompilationMessages::AddMessage(std::string message,
-                                          wgpu::CompilationMessageType type,
-                                          uint64_t lineNum,
-                                          uint64_t linePos,
-                                          uint64_t offset,
-                                          uint64_t length) {
-    // Cannot add messages after GetCompilationInfo has been called.
-    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
+void OwnedCompilationMessages::AddUnanchoredMessage(std::string message,
+                                                    wgpu::CompilationMessageType type) {
+    AddMessage(message, {nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), 0, 0, 0,
+                         0, 0, 0, 0});
+}
 
-    mMessageStrings.push_back(message);
-    mMessages.push_back({nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
+void OwnedCompilationMessages::AddMessageForTesting(std::string message,
+                                                    wgpu::CompilationMessageType type,
+                                                    uint64_t lineNum,
+                                                    uint64_t linePos,
+                                                    uint64_t offset,
+                                                    uint64_t length) {
+    AddMessage(message, {nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
                          linePos, offset, length, linePos, offset, length});
 }
 
 MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnostic) {
-    // Cannot add messages after GetCompilationInfo has been called.
-    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
-
     // Tint line and column values are 1-based.
     uint64_t lineNum = diagnostic.source.range.begin.line;
     uint64_t linePosInBytes = diagnostic.source.range.begin.column;
@@ -161,13 +160,25 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
                                            fileStart + offsetInBytes, lengthInBytes)));
     }
 
-    mMessageStrings.push_back(diagnostic.message);
-
-    mMessages.push_back({nullptr, nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum,
-                         linePosInBytes, offsetInBytes, lengthInBytes, linePosInUTF16,
-                         offsetInUTF16, lengthInUTF16});
+    AddMessage(
+        diagnostic.message,
+        {nullptr, nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum, linePosInBytes,
+         offsetInBytes, lengthInBytes, linePosInUTF16, offsetInUTF16, lengthInUTF16});
 
     return {};
+}
+
+void OwnedCompilationMessages::AddMessage(std::string messageString,
+                                          const WGPUCompilationMessage& message) {
+    // Cannot add messages after GetCompilationInfo has been called.
+    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
+
+    DAWN_ASSERT(message.nextInChain == nullptr);
+    // The message string won't be populated until GetCompilationInfo.
+    DAWN_ASSERT(message.message == nullptr);
+
+    mMessageStrings.push_back(messageString);
+    mMessages.push_back(message);
 }
 
 MaybeError OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnostics) {
