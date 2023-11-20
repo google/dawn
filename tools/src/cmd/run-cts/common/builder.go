@@ -124,6 +124,9 @@ func (b *Builder) Build(verbose bool) error {
 		if err != nil {
 			return fmt.Errorf("%w: %v", err, string(out))
 		}
+		if verbose {
+			fmt.Println(string(out))
+		}
 	}
 
 	return nil

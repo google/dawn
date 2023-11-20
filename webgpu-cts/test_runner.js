@@ -123,8 +123,8 @@ dataCache.setStore({
     const fullPath = getResourcePath(`cache/${path}`);
     const response = await fetch(fullPath);
     if (!response.ok) {
-      sendMessageTestLogString(`failed to load cache file: ${fullPath}`)
-      return Promise.reject(response.statusText);
+      return Promise.reject(`failed to load cache file: '${fullPath}'
+reason: ${response.statusText}`);
     }
     return new Uint8Array(await response.arrayBuffer());
   }
@@ -277,13 +277,6 @@ function sendMessageTestLog(logs) {
         'log': piece
       }));
     });
-}
-
-function sendMessageTestLogString(msg) {
-  socket.send(JSON.stringify({
-    'type': 'TEST_LOG',
-    'log': msg + "\n"
-  }));
 }
 
 function sendMessageTestFinished() {

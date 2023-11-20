@@ -89,6 +89,12 @@ foreach(file, list_from_resource_files_txt) {
 }
 
 action("copy_resources") {
+  # Note: We use a python script to perform the copy here instead of a "copy"
+  # action because of limitations of source expansions. This copy needs to:
+  # * move files to outside the target's directory
+  # * remove '/src/' from within the path
+  # * copy subdirectories.
+  # It does not seem possible to do all of these things with a source expansion.
   src_dir = "../../webgpu-cts/src/resources/"
   dst_dir = "$target_gen_dir/../../webgpu-cts/resources/"
 

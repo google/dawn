@@ -259,7 +259,6 @@ func (c *cmd) runChromeInstance(
 
 	if c.flags.Verbose {
 		chromedp.ListenTarget(runCtx, func(ev interface{}) {
-			// log.Printf("%T", ev)
 			switch ev := ev.(type) {
 			case *runtime.EventConsoleAPICalled:
 				args := make([]string, len(ev.Args))
