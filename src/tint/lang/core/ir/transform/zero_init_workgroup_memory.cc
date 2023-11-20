@@ -113,7 +113,7 @@ struct State {
         }
 
         // Process each entry point function.
-        for (auto* func : ir.functions) {
+        for (auto& func : ir.functions) {
             if (func->Stage() == Function::PipelineStage::kCompute) {
                 ProcessEntryPoint(func);
             }

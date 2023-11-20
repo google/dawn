@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/ice/ice.h"
 
 // Forward declarations
@@ -175,7 +176,7 @@ class Function : public Castable<Function, Value> {
     } return_;
 
     Vector<FunctionParam*, 1> params_;
-    ir::Block* block_ = nullptr;
+    ConstPropagatingPtr<ir::Block> block_;
 };
 
 /// @param value the enum value

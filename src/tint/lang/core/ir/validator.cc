@@ -307,13 +307,13 @@ void Validator::DisassembleIfNeeded() {
 Result<SuccessType> Validator::Run() {
     CheckRootBlock(mod_.root_block);
 
-    for (auto* func : mod_.functions) {
-        if (!all_functions_.Add(func)) {
-            AddError("function '" + Name(func) + "' added to module multiple times");
+    for (auto& func : mod_.functions) {
+        if (!all_functions_.Add(func.Get())) {
+            AddError("function '" + Name(func.Get()) + "' added to module multiple times");
         }
     }
 
-    for (auto* func : mod_.functions) {
+    for (auto& func : mod_.functions) {
         CheckFunction(func);
     }
 

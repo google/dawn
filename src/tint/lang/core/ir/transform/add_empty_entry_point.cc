@@ -38,7 +38,7 @@ namespace tint::core::ir::transform {
 namespace {
 
 void Run(ir::Module& ir) {
-    for (auto* func : ir.functions) {
+    for (auto& func : ir.functions) {
         if (func->Stage() != Function::PipelineStage::kUndefined) {
             return;
         }

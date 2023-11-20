@@ -343,7 +343,7 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     buffer_a->SetBindingPoint(0, 0);
     buffer_b->SetBindingPoint(0, 1);
     buffer_c->SetBindingPoint(0, 2);
-    auto* root = mod.root_block;
+    auto* root = mod.root_block.Get();
     root->Append(buffer_a);
     root->Append(buffer_b);
     root->Append(buffer_c);

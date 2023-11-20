@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/id/generation_id.h"
@@ -110,10 +111,10 @@ class Module {
     BlockAllocator<Value> values;
 
     /// List of functions in the program
-    Vector<Function*, 8> functions;
+    Vector<ConstPropagatingPtr<Function>, 8> functions;
 
     /// The block containing module level declarations, if any exist.
-    Block* root_block = nullptr;
+    ConstPropagatingPtr<Block> root_block;
 
     /// The symbol table for the module
     SymbolTable symbols{prog_id_};

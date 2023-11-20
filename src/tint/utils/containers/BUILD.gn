@@ -45,6 +45,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 libtint_source_set("containers") {
   sources = [
     "bitset.h",
+    "const_propagating_ptr.h",
     "containers.cc",
     "enum_set.h",
     "hashmap.h",

@@ -77,7 +77,7 @@ TEST_F(IR_FromProgramTest, Func) {
 
     ASSERT_EQ(1u, m->functions.Length());
 
-    auto* f = m->functions[0];
+    core::ir::Function* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
@@ -98,7 +98,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
 
     ASSERT_EQ(1u, m->functions.Length());
 
-    auto* f = m->functions[0];
+    core::ir::Function* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
@@ -120,7 +120,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
 
     ASSERT_EQ(1u, m->functions.Length());
 
-    auto* f = m->functions[0];
+    core::ir::Function* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
@@ -850,7 +850,7 @@ TEST_F(IR_FromProgramTest, Switch) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = swtch->Cases();
+    auto& cases = swtch->Cases();
     ASSERT_EQ(3u, cases.Length());
 
     ASSERT_EQ(1u, cases[0].selectors.Length());
@@ -901,7 +901,7 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = swtch->Cases();
+    auto& cases = swtch->Cases();
     ASSERT_EQ(1u, cases.Length());
     ASSERT_EQ(3u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<i32>>());
@@ -940,7 +940,7 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = swtch->Cases();
+    auto& cases = swtch->Cases();
     ASSERT_EQ(1u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     EXPECT_TRUE(cases[0].selectors[0].IsDefault());
@@ -973,7 +973,7 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = swtch->Cases();
+    auto& cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<i32>>());
@@ -1017,7 +1017,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = swtch->Cases();
+    auto& cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<i32>>());
@@ -1151,7 +1151,7 @@ TEST_F(IR_FromProgramTest, Requires) {
 
     ASSERT_EQ(1u, m->functions.Length());
 
-    auto* f = m->functions[0];
+    core::ir::Function* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);

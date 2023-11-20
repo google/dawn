@@ -132,7 +132,7 @@ struct State {
         for (auto* inst = *block->begin(); inst;) {  // For each instruction in 'block'
             // As we're modifying the block that we're iterating over, grab the pointer to the next
             // instruction before (potentially) moving 'inst' to another block.
-            auto* next = inst->next;
+            auto* next = inst->next.Get();
             TINT_DEFER(inst = next);
 
             if (auto* ret = inst->As<core::ir::Return>()) {
@@ -306,7 +306,7 @@ Result<SuccessType> MergeReturn(core::ir::Module& ir) {
     }
 
     // Process each function.
-    for (auto* fn : ir.functions) {
+    for (auto& fn : ir.functions) {
         State{ir}.Process(fn);
     }
 

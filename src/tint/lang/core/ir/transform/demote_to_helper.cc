@@ -66,7 +66,7 @@ struct State {
         // Check each function for discard instructions, potentially inside other functions called
         // (transitively) by the function.
         Vector<Function*, 4> to_process;
-        for (auto* func : ir.functions) {
+        for (auto& func : ir.functions) {
             // If the function contains a discard (directly or indirectly), we need to process it.
             if (HasDiscard(func)) {
                 to_process.Push(func);
@@ -161,7 +161,7 @@ struct State {
         for (auto* inst = *block->begin(); inst;) {
             // As we're (potentially) modifying the block that we're iterating over, grab a pointer
             // to the next instruction before we make any changes.
-            auto* next = inst->next;
+            auto* next = inst->next.Get();
             TINT_DEFER(inst = next);
 
             tint::Switch(

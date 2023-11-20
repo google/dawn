@@ -69,7 +69,7 @@ TEST_F(IR_SwitchTest, Clone) {
     ASSERT_TRUE(new_cond->Is<core::constant::Scalar<i32>>());
     EXPECT_EQ(1_i, new_cond->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 
-    auto cases = new_switch->Cases();
+    auto& cases = new_switch->Cases();
     ASSERT_EQ(2u, cases.Length());
 
     {

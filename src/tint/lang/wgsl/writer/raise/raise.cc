@@ -184,7 +184,7 @@ void ReplaceWorkgroupBarrier(core::ir::Module& mod, core::ir::CoreBuiltinCall* c
     // And replace with:
     //    %value = call workgroupUniformLoad %ptr
 
-    auto* load = As<core::ir::Load>(call->next);
+    auto* load = As<core::ir::Load>(call->next.Get());
     if (!load || load->From()->Type()->As<core::type::Pointer>()->AddressSpace() !=
                      core::AddressSpace::kWorkgroup) {
         // No match
@@ -192,7 +192,7 @@ void ReplaceWorkgroupBarrier(core::ir::Module& mod, core::ir::CoreBuiltinCall* c
         return;
     }
 
-    auto* post_load = As<core::ir::CoreBuiltinCall>(load->next);
+    auto* post_load = As<core::ir::CoreBuiltinCall>(load->next.Get());
     if (!post_load || post_load->Func() != core::BuiltinFn::kWorkgroupBarrier) {
         // No match
         ReplaceBuiltinFnCall(mod, call);

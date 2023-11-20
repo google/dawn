@@ -54,7 +54,7 @@ struct State {
     /// Process the module.
     void Process() {
         // Find user-declared functions that have value arguments containing matrices.
-        for (auto* func : ir.functions) {
+        for (auto& func : ir.functions) {
             for (auto* param : func->Params()) {
                 if (ContainsMatrix(param->Type())) {
                     TransformFunction(func);

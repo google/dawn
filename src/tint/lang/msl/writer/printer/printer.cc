@@ -101,7 +101,7 @@ class Printer : public tint::TextGenerator {
         EmitBlockInstructions(ir_.root_block);
 
         // Emit functions.
-        for (auto* func : ir_.functions) {
+        for (auto& func : ir_.functions) {
             EmitFunction(func);
         }
 

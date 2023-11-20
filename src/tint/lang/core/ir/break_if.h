@@ -32,6 +32,7 @@
 
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/lang/core/ir/value.h"
+#include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
@@ -79,7 +80,7 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     std::string FriendlyName() const override { return "break_if"; }
 
   private:
-    ir::Loop* loop_ = nullptr;
+    ConstPropagatingPtr<ir::Loop> loop_;
 };
 
 }  // namespace tint::core::ir

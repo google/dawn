@@ -80,7 +80,7 @@ struct State {
         }
 
         // Find function parameters that need to be replaced.
-        for (auto* func : ir.functions) {
+        for (auto& func : ir.functions) {
             for (uint32_t index = 0; index < func->Params().Length(); index++) {
                 auto* param = func->Params()[index];
                 auto* storage_texture = param->Type()->As<core::type::StorageTexture>();

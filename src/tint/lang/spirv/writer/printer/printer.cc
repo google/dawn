@@ -304,7 +304,7 @@ class Printer {
         EmitRootBlock(ir_.root_block);
 
         // Emit functions.
-        for (auto* func : ir_.functions) {
+        for (core::ir::Function* func : ir_.functions) {
             EmitFunction(func);
         }
 
@@ -2199,9 +2199,9 @@ class Printer {
     /// @returns the label ID
     uint32_t GetTerminatorBlockLabel(core::ir::Terminator* t) {
         // Walk backwards from `t` until we find a control instruction.
-        auto* inst = t->prev;
+        auto* inst = t->prev.Get();
         while (inst) {
-            auto* prev = inst->prev;
+            auto* prev = inst->prev.Get();
             if (auto* ci = inst->As<core::ir::ControlInstruction>()) {
                 // This is the last control instruction before `t`, so use its merge block label.
                 return GetMergeLabel(ci);

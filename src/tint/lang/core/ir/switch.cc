@@ -57,13 +57,13 @@ Switch* Switch::Clone(CloneContext& ctx) {
     ctx.Replace(this, new_switch);
 
     new_switch->cases_.Reserve(cases_.Length());
-    for (const auto& cse : cases_) {
+    for (auto& cse : cases_) {
         Switch::Case new_case{};
         new_case.block = ctx.ir.blocks.Create<ir::Block>();
         cse.block->CloneInto(ctx, new_case.block);
 
         new_case.selectors.Reserve(cse.selectors.Length());
-        for (const auto& sel : cse.selectors) {
+        for (auto& sel : cse.selectors) {
             auto* new_val = sel.val ? ctx.Clone(sel.val) : nullptr;
             new_case.selectors.Push(Switch::CaseSelector{new_val});
         }

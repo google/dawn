@@ -239,7 +239,8 @@ struct State {
     /// Process the module.
     void Process() {
         // Make a copy of all the functions in the IR module.
-        auto input_fns = ir.functions;
+        // Use transform to convert from ConstPropagatingPtr<Function> to Function*
+        auto input_fns = Transform<8>(ir.functions.Slice(), [](auto& fn) { return fn.Get(); });
 
         // Populate #need_forking
         GatherFnsThatNeedForking();
@@ -258,7 +259,7 @@ struct State {
     /// Populates #need_forking with all the functions that have pointer parameters which need
     /// transforming. These functions will be replaced with variants based on the access shapes.
     void GatherFnsThatNeedForking() {
-        for (auto* fn : ir.functions) {
+        for (auto& fn : ir.functions) {
             for (auto* param : fn->Params()) {
                 if (ParamNeedsTransforming(param)) {
                     need_forking.Add(fn, fn_info_allocator.Create());
@@ -271,7 +272,7 @@ struct State {
     /// Adjusts the calls of all the functions that make calls to #need_forking, which aren't in
     /// #need_forking themselves. This populates #variants_to_build with the called functions.
     void BuildRootFns() {
-        for (auto* fn : ir.functions) {
+        for (auto& fn : ir.functions) {
             if (!need_forking.Contains(fn)) {
                 TransformCalls(fn);
             }
@@ -574,7 +575,7 @@ struct State {
     /// @param input_fns the content of #ir.functions before transformation began.
     void EmitFunctions(VectorRef<Function*> input_fns) {
         ir.functions.Clear();
-        for (auto* fn : input_fns) {
+        for (auto& fn : input_fns) {
             if (auto info = need_forking.Get(fn)) {
                 fn->Destroy();
                 for (auto variant : (*info)->ordered_variants) {

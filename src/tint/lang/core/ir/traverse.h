@@ -54,7 +54,7 @@ void Traverse(Block* block, CALLBACK&& callback) {
                 callback(as_t);
             }
             if (auto* ctrl = inst->As<ControlInstruction>()) {
-                if (auto* next = inst->next) {
+                if (Instruction* next = inst->next) {
                     queue.Push(next);  // Resume iteration of this block
                 }
 
