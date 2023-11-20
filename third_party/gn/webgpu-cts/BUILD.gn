@@ -109,11 +109,11 @@ action("copy_resources") {
   script = "${dawn_root}/webgpu-cts/scripts/copy_files.py"
   args = [
     "--src_dir",
-    rebase_path(src_dir),
+    rebase_path(src_dir, root_build_dir),
     "--dst_dir",
-    rebase_path(dst_dir),
+    rebase_path(dst_dir, root_build_dir),
     "--file_list",
-    rebase_path("resource_files.txt"),
+    rebase_path("resource_files.txt", root_build_dir),
     "--stamp",
     rebase_path(outputs[0], root_build_dir),
   ]
