@@ -1,4 +1,4 @@
-# Shared Texture Memory (Experimental!)
+# Shared Texture Memory
 
 ## Overview
 
