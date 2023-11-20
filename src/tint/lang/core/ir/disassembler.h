@@ -51,14 +51,32 @@ namespace tint::core::ir {
 
 /// @returns the disassembly for the module @p mod
 /// @param mod the module to disassemble
-std::string Disassemble(Module& mod);
+std::string Disassemble(const Module& mod);
 
 /// Helper class to disassemble the IR
 class Disassembler {
   public:
+    /// A reference to an instruction's operand or result.
+    struct IndexedValue {
+        /// The instruction that is using the value;
+        const Instruction* instruction = nullptr;
+        /// The index of the operand that is the value being used.
+        size_t index = 0u;
+
+        /// @returns the hash code of the IndexedValue
+        size_t HashCode() const { return Hash(instruction, index); }
+
+        /// An equality helper for IndexedValue.
+        /// @param other the IndexedValue to compare against
+        /// @returns true if the two IndexedValues are equal
+        bool operator==(const IndexedValue& other) const {
+            return instruction == other.instruction && index == other.index;
+        }
+    };
+
     /// Constructor
     /// @param mod the module
-    explicit Disassembler(Module& mod);
+    explicit Disassembler(const Module& mod);
     ~Disassembler();
 
     /// Returns the module as a string
@@ -70,41 +88,45 @@ class Disassembler {
 
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction
-    Source InstructionSource(Instruction* inst) {
+    Source InstructionSource(const Instruction* inst) {
         return instruction_to_src_.Get(inst).value_or(Source{});
     }
 
     /// @param operand the operand to retrieve
     /// @returns the source for the operand
-    Source OperandSource(Usage operand) { return operand_to_src_.Get(operand).value_or(Source{}); }
+    Source OperandSource(IndexedValue operand) {
+        return operand_to_src_.Get(operand).value_or(Source{});
+    }
 
     /// @param result the result to retrieve
     /// @returns the source for the result
-    Source ResultSource(Usage result) { return result_to_src_.Get(result).value_or(Source{}); }
+    Source ResultSource(IndexedValue result) {
+        return result_to_src_.Get(result).value_or(Source{});
+    }
 
     /// @param blk teh block to retrieve
     /// @returns the source for the block
-    Source BlockSource(Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
+    Source BlockSource(const Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
 
     /// Stores the given @p src location for @p inst instruction
     /// @param inst the instruction to store
     /// @param src the source location
-    void SetSource(Instruction* inst, Source src) { instruction_to_src_.Add(inst, src); }
+    void SetSource(const Instruction* inst, Source src) { instruction_to_src_.Add(inst, src); }
 
     /// Stores the given @p src location for @p blk block
     /// @param blk the block to store
     /// @param src the source location
-    void SetSource(Block* blk, Source src) { block_to_src_.Add(blk, src); }
+    void SetSource(const Block* blk, Source src) { block_to_src_.Add(blk, src); }
 
     /// Stores the given @p src location for @p op operand
     /// @param op the operand to store
     /// @param src the source location
-    void SetSource(Usage op, Source src) { operand_to_src_.Add(op, src); }
+    void SetSource(IndexedValue op, Source src) { operand_to_src_.Add(op, src); }
 
     /// Stores the given @p src location for @p result
     /// @param result the result to store
     /// @param src the source location
-    void SetResultSource(Usage result, Source src) { result_to_src_.Add(result, src); }
+    void SetResultSource(IndexedValue result, Source src) { result_to_src_.Add(result, src); }
 
     /// @returns the source location for the current emission location
     Source::Location MakeCurrentLocation();
@@ -115,13 +137,13 @@ class Disassembler {
         explicit SourceMarker(Disassembler* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
         ~SourceMarker() = default;
 
-        void Store(Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
+        void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
 
-        void Store(Block* blk) { dis_->SetSource(blk, MakeSource()); }
+        void Store(const Block* blk) { dis_->SetSource(blk, MakeSource()); }
 
-        void Store(Usage operand) { dis_->SetSource(operand, MakeSource()); }
+        void Store(IndexedValue operand) { dis_->SetSource(operand, MakeSource()); }
 
-        void StoreResult(Usage result) { dis_->SetResultSource(result, MakeSource()); }
+        void StoreResult(IndexedValue result) { dis_->SetResultSource(result, MakeSource()); }
 
         Source MakeSource() const {
             return Source(Source::Range(begin_, dis_->MakeCurrentLocation()));
@@ -134,39 +156,39 @@ class Disassembler {
 
     StringStream& Indent();
 
-    size_t IdOf(Block* blk);
-    std::string IdOf(Value* node);
-    std::string NameOf(If* inst);
-    std::string NameOf(Loop* inst);
-    std::string NameOf(Switch* inst);
+    size_t IdOf(const Block* blk);
+    std::string IdOf(const Value* node);
+    std::string NameOf(const If* inst);
+    std::string NameOf(const Loop* inst);
+    std::string NameOf(const Switch* inst);
 
-    void EmitBlock(Block* blk, std::string_view comment = "");
-    void EmitFunction(Function* func);
-    void EmitParamAttributes(FunctionParam* p);
-    void EmitReturnAttributes(Function* func);
+    void EmitBlock(const Block* blk, std::string_view comment = "");
+    void EmitFunction(const Function* func);
+    void EmitParamAttributes(const FunctionParam* p);
+    void EmitReturnAttributes(const Function* func);
     void EmitBindingPoint(BindingPoint p);
     void EmitLocation(Location loc);
-    void EmitInstruction(Instruction* inst);
-    void EmitValueWithType(Instruction* val);
-    void EmitValueWithType(Value* val);
-    void EmitValue(Value* val);
-    void EmitValueList(tint::Slice<ir::Value* const> values);
-    void EmitBinary(Binary* b);
-    void EmitUnary(Unary* b);
-    void EmitTerminator(Terminator* b);
-    void EmitSwitch(Switch* s);
-    void EmitLoop(Loop* l);
-    void EmitIf(If* i);
+    void EmitInstruction(const Instruction* inst);
+    void EmitValueWithType(const Instruction* val);
+    void EmitValueWithType(const Value* val);
+    void EmitValue(const Value* val);
+    void EmitValueList(tint::Slice<const ir::Value* const> values);
+    void EmitBinary(const Binary* b);
+    void EmitUnary(const Unary* b);
+    void EmitTerminator(const Terminator* b);
+    void EmitSwitch(const Switch* s);
+    void EmitLoop(const Loop* l);
+    void EmitIf(const If* i);
     void EmitStructDecl(const core::type::Struct* str);
     void EmitLine();
-    void EmitOperand(Instruction* inst, size_t index);
-    void EmitOperandList(Instruction* inst, size_t start_index = 0);
-    void EmitInstructionName(Instruction* inst);
+    void EmitOperand(const Instruction* inst, size_t index);
+    void EmitOperandList(const Instruction* inst, size_t start_index = 0);
+    void EmitInstructionName(const Instruction* inst);
 
-    Module& mod_;
+    const Module& mod_;
     StringStream out_;
-    Hashmap<Block*, size_t, 32> block_ids_;
-    Hashmap<Value*, std::string, 32> value_ids_;
+    Hashmap<const Block*, size_t, 32> block_ids_;
+    Hashmap<const Value*, std::string, 32> value_ids_;
     Hashset<std::string, 32> ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
@@ -174,13 +196,13 @@ class Disassembler {
     uint32_t current_output_line_ = 1;
     uint32_t current_output_start_pos_ = 0;
 
-    Hashmap<Block*, Source, 8> block_to_src_;
-    Hashmap<Instruction*, Source, 8> instruction_to_src_;
-    Hashmap<Usage, Source, 8> operand_to_src_;
-    Hashmap<Usage, Source, 8> result_to_src_;
-    Hashmap<If*, std::string, 8> if_names_;
-    Hashmap<Loop*, std::string, 8> loop_names_;
-    Hashmap<Switch*, std::string, 8> switch_names_;
+    Hashmap<const Block*, Source, 8> block_to_src_;
+    Hashmap<const Instruction*, Source, 8> instruction_to_src_;
+    Hashmap<IndexedValue, Source, 8> operand_to_src_;
+    Hashmap<IndexedValue, Source, 8> result_to_src_;
+    Hashmap<const If*, std::string, 8> if_names_;
+    Hashmap<const Loop*, std::string, 8> loop_names_;
+    Hashmap<const Switch*, std::string, 8> switch_names_;
 };
 
 }  // namespace tint::core::ir

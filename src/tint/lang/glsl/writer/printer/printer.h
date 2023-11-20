@@ -45,7 +45,7 @@ namespace tint::glsl::writer {
 /// @returns the generated GLSL shader on success, or failure
 /// @param module the Tint IR module to generate
 /// @param version the GLSL version information
-Result<std::string> Print(core::ir::Module& module, const Version& version);
+Result<std::string> Print(const core::ir::Module& module, const Version& version);
 
 }  // namespace tint::glsl::writer
 

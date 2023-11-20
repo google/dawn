@@ -50,7 +50,7 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(core::ir::Module& module) : ir_(module) {}
+    explicit Printer(const core::ir::Module& module) : ir_(module) {}
 
     /// @param version the GLSL version information
     /// @returns the generated GLSL shader
@@ -84,7 +84,7 @@ class Printer : public tint::TextGenerator {
     }
 
   private:
-    core::ir::Module& ir_;
+    const core::ir::Module& ir_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
@@ -169,7 +169,7 @@ class Printer : public tint::TextGenerator {
 };
 }  // namespace
 
-Result<std::string> Print(core::ir::Module& module, const Version& version) {
+Result<std::string> Print(const core::ir::Module& module, const Version& version) {
     return Printer{module}.Generate(version);
 }
 

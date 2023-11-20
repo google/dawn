@@ -42,13 +42,13 @@ namespace tint::core::ir {
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
 /// @returns success or failure
-Result<SuccessType> Validate(Module& mod);
+Result<SuccessType> Validate(const Module& mod);
 
 /// Validates the module @p ir and dumps its contents if required by the build configuration.
 /// @param ir the module to transform
 /// @param msg the msg to accompany the output
 /// @returns success or failure
-Result<SuccessType> ValidateAndDumpIfNeeded(Module& ir, const char* msg);
+Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir, const char* msg);
 
 }  // namespace tint::core::ir
 

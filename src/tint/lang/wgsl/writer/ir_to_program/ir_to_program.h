@@ -40,7 +40,7 @@ namespace tint::wgsl::writer {
 /// @param module the IR module
 /// @return the tint::Program.
 /// @note Check the returned Program::Diagnostics() for any errors.
-Program IRToProgram(core::ir::Module& module);
+Program IRToProgram(const core::ir::Module& module);
 
 }  // namespace tint::wgsl::writer
 
