@@ -576,6 +576,7 @@ static_library("Support") {
   public_deps = [
     ":AsmParsers-def",
     ":AsmPrinters-def",
+    ":DataTypes-header",
     ":Disassemblers-def",
     ":Targets-def",
     ":abi-breaking-header",
@@ -688,10 +689,7 @@ static_library("Support") {
 
 # Common code for both llvm-tblgen and clang-tblgen
 source_set("TableGen") {
-  public_deps = [
-    ":DataTypes-header",
-    ":Support",
-  ]
+  public_deps = [ ":Support" ]
 
   sources = [
     "$dawn_dxc_dir/lib/TableGen/Error.cpp",
@@ -1145,7 +1143,6 @@ static_library("dxclib") {
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
   public_deps = [
-    ":DataTypes-header",
     ":HLSLOptions-inc",
     ":Intrinsics-td",
     ":SharedLibAffix-h",
