@@ -1,4 +1,4 @@
-# Shared Fence (Experimental!)
+# Shared Fence
 
 ## Overview
 
