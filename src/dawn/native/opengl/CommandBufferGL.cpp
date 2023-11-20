@@ -637,10 +637,6 @@ MaybeError CommandBuffer::Execute() {
                 auto& dst = copy->destination;
                 Buffer* buffer = ToBackend(src.buffer.Get());
 
-                DAWN_INVALID_IF(
-                    dst.aspect == Aspect::Stencil,
-                    "Copies to stencil textures are unsupported on the OpenGL backend.");
-
                 buffer->EnsureDataInitialized();
                 SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copy->copySize);
                 if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize, dst.mipLevel,

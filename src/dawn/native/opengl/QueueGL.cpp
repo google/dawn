@@ -70,9 +70,6 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
                                    const void* data,
                                    const TextureDataLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
-    DAWN_INVALID_IF(destination.aspect == wgpu::TextureAspect::StencilOnly,
-                    "Writes to stencil textures unsupported on the OpenGL backend.");
-
     TextureCopy textureCopy;
     textureCopy.texture = destination.texture;
     textureCopy.mipLevel = destination.mipLevel;

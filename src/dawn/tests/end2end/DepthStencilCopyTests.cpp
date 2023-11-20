@@ -962,9 +962,12 @@ class StencilCopyTests : public DepthStencilCopyTests {
     }
 
     void DoCopyToStencilTest(uint32_t bufferCopyOffset) {
-        // Copies to a single aspect are unsupported on OpenGL.
-        DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-        DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+        // TODO(crbug.com/dawn/2202): Failing on native GLES drivers due to lack of
+        // glDrawArraysInstancedBaseInstance.
+        DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && !IsANGLE());
+
+        // TODO(crbug.com/dawn/2202): Failing on ANGLE/D3D11 for unknown reasons.
+        DAWN_TEST_UNSUPPORTED_IF(IsANGLED3D11());
 
         // Create a stencil texture
         constexpr uint32_t kWidth = 4;
