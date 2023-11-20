@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-11-16 10:20:22AM
+# Last rolled: 2023-11-20 05:01:42AM
 
 # snorm / stencil8 issues
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r8snorm";dimension="1d" [ Failure ]
