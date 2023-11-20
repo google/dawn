@@ -333,10 +333,7 @@ func (g *Gerrit) SetReadyForReview(changeID, message, reviewer string) error {
 		return err
 	}
 	if reviewer != "" {
-		// Log the reviewer and then replace with enga@.
-		// TODO(crbug.com/dawn/1940): Use the actual reviewer when the bot is stable.
 		log.Printf("Got reviewer %s", reviewer)
-		reviewer = "enga@chromium.org"
 		_, resp, err = g.client.Changes.AddReviewer(changeID, &gerrit.ReviewerInput{
 			Reviewer: reviewer,
 		})
