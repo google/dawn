@@ -28,12 +28,8 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_SYNTAX_TREE_PRINTER_SYNTAX_TREE_PRINTER_H_
 #define SRC_TINT_LANG_WGSL_WRITER_SYNTAX_TREE_PRINTER_SYNTAX_TREE_PRINTER_H_
 
-#include <string>
-
 #include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/generator/text_generator.h"
-#include "src/tint/utils/text/string_stream.h"
 
 // Forward declarations
 namespace tint::core {

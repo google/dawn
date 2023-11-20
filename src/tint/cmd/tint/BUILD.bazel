@@ -102,11 +102,6 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
-    ":tint_build_spv_reader": [
-      "//src/tint/lang/spirv/reader",
-    ],
-    "//conditions:default": [],
-  }) + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_tools",
     ],

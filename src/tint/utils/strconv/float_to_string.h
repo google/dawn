@@ -30,7 +30,7 @@
 
 #include <string>
 
-namespace tint::writer {
+namespace tint::strconv {
 
 /// Converts the float `f` to a string using fixed-point notation (not
 /// scientific). The float will be printed with the full precision required to
@@ -58,6 +58,6 @@ std::string FloatToBitPreservingString(float f);
 /// @return the double f formatted to a string
 std::string DoubleToBitPreservingString(double f);
 
-}  // namespace tint::writer
+}  // namespace tint::strconv
 
 #endif  // SRC_TINT_UTILS_STRCONV_FLOAT_TO_STRING_H_

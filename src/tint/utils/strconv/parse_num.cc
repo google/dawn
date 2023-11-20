@@ -31,7 +31,7 @@
 
 #include "absl/strings/charconv.h"
 
-namespace tint {
+namespace tint::strconv {
 
 namespace {
 
@@ -108,4 +108,4 @@ Result<uint8_t, ParseNumberError> ParseUint8(std::string_view str) {
     return Parse<uint8_t>(str);
 }
 
-}  // namespace tint
+}  // namespace tint::strconv

@@ -235,7 +235,7 @@ void PrintF32(StringStream& out, float value) {
     } else if (std::isnan(value)) {
         out << "NAN";
     } else {
-        out << tint::writer::FloatToString(value) << "f";
+        out << tint::strconv::FloatToString(value) << "f";
     }
 }
 
@@ -249,7 +249,7 @@ void PrintF16(StringStream& out, float value) {
         // There is no NaN expr for half in MSL, "NAN" is of float type.
         out << "NAN";
     } else {
-        out << tint::writer::FloatToString(value) << "h";
+        out << tint::strconv::FloatToString(value) << "h";
     }
 }
 

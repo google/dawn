@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/reader/parser/lexer.h"
 
 #include <limits>
+#include <string>
 #include <tuple>
 #include <vector>
 

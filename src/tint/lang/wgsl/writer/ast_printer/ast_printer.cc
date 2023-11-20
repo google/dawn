@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
 
-#include <algorithm>
+#include <string>
 
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
@@ -263,9 +263,9 @@ void ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
             // and Inf are not allowed to be spelled in literal, it should be fine to emit f16
             // literals in this way.
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kNone) {
-                out << tint::writer::DoubleToBitPreservingString(l->value);
+                out << tint::strconv::DoubleToBitPreservingString(l->value);
             } else {
-                out << tint::writer::FloatToBitPreservingString(static_cast<float>(l->value))
+                out << tint::strconv::FloatToBitPreservingString(static_cast<float>(l->value))
                     << l->suffix;
             }
         },

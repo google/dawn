@@ -27,11 +27,9 @@
 
 #include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
 
-#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <iomanip>
-#include <set>
 #include <utility>
 #include <vector>
 
@@ -41,7 +39,6 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
-#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -54,7 +51,6 @@
 #include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
-#include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/add_empty_entry_point.h"
@@ -141,7 +137,7 @@ void PrintF32(StringStream& out, float value) {
     } else if (std::isnan(value)) {
         out << "0.0f /* nan */";
     } else {
-        out << tint::writer::FloatToString(value) << "f";
+        out << tint::strconv::FloatToString(value) << "f";
     }
 }
 
@@ -151,7 +147,7 @@ void PrintF16(StringStream& out, float value) {
     } else if (std::isnan(value)) {
         out << "0.0h /* nan */";
     } else {
-        out << tint::writer::FloatToString(value) << "h";
+        out << tint::strconv::FloatToString(value) << "h";
     }
 }
 

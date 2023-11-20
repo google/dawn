@@ -51,7 +51,7 @@ void PrintF32(StringStream& out, float value) {
     } else if (std::isnan(value)) {
         out << "0.0f /* nan */";
     } else {
-        out << tint::writer::FloatToString(value) << "f";
+        out << tint::strconv::FloatToString(value) << "f";
     }
 }
 
@@ -61,7 +61,7 @@ void PrintF16(StringStream& out, float value) {
     } else if (std::isnan(value)) {
         out << "0.0hf /* nan */";
     } else {
-        out << tint::writer::FloatToString(value) << "hf";
+        out << tint::strconv::FloatToString(value) << "hf";
     }
 }
 

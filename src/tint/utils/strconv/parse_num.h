@@ -28,16 +28,13 @@
 #ifndef SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_
 #define SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_
 
-#include <optional>
-#include <string>
-
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/result/result.h"
 
-namespace tint {
+namespace tint::strconv {
 
 /// Error returned by the number parsing functions
-enum class ParseNumberError {
+enum class ParseNumberError : uint8_t {
     /// The number was unparsable
     kUnparsable,
     /// The parsed number is not representable by the target datatype
@@ -141,6 +138,6 @@ inline Result<T, ParseNumberError> ParseNumber(std::string_view str) {
 /// Re-enables the unreachable-code compiler warnings
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 
-}  // namespace tint
+}  // namespace tint::strconv
 
 #endif  // SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_

@@ -27,10 +27,7 @@
 
 #include "src/tint/lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.h"
 
-#include <algorithm>
-
 #include "src/tint/lang/core/texel_format.h"
-#include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
@@ -82,7 +79,6 @@
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
@@ -263,9 +259,10 @@ void SyntaxTreePrinter::EmitLiteral(const ast::LiteralExpression* lit) {
                 // NaN and Inf are not allowed to be spelled in literal, it should be fine to emit
                 // f16 literals in this way.
                 if (l->suffix == ast::FloatLiteralExpression::Suffix::kNone) {
-                    Line() << tint::writer::DoubleToBitPreservingString(l->value);
+                    Line() << tint::strconv::DoubleToBitPreservingString(l->value);
                 } else {
-                    Line() << tint::writer::FloatToBitPreservingString(static_cast<float>(l->value))
+                    Line() << tint::strconv::FloatToBitPreservingString(
+                                  static_cast<float>(l->value))
                            << l->suffix;
                 }
             },

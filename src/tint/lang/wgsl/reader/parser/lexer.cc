@@ -31,11 +31,10 @@
 #include <charconv>
 #include <cmath>
 #include <cstring>
-#include <functional>
 #include <limits>
 #include <optional>
+#include <string>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
@@ -430,9 +429,9 @@ std::optional<Token> Lexer::try_float() {
         end_ptr = &at(length() - 1) + 1;
     }
 
-    auto ret = tint::ParseDouble(std::string_view(&at(start), end - start));
+    auto ret = tint::strconv::ParseDouble(std::string_view(&at(start), end - start));
     double value = ret ? ret.Get() : 0.0;
-    bool overflow = !ret && ret.Failure() == tint::ParseNumberError::kResultOutOfRange;
+    bool overflow = !ret && ret.Failure() == tint::strconv::ParseNumberError::kResultOutOfRange;
 
     // If the value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an
     // error.

@@ -282,13 +282,13 @@ class ValueOption : public Option {
         auto arg = arguments.front();
 
         if constexpr (is_number) {
-            auto result = ParseNumber<T>(arg);
+            auto result = strconv::ParseNumber<T>(arg);
             if (result) {
                 value = result.Get();
                 arguments.pop_front();
                 return Success;
             }
-            if (result.Failure() == ParseNumberError::kResultOutOfRange) {
+            if (result.Failure() == strconv::ParseNumberError::kResultOutOfRange) {
                 return ErrInvalidArgument(arg, "value out of range");
             }
             return ErrInvalidArgument(arg, "failed to parse value");

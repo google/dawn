@@ -29,14 +29,12 @@
 
 #include <cmath>
 #include <cstring>
-#include <functional>
 #include <iomanip>
-#include <limits>
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::writer {
+namespace tint::strconv {
 
 namespace {
 
@@ -187,4 +185,4 @@ std::string DoubleToBitPreservingString(double f) {
     return ToBitPreservingString(f);
 }
 
-}  // namespace tint::writer
+}  // namespace tint::strconv

@@ -34,7 +34,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/utils/memory/bitcast.h"
 
-namespace tint::writer {
+namespace tint::strconv {
 namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -345,4 +345,4 @@ TEST(DoubleToBitPreservingStringTest, NaN) {
 }
 
 }  // namespace
-}  // namespace tint::writer
+}  // namespace tint::strconv

@@ -108,12 +108,6 @@ if(TINT_BUILD_MSL_WRITER)
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if(TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
-    tint_lang_spirv_reader
-  )
-endif(TINT_BUILD_SPV_READER)
-
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_cmd_tint_cmd cmd
     "spirv-tools"

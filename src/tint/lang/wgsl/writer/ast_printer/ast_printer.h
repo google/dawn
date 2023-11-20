@@ -28,10 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_AST_PRINTER_H_
 #define SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_AST_PRINTER_H_
 
-#include <string>
-
 #include "src/tint/lang/core/binary_op.h"
-#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/text/string_stream.h"
 
