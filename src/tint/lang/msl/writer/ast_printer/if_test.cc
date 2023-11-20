@@ -32,6 +32,7 @@ namespace {
 
 using MslASTPrinterTest = TestHelper;
 
+// MSLPrinterTest.If
 TEST_F(MslASTPrinterTest, Emit_If) {
     auto* cond = Var("cond", ty.bool_());
     auto* i = If(cond, Block(Return()));
@@ -48,6 +49,7 @@ TEST_F(MslASTPrinterTest, Emit_If) {
 )");
 }
 
+// MSLPrinterTest.IfWithElseIf
 TEST_F(MslASTPrinterTest, Emit_IfWithElseIf) {
     auto* cond = Var("cond", ty.bool_());
     auto* else_cond = Var("else_cond", ty.bool_());
@@ -69,6 +71,7 @@ TEST_F(MslASTPrinterTest, Emit_IfWithElseIf) {
 )");
 }
 
+// MSLPrinterTest.IfWithElse
 TEST_F(MslASTPrinterTest, Emit_IfWithElse) {
     auto* cond = Var("cond", ty.bool_());
     auto* i = If(cond, Block(Return()), Else(Block(Return())));
@@ -87,6 +90,7 @@ TEST_F(MslASTPrinterTest, Emit_IfWithElse) {
 )");
 }
 
+// TODO(dj2): Port to MSLPrinterTest
 TEST_F(MslASTPrinterTest, Emit_IfWithMultiple) {
     auto* cond = Var("cond", ty.bool_());
     auto* else_cond = Var("else_cond", ty.bool_());

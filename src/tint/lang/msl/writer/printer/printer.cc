@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -242,6 +243,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Return* r) { EmitReturn(r); },         //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
+                [&](core::ir::Discard*) { EmitDiscard(); },          //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -425,6 +427,9 @@ class Printer : public tint::TextGenerator {
 
     /// Emit an unreachable instruction
     void EmitUnreachable() { Line() << "/* unreachable */"; }
+
+    /// Emit a discard instruction
+    void EmitDiscard() { Line() << "discard_fragment();"; }
 
     /// Handles generating a address space
     /// @param out the output of the type stream

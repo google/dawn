@@ -29,6 +29,8 @@
 #include "src/tint/lang/msl/writer/ast_printer/helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
+// All ported to IR.
+
 using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::msl::writer {
@@ -44,6 +46,8 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
     out << str.str();
     return out;
 }
+
+// MSLPrinterBinaryTest.Emit
 using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
     auto params = GetParam();
@@ -89,6 +93,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left / right)", core::BinaryOp::kDivide},
                     BinaryData{"(left % right)", core::BinaryOp::kModulo}));
 
+// MSLPrinterBinaryTest_SignedOverflowDefinedBehaviour.Emit
 using MslBinaryTest_SignedOverflowDefinedBehaviour = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
     auto params = GetParam();
@@ -122,6 +127,7 @@ INSTANTIATE_TEST_SUITE_P(MslASTPrinterTest,
                          MslBinaryTest_SignedOverflowDefinedBehaviour,
                          testing::ValuesIn(signed_overflow_defined_behaviour_cases));
 
+// MSLPrinterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained.Emit
 using MslBinaryTest_SignedOverflowDefinedBehaviour_Chained = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
     auto params = GetParam();
@@ -160,6 +166,7 @@ INSTANTIATE_TEST_SUITE_P(MslASTPrinterTest,
                          MslBinaryTest_SignedOverflowDefinedBehaviour_Chained,
                          testing::ValuesIn(signed_overflow_defined_behaviour_chained_cases));
 
+// MslPrinterTest.BinaryModF32
 TEST_F(MslBinaryTest, ModF32) {
     auto* left = Var("left", ty.f32());
     auto* right = Var("right", ty.f32());
@@ -173,6 +180,7 @@ TEST_F(MslBinaryTest, ModF32) {
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
+// MslPrinterTest.BinaryModF16
 TEST_F(MslBinaryTest, ModF16) {
     Enable(wgsl::Extension::kF16);
 
@@ -188,6 +196,7 @@ TEST_F(MslBinaryTest, ModF16) {
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
+// MslBinaryTest.BinaryModVecF32
 TEST_F(MslBinaryTest, ModVec3F32) {
     auto* left = Var("left", ty.vec3<f32>());
     auto* right = Var("right", ty.vec3<f32>());
@@ -201,6 +210,7 @@ TEST_F(MslBinaryTest, ModVec3F32) {
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
+// MslPrinterTest.BinaryModVec3F16
 TEST_F(MslBinaryTest, ModVec3F16) {
     Enable(wgsl::Extension::kF16);
 
@@ -216,6 +226,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
+// MslPrinterTest.BinaryBoolAnd
 TEST_F(MslBinaryTest, BoolAnd) {
     auto* left = Var("left", Expr(true));
     auto* right = Var("right", Expr(false));
@@ -229,6 +240,7 @@ TEST_F(MslBinaryTest, BoolAnd) {
     EXPECT_EQ(out.str(), "bool(left & right)");
 }
 
+// MslPrinterTest.BinaryBoolOr
 TEST_F(MslBinaryTest, BoolOr) {
     auto* left = Var("left", Expr(true));
     auto* right = Var("right", Expr(false));

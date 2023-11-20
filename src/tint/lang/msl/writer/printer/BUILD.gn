@@ -80,6 +80,7 @@ if (tint_build_unittests) {
       sources = [
         "binary_test.cc",
         "constant_test.cc",
+        "discard_test.cc",
         "function_test.cc",
         "helper_test.h",
         "if_test.cc",

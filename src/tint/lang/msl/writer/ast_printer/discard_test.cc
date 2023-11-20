@@ -32,6 +32,7 @@ namespace {
 
 using MslASTPrinterTest = TestHelper;
 
+// MslPrinterTest.Discard
 TEST_F(MslASTPrinterTest, Emit_Discard) {
     auto* stmt = Discard();
 

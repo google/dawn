@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/ast_printer/helper_test.h"
+#include "src/tint/lang/msl/writer/printer/helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {
 
-// All ported to IR tests
+TEST_F(MslPrinterTest, Discard) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] {
+            b.Discard();
+            b.ExitIf(if_);
+        });
+        b.Return(func);
+    });
 
-using MslASTPrinterTest = TestHelper;
-
-// MslPrinterTest.Return
-TEST_F(MslASTPrinterTest, Emit_Return) {
-    auto* r = Return();
-    WrapInFunction(r);
-
-    ASTPrinter& gen = Build();
-
-    gen.IncrementIndent();
-
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), "  return;\n");
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+void foo() {
+  if (true) {
+    discard_fragment();
+  }
 }
-
-// MslPrinterTest.ReturnWithValue
-TEST_F(MslASTPrinterTest, Emit_ReturnWithValue) {
-    auto* r = Return(123_i);
-    Func("f", tint::Empty, ty.i32(), Vector{r});
-
-    ASTPrinter& gen = Build();
-
-    gen.IncrementIndent();
-
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), "  return 123;\n");
+)");
 }
 
 }  // namespace
