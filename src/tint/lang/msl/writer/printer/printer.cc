@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
+#include "src/tint/lang/core/ir/ice.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
@@ -332,7 +333,7 @@ class Printer : public tint::TextGenerator {
                 out << "threadgroup ";
                 break;
             default:
-                TINT_ICE() << "unhandled variable address space";
+                TINT_IR_ICE(ir_) << "unhandled variable address space";
                 return;
         }
 
@@ -451,7 +452,7 @@ class Printer : public tint::TextGenerator {
                 out << "constant";
                 break;
             default:
-                TINT_ICE() << "unhandled address space: " << sc;
+                TINT_IR_ICE(ir_) << "unhandled address space: " << sc;
                 break;
         }
     }
@@ -524,7 +525,7 @@ class Printer : public tint::TextGenerator {
         } else {
             auto count = arr->ConstantCount();
             if (!count) {
-                TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
+                TINT_IR_ICE(ir_) << core::type::Array::kErrExpectedConstantCount;
                 return;
             }
             out << count.value();
@@ -556,7 +557,7 @@ class Printer : public tint::TextGenerator {
     /// @param tex the texture to emit
     void EmitTextureType(StringStream& out, const core::type::Texture* tex) {
         if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
-            TINT_ICE() << "Multiplanar external texture transform was not run.";
+            TINT_IR_ICE(ir_) << "Multiplanar external texture transform was not run.";
             return;
         }
 
@@ -586,7 +587,7 @@ class Printer : public tint::TextGenerator {
                 out << "cube_array";
                 break;
             default:
-                TINT_ICE() << "invalid texture dimensions";
+                TINT_IR_ICE(ir_) << "invalid texture dimensions";
                 return;
         }
         if (tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>()) {
@@ -609,7 +610,7 @@ class Printer : public tint::TextGenerator {
                 } else if (storage->access() == core::Access::kWrite) {
                     out << "access::write";
                 } else {
-                    TINT_ICE() << "invalid access control for storage texture";
+                    TINT_IR_ICE(ir_) << "invalid access control for storage texture";
                     return;
                 }
             },
@@ -671,8 +672,8 @@ class Printer : public tint::TextGenerator {
             if (is_host_shareable) {
                 if (TINT_UNLIKELY(ir_offset < msl_offset)) {
                     // Unimplementable layout
-                    TINT_ICE() << "Structure member offset (" << ir_offset
-                               << ") is behind MSL offset (" << msl_offset << ")";
+                    TINT_IR_ICE(ir_) << "Structure member offset (" << ir_offset
+                                     << ") is behind MSL offset (" << msl_offset << ")";
                     return;
                 }
 
@@ -696,7 +697,7 @@ class Printer : public tint::TextGenerator {
             if (auto builtin = attributes.builtin) {
                 auto name = BuiltinToAttribute(builtin.value());
                 if (name.empty()) {
-                    TINT_ICE() << "unknown builtin";
+                    TINT_IR_ICE(ir_) << "unknown builtin";
                     return;
                 }
                 out << " [[" << name << "]]";
@@ -705,7 +706,7 @@ class Printer : public tint::TextGenerator {
             if (auto location = attributes.location) {
                 auto& pipeline_stage_uses = str->PipelineStageUses();
                 if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
-                    TINT_ICE() << "invalid entry point IO struct uses";
+                    TINT_IR_ICE(ir_) << "invalid entry point IO struct uses";
                     return;
                 }
 
@@ -721,7 +722,7 @@ class Printer : public tint::TextGenerator {
                                core::type::PipelineStageUsage::kFragmentOutput))) {
                     out << " [[color(" + std::to_string(location.value()) + ")]]";
                 } else {
-                    TINT_ICE() << "invalid use of location decoration";
+                    TINT_IR_ICE(ir_) << "invalid use of location decoration";
                     return;
                 }
             }
@@ -729,7 +730,7 @@ class Printer : public tint::TextGenerator {
             if (auto interpolation = attributes.interpolation) {
                 auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
                 if (name.empty()) {
-                    TINT_ICE() << "unknown interpolation attribute";
+                    TINT_IR_ICE(ir_) << "unknown interpolation attribute";
                     return;
                 }
                 out << " [[" << name << "]]";
@@ -746,9 +747,9 @@ class Printer : public tint::TextGenerator {
                 // Calculate new MSL offset
                 auto size_align = MslPackedTypeSizeAndAlign(ty);
                 if (TINT_UNLIKELY(msl_offset % size_align.align)) {
-                    TINT_ICE() << "Misaligned MSL structure member " << mem_name << " : "
-                               << ty->FriendlyName() << " offset: " << msl_offset
-                               << " align: " << size_align.align;
+                    TINT_IR_ICE(ir_) << "Misaligned MSL structure member " << mem_name << " : "
+                                     << ty->FriendlyName() << " offset: " << msl_offset
+                                     << " align: " << size_align.align;
                     return;
                 }
                 msl_offset += size_align.size;
@@ -816,7 +817,7 @@ class Printer : public tint::TextGenerator {
 
                 auto count = a->ConstantCount();
                 if (!count) {
-                    TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
+                    TINT_IR_ICE(ir_) << core::type::Array::kErrExpectedConstantCount;
                     return;
                 }
                 emit_values(*count);
@@ -903,8 +904,8 @@ class Printer : public tint::TextGenerator {
             [&](Default) -> ExprAndPtrKind {
                 auto lookup = bindings_.Find(value);
                 if (TINT_UNLIKELY(!lookup)) {
-                    TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
-                               << ") value has no expression";
+                    TINT_IR_ICE(ir_) << "Expr(" << (value ? value->TypeInfo().name : "null")
+                                     << ") value has no expression";
                     return {};
                 }
 
@@ -926,10 +927,10 @@ class Printer : public tint::TextGenerator {
                         }
 
                         if constexpr (std::is_same_v<T, ConsumedValue>) {
-                            TINT_ICE() << "Expr(" << value->TypeInfo().name
-                                       << ") called twice on the same value";
+                            TINT_IR_ICE(ir_) << "Expr(" << value->TypeInfo().name
+                                             << ") called twice on the same value";
                         } else {
-                            TINT_ICE()
+                            TINT_IR_ICE(ir_)
                                 << "Expr(" << value->TypeInfo().name << ") has unhandled value";
                         }
                         return {};
@@ -999,7 +1000,7 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+        TINT_IR_ICE(ir_) << "Bind(" << value->TypeInfo().name << ") called twice for same value";
     }
 
     /// Associates an IR value the 'var', 'let' or parameter of the given name
@@ -1011,7 +1012,8 @@ class Printer : public tint::TextGenerator {
 
         bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
         if (TINT_UNLIKELY(!added)) {
-            TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+            TINT_IR_ICE(ir_) << "Bind(" << value->TypeInfo().name
+                             << ") called twice for same value";
         }
     }
 
