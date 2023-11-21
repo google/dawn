@@ -59,6 +59,7 @@
 #include "dawn/native/d3d11/SharedTextureMemoryD3D11.h"
 #include "dawn/native/d3d11/SwapChainD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
+#include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -120,6 +121,8 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     DAWN_TRY_ASSIGN(mD3d11Device, ToBackend(GetPhysicalDevice())->CreateD3D11Device());
     DAWN_ASSERT(mD3d11Device != nullptr);
+
+    mIsDebugLayerEnabled = IsDebugLayerEnabled(mD3d11Device);
 
     DAWN_TRY(DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue)));
 
@@ -418,7 +421,7 @@ MaybeError Device::WaitForIdleForDestruction() {
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!mIsDebugLayerEnabled) {
         return {};
     }
 

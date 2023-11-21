@@ -36,6 +36,7 @@
 #include "dawn/native/d3d11/BackendD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
+#include "dawn/native/d3d11/UtilsD3D11.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -72,11 +73,6 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
 
     return CheckHRESULT(infoQueue->PushStorageFilter(&filter),
                         "D3D11 InfoQueue pushing storage filter");
-}
-
-bool IsDebugLayerEnabled(const ComPtr<ID3D11Device>& d3d11Device) {
-    ComPtr<ID3D11Debug> d3d11Debug;
-    return SUCCEEDED(d3d11Device.As(&d3d11Debug));
 }
 
 }  // namespace

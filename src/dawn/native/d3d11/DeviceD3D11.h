@@ -156,6 +156,7 @@ class Device final : public d3d::Device {
     HANDLE mFenceEvent = nullptr;
 
     ComPtr<ID3D11Device> mD3d11Device;
+    bool mIsDebugLayerEnabled = false;
     ComPtr<ID3D11Device5> mD3d11Device5;
     CommandRecordingContext mPendingCommands;
     SerialQueue<ExecutionSerial, ComPtr<IUnknown>> mUsedComObjectRefs;

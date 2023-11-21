@@ -76,4 +76,9 @@ void SetDebugName(Device* device,
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
 }
 
+bool IsDebugLayerEnabled(const ComPtr<ID3D11Device>& d3d11Device) {
+    ComPtr<ID3D11Debug> d3d11Debug;
+    return SUCCEEDED(d3d11Device.As(&d3d11Debug));
+}
+
 }  // namespace dawn::native::d3d11
