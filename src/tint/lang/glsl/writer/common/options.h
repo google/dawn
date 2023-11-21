@@ -61,9 +61,6 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
-    /// Set to `true` to generate GLSL via the Tint IR instead of from the AST.
-    bool use_tint_ir = false;
-
     /// The GLSL version to emit
     Version version;
 

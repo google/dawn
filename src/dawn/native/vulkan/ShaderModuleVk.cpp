@@ -190,6 +190,7 @@ ShaderModule::~ShaderModule() = default;
     X(std::string_view, entryPointName)                                                          \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
+    X(bool, use_tint_ir)                                                                         \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -324,7 +325,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // transform as unsized arrays can only be declared on storage address space.
     req.tintOptions.disable_runtime_sized_array_index_clamping =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
-    req.tintOptions.use_tint_ir = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
+    req.use_tint_ir = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
 
     // Set subgroup uniform control flow flag for subgroup experiment, if device has
     // Chromium-experimental-subgroup-uniform-control-flow feature. (dawn:464)
@@ -400,7 +401,17 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
-            auto tintResult = tint::spirv::writer::Generate(program, r.tintOptions);
+            tint::Result<tint::spirv::writer::Output> tintResult;
+            if (r.use_tint_ir) {
+                // Convert the AST program to an IR module.
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                DAWN_INVALID_IF(!ir, "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason.str());
+
+                tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
+            } else {
+                tintResult = tint::spirv::writer::Generate(program, r.tintOptions);
+            }
             DAWN_INVALID_IF(!tintResult, "An error occurred while generating SPIR-V\n%s",
                             tintResult.Failure().reason.str());
 

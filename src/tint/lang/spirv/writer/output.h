@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,10 @@ struct Output {
 
     /// Copy constructor
     Output(const Output&);
+
+    /// Copy assignment
+    /// @returns this
+    Output& operator=(const Output&);
 
     /// The generated SPIR-V.
     std::vector<uint32_t> spirv;

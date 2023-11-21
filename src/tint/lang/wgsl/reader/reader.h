@@ -49,6 +49,15 @@ Program Parse(const Source::File* file, const Options& options = {});
 /// @returns the resulting IR module, or failure
 Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options = {});
 
+/// Builds a core-dialect core::ir::Module from the given Program
+/// @param program the Program to use.
+/// @returns the core-dialect IR module.
+///
+/// @note this assumes the `program.IsValid()`, and has had const-eval done so
+/// any abstract values have been calculated and converted into the relevant
+/// concrete types.
+tint::Result<core::ir::Module> ProgramToLoweredIR(const Program& program);
+
 }  // namespace tint::wgsl::reader
 
 #endif  // SRC_TINT_LANG_WGSL_READER_READER_H_

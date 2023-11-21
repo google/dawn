@@ -51,13 +51,11 @@ cc_library(
     "//src/tint/api/options",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/glsl/writer/raise",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -78,11 +76,6 @@ cc_library(
       "//src/tint/lang/glsl/writer/ast_printer",
       "//src/tint/lang/glsl/writer/common",
       "//src/tint/lang/glsl/writer/printer",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/reader/program_to_ir",
     ],
     "//conditions:default": [],
   }),
@@ -134,10 +127,5 @@ cc_library(
 alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
-)
-
-alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
 )
 

@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,59 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <string>
-
-#include "src/tint/cmd/bench/bench.h"
-#include "src/tint/lang/spirv/writer/writer.h"
-
-#if TINT_BUILD_WGSL_READER
-#include "src/tint/lang/wgsl/reader/reader.h"
-#endif  // TINT_BUILD_WGSL_READER
+#include "src/tint/lang/spirv/writer/output.h"
 
 namespace tint::spirv::writer {
-namespace {
 
-void GenerateSPIRV(benchmark::State& state, std::string input_name) {
-    auto res = bench::LoadProgram(input_name);
-    if (!res) {
-        state.SkipWithError(res.Failure().reason.str());
-        return;
-    }
-    for (auto _ : state) {
-        auto gen_res = Generate(res->program, {});
-        if (!gen_res) {
-            state.SkipWithError(gen_res.Failure().reason.str());
-        }
-    }
-}
+Output::Output() = default;
 
-void GenerateSPIRV_UseIR(benchmark::State& state, std::string input_name) {
-#if TINT_BUILD_WGSL_READER
-    auto res = bench::LoadProgram(input_name);
-    if (!res) {
-        state.SkipWithError(res.Failure().reason.str());
-        return;
-    }
-    for (auto _ : state) {
-        // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
-        if (!ir) {
-            state.SkipWithError(ir.Failure().reason.str());
-            return;
-        }
+Output::~Output() = default;
 
-        auto gen_res = Generate(ir.Get(), {});
-        if (!gen_res) {
-            state.SkipWithError(gen_res.Failure().reason.str());
-        }
-    }
-#else
-#error "WGSL Reader is required to build IR generator"
-#endif  // TINT_BUILD_WGSL_READER
-}
+Output::Output(const Output&) = default;
 
-TINT_BENCHMARK_PROGRAMS(GenerateSPIRV);
-TINT_BENCHMARK_PROGRAMS(GenerateSPIRV_UseIR);
+Output& Output::operator=(const Output&) = default;
 
-}  // namespace
 }  // namespace tint::spirv::writer

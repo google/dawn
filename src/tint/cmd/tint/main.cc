@@ -634,9 +634,20 @@ bool GenerateSpirv(const tint::Program& program, const Options& options) {
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
-    gen_options.use_tint_ir = options.use_ir;
 
-    auto result = tint::spirv::writer::Generate(program, gen_options);
+    tint::Result<tint::spirv::writer::Output> result;
+    if (options.use_ir) {
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+        if (!ir) {
+            std::cerr << "Failed to generate IR: " << ir << "\n";
+            return false;
+        }
+        result = tint::spirv::writer::Generate(ir.Get(), gen_options);
+    } else {
+        result = tint::spirv::writer::Generate(program, gen_options);
+    }
+
     if (!result) {
         tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
@@ -747,7 +758,6 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
 
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::msl::writer::Options gen_options;
-    gen_options.use_tint_ir = options.use_ir;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_options = options.pixel_local_options;
@@ -757,7 +767,20 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
                                                                           0);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
                                                                           1);
-    auto result = tint::msl::writer::Generate(*input_program, gen_options);
+
+    tint::Result<tint::msl::writer::Output> result;
+    if (options.use_ir) {
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+        if (!ir) {
+            std::cerr << "Failed to generate IR: " << ir << "\n";
+            return false;
+        }
+        result = tint::msl::writer::Generate(ir.Get(), gen_options);
+    } else {
+        result = tint::msl::writer::Generate(*input_program, gen_options);
+    }
+
     if (!result) {
         tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";

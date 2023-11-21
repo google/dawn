@@ -364,12 +364,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
         case OutputFormat::kMSL: {
 #if TINT_BUILD_MSL_WRITER
-            // TODO(crbug.com/tint/1967): Skip fuzzing of the IR version of the MSL writer, which is
-            // still under construction.
-            if (options_msl_.use_tint_ir) {
-                return 0;
-            }
-
             // Remap resource numbers to a flat namespace.
             // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
             if (auto flattened = tint::wgsl::FlattenBindings(program)) {

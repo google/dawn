@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/lang/spirv/writer/output.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -41,6 +42,13 @@ class Program;
 }
 
 namespace tint::spirv::writer {
+
+/// Generate SPIR-V for a program, according to a set of configuration options.
+/// The result will contain the SPIR-V or failure.
+/// @param ir the IR module to translate to SPIR-V
+/// @param options the configuration options to use when generating SPIR-V
+/// @returns the resulting SPIR-V and supplementary information, or failure.
+Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
 /// Generate SPIR-V for a program, according to a set of configuration options.
 /// The result will contain the SPIR-V or failure.

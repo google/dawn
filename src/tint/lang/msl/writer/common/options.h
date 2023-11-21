@@ -130,9 +130,6 @@ struct Options {
     /// for all vertex shaders in the module.
     bool emit_vertex_point_size = false;
 
-    /// Set to `true` to generate MSL via the Tint IR instead of from the AST.
-    bool use_tint_ir = false;
-
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
     uint32_t buffer_size_ubo_index = 30;
@@ -155,7 +152,6 @@ struct Options {
     TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
                  emit_vertex_point_size,
-                 use_tint_ir,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_options,

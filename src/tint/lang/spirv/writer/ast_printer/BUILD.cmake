@@ -130,6 +130,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_ast_printer_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast

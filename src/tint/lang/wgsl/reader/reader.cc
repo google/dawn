@@ -55,4 +55,19 @@ Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& optio
     return module;
 }
 
+tint::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
+    auto ir = tint::wgsl::reader::ProgramToIR(program);
+    if (!ir) {
+        return ir.Failure();
+    }
+
+    // Lower from WGSL-dialect to core-dialect
+    auto res = tint::wgsl::reader::Lower(ir.Get());
+    if (!res) {
+        return res.Failure();
+    }
+
+    return ir;
+}
+
 }  // namespace tint::wgsl::reader

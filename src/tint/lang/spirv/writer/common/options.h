@@ -138,9 +138,6 @@ struct Options {
     /// Set to `true` to always pass matrices to user functions by pointer instead of by value.
     bool pass_matrix_by_pointer = false;
 
-    /// Set to `true` to generate SPIR-V via the Tint IR instead of from the AST.
-    bool use_tint_ir = false;
-
     /// Set to `true` to require `SPV_KHR_subgroup_uniform_control_flow` extension and
     /// `SubgroupUniformControlFlowKHR` execution mode for compute stage entry points in generated
     /// SPIRV module. Issue: dawn:464
@@ -157,7 +154,6 @@ struct Options {
                  use_zero_initialize_workgroup_memory_extension,
                  emit_vertex_point_size,
                  clamp_frag_depth,
-                 use_tint_ir,
                  experimental_require_subgroup_uniform_control_flow,
                  bindings);
 };

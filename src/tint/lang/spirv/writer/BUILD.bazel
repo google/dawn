@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "writer",
   srcs = [
+    "output.cc",
     "writer.cc",
   ],
   hdrs = [
@@ -55,7 +56,6 @@ cc_library(
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -81,11 +81,6 @@ cc_library(
       "//src/tint/lang/spirv/writer/common",
       "//src/tint/lang/spirv/writer/printer",
       "//src/tint/lang/spirv/writer/raise",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/reader/program_to_ir",
     ],
     "//conditions:default": [],
   }),
@@ -167,9 +162,11 @@ cc_library(
     "//src/tint/cmd/bench:bench",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
+    "//src/tint/lang/wgsl/common",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
@@ -190,6 +187,11 @@ cc_library(
     ":tint_build_spv_writer": [
       "//src/tint/lang/spirv/writer",
       "//src/tint/lang/spirv/writer/common",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/reader",
     ],
     "//conditions:default": [],
   }),

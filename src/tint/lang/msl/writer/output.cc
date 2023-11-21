@@ -35,4 +35,6 @@ Output::~Output() = default;
 
 Output::Output(const Output&) = default;
 
+Output& Output::operator=(const Output&) = default;
+
 }  // namespace tint::msl::writer

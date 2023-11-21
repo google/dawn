@@ -39,8 +39,18 @@
 namespace tint {
 class Program;
 }  // namespace tint
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
 namespace tint::msl::writer {
+
+/// Generate MSL for a program, according to a set of configuration options.
+/// The result will contain the MSL and supplementary information, or failure.
+/// @param ir the IR module to translate to MSL
+/// @param options the configuration options to use when generating MSL
+/// @returns the resulting MSL and supplementary information, or failure
+Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
 /// Generate MSL for a program, according to a set of configuration options.
 /// The result will contain the MSL and supplementary information, or failure.
