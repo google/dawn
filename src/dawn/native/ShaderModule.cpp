@@ -564,7 +564,7 @@ MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                              device, layout, entryPoint.stage, bindingId, bindingInfo),
                          "validating that the entry-point's declaration for @group(%u) "
                          "@binding(%u) matches %s",
-                         static_cast<uint32_t>(group), static_cast<uint32_t>(bindingId), layout);
+                         group, bindingId, layout);
     }
 
     return {};
@@ -1108,15 +1108,15 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         DAWN_TRY_CONTEXT(ValidateCompatibilityWithBindGroupLayout(
                              device, group, entryPoint, layout->GetBindGroupLayout(group)),
-                         "validating the entry-point's compatibility for group %u with %s",
-                         static_cast<uint32_t>(group), layout->GetBindGroupLayout(group));
+                         "validating the entry-point's compatibility for group %u with %s", group,
+                         layout->GetBindGroupLayout(group));
     }
 
     for (BindGroupIndex group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
         DAWN_INVALID_IF(entryPoint.bindings[group].size() > 0,
                         "The entry-point uses bindings in group %u but %s doesn't have a "
                         "BindGroupLayout for this index",
-                        static_cast<uint32_t>(group), layout);
+                        group, layout);
     }
 
     // Validate that filtering samplers are not used with unfilterable textures.
@@ -1155,9 +1155,8 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
             textureInfo.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat,
             "Texture binding (group:%u, binding:%u) is %s but used statically with a sampler "
             "(group:%u, binding:%u) that's %s",
-            static_cast<uint32_t>(pair.texture.group), static_cast<uint32_t>(pair.texture.binding),
-            wgpu::TextureSampleType::UnfilterableFloat, static_cast<uint32_t>(pair.sampler.group),
-            static_cast<uint32_t>(pair.sampler.binding), wgpu::SamplerBindingType::Filtering);
+            pair.texture.group, pair.texture.binding, wgpu::TextureSampleType::UnfilterableFloat,
+            pair.sampler.group, pair.sampler.binding, wgpu::SamplerBindingType::Filtering);
     }
 
     // Validate compatibility of the pixel local storage.

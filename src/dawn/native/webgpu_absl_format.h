@@ -32,10 +32,15 @@
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/webgpu_absl_format_autogen.h"
 
+namespace dawn::detail {
+template <typename Tag, typename T>
+class TypedIntegerImpl;
+}  // namespace dawn::detail
+
 namespace dawn::ityp {
 template <typename Index, typename Value>
 class span;
-}
+}  // namespace dawn::ityp
 
 namespace dawn::native {
 
@@ -187,6 +192,15 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         first = false;
     }
     s->Append("]");
+    return {true};
+}
+
+template <typename Tag, typename T>
+absl::FormatConvertResult<absl::FormatConversionCharSet::kNumeric> AbslFormatConvert(
+    const dawn::detail::TypedIntegerImpl<Tag, T>& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("%u", static_cast<T>(value)));
     return {true};
 }
 

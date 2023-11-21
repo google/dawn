@@ -272,11 +272,11 @@ MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
     DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
                     "Bind group layout index (%u) exceeds the maximum number of bind groups (%u).",
-                    static_cast<uint32_t>(groupIndex), kMaxBindGroups);
+                    groupIndex, kMaxBindGroups);
     DAWN_INVALID_IF(
         !mLayout->GetBindGroupLayoutsMask()[groupIndex],
         "Bind group layout index (%u) doesn't correspond to a bind group for this pipeline.",
-        static_cast<uint32_t>(groupIndex));
+        groupIndex);
     return {};
 }
 

@@ -124,7 +124,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
                                                      uint32_t dynamicOffsetCountIn,
                                                      const uint32_t* dynamicOffsetsIn) const {
     DAWN_INVALID_IF(index >= kMaxBindGroupsTyped, "Bind group index (%u) exceeds the maximum (%u).",
-                    static_cast<uint32_t>(index), kMaxBindGroups);
+                    index, kMaxBindGroupsTyped);
 
     ityp::span<BindingIndex, const uint32_t> dynamicOffsets(dynamicOffsetsIn,
                                                             BindingIndex(dynamicOffsetCountIn));
@@ -143,8 +143,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
         layout->GetDynamicBufferCount() != dynamicOffsets.size(),
         "The number of dynamic offsets (%u) does not match the number of dynamic buffers (%u) "
         "in %s.",
-        static_cast<uint32_t>(dynamicOffsets.size()),
-        static_cast<uint32_t>(layout->GetDynamicBufferCount()), layout);
+        dynamicOffsets.size(), layout->GetDynamicBufferCount(), layout);
 
     for (BindingIndex i{0}; i < dynamicOffsets.size(); ++i) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
@@ -169,8 +168,8 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
         }
 
         DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], requiredAlignment),
-                        "Dynamic Offset[%u] (%u) is not %u byte aligned.", static_cast<uint32_t>(i),
-                        dynamicOffsets[i], requiredAlignment);
+                        "Dynamic Offset[%u] (%u) is not %u byte aligned.", i, dynamicOffsets[i],
+                        requiredAlignment);
 
         BufferBinding bufferBinding = group->GetBindingAsBufferBinding(i);
 
@@ -187,14 +186,14 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
                 "range of (offset: %u, size: %u). The binding goes to the end of the buffer "
                 "even with a dynamic offset of 0. Did you forget to specify "
                 "the binding's size?",
-                static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,
-                bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
+                i, dynamicOffsets[i], bufferBinding.buffer, bufferBinding.buffer->GetSize(),
+                bufferBinding.offset, bufferBinding.size);
 
             return DAWN_VALIDATION_ERROR(
                 "Dynamic Offset[%u] (%u) is out of bounds of "
                 "%s with a size of %u and a bound range of (offset: %u, size: %u).",
-                static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,
-                bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
+                i, dynamicOffsets[i], bufferBinding.buffer, bufferBinding.buffer->GetSize(),
+                bufferBinding.offset, bufferBinding.size);
         }
     }
 

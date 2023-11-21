@@ -489,9 +489,9 @@ MaybeError ValidateFramebufferInput(
     return {};
 }
 
-MaybeError ValidateColorTargetStatesMatch(const uint8_t firstColorTargetIndex,
+MaybeError ValidateColorTargetStatesMatch(ColorAttachmentIndex firstColorTargetIndex,
                                           const ColorTargetState* const firstColorTargetState,
-                                          const uint8_t targetIndex,
+                                          ColorAttachmentIndex targetIndex,
                                           const ColorTargetState* target) {
     DAWN_INVALID_IF(firstColorTargetState->writeMask != target->writeMask,
                     "targets[%u].writeMask (%s) does not match targets[%u].writeMask (%s).",
@@ -585,8 +585,7 @@ MaybeError ValidateFragmentState(DeviceBase* device,
     for (ColorAttachmentIndex i{}; i < targets.size(); ++i) {
         if (targets[i].format == wgpu::TextureFormat::Undefined) {
             DAWN_INVALID_IF(targets[i].blend,
-                            "Color target[%u] blend state is set when the format is undefined.",
-                            static_cast<uint8_t>(i));
+                            "Color target[%u] blend state is set when the format is undefined.", i);
         } else {
             targetMask.set(i);
         }
@@ -600,14 +599,13 @@ MaybeError ValidateFragmentState(DeviceBase* device,
         DAWN_TRY_CONTEXT(ValidateColorTargetState(device, targets[i], format,
                                                   fragmentMetadata.fragmentOutputMask[i],
                                                   fragmentMetadata.fragmentOutputVariables[i]),
-                         "validating targets[%u] framebuffer output.", static_cast<uint8_t>(i));
+                         "validating targets[%u] framebuffer output.", i);
         colorAttachmentFormats->push_back(&device->GetValidInternalFormat(targets[i].format));
 
         if (fragmentMetadata.fragmentInputMask[i]) {
             DAWN_TRY_CONTEXT(ValidateFramebufferInput(device, format,
                                                       fragmentMetadata.fragmentInputVariables[i]),
-                             "validating targets[%u]'s framebuffer input.",
-                             static_cast<uint8_t>(i));
+                             "validating targets[%u]'s framebuffer input.", i);
         }
     }
 
@@ -655,9 +653,8 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                 continue;
             }
 
-            DAWN_TRY_CONTEXT(ValidateColorTargetStatesMatch(
-                                 static_cast<uint8_t>(firstColorTargetIndex), firstColorTargetState,
-                                 static_cast<uint8_t>(i), &targets[i]),
+            DAWN_TRY_CONTEXT(ValidateColorTargetStatesMatch(firstColorTargetIndex,
+                                                            firstColorTargetState, i, &targets[i]),
                              "validating targets in compatibility mode.");
         }
     }
