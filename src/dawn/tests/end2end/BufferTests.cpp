@@ -28,9 +28,13 @@
 #include <array>
 #include <cstring>
 #include <limits>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
@@ -1169,6 +1173,332 @@ DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
                       OpenGLBackend({"disable_resource_suballocation"}),
                       OpenGLESBackend({"disable_resource_suballocation"}),
                       VulkanBackend({"disable_resource_suballocation"}));
+
+class BufferMapExtendedUsagesTests : public BufferMappingTests {
+  protected:
+    void SetUp() override {
+        BufferMappingTests::SetUp();
+
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+        // Skip all tests if the BufferMapExtendedUsages feature is not supported.
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (!UsesWire() && SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages})) {
+            requiredFeatures.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
+        }
+        return requiredFeatures;
+    }
+
+    wgpu::RenderPipeline CreateRenderPipelineForTest(bool colorFromUniformBuffer) {
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+
+        std::ostringstream vs;
+        vs << R"(
+            struct VertexOut {
+                @location(0) color : vec4f,
+                @builtin(position) position : vec4f,
+            }
+
+            const vertexPos = array(
+                vec2f(-1.0, -1.0),
+                vec2f( 3.0, -1.0),
+                vec2f(-1.0,  3.0));
+        )";
+
+        if (colorFromUniformBuffer) {
+            // Color is from uniform buffer.
+            vs << R"(
+            struct Uniforms {
+                color : vec4f,
+            }
+            @binding(0) @group(0) var<uniform> uniforms : Uniforms;
+
+            @vertex
+            fn main(@builtin(vertex_index) vertexIndex : u32) -> VertexOut {
+                var output : VertexOut;
+                output.position = vec4f(vertexPos[vertexIndex % 3], 0.0, 1.0);
+                output.color = uniforms.color;
+                return output;
+            })";
+        } else {
+            // Color is from vertex buffer.
+            vs << R"(
+            @vertex
+            fn main(@location(0) vertexColor : vec4f,
+                    @builtin(vertex_index) vertexIndex : u32) -> VertexOut {
+                var output : VertexOut;
+                output.position = vec4f(vertexPos[vertexIndex % 3], 0.0, 1.0);
+                output.color = vertexColor;
+                return output;
+            })";
+
+            pipelineDescriptor.vertex.bufferCount = 1;
+            pipelineDescriptor.cBuffers[0].arrayStride = 4;
+            pipelineDescriptor.cBuffers[0].attributeCount = 1;
+            pipelineDescriptor.cBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+            pipelineDescriptor.cAttributes[0].format = wgpu::VertexFormat::Unorm8x4;
+        }
+        constexpr char fs[] = R"(
+            @fragment
+            fn main(@location(0) color : vec4f) -> @location(0) vec4f {
+                return color;
+            })";
+
+        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, vs.str().c_str());
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, fs);
+
+        pipelineDescriptor.cFragment.targetCount = 1;
+        pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        return pipeline;
+    }
+
+    void EncodeAndSubmitRenderPassForTest(const wgpu::RenderPassDescriptor& renderPass,
+                                          wgpu::RenderPipeline pipeline,
+                                          wgpu::Buffer vertexBuffer,
+                                          wgpu::Buffer indexBuffer,
+                                          wgpu::BindGroup uniformsBindGroup) {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(pipeline);
+        if (uniformsBindGroup) {
+            renderPassEncoder.SetBindGroup(0, uniformsBindGroup);
+        }
+        if (vertexBuffer) {
+            renderPassEncoder.SetVertexBuffer(0, vertexBuffer);
+        }
+
+        if (indexBuffer) {
+            renderPassEncoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
+            renderPassEncoder.DrawIndexed(3);
+        } else {
+            renderPassEncoder.Draw(3);
+        }
+        renderPassEncoder.End();
+
+        wgpu::CommandBuffer commands = commandEncoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    static constexpr wgpu::BufferUsage kNonMapUsages[] = {
+        wgpu::BufferUsage::CopySrc,  wgpu::BufferUsage::CopyDst,      wgpu::BufferUsage::Index,
+        wgpu::BufferUsage::Vertex,   wgpu::BufferUsage::Uniform,      wgpu::BufferUsage::Storage,
+        wgpu::BufferUsage::Indirect, wgpu::BufferUsage::QueryResolve,
+    };
+};
+
+// Test that the map read for any kind of buffer works
+TEST_P(BufferMapExtendedUsagesTests, MapReadWithAnyUsage) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+
+    for (const auto otherUsage : kNonMapUsages) {
+        descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst | otherUsage;
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        uint32_t myData = 0x01020304;
+        constexpr size_t kSize = sizeof(myData);
+        queue.WriteBuffer(buffer, 0, &myData, kSize);
+
+        MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+        CheckMapping(buffer.GetConstMappedRange(), &myData, kSize);
+        CheckMapping(buffer.GetConstMappedRange(0, kSize), &myData, kSize);
+        buffer.Unmap();
+    }
+}
+
+// Test that the map write for any kind of buffer works
+TEST_P(BufferMapExtendedUsagesTests, MapWriteWithAnyUsage) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+
+    for (const auto otherUsage : kNonMapUsages) {
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc | otherUsage;
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        uint32_t myData = 2934875;
+        MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+        ASSERT_NE(nullptr, buffer.GetMappedRange());
+        ASSERT_NE(nullptr, buffer.GetConstMappedRange());
+        memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+        buffer.Unmap();
+
+        EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+    }
+}
+
+// Test that mapping a vertex buffer, modifying the data then draw with the buffer works.
+TEST_P(BufferMapExtendedUsagesTests, MapWriteVertexBufferAndDraw) {
+    const utils::RGBA8 kReds[] = {utils::RGBA8::kRed, utils::RGBA8::kRed, utils::RGBA8::kRed};
+    const utils::RGBA8 kGreens[] = {utils::RGBA8::kGreen, utils::RGBA8::kGreen,
+                                    utils::RGBA8::kGreen};
+
+    // Create buffer with initial red color data.
+    wgpu::Buffer vertexBuffer = utils::CreateBufferFromData(
+        device, kReds, sizeof(kReds), wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::Vertex);
+
+    wgpu::RenderPipeline renderPipeline =
+        CreateRenderPipelineForTest(/*colorFromUniformBuffer=*/false);
+
+    auto redRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    auto greenRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    // First render pass: draw with red color vertex buffer.
+    EncodeAndSubmitRenderPassForTest(redRenderPass.renderPassInfo, renderPipeline, vertexBuffer,
+                                     nullptr, nullptr);
+
+    // Second render pass: draw with green color vertex buffer.
+    MapAsyncAndWait(vertexBuffer, wgpu::MapMode::Write, 0, sizeof(kGreens));
+    ASSERT_NE(nullptr, vertexBuffer.GetMappedRange());
+    memcpy(vertexBuffer.GetMappedRange(), kGreens, sizeof(kGreens));
+    vertexBuffer.Unmap();
+
+    EncodeAndSubmitRenderPassForTest(greenRenderPass.renderPassInfo, renderPipeline, vertexBuffer,
+                                     nullptr, nullptr);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, redRenderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, greenRenderPass.color, 0, 0);
+}
+
+// Test that mapping a index buffer, modifying the data then draw with the buffer works.
+TEST_P(BufferMapExtendedUsagesTests, MapWriteIndexBufferAndDraw) {
+    const utils::RGBA8 kVertexColors[] = {
+        utils::RGBA8::kRed,   utils::RGBA8::kRed,   utils::RGBA8::kRed,
+        utils::RGBA8::kGreen, utils::RGBA8::kGreen, utils::RGBA8::kGreen,
+    };
+    // Last index is unused. It is only to make sure the index buffer's size is multiple of 4.
+    const uint16_t kRedIndices[] = {0, 1, 2, 0};
+    const uint16_t kGreenIndices[] = {3, 4, 5, 3};
+
+    wgpu::Buffer vertexBuffer = utils::CreateBufferFromData(
+        device, kVertexColors, sizeof(kVertexColors), wgpu::BufferUsage::Vertex);
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData(device, kRedIndices, sizeof(kRedIndices),
+                                    wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::Index);
+
+    wgpu::RenderPipeline renderPipeline =
+        CreateRenderPipelineForTest(/*colorFromUniformBuffer=*/false);
+
+    auto redRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    auto greenRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    // First render pass: draw with red color index buffer.
+    EncodeAndSubmitRenderPassForTest(redRenderPass.renderPassInfo, renderPipeline, vertexBuffer,
+                                     indexBuffer, nullptr);
+
+    // Second render pass: draw with green color index buffer.
+    MapAsyncAndWait(indexBuffer, wgpu::MapMode::Write, 0, sizeof(kGreenIndices));
+    ASSERT_NE(nullptr, indexBuffer.GetMappedRange());
+    memcpy(indexBuffer.GetMappedRange(), kGreenIndices, sizeof(kGreenIndices));
+    indexBuffer.Unmap();
+
+    EncodeAndSubmitRenderPassForTest(greenRenderPass.renderPassInfo, renderPipeline, vertexBuffer,
+                                     indexBuffer, nullptr);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, redRenderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, greenRenderPass.color, 0, 0);
+}
+
+// Test that mapping a uniform buffer, modifying the data then draw with the buffer works.
+TEST_P(BufferMapExtendedUsagesTests, MapWriteUniformBufferAndDraw) {
+    const float kRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    const float kGreen[] = {0.0f, 1.0f, 0.0f, 1.0f};
+
+    // Create buffer with initial red color data.
+    wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
+        device, &kRed, sizeof(kRed), wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::Uniform);
+
+    wgpu::RenderPipeline renderPipeline =
+        CreateRenderPipelineForTest(/*colorFromUniformBuffer=*/true);
+    wgpu::BindGroup uniformsBindGroup = utils::MakeBindGroup(
+        device, renderPipeline.GetBindGroupLayout(0), {{0, uniformBuffer, 0, sizeof(kRed)}});
+
+    auto redRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    auto greenRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    // First render pass: draw with red color uniform buffer.
+    EncodeAndSubmitRenderPassForTest(redRenderPass.renderPassInfo, renderPipeline, nullptr, nullptr,
+                                     uniformsBindGroup);
+
+    // Second render pass: draw with green color uniform buffer.
+    MapAsyncAndWait(uniformBuffer, wgpu::MapMode::Write, 0, sizeof(kGreen));
+    ASSERT_NE(nullptr, uniformBuffer.GetMappedRange());
+    memcpy(uniformBuffer.GetMappedRange(), &kGreen, sizeof(kGreen));
+    uniformBuffer.Unmap();
+
+    EncodeAndSubmitRenderPassForTest(greenRenderPass.renderPassInfo, renderPipeline, nullptr,
+                                     nullptr, uniformsBindGroup);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, redRenderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, greenRenderPass.color, 0, 0);
+}
+
+// Test that modifying a storage buffer on GPU, then map read it on CPU works.
+TEST_P(BufferMapExtendedUsagesTests, GPUWriteStorageBufferThenMapRead) {
+    const uint32_t kExpectedValue = 1;
+    constexpr size_t kSize = sizeof(kExpectedValue);
+
+    wgpu::ComputePipeline pipeline;
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, R"(
+            struct SSBO {
+                value : u32
+            }
+            @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+            @compute @workgroup_size(1) fn main() {
+                ssbo.value = 1u;
+            })");
+        csDesc.compute.entryPoint = "main";
+
+        pipeline = device.CreateComputePipeline(&csDesc);
+    }
+
+    wgpu::Buffer ssbo;
+    {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = kSize;
+
+        descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead;
+        ssbo = device.CreateBuffer(&descriptor);
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+        ASSERT_NE(nullptr, pipeline.Get());
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, ssbo, 0, kSize},
+                                                         });
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        queue.Submit(1, &commands);
+    }
+
+    MapAsyncAndWait(ssbo, wgpu::MapMode::Read, 0, 4);
+    CheckMapping(ssbo.GetConstMappedRange(0, kSize), &kExpectedValue, kSize);
+    ssbo.Unmap();
+}
+
+DAWN_INSTANTIATE_TEST(BufferMapExtendedUsagesTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
