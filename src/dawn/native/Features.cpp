@@ -111,27 +111,32 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Stable}},
     {Feature::DawnMultiPlanarFormats,
      {"Import and use multi-planar texture formats with per plane views",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=551", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "multi_planar_formats.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::MultiPlanarFormatExtendedUsages,
      {"Enable creating multi-planar formatted textures directly without importing. Also allows "
       "including CopyDst as texture's usage and per plane copies between a texture and a buffer.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=551",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "multi_planar_formats.md",
       FeatureInfo::FeatureState::Experimental}},
-    // TODO(dawn:551): Merge the feature 'MultiPlanarFormatP010' to 'DawnMultiPlanarFormats' once it
-    // is implemented on all other missing backends.
     {Feature::MultiPlanarFormatP010,
      {"Import and use the P010 multi-planar texture format with per plane views",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=551", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "multi_planar_formats.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::MultiPlanarFormatNv12a,
      {"Import and use the NV12A multi-planar texture format with per plane views",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
-      "multi_planar_format_nv12a.md",
+      "multi_planar_formats.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::MultiPlanarRenderTargets,
      {"Import and use multi-planar texture formats as render attachments",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1337", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "multi_planar_formats.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::DawnNative,
-     {"WebGPU is running on top of dawn_native.",
+     {"WebGPU is running on top of dawn_native, granting some additional capabilities.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "dawn_native.md",
       FeatureInfo::FeatureState::Stable}},
