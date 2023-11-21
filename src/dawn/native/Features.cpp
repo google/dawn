@@ -64,7 +64,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalTimestampQueryInsidePasses,
      {"Support experimental Timestamp Query inside render/compute pass",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=434",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "timestamp_query_inside_passes.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::DepthClipControl,
      {"Disable depth clipping of primitives to the clip volume",
@@ -143,7 +144,9 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::ImplicitDeviceSynchronization,
      {"Public API methods (except encoding) will have implicit device synchronization. So they "
       "will be safe to be used on multiple threads.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1662", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "implicit_device_synchronization.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::SurfaceCapabilities,
      {"Support querying Surface's capabilities such as supported usage flags. This feature also "
       "enables swap chain to be created with usage other than RenderAttachment.",
@@ -163,12 +166,14 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Experimental}},
     {Feature::D3D11MultithreadProtected,
      {"Enable ID3D11Multithread protection for interop with external users of the D3D11 device.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1927", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "d3d11_multithread_protected.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::ANGLETextureSharing,
      {"Enable ANGLE texture sharing to allow the OpenGL ES backend to share textures by external "
       "OpenGL texture ID.",
-      "https://chromium.googlesource.com/angle/angle/+/refs/heads/main/extensions/"
-      "EGL_ANGLE_display_texture_share_group.txt",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "angle_texture_sharing.md",
       FeatureInfo::FeatureState::Stable}},
     {Feature::PixelLocalStorageCoherent,
      {"Supports passing information between invocation in a render pass that cover the same pixel."
@@ -187,7 +192,9 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Experimental}},
     {Feature::Norm16TextureFormats,
      {"Supports R/RG/RGBA16 norm texture formats",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1982", FeatureInfo::FeatureState::Stable}},
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "norm16_texture_formats.md",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::SharedTextureMemoryVkDedicatedAllocation,
      {"Support specifying whether a Vulkan allocation for shared texture memory is a dedicated "
       "memory allocation.",
