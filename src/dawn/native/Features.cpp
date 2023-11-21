@@ -74,7 +74,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://bugs.chromium.org/p/dawn/issues/detail?id=690", FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalDp4a,
      {"Support experimental DP4a instructions in WGSL",
-      "https://bugs.chromium.org/p/tint/issues/detail?id=1497",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shader_features.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::IndirectFirstInstance,
      {"Support non-zero first instance values on indirect draw calls",
@@ -96,12 +96,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Experimental, allows using subgroup and supports the \"enable "
       "chromium_experimental_subgroups\" directive in WGSL. Only used to investigate the semantic "
       "of subgroups and should not be relied upon.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shader_features.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::ChromiumExperimentalSubgroupUniformControlFlow,
      {"Experimental, supports VK_KHR_shader_subgroup_uniform_control_flow on Vulkan devices. Only "
       "used to investigate the semantic of subgroups and should not be relied upon.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shader_features.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnInternalUsages,
      {"Add internal usages to resources to affect how the texture is allocated, but not "
