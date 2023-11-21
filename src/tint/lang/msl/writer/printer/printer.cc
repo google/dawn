@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/ice.h"
@@ -245,6 +246,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
+                [&](core::ir::Construct* c) { EmitConstruct(c); },   //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -431,6 +433,57 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a discard instruction
     void EmitDiscard() { Line() << "discard_fragment();"; }
+
+    /// Emit a constructor
+    void EmitConstruct(core::ir::Construct* c) {
+        StringStream str;
+
+        Switch(
+            c->Result()->Type(),
+            [&](const core::type::Array*) {
+                EmitType(str, c->Result()->Type());
+                str << "{";
+                size_t i = 0;
+                for (auto* arg : c->Args()) {
+                    if (i > 0) {
+                        str << ", ";
+                    }
+                    str << Expr(arg);
+                    i++;
+                }
+                str << "}";
+            },
+            [&](const core::type::Struct* struct_ty) {
+                str << "{";
+                size_t i = 0;
+                for (auto* arg : c->Args()) {
+                    if (i > 0) {
+                        str << ", ";
+                    }
+                    // Emit field designators for structures to account for padding members.
+                    auto name = struct_ty->Members()[i]->Name().Name();
+                    str << "." << name << "=";
+                    str << Expr(arg);
+                    i++;
+                }
+                str << "}";
+            },
+            [&](Default) {
+                EmitType(str, c->Result()->Type());
+                str << "(";
+                size_t i = 0;
+                for (auto* arg : c->Args()) {
+                    if (i > 0) {
+                        str << ", ";
+                    }
+                    str << Expr(arg);
+                    i++;
+                }
+                str << ")";
+            });
+
+        Bind(c->Result(), str.str());
+    }
 
     /// Handles generating a address space
     /// @param out the output of the type stream
