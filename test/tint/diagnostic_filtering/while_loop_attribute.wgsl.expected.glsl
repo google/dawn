@@ -1,12 +1,12 @@
-diagnostic_filtering/while_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
+<dawn>/test/tint/diagnostic_filtering/while_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
   while (x > 0.0 && dpdx(1.0) > 0.0)  {
                     ^^^^^^^^^
 
-diagnostic_filtering/while_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
+<dawn>/test/tint/diagnostic_filtering/while_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
   while (x > 0.0 && dpdx(1.0) > 0.0)  {
   ^^^^^
 
-diagnostic_filtering/while_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
+<dawn>/test/tint/diagnostic_filtering/while_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
   while (x > 0.0 && dpdx(1.0) > 0.0)  {
                     ^^^^^^^^^
 

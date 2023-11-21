@@ -210,14 +210,14 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         hide_cmds
     fi
 
-    status "Testing test/tint/test-all.sh"
+    status "Testing end-to-end tests"
     show_cmds
-        ${SRC_DIR}/test/tint/test-all.sh "${BUILD_DIR}/tint" --verbose
+        ${SRC_DIR}/tools/run tests --tint "${BUILD_DIR}/tint" --verbose
     hide_cmds
 
-    status "Testing test/tint/test-all.sh for SPIR-V IR backend"
+    status "Testing tools/run tests for SPIR-V IR backend"
     show_cmds
-        ${SRC_DIR}/test/tint/test-all.sh "${BUILD_DIR}/tint" --verbose --format spvasm --use-ir
+        ${SRC_DIR}/tools/run tests --tint "${BUILD_DIR}/tint" --verbose --format spvasm --use-ir
     hide_cmds
 
     status "Checking _other.cc files also build"

@@ -137,3 +137,29 @@ func IsFile(path string) bool {
 	}
 	return !s.IsDir()
 }
+
+// CommonRootDir returns the common directory for pathA and pathB
+func CommonRootDir(pathA, pathB string) string {
+	pathA, pathB = filepath.ToSlash(pathA), filepath.ToSlash(pathB) // Normalize to forward-slash
+	if !strings.HasSuffix(pathA, "/") {
+		pathA += "/"
+	}
+	if !strings.HasSuffix(pathB, "/") {
+		pathB += "/"
+	}
+	n := len(pathA)
+	if len(pathB) < n {
+		n = len(pathB)
+	}
+	common := ""
+	for i := 0; i < n; i++ {
+		a, b := pathA[i], pathB[i]
+		if a != b {
+			break
+		}
+		if a == '/' {
+			common = pathA[:i+1]
+		}
+	}
+	return common
+}

@@ -1,12 +1,12 @@
-diagnostic_filtering/for_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
+<dawn>/test/tint/diagnostic_filtering/for_loop_attribute.wgsl:5:21 warning: 'dpdx' must only be called from uniform control flow
   for (; x > v.x && dpdx(1.0) > 0.0; ) {
                     ^^^^^^^^^
 
-diagnostic_filtering/for_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
+<dawn>/test/tint/diagnostic_filtering/for_loop_attribute.wgsl:5:3 note: control flow depends on possibly non-uniform value
   for (; x > v.x && dpdx(1.0) > 0.0; ) {
   ^^^
 
-diagnostic_filtering/for_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
+<dawn>/test/tint/diagnostic_filtering/for_loop_attribute.wgsl:5:21 note: return value of 'dpdx' may be non-uniform
   for (; x > v.x && dpdx(1.0) > 0.0; ) {
                     ^^^^^^^^^
 

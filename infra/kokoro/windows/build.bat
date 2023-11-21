@@ -163,7 +163,7 @@ call :status "Running tint_unittests"
 tint_unittests.exe || goto :error
 @echo off
 
-call :status "Testing test/tint/test-all.sh"
+call :status "Testing end-to-end tests"
 @echo on
 cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC, FXC and Metal validation
@@ -175,7 +175,7 @@ if "%BUILD_TYPE%" == "Debug" (
 ) else (
     set TEST_ALL_FORMATS=wgsl,spvasm,msl,hlsl,glsl
 )
-call git bash -- ./test/tint/test-all.sh %BUILD_DIR%/tint.exe --verbose --format %TEST_ALL_FORMATS% || goto :error
+call git bash -- ./tools/run tests --tint %BUILD_DIR%/tint.exe --verbose --format %TEST_ALL_FORMATS% || goto :error
 set PATH=%OLD_PATH%
 @echo off
 

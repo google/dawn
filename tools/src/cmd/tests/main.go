@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// test-runner runs tint against a number of test shaders checking for expected behavior
+// tests runs tint against a number of test shaders checking for expected behavior
 package main
 
 import (
@@ -37,6 +37,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -47,8 +48,11 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/match"
+	"dawn.googlesource.com/dawn/tools/src/transform"
 	"github.com/fatih/color"
 	"github.com/sergi/go-diff/diffmatchpatch"
+	"golang.org/x/term"
 )
 
 type outputFormat string
@@ -64,14 +68,27 @@ const (
 	wgsl    = outputFormat("wgsl")
 )
 
+// The root directory of the dawn project
+var dawnRoot = fileutils.DawnRoot()
+
+// The default non-flag arguments to the command
+var defaultArgs = []string{"test/tint"}
+
+// The globs automatically appended if a glob argument is a directory
+var directoryGlobs = []string{
+	"**.wgsl",
+	"**.spvasm",
+	"**.spv",
+}
+
 // Directories we don't generate expected PASS result files for.
 // These directories contain large corpora of tests for which the generated code
 // is uninteresting.
 // These paths use unix-style slashes and do not contain the '/test/tint' prefix.
 var dirsWithNoPassExpectations = []string{
-	"benchmark/",
-	"unittest/",
-	"vk-gl-cts/",
+	dawnRoot + "/test/tint/benchmark/",
+	dawnRoot + "/test/tint/unittest/",
+	dawnRoot + "/test/tint/vk-gl-cts/",
 }
 
 func main() {
@@ -82,98 +99,116 @@ func main() {
 }
 
 func showUsage() {
-	fmt.Println(`
-test-runner runs tint against a number of test shaders checking for expected behavior
+	fmt.Printf(`
+tests runs tint against a number of test shaders checking for expected behavior
 
 usage:
-  test-runner [flags...] <executable> [<directory>]
+  tests [flags...] [globs...]
 
-  <executable> the path to the tint executable
-  <directory>  the root directory of the test files
+  [globs]  a list of project-root relative file globs, directory or file paths
+           of test cases.
+           A file path will be added to the test list.
+           A directory will automatically expand to the globs:
+                %v
+           Globs will include all test files that match the glob, but exclude
+		   those that match the --ignore flag.
+           If omitted, defaults to: %v
 
-optional flags:`)
+optional flags:`,
+		transform.SliceNoErr(directoryGlobs, func(in string) string { return fmt.Sprintf("'<dir>/%v'", in) }),
+		transform.SliceNoErr(defaultArgs, func(in string) string { return fmt.Sprintf("'%v'", in) }))
 	flag.PrintDefaults()
 	fmt.Println(``)
 	os.Exit(1)
 }
 
 func run() error {
-	var formatList, filter, dxcPath, fxcPath, xcrunPath string
-	var maxFilenameColumnWidth int
+	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		terminalWidth = 0
+	}
+
+	var formatList, ignore, dxcPath, fxcPath, tintPath, xcrunPath string
+	var maxTableWidth int
 	numCPU := runtime.NumCPU()
 	verbose, useIr, generateExpected, generateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
-	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
+	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
+	flag.StringVar(&tintPath, "tint", defaultTintPath(), "path to the tint executable")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&useIr, "use-ir", false, "generate with the IR enabled")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
-	flag.IntVar(&maxFilenameColumnWidth, "filename-column-width", 0, "maximum width of the filename column")
+	flag.IntVar(&maxTableWidth, "table-width", terminalWidth, "maximum width of the results table")
 	flag.Usage = showUsage
 	flag.Parse()
 
-	args := flag.Args()
-	if len(args) == 0 {
+	// Check the executable can be found and actually is executable
+	if !fileutils.IsExe(tintPath) {
+		fmt.Fprintln(os.Stderr, "tint executable not found, please specify with --tint")
 		showUsage()
 	}
 
-	// executable path is the first argument
-	exe, args := args[0], args[1:]
-
-	// (optional) target directory is the second argument
-	dir := "."
-	if len(args) > 0 {
-		dir, args = args[0], args[1:]
+	// Apply default args, if not provided
+	args := flag.Args()
+	if len(args) == 0 {
+		args = defaultArgs
 	}
 
-	// Check the executable can be found and actually is executable
-	if !fileutils.IsExe(exe) {
-		return fmt.Errorf("'%s' not found or is not executable", exe)
-	}
-	exe, err := filepath.Abs(exe)
-	if err != nil {
-		return err
+	filePredicate := func(s string) bool { return true }
+	if m, err := match.New(ignore); err == nil {
+		filePredicate = func(s string) bool { return !m(s) }
+	} else {
+		return fmt.Errorf("failed to parse --ignore: %w", err)
 	}
 
-	// Allow using '/' in the filter on Windows
-	filter = strings.ReplaceAll(filter, "/", string(filepath.Separator))
+	// Transform args to globs, find the rootPath directory
+	absFiles := []string{}
+	rootPath := ""
+	globs := []string{}
+	for _, arg := range args {
+		// Make absolute
+		if !filepath.IsAbs(arg) {
+			arg = filepath.Join(dawnRoot, arg)
+		}
 
-	// Split the --filter flag up by ',', trimming any whitespace at the start and end
-	globIncludes := strings.Split(filter, ",")
-	for i, s := range globIncludes {
-		s = filepath.ToSlash(s) // Replace '\' with '/'
-		globIncludes[i] = `"` + strings.TrimSpace(s) + `"`
-	}
-
-	// Glob the files to test
-	files, err := glob.Scan(dir, glob.MustParseConfig(`{
-		"paths": [
-			{
-				"include": [ `+strings.Join(globIncludes, ",")+` ]
-			},
-			{
-				"exclude": [
-					"**.expected.wgsl",
-					"**.expected.spvasm",
-					"**.expected.ir.spvasm",
-					"**.expected.msl",
-					"**.expected.fxc.hlsl",
-					"**.expected.dxc.hlsl",
-					"**.expected.glsl"
-				]
+		switch {
+		case fileutils.IsDir(arg):
+			// Argument is to a directory, expand out to N globs
+			for _, glob := range directoryGlobs {
+				globs = append(globs, path.Join(arg, glob))
 			}
-		]
-	}`))
-	if err != nil {
-		return fmt.Errorf("Failed to glob files: %w", err)
+		case fileutils.IsFile(arg):
+			// Argument is a file, append to absFiles
+			absFiles = append(absFiles, arg)
+		default:
+			globs = append(globs, arg)
+		}
+
+		if rootPath == "" {
+			rootPath = filepath.Dir(arg)
+		} else {
+			rootPath = fileutils.CommonRootDir(rootPath, arg)
+		}
+	}
+
+	// Glob the absFiles to test
+	for _, g := range globs {
+		globFiles, err := glob.Glob(g)
+		if err != nil {
+			return fmt.Errorf("Failed to glob files: %w", err)
+		}
+		filtered := transform.Filter(globFiles, filePredicate)
+		normalized := transform.SliceNoErr(filtered, filepath.ToSlash)
+		absFiles = append(absFiles, normalized...)
 	}
 
 	// Ensure the files are sorted (globbing should do this, but why not)
-	sort.Strings(files)
+	sort.Strings(absFiles)
 
 	// Parse --format into a list of outputFormat
 	formats := []outputFormat{}
@@ -255,8 +290,8 @@ func run() error {
 
 	// Build the list of results.
 	// These hold the chans used to report the job results.
-	results := make([]map[outputFormat]chan status, len(files))
-	for i := range files {
+	results := make([]map[outputFormat]chan status, len(absFiles))
+	for i := range absFiles {
 		fileResults := map[outputFormat]chan status{}
 		for _, format := range formats {
 			fileResults[format] = make(chan status, 1)
@@ -268,8 +303,8 @@ func run() error {
 
 	// Spawn numCPU job runners...
 	runCfg := runConfig{
-		wd:               dir,
-		exe:              exe,
+		rootPath:         rootPath,
+		tintPath:         tintPath,
 		dxcPath:          dxcPath,
 		fxcPath:          fxcPath,
 		xcrunPath:        xcrunPath,
@@ -288,8 +323,7 @@ func run() error {
 
 	// Issue the jobs...
 	go func() {
-		for i, file := range files { // For each test file...
-			file := filepath.Join(dir, file)
+		for i, file := range absFiles { // For each test file...
 			flags := parseFlags(file)
 			for _, format := range formats { // For each output format...
 				pendingJobs <- job{
@@ -320,11 +354,31 @@ func run() error {
 		statsByFmt[format] = &stats{}
 	}
 
+	// Make file paths relative to rootPath, if possible
+	relFiles := transform.GoSliceNoErr(absFiles, func(path string) string {
+		path = filepath.ToSlash(path) // Normalize
+		if rel, err := filepath.Rel(rootPath, path); err == nil {
+			return rel
+		}
+		return path
+	})
+
 	// Print the table of file x format and gather per-format stats
 	failures := []failure{}
-	filenameColumnWidth := maxStringLen(files)
-	if maxFilenameColumnWidth > 0 {
-		filenameColumnWidth = maxFilenameColumnWidth
+	filenameColumnWidth := maxStringLen(relFiles)
+
+	// Calculate the table width
+	tableWidth := filenameColumnWidth + 3
+	for _, format := range formats {
+		tableWidth += formatWidth(format) + 3
+	}
+
+	// Reduce filename column width if too big
+	if tableWidth > maxTableWidth {
+		filenameColumnWidth -= tableWidth - maxTableWidth
+		if filenameColumnWidth < 20 {
+			filenameColumnWidth = 20
+		}
 	}
 
 	red := color.New(color.FgRed)
@@ -358,7 +412,7 @@ func run() error {
 
 	newKnownGood := knownGoodHashes{}
 
-	for i, file := range files {
+	for i, file := range relFiles {
 		results := results[i]
 
 		row := &strings.Builder{}
@@ -560,8 +614,8 @@ type job struct {
 }
 
 type runConfig struct {
-	wd               string
-	exe              string
+	rootPath         string
+	tintPath         string
 	dxcPath          string
 	fxcPath          string
 	xcrunPath        string
@@ -591,7 +645,7 @@ func (j job) run(cfg runConfig) {
 
 		// Is there an expected output file? If so, load it.
 		expected, expectedFileExists := "", false
-		if content, err := ioutil.ReadFile(expectedFilePath); err == nil {
+		if content, err := os.ReadFile(expectedFilePath); err == nil {
 			expected = string(content)
 			expectedFileExists = true
 		}
@@ -603,17 +657,8 @@ func (j job) run(cfg runConfig) {
 
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
-		file, err := filepath.Rel(cfg.wd, j.file)
-		if err != nil {
-			file = j.file
-		}
-
-		// Make relative paths use forward slash separators (on Windows) so that paths in tint
-		// output match expected output that contain errors
-		file = strings.ReplaceAll(file, `\`, `/`)
-
 		args := []string{
-			file,
+			j.file,
 			"--format", strings.Split(string(j.format), "-")[0], // 'hlsl-fxc' -> 'hlsl', etc.
 			"--print-hash",
 		}
@@ -624,7 +669,7 @@ func (j job) run(cfg runConfig) {
 
 		// Append any skip-hashes, if they're found.
 		if j.format != "wgsl" { // Don't skip 'wgsl' as this 'toolchain' is ever changing.
-			if skipHashes := cfg.validationCache.knownGood[fileAndFormat{file, j.format}]; len(skipHashes) > 0 {
+			if skipHashes := cfg.validationCache.knownGood[fileAndFormat{j.file, j.format}]; len(skipHashes) > 0 {
 				args = append(args, "--skip-hash", strings.Join(skipHashes, ","))
 			}
 		}
@@ -663,23 +708,24 @@ func (j job) run(cfg runConfig) {
 		args = append(args, j.flags...)
 
 		start := time.Now()
-		ok, out = invoke(cfg.wd, cfg.exe, args...)
+		ok, out = invoke(cfg.rootPath, cfg.tintPath, args...)
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
+		out = strings.ReplaceAll(out, filepath.ToSlash(dawnRoot), "<dawn>")
 		out, hashes := extractValidationHashes(out)
 		matched := expected == "" || expected == out
 
 		canEmitPassExpectationFile := true
 		for _, noPass := range dirsWithNoPassExpectations {
-			if strings.HasPrefix(file, noPass) {
+			if strings.HasPrefix(j.file, noPass) {
 				canEmitPassExpectationFile = false
 				break
 			}
 		}
 
 		saveExpectedFile := func(path string, content string) error {
-			return ioutil.WriteFile(path, []byte(content), 0666)
+			return os.WriteFile(path, []byte(content), 0666)
 		}
 
 		if ok && cfg.generateExpected && (validate || !skipped) {
@@ -997,4 +1043,14 @@ func saveValidationCache(vc validationCache) error {
 	enc := json.NewEncoder(file)
 	enc.SetIndent("", "  ")
 	return enc.Encode(&out)
+}
+
+// defaultRootPath returns the default path to the root of the test tree
+func defaultRootPath() string {
+	return filepath.Join(fileutils.DawnRoot(), "test/tint")
+}
+
+// defaultTintPath returns the default path to the tint executable
+func defaultTintPath() string {
+	return filepath.Join(fileutils.DawnRoot(), "out/active/tint")
 }

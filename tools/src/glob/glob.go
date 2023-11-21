@@ -71,7 +71,7 @@ func Glob(str string) ([]string, error) {
 		}
 	}
 	// No wildcard found. Does the file exist at 'str'?
-	if s, err := os.Stat(str); err != nil && !s.IsDir() {
+	if s, err := os.Stat(str); err == nil && !s.IsDir() {
 		return []string{str}, nil
 	}
 	return []string{}, nil

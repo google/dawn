@@ -62,3 +62,26 @@ func TestDawnRoot(t *testing.T) {
 		t.Errorf("DawnRoot() returned %v.\n%v", dr, diff)
 	}
 }
+
+func TestCommonRootDir(t *testing.T) {
+	for _, test := range []struct {
+		a, b   string
+		expect string
+	}{
+		{"", "", "/"},
+		{"a/b/c", "d/e/f", ""},
+		{"a/", "b", ""},
+		{"a/b/c", "a/b", "a/b/"},
+		{"a/b/c/", "a/b", "a/b/"},
+		{"a/b/c/", "a/b/", "a/b/"},
+		{"a/b/c", "a/b/d", "a/b/"},
+		{"a/b/c", "a/bc", "a/"},
+	} {
+		if got := fileutils.CommonRootDir(test.a, test.b); got != test.expect {
+			t.Errorf("CommonRootDir('%v', '%v') returned '%v'.\nExpected: '%v'", test.a, test.b, got, test.expect)
+		}
+		if got := fileutils.CommonRootDir(test.b, test.a); got != test.expect {
+			t.Errorf("CommonRootDir('%v', '%v') returned '%v'.\nExpected: '%v'", test.b, test.a, got, test.expect)
+		}
+	}
+}

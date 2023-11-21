@@ -66,6 +66,15 @@ func Slice[IN any, OUT any](in []IN, fn func(in IN) (OUT, error)) ([]OUT, error)
 	return out, nil
 }
 
+// SliceNoErr returns a new slice by transforming each element with the function fn
+func SliceNoErr[IN any, OUT any](in []IN, fn func(in IN) OUT) []OUT {
+	out := make([]OUT, len(in))
+	for i, el := range in {
+		out[i] = fn(el)
+	}
+	return out
+}
+
 // GoSlice returns a new slice by transforming each element with the function
 // fn, called by multiple go-routines.
 func GoSlice[IN any, OUT any](in []IN, fn func(in IN) (OUT, error)) ([]OUT, error) {
@@ -101,4 +110,36 @@ func GoSlice[IN any, OUT any](in []IN, fn func(in IN) (OUT, error)) ([]OUT, erro
 	}
 
 	return out, nil
+}
+
+// GoSliceNoErr returns a new slice by transforming each element with the function
+// fn, called by multiple go-routines.
+func GoSliceNoErr[IN any, OUT any](in []IN, fn func(in IN) OUT) []OUT {
+
+	// Create a channel of indices
+	indices := make(chan int, 256)
+	go func() {
+		for i := range in {
+			indices <- i
+		}
+		close(indices)
+	}()
+
+	out := make([]OUT, len(in))
+
+	// Kick a number of workers to process the elements
+	numWorkers := runtime.NumCPU()
+	wg := sync.WaitGroup{}
+	wg.Add(numWorkers)
+	for worker := 0; worker < numWorkers; worker++ {
+		go func() {
+			defer wg.Done()
+			for idx := range indices {
+				out[idx] = fn(in[idx])
+			}
+		}()
+	}
+	wg.Wait()
+
+	return out
 }
