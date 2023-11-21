@@ -223,11 +223,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a block
     /// @param block the block to emit
-    void EmitBlock(core::ir::Block* block) {
-        MarkInlinable(block);
-
-        EmitBlockInstructions(block);
-    }
+    void EmitBlock(core::ir::Block* block) { EmitBlockInstructions(block); }
 
     /// Emit the instructions in a block
     /// @param block the block with the instructions to emit
@@ -237,29 +233,54 @@ class Printer : public tint::TextGenerator {
         for (auto* inst : *block) {
             Switch(
                 inst,                                                //
-                [&](core::ir::Binary* b) { EmitBinary(b); },         //
                 [&](core::ir::ExitIf* e) { EmitExitIf(e); },         //
                 [&](core::ir::If* if_) { EmitIf(if_); },             //
-                [&](core::ir::Let* l) { EmitLet(l); },               //
-                [&](core::ir::Load* l) { EmitLoad(l); },             //
                 [&](core::ir::Return* r) { EmitReturn(r); },         //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
-                [&](core::ir::Construct* c) { EmitConstruct(c); },   //
+
+                [&](core::ir::Binary*) { /* skip */ },     //
+                [&](core::ir::Let* l) { EmitLet(l); },     //
+                [&](core::ir::Load*) { /* skip */ },       //
+                [&](core::ir::Construct*) { /* skip */ },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
 
+    void EmitValue(StringStream& out, core::ir::Value* v) {
+        Switch(
+            v,                                                     //
+            [&](core::ir::Constant* c) { EmitConstant(out, c); },  //
+            // [&](core::ir::FunctionParam* fp) {},                   //
+            [&](core::ir::InstructionResult* r) {
+                Switch(
+                    r->Source(),                                       //
+                    [&](core::ir::Binary* b) { EmitBinary(out, b); },  //
+                    [&](core::ir::Let* l) {
+                        auto name = ir_.NameOf(l->Result());
+                        TINT_ASSERT(name.IsValid());
+                        out << name.Name();
+                    },                                                       //
+                    [&](core::ir::Load* l) { EmitValue(out, l->From()); },   //
+                    [&](core::ir::Construct* c) { EmitConstruct(out, c); },  //
+                    [&](core::ir::Var* var) { EmitVarName(out, var); },      //
+                    TINT_ICE_ON_NO_MATCH);
+            },  //
+            TINT_ICE_ON_NO_MATCH);
+    }
+
     /// Emit a binary instruction
     /// @param b the binary instruction
-    void EmitBinary(core::ir::Binary* b) {
+    void EmitBinary(StringStream& out, core::ir::Binary* b) {
         if (b->Op() == core::ir::BinaryOp::kEqual) {
             auto* rhs = b->RHS()->As<core::ir::Constant>();
             if (rhs && rhs->Type()->Is<core::type::Bool>() &&
                 rhs->Value()->ValueAs<bool>() == false) {
                 // expr == false
-                Bind(b->Result(), "!(" + Expr(b->LHS()) + ")");
+                out << "!(";
+                EmitValue(out, b->LHS());
+                out << ")";
                 return;
             }
         }
@@ -302,18 +323,14 @@ class Printer : public tint::TextGenerator {
             return "<error>";
         };
 
-        StringStream str;
-        str << "(" << Expr(b->LHS()) << " " << kind() << " " + Expr(b->RHS()) << ")";
-
-        Bind(b->Result(), str.str());
+        out << "(";
+        EmitValue(out, b->LHS());
+        out << " " << kind() << " ";
+        EmitValue(out, b->RHS());
+        out << ")";
     }
 
-    /// Emit a load instruction
-    /// @param l the load instruction
-    void EmitLoad(core::ir::Load* l) {
-        // Force loads to be bound as inlines
-        bindings_.Add(l->Result(), InlinedValue{Expr(l->From()), PtrKind::kRef});
-    }
+    void EmitVarName(StringStream& out, core::ir::Var* v) { out << ir_.NameOf(v).Name(); }
 
     /// Emit a var instruction
     /// @param v the var instruction
@@ -345,7 +362,8 @@ class Printer : public tint::TextGenerator {
         out << " " << name.Name();
 
         if (v->Initializer()) {
-            out << " = " << Expr(v->Initializer());
+            out << " = ";
+            EmitValue(out, v->Initializer());
         } else if (space == core::AddressSpace::kPrivate ||
                    space == core::AddressSpace::kFunction ||
                    space == core::AddressSpace::kUndefined) {
@@ -353,35 +371,30 @@ class Printer : public tint::TextGenerator {
             EmitZeroValue(out, ptr->UnwrapPtr());
         }
         out << ";";
-
-        Bind(v->Result(), name, PtrKind::kRef);
     }
 
     /// Emit a let instruction
     /// @param l the let instruction
     void EmitLet(core::ir::Let* l) {
-        Bind(l->Result(), Expr(l->Value(), PtrKind::kPtr), PtrKind::kPtr);
+        auto name = ir_.NameOf(l->Result());
+        TINT_ASSERT(name.IsValid());
+
+        auto out = Line();
+        EmitType(out, l->Result()->Type());
+        out << " const " << name.Name() << " = ";
+        EmitValue(out, l->Value());
+        out << ";";
     }
 
     /// Emit an if instruction
     /// @param if_ the if instruction
     void EmitIf(core::ir::If* if_) {
-        // Emit any nodes that need to be used as PHI nodes
-        for (auto* phi : if_->Results()) {
-            if (!ir_.NameOf(phi).IsValid()) {
-                ir_.SetName(phi, ir_.symbols.New());
-            }
-
-            auto name = ir_.NameOf(phi);
-
+        {
             auto out = Line();
-            EmitType(out, phi->Type());
-            out << " " << name.Name() << ";";
-
-            Bind(phi, name);
+            out << "if (";
+            EmitValue(out, if_->Condition());
+            out << ") {";
         }
-
-        Line() << "if (" << Expr(if_->Condition()) << ") {";
 
         {
             ScopedIndent si(current_buffer_);
@@ -407,7 +420,10 @@ class Printer : public tint::TextGenerator {
             auto* phi = results[i];
             auto* val = args[i];
 
-            Line() << ir_.NameOf(phi).Name() << " = " << Expr(val) << ";";
+            auto out = Line();
+            out << ir_.NameOf(phi).Name() << " = ";
+            EmitValue(out, val);
+            out << ";";
         }
     }
 
@@ -423,7 +439,8 @@ class Printer : public tint::TextGenerator {
         auto out = Line();
         out << "return";
         if (!r->Args().IsEmpty()) {
-            out << " " << Expr(r->Args().Front());
+            out << " ";
+            EmitValue(out, r->Args().Front());
         }
         out << ";";
     }
@@ -435,54 +452,50 @@ class Printer : public tint::TextGenerator {
     void EmitDiscard() { Line() << "discard_fragment();"; }
 
     /// Emit a constructor
-    void EmitConstruct(core::ir::Construct* c) {
-        StringStream str;
-
+    void EmitConstruct(StringStream& out, core::ir::Construct* c) {
         Switch(
             c->Result()->Type(),
             [&](const core::type::Array*) {
-                EmitType(str, c->Result()->Type());
-                str << "{";
+                EmitType(out, c->Result()->Type());
+                out << "{";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {
                     if (i > 0) {
-                        str << ", ";
+                        out << ", ";
                     }
-                    str << Expr(arg);
+                    EmitValue(out, arg);
                     i++;
                 }
-                str << "}";
+                out << "}";
             },
             [&](const core::type::Struct* struct_ty) {
-                str << "{";
+                out << "{";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {
                     if (i > 0) {
-                        str << ", ";
+                        out << ", ";
                     }
                     // Emit field designators for structures to account for padding members.
                     auto name = struct_ty->Members()[i]->Name().Name();
-                    str << "." << name << "=";
-                    str << Expr(arg);
+                    out << "." << name << "=";
+                    EmitValue(out, arg);
                     i++;
                 }
-                str << "}";
+                out << "}";
             },
             [&](Default) {
-                EmitType(str, c->Result()->Type());
-                str << "(";
+                EmitType(out, c->Result()->Type());
+                out << "(";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {
                     if (i > 0) {
-                        str << ", ";
+                        out << ", ";
                     }
-                    str << Expr(arg);
+                    EmitValue(out, arg);
                     i++;
                 }
-                str << ")";
+                out << ")";
             });
-
-        Bind(c->Result(), str.str());
     }
 
     /// Handles generating a address space
@@ -932,177 +945,13 @@ class Printer : public tint::TextGenerator {
     }
 
     /// @return a new, unique identifier with the given prefix.
-    /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
-    /// will be used.
+    /// @param prefix optional prefix to apply to the generated identifier. If empty
+    /// "tint_symbol" will be used.
     std::string UniqueIdentifier(const std::string& prefix /* = "" */) {
         return ir_.symbols.New(prefix).Name();
     }
-
-    TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
-
-    /// Returns the expression for the given value
-    /// @param value the value to lookup
-    /// @param want_ptr_kind the pointer information for the return
-    /// @returns the string expression
-    std::string Expr(core::ir::Value* value, PtrKind want_ptr_kind = PtrKind::kRef) {
-        using ExprAndPtrKind = std::pair<std::string, PtrKind>;
-
-        auto [expr, got_ptr_kind] = tint::Switch(
-            value,
-            [&](core::ir::Constant* c) -> ExprAndPtrKind {
-                StringStream str;
-                EmitConstant(str, c);
-                return {str.str(), PtrKind::kRef};
-            },
-            [&](Default) -> ExprAndPtrKind {
-                auto lookup = bindings_.Find(value);
-                if (TINT_UNLIKELY(!lookup)) {
-                    TINT_IR_ICE(ir_) << "Expr(" << (value ? value->TypeInfo().name : "null")
-                                     << ") value has no expression";
-                    return {};
-                }
-
-                return std::visit(
-                    [&](auto&& got) -> ExprAndPtrKind {
-                        using T = std::decay_t<decltype(got)>;
-
-                        if constexpr (std::is_same_v<T, VariableValue>) {
-                            return {got.name.Name(), got.ptr_kind};
-                        }
-
-                        if constexpr (std::is_same_v<T, InlinedValue>) {
-                            auto result = ExprAndPtrKind{got.expr, got.ptr_kind};
-
-                            // Single use (inlined) expression.
-                            // Mark the bindings_ map entry as consumed.
-                            *lookup = ConsumedValue{};
-                            return result;
-                        }
-
-                        if constexpr (std::is_same_v<T, ConsumedValue>) {
-                            TINT_IR_ICE(ir_) << "Expr(" << value->TypeInfo().name
-                                             << ") called twice on the same value";
-                        } else {
-                            TINT_IR_ICE(ir_)
-                                << "Expr(" << value->TypeInfo().name << ") has unhandled value";
-                        }
-                        return {};
-                    },
-                    *lookup);
-            });
-        if (expr.empty()) {
-            return "<error>";
-        }
-
-        if (value->Type()->Is<core::type::Pointer>()) {
-            return ToPtrKind(expr, got_ptr_kind, want_ptr_kind);
-        }
-
-        return expr;
-    }
-
-    TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
-
-    /// Returns the given expression converted to the given pointer kind
-    /// @param in the input expression
-    /// @param got the pointer kind we have
-    /// @param want the pointer kind we want
-    std::string ToPtrKind(const std::string& in, PtrKind got, PtrKind want) {
-        if (want == PtrKind::kRef && got == PtrKind::kPtr) {
-            return "*(" + in + ")";
-        }
-        if (want == PtrKind::kPtr && got == PtrKind::kRef) {
-            return "&(" + in + ")";
-        }
-        return in;
-    }
-
-    /// Associates an IR value with a result expression
-    /// @param value the IR value
-    /// @param expr the result expression
-    /// @param ptr_kind defines how pointer values are represented by the expression
-    void Bind(core::ir::Value* value, const std::string& expr, PtrKind ptr_kind = PtrKind::kRef) {
-        TINT_ASSERT(value);
-
-        if (can_inline_.Remove(value)) {
-            // Value will be inlined at its place of usage.
-            if (TINT_LIKELY(bindings_.Add(value, InlinedValue{expr, ptr_kind}))) {
-                return;
-            }
-        } else {
-            auto mod_name = ir_.NameOf(value);
-            if (value->Usages().IsEmpty() && !mod_name.IsValid()) {
-                // Drop phonies.
-            } else {
-                if (mod_name.Name().empty()) {
-                    mod_name = ir_.symbols.New("v");
-                }
-
-                auto out = Line();
-                EmitType(out, value->Type());
-                out << " const " << mod_name.Name() << " = ";
-                if (value->Type()->Is<core::type::Pointer>()) {
-                    out << ToPtrKind(expr, ptr_kind, PtrKind::kPtr);
-                } else {
-                    out << expr;
-                }
-                out << ";";
-
-                Bind(value, mod_name, PtrKind::kPtr);
-            }
-            return;
-        }
-
-        TINT_IR_ICE(ir_) << "Bind(" << value->TypeInfo().name << ") called twice for same value";
-    }
-
-    /// Associates an IR value the 'var', 'let' or parameter of the given name
-    /// @param value the IR value
-    /// @param name the name for the value
-    /// @param ptr_kind defines how pointer values are represented by @p expr.
-    void Bind(core::ir::Value* value, Symbol name, PtrKind ptr_kind = PtrKind::kRef) {
-        TINT_ASSERT(value);
-
-        bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
-        if (TINT_UNLIKELY(!added)) {
-            TINT_IR_ICE(ir_) << "Bind(" << value->TypeInfo().name
-                             << ") called twice for same value";
-        }
-    }
-
-    /// Marks instructions in a block for inlineability
-    /// @param block the block
-    void MarkInlinable(core::ir::Block* block) {
-        // An ordered list of possibly-inlinable values returned by sequenced instructions that have
-        // not yet been marked-for or ruled-out-for inlining.
-        UniqueVector<core::ir::Value*, 32> pending_resolution;
-
-        // Walk the instructions of the block starting with the first.
-        for (auto* inst : *block) {
-            // Is the instruction sequenced?
-            bool sequenced = inst->Sequenced();
-
-            if (inst->Results().Length() != 1) {
-                continue;
-            }
-
-            // Instruction has a single result value.
-            // Check to see if the result of this instruction is a candidate for inlining.
-            auto* result = inst->Result(0);
-            // Only values with a single usage can be inlined.
-            // Named values are not inlined, as we want to emit the name for a let.
-            if (result->Usages().Count() == 1 && !ir_.NameOf(result).IsValid()) {
-                if (sequenced) {
-                    // The value comes from a sequenced instruction.  Don't inline.
-                } else {
-                    // The value comes from an unsequenced instruction. Just inline.
-                    can_inline_.Add(result);
-                }
-                continue;
-            }
-        }
-    }
 };
+
 }  // namespace
 
 Result<std::string> Print(core::ir::Module& module) {

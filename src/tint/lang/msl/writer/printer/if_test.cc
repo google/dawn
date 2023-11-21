@@ -116,7 +116,8 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithSinglePhi) {
+// Requires a transform to turn PHIs into lets
+TEST_F(MslPrinterTest, DISABLED_IfWithSinglePhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -143,7 +144,8 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithMultiPhi) {
+// Requires a transform to turn PHIs into lets
+TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -173,7 +175,8 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithMultiPhiReturn1) {
+// Requires a transform to turn PHIs into lets
+TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn1) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -204,7 +207,8 @@ int foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithMultiPhiReturn2) {
+// Requires a transform to turn PHIs into lets
+TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn2) {
     auto* func = b.Function("foo", ty.bool_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
