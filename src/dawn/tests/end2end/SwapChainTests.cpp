@@ -197,6 +197,9 @@ TEST_P(SwapChainTests, ResizingSwapChainOnly) {
 
 // Test resizing the window but not the swapchain.
 TEST_P(SwapChainTests, ResizingWindowOnly) {
+    // TODO(crbug.com/1503912): Failing new ValidateImageAcquireWait in Vulkan Validation Layer.
+    DAWN_SUPPRESS_TEST_IF(IsBackendValidationEnabled() && IsWindows() && IsVulkan() && IsIntel());
+
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
 
     for (int i = 0; i < 10; i++) {
