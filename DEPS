@@ -197,7 +197,7 @@ deps = {
   },
 
   'third_party/dxc': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@c486ec19870ce7d9cd65aae06839f00ea144fb5b',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@f0aed972235c27660cc74f7697a2ba1bfd42be43',
   },
 
   'third_party/dxheaders': {
