@@ -218,11 +218,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     // TODO(dawn:1559) Resolving timestamp queries after a render pass is failing on Qualcomm-based
     // Android devices.
-    if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&
-        !IsAndroidQualcomm()) {
+    // TODO(crbug.com/1504013) Timestamp queries on Android do not return expected values.
+#if !DAWN_PLATFORM_IS(ANDROID)
+    if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
         EnableFeature(Feature::TimestampQuery);
         EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
     }
+#endif
 
     if (IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT)) {
         EnableFeature(Feature::Depth32FloatStencil8);
