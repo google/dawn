@@ -172,7 +172,7 @@ MaybeError ValidateSurfaceDescriptor(InstanceBase* instance, const SurfaceDescri
             x11->xSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
         XWindowAttributes attributes;
         int status = x11->xGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
-                                               xDesc->window, &attributes);
+                                               static_cast<Window>(xDesc->window), &attributes);
         x11->xSetErrorHandler(oldErrorHandler);
 
         DAWN_INVALID_IF(status == 0, "Invalid X Window");

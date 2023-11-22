@@ -3186,7 +3186,7 @@
         "tags": ["native"],
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
-            {"name": "window", "type": "uint32_t"}
+            {"name": "window", "type": "uint64_t"}
         ]
     },
     "surface descriptor from wayland surface": {
