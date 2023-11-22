@@ -176,6 +176,9 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     core::ir::Builder b{mod};
     core::type::Manager& ty{mod.Types()};
     for (auto* inst : mod.instructions.Objects()) {
+        if (!inst->Alive()) {
+            continue;
+        }
         if (auto* call = inst->As<wgsl::ir::BuiltinCall>()) {
             switch (call->Func()) {
                 case BuiltinFn::kWorkgroupUniformLoad: {
