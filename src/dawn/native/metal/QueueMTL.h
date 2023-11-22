@@ -52,7 +52,7 @@ class Queue final : public QueueBase {
     void WaitForCommandsToBeScheduled();
     void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
 
-    Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial) override;
+    Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
   private:

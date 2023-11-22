@@ -229,6 +229,31 @@ wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanosecon
     return wgpu::WaitStatus::Success;
 }
 
+// Reorder callbacks to enforce callback ordering required by the spec.
+// Returns an iterator just past the last ready callback.
+auto PrepareReadyCallbacks(std::vector<TrackedFutureWaitInfo>& futures) {
+    // Partition the futures so the following sort looks at fewer elements.
+    auto endOfReady =
+        std::partition(futures.begin(), futures.end(),
+                       [](const TrackedFutureWaitInfo& future) { return future.ready; });
+
+    // Enforce the following rules from https://gpuweb.github.io/gpuweb/#promise-ordering:
+    // 1. For some GPUQueue q, if p1 = q.onSubmittedWorkDone() is called before
+    //    p2 = q.onSubmittedWorkDone(), then p1 must settle before p2.
+    // 2. For some GPUQueue q and GPUBuffer b on the same GPUDevice,
+    //    if p1 = b.mapAsync() is called before p2 = q.onSubmittedWorkDone(),
+    //    then p1 must settle before p2.
+    //
+    // To satisfy the rules, we need only put lower future ids before higher future
+    // ids. Lower future ids were created first.
+    std::sort(futures.begin(), endOfReady,
+              [](const TrackedFutureWaitInfo& a, const TrackedFutureWaitInfo& b) {
+                  return a.futureID < b.futureID;
+              });
+
+    return endOfReady;
+}
+
 }  // namespace
 
 // EventManager
@@ -297,21 +322,20 @@ void EventManager::ProcessPollEvents() {
         DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
     }
 
+    // Enforce callback ordering.
+    auto readyEnd = PrepareReadyCallbacks(futures);
+
     // For all the futures we are about to complete, first ensure they're untracked. It's OK if
     // something actually isn't tracked anymore (because it completed elsewhere while waiting.)
     mEvents->Use([&](auto events) {
-        for (TrackedFutureWaitInfo& future : futures) {
-            if (future.ready) {
-                events->erase(future.futureID);
-            }
+        for (auto it = futures.begin(); it != readyEnd; ++it) {
+            events->erase(it->futureID);
         }
     });
 
     // Finally, call callbacks.
-    for (TrackedFutureWaitInfo& future : futures) {
-        if (future.ready) {
-            future.event->EnsureComplete(EventCompletionType::Ready);
-        }
+    for (auto it = futures.begin(); it != readyEnd; ++it) {
+        it->event->EnsureComplete(EventCompletionType::Ready);
     }
 }
 
@@ -375,24 +399,22 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
         return waitStatus;
     }
 
+    // Enforce callback ordering
+    auto readyEnd = PrepareReadyCallbacks(futures);
+
     // For any futures that we're about to complete, first ensure they're untracked. It's OK if
     // something actually isn't tracked anymore (because it completed elsewhere while waiting.)
     mEvents->Use([&](auto events) {
-        for (const TrackedFutureWaitInfo& future : futures) {
-            if (future.ready) {
-                events->erase(future.futureID);
-            }
+        for (auto it = futures.begin(); it != readyEnd; ++it) {
+            events->erase(it->futureID);
         }
     });
 
     // Finally, call callbacks and update return values.
-    for (TrackedFutureWaitInfo& future : futures) {
-        if (future.ready) {
-            // Set completed before calling the callback.
-            infos[future.indexInInfos].completed = true;
-            // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
-            future.event->EnsureComplete(EventCompletionType::Ready);
-        }
+    for (auto it = futures.begin(); it != readyEnd; ++it) {
+        // Set completed before calling the callback.
+        infos[it->indexInInfos].completed = true;
+        it->event->EnsureComplete(EventCompletionType::Ready);
     }
 
     return wgpu::WaitStatus::Success;

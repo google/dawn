@@ -74,8 +74,6 @@ class ExecutionQueueBase {
     // resources.
     virtual MaybeError WaitForIdleForDestruction() = 0;
 
-    // Get or create an event that will be complete after the ExecutionSerial passes.
-    virtual Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
     // Wait at most `timeout` synchronously for the ExecutionSerial to pass. Returns true
     // if the serial passed.
     virtual ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout);

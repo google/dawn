@@ -74,11 +74,6 @@ bool ExecutionQueueBase::HasScheduledCommands() const {
            HasPendingCommands();
 }
 
-Ref<SystemEvent> ExecutionQueueBase::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
-    // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
-    DAWN_CHECK(false);
-}
-
 ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial serial,
                                                            Nanoseconds timeout) {
     // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl

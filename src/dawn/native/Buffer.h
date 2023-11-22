@@ -172,6 +172,9 @@ class BufferBase : public ApiObjectBase {
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
+
+    struct MapAsyncEvent;
+    Ref<MapAsyncEvent> mPendingMapEvent;
 };
 
 }  // namespace dawn::native
