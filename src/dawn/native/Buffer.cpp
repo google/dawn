@@ -205,6 +205,9 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     // This can race with Complete such that the early status is ignored, but this is OK
     // because we will still unmap the buffer. It will be as-if the application called
     // Unmap/Destroy just after the map event completed.
+    // TODO(crbug.com/dawn/831): However, CompleteIfSpontaneous may race with Complete
+    // and hit an ASSERT that it was already completed. This would be resolved when
+    // mapping is thread-safe.
     void UnmapEarly(wgpu::BufferMapAsyncStatus status) {
         mBufferOrEarlyStatus.Use([&](auto bufferOrEarlyStatus) { *bufferOrEarlyStatus = status; });
         CompleteIfSpontaneous();

@@ -52,7 +52,7 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
         instance2.Get(), nullptr,
         [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char*, void* userdata) {
             ASSERT_EQ(status, WGPURequestAdapterStatus_Success);
-            *reinterpret_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter(adapter);
+            *reinterpret_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(adapter);
         },
         &adapter2);
     DAWN_ASSERT(adapter2);
@@ -62,7 +62,7 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
         adapter2.Get(), nullptr,
         [](WGPURequestDeviceStatus status, WGPUDevice device, const char*, void* userdata) {
             ASSERT_EQ(status, WGPURequestDeviceStatus_Success);
-            *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device(device);
+            *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(device);
         },
         &device2);
     DAWN_ASSERT(device2);
