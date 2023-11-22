@@ -45,24 +45,29 @@ if (tint_build_unittests || tint_build_benchmarks) {
 libtint_source_set("bytes") {
   sources = [
     "bytes.cc",
+    "decoder.h",
     "endianness.h",
     "reader.h",
     "swap.h",
   ]
   deps = [
     "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
     "${tint_src_dir}/utils/reflection",
+    "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
+    "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "decoder_test.cc",
       "reader_test.cc",
       "swap_test.cc",
     ]
@@ -70,12 +75,15 @@ if (tint_build_unittests) {
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
   }
