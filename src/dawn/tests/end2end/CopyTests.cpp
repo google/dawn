@@ -268,11 +268,6 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
                               IsANGLED3D11() && IsWindows());
 
-        // TODO(dawn:1877): blit texture to copy path failing some tests on ANGLE Swiftshader
-        DAWN_SUPPRESS_TEST_IF((IsSnorm(GetParam().mTextureFormat) ||
-                               GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                              IsANGLESwiftShader());
-
         // TODO(dawn:1913): Many float formats tests failing for Metal backend on Mac Intel.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::R32Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG32Float ||
