@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/discard.h"
@@ -253,6 +254,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
 
+                [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },    //
                 [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },     //
                 [&](core::ir::Let* l) { EmitLet(l); },                      //
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
@@ -293,6 +295,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Load* l) { EmitValue(out, l->From()); },   //
                     [&](const core::ir::Construct* c) { EmitConstruct(out, c); },  //
                     [&](const core::ir::Var* var) { EmitVarName(out, var); },      //
+                    [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },      //
                     TINT_ICE_ON_NO_MATCH);
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -478,6 +481,15 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a discard instruction
     void EmitDiscard() { Line() << "discard_fragment();"; }
+
+    /// Emit a bitcast instruction
+    void EmitBitcast(StringStream& out, const core::ir::Bitcast* b) {
+        out << "as_type<";
+        EmitType(out, b->Result()->Type());
+        out << ">(";
+        EmitValue(out, b->Val());
+        out << ")";
+    }
 
     /// Emit a constructor
     void EmitConstruct(StringStream& out, const core::ir::Construct* c) {
