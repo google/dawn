@@ -1,0 +1,46 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:626 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<handle, texture_external, read> = var @binding_point(1, 0)
+}
+
+%textureLoad2d = func(%tint_symbol:texture_external, %coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:vec4<f32> = textureLoad %tint_symbol, %coords
+    ret %5
+  }
+}
+%doTextureLoad = func():void -> %b3 {
+  %b3 = block {
+    %7:texture_external = load %arg_0
+    %8:vec4<f32> = call %textureLoad2d, %7, vec2<i32>(0i)
+    %res:ptr<function, vec4<f32>, read_write> = var, %8
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b4 {
+  %b4 = block {
+    %11:void = call %doTextureLoad
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b5 {
+  %b5 = block {
+    %13:void = call %doTextureLoad
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+  %b6 = block {
+    %15:void = call %doTextureLoad
+    ret
+  }
+}
+
+Multiplanar external texture transform was not run.
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

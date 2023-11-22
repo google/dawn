@@ -1,0 +1,182 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 2> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 4> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_7:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_10:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %m23:ptr<function, mat2x3<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %8:ptr<uniform, f32, read> = access %x_7, 0u, 1i, 0u
+    %x_46:f32 = load %8
+    %10:vec3<f32> = construct %x_46, 0.0f, 0.0f
+    %11:vec3<f32> = construct 0.0f, %x_46, 0.0f
+    %12:mat2x3<f32> = construct %10, %11
+    store %m23, %12
+    store %i, 1i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_80:ptr<function, bool, read_write> = var
+        %x_81:ptr<function, bool, read_write> = var
+        %15:i32 = load %i
+        %16:ptr<uniform, i32, read> = access %x_10, 0u, 3i, 0u
+        %17:i32 = load %16
+        %18:bool = lt %15, %17
+        if %18 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %19:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %x_60:i32 = load %19
+        %21:ptr<uniform, i32, read> = access %x_10, 0u, 2i, 0u
+        %x_62:i32 = load %21
+        %23:ptr<function, vec3<f32>, read_write> = access %m23, %x_60
+        %24:ptr<function, vec3<f32>, read_write> = access %m23, %x_60
+        %25:f32 = load_vector_element %24, %x_62
+        %26:ptr<uniform, f32, read> = access %x_7, 0u, 0i, 0u
+        %27:f32 = load %26
+        %28:f32 = add %25, %27
+        store_vector_element %23, %x_62, %28
+        %29:f32 = load_vector_element %gl_FragCoord, 1u
+        %30:ptr<uniform, f32, read> = access %x_7, 0u, 0i, 0u
+        %31:f32 = load %30
+        %32:bool = lt %29, %31
+        if %32 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            exit_if  # if_2
+          }
+        }
+        store %x_81, true
+        if true [t: %b8] {  # if_3
+          %b8 = block {  # true
+            %33:f32 = load_vector_element %gl_FragCoord, 0u
+            %34:bool = lt %33, 0.0f
+            store %x_80, %34
+            %35:bool = load %x_80
+            store %x_81, %35
+            exit_if  # if_3
+          }
+        }
+        %36:bool = load %x_81
+        %37:bool = eq %36, false
+        if %37 [t: %b9] {  # if_4
+          %b9 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %38:i32 = load %i
+        %39:i32 = add %38, 1i
+        store %i, %39
+        next_iteration %b3
+      }
+    }
+    %40:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %41:i32 = load %40
+    %42:f32 = convert %41
+    %43:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %44:i32 = load %43
+    %45:f32 = convert %44
+    %46:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %47:i32 = load %46
+    %48:f32 = convert %47
+    %49:vec3<f32> = construct %42, %45, %48
+    %50:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %51:i32 = load %50
+    %52:f32 = convert %51
+    %53:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %54:i32 = load %53
+    %55:f32 = convert %54
+    %56:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+    %57:i32 = load %56
+    %58:f32 = convert %57
+    %59:vec3<f32> = construct %52, %55, %58
+    %x_108:mat2x3<f32> = construct %49, %59
+    %61:ptr<function, vec3<f32>, read_write> = access %m23, 0u
+    %62:vec3<f32> = load %61
+    %63:vec3<f32> = access %x_108, 0u
+    %64:vec3<bool> = eq %62, %63
+    %65:bool = all %64
+    %66:ptr<function, vec3<f32>, read_write> = access %m23, 1u
+    %67:vec3<f32> = load %66
+    %68:vec3<f32> = access %x_108, 1u
+    %69:vec3<bool> = eq %67, %68
+    %70:bool = all %69
+    %71:bool = and %65, %70
+    if %71 [t: %b10, f: %b11] {  # if_5
+      %b10 = block {  # true
+        %72:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %73:i32 = load %72
+        %74:f32 = convert %73
+        %75:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %76:i32 = load %75
+        %77:f32 = convert %76
+        %78:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %79:i32 = load %78
+        %80:f32 = convert %79
+        %81:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %82:i32 = load %81
+        %83:f32 = convert %82
+        %84:vec4<f32> = construct %74, %77, %80, %83
+        store %x_GLF_color, %84
+        exit_if  # if_5
+      }
+      %b11 = block {  # false
+        %85:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %86:i32 = load %85
+        %87:f32 = convert %86
+        %88:vec4<f32> = construct %87
+        store %x_GLF_color, %88
+        exit_if  # if_5
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b12 {
+  %b12 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %91:void = call %main_1
+    %92:vec4<f32> = load %x_GLF_color
+    %93:main_out = construct %92
+    ret %93
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

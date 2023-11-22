@@ -1,0 +1,145 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  resolution:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_195:ptr<function, array<i32, 256>, read_write> = var
+    %x_196:ptr<function, array<i32, 256>, read_write> = var
+    %x_197:ptr<function, array<i32, 256>, read_write> = var
+    %x_209:ptr<function, vec2<i32>, read_write> = var
+    %x_213:ptr<function, vec2<i32>, read_write> = var
+    %x_241:ptr<function, vec4<f32>, read_write> = var
+    %x_243:ptr<function, vec4<f32>, read_write> = var
+    %x_244:ptr<function, bool, read_write> = var
+    %x_246:ptr<function, vec4<f32>, read_write> = var
+    %14:vec4<f32> = load %gl_FragCoord
+    %15:vec2<f32> = swizzle %14, xy
+    %16:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %17:vec2<f32> = load %16
+    %x_202:vec2<f32> = div %15, %17
+    %19:f32 = access %x_202, 0u
+    %20:f32 = mul %19, 256.0f
+    %21:i32 = convert %20
+    %22:f32 = access %x_202, 1u
+    %23:f32 = mul %22, 256.0f
+    %24:i32 = convert %23
+    %25:vec2<i32> = construct %21, %24
+    store %x_209, %25
+    switch 0u [c: (default, %b3)] {  # switch_1
+      %b3 = block {  # case
+        %26:vec2<i32> = load %x_209
+        store %x_213, %26
+        loop [b: %b4, c: %b5] {  # loop_1
+          %b4 = block {  # body
+            %x_230:ptr<function, bool, read_write> = var
+            %x_231:ptr<function, bool, read_write> = var
+            %x_216:i32 = load_vector_element %x_213, 1u
+            store %x_243, vec4<f32>(0.0f)
+            store %x_244, false
+            %30:bool = neq %x_216, 256i
+            if %30 [t: %b6, f: %b7] {  # if_1
+              %b6 = block {  # true
+                exit_if  # if_1
+              }
+              %b7 = block {  # false
+                exit_loop  # loop_1
+              }
+            }
+            %x_220:i32 = load_vector_element %x_213, 0u
+            store %x_195, array<i32, 256>(115i, 133i, 150i, 164i, 176i, 184i, 190i, 192i, 191i, 187i, 181i, 172i, 163i, 153i, 143i, 134i, 126i, 120i, 116i, 114i, 114i, 117i, 121i, 127i, 134i, 141i, 148i, 154i, 159i, 162i, 163i, 161i, 157i, 151i, 143i, 134i, 124i, 113i, 103i, 94i, 87i, 82i, 79i, 80i, 84i, 91i, 101i, 114i, 130i, 146i, 164i, 182i, 199i, 215i, 229i, 240i, 249i, 254i, 256i, 254i, 250i, 243i, 233i, 223i, 212i, 200i, 190i, 180i, 172i, 166i, 163i, 161i, 162i, 164i, 169i, 174i, 179i, 185i, 190i, 193i, 195i, 195i, 192i, 188i, 180i, 171i, 161i, 149i, 137i, 125i, 114i, 105i, 97i, 93i, 91i, 93i, 98i, 106i, 117i, 130i, 145i, 161i, 177i, 193i, 208i, 221i, 231i, 239i, 243i, 244i, 242i, 236i, 228i, 218i, 207i, 194i, 181i, 169i, 158i, 148i, 141i, 135i, 132i, 131i, 132i, 135i, 138i, 143i, 147i, 151i, 154i, 155i, 155i, 152i, 146i, 139i, 129i, 118i, 106i, 93i, 80i, 68i, 58i, 49i, 43i, 40i, 41i, 44i, 51i, 61i, 73i, 87i, 103i, 119i, 134i, 149i, 162i, 173i, 181i, 186i, 188i, 186i, 181i, 174i, 164i, 153i, 141i, 128i, 116i, 104i, 94i, 86i, 81i, 77i, 76i, 77i, 80i, 84i, 89i, 94i, 98i, 102i, 104i, 104i, 102i, 98i, 92i, 83i, 73i, 62i, 50i, 38i, 26i, 16i, 8i, 2i, 0i, 0i, 4i, 11i, 21i, 33i, 48i, 64i, 81i, 98i, 114i, 129i, 141i, 151i, 158i, 161i, 161i, 158i, 152i, 144i, 134i, 123i, 112i, 100i, 90i, 81i, 73i, 68i, 65i, 65i, 67i, 70i, 75i, 81i, 87i, 92i, 97i, 101i, 103i, 102i, 100i, 95i, 88i, 79i, 69i, 58i, 47i, 36i, 26i, 18i, 13i, 11i, 11i, 15i, 22i, 32i, 45i, 60i, 77i, 94i)
+            %32:ptr<function, i32, read_write> = access %x_195, %x_216
+            %33:i32 = load %32
+            %34:i32 = add %33, 15i
+            %x_224:bool = lt %x_220, %34
+            store %x_231, %x_224
+            if %x_224 [t: %b8] {  # if_2
+              %b8 = block {  # true
+                store %x_196, array<i32, 256>(115i, 133i, 150i, 164i, 176i, 184i, 190i, 192i, 191i, 187i, 181i, 172i, 163i, 153i, 143i, 134i, 126i, 120i, 116i, 114i, 114i, 117i, 121i, 127i, 134i, 141i, 148i, 154i, 159i, 162i, 163i, 161i, 157i, 151i, 143i, 134i, 124i, 113i, 103i, 94i, 87i, 82i, 79i, 80i, 84i, 91i, 101i, 114i, 130i, 146i, 164i, 182i, 199i, 215i, 229i, 240i, 249i, 254i, 256i, 254i, 250i, 243i, 233i, 223i, 212i, 200i, 190i, 180i, 172i, 166i, 163i, 161i, 162i, 164i, 169i, 174i, 179i, 185i, 190i, 193i, 195i, 195i, 192i, 188i, 180i, 171i, 161i, 149i, 137i, 125i, 114i, 105i, 97i, 93i, 91i, 93i, 98i, 106i, 117i, 130i, 145i, 161i, 177i, 193i, 208i, 221i, 231i, 239i, 243i, 244i, 242i, 236i, 228i, 218i, 207i, 194i, 181i, 169i, 158i, 148i, 141i, 135i, 132i, 131i, 132i, 135i, 138i, 143i, 147i, 151i, 154i, 155i, 155i, 152i, 146i, 139i, 129i, 118i, 106i, 93i, 80i, 68i, 58i, 49i, 43i, 40i, 41i, 44i, 51i, 61i, 73i, 87i, 103i, 119i, 134i, 149i, 162i, 173i, 181i, 186i, 188i, 186i, 181i, 174i, 164i, 153i, 141i, 128i, 116i, 104i, 94i, 86i, 81i, 77i, 76i, 77i, 80i, 84i, 89i, 94i, 98i, 102i, 104i, 104i, 102i, 98i, 92i, 83i, 73i, 62i, 50i, 38i, 26i, 16i, 8i, 2i, 0i, 0i, 4i, 11i, 21i, 33i, 48i, 64i, 81i, 98i, 114i, 129i, 141i, 151i, 158i, 161i, 161i, 158i, 152i, 144i, 134i, 123i, 112i, 100i, 90i, 81i, 73i, 68i, 65i, 65i, 67i, 70i, 75i, 81i, 87i, 92i, 97i, 101i, 103i, 102i, 100i, 95i, 88i, 79i, 69i, 58i, 47i, 36i, 26i, 18i, 13i, 11i, 11i, 15i, 22i, 32i, 45i, 60i, 77i, 94i)
+                %36:ptr<function, i32, read_write> = access %x_196, %x_216
+                %37:i32 = load %36
+                %38:i32 = sub %37, 15i
+                %39:bool = gt %x_220, %38
+                store %x_230, %39
+                %40:bool = load %x_230
+                store %x_231, %40
+                exit_if  # if_2
+              }
+            }
+            %41:bool = load %x_231
+            if %41 [t: %b9] {  # if_3
+              %b9 = block {  # true
+                store %x_197, array<i32, 256>(115i, 133i, 150i, 164i, 176i, 184i, 190i, 192i, 191i, 187i, 181i, 172i, 163i, 153i, 143i, 134i, 126i, 120i, 116i, 114i, 114i, 117i, 121i, 127i, 134i, 141i, 148i, 154i, 159i, 162i, 163i, 161i, 157i, 151i, 143i, 134i, 124i, 113i, 103i, 94i, 87i, 82i, 79i, 80i, 84i, 91i, 101i, 114i, 130i, 146i, 164i, 182i, 199i, 215i, 229i, 240i, 249i, 254i, 256i, 254i, 250i, 243i, 233i, 223i, 212i, 200i, 190i, 180i, 172i, 166i, 163i, 161i, 162i, 164i, 169i, 174i, 179i, 185i, 190i, 193i, 195i, 195i, 192i, 188i, 180i, 171i, 161i, 149i, 137i, 125i, 114i, 105i, 97i, 93i, 91i, 93i, 98i, 106i, 117i, 130i, 145i, 161i, 177i, 193i, 208i, 221i, 231i, 239i, 243i, 244i, 242i, 236i, 228i, 218i, 207i, 194i, 181i, 169i, 158i, 148i, 141i, 135i, 132i, 131i, 132i, 135i, 138i, 143i, 147i, 151i, 154i, 155i, 155i, 152i, 146i, 139i, 129i, 118i, 106i, 93i, 80i, 68i, 58i, 49i, 43i, 40i, 41i, 44i, 51i, 61i, 73i, 87i, 103i, 119i, 134i, 149i, 162i, 173i, 181i, 186i, 188i, 186i, 181i, 174i, 164i, 153i, 141i, 128i, 116i, 104i, 94i, 86i, 81i, 77i, 76i, 77i, 80i, 84i, 89i, 94i, 98i, 102i, 104i, 104i, 102i, 98i, 92i, 83i, 73i, 62i, 50i, 38i, 26i, 16i, 8i, 2i, 0i, 0i, 4i, 11i, 21i, 33i, 48i, 64i, 81i, 98i, 114i, 129i, 141i, 151i, 158i, 161i, 161i, 158i, 152i, 144i, 134i, 123i, 112i, 100i, 90i, 81i, 73i, 68i, 65i, 65i, 67i, 70i, 75i, 81i, 87i, 92i, 97i, 101i, 103i, 102i, 100i, 95i, 88i, 79i, 69i, 58i, 47i, 36i, 26i, 18i, 13i, 11i, 11i, 15i, 22i, 32i, 45i, 60i, 77i, 94i)
+                %42:ptr<function, i32, read_write> = access %x_197, %x_216
+                %43:i32 = load %42
+                %44:i32 = sub %x_220, %43
+                %45:f32 = convert %44
+                %46:f32 = abs %45
+                %47:f32 = sub 15.0f, %46
+                %x_240:f32 = mul %47, 0.06666667014360427856f
+                %49:vec4<f32> = construct %x_240, %x_240, %x_240, 1.0f
+                store %x_241, %49
+                %50:vec4<f32> = load %x_241
+                store %x_243, %50
+                store %x_244, true
+                exit_loop  # loop_1
+              }
+            }
+            %51:vec2<i32> = load %x_213
+            %x_214_1:ptr<function, vec2<i32>, read_write> = var, %51
+            %53:i32 = add %x_216, 1i
+            store_vector_element %x_214_1, 1u, %53
+            %x_214:vec2<i32> = load %x_214_1
+            continue %b5
+          }
+          %b5 = block {  # continuing
+            store %x_213, %x_214
+            next_iteration %b4
+          }
+        }
+        %55:vec4<f32> = load %x_243
+        store %x_246, %55
+        %56:bool = load %x_244
+        if %56 [t: %b10] {  # if_4
+          %b10 = block {  # true
+            exit_switch  # switch_1
+          }
+        }
+        store %x_246, vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f)
+        exit_switch  # switch_1
+      }
+    }
+    %57:vec4<f32> = load %x_246
+    store %x_GLF_color, %57
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b11 {
+  %b11 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %60:void = call %main_1
+    %61:vec4<f32> = load %x_GLF_color
+    %62:main_out = construct %61
+    ret %62
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

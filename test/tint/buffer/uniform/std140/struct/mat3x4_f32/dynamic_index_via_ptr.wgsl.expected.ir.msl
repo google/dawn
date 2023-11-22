@@ -1,0 +1,54 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(16) {
+  m:mat3x4<f32> @offset(0)
+}
+
+Outer = struct @align(16) {
+  a:array<Inner, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %a:ptr<uniform, array<Outer, 4>, read> = var @binding_point(0, 0)
+  %counter:ptr<private, i32, read_write> = var, 0i
+}
+
+%i = func():i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = load %counter
+    %5:i32 = add %4, 1i
+    store %counter, %5
+    %6:i32 = load %counter
+    ret %6
+  }
+}
+%f = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %p_a:ptr<uniform, array<Outer, 4>, read> = let %a
+    %9:i32 = call %i
+    %p_a_i:ptr<uniform, Outer, read> = access %p_a, %9
+    %p_a_i_a:ptr<uniform, array<Inner, 4>, read> = access %p_a_i, 0u
+    %12:i32 = call %i
+    %p_a_i_a_i:ptr<uniform, Inner, read> = access %p_a_i_a, %12
+    %p_a_i_a_i_m:ptr<uniform, mat3x4<f32>, read> = access %p_a_i_a_i, 0u
+    %15:i32 = call %i
+    %p_a_i_a_i_m_i:ptr<uniform, vec4<f32>, read> = access %p_a_i_a_i_m, %15
+    %l_a:array<Outer, 4> = load %p_a
+    %l_a_i:Outer = load %p_a_i
+    %l_a_i_a:array<Inner, 4> = load %p_a_i_a
+    %l_a_i_a_i:Inner = load %p_a_i_a_i
+    %l_a_i_a_i_m:mat3x4<f32> = load %p_a_i_a_i_m
+    %l_a_i_a_i_m_i:vec4<f32> = load %p_a_i_a_i_m_i
+    %23:i32 = call %i
+    %l_a_i_a_i_m_i_i:f32 = load_vector_element %p_a_i_a_i_m_i, %23
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

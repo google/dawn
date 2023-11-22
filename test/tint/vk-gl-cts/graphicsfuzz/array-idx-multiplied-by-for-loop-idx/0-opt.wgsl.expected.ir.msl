@@ -1,0 +1,180 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_ = func():f32 -> %b2 {
+  %b2 = block {
+    %x:ptr<function, i32, read_write> = var
+    %x_99:f32 = load_vector_element %gl_FragCoord, 0u
+    %7:bool = lt %x_99, 1.0f
+    if %7 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        ret 5.0f
+      }
+    }
+    %8:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_104:f32 = load_vector_element %8, 0u
+    %10:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_106:f32 = load_vector_element %10, 1u
+    %12:bool = gt %x_104, %x_106
+    if %12 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        ret 1.0f
+      }
+    }
+    %13:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_111:f32 = load_vector_element %13, 0u
+    %15:i32 = convert %x_111
+    store %x, %15
+    %16:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_114:f32 = load_vector_element %16, 0u
+    %x_118:i32 = load %x
+    %19:f32 = clamp %x_114, 0.0f, 1.0f
+    %20:i32 = convert %19
+    %21:i32 = mul %20, 3i
+    %22:i32 = add %x_118, %21
+    store %x, %22
+    %x_120:i32 = load %x
+    %24:f32 = convert %x_120
+    %25:f32 = add 5.0f, %24
+    ret %25
+  }
+}
+%main_1 = func():void -> %b5 {
+  %b5 = block {
+    %i:ptr<function, i32, read_write> = var
+    %j:ptr<function, i32, read_write> = var
+    %data:ptr<function, array<vec2<f32>, 17>, read_write> = var
+    store %i, 0i
+    loop [b: %b6, c: %b7] {  # loop_1
+      %b6 = block {  # body
+        %x_48:i32 = load %i
+        %31:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+        %x_50:f32 = load_vector_element %31, 0u
+        %33:i32 = convert %x_50
+        %34:i32 = add 4i, %33
+        %35:bool = lt %x_48, %34
+        if %35 [t: %b8, f: %b9] {  # if_3
+          %b8 = block {  # true
+            exit_if  # if_3
+          }
+          %b9 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_56:f32 = load_vector_element %gl_FragCoord, 0u
+        %37:bool = gte %x_56, 0.0f
+        if %37 [t: %b10] {  # if_4
+          %b10 = block {  # true
+            store %j, 0i
+            loop [b: %b11, c: %b12] {  # loop_2
+              %b11 = block {  # body
+                %x_81:ptr<function, bool, read_write> = var
+                %x_82_phi:ptr<function, bool, read_write> = var
+                %x_64:i32 = load %j
+                %41:bool = lt %x_64, 4i
+                if %41 [t: %b13, f: %b14] {  # if_5
+                  %b13 = block {  # true
+                    exit_if  # if_5
+                  }
+                  %b14 = block {  # false
+                    exit_loop  # loop_2
+                  }
+                }
+                %x_67:i32 = load %j
+                %x_69:i32 = load %i
+                %x_71:f32 = call %func_
+                %45:i32 = mul 4i, %x_67
+                %46:i32 = add %45, %x_69
+                %47:ptr<function, vec2<f32>, read_write> = access %data, %46
+                store_vector_element %47, 0u, %x_71
+                %48:ptr<function, vec2<f32>, read_write> = access %data, 0i
+                %x_74:f32 = load_vector_element %48, 0u
+                %x_75:bool = eq %x_74, 5.0f
+                store %x_82_phi, %x_75
+                %51:bool = eq %x_75, false
+                if %51 [t: %b15] {  # if_6
+                  %b15 = block {  # true
+                    %52:ptr<function, vec2<f32>, read_write> = access %data, 15i
+                    %x_80:f32 = load_vector_element %52, 0u
+                    %54:bool = eq %x_80, 5.0f
+                    store %x_81, %54
+                    %55:bool = load %x_81
+                    store %x_82_phi, %55
+                    exit_if  # if_6
+                  }
+                }
+                %x_82:bool = load %x_82_phi
+                if %x_82 [t: %b16, f: %b17] {  # if_7
+                  %b16 = block {  # true
+                    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+                    exit_if  # if_7
+                  }
+                  %b17 = block {  # false
+                    store %x_GLF_color, vec4<f32>(0.0f)
+                    exit_if  # if_7
+                  }
+                }
+                %57:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+                %x_87:f32 = load_vector_element %57, 0u
+                %59:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+                %x_89:f32 = load_vector_element %59, 1u
+                %61:bool = gt %x_87, %x_89
+                if %61 [t: %b18] {  # if_8
+                  %b18 = block {  # true
+                    ret
+                  }
+                }
+                continue %b12
+              }
+              %b12 = block {  # continuing
+                %x_93:i32 = load %j
+                %63:i32 = add %x_93, 1i
+                store %j, %63
+                next_iteration %b11
+              }
+            }
+            exit_if  # if_4
+          }
+        }
+        continue %b7
+      }
+      %b7 = block {  # continuing
+        %x_95:i32 = load %i
+        %65:i32 = add %x_95, 1i
+        store %i, %65
+        next_iteration %b6
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b19 {
+  %b19 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %68:void = call %main_1
+    %69:vec4<f32> = load %x_GLF_color
+    %70:main_out = construct %69
+    ret %70
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

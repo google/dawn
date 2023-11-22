@@ -1,0 +1,130 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+StructType = struct @align(16) {
+  col:vec3<f32> @offset(0)
+  bbbb:vec4<bool> @offset(16)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_33:ptr<function, StructType, read_write> = var
+    %x_38:ptr<function, i32, read_write> = var
+    %x_42:ptr<function, StructType, read_write> = var
+    %x_33_phi:ptr<function, StructType, read_write> = var
+    %x_9_phi:ptr<function, i32, read_write> = var
+    %x_42_phi:ptr<function, StructType, read_write> = var
+    %x_10_phi:ptr<function, i32, read_write> = var
+    store %x_33_phi, StructType(vec3<f32>(0.0f), vec4<bool>(false))
+    store %x_9_phi, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_34:ptr<function, StructType, read_write> = var
+        %x_7:ptr<function, i32, read_write> = var
+        %13:StructType = load %x_33_phi
+        store %x_33, %13
+        %x_9:i32 = load %x_9_phi
+        %15:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
+        %x_37:f32 = load_vector_element %15, 1u
+        %17:i32 = convert %x_37
+        store %x_38, %17
+        %18:i32 = load %x_38
+        %19:bool = lt %x_9, %18
+        if %19 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %20:StructType = load %x_33
+        store %x_34, %20
+        %21:ptr<function, vec3<f32>, read_write> = access %x_34, 0u
+        store %21, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %22:i32 = add %x_9, 1i
+        store %x_7, %22
+        %23:StructType = load %x_34
+        store %x_33_phi, %23
+        %24:i32 = load %x_7
+        store %x_9_phi, %24
+        next_iteration %b3
+      }
+    }
+    %25:StructType = load %x_33
+    store %x_42_phi, %25
+    store %x_10_phi, 0i
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %x_43:ptr<function, StructType, read_write> = var
+        %x_8:ptr<function, i32, read_write> = var
+        %28:StructType = load %x_42_phi
+        store %x_42, %28
+        %x_10:i32 = load %x_10_phi
+        %30:i32 = load %x_38
+        %31:bool = lt %x_10, %30
+        if %31 [t: %b9, f: %b10] {  # if_2
+          %b9 = block {  # true
+            exit_if  # if_2
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %32:StructType = load %x_42
+        store %x_43, %32
+        %33:ptr<function, vec3<f32>, read_write> = access %x_43, 0u
+        store %33, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %34:i32 = add %x_10, 1i
+        store %x_8, %34
+        %35:StructType = load %x_43
+        store %x_42_phi, %35
+        %36:i32 = load %x_8
+        store %x_10_phi, %36
+        next_iteration %b7
+      }
+    }
+    %37:ptr<function, vec3<f32>, read_write> = access %x_42, 0u
+    %x_47:vec3<f32> = load %37
+    %39:f32 = access %x_47, 0u
+    %40:f32 = access %x_47, 1u
+    %41:f32 = access %x_47, 2u
+    %42:vec4<f32> = construct %39, %40, %41, 1.0f
+    store %x_GLF_color, %42
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b11 {
+  %b11 = block {
+    %44:void = call %main_1
+    %45:vec4<f32> = load %x_GLF_color
+    %46:main_out = construct %45
+    ret %46
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

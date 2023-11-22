@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<workgroup, atomic<u32>, read_write> = var
+  %prevent_dce:ptr<storage, u32, read_write> = var @binding_point(2, 0)
+}
+
+%atomicXor_c8e6be = func():void -> %b2 {
+  %b2 = block {
+    %arg_1:ptr<function, u32, read_write> = var, 1u
+    %5:u32 = load %arg_1
+    %6:u32 = atomicXor %arg_0, %5
+    %res:ptr<function, u32, read_write> = var, %6
+    %8:u32 = load %res
+    store %prevent_dce, %8
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %10:void = call %atomicXor_c8e6be
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,53 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: PixelLocal = struct @align(4) {
+  a:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %P:ptr<pixel_local, PixelLocal, read_write> = var
+}
+
+%f0 = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %4:u32 = load %3
+    %5:u32 = add %4, 9u
+    store %3, %5
+    ret
+  }
+}
+%f1 = func():void -> %b3 {
+  %b3 = block {
+    %7:void = call %f0
+    %8:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %9:u32 = load %8
+    %10:u32 = add %9, 8u
+    store %8, %10
+    ret
+  }
+}
+%f2 = func():void -> %b4 {
+  %b4 = block {
+    %12:ptr<pixel_local, u32, read_write> = access %P, 0u
+    %13:u32 = load %12
+    %14:u32 = add %13, 7u
+    store %12, %14
+    %15:void = call %f1
+    ret
+  }
+}
+%f = @fragment func():vec4<f32> [@location(0)] -> %b5 {
+  %b5 = block {
+    %17:void = call %f2
+    ret vec4<f32>(2.0f)
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,301 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SimParams = struct @align(4) {
+  deltaT:f32 @offset(0)
+  rule1Distance:f32 @offset(4)
+  rule2Distance:f32 @offset(8)
+  rule3Distance:f32 @offset(12)
+  rule1Scale:f32 @offset(16)
+  rule2Scale:f32 @offset(20)
+  rule3Scale:f32 @offset(24)
+}
+
+Particle = struct @align(8) {
+  pos:vec2<f32> @offset(0)
+  vel:vec2<f32> @offset(8)
+}
+
+Particles = struct @align(8) {
+  particles:array<Particle, 5> @offset(0)
+}
+
+%b1 = block {  # root
+  %params:ptr<uniform, SimParams, read> = var @binding_point(0, 0)
+  %particlesA:ptr<storage, Particles, read_write> = var @binding_point(0, 1)
+  %particlesB:ptr<storage, Particles, read_write> = var @binding_point(0, 2)
+}
+
+%vert_main = @vertex func(%a_particlePos:vec2<f32> [@location(0)], %a_particleVel:vec2<f32> [@location(1)], %a_pos:vec2<f32> [@location(2)]):vec4<f32> [@position] -> %b2 {
+  %b2 = block {
+    %8:f32 = access %a_particleVel, 0u
+    %9:f32 = access %a_particleVel, 1u
+    %10:f32 = atan2 %8, %9
+    %11:f32 = negation %10
+    %angle:ptr<function, f32, read_write> = var, %11
+    %13:f32 = access %a_pos, 0u
+    %14:f32 = load %angle
+    %15:f32 = cos %14
+    %16:f32 = mul %13, %15
+    %17:f32 = access %a_pos, 1u
+    %18:f32 = load %angle
+    %19:f32 = sin %18
+    %20:f32 = mul %17, %19
+    %21:f32 = sub %16, %20
+    %22:f32 = access %a_pos, 0u
+    %23:f32 = load %angle
+    %24:f32 = sin %23
+    %25:f32 = mul %22, %24
+    %26:f32 = access %a_pos, 1u
+    %27:f32 = load %angle
+    %28:f32 = cos %27
+    %29:f32 = mul %26, %28
+    %30:f32 = add %25, %29
+    %31:vec2<f32> = construct %21, %30
+    %pos:ptr<function, vec2<f32>, read_write> = var, %31
+    %33:vec2<f32> = load %pos
+    %34:vec2<f32> = add %33, %a_particlePos
+    %35:vec4<f32> = construct %34, 0.0f, 1.0f
+    ret %35
+  }
+}
+%frag_main = @fragment func():vec4<f32> [@location(0)] -> %b3 {
+  %b3 = block {
+    ret vec4<f32>(1.0f)
+  }
+}
+%comp_main = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID:vec3<u32> [@global_invocation_id]):void -> %b4 {
+  %b4 = block {
+    %39:u32 = access %gl_GlobalInvocationID, 0u
+    %index:ptr<function, u32, read_write> = var, %39
+    %41:u32 = load %index
+    %42:bool = gte %41, 5u
+    if %42 [t: %b5] {  # if_1
+      %b5 = block {  # true
+        ret
+      }
+    }
+    %43:u32 = load %index
+    %44:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %43, 0u
+    %45:vec2<f32> = load %44
+    %vPos:ptr<function, vec2<f32>, read_write> = var, %45
+    %47:u32 = load %index
+    %48:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %47, 1u
+    %49:vec2<f32> = load %48
+    %vVel:ptr<function, vec2<f32>, read_write> = var, %49
+    %cMass:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %cVel:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %colVel:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %cMassCount:ptr<function, i32, read_write> = var, 0i
+    %cVelCount:ptr<function, i32, read_write> = var, 0i
+    %pos_1:ptr<function, vec2<f32>, read_write> = var  # %pos_1: 'pos'
+    %vel:ptr<function, vec2<f32>, read_write> = var
+    loop [i: %b6, b: %b7, c: %b8] {  # loop_1
+      %b6 = block {  # initializer
+        %i:ptr<function, u32, read_write> = var, 0u
+        next_iteration %b7
+      }
+      %b7 = block {  # body
+        %59:u32 = load %i
+        %60:bool = lt %59, 5u
+        if %60 [t: %b9, f: %b10] {  # if_2
+          %b9 = block {  # true
+            exit_if  # if_2
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %61:u32 = load %i
+        %62:u32 = load %index
+        %63:bool = eq %61, %62
+        if %63 [t: %b11] {  # if_3
+          %b11 = block {  # true
+            continue %b8
+          }
+        }
+        %64:u32 = load %i
+        %65:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %64, 0u
+        %66:vec2<f32> = load %65
+        %67:vec2<f32> = swizzle %66, xy
+        store %pos_1, %67
+        %68:u32 = load %i
+        %69:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %68, 1u
+        %70:vec2<f32> = load %69
+        %71:vec2<f32> = swizzle %70, xy
+        store %vel, %71
+        %72:vec2<f32> = load %pos_1
+        %73:vec2<f32> = load %vPos
+        %74:f32 = distance %72, %73
+        %75:ptr<uniform, f32, read> = access %params, 1u
+        %76:f32 = load %75
+        %77:bool = lt %74, %76
+        if %77 [t: %b12] {  # if_4
+          %b12 = block {  # true
+            %78:vec2<f32> = load %cMass
+            %79:vec2<f32> = load %pos_1
+            %80:vec2<f32> = add %78, %79
+            store %cMass, %80
+            %81:i32 = load %cMassCount
+            %82:i32 = add %81, 1i
+            store %cMassCount, %82
+            exit_if  # if_4
+          }
+        }
+        %83:vec2<f32> = load %pos_1
+        %84:vec2<f32> = load %vPos
+        %85:f32 = distance %83, %84
+        %86:ptr<uniform, f32, read> = access %params, 2u
+        %87:f32 = load %86
+        %88:bool = lt %85, %87
+        if %88 [t: %b13] {  # if_5
+          %b13 = block {  # true
+            %89:vec2<f32> = load %colVel
+            %90:vec2<f32> = load %pos_1
+            %91:vec2<f32> = load %vPos
+            %92:vec2<f32> = sub %90, %91
+            %93:vec2<f32> = sub %89, %92
+            store %colVel, %93
+            exit_if  # if_5
+          }
+        }
+        %94:vec2<f32> = load %pos_1
+        %95:vec2<f32> = load %vPos
+        %96:f32 = distance %94, %95
+        %97:ptr<uniform, f32, read> = access %params, 3u
+        %98:f32 = load %97
+        %99:bool = lt %96, %98
+        if %99 [t: %b14] {  # if_6
+          %b14 = block {  # true
+            %100:vec2<f32> = load %cVel
+            %101:vec2<f32> = load %vel
+            %102:vec2<f32> = add %100, %101
+            store %cVel, %102
+            %103:i32 = load %cVelCount
+            %104:i32 = add %103, 1i
+            store %cVelCount, %104
+            exit_if  # if_6
+          }
+        }
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %105:u32 = load %i
+        %106:u32 = add %105, 1u
+        store %i, %106
+        next_iteration %b7
+      }
+    }
+    %107:i32 = load %cMassCount
+    %108:bool = gt %107, 0i
+    if %108 [t: %b15] {  # if_7
+      %b15 = block {  # true
+        %109:vec2<f32> = load %cMass
+        %110:i32 = load %cMassCount
+        %111:f32 = convert %110
+        %112:i32 = load %cMassCount
+        %113:f32 = convert %112
+        %114:vec2<f32> = construct %111, %113
+        %115:vec2<f32> = div %109, %114
+        %116:vec2<f32> = load %vPos
+        %117:vec2<f32> = sub %115, %116
+        store %cMass, %117
+        exit_if  # if_7
+      }
+    }
+    %118:i32 = load %cVelCount
+    %119:bool = gt %118, 0i
+    if %119 [t: %b16] {  # if_8
+      %b16 = block {  # true
+        %120:vec2<f32> = load %cVel
+        %121:i32 = load %cVelCount
+        %122:f32 = convert %121
+        %123:i32 = load %cVelCount
+        %124:f32 = convert %123
+        %125:vec2<f32> = construct %122, %124
+        %126:vec2<f32> = div %120, %125
+        store %cVel, %126
+        exit_if  # if_8
+      }
+    }
+    %127:vec2<f32> = load %vVel
+    %128:vec2<f32> = load %cMass
+    %129:ptr<uniform, f32, read> = access %params, 4u
+    %130:f32 = load %129
+    %131:vec2<f32> = mul %128, %130
+    %132:vec2<f32> = add %127, %131
+    %133:vec2<f32> = load %colVel
+    %134:ptr<uniform, f32, read> = access %params, 5u
+    %135:f32 = load %134
+    %136:vec2<f32> = mul %133, %135
+    %137:vec2<f32> = add %132, %136
+    %138:vec2<f32> = load %cVel
+    %139:ptr<uniform, f32, read> = access %params, 6u
+    %140:f32 = load %139
+    %141:vec2<f32> = mul %138, %140
+    %142:vec2<f32> = add %137, %141
+    store %vVel, %142
+    %143:vec2<f32> = load %vVel
+    %144:vec2<f32> = normalize %143
+    %145:vec2<f32> = load %vVel
+    %146:f32 = length %145
+    %147:f32 = clamp %146, 0.0f, 0.10000000149011611938f
+    %148:vec2<f32> = mul %144, %147
+    store %vVel, %148
+    %149:vec2<f32> = load %vPos
+    %150:vec2<f32> = load %vVel
+    %151:ptr<uniform, f32, read> = access %params, 0u
+    %152:f32 = load %151
+    %153:vec2<f32> = mul %150, %152
+    %154:vec2<f32> = add %149, %153
+    store %vPos, %154
+    %155:f32 = load_vector_element %vPos, 0u
+    %156:bool = lt %155, -1.0f
+    if %156 [t: %b17] {  # if_9
+      %b17 = block {  # true
+        store_vector_element %vPos, 0u, 1.0f
+        exit_if  # if_9
+      }
+    }
+    %157:f32 = load_vector_element %vPos, 0u
+    %158:bool = gt %157, 1.0f
+    if %158 [t: %b18] {  # if_10
+      %b18 = block {  # true
+        store_vector_element %vPos, 0u, -1.0f
+        exit_if  # if_10
+      }
+    }
+    %159:f32 = load_vector_element %vPos, 1u
+    %160:bool = lt %159, -1.0f
+    if %160 [t: %b19] {  # if_11
+      %b19 = block {  # true
+        store_vector_element %vPos, 1u, 1.0f
+        exit_if  # if_11
+      }
+    }
+    %161:f32 = load_vector_element %vPos, 1u
+    %162:bool = gt %161, 1.0f
+    if %162 [t: %b20] {  # if_12
+      %b20 = block {  # true
+        store_vector_element %vPos, 1u, -1.0f
+        exit_if  # if_12
+      }
+    }
+    %163:u32 = load %index
+    %164:ptr<storage, vec2<f32>, read_write> = access %particlesB, 0u, %163, 0u
+    %165:vec2<f32> = load %vPos
+    store %164, %165
+    %166:u32 = load %index
+    %167:ptr<storage, vec2<f32>, read_write> = access %particlesB, 0u, %166, 1u
+    %168:vec2<f32> = load %vVel
+    store %167, %168
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

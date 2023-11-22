@@ -1,0 +1,189 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: theSSBO = struct @align(4) {
+  out_data:i32 @offset(0)
+}
+
+buf1 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+%b1 = block {  # root
+  %x_4:ptr<storage, theSSBO, read_write> = var @binding_point(0, 0)
+  %x_6:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %i:ptr<function, i32, read_write> = var
+    %GLF_live3s:ptr<function, f32, read_write> = var
+    %i_1:ptr<function, i32, read_write> = var
+    %z:ptr<function, i32, read_write> = var
+    %8:ptr<storage, i32, read_write> = access %x_4, 0u
+    store %8, 42i
+    %9:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %10:f32 = load_vector_element %9, 0u
+    %11:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %12:f32 = load_vector_element %11, 1u
+    %13:bool = gt %10, %12
+    if %13 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %14:void = workgroupBarrier
+        exit_if  # if_1
+      }
+    }
+    %15:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %16:f32 = load_vector_element %15, 0u
+    %17:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %18:f32 = load_vector_element %17, 1u
+    %19:bool = gt %16, %18
+    if %19 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %20:void = workgroupBarrier
+        exit_if  # if_2
+      }
+    }
+    %21:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %22:f32 = load_vector_element %21, 1u
+    %23:i32 = convert %22
+    store %i, %23
+    loop [b: %b5, c: %b6] {  # loop_1
+      %b5 = block {  # body
+        %24:i32 = load %i
+        %25:bool = gt %24, 0i
+        if %25 [t: %b7, f: %b8] {  # if_3
+          %b7 = block {  # true
+            exit_if  # if_3
+          }
+          %b8 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %26:void = workgroupBarrier
+        continue %b6
+      }
+      %b6 = block {  # continuing
+        %27:i32 = load %i
+        %28:i32 = sub %27, 1i
+        store %i, %28
+        next_iteration %b5
+      }
+    }
+    store %GLF_live3s, 0.0f
+    loop [b: %b9, c: %b10] {  # loop_2
+      %b9 = block {  # body
+        store %i_1, 1i
+        loop [b: %b11, c: %b12] {  # loop_3
+          %b11 = block {  # body
+            %29:i32 = load %i_1
+            %30:bool = lt %29, 2i
+            if %30 [t: %b13, f: %b14] {  # if_4
+              %b13 = block {  # true
+                exit_if  # if_4
+              }
+              %b14 = block {  # false
+                exit_loop  # loop_3
+              }
+            }
+            %31:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+            %32:f32 = load_vector_element %31, 0u
+            %33:bool = gt %32, 1.0f
+            if %33 [t: %b15] {  # if_5
+              %b15 = block {  # true
+                %34:void = workgroupBarrier
+                exit_if  # if_5
+              }
+            }
+            %35:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+            %36:f32 = load_vector_element %35, 0u
+            %37:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+            %38:f32 = load_vector_element %37, 1u
+            %39:bool = gt %36, %38
+            if %39 [t: %b16] {  # if_6
+              %b16 = block {  # true
+                %40:void = workgroupBarrier
+                exit_if  # if_6
+              }
+            }
+            %41:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+            %42:f32 = load_vector_element %41, 1u
+            %43:i32 = convert %42
+            store %z, %43
+            loop [b: %b17, c: %b18] {  # loop_4
+              %b17 = block {  # body
+                %44:i32 = load %z
+                %45:bool = gt %44, 0i
+                if %45 [t: %b19, f: %b20] {  # if_7
+                  %b19 = block {  # true
+                    exit_if  # if_7
+                  }
+                  %b20 = block {  # false
+                    exit_loop  # loop_4
+                  }
+                }
+                %46:f32 = load %GLF_live3s
+                %47:f32 = add %46, 1.0f
+                store %GLF_live3s, %47
+                continue %b18
+              }
+              %b18 = block {  # continuing
+                %48:i32 = load %z
+                %49:i32 = sub %48, 1i
+                store %z, %49
+                next_iteration %b17
+              }
+            }
+            %50:i32 = load %i_1
+            %51:bool = gte %50, 1i
+            if %51 [t: %b21] {  # if_8
+              %b21 = block {  # true
+                %52:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+                %53:f32 = load_vector_element %52, 0u
+                %54:bool = gt %53, 1.0f
+                if %54 [t: %b22] {  # if_9
+                  %b22 = block {  # true
+                    %55:void = workgroupBarrier
+                    exit_if  # if_9
+                  }
+                }
+                exit_if  # if_8
+              }
+            }
+            continue %b12
+          }
+          %b12 = block {  # continuing
+            %56:i32 = load %i_1
+            %57:i32 = add %56, 1i
+            store %i_1, %57
+            next_iteration %b11
+          }
+        }
+        continue %b10
+      }
+      %b10 = block {  # continuing
+        %58:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+        %x_111:f32 = load_vector_element %58, 0u
+        %60:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+        %x_113:f32 = load_vector_element %60, 1u
+        %62:bool = gt %x_111, %x_113
+        %63:bool = eq %62, false
+        break_if %63 %b9
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b23 {
+  %b23 = block {
+    %65:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

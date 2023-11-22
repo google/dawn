@@ -1,0 +1,47 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<handle, texture_multisampled_2d<u32>, read> = var @binding_point(1, 0)
+  %prevent_dce:ptr<storage, vec4<u32>, read_write> = var @binding_point(2, 0)
+}
+
+%textureLoad_fe0565 = func():void -> %b2 {
+  %b2 = block {
+    %arg_1:ptr<function, vec2<u32>, read_write> = var, vec2<u32>(1u)
+    %arg_2:ptr<function, i32, read_write> = var, 1i
+    %6:texture_multisampled_2d<u32> = load %arg_0
+    %7:vec2<u32> = load %arg_1
+    %8:i32 = load %arg_2
+    %9:vec4<u32> = textureLoad %6, %7, %8
+    %res:ptr<function, vec4<u32>, read_write> = var, %9
+    %11:vec4<u32> = load %res
+    store %prevent_dce, %11
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %13:void = call %textureLoad_fe0565
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %15:void = call %textureLoad_fe0565
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %17:void = call %textureLoad_fe0565
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

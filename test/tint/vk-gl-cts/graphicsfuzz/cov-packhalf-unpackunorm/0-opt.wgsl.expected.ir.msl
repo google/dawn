@@ -1,0 +1,182 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 4> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 4> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_10:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, u32, read_write> = var
+    %values:ptr<function, vec4<f32>, read_write> = var
+    %r:ptr<function, vec4<f32>, read_write> = var
+    %x_85:ptr<function, bool, read_write> = var
+    %x_101:ptr<function, bool, read_write> = var
+    %x_117:ptr<function, bool, read_write> = var
+    %x_86_phi:ptr<function, bool, read_write> = var
+    %x_102_phi:ptr<function, bool, read_write> = var
+    %x_118_phi:ptr<function, bool, read_write> = var
+    store %a, 1006648320u
+    %x_38:u32 = load %a
+    %15:vec4<f32> = unpack4x8unorm %x_38
+    store %values, %15
+    %16:ptr<uniform, f32, read> = access %x_8, 0u, 3i, 0u
+    %x_41:f32 = load %16
+    %18:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
+    %x_43:f32 = load %18
+    %20:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
+    %x_45:f32 = load %20
+    %22:ptr<uniform, f32, read> = access %x_8, 0u, 3i, 0u
+    %x_48:f32 = load %22
+    %24:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
+    %x_50:f32 = load %24
+    %26:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
+    %x_53:f32 = load %26
+    %28:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
+    %x_55:f32 = load %28
+    %30:f32 = div %x_43, %x_45
+    %31:f32 = div %x_48, %x_50
+    %32:f32 = div %x_53, %x_55
+    %33:vec4<f32> = construct %x_41, %30, %31, %32
+    store %r, %33
+    %34:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+    %x_59:i32 = load %34
+    %x_61:f32 = load_vector_element %values, %x_59
+    %37:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+    %x_63:i32 = load %37
+    %x_65:f32 = load_vector_element %r, %x_63
+    %40:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
+    %x_69:f32 = load %40
+    %42:f32 = sub %x_61, %x_65
+    %43:f32 = abs %42
+    %x_70:bool = lt %43, %x_69
+    store %x_86_phi, %x_70
+    if %x_70 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %45:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %x_74:i32 = load %45
+        %x_76:f32 = load_vector_element %values, %x_74
+        %48:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %x_78:i32 = load %48
+        %x_80:f32 = load_vector_element %r, %x_78
+        %51:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
+        %x_84:f32 = load %51
+        %53:f32 = sub %x_76, %x_80
+        %54:f32 = abs %53
+        %55:bool = lt %54, %x_84
+        store %x_85, %55
+        %56:bool = load %x_85
+        store %x_86_phi, %56
+        exit_if  # if_1
+      }
+    }
+    %x_86:bool = load %x_86_phi
+    store %x_102_phi, %x_86
+    if %x_86 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %58:ptr<uniform, i32, read> = access %x_10, 0u, 3i, 0u
+        %x_90:i32 = load %58
+        %x_92:f32 = load_vector_element %values, %x_90
+        %61:ptr<uniform, i32, read> = access %x_10, 0u, 3i, 0u
+        %x_94:i32 = load %61
+        %x_96:f32 = load_vector_element %r, %x_94
+        %64:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
+        %x_100:f32 = load %64
+        %66:f32 = sub %x_92, %x_96
+        %67:f32 = abs %66
+        %68:bool = lt %67, %x_100
+        store %x_101, %68
+        %69:bool = load %x_101
+        store %x_102_phi, %69
+        exit_if  # if_2
+      }
+    }
+    %x_102:bool = load %x_102_phi
+    store %x_118_phi, %x_102
+    if %x_102 [t: %b5] {  # if_3
+      %b5 = block {  # true
+        %71:ptr<uniform, i32, read> = access %x_10, 0u, 2i, 0u
+        %x_106:i32 = load %71
+        %x_108:f32 = load_vector_element %values, %x_106
+        %74:ptr<uniform, i32, read> = access %x_10, 0u, 2i, 0u
+        %x_110:i32 = load %74
+        %x_112:f32 = load_vector_element %r, %x_110
+        %77:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
+        %x_116:f32 = load %77
+        %79:f32 = sub %x_108, %x_112
+        %80:f32 = abs %79
+        %81:bool = lt %80, %x_116
+        store %x_117, %81
+        %82:bool = load %x_117
+        store %x_118_phi, %82
+        exit_if  # if_3
+      }
+    }
+    %x_118:bool = load %x_118_phi
+    if %x_118 [t: %b6, f: %b7] {  # if_4
+      %b6 = block {  # true
+        %84:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %x_123:i32 = load %84
+        %86:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %x_126:i32 = load %86
+        %88:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %x_129:i32 = load %88
+        %90:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %x_132:i32 = load %90
+        %92:f32 = convert %x_123
+        %93:f32 = convert %x_126
+        %94:f32 = convert %x_129
+        %95:f32 = convert %x_132
+        %96:vec4<f32> = construct %92, %93, %94, %95
+        store %x_GLF_color, %96
+        exit_if  # if_4
+      }
+      %b7 = block {  # false
+        %97:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %x_136:i32 = load %97
+        %x_137:f32 = convert %x_136
+        %100:vec4<f32> = construct %x_137, %x_137, %x_137, %x_137
+        store %x_GLF_color, %100
+        exit_if  # if_4
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b8 {
+  %b8 = block {
+    %102:void = call %main_1
+    %103:vec4<f32> = load %x_GLF_color
+    %104:main_out = construct %103
+    ret %104
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,131 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 2> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 2> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_8:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, f32, read_write> = var
+    %6:ptr<uniform, f32, read> = access %x_5, 0u, 1i, 0u
+    %7:f32 = load %6
+    %8:vec4<f32> = construct %7
+    store %x_GLF_color, %8
+    %9:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+    %10:f32 = load %9
+    store %a, %10
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %11:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %12:f32 = load %11
+        %13:f32 = div %12, 0.20000000298023223877f
+        %14:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %15:f32 = load %14
+        %16:bool = lt %13, %15
+        if %16 [t: %b5] {  # if_1
+          %b5 = block {  # true
+            ret
+          }
+        }
+        %17:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %18:f32 = load %17
+        %19:f32 = div %18, 0.20000000298023223877f
+        %20:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %21:f32 = load %20
+        %22:bool = lt %19, %21
+        if %22 [t: %b6] {  # if_2
+          %b6 = block {  # true
+            ret
+          }
+        }
+        %23:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %24:f32 = load %23
+        %25:f32 = div %24, 0.20000000298023223877f
+        %26:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %27:f32 = load %26
+        %28:bool = lt %25, %27
+        if %28 [t: %b7] {  # if_3
+          %b7 = block {  # true
+            ret
+          }
+        }
+        %29:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %30:f32 = load %29
+        %31:f32 = div %30, 0.20000000298023223877f
+        %32:ptr<uniform, f32, read> = access %x_5, 0u, 0i, 0u
+        %33:f32 = load %32
+        %34:bool = lt %31, %33
+        if %34 [t: %b8, f: %b9] {  # if_4
+          %b8 = block {  # true
+            ret
+          }
+          %b9 = block {  # false
+            store %a, 0.0f
+            exit_if  # if_4
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_72:f32 = load %a
+        %36:bool = eq %x_72, 0.0f
+        %37:bool = eq %36, false
+        %38:bool = eq %37, false
+        break_if %38 %b3
+      }
+    }
+    %39:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+    %40:i32 = load %39
+    %41:f32 = convert %40
+    %42:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %43:i32 = load %42
+    %44:f32 = convert %43
+    %45:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %46:i32 = load %45
+    %47:f32 = convert %46
+    %48:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+    %49:i32 = load %48
+    %50:f32 = convert %49
+    %51:vec4<f32> = construct %41, %44, %47, %50
+    store %x_GLF_color, %51
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b10 {
+  %b10 = block {
+    %53:void = call %main_1
+    %54:vec4<f32> = load %x_GLF_color
+    %55:main_out = construct %54
+    ret %55
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

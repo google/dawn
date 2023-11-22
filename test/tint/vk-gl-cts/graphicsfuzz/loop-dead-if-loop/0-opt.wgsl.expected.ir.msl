@@ -1,0 +1,143 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %k:ptr<function, i32, read_write> = var
+    %GLF_dead0j:ptr<function, i32, read_write> = var
+    %donor_replacementGLF_dead0stack:ptr<function, array<i32, 10>, read_write> = var
+    %donor_replacementGLF_dead0top:ptr<function, i32, read_write> = var
+    %x_54:ptr<function, i32, read_write> = var
+    %matrix_b:ptr<function, vec4<f32>, read_write> = var
+    %b:ptr<function, i32, read_write> = var
+    store %k, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_12:i32 = load %k
+        %12:bool = lt %x_12, 4i
+        if %12 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %13:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+        %x_62:f32 = load_vector_element %13, 1u
+        %15:bool = gt 0.0f, %x_62
+        if %15 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            store %GLF_dead0j, 1i
+            loop [b: %b8, c: %b9] {  # loop_2
+              %b8 = block {  # body
+                %16:ptr<function, i32, read_write> = access %donor_replacementGLF_dead0stack, 0i
+                %x_13:i32 = load %16
+                %18:bool = lte 1i, %x_13
+                if %18 [t: %b10, f: %b11] {  # if_3
+                  %b10 = block {  # true
+                    exit_if  # if_3
+                  }
+                  %b11 = block {  # false
+                    exit_loop  # loop_2
+                  }
+                }
+                continue %b9
+              }
+              %b9 = block {  # continuing
+                next_iteration %b8
+              }
+            }
+            %x_14:i32 = load %donor_replacementGLF_dead0top
+            %x_15:i32 = load %donor_replacementGLF_dead0top
+            %21:bool = gte %x_14, 0i
+            %22:bool = lt %x_15, 9i
+            %23:bool = and %21, %22
+            if %23 [t: %b12, f: %b13] {  # if_4
+              %b12 = block {  # true
+                %x_16:i32 = load %donor_replacementGLF_dead0top
+                %x_17:i32 = add %x_16, 1i
+                store %donor_replacementGLF_dead0top, %x_17
+                store %x_54, %x_17
+                exit_if  # if_4
+              }
+              %b13 = block {  # false
+                store %x_54, 0i
+                exit_if  # if_4
+              }
+            }
+            %x_18:i32 = load %x_54
+            %27:ptr<function, i32, read_write> = access %donor_replacementGLF_dead0stack, %x_18
+            store %27, 1i
+            exit_if  # if_2
+          }
+        }
+        store %matrix_b, vec4<f32>(0.0f)
+        store %b, 3i
+        loop [b: %b14, c: %b15] {  # loop_3
+          %b14 = block {  # body
+            %x_19:i32 = load %b
+            %29:bool = gte %x_19, 0i
+            if %29 [t: %b16, f: %b17] {  # if_5
+              %b16 = block {  # true
+                exit_if  # if_5
+              }
+              %b17 = block {  # false
+                exit_loop  # loop_3
+              }
+            }
+            %x_20:i32 = load %b
+            %x_21:i32 = load %b
+            %x_87:f32 = load_vector_element %matrix_b, %x_21
+            %33:f32 = sub %x_87, 1.0f
+            store_vector_element %matrix_b, %x_20, %33
+            continue %b15
+          }
+          %b15 = block {  # continuing
+            %x_22:i32 = load %b
+            %35:i32 = sub %x_22, 1i
+            store %b, %35
+            next_iteration %b14
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_24:i32 = load %k
+        %37:i32 = add %x_24, 1i
+        store %k, %37
+        next_iteration %b3
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b18 {
+  %b18 = block {
+    %39:void = call %main_1
+    %40:vec4<f32> = load %x_GLF_color
+    %41:main_out = construct %40
+    ret %41
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

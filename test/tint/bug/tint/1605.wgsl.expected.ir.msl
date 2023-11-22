@@ -1,0 +1,76 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %b:ptr<uniform, i32, read> = var @binding_point(0, 0)
+}
+
+%func_3 = func():bool -> %b2 {
+  %b2 = block {
+    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
+      %b3 = block {  # initializer
+        %i:ptr<function, i32, read_write> = var, 0i
+        next_iteration %b4
+      }
+      %b4 = block {  # body
+        %4:i32 = load %i
+        %5:i32 = load %b
+        %6:bool = lt %4, %5
+        if %6 [t: %b6, f: %b7] {  # if_1
+          %b6 = block {  # true
+            exit_if  # if_1
+          }
+          %b7 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: %b8, b: %b9, c: %b10] {  # loop_2
+          %b8 = block {  # initializer
+            %j:ptr<function, i32, read_write> = var, -1i
+            next_iteration %b9
+          }
+          %b9 = block {  # body
+            %8:i32 = load %j
+            %9:bool = eq %8, 1i
+            if %9 [t: %b11, f: %b12] {  # if_2
+              %b11 = block {  # true
+                exit_if  # if_2
+              }
+              %b12 = block {  # false
+                exit_loop  # loop_2
+              }
+            }
+            ret false
+          }
+          %b10 = block {  # continuing
+            %10:i32 = load %j
+            %11:i32 = add %10, 1i
+            store %j, %11
+            next_iteration %b9
+          }
+        }
+        continue %b5
+      }
+      %b5 = block {  # continuing
+        %12:i32 = load %i
+        %13:i32 = add %12, 1i
+        store %i, %13
+        next_iteration %b4
+      }
+    }
+    ret false
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b13 {
+  %b13 = block {
+    %15:bool = call %func_3
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

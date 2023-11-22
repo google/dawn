@@ -1,0 +1,114 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  m:mat3x3<f32> @offset(0)
+}
+
+S2 = struct @align(16) {
+  m:array<mat3x3<f32>, 1> @offset(0)
+}
+
+S3 = struct @align(16) {
+  s:S @offset(0)
+}
+
+S4 = struct @align(16) {
+  s:array<S, 1> @offset(0)
+}
+
+%b1 = block {  # root
+  %buffer0:ptr<storage, mat3x3<f32>, read_write> = var @binding_point(0, 0)
+  %buffer1:ptr<storage, S, read_write> = var @binding_point(0, 1)
+  %buffer2:ptr<storage, S2, read_write> = var @binding_point(0, 2)
+  %buffer3:ptr<storage, S3, read_write> = var @binding_point(0, 3)
+  %buffer4:ptr<storage, S4, read_write> = var @binding_point(0, 4)
+  %buffer5:ptr<storage, array<mat3x3<f32>, 1>, read_write> = var @binding_point(0, 5)
+  %buffer6:ptr<storage, array<S, 1>, read_write> = var @binding_point(0, 6)
+  %buffer7:ptr<storage, array<S2, 1>, read_write> = var @binding_point(0, 7)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %m:ptr<function, mat3x3<f32>, read_write> = var
+    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
+      %b3 = block {  # initializer
+        %c:ptr<function, u32, read_write> = var, 0u
+        next_iteration %b4
+      }
+      %b4 = block {  # body
+        %12:u32 = load %c
+        %13:bool = lt %12, 3u
+        if %13 [t: %b6, f: %b7] {  # if_1
+          %b6 = block {  # true
+            exit_if  # if_1
+          }
+          %b7 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %14:u32 = load %c
+        %15:ptr<function, vec3<f32>, read_write> = access %m, %14
+        %16:u32 = load %c
+        %17:u32 = mul %16, 3u
+        %18:u32 = add %17, 1u
+        %19:f32 = convert %18
+        %20:u32 = load %c
+        %21:u32 = mul %20, 3u
+        %22:u32 = add %21, 2u
+        %23:f32 = convert %22
+        %24:u32 = load %c
+        %25:u32 = mul %24, 3u
+        %26:u32 = add %25, 3u
+        %27:f32 = convert %26
+        %28:vec3<f32> = construct %19, %23, %27
+        store %15, %28
+        continue %b5
+      }
+      %b5 = block {  # continuing
+        %29:u32 = load %c
+        %30:u32 = add %29, 1u
+        store %c, %30
+        next_iteration %b4
+      }
+    }
+    %a:mat3x3<f32> = load %m
+    store %buffer0, %a
+    %32:mat3x3<f32> = load %m
+    %a_1:S = construct %32  # %a_1: 'a'
+    store %buffer1, %a_1
+    %34:mat3x3<f32> = load %m
+    %35:array<mat3x3<f32>, 1> = construct %34
+    %a_2:S2 = construct %35  # %a_2: 'a'
+    store %buffer2, %a_2
+    %37:mat3x3<f32> = load %m
+    %38:S = construct %37
+    %a_3:S3 = construct %38  # %a_3: 'a'
+    store %buffer3, %a_3
+    %40:mat3x3<f32> = load %m
+    %41:S = construct %40
+    %42:array<S, 1> = construct %41
+    %a_4:S4 = construct %42  # %a_4: 'a'
+    store %buffer4, %a_4
+    %44:mat3x3<f32> = load %m
+    %a_5:array<mat3x3<f32>, 1> = construct %44  # %a_5: 'a'
+    store %buffer5, %a_5
+    %46:mat3x3<f32> = load %m
+    %47:S = construct %46
+    %a_6:array<S, 1> = construct %47  # %a_6: 'a'
+    store %buffer6, %a_6
+    %49:mat3x3<f32> = load %m
+    %50:array<mat3x3<f32>, 1> = construct %49
+    %51:S2 = construct %50
+    %a_7:array<S2, 1> = construct %51  # %a_7: 'a'
+    store %buffer7, %a_7
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,41 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: UBO = struct @align(4) {
+  dynamic_idx:i32 @offset(0)
+}
+
+Result = struct @align(4) {
+  out:i32 @offset(0)
+}
+
+SSBO = struct @align(4) {
+  data:array<i32, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %ubo:ptr<uniform, UBO, read> = var @binding_point(0, 0)
+  %result:ptr<storage, Result, read_write> = var @binding_point(0, 2)
+  %ssbo:ptr<storage, SSBO, read_write> = var @binding_point(0, 1)
+}
+
+%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %5:ptr<uniform, i32, read> = access %ubo, 0u
+    %6:i32 = load %5
+    %7:ptr<storage, i32, read_write> = access %ssbo, 0u, %6
+    store %7, 1i
+    %8:ptr<storage, i32, read_write> = access %result, 0u
+    %9:ptr<storage, i32, read_write> = access %ssbo, 0u, 3i
+    %10:i32 = load %9
+    store %8, %10
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

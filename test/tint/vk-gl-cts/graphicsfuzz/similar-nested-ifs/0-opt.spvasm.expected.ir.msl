@@ -1,0 +1,132 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gv:ptr<private, f32, read_write> = var
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %lv:ptr<function, f32, read_write> = var
+    %x_43:ptr<function, f32, read_write> = var
+    %GLF_live5r:ptr<function, i32, read_write> = var
+    %GLF_live5_looplimiter6:ptr<function, i32, read_write> = var
+    %10:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %11:f32 = load_vector_element %10, 1u
+    %12:bool = gt 1.0f, %11
+    if %12 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %13:f32 = load %gv
+        %14:f32 = abs %13
+        store %x_43, %14
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        store %x_43, 260.0f
+        exit_if  # if_1
+      }
+    }
+    %15:f32 = load %x_43
+    store %lv, %15
+    %16:f32 = load %lv
+    %17:i32 = convert %16
+    %18:bool = lt %17, 250i
+    if %18 [t: %b5] {  # if_2
+      %b5 = block {  # true
+        %19:f32 = load %lv
+        %20:i32 = convert %19
+        %21:bool = lt %20, 180i
+        if %21 [t: %b6, f: %b7] {  # if_3
+          %b6 = block {  # true
+            %22:f32 = load %lv
+            %x_65:f32 = clamp %22, 1.0f, 1.0f
+            exit_if  # if_3
+          }
+          %b7 = block {  # false
+            %24:f32 = load_vector_element %gl_FragCoord, 1u
+            %25:bool = lt %24, 0.0f
+            if %25 [t: %b8] {  # if_4
+              %b8 = block {  # true
+                %26:f32 = load %lv
+                %27:i32 = convert %26
+                %28:bool = lt %27, 210i
+                if %28 [t: %b9] {  # if_5
+                  %b9 = block {  # true
+                    loop [b: %b10, c: %b11] {  # loop_1
+                      %b10 = block {  # body
+                        continue %b11
+                      }
+                      %b11 = block {  # continuing
+                        break_if false %b10
+                      }
+                    }
+                    exit_if  # if_5
+                  }
+                }
+                store %GLF_live5r, 0i
+                loop [b: %b12, c: %b13] {  # loop_2
+                  %b12 = block {  # body
+                    if true [t: %b14, f: %b15] {  # if_6
+                      %b14 = block {  # true
+                        exit_if  # if_6
+                      }
+                      %b15 = block {  # false
+                        exit_loop  # loop_2
+                      }
+                    }
+                    %29:i32 = load %GLF_live5_looplimiter6
+                    %30:bool = gte %29, 6i
+                    if %30 [t: %b16] {  # if_7
+                      %b16 = block {  # true
+                        exit_loop  # loop_2
+                      }
+                    }
+                    %31:i32 = load %GLF_live5_looplimiter6
+                    %32:i32 = add %31, 1i
+                    store %GLF_live5_looplimiter6, %32
+                    continue %b13
+                  }
+                  %b13 = block {  # continuing
+                    next_iteration %b12
+                  }
+                }
+                exit_if  # if_4
+              }
+            }
+            exit_if  # if_3
+          }
+        }
+        exit_if  # if_2
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b17 {
+  %b17 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %35:void = call %main_1
+    %36:vec4<f32> = load %x_GLF_color
+    %37:main_out = construct %36
+    ret %37
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

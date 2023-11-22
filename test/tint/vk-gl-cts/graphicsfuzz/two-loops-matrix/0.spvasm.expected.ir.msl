@@ -1,0 +1,108 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(16) {
+  matrix_a_uni:mat4x4<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x:ptr<function, i32, read_write> = var
+    %matrix_u:ptr<function, vec4<f32>, read_write> = var
+    %b:ptr<function, i32, read_write> = var
+    %matrix_b:ptr<function, vec4<f32>, read_write> = var
+    %x_42:ptr<function, vec4<f32>, read_write> = var
+    store %x, 4i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %9:i32 = load %x
+        %10:bool = gte %9, 1i
+        if %10 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_11:i32 = load %x
+        store_vector_element %matrix_u, %x_11, 1.0f
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %12:i32 = load %x
+        %13:i32 = sub %12, 1i
+        store %x, %13
+        next_iteration %b3
+      }
+    }
+    store %b, 4i
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %14:ptr<uniform, vec4<f32>, read> = access %x_8, 0u, 0i
+        %15:f32 = load_vector_element %14, 0u
+        %16:bool = lt %15, -1.0f
+        if %16 [t: %b9, f: %b10] {  # if_2
+          %b9 = block {  # true
+            exit_if  # if_2
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %x_14:i32 = load %b
+        %18:i32 = load %b
+        %19:bool = gt %18, 1i
+        if %19 [t: %b11, f: %b12] {  # if_3
+          %b11 = block {  # true
+            %20:vec4<f32> = load %matrix_b
+            %21:vec4<f32> = load %matrix_b
+            %22:vec4<f32> = min %20, %21
+            store %x_42, %22
+            exit_if  # if_3
+          }
+          %b12 = block {  # false
+            %23:vec4<f32> = load %matrix_u
+            store %x_42, %23
+            exit_if  # if_3
+          }
+        }
+        %24:f32 = load_vector_element %x_42, 1u
+        store_vector_element %matrix_b, %x_14, %24
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %25:i32 = load %b
+        %26:i32 = sub %25, 1i
+        store %b, %26
+        next_iteration %b7
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b13 {
+  %b13 = block {
+    %28:void = call %main_1
+    %29:vec4<f32> = load %x_GLF_color
+    %30:main_out = construct %29
+    ret %30
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,616 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Tables = struct @align(4) {
+  edges:array<u32, 256> @offset(0)
+  tris:array<i32, 4096> @offset(1024)
+}
+
+IsosurfaceVolume = struct @align(16) {
+  min:vec3<f32> @offset(0)
+  max:vec3<f32> @offset(16)
+  step:vec3<f32> @offset(32)
+  size:vec3<u32> @offset(48)
+  threshold:f32 @offset(60)
+  values:array<f32> @offset(64)
+}
+
+PositionBuffer = struct @align(4) {
+  values:array<f32> @offset(0)
+}
+
+NormalBuffer = struct @align(4) {
+  values:array<f32> @offset(0)
+}
+
+IndexBuffer = struct @align(4) {
+  tris:array<u32> @offset(0)
+}
+
+DrawIndirectArgs = struct @align(4) {
+  vc:u32 @offset(0)
+  vertexCount:atomic<u32> @offset(4)
+  firstVertex:u32 @offset(8)
+  firstInstance:u32 @offset(12)
+  indexCount:atomic<u32> @offset(16)
+  indexedInstanceCount:u32 @offset(20)
+  indexedFirstIndex:u32 @offset(24)
+  indexedBaseVertex:u32 @offset(28)
+  indexedFirstInstance:u32 @offset(32)
+}
+
+%b1 = block {  # root
+  %tables:ptr<storage, Tables, read> = var @binding_point(0, 0)
+  %volume:ptr<storage, IsosurfaceVolume, read_write> = var @binding_point(0, 1)
+  %positionsOut:ptr<storage, PositionBuffer, read_write> = var @binding_point(0, 2)
+  %normalsOut:ptr<storage, NormalBuffer, read_write> = var @binding_point(0, 3)
+  %indicesOut:ptr<storage, IndexBuffer, read_write> = var @binding_point(0, 4)
+  %drawOut:ptr<storage, DrawIndirectArgs, read_write> = var @binding_point(0, 5)
+  %positions:ptr<private, array<vec3<f32>, 12>, read_write> = var
+  %normals:ptr<private, array<vec3<f32>, 12>, read_write> = var
+  %indices:ptr<private, array<u32, 12>, read_write> = var
+  %cubeVerts:ptr<private, u32, read_write> = var, 0u
+}
+
+%valueAt = func(%index:vec3<u32>):f32 -> %b2 {
+  %b2 = block {
+    %13:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %14:vec3<u32> = load %13
+    %15:vec3<bool> = gte %index, %14
+    %16:bool = any %15
+    if %16 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        ret 0.0f
+      }
+    }
+    %17:u32 = access %index, 0u
+    %18:u32 = access %index, 1u
+    %19:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %20:u32 = load_vector_element %19, 0u
+    %21:u32 = mul %18, %20
+    %22:u32 = add %17, %21
+    %23:u32 = access %index, 2u
+    %24:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %25:u32 = load_vector_element %24, 0u
+    %26:u32 = mul %23, %25
+    %27:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %28:u32 = load_vector_element %27, 1u
+    %29:u32 = mul %26, %28
+    %valueIndex:u32 = add %22, %29
+    %31:ptr<storage, f32, read_write> = access %volume, 5u, %valueIndex
+    %32:f32 = load %31
+    ret %32
+  }
+}
+%positionAt = func(%index_1:vec3<u32>):vec3<f32> -> %b4 {  # %index_1: 'index'
+  %b4 = block {
+    %35:ptr<storage, vec3<f32>, read_write> = access %volume, 0u
+    %36:vec3<f32> = load %35
+    %37:ptr<storage, vec3<f32>, read_write> = access %volume, 2u
+    %38:vec3<f32> = load %37
+    %39:vec3<u32> = swizzle %index_1, xyz
+    %40:vec3<f32> = convert %39
+    %41:vec3<f32> = mul %38, %40
+    %42:vec3<f32> = add %36, %41
+    ret %42
+  }
+}
+%normalAt = func(%index_2:vec3<u32>):vec3<f32> -> %b5 {  # %index_2: 'index'
+  %b5 = block {
+    %45:vec3<u32> = sub %index_2, vec3<u32>(1u, 0u, 0u)
+    %46:f32 = call %valueAt, %45
+    %47:vec3<u32> = add %index_2, vec3<u32>(1u, 0u, 0u)
+    %48:f32 = call %valueAt, %47
+    %49:f32 = sub %46, %48
+    %50:vec3<u32> = sub %index_2, vec3<u32>(0u, 1u, 0u)
+    %51:f32 = call %valueAt, %50
+    %52:vec3<u32> = add %index_2, vec3<u32>(0u, 1u, 0u)
+    %53:f32 = call %valueAt, %52
+    %54:f32 = sub %51, %53
+    %55:vec3<u32> = sub %index_2, vec3<u32>(0u, 0u, 1u)
+    %56:f32 = call %valueAt, %55
+    %57:vec3<u32> = add %index_2, vec3<u32>(0u, 0u, 1u)
+    %58:f32 = call %valueAt, %57
+    %59:f32 = sub %56, %58
+    %60:vec3<f32> = construct %49, %54, %59
+    ret %60
+  }
+}
+%interpX = func(%index_3:u32, %i:vec3<u32>, %va:f32, %vb:f32):void -> %b6 {  # %index_3: 'index'
+  %b6 = block {
+    %66:ptr<storage, f32, read_write> = access %volume, 4u
+    %67:f32 = load %66
+    %68:f32 = sub %67, %va
+    %69:f32 = sub %vb, %va
+    %mu:f32 = div %68, %69
+    %71:u32 = load %cubeVerts
+    %72:ptr<private, vec3<f32>, read_write> = access %positions, %71
+    %73:vec3<f32> = call %positionAt, %i
+    %74:ptr<storage, vec3<f32>, read_write> = access %volume, 2u
+    %75:f32 = load_vector_element %74, 0u
+    %76:f32 = mul %75, %mu
+    %77:vec3<f32> = construct %76, 0.0f, 0.0f
+    %78:vec3<f32> = add %73, %77
+    store %72, %78
+    %na:vec3<f32> = call %normalAt, %i
+    %80:vec3<u32> = add %i, vec3<u32>(1u, 0u, 0u)
+    %nb:vec3<f32> = call %normalAt, %80
+    %82:u32 = load %cubeVerts
+    %83:ptr<private, vec3<f32>, read_write> = access %normals, %82
+    %84:vec3<f32> = construct %mu, %mu, %mu
+    %85:vec3<f32> = mix %na, %nb, %84
+    store %83, %85
+    %86:ptr<private, u32, read_write> = access %indices, %index_3
+    %87:u32 = load %cubeVerts
+    store %86, %87
+    %88:u32 = load %cubeVerts
+    %89:u32 = add %88, 1u
+    store %cubeVerts, %89
+    ret
+  }
+}
+%interpY = func(%index_4:u32, %i_1:vec3<u32>, %va_1:f32, %vb_1:f32):void -> %b7 {  # %index_4: 'index', %i_1: 'i', %va_1: 'va', %vb_1: 'vb'
+  %b7 = block {
+    %95:ptr<storage, f32, read_write> = access %volume, 4u
+    %96:f32 = load %95
+    %97:f32 = sub %96, %va_1
+    %98:f32 = sub %vb_1, %va_1
+    %mu_1:f32 = div %97, %98  # %mu_1: 'mu'
+    %100:u32 = load %cubeVerts
+    %101:ptr<private, vec3<f32>, read_write> = access %positions, %100
+    %102:vec3<f32> = call %positionAt, %i_1
+    %103:ptr<storage, vec3<f32>, read_write> = access %volume, 2u
+    %104:f32 = load_vector_element %103, 1u
+    %105:f32 = mul %104, %mu_1
+    %106:vec3<f32> = construct 0.0f, %105, 0.0f
+    %107:vec3<f32> = add %102, %106
+    store %101, %107
+    %na_1:vec3<f32> = call %normalAt, %i_1  # %na_1: 'na'
+    %109:vec3<u32> = add %i_1, vec3<u32>(0u, 1u, 0u)
+    %nb_1:vec3<f32> = call %normalAt, %109  # %nb_1: 'nb'
+    %111:u32 = load %cubeVerts
+    %112:ptr<private, vec3<f32>, read_write> = access %normals, %111
+    %113:vec3<f32> = construct %mu_1, %mu_1, %mu_1
+    %114:vec3<f32> = mix %na_1, %nb_1, %113
+    store %112, %114
+    %115:ptr<private, u32, read_write> = access %indices, %index_4
+    %116:u32 = load %cubeVerts
+    store %115, %116
+    %117:u32 = load %cubeVerts
+    %118:u32 = add %117, 1u
+    store %cubeVerts, %118
+    ret
+  }
+}
+%interpZ = func(%index_5:u32, %i_2:vec3<u32>, %va_2:f32, %vb_2:f32):void -> %b8 {  # %index_5: 'index', %i_2: 'i', %va_2: 'va', %vb_2: 'vb'
+  %b8 = block {
+    %124:ptr<storage, f32, read_write> = access %volume, 4u
+    %125:f32 = load %124
+    %126:f32 = sub %125, %va_2
+    %127:f32 = sub %vb_2, %va_2
+    %mu_2:f32 = div %126, %127  # %mu_2: 'mu'
+    %129:u32 = load %cubeVerts
+    %130:ptr<private, vec3<f32>, read_write> = access %positions, %129
+    %131:vec3<f32> = call %positionAt, %i_2
+    %132:ptr<storage, vec3<f32>, read_write> = access %volume, 2u
+    %133:f32 = load_vector_element %132, 2u
+    %134:f32 = mul %133, %mu_2
+    %135:vec3<f32> = construct 0.0f, 0.0f, %134
+    %136:vec3<f32> = add %131, %135
+    store %130, %136
+    %na_2:vec3<f32> = call %normalAt, %i_2  # %na_2: 'na'
+    %138:vec3<u32> = add %i_2, vec3<u32>(0u, 0u, 1u)
+    %nb_2:vec3<f32> = call %normalAt, %138  # %nb_2: 'nb'
+    %140:u32 = load %cubeVerts
+    %141:ptr<private, vec3<f32>, read_write> = access %normals, %140
+    %142:vec3<f32> = construct %mu_2, %mu_2, %mu_2
+    %143:vec3<f32> = mix %na_2, %nb_2, %142
+    store %141, %143
+    %144:ptr<private, u32, read_write> = access %indices, %index_5
+    %145:u32 = load %cubeVerts
+    store %144, %145
+    %146:u32 = load %cubeVerts
+    %147:u32 = add %146, 1u
+    store %cubeVerts, %147
+    ret
+  }
+}
+%computeMain = @compute @workgroup_size(4, 4, 4) func(%global_id:vec3<u32> [@global_invocation_id]):void -> %b9 {
+  %b9 = block {
+    %i0:vec3<u32> = let %global_id
+    %i1:vec3<u32> = add %global_id, vec3<u32>(1u, 0u, 0u)
+    %i2:vec3<u32> = add %global_id, vec3<u32>(1u, 1u, 0u)
+    %i3:vec3<u32> = add %global_id, vec3<u32>(0u, 1u, 0u)
+    %i4:vec3<u32> = add %global_id, vec3<u32>(0u, 0u, 1u)
+    %i5:vec3<u32> = add %global_id, vec3<u32>(1u, 0u, 1u)
+    %i6:vec3<u32> = add %global_id, vec3<u32>(1u)
+    %i7:vec3<u32> = add %global_id, vec3<u32>(0u, 1u, 1u)
+    %v0:f32 = call %valueAt, %i0
+    %v1:f32 = call %valueAt, %i1
+    %v2:f32 = call %valueAt, %i2
+    %v3:f32 = call %valueAt, %i3
+    %v4:f32 = call %valueAt, %i4
+    %v5:f32 = call %valueAt, %i5
+    %v6:f32 = call %valueAt, %i6
+    %v7:f32 = call %valueAt, %i7
+    %cubeIndex:ptr<function, u32, read_write> = var, 0u
+    %167:ptr<storage, f32, read_write> = access %volume, 4u
+    %168:f32 = load %167
+    %169:bool = lt %v0, %168
+    if %169 [t: %b10] {  # if_2
+      %b10 = block {  # true
+        %170:u32 = load %cubeIndex
+        %171:u32 = or %170, 1u
+        store %cubeIndex, %171
+        exit_if  # if_2
+      }
+    }
+    %172:ptr<storage, f32, read_write> = access %volume, 4u
+    %173:f32 = load %172
+    %174:bool = lt %v1, %173
+    if %174 [t: %b11] {  # if_3
+      %b11 = block {  # true
+        %175:u32 = load %cubeIndex
+        %176:u32 = or %175, 2u
+        store %cubeIndex, %176
+        exit_if  # if_3
+      }
+    }
+    %177:ptr<storage, f32, read_write> = access %volume, 4u
+    %178:f32 = load %177
+    %179:bool = lt %v2, %178
+    if %179 [t: %b12] {  # if_4
+      %b12 = block {  # true
+        %180:u32 = load %cubeIndex
+        %181:u32 = or %180, 4u
+        store %cubeIndex, %181
+        exit_if  # if_4
+      }
+    }
+    %182:ptr<storage, f32, read_write> = access %volume, 4u
+    %183:f32 = load %182
+    %184:bool = lt %v3, %183
+    if %184 [t: %b13] {  # if_5
+      %b13 = block {  # true
+        %185:u32 = load %cubeIndex
+        %186:u32 = or %185, 8u
+        store %cubeIndex, %186
+        exit_if  # if_5
+      }
+    }
+    %187:ptr<storage, f32, read_write> = access %volume, 4u
+    %188:f32 = load %187
+    %189:bool = lt %v4, %188
+    if %189 [t: %b14] {  # if_6
+      %b14 = block {  # true
+        %190:u32 = load %cubeIndex
+        %191:u32 = or %190, 16u
+        store %cubeIndex, %191
+        exit_if  # if_6
+      }
+    }
+    %192:ptr<storage, f32, read_write> = access %volume, 4u
+    %193:f32 = load %192
+    %194:bool = lt %v5, %193
+    if %194 [t: %b15] {  # if_7
+      %b15 = block {  # true
+        %195:u32 = load %cubeIndex
+        %196:u32 = or %195, 32u
+        store %cubeIndex, %196
+        exit_if  # if_7
+      }
+    }
+    %197:ptr<storage, f32, read_write> = access %volume, 4u
+    %198:f32 = load %197
+    %199:bool = lt %v6, %198
+    if %199 [t: %b16] {  # if_8
+      %b16 = block {  # true
+        %200:u32 = load %cubeIndex
+        %201:u32 = or %200, 64u
+        store %cubeIndex, %201
+        exit_if  # if_8
+      }
+    }
+    %202:ptr<storage, f32, read_write> = access %volume, 4u
+    %203:f32 = load %202
+    %204:bool = lt %v7, %203
+    if %204 [t: %b17] {  # if_9
+      %b17 = block {  # true
+        %205:u32 = load %cubeIndex
+        %206:u32 = or %205, 128u
+        store %cubeIndex, %206
+        exit_if  # if_9
+      }
+    }
+    %207:u32 = load %cubeIndex
+    %208:ptr<storage, u32, read> = access %tables, 0u, %207
+    %edges:u32 = load %208
+    %210:u32 = and %edges, 1u
+    %211:bool = neq %210, 0u
+    if %211 [t: %b18] {  # if_10
+      %b18 = block {  # true
+        %212:void = call %interpX, 0u, %i0, %v0, %v1
+        exit_if  # if_10
+      }
+    }
+    %213:u32 = and %edges, 2u
+    %214:bool = neq %213, 0u
+    if %214 [t: %b19] {  # if_11
+      %b19 = block {  # true
+        %215:void = call %interpY, 1u, %i1, %v1, %v2
+        exit_if  # if_11
+      }
+    }
+    %216:u32 = and %edges, 4u
+    %217:bool = neq %216, 0u
+    if %217 [t: %b20] {  # if_12
+      %b20 = block {  # true
+        %218:void = call %interpX, 2u, %i3, %v3, %v2
+        exit_if  # if_12
+      }
+    }
+    %219:u32 = and %edges, 8u
+    %220:bool = neq %219, 0u
+    if %220 [t: %b21] {  # if_13
+      %b21 = block {  # true
+        %221:void = call %interpY, 3u, %i0, %v0, %v3
+        exit_if  # if_13
+      }
+    }
+    %222:u32 = and %edges, 16u
+    %223:bool = neq %222, 0u
+    if %223 [t: %b22] {  # if_14
+      %b22 = block {  # true
+        %224:void = call %interpX, 4u, %i4, %v4, %v5
+        exit_if  # if_14
+      }
+    }
+    %225:u32 = and %edges, 32u
+    %226:bool = neq %225, 0u
+    if %226 [t: %b23] {  # if_15
+      %b23 = block {  # true
+        %227:void = call %interpY, 5u, %i5, %v5, %v6
+        exit_if  # if_15
+      }
+    }
+    %228:u32 = and %edges, 64u
+    %229:bool = neq %228, 0u
+    if %229 [t: %b24] {  # if_16
+      %b24 = block {  # true
+        %230:void = call %interpX, 6u, %i7, %v7, %v6
+        exit_if  # if_16
+      }
+    }
+    %231:u32 = and %edges, 128u
+    %232:bool = neq %231, 0u
+    if %232 [t: %b25] {  # if_17
+      %b25 = block {  # true
+        %233:void = call %interpY, 7u, %i4, %v4, %v7
+        exit_if  # if_17
+      }
+    }
+    %234:u32 = and %edges, 256u
+    %235:bool = neq %234, 0u
+    if %235 [t: %b26] {  # if_18
+      %b26 = block {  # true
+        %236:void = call %interpZ, 8u, %i0, %v0, %v4
+        exit_if  # if_18
+      }
+    }
+    %237:u32 = and %edges, 512u
+    %238:bool = neq %237, 0u
+    if %238 [t: %b27] {  # if_19
+      %b27 = block {  # true
+        %239:void = call %interpZ, 9u, %i1, %v1, %v5
+        exit_if  # if_19
+      }
+    }
+    %240:u32 = and %edges, 1024u
+    %241:bool = neq %240, 0u
+    if %241 [t: %b28] {  # if_20
+      %b28 = block {  # true
+        %242:void = call %interpZ, 10u, %i2, %v2, %v6
+        exit_if  # if_20
+      }
+    }
+    %243:u32 = and %edges, 2048u
+    %244:bool = neq %243, 0u
+    if %244 [t: %b29] {  # if_21
+      %b29 = block {  # true
+        %245:void = call %interpZ, 11u, %i3, %v3, %v7
+        exit_if  # if_21
+      }
+    }
+    %246:u32 = load %cubeIndex
+    %247:u32 = shiftl %246, 4u
+    %triTableOffset:u32 = add %247, 1u
+    %249:u32 = sub %triTableOffset, 1u
+    %250:ptr<storage, i32, read> = access %tables, 1u, %249
+    %251:i32 = load %250
+    %indexCount:u32 = convert %251
+    %253:ptr<storage, atomic<u32>, read_write> = access %drawOut, 1u
+    %254:u32 = load %cubeVerts
+    %255:u32 = atomicAdd %253, %254
+    %firstVertex:ptr<function, u32, read_write> = var, %255
+    %257:u32 = access %global_id, 0u
+    %258:u32 = access %global_id, 1u
+    %259:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %260:u32 = load_vector_element %259, 0u
+    %261:u32 = mul %258, %260
+    %262:u32 = add %257, %261
+    %263:u32 = access %global_id, 2u
+    %264:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %265:u32 = load_vector_element %264, 0u
+    %266:u32 = mul %263, %265
+    %267:ptr<storage, vec3<u32>, read_write> = access %volume, 3u
+    %268:u32 = load_vector_element %267, 1u
+    %269:u32 = mul %266, %268
+    %bufferOffset:u32 = add %262, %269
+    %firstIndex:u32 = mul %bufferOffset, 15u
+    loop [i: %b30, b: %b31, c: %b32] {  # loop_1
+      %b30 = block {  # initializer
+        %i_3:ptr<function, u32, read_write> = var, 0u  # %i_3: 'i'
+        next_iteration %b31
+      }
+      %b31 = block {  # body
+        %273:u32 = load %i_3
+        %274:u32 = load %cubeVerts
+        %275:bool = lt %273, %274
+        if %275 [t: %b33, f: %b34] {  # if_22
+          %b33 = block {  # true
+            exit_if  # if_22
+          }
+          %b34 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %276:u32 = load %firstVertex
+        %277:u32 = mul %276, 3u
+        %278:u32 = load %i_3
+        %279:u32 = mul %278, 3u
+        %280:u32 = add %277, %279
+        %281:ptr<storage, f32, read_write> = access %positionsOut, 0u, %280
+        %282:u32 = load %i_3
+        %283:ptr<private, vec3<f32>, read_write> = access %positions, %282
+        %284:f32 = load_vector_element %283, 0u
+        store %281, %284
+        %285:u32 = load %firstVertex
+        %286:u32 = mul %285, 3u
+        %287:u32 = load %i_3
+        %288:u32 = mul %287, 3u
+        %289:u32 = add %286, %288
+        %290:u32 = add %289, 1u
+        %291:ptr<storage, f32, read_write> = access %positionsOut, 0u, %290
+        %292:u32 = load %i_3
+        %293:ptr<private, vec3<f32>, read_write> = access %positions, %292
+        %294:f32 = load_vector_element %293, 1u
+        store %291, %294
+        %295:u32 = load %firstVertex
+        %296:u32 = mul %295, 3u
+        %297:u32 = load %i_3
+        %298:u32 = mul %297, 3u
+        %299:u32 = add %296, %298
+        %300:u32 = add %299, 2u
+        %301:ptr<storage, f32, read_write> = access %positionsOut, 0u, %300
+        %302:u32 = load %i_3
+        %303:ptr<private, vec3<f32>, read_write> = access %positions, %302
+        %304:f32 = load_vector_element %303, 2u
+        store %301, %304
+        %305:u32 = load %firstVertex
+        %306:u32 = mul %305, 3u
+        %307:u32 = load %i_3
+        %308:u32 = mul %307, 3u
+        %309:u32 = add %306, %308
+        %310:ptr<storage, f32, read_write> = access %normalsOut, 0u, %309
+        %311:u32 = load %i_3
+        %312:ptr<private, vec3<f32>, read_write> = access %normals, %311
+        %313:f32 = load_vector_element %312, 0u
+        store %310, %313
+        %314:u32 = load %firstVertex
+        %315:u32 = mul %314, 3u
+        %316:u32 = load %i_3
+        %317:u32 = mul %316, 3u
+        %318:u32 = add %315, %317
+        %319:u32 = add %318, 1u
+        %320:ptr<storage, f32, read_write> = access %normalsOut, 0u, %319
+        %321:u32 = load %i_3
+        %322:ptr<private, vec3<f32>, read_write> = access %normals, %321
+        %323:f32 = load_vector_element %322, 1u
+        store %320, %323
+        %324:u32 = load %firstVertex
+        %325:u32 = mul %324, 3u
+        %326:u32 = load %i_3
+        %327:u32 = mul %326, 3u
+        %328:u32 = add %325, %327
+        %329:u32 = add %328, 2u
+        %330:ptr<storage, f32, read_write> = access %normalsOut, 0u, %329
+        %331:u32 = load %i_3
+        %332:ptr<private, vec3<f32>, read_write> = access %normals, %331
+        %333:f32 = load_vector_element %332, 2u
+        store %330, %333
+        continue %b32
+      }
+      %b32 = block {  # continuing
+        %334:u32 = load %i_3
+        %335:u32 = add %334, 1u
+        store %i_3, %335
+        next_iteration %b31
+      }
+    }
+    loop [i: %b35, b: %b36, c: %b37] {  # loop_2
+      %b35 = block {  # initializer
+        %i_4:ptr<function, u32, read_write> = var, 0u  # %i_4: 'i'
+        next_iteration %b36
+      }
+      %b36 = block {  # body
+        %337:u32 = load %i_4
+        %338:bool = lt %337, %indexCount
+        if %338 [t: %b38, f: %b39] {  # if_23
+          %b38 = block {  # true
+            exit_if  # if_23
+          }
+          %b39 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %339:u32 = load %i_4
+        %340:u32 = add %triTableOffset, %339
+        %341:ptr<storage, i32, read> = access %tables, 1u, %340
+        %index_6:i32 = load %341  # %index_6: 'index'
+        %343:u32 = load %i_4
+        %344:u32 = add %firstIndex, %343
+        %345:ptr<storage, u32, read_write> = access %indicesOut, 0u, %344
+        %346:u32 = load %firstVertex
+        %347:ptr<private, u32, read_write> = access %indices, %index_6
+        %348:u32 = load %347
+        %349:u32 = add %346, %348
+        store %345, %349
+        continue %b37
+      }
+      %b37 = block {  # continuing
+        %350:u32 = load %i_4
+        %351:u32 = add %350, 1u
+        store %i_4, %351
+        next_iteration %b36
+      }
+    }
+    loop [i: %b40, b: %b41, c: %b42] {  # loop_3
+      %b40 = block {  # initializer
+        %i_5:ptr<function, u32, read_write> = var, %indexCount  # %i_5: 'i'
+        next_iteration %b41
+      }
+      %b41 = block {  # body
+        %353:u32 = load %i_5
+        %354:bool = lt %353, 15u
+        if %354 [t: %b43, f: %b44] {  # if_24
+          %b43 = block {  # true
+            exit_if  # if_24
+          }
+          %b44 = block {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %355:u32 = load %i_5
+        %356:u32 = add %firstIndex, %355
+        %357:ptr<storage, u32, read_write> = access %indicesOut, 0u, %356
+        %358:u32 = load %firstVertex
+        store %357, %358
+        continue %b42
+      }
+      %b42 = block {  # continuing
+        %359:u32 = load %i_5
+        %360:u32 = add %359, 1u
+        store %i_5, %360
+        next_iteration %b41
+      }
+    }
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

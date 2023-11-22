@@ -1,0 +1,57 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %a:ptr<push_constant, i32, read_write> = var
+  %b:ptr<push_constant, i32, read_write> = var
+  %c:ptr<push_constant, i32, read_write> = var
+}
+
+%uses_a = func():void -> %b2 {
+  %b2 = block {
+    %foo:i32 = load %a
+    ret
+  }
+}
+%uses_uses_a = func():void -> %b3 {
+  %b3 = block {
+    %7:void = call %uses_a
+    ret
+  }
+}
+%uses_b = func():void -> %b4 {
+  %b4 = block {
+    %foo_1:i32 = load %b  # %foo_1: 'foo'
+    ret
+  }
+}
+%main1 = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %11:void = call %uses_a
+    ret
+  }
+}
+%main2 = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+  %b6 = block {
+    %13:void = call %uses_uses_a
+    ret
+  }
+}
+%main3 = @compute @workgroup_size(1, 1, 1) func():void -> %b7 {
+  %b7 = block {
+    %15:void = call %uses_b
+    ret
+  }
+}
+%main4 = @compute @workgroup_size(1, 1, 1) func():void -> %b8 {
+  %b8 = block {
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

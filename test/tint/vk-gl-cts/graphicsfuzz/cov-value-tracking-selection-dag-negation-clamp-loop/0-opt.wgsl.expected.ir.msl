@@ -1,0 +1,303 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr, 16> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %r:ptr<function, array<i32, 15>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %data:ptr<function, array<i32, 15>, read_write> = var
+    %i_1:ptr<function, i32, read_write> = var
+    %i_2:ptr<function, i32, read_write> = var
+    %i_3:ptr<function, i32, read_write> = var
+    %10:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_46:i32 = load %10
+    %12:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_48:i32 = load %12
+    %14:ptr<function, i32, read_write> = access %r, %x_46
+    store %14, %x_48
+    %15:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_51:i32 = load %15
+    %17:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_53:i32 = load %17
+    %19:ptr<function, i32, read_write> = access %r, %x_51
+    store %19, %x_53
+    %20:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_56:i32 = load %20
+    %22:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_58:i32 = load %22
+    %24:ptr<function, i32, read_write> = access %r, %x_56
+    store %24, %x_58
+    %25:ptr<uniform, i32, read> = access %x_6, 0u, 3i, 0u
+    %x_61:i32 = load %25
+    %27:ptr<uniform, i32, read> = access %x_6, 0u, 3i, 0u
+    %x_63:i32 = load %27
+    %29:ptr<function, i32, read_write> = access %r, %x_61
+    store %29, %x_63
+    %30:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
+    %x_66:i32 = load %30
+    %32:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
+    %x_68:i32 = load %32
+    %34:ptr<function, i32, read_write> = access %r, %x_66
+    store %34, %x_68
+    %35:ptr<uniform, i32, read> = access %x_6, 0u, 5i, 0u
+    %x_71:i32 = load %35
+    %37:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_73:i32 = load %37
+    %39:ptr<function, i32, read_write> = access %r, %x_71
+    %40:i32 = negation %x_73
+    store %39, %40
+    %41:ptr<uniform, i32, read> = access %x_6, 0u, 8i, 0u
+    %x_77:i32 = load %41
+    %43:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_79:i32 = load %43
+    %45:ptr<function, i32, read_write> = access %r, %x_77
+    %46:i32 = negation %x_79
+    store %45, %46
+    %47:ptr<uniform, i32, read> = access %x_6, 0u, 9i, 0u
+    %x_83:i32 = load %47
+    %49:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_85:i32 = load %49
+    %51:ptr<function, i32, read_write> = access %r, %x_83
+    %52:i32 = negation %x_85
+    store %51, %52
+    %53:ptr<uniform, i32, read> = access %x_6, 0u, 10i, 0u
+    %x_89:i32 = load %53
+    %55:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_91:i32 = load %55
+    %57:ptr<function, i32, read_write> = access %r, %x_89
+    %58:i32 = negation %x_91
+    store %57, %58
+    %59:ptr<uniform, i32, read> = access %x_6, 0u, 11i, 0u
+    %x_95:i32 = load %59
+    %61:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_97:i32 = load %61
+    %63:ptr<function, i32, read_write> = access %r, %x_95
+    %64:i32 = negation %x_97
+    store %63, %64
+    %65:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+    %x_101:i32 = load %65
+    %67:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_103:i32 = load %67
+    %69:ptr<function, i32, read_write> = access %r, %x_101
+    %70:i32 = negation %x_103
+    store %69, %70
+    %71:ptr<uniform, i32, read> = access %x_6, 0u, 12i, 0u
+    %x_107:i32 = load %71
+    %73:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_109:i32 = load %73
+    %75:ptr<function, i32, read_write> = access %r, %x_107
+    %76:i32 = negation %x_109
+    store %75, %76
+    %77:ptr<uniform, i32, read> = access %x_6, 0u, 13i, 0u
+    %x_113:i32 = load %77
+    %79:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_115:i32 = load %79
+    %81:ptr<function, i32, read_write> = access %r, %x_113
+    %82:i32 = negation %x_115
+    store %81, %82
+    %83:ptr<uniform, i32, read> = access %x_6, 0u, 14i, 0u
+    %x_119:i32 = load %83
+    %85:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_121:i32 = load %85
+    %87:ptr<function, i32, read_write> = access %r, %x_119
+    %88:i32 = negation %x_121
+    store %87, %88
+    %89:ptr<uniform, i32, read> = access %x_6, 0u, 15i, 0u
+    %x_125:i32 = load %89
+    %91:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_127:i32 = load %91
+    %93:ptr<function, i32, read_write> = access %r, %x_125
+    %94:i32 = negation %x_127
+    store %93, %94
+    store %i, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_134:i32 = load %i
+        %96:ptr<uniform, i32, read> = access %x_6, 0u, 5i, 0u
+        %x_136:i32 = load %96
+        %98:bool = lt %x_134, %x_136
+        if %98 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_139:i32 = load %i
+        %x_140:i32 = load %i
+        %x_142:i32 = load %i
+        %102:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %x_145:i32 = load %102
+        %104:ptr<function, i32, read_write> = access %data, %x_139
+        %105:i32 = complement %x_140
+        %106:i32 = complement %x_142
+        %107:i32 = clamp %105, %106, %x_145
+        %108:i32 = complement %107
+        store %104, %108
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_149:i32 = load %i
+        %110:i32 = add %x_149, 1i
+        store %i, %110
+        next_iteration %b3
+      }
+    }
+    %111:ptr<uniform, i32, read> = access %x_6, 0u, 5i, 0u
+    %x_152:i32 = load %111
+    store %i_1, %x_152
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %x_157:i32 = load %i_1
+        %114:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+        %x_159:i32 = load %114
+        %116:bool = lt %x_157, %x_159
+        if %116 [t: %b9, f: %b10] {  # if_2
+          %b9 = block {  # true
+            exit_if  # if_2
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %x_162:i32 = load %i_1
+        %x_163:i32 = load %i_1
+        %119:ptr<function, i32, read_write> = access %data, %x_162
+        %120:i32 = complement %x_163
+        %121:i32 = clamp %120, 0i, 1i
+        %122:i32 = complement %121
+        store %119, %122
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %x_168:i32 = load %i_1
+        %124:i32 = add %x_168, 1i
+        store %i_1, %124
+        next_iteration %b7
+      }
+    }
+    %125:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+    %x_171:i32 = load %125
+    store %i_2, %x_171
+    loop [b: %b11, c: %b12] {  # loop_3
+      %b11 = block {  # body
+        %x_176:i32 = load %i_2
+        %128:ptr<uniform, i32, read> = access %x_6, 0u, 7i, 0u
+        %x_178:i32 = load %128
+        %130:bool = lt %x_176, %x_178
+        if %130 [t: %b13, f: %b14] {  # if_3
+          %b13 = block {  # true
+            exit_if  # if_3
+          }
+          %b14 = block {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %x_181:i32 = load %i_2
+        %x_182:i32 = load %i_2
+        %133:ptr<function, i32, read_write> = access %data, %x_181
+        %134:i32 = clamp %x_182, 0i, 1i
+        %135:i32 = complement %134
+        store %133, %135
+        continue %b12
+      }
+      %b12 = block {  # continuing
+        %x_186:i32 = load %i_2
+        %137:i32 = add %x_186, 1i
+        store %i_2, %137
+        next_iteration %b11
+      }
+    }
+    %138:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_189:i32 = load %138
+    store %i_3, %x_189
+    loop [b: %b15, c: %b16] {  # loop_4
+      %b15 = block {  # body
+        %x_194:i32 = load %i_3
+        %141:ptr<uniform, i32, read> = access %x_6, 0u, 7i, 0u
+        %x_196:i32 = load %141
+        %143:bool = lt %x_194, %x_196
+        if %143 [t: %b17, f: %b18] {  # if_4
+          %b17 = block {  # true
+            exit_if  # if_4
+          }
+          %b18 = block {  # false
+            exit_loop  # loop_4
+          }
+        }
+        %x_199:i32 = load %i_3
+        %145:ptr<function, i32, read_write> = access %data, %x_199
+        %x_201:i32 = load %145
+        %x_202:i32 = load %i_3
+        %148:ptr<function, i32, read_write> = access %r, %x_202
+        %x_204:i32 = load %148
+        %150:bool = neq %x_201, %x_204
+        if %150 [t: %b19] {  # if_5
+          %b19 = block {  # true
+            %151:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+            %x_209:i32 = load %151
+            %x_210:f32 = convert %x_209
+            %154:vec4<f32> = construct %x_210, %x_210, %x_210, %x_210
+            store %x_GLF_color, %154
+            ret
+          }
+        }
+        continue %b16
+      }
+      %b16 = block {  # continuing
+        %x_212:i32 = load %i_3
+        %156:i32 = add %x_212, 1i
+        store %i_3, %156
+        next_iteration %b15
+      }
+    }
+    %157:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_215:i32 = load %157
+    %159:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_218:i32 = load %159
+    %161:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_221:i32 = load %161
+    %163:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_224:i32 = load %163
+    %165:f32 = convert %x_215
+    %166:f32 = convert %x_218
+    %167:f32 = convert %x_221
+    %168:f32 = convert %x_224
+    %169:vec4<f32> = construct %165, %166, %167, %168
+    store %x_GLF_color, %169
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b20 {
+  %b20 = block {
+    %171:void = call %main_1
+    %172:vec4<f32> = load %x_GLF_color
+    %173:main_out = construct %172
+    ret %173
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

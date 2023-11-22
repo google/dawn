@@ -1,0 +1,76 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  five:i32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %i:ptr<function, i32, read_write> = var
+    %5:ptr<uniform, i32, read> = access %x_6, 0u
+    %6:i32 = load %5
+    store %i, %6
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %7:i32 = load %i
+        %8:bool = gt %7, 0i
+        if %8 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %9:i32 = load %i
+        %10:i32 = sub %9, 1i
+        store %i, %10
+        %11:i32 = load %i
+        %12:i32 = sub %11, 1i
+        store %i, %12
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    %13:i32 = load %i
+    %14:bool = eq %13, -1i
+    if %14 [t: %b7, f: %b8] {  # if_2
+      %b7 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_2
+      }
+      %b8 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b9 {
+  %b9 = block {
+    %16:void = call %main_1
+    %17:vec4<f32> = load %x_GLF_color
+    %18:main_out = construct %17
+    ret %18
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

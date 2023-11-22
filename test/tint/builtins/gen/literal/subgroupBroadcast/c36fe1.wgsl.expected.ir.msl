@@ -1,0 +1,29 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %prevent_dce:ptr<storage, u32, read_write> = var @binding_point(2, 0)
+}
+
+%subgroupBroadcast_c36fe1 = func():void -> %b2 {
+  %b2 = block {
+    %3:u32 = subgroupBroadcast 1u, 1u
+    %res:ptr<function, u32, read_write> = var, %3
+    %5:u32 = load %res
+    store %prevent_dce, %5
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %7:void = call %subgroupBroadcast_c36fe1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

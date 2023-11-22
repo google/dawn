@@ -1,0 +1,116 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  resolution:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_10:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%collatz_i1_ = func(%v:ptr<function, i32, read_write>):i32 -> %b2 {
+  %b2 = block {
+    %count:ptr<function, i32, read_write> = var
+    store %count, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_89:i32 = load %v
+        %8:bool = gt %x_89, 1i
+        if %8 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_92:i32 = load %v
+        %10:i32 = and %x_92, 1i
+        %11:bool = eq %10, 1i
+        if %11 [t: %b7, f: %b8] {  # if_2
+          %b7 = block {  # true
+            %x_98:i32 = load %v
+            %13:i32 = mul 3i, %x_98
+            %14:i32 = add %13, 1i
+            store %v, %14
+            exit_if  # if_2
+          }
+          %b8 = block {  # false
+            %x_101:i32 = load %v
+            %16:i32 = div %x_101, 2i
+            store %v, %16
+            exit_if  # if_2
+          }
+        }
+        %x_103:i32 = load %count
+        %18:i32 = add %x_103, 1i
+        store %count, %18
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    %x_105:i32 = load %count
+    ret %x_105
+  }
+}
+%main_1 = func():void -> %b9 {
+  %b9 = block {
+    %lin:ptr<function, vec2<f32>, read_write> = var
+    %v_1:ptr<function, i32, read_write> = var
+    %param:ptr<function, i32, read_write> = var
+    %indexable:ptr<function, array<vec4<f32>, 16>, read_write> = var
+    %x_63:vec4<f32> = load %gl_FragCoord
+    %26:ptr<uniform, vec2<f32>, read> = access %x_10, 0u
+    %x_66:vec2<f32> = load %26
+    %28:f32 = access %x_63, 0u
+    %29:f32 = access %x_63, 1u
+    %30:vec2<f32> = construct %28, %29
+    %31:vec2<f32> = div %30, %x_66
+    store %lin, %31
+    %x_68:vec2<f32> = load %lin
+    %33:vec2<f32> = mul %x_68, 8.0f
+    %34:vec2<f32> = floor %33
+    store %lin, %34
+    %x_72:f32 = load_vector_element %lin, 0u
+    %x_76:f32 = load_vector_element %lin, 1u
+    %37:i32 = convert %x_72
+    %38:i32 = mul %37, 8i
+    %39:i32 = convert %x_76
+    %40:i32 = add %38, %39
+    store %v_1, %40
+    %x_79:i32 = load %v_1
+    store %param, %x_79
+    %x_80:i32 = call %collatz_i1_, %param
+    store %indexable, array<vec4<f32>, 16>(vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.5f, 0.0f, 1.0f), vec4<f32>(0.5f, 0.5f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.0f, 0.5f, 1.0f), vec4<f32>(0.5f, 0.0f, 0.5f, 1.0f), vec4<f32>(0.0f, 0.5f, 0.5f, 1.0f), vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f), vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 1.0f, 0.0f, 1.0f), vec4<f32>(1.0f, 1.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.0f, 1.0f, 1.0f), vec4<f32>(1.0f, 0.0f, 1.0f, 1.0f), vec4<f32>(0.0f, 1.0f, 1.0f, 1.0f), vec4<f32>(1.0f))
+    %43:i32 = mod %x_80, 16i
+    %44:ptr<function, vec4<f32>, read_write> = access %indexable, %43
+    %x_83:vec4<f32> = load %44
+    store %x_GLF_color, %x_83
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b10 {
+  %b10 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %48:void = call %main_1
+    %49:vec4<f32> = load %x_GLF_color
+    %50:main_out = construct %49
+    ret %50
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

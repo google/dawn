@@ -1,0 +1,26 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: UniformBuffer = struct @align(16) {
+  d:vec3<i32> @offset(0)
+}
+
+%b1 = block {  # root
+  %u_input:ptr<uniform, UniformBuffer, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec3<i32>, read> = access %u_input, 0u
+    %4:vec3<i32> = load %3
+    %temp:vec3<i32> = shiftl %4, vec3<u32>(0u)
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

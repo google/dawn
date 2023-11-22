@@ -1,0 +1,72 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr, 2> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %4:ptr<uniform, i32, read> = access %x_5, 0u, 0i, 0u
+    %x_22:i32 = load %4
+    %6:u32 = bitcast %x_22
+    %7:i32 = shiftr 1i, %6
+    %8:bool = gt %7, 0i
+    if %8 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %9:ptr<uniform, i32, read> = access %x_5, 0u, 1i, 0u
+        %x_29:i32 = load %9
+        %11:ptr<uniform, i32, read> = access %x_5, 0u, 0i, 0u
+        %x_32:i32 = load %11
+        %13:ptr<uniform, i32, read> = access %x_5, 0u, 0i, 0u
+        %x_35:i32 = load %13
+        %15:ptr<uniform, i32, read> = access %x_5, 0u, 1i, 0u
+        %x_38:i32 = load %15
+        %17:f32 = convert %x_29
+        %18:f32 = convert %x_32
+        %19:f32 = convert %x_35
+        %20:f32 = convert %x_38
+        %21:vec4<f32> = construct %17, %18, %19, %20
+        store %x_GLF_color, %21
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %22:ptr<uniform, i32, read> = access %x_5, 0u, 0i, 0u
+        %x_42:i32 = load %22
+        %x_43:f32 = convert %x_42
+        %25:vec4<f32> = construct %x_43, %x_43, %x_43, %x_43
+        store %x_GLF_color, %25
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b5 {
+  %b5 = block {
+    %27:void = call %main_1
+    %28:vec4<f32> = load %x_GLF_color
+    %29:main_out = construct %28
+    ret %29
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

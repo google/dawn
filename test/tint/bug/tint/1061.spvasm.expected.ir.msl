@@ -1,0 +1,64 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(16) {
+  r:vec4<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %f:ptr<function, f32, read_write> = var
+    %v:ptr<function, vec4<f32>, read_write> = var
+    store %f, 1.0f
+    %6:f32 = load %f
+    %7:f32 = sin %6
+    %8:f32 = load %f
+    %9:f32 = cos %8
+    %10:f32 = load %f
+    %11:f32 = exp2 %10
+    %12:f32 = load %f
+    %13:f32 = log %12
+    %14:vec4<f32> = construct %7, %9, %11, %13
+    store %v, %14
+    %15:vec4<f32> = load %v
+    %16:ptr<uniform, vec4<f32>, read> = access %x_7, 0u
+    %17:vec4<f32> = load %16
+    %18:f32 = distance %15, %17
+    %19:bool = lt %18, 0.10000000149011611938f
+    if %19 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b5 {
+  %b5 = block {
+    %21:void = call %main_1
+    %22:vec4<f32> = load %x_GLF_color
+    %23:main_out = construct %22
+    ret %23
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

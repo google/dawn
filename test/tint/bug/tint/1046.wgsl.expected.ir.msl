@@ -1,0 +1,118 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Uniforms = struct @align(16) {
+  worldView:mat4x4<f32> @offset(0)
+  proj:mat4x4<f32> @offset(64)
+  numPointLights:u32 @offset(128)
+  color_source:u32 @offset(132)
+  color:vec4<f32> @offset(144)
+}
+
+PointLight = struct @align(16) {
+  position:vec4<f32> @offset(0)
+}
+
+PointLights = struct @align(16) {
+  values:array<PointLight> @offset(0)
+}
+
+FragmentInput = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  view_position:vec4<f32> @offset(16), @location(0)
+  normal:vec4<f32> @offset(32), @location(1)
+  uv:vec2<f32> @offset(48), @location(2)
+  color:vec4<f32> @offset(64), @location(3)
+}
+
+FragmentOutput = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 0)
+  %pointLights:ptr<storage, PointLights, read> = var @binding_point(0, 1)
+  %mySampler:ptr<handle, sampler, read> = var @binding_point(0, 2)
+  %myTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 3)
+}
+
+%getColor = func(%tint_symbol:FragmentInput):vec4<f32> -> %b2 {
+  %b2 = block {
+    %color:ptr<function, vec4<f32>, read_write> = var
+    %8:ptr<uniform, u32, read> = access %uniforms, 3u
+    %9:u32 = load %8
+    %10:bool = eq %9, 0u
+    if %10 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %11:vec4<f32> = access %tint_symbol, 4u
+        store %color, %11
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %12:ptr<uniform, u32, read> = access %uniforms, 3u
+        %13:u32 = load %12
+        %14:bool = eq %13, 1u
+        if %14 [t: %b5, f: %b6] {  # if_2
+          %b5 = block {  # true
+            %15:vec4<f32> = access %tint_symbol, 2u
+            store %color, %15
+            store_vector_element %color, 3u, 1.0f
+            exit_if  # if_2
+          }
+          %b6 = block {  # false
+            %16:ptr<uniform, u32, read> = access %uniforms, 3u
+            %17:u32 = load %16
+            %18:bool = eq %17, 2u
+            if %18 [t: %b7, f: %b8] {  # if_3
+              %b7 = block {  # true
+                %19:ptr<uniform, vec4<f32>, read> = access %uniforms, 4u
+                %20:vec4<f32> = load %19
+                store %color, %20
+                exit_if  # if_3
+              }
+              %b8 = block {  # false
+                %21:ptr<uniform, u32, read> = access %uniforms, 3u
+                %22:u32 = load %21
+                %23:bool = eq %22, 3u
+                if %23 [t: %b9] {  # if_4
+                  %b9 = block {  # true
+                    %24:texture_2d<f32> = load %myTexture
+                    %25:sampler = load %mySampler
+                    %26:vec2<f32> = access %tint_symbol, 3u
+                    %27:vec4<f32> = textureSample %24, %25, %26
+                    store %color, %27
+                    exit_if  # if_4
+                  }
+                }
+                exit_if  # if_3
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %28:vec4<f32> = load %color
+    ret %28
+  }
+}
+%tint_symbol_1 = @fragment func(%tint_symbol_2:FragmentInput):FragmentOutput -> %b10 {  # %tint_symbol_2: 'tint_symbol'
+  %b10 = block {
+    %output:ptr<function, FragmentOutput, read_write> = var
+    %32:ptr<function, vec4<f32>, read_write> = access %output, 0u
+    store %32, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    %33:Uniforms = load %uniforms
+    %34:sampler = load %mySampler
+    %35:texture_2d<f32> = load %myTexture
+    %36:FragmentOutput = load %output
+    ret %36
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

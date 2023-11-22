@@ -1,0 +1,245 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: OutputBuf = struct @align(4) {
+  result:array<u32> @offset(0)
+}
+
+Uniforms = struct @align(8) {
+  dstTextureFlipY:u32 @offset(0)
+  channelCount:u32 @offset(4)
+  srcCopyOrigin:vec2<u32> @offset(8)
+  dstCopyOrigin:vec2<u32> @offset(16)
+  copySize:vec2<u32> @offset(24)
+}
+
+%b1 = block {  # root
+  %src:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %dst:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %output:ptr<storage, OutputBuf, read_write> = var @binding_point(0, 2)
+  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
+}
+
+%aboutEqual = func(%value:f32, %expect:f32):bool -> %b2 {
+  %b2 = block {
+    %8:f32 = sub %value, %expect
+    %9:f32 = abs %8
+    %10:bool = lt %9, 0.00100000004749745131f
+    ret %10
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void -> %b3 {
+  %b3 = block {
+    %13:texture_2d<f32> = load %src
+    %srcSize:vec2<u32> = textureDimensions %13
+    %15:texture_2d<f32> = load %dst
+    %dstSize:vec2<u32> = textureDimensions %15
+    %17:vec2<u32> = swizzle %GlobalInvocationID, xy
+    %dstTexCoord:vec2<u32> = construct %17
+    %nonCoveredColor:vec4<f32> = let vec4<f32>(0.0f, 1.0f, 0.0f, 1.0f)
+    %success:ptr<function, bool, read_write> = var, true
+    %21:u32 = access %dstTexCoord, 0u
+    %22:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
+    %23:u32 = load_vector_element %22, 0u
+    %24:bool = lt %21, %23
+    %25:bool = if %24 [t: %b4, f: %b5] {  # if_1
+      %b4 = block {  # true
+        exit_if true  # if_1
+      }
+      %b5 = block {  # false
+        %26:u32 = access %dstTexCoord, 1u
+        %27:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
+        %28:u32 = load_vector_element %27, 1u
+        %29:bool = lt %26, %28
+        exit_if %29  # if_1
+      }
+    }
+    %30:bool = if %25 [t: %b6, f: %b7] {  # if_2
+      %b6 = block {  # true
+        exit_if true  # if_2
+      }
+      %b7 = block {  # false
+        %31:u32 = access %dstTexCoord, 0u
+        %32:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
+        %33:u32 = load_vector_element %32, 0u
+        %34:ptr<uniform, vec2<u32>, read> = access %uniforms, 4u
+        %35:u32 = load_vector_element %34, 0u
+        %36:u32 = add %33, %35
+        %37:bool = gte %31, %36
+        exit_if %37  # if_2
+      }
+    }
+    %38:bool = if %30 [t: %b8, f: %b9] {  # if_3
+      %b8 = block {  # true
+        exit_if true  # if_3
+      }
+      %b9 = block {  # false
+        %39:u32 = access %dstTexCoord, 1u
+        %40:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
+        %41:u32 = load_vector_element %40, 1u
+        %42:ptr<uniform, vec2<u32>, read> = access %uniforms, 4u
+        %43:u32 = load_vector_element %42, 1u
+        %44:u32 = add %41, %43
+        %45:bool = gte %39, %44
+        exit_if %45  # if_3
+      }
+    }
+    if %38 [t: %b10, f: %b11] {  # if_4
+      %b10 = block {  # true
+        %46:bool = load %success
+        %47:bool = if %46 [t: %b12, f: %b13] {  # if_5
+          %b12 = block {  # true
+            %48:texture_2d<f32> = load %dst
+            %49:vec2<i32> = convert %dstTexCoord
+            %50:vec4<f32> = textureLoad %48, %49, 0i
+            %51:vec4<bool> = eq %50, %nonCoveredColor
+            %52:bool = all %51
+            exit_if %52  # if_5
+          }
+          %b13 = block {  # false
+            exit_if false  # if_5
+          }
+        }
+        store %success, %47
+        exit_if  # if_4
+      }
+      %b11 = block {  # false
+        %53:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
+        %54:vec2<u32> = load %53
+        %55:vec2<u32> = sub %dstTexCoord, %54
+        %56:ptr<uniform, vec2<u32>, read> = access %uniforms, 2u
+        %57:vec2<u32> = load %56
+        %58:vec2<u32> = add %55, %57
+        %srcTexCoord:ptr<function, vec2<u32>, read_write> = var, %58
+        %60:ptr<uniform, u32, read> = access %uniforms, 0u
+        %61:u32 = load %60
+        %62:bool = eq %61, 1u
+        if %62 [t: %b14] {  # if_6
+          %b14 = block {  # true
+            %63:u32 = access %srcSize, 1u
+            %64:u32 = load_vector_element %srcTexCoord, 1u
+            %65:u32 = sub %63, %64
+            %66:u32 = sub %65, 1u
+            store_vector_element %srcTexCoord, 1u, %66
+            exit_if  # if_6
+          }
+        }
+        %67:texture_2d<f32> = load %src
+        %68:vec2<u32> = load %srcTexCoord
+        %69:vec2<i32> = convert %68
+        %srcColor:vec4<f32> = textureLoad %67, %69, 0i
+        %71:texture_2d<f32> = load %dst
+        %72:vec2<i32> = convert %dstTexCoord
+        %dstColor:vec4<f32> = textureLoad %71, %72, 0i
+        %74:ptr<uniform, u32, read> = access %uniforms, 1u
+        %75:u32 = load %74
+        %76:bool = eq %75, 2u
+        if %76 [t: %b15, f: %b16] {  # if_7
+          %b15 = block {  # true
+            %77:bool = load %success
+            %78:bool = if %77 [t: %b17, f: %b18] {  # if_8
+              %b17 = block {  # true
+                %79:f32 = access %dstColor, 0u
+                %80:f32 = access %srcColor, 0u
+                %81:bool = call %aboutEqual, %79, %80
+                exit_if %81  # if_8
+              }
+              %b18 = block {  # false
+                exit_if false  # if_8
+              }
+            }
+            %82:bool = if %78 [t: %b19, f: %b20] {  # if_9
+              %b19 = block {  # true
+                %83:f32 = access %dstColor, 1u
+                %84:f32 = access %srcColor, 1u
+                %85:bool = call %aboutEqual, %83, %84
+                exit_if %85  # if_9
+              }
+              %b20 = block {  # false
+                exit_if false  # if_9
+              }
+            }
+            store %success, %82
+            exit_if  # if_7
+          }
+          %b16 = block {  # false
+            %86:bool = load %success
+            %87:bool = if %86 [t: %b21, f: %b22] {  # if_10
+              %b21 = block {  # true
+                %88:f32 = access %dstColor, 0u
+                %89:f32 = access %srcColor, 0u
+                %90:bool = call %aboutEqual, %88, %89
+                exit_if %90  # if_10
+              }
+              %b22 = block {  # false
+                exit_if false  # if_10
+              }
+            }
+            %91:bool = if %87 [t: %b23, f: %b24] {  # if_11
+              %b23 = block {  # true
+                %92:f32 = access %dstColor, 1u
+                %93:f32 = access %srcColor, 1u
+                %94:bool = call %aboutEqual, %92, %93
+                exit_if %94  # if_11
+              }
+              %b24 = block {  # false
+                exit_if false  # if_11
+              }
+            }
+            %95:bool = if %91 [t: %b25, f: %b26] {  # if_12
+              %b25 = block {  # true
+                %96:f32 = access %dstColor, 2u
+                %97:f32 = access %srcColor, 2u
+                %98:bool = call %aboutEqual, %96, %97
+                exit_if %98  # if_12
+              }
+              %b26 = block {  # false
+                exit_if false  # if_12
+              }
+            }
+            %99:bool = if %95 [t: %b27, f: %b28] {  # if_13
+              %b27 = block {  # true
+                %100:f32 = access %dstColor, 3u
+                %101:f32 = access %srcColor, 3u
+                %102:bool = call %aboutEqual, %100, %101
+                exit_if %102  # if_13
+              }
+              %b28 = block {  # false
+                exit_if false  # if_13
+              }
+            }
+            store %success, %99
+            exit_if  # if_7
+          }
+        }
+        exit_if  # if_4
+      }
+    }
+    %103:u32 = access %GlobalInvocationID, 1u
+    %104:u32 = access %dstSize, 0u
+    %105:u32 = mul %103, %104
+    %106:u32 = access %GlobalInvocationID, 0u
+    %outputIndex:u32 = add %105, %106
+    %108:bool = load %success
+    if %108 [t: %b29, f: %b30] {  # if_14
+      %b29 = block {  # true
+        %109:ptr<storage, u32, read_write> = access %output, 0u, %outputIndex
+        store %109, 1u
+        exit_if  # if_14
+      }
+      %b30 = block {  # false
+        %110:ptr<storage, u32, read_write> = access %output, 0u, %outputIndex
+        store %110, 0u
+        exit_if  # if_14
+      }
+    }
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

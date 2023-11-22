@@ -1,0 +1,235 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: UniformBuffer = struct @align(16) {
+  unknownInput_S1_c0:f32 @offset(16)
+  ucolorRed_S1_c0:vec4<f32> @offset(32)
+  ucolorGreen_S1_c0:vec4<f32> @offset(48)
+  umatrix_S1:mat3x3<f32> @offset(64)
+}
+
+main_out = struct @align(16) {
+  sk_FragColor_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_4:ptr<uniform, UniformBuffer, read> = var @binding_point(0, 0)
+  %sk_FragColor:ptr<private, vec4<f32>, read_write> = var
+  %sk_Clockwise:ptr<private, bool, read_write> = var
+  %vcolor_S0:ptr<private, vec4<f32>, read_write> = var
+}
+
+%test_int_S1_c0_b = func():bool -> %b2 {
+  %b2 = block {
+    %unknown:ptr<function, i32, read_write> = var
+    %ok:ptr<function, bool, read_write> = var
+    %val:ptr<function, vec4<i32>, read_write> = var
+    %x_40:ptr<function, bool, read_write> = var
+    %x_41:ptr<function, bool, read_write> = var
+    %x_54:ptr<function, bool, read_write> = var
+    %x_55:ptr<function, bool, read_write> = var
+    %x_65:ptr<function, bool, read_write> = var
+    %x_66:ptr<function, bool, read_write> = var
+    %15:ptr<uniform, f32, read> = access %x_4, 0u
+    %16:f32 = load %15
+    %x_27:i32 = convert %16
+    store %unknown, %x_27
+    store %ok, true
+    store %x_41, false
+    if true [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %18:vec4<i32> = construct %x_27
+        %19:vec4<i32> = div vec4<i32>(0i), %18
+        %20:vec4<bool> = eq %19, vec4<i32>(0i)
+        %21:bool = all %20
+        store %x_40, %21
+        %22:bool = load %x_40
+        store %x_41, %22
+        exit_if  # if_1
+      }
+    }
+    %23:bool = load %x_41
+    store %ok, %23
+    %x_44:vec4<i32> = construct %x_27
+    store %val, %x_44
+    %x_47:vec4<i32> = add %x_44, vec4<i32>(1i)
+    store %val, %x_47
+    %x_48:vec4<i32> = sub %x_47, vec4<i32>(1i)
+    store %val, %x_48
+    %x_49:vec4<i32> = add %x_48, vec4<i32>(1i)
+    store %val, %x_49
+    %x_50:vec4<i32> = sub %x_49, vec4<i32>(1i)
+    store %val, %x_50
+    store %x_55, false
+    %29:bool = load %x_41
+    if %29 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %30:vec4<bool> = eq %x_50, %x_44
+        %31:bool = all %30
+        store %x_54, %31
+        %32:bool = load %x_54
+        store %x_55, %32
+        exit_if  # if_2
+      }
+    }
+    %33:bool = load %x_55
+    store %ok, %33
+    %x_58:vec4<i32> = mul %x_50, vec4<i32>(2i)
+    store %val, %x_58
+    %x_59:vec4<i32> = div %x_58, vec4<i32>(2i)
+    store %val, %x_59
+    %x_60:vec4<i32> = mul %x_59, vec4<i32>(2i)
+    store %val, %x_60
+    %x_61:vec4<i32> = div %x_60, vec4<i32>(2i)
+    store %val, %x_61
+    store %x_66, false
+    %38:bool = load %x_55
+    if %38 [t: %b5] {  # if_3
+      %b5 = block {  # true
+        %39:vec4<bool> = eq %x_61, %x_44
+        %40:bool = all %39
+        store %x_65, %40
+        %41:bool = load %x_65
+        store %x_66, %41
+        exit_if  # if_3
+      }
+    }
+    %42:bool = load %x_66
+    store %ok, %42
+    %43:bool = load %x_66
+    ret %43
+  }
+}
+%main_1 = func():void -> %b6 {
+  %b6 = block {
+    %outputColor_S0:ptr<function, vec4<f32>, read_write> = var
+    %output_S1:ptr<function, vec4<f32>, read_write> = var
+    %x_8_unknown:ptr<function, f32, read_write> = var
+    %x_9_ok:ptr<function, bool, read_write> = var
+    %x_10_val:ptr<function, vec4<f32>, read_write> = var
+    %x_116:ptr<function, vec4<f32>, read_write> = var
+    %x_86:ptr<function, bool, read_write> = var
+    %x_87:ptr<function, bool, read_write> = var
+    %x_99:ptr<function, bool, read_write> = var
+    %x_100:ptr<function, bool, read_write> = var
+    %x_110:ptr<function, bool, read_write> = var
+    %x_111:ptr<function, bool, read_write> = var
+    %x_114:ptr<function, bool, read_write> = var
+    %x_115:ptr<function, bool, read_write> = var
+    %59:vec4<f32> = load %vcolor_S0
+    store %outputColor_S0, %59
+    %60:ptr<uniform, f32, read> = access %x_4, 0u
+    %x_77:f32 = load %60
+    store %x_8_unknown, %x_77
+    store %x_9_ok, true
+    store %x_87, false
+    if true [t: %b7] {  # if_4
+      %b7 = block {  # true
+        %62:vec4<f32> = construct %x_77
+        %63:vec4<f32> = div vec4<f32>(0.0f), %62
+        %64:vec4<bool> = eq %63, vec4<f32>(0.0f)
+        %65:bool = all %64
+        store %x_86, %65
+        %66:bool = load %x_86
+        store %x_87, %66
+        exit_if  # if_4
+      }
+    }
+    %67:bool = load %x_87
+    store %x_9_ok, %67
+    %x_89:vec4<f32> = construct %x_77
+    store %x_10_val, %x_89
+    %x_92:vec4<f32> = add %x_89, vec4<f32>(1.0f)
+    store %x_10_val, %x_92
+    %x_93:vec4<f32> = sub %x_92, vec4<f32>(1.0f)
+    store %x_10_val, %x_93
+    %x_94:vec4<f32> = add %x_93, vec4<f32>(1.0f)
+    store %x_10_val, %x_94
+    %x_95:vec4<f32> = sub %x_94, vec4<f32>(1.0f)
+    store %x_10_val, %x_95
+    store %x_100, false
+    %73:bool = load %x_87
+    if %73 [t: %b8] {  # if_5
+      %b8 = block {  # true
+        %74:vec4<bool> = eq %x_95, %x_89
+        %75:bool = all %74
+        store %x_99, %75
+        %76:bool = load %x_99
+        store %x_100, %76
+        exit_if  # if_5
+      }
+    }
+    %77:bool = load %x_100
+    store %x_9_ok, %77
+    %x_103:vec4<f32> = mul %x_95, vec4<f32>(2.0f)
+    store %x_10_val, %x_103
+    %x_104:vec4<f32> = div %x_103, vec4<f32>(2.0f)
+    store %x_10_val, %x_104
+    %x_105:vec4<f32> = mul %x_104, vec4<f32>(2.0f)
+    store %x_10_val, %x_105
+    %x_106:vec4<f32> = div %x_105, vec4<f32>(2.0f)
+    store %x_10_val, %x_106
+    store %x_111, false
+    %82:bool = load %x_100
+    if %82 [t: %b9] {  # if_6
+      %b9 = block {  # true
+        %83:vec4<bool> = eq %x_106, %x_89
+        %84:bool = all %83
+        store %x_110, %84
+        %85:bool = load %x_110
+        store %x_111, %85
+        exit_if  # if_6
+      }
+    }
+    %86:bool = load %x_111
+    store %x_9_ok, %86
+    store %x_115, false
+    %87:bool = load %x_111
+    if %87 [t: %b10] {  # if_7
+      %b10 = block {  # true
+        %88:bool = call %test_int_S1_c0_b
+        store %x_114, %88
+        %89:bool = load %x_114
+        store %x_115, %89
+        exit_if  # if_7
+      }
+    }
+    %90:bool = load %x_115
+    if %90 [t: %b11, f: %b12] {  # if_8
+      %b11 = block {  # true
+        %91:ptr<uniform, vec4<f32>, read> = access %x_4, 2u
+        %92:vec4<f32> = load %91
+        store %x_116, %92
+        exit_if  # if_8
+      }
+      %b12 = block {  # false
+        %93:ptr<uniform, vec4<f32>, read> = access %x_4, 1u
+        %94:vec4<f32> = load %93
+        store %x_116, %94
+        exit_if  # if_8
+      }
+    }
+    %x_125:vec4<f32> = load %x_116
+    %96:vec4<f32> = load %x_116
+    store %output_S1, %96
+    store %sk_FragColor, %x_125
+    ret
+  }
+}
+%tint_symbol = @fragment func(%sk_Clockwise_param:bool [@front_facing], %vcolor_S0_param:vec4<f32> [@location(0)]):main_out -> %b13 {
+  %b13 = block {
+    store %sk_Clockwise, %sk_Clockwise_param
+    store %vcolor_S0, %vcolor_S0_param
+    %100:void = call %main_1
+    %101:vec4<f32> = load %sk_FragColor
+    %102:main_out = construct %101
+    ret %102
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

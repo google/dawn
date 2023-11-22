@@ -1,0 +1,608 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  resolution:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %map:ptr<private, array<i32, 256>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %x_60:ptr<private, mat2x4<f32>, read_write> = var, mat2x4<f32>(vec4<f32>(0.0f))
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %pos:ptr<function, vec2<f32>, read_write> = var
+    %ipos:ptr<function, vec2<i32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %p:ptr<function, vec2<i32>, read_write> = var
+    %canwalk:ptr<function, bool, read_write> = var
+    %v:ptr<function, i32, read_write> = var
+    %directions:ptr<function, i32, read_write> = var
+    %j:ptr<function, i32, read_write> = var
+    %d:ptr<function, i32, read_write> = var
+    %x_63:vec4<f32> = load %gl_FragCoord
+    %17:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_67:vec2<f32> = load %17
+    %x_68:i32 = let -242i
+    %20:f32 = access %x_63, 0u
+    %21:f32 = access %x_63, 1u
+    %22:vec2<f32> = construct %20, %21
+    %23:vec2<f32> = div %22, %x_67
+    store %pos, %23
+    %x_71:f32 = load_vector_element %pos, 0u
+    %x_75:f32 = load_vector_element %pos, 1u
+    %26:f32 = mul %x_71, 16.0f
+    %27:i32 = convert %26
+    %28:f32 = mul %x_75, 16.0f
+    %29:i32 = convert %28
+    %30:vec2<i32> = construct %27, %29
+    store %ipos, %30
+    store %i, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_83:i32 = load %i
+        %32:bool = lt %x_83, 256i
+        if %32 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_86:i32 = load %i
+        %34:ptr<private, i32, read_write> = access %map, %x_86
+        store %34, 0i
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_88:i32 = load %i
+        %36:i32 = add %x_88, 1i
+        store %i, %36
+        next_iteration %b3
+      }
+    }
+    store %p, vec2<i32>(0i)
+    store %canwalk, true
+    store %v, 0i
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %x_110:ptr<function, bool, read_write> = var
+        %x_130:ptr<function, bool, read_write> = var
+        %x_150:ptr<function, bool, read_write> = var
+        %x_171:ptr<function, bool, read_write> = var
+        %x_111_phi:ptr<function, bool, read_write> = var
+        %x_131_phi:ptr<function, bool, read_write> = var
+        %x_151_phi:ptr<function, bool, read_write> = var
+        %x_172_phi:ptr<function, bool, read_write> = var
+        %x_94:i32 = load %v
+        %46:i32 = add %x_94, 1i
+        store %v, %46
+        store %directions, 0i
+        %x_97:i32 = load_vector_element %p, 0u
+        %x_98:bool = gt %x_97, 0i
+        store %x_111_phi, %x_98
+        if %x_98 [t: %b9] {  # if_2
+          %b9 = block {  # true
+            %x_102:i32 = load_vector_element %p, 0u
+            %x_105:i32 = load_vector_element %p, 1u
+            %51:i32 = sub %x_102, 2i
+            %52:i32 = mul %x_105, 16i
+            %53:i32 = add %51, %52
+            %54:ptr<private, i32, read_write> = access %map, %53
+            %x_109:i32 = load %54
+            %56:bool = eq %x_109, 0i
+            store %x_110, %56
+            %57:bool = load %x_110
+            store %x_111_phi, %57
+            exit_if  # if_2
+          }
+        }
+        %x_111:bool = load %x_111_phi
+        if %x_111 [t: %b10] {  # if_3
+          %b10 = block {  # true
+            %x_114:i32 = load %directions
+            %60:i32 = add %x_114, 1i
+            store %directions, %60
+            exit_if  # if_3
+          }
+        }
+        %x_117:i32 = load_vector_element %p, 1u
+        %x_118:bool = gt %x_117, 0i
+        store %x_131_phi, %x_118
+        if %x_118 [t: %b11] {  # if_4
+          %b11 = block {  # true
+            %x_122:i32 = load_vector_element %p, 0u
+            %x_124:i32 = load_vector_element %p, 1u
+            %65:i32 = sub %x_124, 2i
+            %66:i32 = mul %65, 16i
+            %67:i32 = add %x_122, %66
+            %68:ptr<private, i32, read_write> = access %map, %67
+            %x_129:i32 = load %68
+            %70:bool = eq %x_129, 0i
+            store %x_130, %70
+            %71:bool = load %x_130
+            store %x_131_phi, %71
+            exit_if  # if_4
+          }
+        }
+        %x_131:bool = load %x_131_phi
+        if %x_131 [t: %b12] {  # if_5
+          %b12 = block {  # true
+            %x_134:i32 = load %directions
+            %74:i32 = add %x_134, 1i
+            store %directions, %74
+            exit_if  # if_5
+          }
+        }
+        %x_137:i32 = load_vector_element %p, 0u
+        %x_138:bool = lt %x_137, 14i
+        store %x_151_phi, %x_138
+        if %x_138 [t: %b13] {  # if_6
+          %b13 = block {  # true
+            %x_142:i32 = load_vector_element %p, 0u
+            %x_145:i32 = load_vector_element %p, 1u
+            %79:i32 = add %x_142, 2i
+            %80:i32 = mul %x_145, 16i
+            %81:i32 = add %79, %80
+            %82:ptr<private, i32, read_write> = access %map, %81
+            %x_149:i32 = load %82
+            %84:bool = eq %x_149, 0i
+            store %x_150, %84
+            %85:bool = load %x_150
+            store %x_151_phi, %85
+            exit_if  # if_6
+          }
+        }
+        %x_151:bool = load %x_151_phi
+        if %x_151 [t: %b14] {  # if_7
+          %b14 = block {  # true
+            %x_154:i32 = load %directions
+            %88:i32 = add %x_154, 1i
+            store %directions, %88
+            exit_if  # if_7
+          }
+        }
+        %x_156:i32 = sub 256i, %x_68
+        %x_158:i32 = load_vector_element %p, 1u
+        %x_159:bool = lt %x_158, 14i
+        store %x_172_phi, %x_159
+        if %x_159 [t: %b15] {  # if_8
+          %b15 = block {  # true
+            %x_163:i32 = load_vector_element %p, 0u
+            %x_165:i32 = load_vector_element %p, 1u
+            %94:i32 = add %x_165, 2i
+            %95:i32 = mul %94, 16i
+            %96:i32 = add %x_163, %95
+            %97:ptr<private, i32, read_write> = access %map, %96
+            %x_170:i32 = load %97
+            %99:bool = eq %x_170, 0i
+            store %x_171, %99
+            %100:bool = load %x_171
+            store %x_172_phi, %100
+            exit_if  # if_8
+          }
+        }
+        %x_172:bool = load %x_172_phi
+        if %x_172 [t: %b16] {  # if_9
+          %b16 = block {  # true
+            %x_175:i32 = load %directions
+            %103:i32 = add %x_175, 1i
+            store %directions, %103
+            exit_if  # if_9
+          }
+        }
+        %x_237:ptr<function, bool, read_write> = var
+        %x_250:ptr<function, bool, read_write> = var
+        %x_289:ptr<function, bool, read_write> = var
+        %x_302:ptr<function, bool, read_write> = var
+        %x_341:ptr<function, bool, read_write> = var
+        %x_354:ptr<function, bool, read_write> = var
+        %x_393:ptr<function, bool, read_write> = var
+        %x_406:ptr<function, bool, read_write> = var
+        %x_238_phi:ptr<function, bool, read_write> = var
+        %x_251_phi:ptr<function, bool, read_write> = var
+        %x_290_phi:ptr<function, bool, read_write> = var
+        %x_303_phi:ptr<function, bool, read_write> = var
+        %x_342_phi:ptr<function, bool, read_write> = var
+        %x_355_phi:ptr<function, bool, read_write> = var
+        %x_394_phi:ptr<function, bool, read_write> = var
+        %x_407_phi:ptr<function, bool, read_write> = var
+        %x_177:i32 = load %directions
+        %121:bool = eq %x_177, 0i
+        if %121 [t: %b17, f: %b18] {  # if_10
+          %b17 = block {  # true
+            store %canwalk, false
+            store %i, 0i
+            loop [b: %b19, c: %b20] {  # loop_3
+              %b19 = block {  # body
+                %x_186:i32 = load %i
+                %123:bool = lt %x_186, 8i
+                if %123 [t: %b21, f: %b22] {  # if_11
+                  %b21 = block {  # true
+                    exit_if  # if_11
+                  }
+                  %b22 = block {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                store %j, 0i
+                %x_189:i32 = sub %x_156, %x_186
+                store %x_60, mat2x4<f32>(vec4<f32>(0.0f))
+                if false [t: %b23] {  # if_12
+                  %b23 = block {  # true
+                    continue %b20
+                  }
+                }
+                loop [b: %b24, c: %b25] {  # loop_4
+                  %b24 = block {  # body
+                    %x_194:i32 = load %j
+                    %126:bool = lt %x_194, 8i
+                    if %126 [t: %b26, f: %b27] {  # if_13
+                      %b26 = block {  # true
+                        exit_if  # if_13
+                      }
+                      %b27 = block {  # false
+                        exit_loop  # loop_4
+                      }
+                    }
+                    %x_197:i32 = load %j
+                    %x_199:i32 = load %i
+                    %129:i32 = mul %x_197, 2i
+                    %130:i32 = mul %x_199, 2i
+                    %131:i32 = mul %130, 16i
+                    %132:i32 = add %129, %131
+                    %133:ptr<private, i32, read_write> = access %map, %132
+                    %x_204:i32 = load %133
+                    %135:bool = eq %x_204, 0i
+                    if %135 [t: %b28] {  # if_14
+                      %b28 = block {  # true
+                        %x_208:i32 = load %j
+                        %137:i32 = mul %x_208, 2i
+                        store_vector_element %p, 0u, %137
+                        %x_211:i32 = load %i
+                        %139:i32 = mul %x_211, 2i
+                        store_vector_element %p, 1u, %139
+                        store %canwalk, true
+                        exit_if  # if_14
+                      }
+                    }
+                    continue %b25
+                  }
+                  %b25 = block {  # continuing
+                    %x_214:i32 = load %j
+                    %141:i32 = add %x_214, 1i
+                    store %j, %141
+                    next_iteration %b24
+                  }
+                }
+                continue %b20
+              }
+              %b20 = block {  # continuing
+                %x_216:i32 = load %i
+                %143:i32 = add %x_216, 1i
+                store %i, %143
+                next_iteration %b19
+              }
+            }
+            %x_219:i32 = load_vector_element %p, 0u
+            %x_221:i32 = load_vector_element %p, 1u
+            %146:i32 = mul %x_221, 16i
+            %147:i32 = add %x_219, %146
+            %148:ptr<private, i32, read_write> = access %map, %147
+            store %148, 1i
+            exit_if  # if_10
+          }
+          %b18 = block {  # false
+            %x_225:i32 = load %v
+            %x_226:i32 = load %directions
+            %151:i32 = mod %x_225, %x_226
+            store %d, %151
+            %x_228:i32 = load %directions
+            %x_229:i32 = load %v
+            %154:i32 = add %x_229, %x_228
+            store %v, %154
+            %x_231:i32 = load %d
+            %x_232:bool = gte %x_231, 0i
+            store %x_238_phi, %x_232
+            if %x_232 [t: %b29] {  # if_15
+              %b29 = block {  # true
+                %x_236:i32 = load_vector_element %p, 0u
+                %158:bool = gt %x_236, 0i
+                store %x_237, %158
+                %159:bool = load %x_237
+                store %x_238_phi, %159
+                exit_if  # if_15
+              }
+            }
+            %x_238:bool = load %x_238_phi
+            store %x_251_phi, %x_238
+            if %x_238 [t: %b30] {  # if_16
+              %b30 = block {  # true
+                %x_242:i32 = load_vector_element %p, 0u
+                %x_245:i32 = load_vector_element %p, 1u
+                %163:i32 = sub %x_242, 2i
+                %164:i32 = mul %x_245, 16i
+                %165:i32 = add %163, %164
+                %166:ptr<private, i32, read_write> = access %map, %165
+                %x_249:i32 = load %166
+                %168:bool = eq %x_249, 0i
+                store %x_250, %168
+                %169:bool = load %x_250
+                store %x_251_phi, %169
+                exit_if  # if_16
+              }
+            }
+            %x_251:bool = load %x_251_phi
+            if %x_251 [t: %b31] {  # if_17
+              %b31 = block {  # true
+                %x_254:i32 = load %d
+                %172:i32 = sub %x_254, 1i
+                store %d, %172
+                %x_257:i32 = load_vector_element %p, 0u
+                %x_259:i32 = load_vector_element %p, 1u
+                %175:i32 = mul %x_259, 16i
+                %176:i32 = add %x_257, %175
+                %177:ptr<private, i32, read_write> = access %map, %176
+                store %177, 1i
+                %x_264:i32 = load_vector_element %p, 0u
+                %x_267:i32 = load_vector_element %p, 1u
+                %180:i32 = sub %x_264, 1i
+                %181:i32 = mul %x_267, 16i
+                %182:i32 = add %180, %181
+                %183:ptr<private, i32, read_write> = access %map, %182
+                store %183, 1i
+                %x_272:i32 = load_vector_element %p, 0u
+                %x_275:i32 = load_vector_element %p, 1u
+                %186:i32 = sub %x_272, 2i
+                %187:i32 = mul %x_275, 16i
+                %188:i32 = add %186, %187
+                %189:ptr<private, i32, read_write> = access %map, %188
+                store %189, 1i
+                %x_280:i32 = load_vector_element %p, 0u
+                %191:i32 = sub %x_280, 2i
+                store_vector_element %p, 0u, %191
+                exit_if  # if_17
+              }
+            }
+            %x_283:i32 = load %d
+            %x_284:bool = gte %x_283, 0i
+            store %x_290_phi, %x_284
+            if %x_284 [t: %b32] {  # if_18
+              %b32 = block {  # true
+                %x_288:i32 = load_vector_element %p, 1u
+                %195:bool = gt %x_288, 0i
+                store %x_289, %195
+                %196:bool = load %x_289
+                store %x_290_phi, %196
+                exit_if  # if_18
+              }
+            }
+            %x_290:bool = load %x_290_phi
+            store %x_303_phi, %x_290
+            if %x_290 [t: %b33] {  # if_19
+              %b33 = block {  # true
+                %x_294:i32 = load_vector_element %p, 0u
+                %x_296:i32 = load_vector_element %p, 1u
+                %200:i32 = sub %x_296, 2i
+                %201:i32 = mul %200, 16i
+                %202:i32 = add %x_294, %201
+                %203:ptr<private, i32, read_write> = access %map, %202
+                %x_301:i32 = load %203
+                %205:bool = eq %x_301, 0i
+                store %x_302, %205
+                %206:bool = load %x_302
+                store %x_303_phi, %206
+                exit_if  # if_19
+              }
+            }
+            %x_303:bool = load %x_303_phi
+            if %x_303 [t: %b34] {  # if_20
+              %b34 = block {  # true
+                %x_306:i32 = load %d
+                %209:i32 = sub %x_306, 1i
+                store %d, %209
+                %x_309:i32 = load_vector_element %p, 0u
+                %x_311:i32 = load_vector_element %p, 1u
+                %212:i32 = mul %x_311, 16i
+                %213:i32 = add %x_309, %212
+                %214:ptr<private, i32, read_write> = access %map, %213
+                store %214, 1i
+                %x_316:i32 = load_vector_element %p, 0u
+                %x_318:i32 = load_vector_element %p, 1u
+                %217:i32 = sub %x_318, 1i
+                %218:i32 = mul %217, 16i
+                %219:i32 = add %x_316, %218
+                %220:ptr<private, i32, read_write> = access %map, %219
+                store %220, 1i
+                %x_324:i32 = load_vector_element %p, 0u
+                %x_326:i32 = load_vector_element %p, 1u
+                %223:i32 = sub %x_326, 2i
+                %224:i32 = mul %223, 16i
+                %225:i32 = add %x_324, %224
+                %226:ptr<private, i32, read_write> = access %map, %225
+                store %226, 1i
+                %x_332:i32 = load_vector_element %p, 1u
+                %228:i32 = sub %x_332, 2i
+                store_vector_element %p, 1u, %228
+                exit_if  # if_20
+              }
+            }
+            %x_335:i32 = load %d
+            %x_336:bool = gte %x_335, 0i
+            store %x_342_phi, %x_336
+            if %x_336 [t: %b35] {  # if_21
+              %b35 = block {  # true
+                %x_340:i32 = load_vector_element %p, 0u
+                %232:bool = lt %x_340, 14i
+                store %x_341, %232
+                %233:bool = load %x_341
+                store %x_342_phi, %233
+                exit_if  # if_21
+              }
+            }
+            %x_342:bool = load %x_342_phi
+            store %x_355_phi, %x_342
+            if %x_342 [t: %b36] {  # if_22
+              %b36 = block {  # true
+                %x_346:i32 = load_vector_element %p, 0u
+                %x_349:i32 = load_vector_element %p, 1u
+                %237:i32 = add %x_346, 2i
+                %238:i32 = mul %x_349, 16i
+                %239:i32 = add %237, %238
+                %240:ptr<private, i32, read_write> = access %map, %239
+                %x_353:i32 = load %240
+                %242:bool = eq %x_353, 0i
+                store %x_354, %242
+                %243:bool = load %x_354
+                store %x_355_phi, %243
+                exit_if  # if_22
+              }
+            }
+            %x_355:bool = load %x_355_phi
+            if %x_355 [t: %b37] {  # if_23
+              %b37 = block {  # true
+                %x_358:i32 = load %d
+                %246:i32 = sub %x_358, 1i
+                store %d, %246
+                %x_361:i32 = load_vector_element %p, 0u
+                %x_363:i32 = load_vector_element %p, 1u
+                %249:i32 = mul %x_363, 16i
+                %250:i32 = add %x_361, %249
+                %251:ptr<private, i32, read_write> = access %map, %250
+                store %251, 1i
+                %x_368:i32 = load_vector_element %p, 0u
+                %x_371:i32 = load_vector_element %p, 1u
+                %254:i32 = add %x_368, 1i
+                %255:i32 = mul %x_371, 16i
+                %256:i32 = add %254, %255
+                %257:ptr<private, i32, read_write> = access %map, %256
+                store %257, 1i
+                %x_376:i32 = load_vector_element %p, 0u
+                %x_379:i32 = load_vector_element %p, 1u
+                %260:i32 = add %x_376, 2i
+                %261:i32 = mul %x_379, 16i
+                %262:i32 = add %260, %261
+                %263:ptr<private, i32, read_write> = access %map, %262
+                store %263, 1i
+                %x_384:i32 = load_vector_element %p, 0u
+                %265:i32 = add %x_384, 2i
+                store_vector_element %p, 0u, %265
+                exit_if  # if_23
+              }
+            }
+            %x_387:i32 = load %d
+            %x_388:bool = gte %x_387, 0i
+            store %x_394_phi, %x_388
+            if %x_388 [t: %b38] {  # if_24
+              %b38 = block {  # true
+                %x_392:i32 = load_vector_element %p, 1u
+                %269:bool = lt %x_392, 14i
+                store %x_393, %269
+                %270:bool = load %x_393
+                store %x_394_phi, %270
+                exit_if  # if_24
+              }
+            }
+            %x_394:bool = load %x_394_phi
+            store %x_407_phi, %x_394
+            if %x_394 [t: %b39] {  # if_25
+              %b39 = block {  # true
+                %x_398:i32 = load_vector_element %p, 0u
+                %x_400:i32 = load_vector_element %p, 1u
+                %274:i32 = add %x_400, 2i
+                %275:i32 = mul %274, 16i
+                %276:i32 = add %x_398, %275
+                %277:ptr<private, i32, read_write> = access %map, %276
+                %x_405:i32 = load %277
+                %279:bool = eq %x_405, 0i
+                store %x_406, %279
+                %280:bool = load %x_406
+                store %x_407_phi, %280
+                exit_if  # if_25
+              }
+            }
+            %x_407:bool = load %x_407_phi
+            if %x_407 [t: %b40] {  # if_26
+              %b40 = block {  # true
+                %x_410:i32 = load %d
+                %283:i32 = sub %x_410, 1i
+                store %d, %283
+                %x_413:i32 = load_vector_element %p, 0u
+                %x_415:i32 = load_vector_element %p, 1u
+                %286:i32 = mul %x_415, 16i
+                %287:i32 = add %x_413, %286
+                %288:ptr<private, i32, read_write> = access %map, %287
+                store %288, 1i
+                %x_420:i32 = load_vector_element %p, 0u
+                %x_422:i32 = load_vector_element %p, 1u
+                %291:i32 = add %x_422, 1i
+                %292:i32 = mul %291, 16i
+                %293:i32 = add %x_420, %292
+                %294:ptr<private, i32, read_write> = access %map, %293
+                store %294, 1i
+                %x_428:i32 = load_vector_element %p, 0u
+                %x_430:i32 = load_vector_element %p, 1u
+                %297:i32 = add %x_430, 2i
+                %298:i32 = mul %297, 16i
+                %299:i32 = add %x_428, %298
+                %300:ptr<private, i32, read_write> = access %map, %299
+                store %300, 1i
+                %x_436:i32 = load_vector_element %p, 1u
+                %302:i32 = add %x_436, 2i
+                store_vector_element %p, 1u, %302
+                exit_if  # if_26
+              }
+            }
+            exit_if  # if_10
+          }
+        }
+        %x_440:i32 = load_vector_element %ipos, 1u
+        %x_443:i32 = load_vector_element %ipos, 0u
+        %305:i32 = mul %x_440, 16i
+        %306:i32 = add %305, %x_443
+        %307:ptr<private, i32, read_write> = access %map, %306
+        %x_446:i32 = load %307
+        %309:bool = eq %x_446, 1i
+        if %309 [t: %b41] {  # if_27
+          %b41 = block {  # true
+            store %x_GLF_color, vec4<f32>(1.0f)
+            ret
+          }
+        }
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %x_450:bool = load %canwalk
+        %311:bool = eq %x_450, false
+        break_if %311 %b7
+      }
+    }
+    store %x_GLF_color, vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b42 {
+  %b42 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %314:void = call %main_1
+    %315:vec4<f32> = load %x_GLF_color
+    %316:main_out = construct %315
+    ret %316
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,93 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+LeftOver = struct @align(16) {
+  worldViewProjection:mat4x4<f32> @offset(0)
+  time:f32 @offset(64)
+  test2:array<mat4x4<f32>, 2> @offset(80)
+  test:array<strided_arr, 4> @offset(208)
+}
+
+main_out = struct @align(16) {
+  gl_Position:vec4<f32> @offset(0), @builtin(position)
+  vUV_1:vec2<f32> @offset(16), @location(0)
+}
+
+%b1 = block {  # root
+  %position_1:ptr<private, vec3<f32>, read_write> = var
+  %x_14:ptr<uniform, LeftOver, read> = var @binding_point(2, 2)
+  %vUV:ptr<private, vec2<f32>, read_write> = var
+  %uv:ptr<private, vec2<f32>, read_write> = var
+  %normal:ptr<private, vec3<f32>, read_write> = var
+  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %q:ptr<function, vec4<f32>, read_write> = var
+    %p:ptr<function, vec3<f32>, read_write> = var
+    %10:f32 = load_vector_element %position_1, 0u
+    %11:f32 = load_vector_element %position_1, 1u
+    %12:f32 = load_vector_element %position_1, 2u
+    %13:vec4<f32> = construct %10, %11, %12, 1.0f
+    store %q, %13
+    %14:vec4<f32> = load %q
+    %15:vec3<f32> = swizzle %14, xyz
+    store %p, %15
+    %16:f32 = load_vector_element %p, 0u
+    %17:ptr<uniform, f32, read> = access %x_14, 3u, 0i, 0u
+    %18:f32 = load %17
+    %19:f32 = load_vector_element %position_1, 1u
+    %20:f32 = mul %18, %19
+    %21:ptr<uniform, f32, read> = access %x_14, 1u
+    %22:f32 = load %21
+    %23:f32 = add %20, %22
+    %24:f32 = sin %23
+    %25:f32 = add %16, %24
+    store_vector_element %p, 0u, %25
+    %26:f32 = load_vector_element %p, 1u
+    %27:ptr<uniform, f32, read> = access %x_14, 1u
+    %28:f32 = load %27
+    %29:f32 = add %28, 4.0f
+    %30:f32 = sin %29
+    %31:f32 = add %26, %30
+    store_vector_element %p, 1u, %31
+    %32:ptr<uniform, mat4x4<f32>, read> = access %x_14, 0u
+    %33:mat4x4<f32> = load %32
+    %34:f32 = load_vector_element %p, 0u
+    %35:f32 = load_vector_element %p, 1u
+    %36:f32 = load_vector_element %p, 2u
+    %37:vec4<f32> = construct %34, %35, %36, 1.0f
+    %38:vec4<f32> = mul %33, %37
+    store %gl_Position, %38
+    %39:vec2<f32> = load %uv
+    store %vUV, %39
+    %40:f32 = load_vector_element %gl_Position, 1u
+    %41:f32 = mul %40, -1.0f
+    store_vector_element %gl_Position, 1u, %41
+    ret
+  }
+}
+%tint_symbol = @vertex func(%position_1_param:vec3<f32> [@location(0)], %uv_param:vec2<f32> [@location(2)], %normal_param:vec3<f32> [@location(1)]):main_out -> %b3 {
+  %b3 = block {
+    store %position_1, %position_1_param
+    store %uv, %uv_param
+    store %normal, %normal_param
+    %46:void = call %main_1
+    %47:vec4<f32> = load %gl_Position
+    %48:vec2<f32> = load %vUV
+    %49:main_out = construct %47, %48
+    ret %49
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

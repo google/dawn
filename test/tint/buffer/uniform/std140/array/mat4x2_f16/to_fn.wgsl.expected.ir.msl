@@ -1,0 +1,53 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %u:ptr<uniform, array<mat4x2<f16>, 4>, read> = var @binding_point(0, 0)
+}
+
+%a = func(%a_1:array<mat4x2<f16>, 4>):void -> %b2 {  # %a_1: 'a'
+  %b2 = block {
+    ret
+  }
+}
+%b = func(%m:mat4x2<f16>):void -> %b3 {
+  %b3 = block {
+    ret
+  }
+}
+%c = func(%v:vec2<f16>):void -> %b4 {
+  %b4 = block {
+    ret
+  }
+}
+%d = func(%f:f16):void -> %b5 {
+  %b5 = block {
+    ret
+  }
+}
+%f_1 = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {  # %f_1: 'f'
+  %b6 = block {
+    %11:array<mat4x2<f16>, 4> = load %u
+    %12:void = call %a, %11
+    %13:ptr<uniform, mat4x2<f16>, read> = access %u, 1i
+    %14:mat4x2<f16> = load %13
+    %15:void = call %b, %14
+    %16:ptr<uniform, vec2<f16>, read> = access %u, 1i, 0i
+    %17:vec2<f16> = load %16
+    %18:vec2<f16> = swizzle %17, yx
+    %19:void = call %c, %18
+    %20:ptr<uniform, vec2<f16>, read> = access %u, 1i, 0i
+    %21:vec2<f16> = load %20
+    %22:vec2<f16> = swizzle %21, yx
+    %23:f16 = access %22, 0u
+    %24:void = call %d, %23
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

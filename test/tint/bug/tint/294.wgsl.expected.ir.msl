@@ -1,0 +1,23 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Light = struct @align(16) {
+  position:vec3<f32> @offset(0)
+  colour:vec3<f32> @offset(16)
+}
+
+Lights = struct @align(16) {
+  light:array<Light> @offset(0)
+}
+
+%b1 = block {  # root
+  %lights:ptr<storage, Lights, read> = var @binding_point(0, 1)
+}
+
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

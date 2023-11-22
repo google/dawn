@@ -1,0 +1,395 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Mat4x4_ = struct @align(16) {
+  mx:vec4<f32> @offset(0)
+  my:vec4<f32> @offset(16)
+  mz:vec4<f32> @offset(32)
+  mw:vec4<f32> @offset(48)
+}
+
+ub_SceneParams = struct @align(16) {
+  u_Projection:Mat4x4_ @offset(0)
+}
+
+Mat4x2_ = struct @align(16) {
+  mx:vec4<f32> @offset(0)
+  my:vec4<f32> @offset(16)
+}
+
+ub_MaterialParams = struct @align(16) {
+  u_TexMtx:array<Mat4x2_, 1> @offset(0)
+  u_Misc0_:vec4<f32> @offset(32)
+}
+
+Mat4x3_ = struct @align(16) {
+  mx:vec4<f32> @offset(0)
+  my:vec4<f32> @offset(16)
+  mz:vec4<f32> @offset(32)
+}
+
+ub_PacketParams = struct @align(16) {
+  u_PosMtx:array<Mat4x3_, 32> @offset(0)
+}
+
+VertexOutput = struct @align(16) {
+  v_Color:vec4<f32> @offset(0), @location(0)
+  v_TexCoord:vec2<f32> @offset(16), @location(1)
+  member:vec4<f32> @offset(32), @builtin(position)
+}
+
+%b1 = block {  # root
+  %global:ptr<uniform, ub_SceneParams, read> = var @binding_point(0, 0)
+  %global1:ptr<uniform, ub_MaterialParams, read> = var @binding_point(0, 1)
+  %global2:ptr<uniform, ub_PacketParams, read> = var @binding_point(0, 2)
+  %a_Position1:ptr<private, vec3<f32>, read_write> = var
+  %a_UV1:ptr<private, vec2<f32>, read_write> = var
+  %a_Color1:ptr<private, vec4<f32>, read_write> = var
+  %a_Normal1:ptr<private, vec3<f32>, read_write> = var
+  %a_PosMtxIdx1:ptr<private, f32, read_write> = var
+  %v_Color:ptr<private, vec4<f32>, read_write> = var
+  %v_TexCoord:ptr<private, vec2<f32>, read_write> = var
+  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+}
+
+%Mat4x3GetCol0_ = func(%m:Mat4x3_):vec3<f32> -> %b2 {
+  %b2 = block {
+    %m1:ptr<function, Mat4x3_, read_write> = var
+    store %m1, %m
+    %x_e2:Mat4x3_ = load %m1
+    %x_e5:Mat4x3_ = load %m1
+    %x_e8:Mat4x3_ = load %m1
+    %18:f32 = access %x_e2, 0u, 0u
+    %19:f32 = access %x_e5, 1u, 0u
+    %20:f32 = access %x_e8, 2u, 0u
+    %21:vec3<f32> = construct %18, %19, %20
+    ret %21
+  }
+}
+%Mat4x3GetCol1_ = func(%m2:Mat4x3_):vec3<f32> -> %b3 {
+  %b3 = block {
+    %m3:ptr<function, Mat4x3_, read_write> = var
+    store %m3, %m2
+    %x_e2_1:Mat4x3_ = load %m3  # %x_e2_1: 'x_e2'
+    %x_e5_1:Mat4x3_ = load %m3  # %x_e5_1: 'x_e5'
+    %x_e8_1:Mat4x3_ = load %m3  # %x_e8_1: 'x_e8'
+    %28:f32 = access %x_e2_1, 0u, 1u
+    %29:f32 = access %x_e5_1, 1u, 1u
+    %30:f32 = access %x_e8_1, 2u, 1u
+    %31:vec3<f32> = construct %28, %29, %30
+    ret %31
+  }
+}
+%Mat4x3GetCol2_ = func(%m4:Mat4x3_):vec3<f32> -> %b4 {
+  %b4 = block {
+    %m5:ptr<function, Mat4x3_, read_write> = var
+    store %m5, %m4
+    %x_e2_2:Mat4x3_ = load %m5  # %x_e2_2: 'x_e2'
+    %x_e5_2:Mat4x3_ = load %m5  # %x_e5_2: 'x_e5'
+    %x_e8_2:Mat4x3_ = load %m5  # %x_e8_2: 'x_e8'
+    %38:f32 = access %x_e2_2, 0u, 2u
+    %39:f32 = access %x_e5_2, 1u, 2u
+    %40:f32 = access %x_e8_2, 2u, 2u
+    %41:vec3<f32> = construct %38, %39, %40
+    ret %41
+  }
+}
+%Mat4x3GetCol3_ = func(%m6:Mat4x3_):vec3<f32> -> %b5 {
+  %b5 = block {
+    %m7:ptr<function, Mat4x3_, read_write> = var
+    store %m7, %m6
+    %x_e2_3:Mat4x3_ = load %m7  # %x_e2_3: 'x_e2'
+    %x_e5_3:Mat4x3_ = load %m7  # %x_e5_3: 'x_e5'
+    %x_e8_3:Mat4x3_ = load %m7  # %x_e8_3: 'x_e8'
+    %48:f32 = access %x_e2_3, 0u, 3u
+    %49:f32 = access %x_e5_3, 1u, 3u
+    %50:f32 = access %x_e8_3, 2u, 3u
+    %51:vec3<f32> = construct %48, %49, %50
+    ret %51
+  }
+}
+%Mul = func(%m8:Mat4x4_, %v:vec4<f32>):vec4<f32> -> %b6 {
+  %b6 = block {
+    %m9:ptr<function, Mat4x4_, read_write> = var
+    %v1:ptr<function, vec4<f32>, read_write> = var
+    store %m9, %m8
+    store %v1, %v
+    %x_e4:Mat4x4_ = load %m9
+    %x_e6:vec4<f32> = load %v1
+    %x_e8_4:Mat4x4_ = load %m9  # %x_e8_4: 'x_e8'
+    %x_e10:vec4<f32> = load %v1
+    %x_e12:Mat4x4_ = load %m9
+    %x_e14:vec4<f32> = load %v1
+    %x_e16:Mat4x4_ = load %m9
+    %x_e18:vec4<f32> = load %v1
+    %65:vec4<f32> = access %x_e4, 0u
+    %66:f32 = dot %65, %x_e6
+    %67:vec4<f32> = access %x_e8_4, 1u
+    %68:f32 = dot %67, %x_e10
+    %69:vec4<f32> = access %x_e12, 2u
+    %70:f32 = dot %69, %x_e14
+    %71:vec4<f32> = access %x_e16, 3u
+    %72:f32 = dot %71, %x_e18
+    %73:vec4<f32> = construct %66, %68, %70, %72
+    ret %73
+  }
+}
+%Mul1 = func(%m10:Mat4x3_, %v2:vec4<f32>):vec3<f32> -> %b7 {
+  %b7 = block {
+    %m11:ptr<function, Mat4x3_, read_write> = var
+    %v3:ptr<function, vec4<f32>, read_write> = var
+    store %m11, %m10
+    store %v3, %v2
+    %x_e4_1:Mat4x3_ = load %m11  # %x_e4_1: 'x_e4'
+    %x_e6_1:vec4<f32> = load %v3  # %x_e6_1: 'x_e6'
+    %x_e8_5:Mat4x3_ = load %m11  # %x_e8_5: 'x_e8'
+    %x_e10_1:vec4<f32> = load %v3  # %x_e10_1: 'x_e10'
+    %x_e12_1:Mat4x3_ = load %m11  # %x_e12_1: 'x_e12'
+    %x_e14_1:vec4<f32> = load %v3  # %x_e14_1: 'x_e14'
+    %85:vec4<f32> = access %x_e4_1, 0u
+    %86:f32 = dot %85, %x_e6_1
+    %87:vec4<f32> = access %x_e8_5, 1u
+    %88:f32 = dot %87, %x_e10_1
+    %89:vec4<f32> = access %x_e12_1, 2u
+    %90:f32 = dot %89, %x_e14_1
+    %91:vec3<f32> = construct %86, %88, %90
+    ret %91
+  }
+}
+%Mul2 = func(%m12:Mat4x2_, %v4:vec4<f32>):vec2<f32> -> %b8 {
+  %b8 = block {
+    %m13:ptr<function, Mat4x2_, read_write> = var
+    %v5:ptr<function, vec4<f32>, read_write> = var
+    store %m13, %m12
+    store %v5, %v4
+    %x_e4_2:Mat4x2_ = load %m13  # %x_e4_2: 'x_e4'
+    %x_e6_2:vec4<f32> = load %v5  # %x_e6_2: 'x_e6'
+    %x_e8_6:Mat4x2_ = load %m13  # %x_e8_6: 'x_e8'
+    %x_e10_2:vec4<f32> = load %v5  # %x_e10_2: 'x_e10'
+    %101:vec4<f32> = access %x_e4_2, 0u
+    %102:f32 = dot %101, %x_e6_2
+    %103:vec4<f32> = access %x_e8_6, 1u
+    %104:f32 = dot %103, %x_e10_2
+    %105:vec2<f32> = construct %102, %104
+    ret %105
+  }
+}
+%Mul3 = func(%v6:vec3<f32>, %m14:Mat4x3_):vec4<f32> -> %b9 {
+  %b9 = block {
+    %v7:ptr<function, vec3<f32>, read_write> = var
+    %m15:ptr<function, Mat4x3_, read_write> = var
+    store %v7, %v6
+    store %m15, %m14
+    %x_e5_4:Mat4x3_ = load %m15  # %x_e5_4: 'x_e5'
+    %x_e6_3:vec3<f32> = call %Mat4x3GetCol0_, %x_e5_4  # %x_e6_3: 'x_e6'
+    %x_e7:vec3<f32> = load %v7
+    %x_e10_3:Mat4x3_ = load %m15  # %x_e10_3: 'x_e10'
+    %x_e11:vec3<f32> = call %Mat4x3GetCol1_, %x_e10_3
+    %x_e12_2:vec3<f32> = load %v7  # %x_e12_2: 'x_e12'
+    %x_e15:Mat4x3_ = load %m15
+    %x_e16_1:vec3<f32> = call %Mat4x3GetCol2_, %x_e15  # %x_e16_1: 'x_e16'
+    %x_e17:vec3<f32> = load %v7
+    %x_e20:Mat4x3_ = load %m15
+    %x_e21:vec3<f32> = call %Mat4x3GetCol3_, %x_e20
+    %x_e22:vec3<f32> = load %v7
+    %123:f32 = dot %x_e6_3, %x_e7
+    %124:f32 = dot %x_e11, %x_e12_2
+    %125:f32 = dot %x_e16_1, %x_e17
+    %126:f32 = dot %x_e21, %x_e22
+    %127:vec4<f32> = construct %123, %124, %125, %126
+    ret %127
+  }
+}
+%x_Mat4x4_ = func(%n:f32):Mat4x4_ -> %b10 {
+  %b10 = block {
+    %n1:ptr<function, f32, read_write> = var
+    %o:ptr<function, Mat4x4_, read_write> = var
+    store %n1, %n
+    %x_e4_3:f32 = load %n1  # %x_e4_3: 'x_e4'
+    %133:ptr<function, vec4<f32>, read_write> = access %o, 0u
+    %134:vec4<f32> = construct %x_e4_3, 0.0f, 0.0f, 0.0f
+    store %133, %134
+    %x_e11_1:f32 = load %n1  # %x_e11_1: 'x_e11'
+    %136:ptr<function, vec4<f32>, read_write> = access %o, 1u
+    %137:vec4<f32> = construct 0.0f, %x_e11_1, 0.0f, 0.0f
+    store %136, %137
+    %x_e18_1:f32 = load %n1  # %x_e18_1: 'x_e18'
+    %139:ptr<function, vec4<f32>, read_write> = access %o, 2u
+    %140:vec4<f32> = construct 0.0f, 0.0f, %x_e18_1, 0.0f
+    store %139, %140
+    %x_e25:f32 = load %n1
+    %142:ptr<function, vec4<f32>, read_write> = access %o, 3u
+    %143:vec4<f32> = construct 0.0f, 0.0f, 0.0f, %x_e25
+    store %142, %143
+    %x_e27:Mat4x4_ = load %o
+    ret %x_e27
+  }
+}
+%x_Mat4x4_1 = func(%m16:Mat4x3_):Mat4x4_ -> %b11 {
+  %b11 = block {
+    %m17:ptr<function, Mat4x3_, read_write> = var
+    %o1:ptr<function, Mat4x4_, read_write> = var
+    store %m17, %m16
+    %x_e4_4:Mat4x4_ = call %x_Mat4x4_, 1.0f  # %x_e4_4: 'x_e4'
+    store %o1, %x_e4_4
+    %x_e7_1:Mat4x3_ = load %m17  # %x_e7_1: 'x_e7'
+    %151:ptr<function, vec4<f32>, read_write> = access %o1, 0u
+    %152:vec4<f32> = access %x_e7_1, 0u
+    store %151, %152
+    %x_e10_4:Mat4x3_ = load %m17  # %x_e10_4: 'x_e10'
+    %154:ptr<function, vec4<f32>, read_write> = access %o1, 1u
+    %155:vec4<f32> = access %x_e10_4, 1u
+    store %154, %155
+    %x_e13:Mat4x3_ = load %m17
+    %157:ptr<function, vec4<f32>, read_write> = access %o1, 2u
+    %158:vec4<f32> = access %x_e13, 2u
+    store %157, %158
+    %x_e15_1:Mat4x4_ = load %o1  # %x_e15_1: 'x_e15'
+    ret %x_e15_1
+  }
+}
+%x_Mat4x4_2 = func(%m18:Mat4x2_):Mat4x4_ -> %b12 {
+  %b12 = block {
+    %m19:ptr<function, Mat4x2_, read_write> = var
+    %o2:ptr<function, Mat4x4_, read_write> = var
+    store %m19, %m18
+    %x_e4_5:Mat4x4_ = call %x_Mat4x4_, 1.0f  # %x_e4_5: 'x_e4'
+    store %o2, %x_e4_5
+    %x_e7_2:Mat4x2_ = load %m19  # %x_e7_2: 'x_e7'
+    %166:ptr<function, vec4<f32>, read_write> = access %o2, 0u
+    %167:vec4<f32> = access %x_e7_2, 0u
+    store %166, %167
+    %x_e10_5:Mat4x2_ = load %m19  # %x_e10_5: 'x_e10'
+    %169:ptr<function, vec4<f32>, read_write> = access %o2, 1u
+    %170:vec4<f32> = access %x_e10_5, 1u
+    store %169, %170
+    %x_e12_3:Mat4x4_ = load %o2  # %x_e12_3: 'x_e12'
+    ret %x_e12_3
+  }
+}
+%x_Mat4x3_ = func(%n2:f32):Mat4x3_ -> %b13 {
+  %b13 = block {
+    %n3:ptr<function, f32, read_write> = var
+    %o3:ptr<function, Mat4x3_, read_write> = var
+    store %n3, %n2
+    %x_e4_6:f32 = load %n3  # %x_e4_6: 'x_e4'
+    %177:ptr<function, vec4<f32>, read_write> = access %o3, 0u
+    %178:vec4<f32> = construct %x_e4_6, 0.0f, 0.0f, 0.0f
+    store %177, %178
+    %x_e11_2:f32 = load %n3  # %x_e11_2: 'x_e11'
+    %180:ptr<function, vec4<f32>, read_write> = access %o3, 1u
+    %181:vec4<f32> = construct 0.0f, %x_e11_2, 0.0f, 0.0f
+    store %180, %181
+    %x_e18_2:f32 = load %n3  # %x_e18_2: 'x_e18'
+    %183:ptr<function, vec4<f32>, read_write> = access %o3, 2u
+    %184:vec4<f32> = construct 0.0f, 0.0f, %x_e18_2, 0.0f
+    store %183, %184
+    %x_e21_1:Mat4x3_ = load %o3  # %x_e21_1: 'x_e21'
+    ret %x_e21_1
+  }
+}
+%x_Mat4x3_1 = func(%m20:Mat4x4_):Mat4x3_ -> %b14 {
+  %b14 = block {
+    %m21:ptr<function, Mat4x4_, read_write> = var
+    %o4:ptr<function, Mat4x3_, read_write> = var
+    store %m21, %m20
+    %x_e4_7:Mat4x4_ = load %m21  # %x_e4_7: 'x_e4'
+    %191:ptr<function, vec4<f32>, read_write> = access %o4, 0u
+    %192:vec4<f32> = access %x_e4_7, 0u
+    store %191, %192
+    %x_e7_3:Mat4x4_ = load %m21  # %x_e7_3: 'x_e7'
+    %194:ptr<function, vec4<f32>, read_write> = access %o4, 1u
+    %195:vec4<f32> = access %x_e7_3, 1u
+    store %194, %195
+    %x_e10_6:Mat4x4_ = load %m21  # %x_e10_6: 'x_e10'
+    %197:ptr<function, vec4<f32>, read_write> = access %o4, 2u
+    %198:vec4<f32> = access %x_e10_6, 2u
+    store %197, %198
+    %x_e12_4:Mat4x3_ = load %o4  # %x_e12_4: 'x_e12'
+    ret %x_e12_4
+  }
+}
+%main1 = func():void -> %b15 {
+  %b15 = block {
+    %t_PosMtx:ptr<function, Mat4x3_, read_write> = var
+    %t_TexSpaceCoord:ptr<function, vec2<f32>, read_write> = var
+    %x_e15_2:f32 = load %a_PosMtxIdx1  # %x_e15_2: 'x_e15'
+    %204:i32 = convert %x_e15_2
+    %205:ptr<uniform, Mat4x3_, read> = access %global2, 0u, %204
+    %x_e18_3:Mat4x3_ = load %205  # %x_e18_3: 'x_e18'
+    store %t_PosMtx, %x_e18_3
+    %x_e23:Mat4x3_ = load %t_PosMtx
+    %x_e24:Mat4x4_ = call %x_Mat4x4_1, %x_e23
+    %x_e25_1:vec3<f32> = load %a_Position1  # %x_e25_1: 'x_e25'
+    %x_e29:Mat4x3_ = load %t_PosMtx
+    %x_e30:Mat4x4_ = call %x_Mat4x4_1, %x_e29
+    %x_e31:vec3<f32> = load %a_Position1
+    %213:vec4<f32> = construct %x_e31, 1.0f
+    %x_e34:vec4<f32> = call %Mul, %x_e30, %213
+    %215:ptr<uniform, Mat4x4_, read> = access %global, 0u
+    %x_e35:Mat4x4_ = load %215
+    %x_e37:Mat4x3_ = load %t_PosMtx
+    %x_e38:Mat4x4_ = call %x_Mat4x4_1, %x_e37
+    %x_e39:vec3<f32> = load %a_Position1
+    %x_e43:Mat4x3_ = load %t_PosMtx
+    %x_e44:Mat4x4_ = call %x_Mat4x4_1, %x_e43
+    %x_e45:vec3<f32> = load %a_Position1
+    %223:vec4<f32> = construct %x_e45, 1.0f
+    %x_e48:vec4<f32> = call %Mul, %x_e44, %223
+    %x_e49:vec4<f32> = call %Mul, %x_e35, %x_e48
+    store %gl_Position, %x_e49
+    %x_e50:vec4<f32> = load %a_Color1
+    store %v_Color, %x_e50
+    %227:ptr<uniform, vec4<f32>, read> = access %global1, 1u
+    %x_e52:vec4<f32> = load %227
+    %229:f32 = access %x_e52, 0u
+    %230:bool = eq %229, 2.0f
+    if %230 [t: %b16, f: %b17] {  # if_1
+      %b16 = block {  # true
+        %x_e59:vec3<f32> = load %a_Normal1
+        %232:ptr<uniform, Mat4x2_, read> = access %global1, 0u, 0i
+        %x_e64:Mat4x2_ = load %232
+        %x_e65:vec3<f32> = load %a_Normal1
+        %235:vec4<f32> = construct %x_e65, 1.0f
+        %x_e68:vec2<f32> = call %Mul2, %x_e64, %235
+        %237:vec2<f32> = swizzle %x_e68, xy
+        store %v_TexCoord, %237
+        ret
+      }
+      %b17 = block {  # false
+        %x_e73:vec2<f32> = load %a_UV1
+        %239:ptr<uniform, Mat4x2_, read> = access %global1, 0u, 0i
+        %x_e79:Mat4x2_ = load %239
+        %x_e80:vec2<f32> = load %a_UV1
+        %242:vec4<f32> = construct %x_e80, 1.0f, 1.0f
+        %x_e84:vec2<f32> = call %Mul2, %x_e79, %242
+        %244:vec2<f32> = swizzle %x_e84, xy
+        store %v_TexCoord, %244
+        ret
+      }
+    }
+    unreachable
+  }
+}
+%tint_symbol = @vertex func(%a_Position:vec3<f32> [@location(0)], %a_UV:vec2<f32> [@location(1)], %a_Color:vec4<f32> [@location(2)], %a_Normal:vec3<f32> [@location(3)], %a_PosMtxIdx:f32 [@location(4)]):VertexOutput -> %b18 {
+  %b18 = block {
+    store %a_Position1, %a_Position
+    store %a_UV1, %a_UV
+    store %a_Color1, %a_Color
+    store %a_Normal1, %a_Normal
+    store %a_PosMtxIdx1, %a_PosMtxIdx
+    %251:void = call %main1
+    %x_e11_3:vec4<f32> = load %v_Color  # %x_e11_3: 'x_e11'
+    %x_e13_1:vec2<f32> = load %v_TexCoord  # %x_e13_1: 'x_e13'
+    %x_e15_3:vec4<f32> = load %gl_Position  # %x_e15_3: 'x_e15'
+    %255:VertexOutput = construct %x_e11_3, %x_e13_1, %x_e15_3
+    ret %255
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,83 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_46_phi:ptr<function, bool, read_write> = var
+        loop [b: %b5, c: %b6] {  # loop_2
+          %b5 = block {  # body
+            %x_37:f32 = load_vector_element %gl_FragCoord, 0u
+            %7:bool = lt %x_37, 0.0f
+            if %7 [t: %b7] {  # if_1
+              %b7 = block {  # true
+                %8:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+                %x_42:f32 = load_vector_element %8, 1u
+                %10:bool = gt 1.0f, %x_42
+                if %10 [t: %b8, f: %b9] {  # if_2
+                  %b8 = block {  # true
+                    discard
+                    exit_if  # if_2
+                  }
+                  %b9 = block {  # false
+                    continue %b6
+                  }
+                }
+                exit_if  # if_1
+              }
+            }
+            store %x_46_phi, true
+            exit_loop  # loop_2
+          }
+          %b6 = block {  # continuing
+            store %x_46_phi, false
+            break_if true %b5
+          }
+        }
+        %x_46:bool = load %x_46_phi
+        if %x_46 [t: %b10] {  # if_3
+          %b10 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        exit_loop  # loop_1
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b11 {
+  %b11 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %14:void = call %main_1
+    %15:vec4<f32> = load %x_GLF_color
+    %16:main_out = construct %15
+    ret %16
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

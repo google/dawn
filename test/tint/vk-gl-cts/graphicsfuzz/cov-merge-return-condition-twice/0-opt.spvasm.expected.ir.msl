@@ -1,0 +1,88 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  three:f32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_ = func():f32 -> %b2 {
+  %b2 = block {
+    %b:ptr<function, f32, read_write> = var
+    %x_34:ptr<function, f32, read_write> = var
+    %x_48:ptr<function, f32, read_write> = var
+    store %b, 2.0f
+    store %x_34, 2.0f
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %7:ptr<uniform, f32, read> = access %x_7, 0u
+        %8:f32 = load %7
+        %9:bool = eq %8, 0.0f
+        if %9 [t: %b5] {  # if_1
+          %b5 = block {  # true
+            %10:f32 = load %x_34
+            store %x_48, %10
+            exit_loop  # loop_1
+          }
+        }
+        %11:ptr<uniform, f32, read> = access %x_7, 0u
+        %12:f32 = load %11
+        %13:bool = eq %12, 0.0f
+        if %13 [t: %b6] {  # if_2
+          %b6 = block {  # true
+            ret 1.0f
+          }
+        }
+        store %b, 1.0f
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        store %x_34, 1.0f
+        store %x_48, 1.0f
+        break_if true %b3
+      }
+    }
+    %14:f32 = load %x_48
+    ret %14
+  }
+}
+%main_1 = func():void -> %b7 {
+  %b7 = block {
+    %x_27:f32 = call %func_
+    %17:bool = eq %x_27, 1.0f
+    if %17 [t: %b8, f: %b9] {  # if_3
+      %b8 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_3
+      }
+      %b9 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b10 {
+  %b10 = block {
+    %19:void = call %main_1
+    %20:vec4<f32> = load %x_GLF_color
+    %21:main_out = construct %20
+    ret %21
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

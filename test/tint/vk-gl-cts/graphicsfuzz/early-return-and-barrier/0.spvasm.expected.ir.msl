@@ -1,0 +1,84 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: theSSBO = struct @align(4) {
+  out_data:i32 @offset(0)
+}
+
+%b1 = block {  # root
+  %x_4:ptr<storage, theSSBO, read_write> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_30:ptr<function, mat2x2<f32>, read_write> = var
+    %x_32:ptr<function, i32, read_write> = var
+    %5:ptr<storage, i32, read_write> = access %x_4, 0u
+    store %5, 42i
+    store %x_30, mat2x2<f32>(vec2<f32>(0.0f))
+    store %x_32, 1i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_33:ptr<function, i32, read_write> = var
+        %7:i32 = load %x_32
+        %8:bool = gt %7, 0i
+        if %8 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %9:i32 = load %x_32
+        %10:i32 = sub %9, 1i
+        store %x_33, %10
+        store %x_30, mat2x2<f32>(vec2<f32>(1.0f, 0.0f), vec2<f32>(0.0f, 1.0f))
+        %11:i32 = load %x_33
+        store %x_32, %11
+        next_iteration %b3
+      }
+    }
+    %12:ptr<function, vec2<f32>, read_write> = access %x_30, 0u
+    %13:vec2<f32> = load %12
+    %14:vec2<f32> = sub %13, vec2<f32>(1.0f, 0.0f)
+    %15:ptr<function, vec2<f32>, read_write> = access %x_30, 1u
+    %16:vec2<f32> = load %15
+    %17:vec2<f32> = sub %16, vec2<f32>(0.0f, 1.0f)
+    %18:mat2x2<f32> = construct %14, %17
+    %x_41:vec2<f32> = mul vec2<f32>(1.0f), %18
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %20:f32 = access %x_41, 0u
+        %21:bool = lt 1.0f, %20
+        if %21 [t: %b9] {  # if_2
+          %b9 = block {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %22:void = workgroupBarrier
+        exit_loop  # loop_2
+      }
+      %b8 = block {  # continuing
+        next_iteration %b7
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b10 {
+  %b10 = block {
+    %24:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

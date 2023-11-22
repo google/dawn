@@ -1,0 +1,63 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(4) {
+  field0:array<i32> @offset(0)
+}
+
+main_out = struct @align(4) {
+  x_4_1:i32 @offset(0), @location(0), @interpolate(flat)
+}
+
+%b1 = block {  # root
+  %x_2:ptr<private, vec4<f32>, read_write> = var
+  %x_3:ptr<private, i32, read_write> = var
+  %x_4:ptr<private, i32, read_write> = var
+  %x_5:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    store %x_4, 1i
+    %x_23:vec4<f32> = load %x_2
+    %7:f32 = access %x_23, 0u
+    %x_27:i32 = convert %7
+    %9:f32 = access %x_23, 1u
+    %x_28:i32 = convert %9
+    %x_33:i32 = load %x_3
+    %12:i32 = mul %x_28, 8i
+    %13:i32 = add %x_27, %12
+    %14:ptr<storage, i32, read_write> = access %x_5, 0u, %13
+    store %14, %x_27
+    %15:i32 = and %x_27, 1i
+    %16:i32 = and %x_28, 1i
+    %17:i32 = add %15, %16
+    %18:i32 = add %17, %x_33
+    %19:f32 = access %x_23, 2u
+    %20:i32 = convert %19
+    %21:bool = eq %18, %20
+    if %21 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%x_2_param:vec4<f32> [@position], %x_3_param:i32 [@location(0), @interpolate(flat)]):main_out -> %b4 {
+  %b4 = block {
+    store %x_2, %x_2_param
+    store %x_3, %x_3_param
+    %25:void = call %main_1
+    %26:i32 = load %x_4
+    %27:main_out = construct %26
+    ret %27
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

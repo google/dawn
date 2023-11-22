@@ -1,0 +1,38 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: FragmentOutput = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+}
+
+FragmentInput = struct @align(8) {
+  vUv:vec2<f32> @offset(0), @location(2)
+}
+
+%b1 = block {  # root
+  %depthMap:ptr<handle, texture_depth_2d, read> = var @binding_point(1, 5)
+  %texSampler:ptr<handle, sampler, read> = var @binding_point(1, 3)
+}
+
+%tint_symbol = @fragment func(%fIn:FragmentInput):FragmentOutput -> %b2 {
+  %b2 = block {
+    %5:texture_depth_2d = load %depthMap
+    %6:sampler = load %texSampler
+    %7:vec2<f32> = access %fIn, 0u
+    %sample:f32 = textureSample %5, %6, %7
+    %color:vec3<f32> = construct %sample, %sample, %sample
+    %fOut:ptr<function, FragmentOutput, read_write> = var
+    %11:ptr<function, vec4<f32>, read_write> = access %fOut, 0u
+    %12:vec4<f32> = construct %color, 1.0f
+    store %11, %12
+    %13:FragmentOutput = load %fOut
+    ret %13
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

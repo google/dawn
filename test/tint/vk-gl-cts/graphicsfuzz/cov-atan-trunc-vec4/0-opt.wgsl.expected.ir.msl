@@ -1,0 +1,116 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr, 2> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr_1, 2> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_9:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %v:ptr<function, vec4<f32>, read_write> = var
+    %f:ptr<function, f32, read_write> = var
+    %x_56:ptr<function, bool, read_write> = var
+    %x_57_phi:ptr<function, bool, read_write> = var
+    %9:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_32:i32 = load %9
+    %11:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_35:i32 = load %11
+    %13:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_38:i32 = load %13
+    %15:f32 = convert %x_32
+    %16:f32 = convert %x_35
+    %17:f32 = convert %x_38
+    %18:vec4<f32> = construct %15, %16, -621.59600830078125f, %17
+    store %v, %18
+    %x_41:vec4<f32> = load %v
+    %20:vec4<f32> = trunc %x_41
+    %21:vec4<f32> = atan %20
+    %22:f32 = access %21, 2u
+    store %f, %22
+    %x_45:f32 = load %f
+    %24:ptr<uniform, f32, read> = access %x_9, 0u, 0i, 0u
+    %x_47:f32 = load %24
+    %26:f32 = negation %x_47
+    %x_49:bool = gt %x_45, %26
+    store %x_57_phi, %x_49
+    if %x_49 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %x_52:f32 = load %f
+        %29:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+        %x_54:f32 = load %29
+        %31:f32 = negation %x_54
+        %32:bool = lt %x_52, %31
+        store %x_56, %32
+        %33:bool = load %x_56
+        store %x_57_phi, %33
+        exit_if  # if_1
+      }
+    }
+    %x_57:bool = load %x_57_phi
+    if %x_57 [t: %b4, f: %b5] {  # if_2
+      %b4 = block {  # true
+        %35:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %x_62:i32 = load %35
+        %37:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_65:i32 = load %37
+        %39:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_68:i32 = load %39
+        %41:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %x_71:i32 = load %41
+        %43:f32 = convert %x_62
+        %44:f32 = convert %x_65
+        %45:f32 = convert %x_68
+        %46:f32 = convert %x_71
+        %47:vec4<f32> = construct %43, %44, %45, %46
+        store %x_GLF_color, %47
+        exit_if  # if_2
+      }
+      %b5 = block {  # false
+        %48:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_75:i32 = load %48
+        %x_76:f32 = convert %x_75
+        %51:vec4<f32> = construct %x_76, %x_76, %x_76, %x_76
+        store %x_GLF_color, %51
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b6 {
+  %b6 = block {
+    %53:void = call %main_1
+    %54:vec4<f32> = load %x_GLF_color
+    %55:main_out = construct %54
+    ret %55
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,38 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: main_out = struct @align(4) {
+  x_2_1:u32 @offset(0), @location(0), @interpolate(flat)
+  x_4_1:u32 @offset(4), @location(6), @interpolate(flat)
+}
+
+%b1 = block {  # root
+  %x_1:ptr<private, u32, read_write> = var
+  %x_2:ptr<private, u32, read_write> = var
+  %x_3:ptr<private, u32, read_write> = var
+  %x_4:ptr<private, u32, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+%tint_symbol = @fragment func(%x_1_param:u32 [@location(0), @interpolate(flat)], %x_3_param:u32 [@location(30), @interpolate(flat)]):main_out -> %b3 {
+  %b3 = block {
+    store %x_1, %x_1_param
+    store %x_3, %x_3_param
+    %9:void = call %main_1
+    %10:u32 = load %x_2
+    %11:u32 = load %x_4
+    %12:main_out = construct %10, %11
+    ret %12
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

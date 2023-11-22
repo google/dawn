@@ -1,0 +1,57 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(8) {
+  el:vec2<f32> @offset(0)
+}
+
+SSBO = struct @align(8) {
+  m:array<strided_arr, 2> @offset(0)
+}
+
+%b1 = block {  # root
+  %ssbo:ptr<storage, SSBO, read_write> = var @binding_point(0, 0)
+}
+
+%mat2x2_stride_16_to_arr = func(%m:mat2x2<f32>):array<strided_arr, 2> -> %b2 {
+  %b2 = block {
+    %4:vec2<f32> = access %m, 0u
+    %5:strided_arr = construct %4
+    %6:vec2<f32> = access %m, 1u
+    %7:strided_arr = construct %6
+    %8:array<strided_arr, 2> = construct %5, %7
+    ret %8
+  }
+}
+%arr_to_mat2x2_stride_16 = func(%arr:array<strided_arr, 2>):mat2x2<f32> -> %b3 {
+  %b3 = block {
+    %11:vec2<f32> = access %arr, 0u, 0u
+    %12:vec2<f32> = access %arr, 1u, 0u
+    %13:mat2x2<f32> = construct %11, %12
+    ret %13
+  }
+}
+%f_1 = func():void -> %b4 {
+  %b4 = block {
+    %15:ptr<storage, array<strided_arr, 2>, read_write> = access %ssbo, 0u
+    %16:ptr<storage, array<strided_arr, 2>, read_write> = access %ssbo, 0u
+    %17:array<strided_arr, 2> = load %16
+    %18:mat2x2<f32> = call %arr_to_mat2x2_stride_16, %17
+    %19:array<strided_arr, 2> = call %mat2x2_stride_16_to_arr, %18
+    store %15, %19
+    ret
+  }
+}
+%f = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %21:void = call %f_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

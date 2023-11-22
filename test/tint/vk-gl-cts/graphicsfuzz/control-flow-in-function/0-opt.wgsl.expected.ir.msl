@@ -1,0 +1,514 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_25:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%drawShape_vf2_ = func(%pos:ptr<function, vec2<f32>, read_write>):vec3<f32> -> %b2 {
+  %b2 = block {
+    %c2:ptr<function, bool, read_write> = var
+    %c3:ptr<function, bool, read_write> = var
+    %c4:ptr<function, bool, read_write> = var
+    %c5:ptr<function, bool, read_write> = var
+    %c6:ptr<function, bool, read_write> = var
+    %GLF_live4i:ptr<function, i32, read_write> = var
+    %GLF_live4_looplimiter5:ptr<function, i32, read_write> = var
+    %GLF_live7m42:ptr<function, mat4x2<f32>, read_write> = var
+    %GLF_live7m33:ptr<function, mat3x3<f32>, read_write> = var
+    %GLF_live7cols:ptr<function, i32, read_write> = var
+    %GLF_live7_looplimiter3:ptr<function, i32, read_write> = var
+    %GLF_live7rows:ptr<function, i32, read_write> = var
+    %GLF_live7_looplimiter2:ptr<function, i32, read_write> = var
+    %GLF_live7_looplimiter1:ptr<function, i32, read_write> = var
+    %GLF_live7c:ptr<function, i32, read_write> = var
+    %GLF_live7r:ptr<function, i32, read_write> = var
+    %GLF_live7_looplimiter0:ptr<function, i32, read_write> = var
+    %GLF_live7sum_index:ptr<function, i32, read_write> = var
+    %GLF_live7_looplimiter7:ptr<function, i32, read_write> = var
+    %GLF_live7cols_1:ptr<function, i32, read_write> = var
+    %GLF_live7rows_1:ptr<function, i32, read_write> = var
+    %GLF_live7sums:ptr<function, array<f32, 9>, read_write> = var
+    %GLF_live7c_1:ptr<function, i32, read_write> = var
+    %GLF_live7r_1:ptr<function, i32, read_write> = var
+    %x_180:ptr<function, i32, read_write> = var
+    %indexable:ptr<function, mat3x3<f32>, read_write> = var
+    %x_182:f32 = load_vector_element %pos, 0u
+    %33:bool = gt %x_182, 1.0f
+    store %c2, %33
+    %x_184:bool = load %c2
+    if %x_184 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        ret vec3<f32>(1.0f)
+      }
+    }
+    %x_188:f32 = load_vector_element %pos, 1u
+    %36:bool = lt %x_188, 1.0f
+    store %c3, %36
+    %x_190:bool = load %c3
+    if %x_190 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        ret vec3<f32>(1.0f)
+      }
+    }
+    %x_194:f32 = load_vector_element %pos, 1u
+    %39:bool = gt %x_194, 1.0f
+    store %c4, %39
+    %x_196:bool = load %c4
+    if %x_196 [t: %b5] {  # if_3
+      %b5 = block {  # true
+        ret vec3<f32>(1.0f)
+      }
+    }
+    %x_200:f32 = load_vector_element %pos, 0u
+    %42:bool = lt %x_200, 1.0f
+    store %c5, %42
+    %x_202:bool = load %c5
+    if %x_202 [t: %b6] {  # if_4
+      %b6 = block {  # true
+        ret vec3<f32>(1.0f)
+      }
+    }
+    %x_206:f32 = load_vector_element %pos, 0u
+    %45:f32 = add %x_206, 1.0f
+    %46:bool = gt %45, 1.0f
+    store %c6, %46
+    %x_209:bool = load %c6
+    if %x_209 [t: %b7] {  # if_5
+      %b7 = block {  # true
+        ret vec3<f32>(1.0f)
+      }
+    }
+    store %GLF_live4i, 0i
+    loop [b: %b8, c: %b9] {  # loop_1
+      %b8 = block {  # body
+        %x_39:i32 = load %GLF_live4i
+        %49:bool = lt %x_39, 4i
+        if %49 [t: %b10, f: %b11] {  # if_6
+          %b10 = block {  # true
+            exit_if  # if_6
+          }
+          %b11 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_40:i32 = load %GLF_live4_looplimiter5
+        %51:bool = gte %x_40, 7i
+        if %51 [t: %b12] {  # if_7
+          %b12 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %x_41:i32 = load %GLF_live4_looplimiter5
+        %53:i32 = add %x_41, 1i
+        store %GLF_live4_looplimiter5, %53
+        store %GLF_live7m42, mat4x2<f32>(vec2<f32>(1.0f, 0.0f), vec2<f32>(0.0f, 1.0f), vec2<f32>(0.0f), vec2<f32>(1.0f, 0.0f))
+        store %GLF_live7m33, mat3x3<f32>(vec3<f32>(1.0f, 0.0f, 0.0f), vec3<f32>(0.0f, 1.0f, 0.0f), vec3<f32>(0.0f, 0.0f, 1.0f))
+        store %GLF_live7cols, 2i
+        loop [b: %b13, c: %b14] {  # loop_2
+          %b13 = block {  # body
+            %x_43:i32 = load %GLF_live7cols
+            %55:bool = lt %x_43, 4i
+            if %55 [t: %b15, f: %b16] {  # if_8
+              %b15 = block {  # true
+                exit_if  # if_8
+              }
+              %b16 = block {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %x_44:i32 = load %GLF_live7_looplimiter3
+            %57:bool = gte %x_44, 7i
+            if %57 [t: %b17] {  # if_9
+              %b17 = block {  # true
+                exit_loop  # loop_2
+              }
+            }
+            %x_45:i32 = load %GLF_live7_looplimiter3
+            %59:i32 = add %x_45, 1i
+            store %GLF_live7_looplimiter3, %59
+            store %GLF_live7rows, 2i
+            loop [b: %b18, c: %b19] {  # loop_3
+              %b18 = block {  # body
+                %x_47:i32 = load %GLF_live7rows
+                %61:bool = lt %x_47, 4i
+                if %61 [t: %b20, f: %b21] {  # if_10
+                  %b20 = block {  # true
+                    exit_if  # if_10
+                  }
+                  %b21 = block {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                %x_48:i32 = load %GLF_live7_looplimiter2
+                %63:bool = gte %x_48, 7i
+                if %63 [t: %b22] {  # if_11
+                  %b22 = block {  # true
+                    exit_loop  # loop_3
+                  }
+                }
+                %x_49:i32 = load %GLF_live7_looplimiter2
+                %65:i32 = add %x_49, 1i
+                store %GLF_live7_looplimiter2, %65
+                store %GLF_live7_looplimiter1, 0i
+                store %GLF_live7c, 0i
+                loop [b: %b23, c: %b24] {  # loop_4
+                  %b23 = block {  # body
+                    %x_51:i32 = load %GLF_live7c
+                    %67:bool = lt %x_51, 3i
+                    if %67 [t: %b25, f: %b26] {  # if_12
+                      %b25 = block {  # true
+                        exit_if  # if_12
+                      }
+                      %b26 = block {  # false
+                        exit_loop  # loop_4
+                      }
+                    }
+                    %x_52:i32 = load %GLF_live7_looplimiter1
+                    %69:bool = gte %x_52, 7i
+                    if %69 [t: %b27] {  # if_13
+                      %b27 = block {  # true
+                        exit_loop  # loop_4
+                      }
+                    }
+                    %x_53:i32 = load %GLF_live7_looplimiter1
+                    %71:i32 = add %x_53, 1i
+                    store %GLF_live7_looplimiter1, %71
+                    store %GLF_live7r, 0i
+                    loop [b: %b28, c: %b29] {  # loop_5
+                      %b28 = block {  # body
+                        %x_55:i32 = load %GLF_live7r
+                        %73:bool = lt %x_55, 2i
+                        if %73 [t: %b30, f: %b31] {  # if_14
+                          %b30 = block {  # true
+                            exit_if  # if_14
+                          }
+                          %b31 = block {  # false
+                            exit_loop  # loop_5
+                          }
+                        }
+                        %x_56:i32 = load %GLF_live7_looplimiter0
+                        %75:bool = gte %x_56, 7i
+                        if %75 [t: %b32] {  # if_15
+                          %b32 = block {  # true
+                            exit_loop  # loop_5
+                          }
+                        }
+                        %x_57:i32 = load %GLF_live7_looplimiter0
+                        %77:i32 = add %x_57, 1i
+                        store %GLF_live7_looplimiter0, %77
+                        %x_59:i32 = load %GLF_live7c
+                        %x_60:i32 = load %GLF_live7c
+                        %x_61:i32 = load %GLF_live7c
+                        %x_62:i32 = load %GLF_live7r
+                        %x_63:i32 = load %GLF_live7r
+                        %x_64:i32 = load %GLF_live7r
+                        %84:bool = gte %x_59, 0i
+                        %85:bool = lt %x_60, 3i
+                        %86:bool = and %84, %85
+                        %87:i32 = select 0i, %x_61, %86
+                        %88:ptr<function, vec3<f32>, read_write> = access %GLF_live7m33, %87
+                        %89:bool = gte %x_62, 0i
+                        %90:bool = lt %x_63, 3i
+                        %91:bool = and %89, %90
+                        %92:i32 = select 0i, %x_64, %91
+                        store_vector_element %88, %92, 1.0f
+                        %93:ptr<uniform, vec2<f32>, read> = access %x_25, 0u
+                        %x_267:f32 = load_vector_element %93, 1u
+                        %95:bool = gt 0.0f, %x_267
+                        if %95 [t: %b33, f: %b34] {  # if_16
+                          %b33 = block {  # true
+                            exit_if  # if_16
+                          }
+                          %b34 = block {  # false
+                            %x_65:i32 = load %GLF_live7c
+                            %x_66:i32 = load %GLF_live7c
+                            %x_67:i32 = load %GLF_live7c
+                            %x_68:i32 = load %GLF_live7r
+                            %x_69:i32 = load %GLF_live7r
+                            %x_70:i32 = load %GLF_live7r
+                            %102:bool = gte %x_65, 0i
+                            %103:bool = lt %x_66, 4i
+                            %104:bool = and %102, %103
+                            %105:i32 = select 0i, %x_67, %104
+                            %106:ptr<function, vec2<f32>, read_write> = access %GLF_live7m42, %105
+                            %107:bool = gte %x_68, 0i
+                            %108:bool = lt %x_69, 2i
+                            %109:bool = and %107, %108
+                            %110:i32 = select 0i, %x_70, %109
+                            store_vector_element %106, %110, 1.0f
+                            exit_if  # if_16
+                          }
+                        }
+                        continue %b29
+                      }
+                      %b29 = block {  # continuing
+                        %x_71:i32 = load %GLF_live7r
+                        %112:i32 = add %x_71, 1i
+                        store %GLF_live7r, %112
+                        next_iteration %b28
+                      }
+                    }
+                    continue %b24
+                  }
+                  %b24 = block {  # continuing
+                    %x_73:i32 = load %GLF_live7c
+                    %114:i32 = add %x_73, 1i
+                    store %GLF_live7c, %114
+                    next_iteration %b23
+                  }
+                }
+                continue %b19
+              }
+              %b19 = block {  # continuing
+                %x_75:i32 = load %GLF_live7rows
+                %116:i32 = add %x_75, 1i
+                store %GLF_live7rows, %116
+                next_iteration %b18
+              }
+            }
+            continue %b14
+          }
+          %b14 = block {  # continuing
+            %x_77:i32 = load %GLF_live7cols
+            %118:i32 = add %x_77, 1i
+            store %GLF_live7cols, %118
+            next_iteration %b13
+          }
+        }
+        store %GLF_live7sum_index, 0i
+        store %GLF_live7_looplimiter7, 0i
+        store %GLF_live7cols_1, 2i
+        loop [b: %b35, c: %b36] {  # loop_6
+          %b35 = block {  # body
+            %x_79:i32 = load %GLF_live7cols_1
+            %120:bool = lt %x_79, 4i
+            if %120 [t: %b37, f: %b38] {  # if_17
+              %b37 = block {  # true
+                exit_if  # if_17
+              }
+              %b38 = block {  # false
+                exit_loop  # loop_6
+              }
+            }
+            %x_80:i32 = load %GLF_live7_looplimiter7
+            %122:bool = gte %x_80, 7i
+            if %122 [t: %b39] {  # if_18
+              %b39 = block {  # true
+                exit_loop  # loop_6
+              }
+            }
+            %x_81:i32 = load %GLF_live7_looplimiter7
+            %124:i32 = add %x_81, 1i
+            store %GLF_live7_looplimiter7, %124
+            store %GLF_live7rows_1, 2i
+            %x_83:i32 = load %GLF_live7sum_index
+            %x_84:i32 = load %GLF_live7sum_index
+            %x_85:i32 = load %GLF_live7sum_index
+            %128:bool = gte %x_83, 0i
+            %129:bool = lt %x_84, 9i
+            %130:bool = and %128, %129
+            %131:i32 = select 0i, %x_85, %130
+            %132:ptr<function, f32, read_write> = access %GLF_live7sums, %131
+            store %132, 0.0f
+            store %GLF_live7c_1, 0i
+            loop [b: %b40, c: %b41] {  # loop_7
+              %b40 = block {  # body
+                %x_86:i32 = load %GLF_live7c_1
+                %134:bool = lt %x_86, 1i
+                if %134 [t: %b42, f: %b43] {  # if_19
+                  %b42 = block {  # true
+                    exit_if  # if_19
+                  }
+                  %b43 = block {  # false
+                    exit_loop  # loop_7
+                  }
+                }
+                store %GLF_live7r_1, 0i
+                loop [b: %b44, c: %b45] {  # loop_8
+                  %b44 = block {  # body
+                    %x_87:i32 = load %GLF_live7r_1
+                    %x_88:i32 = load %GLF_live7rows_1
+                    %137:bool = lt %x_87, %x_88
+                    if %137 [t: %b46, f: %b47] {  # if_20
+                      %b46 = block {  # true
+                        exit_if  # if_20
+                      }
+                      %b47 = block {  # false
+                        exit_loop  # loop_8
+                      }
+                    }
+                    %x_89:i32 = load %GLF_live7sum_index
+                    %x_90:i32 = load %GLF_live7sum_index
+                    %x_91:i32 = load %GLF_live7sum_index
+                    %141:bool = gte %x_89, 0i
+                    %142:bool = lt %x_90, 9i
+                    %143:bool = and %141, %142
+                    %x_310:i32 = select 0i, %x_91, %143
+                    %x_311:mat3x3<f32> = load %GLF_live7m33
+                    %x_312:mat3x3<f32> = transpose %x_311
+                    %x_92:i32 = load %GLF_live7c_1
+                    %148:bool = lt %x_92, 3i
+                    if %148 [t: %b48, f: %b49] {  # if_21
+                      %b48 = block {  # true
+                        store %x_180, 1i
+                        exit_if  # if_21
+                      }
+                      %b49 = block {  # false
+                        %149:ptr<uniform, vec2<f32>, read> = access %x_25, 0u
+                        %x_318:f32 = load_vector_element %149, 0u
+                        %151:i32 = convert %x_318
+                        store %x_180, %151
+                        exit_if  # if_21
+                      }
+                    }
+                    %x_320:i32 = load %x_180
+                    %x_93:i32 = load %GLF_live7r_1
+                    store %indexable, %x_312
+                    %154:ptr<function, vec3<f32>, read_write> = access %indexable, %x_320
+                    %155:bool = lt %x_93, 3i
+                    %156:i32 = select 0i, 1i, %155
+                    %x_324:f32 = load_vector_element %154, %156
+                    %158:ptr<function, f32, read_write> = access %GLF_live7sums, %x_310
+                    %x_326:f32 = load %158
+                    %160:ptr<function, f32, read_write> = access %GLF_live7sums, %x_310
+                    %161:f32 = add %x_326, %x_324
+                    store %160, %161
+                    %x_94:i32 = load %GLF_live7sum_index
+                    %x_95:i32 = load %GLF_live7sum_index
+                    %x_96:i32 = load %GLF_live7sum_index
+                    %165:bool = gte %x_94, 0i
+                    %166:bool = lt %x_95, 9i
+                    %167:bool = and %165, %166
+                    %x_332:i32 = select 0i, %x_96, %167
+                    %x_97:i32 = load %GLF_live7r_1
+                    %170:ptr<function, vec2<f32>, read_write> = access %GLF_live7m42, 1i
+                    %x_334:f32 = load_vector_element %170, %x_97
+                    %172:ptr<function, f32, read_write> = access %GLF_live7sums, %x_332
+                    %x_336:f32 = load %172
+                    %174:ptr<function, f32, read_write> = access %GLF_live7sums, %x_332
+                    %175:f32 = add %x_336, %x_334
+                    store %174, %175
+                    continue %b45
+                  }
+                  %b45 = block {  # continuing
+                    %x_98:i32 = load %GLF_live7r_1
+                    %177:i32 = add %x_98, 1i
+                    store %GLF_live7r_1, %177
+                    next_iteration %b44
+                  }
+                }
+                continue %b41
+              }
+              %b41 = block {  # continuing
+                %x_100:i32 = load %GLF_live7c_1
+                %179:i32 = add %x_100, 1i
+                store %GLF_live7c_1, %179
+                next_iteration %b40
+              }
+            }
+            %x_102:i32 = load %GLF_live7sum_index
+            %181:i32 = add %x_102, 1i
+            store %GLF_live7sum_index, %181
+            continue %b36
+          }
+          %b36 = block {  # continuing
+            %x_104:i32 = load %GLF_live7cols_1
+            %183:i32 = add %x_104, 1i
+            store %GLF_live7cols_1, %183
+            next_iteration %b35
+          }
+        }
+        continue %b9
+      }
+      %b9 = block {  # continuing
+        %x_106:i32 = load %GLF_live4i
+        %185:i32 = add %x_106, 1i
+        store %GLF_live4i, %185
+        next_iteration %b8
+      }
+    }
+    ret vec3<f32>(1.0f)
+  }
+}
+%main_1 = func():void -> %b50 {
+  %b50 = block {
+    %position:ptr<function, vec2<f32>, read_write> = var
+    %param:ptr<function, vec2<f32>, read_write> = var
+    %param_1:ptr<function, vec2<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %param_2:ptr<function, vec2<f32>, read_write> = var
+    %192:ptr<uniform, vec2<f32>, read> = access %x_25, 0u
+    %x_161:f32 = load_vector_element %192, 0u
+    %194:bool = gte %x_161, 2.0f
+    if %194 [t: %b51] {  # if_22
+      %b51 = block {  # true
+        %x_165:vec4<f32> = load %gl_FragCoord
+        %196:f32 = access %x_165, 0u
+        %197:f32 = access %x_165, 1u
+        %198:vec2<f32> = construct %196, %197
+        store %position, %198
+        %x_167:vec2<f32> = load %position
+        store %param, %x_167
+        %x_168:vec3<f32> = call %drawShape_vf2_, %param
+        %x_169:vec2<f32> = load %position
+        store %param_1, %x_169
+        %x_170:vec3<f32> = call %drawShape_vf2_, %param_1
+        store %i, 25i
+        loop [b: %b52, c: %b53] {  # loop_9
+          %b52 = block {  # body
+            %x_108:i32 = load %i
+            %204:bool = gt %x_108, 0i
+            if %204 [t: %b54, f: %b55] {  # if_23
+              %b54 = block {  # true
+                exit_if  # if_23
+              }
+              %b55 = block {  # false
+                exit_loop  # loop_9
+              }
+            }
+            %x_177:vec2<f32> = load %position
+            store %param_2, %x_177
+            %x_178:vec3<f32> = call %drawShape_vf2_, %param_2
+            continue %b53
+          }
+          %b53 = block {  # continuing
+            %x_109:i32 = load %i
+            %208:i32 = sub %x_109, 1i
+            store %i, %208
+            next_iteration %b52
+          }
+        }
+        exit_if  # if_22
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b56 {
+  %b56 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %211:void = call %main_1
+    %212:vec4<f32> = load %x_GLF_color
+    %213:main_out = construct %212
+    ret %213
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

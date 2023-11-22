@@ -1,0 +1,395 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Uniforms = struct @align(16) {
+  numTriangles:u32 @offset(0)
+  gridSize:u32 @offset(4)
+  pad1:u32 @offset(8)
+  pad2:u32 @offset(12)
+  bbMin:vec3<f32> @offset(16)
+  bbMax:vec3<f32> @offset(32)
+}
+
+U32s = struct @align(4) {
+  values:array<u32> @offset(0)
+}
+
+F32s = struct @align(4) {
+  values:array<f32> @offset(0)
+}
+
+AU32s = struct @align(4) {
+  values:array<atomic<u32>> @offset(0)
+}
+
+AI32s = struct @align(4) {
+  values:array<atomic<i32>> @offset(0)
+}
+
+Dbg = struct @align(4) {
+  offsetCounter:atomic<u32> @offset(0)
+  pad0:u32 @offset(4)
+  pad1:u32 @offset(8)
+  pad2:u32 @offset(12)
+  value0:u32 @offset(16)
+  value1:u32 @offset(20)
+  value2:u32 @offset(24)
+  value3:u32 @offset(28)
+  value_f32_0:f32 @offset(32)
+  value_f32_1:f32 @offset(36)
+  value_f32_2:f32 @offset(40)
+  value_f32_3:f32 @offset(44)
+}
+
+%b1 = block {  # root
+  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 0)
+  %indices:ptr<storage, U32s, read_write> = var @binding_point(0, 10)
+  %positions:ptr<storage, F32s, read_write> = var @binding_point(0, 11)
+  %counters:ptr<storage, AU32s, read_write> = var @binding_point(0, 20)
+  %LUT:ptr<storage, AI32s, read_write> = var @binding_point(0, 21)
+  %dbg:ptr<storage, Dbg, read_write> = var @binding_point(0, 50)
+}
+
+%toVoxelPos = func(%position:vec3<f32>):vec3<f32> -> %b2 {
+  %b2 = block {
+    %9:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %10:f32 = load_vector_element %9, 0u
+    %11:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %12:f32 = load_vector_element %11, 1u
+    %13:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %14:f32 = load_vector_element %13, 2u
+    %15:vec3<f32> = construct %10, %12, %14
+    %bbMin:ptr<function, vec3<f32>, read_write> = var, %15
+    %17:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
+    %18:f32 = load_vector_element %17, 0u
+    %19:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
+    %20:f32 = load_vector_element %19, 1u
+    %21:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
+    %22:f32 = load_vector_element %21, 2u
+    %23:vec3<f32> = construct %18, %20, %22
+    %bbMax:ptr<function, vec3<f32>, read_write> = var, %23
+    %25:vec3<f32> = load %bbMax
+    %26:vec3<f32> = load %bbMin
+    %27:vec3<f32> = sub %25, %26
+    %bbSize:ptr<function, vec3<f32>, read_write> = var, %27
+    %29:f32 = load_vector_element %bbSize, 0u
+    %30:f32 = load_vector_element %bbSize, 1u
+    %31:f32 = max %29, %30
+    %32:f32 = load_vector_element %bbSize, 2u
+    %33:f32 = max %31, %32
+    %cubeSize:ptr<function, f32, read_write> = var, %33
+    %35:ptr<uniform, u32, read> = access %uniforms, 1u
+    %36:u32 = load %35
+    %37:f32 = convert %36
+    %gridSize:ptr<function, f32, read_write> = var, %37
+    %39:f32 = load %gridSize
+    %40:f32 = access %position, 0u
+    %41:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %42:f32 = load_vector_element %41, 0u
+    %43:f32 = sub %40, %42
+    %44:f32 = mul %39, %43
+    %45:f32 = load %cubeSize
+    %46:f32 = div %44, %45
+    %gx:ptr<function, f32, read_write> = var, %46
+    %48:f32 = load %gridSize
+    %49:f32 = access %position, 1u
+    %50:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %51:f32 = load_vector_element %50, 1u
+    %52:f32 = sub %49, %51
+    %53:f32 = mul %48, %52
+    %54:f32 = load %cubeSize
+    %55:f32 = div %53, %54
+    %gy:ptr<function, f32, read_write> = var, %55
+    %57:f32 = load %gridSize
+    %58:f32 = access %position, 2u
+    %59:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
+    %60:f32 = load_vector_element %59, 2u
+    %61:f32 = sub %58, %60
+    %62:f32 = mul %57, %61
+    %63:f32 = load %cubeSize
+    %64:f32 = div %62, %63
+    %gz:ptr<function, f32, read_write> = var, %64
+    %66:f32 = load %gx
+    %67:f32 = load %gy
+    %68:f32 = load %gz
+    %69:vec3<f32> = construct %66, %67, %68
+    ret %69
+  }
+}
+%toIndex1D = func(%gridSize_1:u32, %voxelPos:vec3<f32>):u32 -> %b3 {  # %gridSize_1: 'gridSize'
+  %b3 = block {
+    %73:vec3<u32> = convert %voxelPos
+    %icoord:ptr<function, vec3<u32>, read_write> = var, %73
+    %75:u32 = load_vector_element %icoord, 0u
+    %76:u32 = load_vector_element %icoord, 1u
+    %77:u32 = mul %gridSize_1, %76
+    %78:u32 = add %75, %77
+    %79:u32 = mul %gridSize_1, %gridSize_1
+    %80:u32 = load_vector_element %icoord, 2u
+    %81:u32 = mul %79, %80
+    %82:u32 = add %78, %81
+    ret %82
+  }
+}
+%toIndex3D = func(%gridSize_2:u32, %index:u32):vec3<u32> -> %b4 {  # %gridSize_2: 'gridSize'
+  %b4 = block {
+    %86:u32 = mul %gridSize_2, %gridSize_2
+    %87:u32 = div %index, %86
+    %z:ptr<function, u32, read_write> = var, %87
+    %89:u32 = mul %gridSize_2, %gridSize_2
+    %90:u32 = load %z
+    %91:u32 = mul %89, %90
+    %92:u32 = sub %index, %91
+    %93:u32 = div %92, %gridSize_2
+    %y:ptr<function, u32, read_write> = var, %93
+    %95:u32 = mod %index, %gridSize_2
+    %x:ptr<function, u32, read_write> = var, %95
+    %97:u32 = load %x
+    %98:u32 = load %y
+    %99:u32 = load %z
+    %100:vec3<u32> = construct %97, %98, %99
+    ret %100
+  }
+}
+%loadPosition = func(%vertexIndex:u32):vec3<f32> -> %b5 {
+  %b5 = block {
+    %103:u32 = mul 3u, %vertexIndex
+    %104:u32 = add %103, 0u
+    %105:ptr<storage, f32, read_write> = access %positions, 0u, %104
+    %106:f32 = load %105
+    %107:u32 = mul 3u, %vertexIndex
+    %108:u32 = add %107, 1u
+    %109:ptr<storage, f32, read_write> = access %positions, 0u, %108
+    %110:f32 = load %109
+    %111:u32 = mul 3u, %vertexIndex
+    %112:u32 = add %111, 2u
+    %113:ptr<storage, f32, read_write> = access %positions, 0u, %112
+    %114:f32 = load %113
+    %115:vec3<f32> = construct %106, %110, %114
+    %position_1:ptr<function, vec3<f32>, read_write> = var, %115  # %position_1: 'position'
+    %117:vec3<f32> = load %position_1
+    ret %117
+  }
+}
+%doIgnore = func():void -> %b6 {
+  %b6 = block {
+    %119:ptr<uniform, u32, read> = access %uniforms, 0u
+    %120:u32 = load %119
+    %g42:ptr<function, u32, read_write> = var, %120
+    %122:ptr<storage, u32, read_write> = access %dbg, 5u
+    %123:u32 = load %122
+    %kj6:ptr<function, u32, read_write> = var, %123
+    %125:ptr<storage, atomic<u32>, read_write> = access %counters, 0u, 0i
+    %126:u32 = atomicLoad %125
+    %b53:ptr<function, u32, read_write> = var, %126
+    %128:ptr<storage, u32, read_write> = access %indices, 0u, 0i
+    %129:u32 = load %128
+    %rwg:ptr<function, u32, read_write> = var, %129
+    %131:ptr<storage, f32, read_write> = access %positions, 0u, 0i
+    %132:f32 = load %131
+    %rb5:ptr<function, f32, read_write> = var, %132
+    %134:ptr<storage, atomic<i32>, read_write> = access %LUT, 0u, 0i
+    %135:i32 = atomicLoad %134
+    %g55:ptr<function, i32, read_write> = var, %135
+    ret
+  }
+}
+%main_count = @compute @workgroup_size(128, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void -> %b7 {
+  %b7 = block {
+    %139:u32 = access %GlobalInvocationID, 0u
+    %triangleIndex:ptr<function, u32, read_write> = var, %139
+    %141:u32 = load %triangleIndex
+    %142:ptr<uniform, u32, read> = access %uniforms, 0u
+    %143:u32 = load %142
+    %144:bool = gte %141, %143
+    if %144 [t: %b8] {  # if_1
+      %b8 = block {  # true
+        ret
+      }
+    }
+    %145:void = call %doIgnore
+    %146:u32 = load %triangleIndex
+    %147:u32 = mul 3u, %146
+    %148:u32 = add %147, 0u
+    %149:ptr<storage, u32, read_write> = access %indices, 0u, %148
+    %150:u32 = load %149
+    %i0:ptr<function, u32, read_write> = var, %150
+    %152:u32 = load %triangleIndex
+    %153:u32 = mul 3u, %152
+    %154:u32 = add %153, 1u
+    %155:ptr<storage, u32, read_write> = access %indices, 0u, %154
+    %156:u32 = load %155
+    %i1:ptr<function, u32, read_write> = var, %156
+    %158:u32 = load %triangleIndex
+    %159:u32 = mul 3u, %158
+    %160:u32 = add %159, 2u
+    %161:ptr<storage, u32, read_write> = access %indices, 0u, %160
+    %162:u32 = load %161
+    %i2:ptr<function, u32, read_write> = var, %162
+    %164:u32 = load %i0
+    %165:vec3<f32> = call %loadPosition, %164
+    %p0:ptr<function, vec3<f32>, read_write> = var, %165
+    %167:u32 = load %i1
+    %168:vec3<f32> = call %loadPosition, %167
+    %p1:ptr<function, vec3<f32>, read_write> = var, %168
+    %170:u32 = load %i2
+    %171:vec3<f32> = call %loadPosition, %170
+    %p2:ptr<function, vec3<f32>, read_write> = var, %171
+    %173:vec3<f32> = load %p0
+    %174:vec3<f32> = load %p1
+    %175:vec3<f32> = add %173, %174
+    %176:vec3<f32> = load %p2
+    %177:vec3<f32> = add %175, %176
+    %178:vec3<f32> = div %177, 3.0f
+    %center:ptr<function, vec3<f32>, read_write> = var, %178
+    %180:vec3<f32> = load %center
+    %181:vec3<f32> = call %toVoxelPos, %180
+    %voxelPos_1:ptr<function, vec3<f32>, read_write> = var, %181  # %voxelPos_1: 'voxelPos'
+    %183:ptr<uniform, u32, read> = access %uniforms, 1u
+    %184:u32 = load %183
+    %185:vec3<f32> = load %voxelPos_1
+    %186:u32 = call %toIndex1D, %184, %185
+    %voxelIndex:ptr<function, u32, read_write> = var, %186
+    %188:u32 = load %voxelIndex
+    %189:ptr<storage, atomic<u32>, read_write> = access %counters, 0u, %188
+    %190:u32 = atomicAdd %189, 1u
+    %acefg:ptr<function, u32, read_write> = var, %190
+    %192:u32 = load %triangleIndex
+    %193:bool = eq %192, 0u
+    if %193 [t: %b9] {  # if_2
+      %b9 = block {  # true
+        %194:ptr<storage, u32, read_write> = access %dbg, 4u
+        %195:ptr<uniform, u32, read> = access %uniforms, 1u
+        %196:u32 = load %195
+        store %194, %196
+        %197:ptr<storage, f32, read_write> = access %dbg, 8u
+        %198:f32 = load_vector_element %center, 0u
+        store %197, %198
+        %199:ptr<storage, f32, read_write> = access %dbg, 9u
+        %200:f32 = load_vector_element %center, 1u
+        store %199, %200
+        %201:ptr<storage, f32, read_write> = access %dbg, 10u
+        %202:f32 = load_vector_element %center, 2u
+        store %201, %202
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%main_create_lut = @compute @workgroup_size(128, 1, 1) func(%GlobalInvocationID_1:vec3<u32> [@global_invocation_id]):void -> %b10 {  # %GlobalInvocationID_1: 'GlobalInvocationID'
+  %b10 = block {
+    %205:u32 = access %GlobalInvocationID_1, 0u
+    %voxelIndex_1:ptr<function, u32, read_write> = var, %205  # %voxelIndex_1: 'voxelIndex'
+    %207:void = call %doIgnore
+    %208:ptr<uniform, u32, read> = access %uniforms, 1u
+    %209:u32 = load %208
+    %210:ptr<uniform, u32, read> = access %uniforms, 1u
+    %211:u32 = load %210
+    %212:u32 = mul %209, %211
+    %213:ptr<uniform, u32, read> = access %uniforms, 1u
+    %214:u32 = load %213
+    %215:u32 = mul %212, %214
+    %maxVoxels:ptr<function, u32, read_write> = var, %215
+    %217:u32 = load %voxelIndex_1
+    %218:u32 = load %maxVoxels
+    %219:bool = gte %217, %218
+    if %219 [t: %b11] {  # if_3
+      %b11 = block {  # true
+        ret
+      }
+    }
+    %220:u32 = load %voxelIndex_1
+    %221:ptr<storage, atomic<u32>, read_write> = access %counters, 0u, %220
+    %222:u32 = atomicLoad %221
+    %numTriangles:ptr<function, u32, read_write> = var, %222
+    %offset:ptr<function, i32, read_write> = var, -1i
+    %225:u32 = load %numTriangles
+    %226:bool = gt %225, 0u
+    if %226 [t: %b12] {  # if_4
+      %b12 = block {  # true
+        %227:ptr<storage, atomic<u32>, read_write> = access %dbg, 0u
+        %228:u32 = load %numTriangles
+        %229:u32 = atomicAdd %227, %228
+        %230:i32 = convert %229
+        store %offset, %230
+        exit_if  # if_4
+      }
+    }
+    %231:u32 = load %voxelIndex_1
+    %232:ptr<storage, atomic<i32>, read_write> = access %LUT, 0u, %231
+    %233:i32 = load %offset
+    %234:void = atomicStore %232, %233
+    ret
+  }
+}
+%main_sort_triangles = @compute @workgroup_size(128, 1, 1) func(%GlobalInvocationID_2:vec3<u32> [@global_invocation_id]):void -> %b13 {  # %GlobalInvocationID_2: 'GlobalInvocationID'
+  %b13 = block {
+    %237:u32 = access %GlobalInvocationID_2, 0u
+    %triangleIndex_1:ptr<function, u32, read_write> = var, %237  # %triangleIndex_1: 'triangleIndex'
+    %239:void = call %doIgnore
+    %240:u32 = load %triangleIndex_1
+    %241:ptr<uniform, u32, read> = access %uniforms, 0u
+    %242:u32 = load %241
+    %243:bool = gte %240, %242
+    if %243 [t: %b14] {  # if_5
+      %b14 = block {  # true
+        ret
+      }
+    }
+    %244:u32 = load %triangleIndex_1
+    %245:u32 = mul 3u, %244
+    %246:u32 = add %245, 0u
+    %247:ptr<storage, u32, read_write> = access %indices, 0u, %246
+    %248:u32 = load %247
+    %i0_1:ptr<function, u32, read_write> = var, %248  # %i0_1: 'i0'
+    %250:u32 = load %triangleIndex_1
+    %251:u32 = mul 3u, %250
+    %252:u32 = add %251, 1u
+    %253:ptr<storage, u32, read_write> = access %indices, 0u, %252
+    %254:u32 = load %253
+    %i1_1:ptr<function, u32, read_write> = var, %254  # %i1_1: 'i1'
+    %256:u32 = load %triangleIndex_1
+    %257:u32 = mul 3u, %256
+    %258:u32 = add %257, 2u
+    %259:ptr<storage, u32, read_write> = access %indices, 0u, %258
+    %260:u32 = load %259
+    %i2_1:ptr<function, u32, read_write> = var, %260  # %i2_1: 'i2'
+    %262:u32 = load %i0_1
+    %263:vec3<f32> = call %loadPosition, %262
+    %p0_1:ptr<function, vec3<f32>, read_write> = var, %263  # %p0_1: 'p0'
+    %265:u32 = load %i1_1
+    %266:vec3<f32> = call %loadPosition, %265
+    %p1_1:ptr<function, vec3<f32>, read_write> = var, %266  # %p1_1: 'p1'
+    %268:u32 = load %i2_1
+    %269:vec3<f32> = call %loadPosition, %268
+    %p2_1:ptr<function, vec3<f32>, read_write> = var, %269  # %p2_1: 'p2'
+    %271:vec3<f32> = load %p0_1
+    %272:vec3<f32> = load %p1_1
+    %273:vec3<f32> = add %271, %272
+    %274:vec3<f32> = load %p2_1
+    %275:vec3<f32> = add %273, %274
+    %276:vec3<f32> = div %275, 3.0f
+    %center_1:ptr<function, vec3<f32>, read_write> = var, %276  # %center_1: 'center'
+    %278:vec3<f32> = load %center_1
+    %279:vec3<f32> = call %toVoxelPos, %278
+    %voxelPos_2:ptr<function, vec3<f32>, read_write> = var, %279  # %voxelPos_2: 'voxelPos'
+    %281:ptr<uniform, u32, read> = access %uniforms, 1u
+    %282:u32 = load %281
+    %283:vec3<f32> = load %voxelPos_2
+    %284:u32 = call %toIndex1D, %282, %283
+    %voxelIndex_2:ptr<function, u32, read_write> = var, %284  # %voxelIndex_2: 'voxelIndex'
+    %286:u32 = load %voxelIndex_2
+    %287:ptr<storage, atomic<i32>, read_write> = access %LUT, 0u, %286
+    %288:i32 = atomicAdd %287, 1i
+    %triangleOffset:ptr<function, i32, read_write> = var, %288
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

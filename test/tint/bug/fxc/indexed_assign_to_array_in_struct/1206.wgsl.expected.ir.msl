@@ -1,0 +1,46 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Particle = struct @align(16) {
+  position:array<vec3<f32>, 8> @offset(0)
+  lifetime:f32 @offset(128)
+  color:vec4<f32> @offset(144)
+  velocity:vec3<f32> @offset(160)
+}
+
+Particles = struct @align(16) {
+  p:array<Particle> @offset(0)
+}
+
+Simulation = struct @align(4) {
+  i:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %particles:ptr<storage, Particles, read> = var @binding_point(1, 3)
+  %sim:ptr<uniform, Simulation, read> = var @binding_point(1, 4)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %4:ptr<storage, Particle, read> = access %particles, 0u, 0i
+    %5:Particle = load %4
+    %particle:ptr<function, Particle, read_write> = var, %5
+    %7:ptr<uniform, u32, read> = access %sim, 0u
+    %8:u32 = load %7
+    %9:ptr<function, vec3<f32>, read_write> = access %particle, 0u, %8
+    %10:ptr<uniform, u32, read> = access %sim, 0u
+    %11:u32 = load %10
+    %12:ptr<function, vec3<f32>, read_write> = access %particle, 0u, %11
+    %13:vec3<f32> = load %12
+    store %9, %13
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

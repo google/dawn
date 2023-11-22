@@ -1,0 +1,27 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: Out = struct @align(16) {
+  pos:vec4<f32> @offset(0), @builtin(position)
+  none:f32 @offset(16), @location(0)
+  flat:f32 @offset(20), @location(1), @interpolate(flat)
+  perspective_center:f32 @offset(24), @location(2), @interpolate(perspective, center)
+  perspective_centroid:f32 @offset(28), @location(3), @interpolate(perspective, centroid)
+  perspective_sample:f32 @offset(32), @location(4), @interpolate(perspective, sample)
+  linear_center:f32 @offset(36), @location(5), @interpolate(linear, center)
+  linear_centroid:f32 @offset(40), @location(6), @interpolate(linear, centroid)
+  linear_sample:f32 @offset(44), @location(7), @interpolate(linear, sample)
+}
+
+%tint_symbol = @vertex func():Out -> %b1 {
+  %b1 = block {
+    ret Out(vec4<f32>(0.0f), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

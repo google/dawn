@@ -1,0 +1,46 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: block0 = struct @align(16) {
+  in_color:vec4<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  gl_Position:vec4<f32> @offset(0), @builtin(position)
+  frag_color_1:vec4<f32> @offset(16), @location(0)
+}
+
+%b1 = block {  # root
+  %pos:ptr<private, vec4<f32>, read_write> = var
+  %frag_color:ptr<private, vec4<f32>, read_write> = var
+  %x_8:ptr<uniform, block0, read> = var @binding_point(0, 1)
+  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_24:vec4<f32> = load %pos
+    store %gl_Position, %x_24
+    %7:ptr<uniform, vec4<f32>, read> = access %x_8, 0u
+    %x_27:vec4<f32> = load %7
+    store %frag_color, %x_27
+    ret
+  }
+}
+%tint_symbol = @vertex func(%position_param:vec4<f32> [@location(0)]):main_out -> %b3 {
+  %b3 = block {
+    store %pos, %position_param
+    %11:void = call %main_1
+    %12:vec4<f32> = load %gl_Position
+    %13:vec4<f32> = load %frag_color
+    %14:main_out = construct %12, %13
+    ret %14
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,35 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<handle, texture_3d<f32>, read> = var @binding_point(1, 0)
+  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
+  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+}
+
+%textureSample_2149ec = func():void -> %b2 {
+  %b2 = block {
+    %arg_2:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(1.0f)
+    %6:texture_3d<f32> = load %arg_0
+    %7:sampler = load %arg_1
+    %8:vec3<f32> = load %arg_2
+    %9:vec4<f32> = textureSample %6, %7, %8, vec3<i32>(1i)
+    %res:ptr<function, vec4<f32>, read_write> = var, %9
+    %11:vec4<f32> = load %res
+    store %prevent_dce, %11
+    ret
+  }
+}
+%fragment_main = @fragment func():void -> %b3 {
+  %b3 = block {
+    %13:void = call %textureSample_2149ec
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,67 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  zero:i32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, vec2<f32>, read_write> = var
+    %b:ptr<function, vec2<f32>, read_write> = var
+    store %a, vec2<f32>(1.0f)
+    %6:ptr<uniform, i32, read> = access %x_6, 0u
+    %x_38:i32 = load %6
+    %8:bool = eq %x_38, 1i
+    if %8 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %x_43:f32 = load_vector_element %a, 0u
+        %10:f32 = add %x_43, 1.0f
+        store_vector_element %a, 0u, %10
+        exit_if  # if_1
+      }
+    }
+    %x_47:f32 = load_vector_element %a, 1u
+    %12:vec2<f32> = construct %x_47, %x_47
+    %13:vec2<f32> = add %12, vec2<f32>(2.0f, 3.0f)
+    store %b, %13
+    %x_50:vec2<f32> = load %b
+    %15:vec2<bool> = eq %x_50, vec2<f32>(3.0f, 4.0f)
+    %16:bool = all %15
+    if %16 [t: %b4, f: %b5] {  # if_2
+      %b4 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_2
+      }
+      %b5 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b6 {
+  %b6 = block {
+    %18:void = call %main_1
+    %19:vec4<f32> = load %x_GLF_color
+    %20:main_out = construct %19
+    ret %20
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,171 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Camera = struct @align(16) {
+  projection:mat4x4<f32> @offset(0)
+  inverseProjection:mat4x4<f32> @offset(64)
+  view:mat4x4<f32> @offset(128)
+  position:vec3<f32> @offset(192)
+  time:f32 @offset(204)
+  outputSize:vec2<f32> @offset(208)
+  zNear:f32 @offset(216)
+  zFar:f32 @offset(220)
+}
+
+VertexInput = struct @align(16) {
+  position:vec4<f32> @offset(0), @location(0)
+  normal:vec3<f32> @offset(16), @location(1)
+  tangent:vec4<f32> @offset(32), @location(2)
+  texcoord:vec2<f32> @offset(48), @location(3)
+  joints:vec4<u32> @offset(64), @location(6)
+  weights:vec4<f32> @offset(80), @location(7)
+  instance0:vec4<f32> @offset(96), @location(8)
+  instance1:vec4<f32> @offset(112), @location(9)
+  instance2:vec4<f32> @offset(128), @location(10)
+  instance3:vec4<f32> @offset(144), @location(11)
+  instanceColor:vec4<f32> @offset(160), @location(12)
+}
+
+Joints = struct @align(16) {
+  matrices:array<mat4x4<f32>> @offset(0)
+}
+
+VertexOutput = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  worldPos:vec3<f32> @offset(16), @location(0)
+  view:vec3<f32> @offset(32), @location(1)
+  texcoord:vec2<f32> @offset(48), @location(2)
+  texcoord2:vec2<f32> @offset(56), @location(3)
+  color:vec4<f32> @offset(64), @location(4)
+  instanceColor:vec4<f32> @offset(80), @location(5)
+  normal:vec3<f32> @offset(96), @location(6)
+  tangent:vec3<f32> @offset(112), @location(7)
+  bitangent:vec3<f32> @offset(128), @location(8)
+}
+
+%b1 = block {  # root
+  %camera:ptr<uniform, Camera, read> = var @binding_point(0, 0)
+  %joint:ptr<storage, Joints, read> = var @binding_point(0, 1)
+  %inverseBind:ptr<storage, Joints, read> = var @binding_point(0, 2)
+}
+
+%getInstanceMatrix = func(%input:VertexInput):mat4x4<f32> -> %b2 {
+  %b2 = block {
+    %6:vec4<f32> = access %input, 6u
+    %7:vec4<f32> = access %input, 7u
+    %8:vec4<f32> = access %input, 8u
+    %9:vec4<f32> = access %input, 9u
+    %10:mat4x4<f32> = construct %6, %7, %8, %9
+    ret %10
+  }
+}
+%getSkinMatrix = func(%input_1:VertexInput):mat4x4<f32> -> %b3 {  # %input_1: 'input'
+  %b3 = block {
+    %13:u32 = access %input_1, 4u, 0u
+    %14:ptr<storage, mat4x4<f32>, read> = access %joint, 0u, %13
+    %15:mat4x4<f32> = load %14
+    %16:u32 = access %input_1, 4u, 0u
+    %17:ptr<storage, mat4x4<f32>, read> = access %inverseBind, 0u, %16
+    %18:mat4x4<f32> = load %17
+    %joint0:mat4x4<f32> = mul %15, %18
+    %20:u32 = access %input_1, 4u, 1u
+    %21:ptr<storage, mat4x4<f32>, read> = access %joint, 0u, %20
+    %22:mat4x4<f32> = load %21
+    %23:u32 = access %input_1, 4u, 1u
+    %24:ptr<storage, mat4x4<f32>, read> = access %inverseBind, 0u, %23
+    %25:mat4x4<f32> = load %24
+    %joint1:mat4x4<f32> = mul %22, %25
+    %27:u32 = access %input_1, 4u, 2u
+    %28:ptr<storage, mat4x4<f32>, read> = access %joint, 0u, %27
+    %29:mat4x4<f32> = load %28
+    %30:u32 = access %input_1, 4u, 2u
+    %31:ptr<storage, mat4x4<f32>, read> = access %inverseBind, 0u, %30
+    %32:mat4x4<f32> = load %31
+    %joint2:mat4x4<f32> = mul %29, %32
+    %34:u32 = access %input_1, 4u, 3u
+    %35:ptr<storage, mat4x4<f32>, read> = access %joint, 0u, %34
+    %36:mat4x4<f32> = load %35
+    %37:u32 = access %input_1, 4u, 3u
+    %38:ptr<storage, mat4x4<f32>, read> = access %inverseBind, 0u, %37
+    %39:mat4x4<f32> = load %38
+    %joint3:mat4x4<f32> = mul %36, %39
+    %41:f32 = access %input_1, 5u, 0u
+    %42:mat4x4<f32> = mul %joint0, %41
+    %43:f32 = access %input_1, 5u, 1u
+    %44:mat4x4<f32> = mul %joint1, %43
+    %45:mat4x4<f32> = add %42, %44
+    %46:f32 = access %input_1, 5u, 2u
+    %47:mat4x4<f32> = mul %joint2, %46
+    %48:mat4x4<f32> = add %45, %47
+    %49:f32 = access %input_1, 5u, 3u
+    %50:mat4x4<f32> = mul %joint3, %49
+    %skinMatrix:mat4x4<f32> = add %48, %50
+    ret %skinMatrix
+  }
+}
+%vertexMain = @vertex func(%input_2:VertexInput):VertexOutput -> %b4 {  # %input_2: 'input'
+  %b4 = block {
+    %output:ptr<function, VertexOutput, read_write> = var
+    %modelMatrix:mat4x4<f32> = call %getSkinMatrix, %input_2
+    %56:ptr<function, vec3<f32>, read_write> = access %output, 7u
+    %57:vec3<f32> = access %input_2, 1u
+    %58:vec4<f32> = construct %57, 0.0f
+    %59:vec4<f32> = mul %modelMatrix, %58
+    %60:vec3<f32> = swizzle %59, xyz
+    %61:vec3<f32> = normalize %60
+    store %56, %61
+    %62:ptr<function, vec3<f32>, read_write> = access %output, 8u
+    %63:vec4<f32> = access %input_2, 2u
+    %64:vec3<f32> = swizzle %63, xyz
+    %65:vec4<f32> = construct %64, 0.0f
+    %66:vec4<f32> = mul %modelMatrix, %65
+    %67:vec3<f32> = swizzle %66, xyz
+    %68:vec3<f32> = normalize %67
+    store %62, %68
+    %69:ptr<function, vec3<f32>, read_write> = access %output, 9u
+    %70:ptr<function, vec3<f32>, read_write> = access %output, 7u
+    %71:vec3<f32> = load %70
+    %72:ptr<function, vec3<f32>, read_write> = access %output, 8u
+    %73:vec3<f32> = load %72
+    %74:vec3<f32> = cross %71, %73
+    %75:f32 = access %input_2, 2u, 3u
+    %76:vec3<f32> = mul %74, %75
+    store %69, %76
+    %77:ptr<function, vec4<f32>, read_write> = access %output, 5u
+    store %77, vec4<f32>(1.0f)
+    %78:ptr<function, vec2<f32>, read_write> = access %output, 3u
+    %79:vec2<f32> = access %input_2, 3u
+    store %78, %79
+    %80:ptr<function, vec4<f32>, read_write> = access %output, 6u
+    %81:vec4<f32> = access %input_2, 10u
+    store %80, %81
+    %82:vec4<f32> = access %input_2, 0u
+    %modelPos:vec4<f32> = mul %modelMatrix, %82
+    %84:ptr<function, vec3<f32>, read_write> = access %output, 1u
+    %85:vec3<f32> = swizzle %modelPos, xyz
+    store %84, %85
+    %86:ptr<function, vec3<f32>, read_write> = access %output, 2u
+    %87:ptr<uniform, vec3<f32>, read> = access %camera, 3u
+    %88:vec3<f32> = load %87
+    %89:vec3<f32> = swizzle %modelPos, xyz
+    %90:vec3<f32> = sub %88, %89
+    store %86, %90
+    %91:ptr<function, vec4<f32>, read_write> = access %output, 0u
+    %92:ptr<uniform, mat4x4<f32>, read> = access %camera, 0u
+    %93:mat4x4<f32> = load %92
+    %94:ptr<uniform, mat4x4<f32>, read> = access %camera, 2u
+    %95:mat4x4<f32> = load %94
+    %96:mat4x4<f32> = mul %93, %95
+    %97:vec4<f32> = mul %96, %modelPos
+    store %91, %97
+    %98:VertexOutput = load %output
+    ret %98
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

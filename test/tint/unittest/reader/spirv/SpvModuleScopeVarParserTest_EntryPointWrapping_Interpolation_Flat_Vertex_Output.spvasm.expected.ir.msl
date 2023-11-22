@@ -1,0 +1,49 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: main_out = struct @align(16) {
+  x_1_1:u32 @offset(0), @location(1), @interpolate(flat)
+  x_2_1:vec2<u32> @offset(8), @location(2), @interpolate(flat)
+  x_3_1:i32 @offset(16), @location(3), @interpolate(flat)
+  x_4_1:vec2<i32> @offset(24), @location(4), @interpolate(flat)
+  x_5_1:f32 @offset(32), @location(5), @interpolate(flat)
+  x_6_1:vec2<f32> @offset(40), @location(6), @interpolate(flat)
+  x_8_1:vec4<f32> @offset(48), @builtin(position)
+}
+
+%b1 = block {  # root
+  %x_1:ptr<private, u32, read_write> = var
+  %x_2:ptr<private, vec2<u32>, read_write> = var
+  %x_3:ptr<private, i32, read_write> = var
+  %x_4:ptr<private, vec2<i32>, read_write> = var
+  %x_5:ptr<private, f32, read_write> = var
+  %x_6:ptr<private, vec2<f32>, read_write> = var
+  %x_8:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+%tint_symbol = @vertex func():main_out -> %b3 {
+  %b3 = block {
+    %10:void = call %main_1
+    %11:u32 = load %x_1
+    %12:vec2<u32> = load %x_2
+    %13:i32 = load %x_3
+    %14:vec2<i32> = load %x_4
+    %15:f32 = load %x_5
+    %16:vec2<f32> = load %x_6
+    %17:vec4<f32> = load %x_8
+    %18:main_out = construct %11, %12, %13, %14, %15, %16, %17
+    ret %18
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

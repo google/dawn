@@ -1,0 +1,27 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  matrix_view:mat4x4<f32> @offset(0)
+  matrix_normal:mat3x3<f32> @offset(64)
+}
+
+%b1 = block {  # root
+  %tint_symbol:ptr<uniform, S, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol_1 = @vertex func():vec4<f32> [@position] -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, vec4<f32>, read> = access %tint_symbol, 0u, 0i
+    %x:f32 = load_vector_element %3, 2u
+    %5:vec4<f32> = construct %x, 0.0f, 0.0f, 1.0f
+    ret %5
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

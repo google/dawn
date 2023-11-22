@@ -1,0 +1,63 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  arr:array<vec4<i32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %src_private:ptr<private, array<vec4<i32>, 4>, read_write> = var
+  %src_workgroup:ptr<workgroup, array<vec4<i32>, 4>, read_write> = var
+  %src_uniform:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %src_storage:ptr<storage, S, read_write> = var @binding_point(0, 1)
+  %dst:ptr<private, array<vec4<i32>, 4>, read_write> = var
+  %dst_nested:ptr<private, array<array<array<i32, 2>, 3>, 4>, read_write> = var
+}
+
+%ret_arr = func():array<vec4<i32>, 4> -> %b2 {
+  %b2 = block {
+    ret array<vec4<i32>, 4>(vec4<i32>(0i))
+  }
+}
+%ret_struct_arr = func():S -> %b3 {
+  %b3 = block {
+    ret S(array<vec4<i32>, 4>(vec4<i32>(0i)))
+  }
+}
+%foo = func(%src_param:array<vec4<i32>, 4>):void -> %b4 {
+  %b4 = block {
+    %src_function:ptr<function, array<vec4<i32>, 4>, read_write> = var
+    store %dst, array<vec4<i32>, 4>(vec4<i32>(1i), vec4<i32>(2i), vec4<i32>(3i), vec4<i32>(3i))
+    store %dst, %src_param
+    %12:array<vec4<i32>, 4> = call %ret_arr
+    store %dst, %12
+    %src_let:array<vec4<i32>, 4> = let array<vec4<i32>, 4>(vec4<i32>(0i))
+    store %dst, %src_let
+    %14:array<vec4<i32>, 4> = load %src_function
+    store %dst, %14
+    %15:array<vec4<i32>, 4> = load %src_private
+    store %dst, %15
+    %16:array<vec4<i32>, 4> = load %src_workgroup
+    store %dst, %16
+    %17:S = call %ret_struct_arr
+    %18:array<vec4<i32>, 4> = access %17, 0u
+    store %dst, %18
+    %19:ptr<uniform, array<vec4<i32>, 4>, read> = access %src_uniform, 0u
+    %20:array<vec4<i32>, 4> = load %19
+    store %dst, %20
+    %21:ptr<storage, array<vec4<i32>, 4>, read_write> = access %src_storage, 0u
+    %22:array<vec4<i32>, 4> = load %21
+    store %dst, %22
+    %src_nested:ptr<function, array<array<array<i32, 2>, 3>, 4>, read_write> = var
+    %24:array<array<array<i32, 2>, 3>, 4> = load %src_nested
+    store %dst_nested, %24
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

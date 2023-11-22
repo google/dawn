@@ -1,0 +1,176 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 4> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 4> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_10:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, u32, read_write> = var
+    %v1:ptr<function, vec4<f32>, read_write> = var
+    %E:ptr<function, f32, read_write> = var
+    %x_69:ptr<function, bool, read_write> = var
+    %x_70:ptr<function, bool, read_write> = var
+    %x_85:ptr<function, bool, read_write> = var
+    %x_86:ptr<function, bool, read_write> = var
+    %x_101:ptr<function, bool, read_write> = var
+    %x_102:ptr<function, bool, read_write> = var
+    %14:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %15:f32 = load %14
+    %16:vec4<f32> = construct %15
+    %17:u32 = pack4x8snorm %16
+    store %a, %17
+    %18:u32 = load %a
+    %19:vec4<f32> = unpack4x8unorm %18
+    store %v1, %19
+    %20:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %21:f32 = load %20
+    store %E, %21
+    %22:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+    %23:i32 = load %22
+    %24:f32 = load_vector_element %v1, %23
+    %25:ptr<uniform, f32, read> = access %x_6, 0u, 2i, 0u
+    %26:f32 = load %25
+    %27:ptr<uniform, f32, read> = access %x_6, 0u, 3i, 0u
+    %28:f32 = load %27
+    %29:f32 = div %26, %28
+    %30:f32 = sub %24, %29
+    %31:f32 = abs %30
+    %32:f32 = load %E
+    %x_54:bool = lt %31, %32
+    store %x_70, %x_54
+    if %x_54 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %34:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %35:i32 = load %34
+        %36:f32 = load_vector_element %v1, %35
+        %37:ptr<uniform, f32, read> = access %x_6, 0u, 2i, 0u
+        %38:f32 = load %37
+        %39:ptr<uniform, f32, read> = access %x_6, 0u, 3i, 0u
+        %40:f32 = load %39
+        %41:f32 = div %38, %40
+        %42:f32 = sub %36, %41
+        %43:f32 = abs %42
+        %44:f32 = load %E
+        %45:bool = lt %43, %44
+        store %x_69, %45
+        %46:bool = load %x_69
+        store %x_70, %46
+        exit_if  # if_1
+      }
+    }
+    %47:bool = load %x_70
+    store %x_86, %47
+    %48:bool = load %x_70
+    if %48 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %49:ptr<uniform, i32, read> = access %x_10, 0u, 3i, 0u
+        %50:i32 = load %49
+        %51:f32 = load_vector_element %v1, %50
+        %52:ptr<uniform, f32, read> = access %x_6, 0u, 2i, 0u
+        %53:f32 = load %52
+        %54:ptr<uniform, f32, read> = access %x_6, 0u, 3i, 0u
+        %55:f32 = load %54
+        %56:f32 = div %53, %55
+        %57:f32 = sub %51, %56
+        %58:f32 = abs %57
+        %59:f32 = load %E
+        %60:bool = lt %58, %59
+        store %x_85, %60
+        %61:bool = load %x_85
+        store %x_86, %61
+        exit_if  # if_2
+      }
+    }
+    %62:bool = load %x_86
+    store %x_102, %62
+    %63:bool = load %x_86
+    if %63 [t: %b5] {  # if_3
+      %b5 = block {  # true
+        %64:ptr<uniform, i32, read> = access %x_10, 0u, 2i, 0u
+        %65:i32 = load %64
+        %66:f32 = load_vector_element %v1, %65
+        %67:ptr<uniform, f32, read> = access %x_6, 0u, 2i, 0u
+        %68:f32 = load %67
+        %69:ptr<uniform, f32, read> = access %x_6, 0u, 3i, 0u
+        %70:f32 = load %69
+        %71:f32 = div %68, %70
+        %72:f32 = sub %66, %71
+        %73:f32 = abs %72
+        %74:f32 = load %E
+        %75:bool = lt %73, %74
+        store %x_101, %75
+        %76:bool = load %x_101
+        store %x_102, %76
+        exit_if  # if_3
+      }
+    }
+    %77:bool = load %x_102
+    if %77 [t: %b6, f: %b7] {  # if_4
+      %b6 = block {  # true
+        %78:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %79:i32 = load %78
+        %80:f32 = convert %79
+        %81:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %82:i32 = load %81
+        %83:f32 = convert %82
+        %84:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %85:i32 = load %84
+        %86:f32 = convert %85
+        %87:ptr<uniform, i32, read> = access %x_10, 0u, 0i, 0u
+        %88:i32 = load %87
+        %89:f32 = convert %88
+        %90:vec4<f32> = construct %80, %83, %86, %89
+        store %x_GLF_color, %90
+        exit_if  # if_4
+      }
+      %b7 = block {  # false
+        %91:ptr<uniform, i32, read> = access %x_10, 0u, 1i, 0u
+        %92:i32 = load %91
+        %93:f32 = convert %92
+        %94:vec4<f32> = construct %93
+        store %x_GLF_color, %94
+        exit_if  # if_4
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b8 {
+  %b8 = block {
+    %96:void = call %main_1
+    %97:vec4<f32> = load %x_GLF_color
+    %98:main_out = construct %97
+    ret %98
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

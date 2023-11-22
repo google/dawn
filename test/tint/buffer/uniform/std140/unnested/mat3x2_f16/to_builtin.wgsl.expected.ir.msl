@@ -1,0 +1,29 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %u:ptr<uniform, mat3x2<f16>, read> = var @binding_point(0, 0)
+}
+
+%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:mat3x2<f16> = load %u
+    %t:mat2x3<f16> = transpose %3
+    %5:ptr<uniform, vec2<f16>, read> = access %u, 1i
+    %6:vec2<f16> = load %5
+    %l:f16 = length %6
+    %8:ptr<uniform, vec2<f16>, read> = access %u, 0i
+    %9:vec2<f16> = load %8
+    %10:vec2<f16> = swizzle %9, yx
+    %11:f16 = access %10, 0u
+    %a:f16 = abs %11
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

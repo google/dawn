@@ -1,0 +1,218 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(8) {
+  field0:vec2<f32> @offset(0)
+  field1:u32 @offset(8)
+}
+
+S_1 = struct @align(4) {
+  field0:u32 @offset(0)
+}
+
+S_2 = struct @align(4) {
+  field0:S_1 @offset(0)
+}
+
+S_3 = struct @align(16) {
+  field0:array<vec4<f32>> @offset(0)
+}
+
+S_4 = struct @align(16) {
+  field0:array<vec4<f32>> @offset(0)
+}
+
+%b1 = block {  # root
+  %x_28:ptr<workgroup, array<S, 4096>, read_write> = var
+  %x_34:ptr<workgroup, atomic<u32>, read_write> = var
+  %x_35:ptr<workgroup, atomic<u32>, read_write> = var
+  %x_36:ptr<workgroup, atomic<u32>, read_write> = var
+  %x_37:ptr<workgroup, atomic<u32>, read_write> = var
+  %x_3:ptr<private, vec3<u32>, read_write> = var
+  %x_6:ptr<uniform, S_2, read> = var @binding_point(0, 1)
+  %x_9:ptr<storage, S_3, read> = var @binding_point(0, 2)
+  %x_12:ptr<storage, S_4, read_write> = var @binding_point(0, 3)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_54:ptr<function, u32, read_write> = var
+    %x_58:ptr<function, u32, read_write> = var
+    %x_85:ptr<function, vec4<f32>, read_write> = var
+    %x_88:ptr<function, u32, read_write> = var
+    %x_52:u32 = load_vector_element %x_3, 0u
+    store %x_54, 0u
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_55:ptr<function, u32, read_write> = var
+        %17:ptr<uniform, u32, read> = access %x_6, 0u, 0u
+        %18:u32 = load %17
+        store %x_58, %18
+        %19:u32 = load %x_54
+        %20:u32 = load %x_58
+        %21:bool = lt %19, %20
+        if %21 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %22:u32 = load %x_54
+        %x_62:u32 = add %22, %x_52
+        %24:u32 = load %x_58
+        %25:bool = gte %x_62, %24
+        if %25 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            %26:ptr<storage, vec4<f32>, read> = access %x_9, 0u, %x_62
+            %x_67:vec4<f32> = load %26
+            %28:ptr<workgroup, S, read_write> = access %x_28, %x_62
+            %29:vec2<f32> = swizzle %x_67, xy
+            %30:vec2<f32> = swizzle %x_67, zw
+            %31:vec2<f32> = add %29, %30
+            %32:vec2<f32> = mul %31, 0.5f
+            %33:S = construct %32, %x_62
+            store %28, %33
+            exit_if  # if_2
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %34:u32 = load %x_54
+        %35:u32 = add %34, 32u
+        store %x_55, %35
+        %36:u32 = load %x_55
+        store %x_54, %36
+        next_iteration %b3
+      }
+    }
+    %37:void = workgroupBarrier
+    %38:u32 = load %x_58
+    %x_74:i32 = bitcast %38
+    %40:ptr<workgroup, vec2<f32>, read_write> = access %x_28, 0i, 0u
+    %x_76:vec2<f32> = load %40
+    %42:bool = eq %x_52, 0u
+    if %42 [t: %b8] {  # if_3
+      %b8 = block {  # true
+        %x_80:vec2<u32> = bitcast %x_76
+        %x_81:u32 = access %x_80, 0u
+        %45:void = atomicStore %x_34, %x_81
+        %x_82:u32 = access %x_80, 1u
+        %47:void = atomicStore %x_35, %x_82
+        %48:void = atomicStore %x_36, %x_81
+        %49:void = atomicStore %x_37, %x_82
+        exit_if  # if_3
+      }
+    }
+    %50:vec4<f32> = swizzle %x_76, xyxy
+    store %x_85, %50
+    store %x_88, 1u
+    loop [b: %b9, c: %b10] {  # loop_2
+      %b9 = block {  # body
+        %x_111:ptr<function, vec4<f32>, read_write> = var
+        %x_86:ptr<function, vec4<f32>, read_write> = var
+        %x_89:ptr<function, u32, read_write> = var
+        %x_90:u32 = bitcast %x_74
+        %55:u32 = load %x_88
+        %56:bool = lt %55, %x_90
+        if %56 [t: %b11, f: %b12] {  # if_4
+          %b11 = block {  # true
+            exit_if  # if_4
+          }
+          %b12 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %57:u32 = load %x_88
+        %x_94:u32 = add %57, %x_52
+        %59:vec4<f32> = load %x_85
+        store %x_86, %59
+        %60:bool = gte %x_94, %x_90
+        if %60 [t: %b13] {  # if_5
+          %b13 = block {  # true
+            %61:ptr<workgroup, vec2<f32>, read_write> = access %x_28, %x_94, 0u
+            %x_99:vec2<f32> = load %61
+            %63:vec4<f32> = load %x_85
+            %64:vec2<f32> = swizzle %63, xy
+            %x_101:vec2<f32> = min %64, %x_99
+            %66:vec4<f32> = load %x_85
+            %x_103_1:ptr<function, vec4<f32>, read_write> = var, %66
+            %68:f32 = access %x_101, 0u
+            store_vector_element %x_103_1, 0u, %68
+            %x_103:vec4<f32> = load %x_103_1
+            %x_105_1:ptr<function, vec4<f32>, read_write> = var, %x_103
+            %71:f32 = access %x_101, 1u
+            store_vector_element %x_105_1, 1u, %71
+            %x_105:vec4<f32> = load %x_105_1
+            %73:vec4<f32> = load %x_105_1
+            %74:vec2<f32> = swizzle %73, zw
+            %x_107:vec2<f32> = max %74, %x_99
+            %x_109_1:ptr<function, vec4<f32>, read_write> = var, %x_105
+            %77:f32 = access %x_107, 0u
+            store_vector_element %x_109_1, 2u, %77
+            %78:vec4<f32> = load %x_109_1
+            store %x_111, %78
+            %79:f32 = access %x_107, 1u
+            store_vector_element %x_111, 3u, %79
+            %80:vec4<f32> = load %x_111
+            store %x_86, %80
+            exit_if  # if_5
+          }
+        }
+        continue %b10
+      }
+      %b10 = block {  # continuing
+        %81:u32 = load %x_88
+        %82:u32 = add %81, 32u
+        store %x_89, %82
+        %83:vec4<f32> = load %x_86
+        store %x_85, %83
+        %84:u32 = load %x_89
+        store %x_88, %84
+        next_iteration %b9
+      }
+    }
+    %85:void = workgroupBarrier
+    %86:f32 = load_vector_element %x_85, 0u
+    %87:u32 = bitcast %86
+    %x_114:u32 = atomicMin %x_34, %87
+    %89:f32 = load_vector_element %x_85, 1u
+    %90:u32 = bitcast %89
+    %x_117:u32 = atomicMin %x_35, %90
+    %92:f32 = load_vector_element %x_85, 2u
+    %93:u32 = bitcast %92
+    %x_120:u32 = atomicMax %x_36, %93
+    %95:f32 = load_vector_element %x_85, 3u
+    %96:u32 = bitcast %95
+    %x_123:u32 = atomicMax %x_37, %96
+    %98:void = workgroupBarrier
+    %99:ptr<storage, vec4<f32>, read_write> = access %x_12, 0u, 0i
+    %100:u32 = atomicLoad %x_34
+    %101:f32 = bitcast %100
+    %102:u32 = atomicLoad %x_35
+    %103:f32 = bitcast %102
+    %104:u32 = atomicLoad %x_36
+    %105:f32 = bitcast %104
+    %106:u32 = atomicLoad %x_37
+    %107:f32 = bitcast %106
+    %108:vec4<f32> = construct %101, %103, %105, %107
+    store %99, %108
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(32, 1, 1) func(%x_3_param:vec3<u32> [@local_invocation_id]):void -> %b14 {
+  %b14 = block {
+    store %x_3, %x_3_param
+    %111:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

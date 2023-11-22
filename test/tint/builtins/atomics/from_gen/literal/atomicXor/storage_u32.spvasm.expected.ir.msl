@@ -1,0 +1,51 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RW_atomic = struct @align(4) {
+  arg_0:atomic<u32> @offset(0)
+}
+
+%b1 = block {  # root
+  %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
+}
+
+%atomicXor_54510e = func():void -> %b2 {
+  %b2 = block {
+    %res:ptr<function, u32, read_write> = var, 0u
+    %4:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
+    %x_9:u32 = atomicXor %4, 1u
+    store %res, %x_9
+    ret
+  }
+}
+%fragment_main_1 = func():void -> %b3 {
+  %b3 = block {
+    %7:void = call %atomicXor_54510e
+    ret
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %9:void = call %fragment_main_1
+    ret
+  }
+}
+%compute_main_1 = func():void -> %b5 {
+  %b5 = block {
+    %11:void = call %atomicXor_54510e
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+  %b6 = block {
+    %13:void = call %compute_main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,99 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(4) {
+  scalar_i32:i32 @offset(0)
+  scalar_f32:f32 @offset(4)
+}
+
+S = struct @align(16) {
+  scalar_f32:f32 @offset(0)
+  scalar_i32:i32 @offset(4)
+  scalar_u32:u32 @offset(8)
+  vec2_f32:vec2<f32> @offset(16)
+  vec2_i32:vec2<i32> @offset(24)
+  vec2_u32:vec2<u32> @offset(32)
+  vec3_f32:vec3<f32> @offset(48)
+  vec3_i32:vec3<i32> @offset(64)
+  vec3_u32:vec3<u32> @offset(80)
+  vec4_f32:vec4<f32> @offset(96)
+  vec4_i32:vec4<i32> @offset(112)
+  vec4_u32:vec4<u32> @offset(128)
+  mat2x2_f32:mat2x2<f32> @offset(144)
+  mat2x3_f32:mat2x3<f32> @offset(160)
+  mat2x4_f32:mat2x4<f32> @offset(192)
+  mat3x2_f32:mat3x2<f32> @offset(224)
+  mat3x3_f32:mat3x3<f32> @offset(256)
+  mat3x4_f32:mat3x4<f32> @offset(304)
+  mat4x2_f32:mat4x2<f32> @offset(352)
+  mat4x3_f32:mat4x3<f32> @offset(384)
+  mat4x4_f32:mat4x4<f32> @offset(448)
+  arr2_vec3_f32:array<vec3<f32>, 2> @offset(512)
+  struct_inner:Inner @offset(544)
+  array_struct_inner:array<Inner, 4> @offset(552)
+}
+
+%b1 = block {  # root
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, f32, read_write> = access %sb, 0u
+    store %3, 0.0f
+    %4:ptr<storage, i32, read_write> = access %sb, 1u
+    store %4, 0i
+    %5:ptr<storage, u32, read_write> = access %sb, 2u
+    store %5, 0u
+    %6:ptr<storage, vec2<f32>, read_write> = access %sb, 3u
+    store %6, vec2<f32>(0.0f)
+    %7:ptr<storage, vec2<i32>, read_write> = access %sb, 4u
+    store %7, vec2<i32>(0i)
+    %8:ptr<storage, vec2<u32>, read_write> = access %sb, 5u
+    store %8, vec2<u32>(0u)
+    %9:ptr<storage, vec3<f32>, read_write> = access %sb, 6u
+    store %9, vec3<f32>(0.0f)
+    %10:ptr<storage, vec3<i32>, read_write> = access %sb, 7u
+    store %10, vec3<i32>(0i)
+    %11:ptr<storage, vec3<u32>, read_write> = access %sb, 8u
+    store %11, vec3<u32>(0u)
+    %12:ptr<storage, vec4<f32>, read_write> = access %sb, 9u
+    store %12, vec4<f32>(0.0f)
+    %13:ptr<storage, vec4<i32>, read_write> = access %sb, 10u
+    store %13, vec4<i32>(0i)
+    %14:ptr<storage, vec4<u32>, read_write> = access %sb, 11u
+    store %14, vec4<u32>(0u)
+    %15:ptr<storage, mat2x2<f32>, read_write> = access %sb, 12u
+    store %15, mat2x2<f32>(vec2<f32>(0.0f))
+    %16:ptr<storage, mat2x3<f32>, read_write> = access %sb, 13u
+    store %16, mat2x3<f32>(vec3<f32>(0.0f))
+    %17:ptr<storage, mat2x4<f32>, read_write> = access %sb, 14u
+    store %17, mat2x4<f32>(vec4<f32>(0.0f))
+    %18:ptr<storage, mat3x2<f32>, read_write> = access %sb, 15u
+    store %18, mat3x2<f32>(vec2<f32>(0.0f))
+    %19:ptr<storage, mat3x3<f32>, read_write> = access %sb, 16u
+    store %19, mat3x3<f32>(vec3<f32>(0.0f))
+    %20:ptr<storage, mat3x4<f32>, read_write> = access %sb, 17u
+    store %20, mat3x4<f32>(vec4<f32>(0.0f))
+    %21:ptr<storage, mat4x2<f32>, read_write> = access %sb, 18u
+    store %21, mat4x2<f32>(vec2<f32>(0.0f))
+    %22:ptr<storage, mat4x3<f32>, read_write> = access %sb, 19u
+    store %22, mat4x3<f32>(vec3<f32>(0.0f))
+    %23:ptr<storage, mat4x4<f32>, read_write> = access %sb, 20u
+    store %23, mat4x4<f32>(vec4<f32>(0.0f))
+    %24:ptr<storage, array<vec3<f32>, 2>, read_write> = access %sb, 21u
+    store %24, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    %25:ptr<storage, Inner, read_write> = access %sb, 22u
+    store %25, Inner(0i, 0.0f)
+    %26:ptr<storage, array<Inner, 4>, read_write> = access %sb, 23u
+    store %26, array<Inner, 4>(Inner(0i, 0.0f))
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

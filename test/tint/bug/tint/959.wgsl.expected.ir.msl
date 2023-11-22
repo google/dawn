@@ -1,0 +1,118 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(4) {
+  a:f32 @offset(0)
+}
+
+%b1 = block {  # root
+  %b0:ptr<storage, S, read> = var @binding_point(0, 0)
+  %b1:ptr<storage, S, read> = var @binding_point(1, 0)
+  %b2:ptr<storage, S, read> = var @binding_point(2, 0)
+  %b3:ptr<storage, S, read> = var @binding_point(3, 0)
+  %b4:ptr<storage, S, read> = var @binding_point(4, 0)
+  %b5:ptr<storage, S, read> = var @binding_point(5, 0)
+  %b6:ptr<storage, S, read> = var @binding_point(6, 0)
+  %b7:ptr<storage, S, read> = var @binding_point(7, 0)
+  %b8:ptr<uniform, S, read> = var @binding_point(9, 1)
+  %b9:ptr<uniform, S, read> = var @binding_point(8, 1)
+  %b10:ptr<uniform, S, read> = var @binding_point(10, 1)
+  %b11:ptr<uniform, S, read> = var @binding_point(11, 1)
+  %b12:ptr<uniform, S, read> = var @binding_point(12, 1)
+  %b13:ptr<uniform, S, read> = var @binding_point(13, 1)
+  %b14:ptr<uniform, S, read> = var @binding_point(14, 1)
+  %b15:ptr<uniform, S, read> = var @binding_point(15, 1)
+  %t0:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %t1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 1)
+  %t2:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 1)
+  %t3:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 1)
+  %t4:ptr<handle, texture_2d<f32>, read> = var @binding_point(4, 1)
+  %t5:ptr<handle, texture_2d<f32>, read> = var @binding_point(5, 1)
+  %t6:ptr<handle, texture_2d<f32>, read> = var @binding_point(6, 1)
+  %t7:ptr<handle, texture_2d<f32>, read> = var @binding_point(7, 1)
+  %t8:ptr<handle, texture_depth_2d, read> = var @binding_point(8, 200)
+  %t9:ptr<handle, texture_depth_2d, read> = var @binding_point(9, 200)
+  %t10:ptr<handle, texture_depth_2d, read> = var @binding_point(10, 200)
+  %t11:ptr<handle, texture_depth_2d, read> = var @binding_point(11, 200)
+  %t12:ptr<handle, texture_depth_2d, read> = var @binding_point(12, 200)
+  %t13:ptr<handle, texture_depth_2d, read> = var @binding_point(13, 200)
+  %t14:ptr<handle, texture_depth_2d, read> = var @binding_point(14, 200)
+  %t15:ptr<handle, texture_depth_2d, read> = var @binding_point(15, 200)
+  %s0:ptr<handle, sampler, read> = var @binding_point(0, 200)
+  %s1:ptr<handle, sampler, read> = var @binding_point(1, 200)
+  %s2:ptr<handle, sampler, read> = var @binding_point(2, 200)
+  %s3:ptr<handle, sampler, read> = var @binding_point(3, 200)
+  %s4:ptr<handle, sampler, read> = var @binding_point(4, 200)
+  %s5:ptr<handle, sampler, read> = var @binding_point(5, 200)
+  %s6:ptr<handle, sampler, read> = var @binding_point(6, 200)
+  %s7:ptr<handle, sampler, read> = var @binding_point(7, 200)
+  %s8:ptr<handle, sampler_comparison, read> = var @binding_point(8, 300)
+  %s9:ptr<handle, sampler_comparison, read> = var @binding_point(9, 300)
+  %s10:ptr<handle, sampler_comparison, read> = var @binding_point(10, 300)
+  %s11:ptr<handle, sampler_comparison, read> = var @binding_point(11, 300)
+  %s12:ptr<handle, sampler_comparison, read> = var @binding_point(12, 300)
+  %s13:ptr<handle, sampler_comparison, read> = var @binding_point(13, 300)
+  %s14:ptr<handle, sampler_comparison, read> = var @binding_point(14, 300)
+  %s15:ptr<handle, sampler_comparison, read> = var @binding_point(15, 300)
+}
+
+%tint_symbol = @fragment func():void -> %b2 {
+  %b2 = block {
+    %50:S = load %b0
+    %51:S = load %b1
+    %52:S = load %b2
+    %53:S = load %b3
+    %54:S = load %b4
+    %55:S = load %b5
+    %56:S = load %b6
+    %57:S = load %b7
+    %58:S = load %b8
+    %59:S = load %b9
+    %60:S = load %b10
+    %61:S = load %b11
+    %62:S = load %b12
+    %63:S = load %b13
+    %64:S = load %b14
+    %65:S = load %b15
+    %66:texture_2d<f32> = load %t0
+    %67:texture_2d<f32> = load %t1
+    %68:texture_2d<f32> = load %t2
+    %69:texture_2d<f32> = load %t3
+    %70:texture_2d<f32> = load %t4
+    %71:texture_2d<f32> = load %t5
+    %72:texture_2d<f32> = load %t6
+    %73:texture_2d<f32> = load %t7
+    %74:texture_depth_2d = load %t8
+    %75:texture_depth_2d = load %t9
+    %76:texture_depth_2d = load %t10
+    %77:texture_depth_2d = load %t11
+    %78:texture_depth_2d = load %t12
+    %79:texture_depth_2d = load %t13
+    %80:texture_depth_2d = load %t14
+    %81:texture_depth_2d = load %t15
+    %82:sampler = load %s0
+    %83:sampler = load %s1
+    %84:sampler = load %s2
+    %85:sampler = load %s3
+    %86:sampler = load %s4
+    %87:sampler = load %s5
+    %88:sampler = load %s6
+    %89:sampler = load %s7
+    %90:sampler_comparison = load %s8
+    %91:sampler_comparison = load %s9
+    %92:sampler_comparison = load %s10
+    %93:sampler_comparison = load %s11
+    %94:sampler_comparison = load %s12
+    %95:sampler_comparison = load %s13
+    %96:sampler_comparison = load %s14
+    %97:sampler_comparison = load %s15
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

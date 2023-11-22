@@ -1,0 +1,49 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:array<array<strided_arr, 2>, 3> @offset(0)
+}
+
+S = struct @align(4) {
+  a:array<strided_arr_1, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %s:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%f_1 = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<strided_arr_1, 4>, read_write> = access %s, 0u
+    %x_19:array<strided_arr_1, 4> = load %3
+    %5:ptr<storage, array<array<strided_arr, 2>, 3>, read_write> = access %s, 0u, 3i, 0u
+    %x_24:array<array<strided_arr, 2>, 3> = load %5
+    %7:ptr<storage, array<strided_arr, 2>, read_write> = access %s, 0u, 3i, 0u, 2i
+    %x_28:array<strided_arr, 2> = load %7
+    %9:ptr<storage, f32, read_write> = access %s, 0u, 3i, 0u, 2i, 1i, 0u
+    %x_32:f32 = load %9
+    %11:ptr<storage, array<strided_arr_1, 4>, read_write> = access %s, 0u
+    store %11, array<strided_arr_1, 4>(strided_arr_1(array<array<strided_arr, 2>, 3>(array<strided_arr, 2>(strided_arr(0.0f)))))
+    %12:ptr<storage, f32, read_write> = access %s, 0u, 3i, 0u, 2i, 1i, 0u
+    store %12, 5.0f
+    ret
+  }
+}
+%f = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %14:void = call %f_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

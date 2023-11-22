@@ -1,0 +1,29 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Results = struct @align(4) {
+  colorSamples:array<f32, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %texture0:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
+  %results:ptr<storage, Results, read_write> = var @binding_point(0, 2)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %4:ptr<storage, f32, read_write> = access %results, 0u, 0i
+    %5:texture_multisampled_2d<f32> = load %texture0
+    %6:vec4<f32> = textureLoad %5, vec2<i32>(0i), 0i
+    %7:f32 = access %6, 0u
+    store %4, %7
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,140 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  one:i32 @offset(0)
+}
+
+S = struct @align(4) {
+  data:i32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_11:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_struct_S_i11_i1_ = func(%s:ptr<function, S, read_write>, %x:ptr<function, i32, read_write>):i32 -> %b2 {
+  %b2 = block {
+    %6:ptr<function, i32, read_write> = access %s, 0u
+    %7:i32 = load %6
+    %8:bool = eq %7, 1i
+    if %8 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %x_18:i32 = load %x
+        %10:ptr<function, i32, read_write> = access %s, 0u
+        %x_19:i32 = load %10
+        %12:i32 = add %x_18, %x_19
+        ret %12
+      }
+      %b4 = block {  # false
+        %x_21:i32 = load %x
+        ret %x_21
+      }
+    }
+    unreachable
+  }
+}
+%main_1 = func():void -> %b5 {
+  %b5 = block {
+    %a:ptr<function, i32, read_write> = var
+    %arr:ptr<function, array<S, 1>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %param:ptr<function, S, read_write> = var
+    %param_1:ptr<function, i32, read_write> = var
+    %param_2:ptr<function, S, read_write> = var
+    %param_3:ptr<function, i32, read_write> = var
+    store %a, 0i
+    %22:ptr<function, i32, read_write> = access %arr, 0i, 0u
+    %23:ptr<uniform, i32, read> = access %x_11, 0u
+    %24:i32 = load %23
+    store %22, %24
+    store %i, 0i
+    loop [b: %b6, c: %b7] {  # loop_1
+      %b6 = block {  # body
+        %25:i32 = load %i
+        %26:ptr<uniform, i32, read> = access %x_11, 0u
+        %27:i32 = load %26
+        %28:i32 = add 5i, %27
+        %29:bool = lt %25, %28
+        if %29 [t: %b8, f: %b9] {  # if_2
+          %b8 = block {  # true
+            exit_if  # if_2
+          }
+          %b9 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %30:i32 = load %i
+        %31:i32 = mod %30, 2i
+        %32:bool = neq %31, 0i
+        if %32 [t: %b10, f: %b11] {  # if_3
+          %b10 = block {  # true
+            %33:ptr<function, S, read_write> = access %arr, 0i
+            %34:S = load %33
+            store %param, %34
+            %35:i32 = load %i
+            store %param_1, %35
+            %x_29:i32 = call %func_struct_S_i11_i1_, %param, %param_1
+            %37:ptr<function, S, read_write> = access %arr, 0i
+            %38:S = load %param
+            store %37, %38
+            store %a, %x_29
+            exit_if  # if_3
+          }
+          %b11 = block {  # false
+            %39:ptr<function, S, read_write> = access %arr, 0i
+            %40:S = load %39
+            store %param_2, %40
+            store %param_3, 1i
+            %x_30:i32 = call %func_struct_S_i11_i1_, %param_2, %param_3
+            %42:ptr<function, S, read_write> = access %arr, 0i
+            %43:S = load %param_2
+            store %42, %43
+            store %a, %x_30
+            exit_if  # if_3
+          }
+        }
+        continue %b7
+      }
+      %b7 = block {  # continuing
+        %44:i32 = load %i
+        %45:i32 = add %44, 1i
+        store %i, %45
+        next_iteration %b6
+      }
+    }
+    %46:i32 = load %a
+    %47:bool = eq %46, 6i
+    if %47 [t: %b12, f: %b13] {  # if_4
+      %b12 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_4
+      }
+      %b13 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_4
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b14 {
+  %b14 = block {
+    %49:void = call %main_1
+    %50:vec4<f32> = load %x_GLF_color
+    %51:main_out = construct %50
+    ret %51
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

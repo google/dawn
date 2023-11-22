@@ -1,0 +1,28 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: Interface = struct @align(16) {
+  col1:f32 @offset(0), @location(1)
+  col2:f32 @offset(4), @location(2)
+  pos:vec4<f32> @offset(16), @builtin(position)
+}
+
+%vert_main = @vertex func():Interface -> %b1 {
+  %b1 = block {
+    ret Interface(0.40000000596046447754f, 0.60000002384185791016f, vec4<f32>(0.0f))
+  }
+}
+%frag_main = @fragment func(%colors:Interface):void -> %b2 {
+  %b2 = block {
+    %r:f32 = access %colors, 0u
+    %g:f32 = access %colors, 1u
+    ret
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

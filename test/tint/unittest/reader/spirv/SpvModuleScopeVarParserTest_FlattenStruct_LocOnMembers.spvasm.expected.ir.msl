@@ -1,0 +1,48 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: Communicators = struct @align(16) {
+  alice:f32 @offset(0)
+  bob:vec4<f32> @offset(16)
+}
+
+main_out = struct @align(16) {
+  x_2_1:vec4<f32> @offset(0), @builtin(position)
+  x_3_1:f32 @offset(16), @location(9)
+  x_3_2:vec4<f32> @offset(32), @location(11)
+}
+
+%b1 = block {  # root
+  %x_1:ptr<private, Communicators, read_write> = var
+  %x_3:ptr<private, Communicators, read_write> = var
+  %x_2:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+%tint_symbol = @vertex func(%x_1_param:f32 [@location(9)], %x_1_param_1:vec4<f32> [@location(11)]):main_out -> %b3 {
+  %b3 = block {
+    %8:ptr<private, f32, read_write> = access %x_1, 0u
+    store %8, %x_1_param
+    %9:ptr<private, vec4<f32>, read_write> = access %x_1, 1u
+    store %9, %x_1_param_1
+    %10:void = call %main_1
+    %11:vec4<f32> = load %x_2
+    %12:ptr<private, f32, read_write> = access %x_3, 0u
+    %13:f32 = load %12
+    %14:ptr<private, vec4<f32>, read_write> = access %x_3, 1u
+    %15:vec4<f32> = load %14
+    %16:main_out = construct %11, %13, %15
+    ret %16
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

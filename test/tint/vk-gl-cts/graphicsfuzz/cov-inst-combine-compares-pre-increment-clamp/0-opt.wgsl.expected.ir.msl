@@ -1,0 +1,128 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 3> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 2> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_9:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %x_14:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+}
+
+%f1_f1_ = func(%a:ptr<function, f32, read_write>):f32 -> %b2 {
+  %b2 = block {
+    %b:ptr<function, i32, read_write> = var
+    %c:ptr<function, f32, read_write> = var
+    store %b, 8i
+    %x_71:f32 = load_vector_element %gl_FragCoord, 1u
+    %10:ptr<uniform, f32, read> = access %x_9, 0u, 0i, 0u
+    %x_73:f32 = load %10
+    %12:bool = gte %x_71, %x_73
+    if %12 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %x_77:i32 = load %b
+        %14:i32 = add %x_77, 1i
+        store %b, %14
+        %x_79:i32 = load %b
+        %16:i32 = add %x_79, 1i
+        store %b, %16
+        exit_if  # if_1
+      }
+    }
+    %x_81:f32 = load %a
+    %18:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+    %x_83:f32 = load %18
+    %20:bool = lt %x_81, %x_83
+    if %20 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %21:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+        %x_88:f32 = load %21
+        ret %x_88
+      }
+    }
+    %x_89:i32 = load %b
+    %24:i32 = clamp %x_89, 0i, 2i
+    %25:f32 = convert %24
+    store %c, %25
+    %x_92:f32 = load %c
+    ret %x_92
+  }
+}
+%main_1 = func():void -> %b5 {
+  %b5 = block {
+    %a_1:ptr<function, f32, read_write> = var
+    %param:ptr<function, f32, read_write> = var
+    %30:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+    %x_43:f32 = load %30
+    store %param, %x_43
+    %x_44:f32 = call %f1_f1_, %param
+    store %a_1, %x_44
+    %x_45:f32 = load %a_1
+    %34:ptr<uniform, f32, read> = access %x_9, 0u, 2i, 0u
+    %x_47:f32 = load %34
+    %36:bool = eq %x_45, %x_47
+    if %36 [t: %b6, f: %b7] {  # if_3
+      %b6 = block {  # true
+        %37:ptr<uniform, i32, read> = access %x_14, 0u, 1i, 0u
+        %x_53:i32 = load %37
+        %39:ptr<uniform, i32, read> = access %x_14, 0u, 0i, 0u
+        %x_56:i32 = load %39
+        %41:ptr<uniform, i32, read> = access %x_14, 0u, 0i, 0u
+        %x_59:i32 = load %41
+        %43:ptr<uniform, i32, read> = access %x_14, 0u, 1i, 0u
+        %x_62:i32 = load %43
+        %45:f32 = convert %x_53
+        %46:f32 = convert %x_56
+        %47:f32 = convert %x_59
+        %48:f32 = convert %x_62
+        %49:vec4<f32> = construct %45, %46, %47, %48
+        store %x_GLF_color, %49
+        exit_if  # if_3
+      }
+      %b7 = block {  # false
+        %50:ptr<uniform, i32, read> = access %x_14, 0u, 0i, 0u
+        %x_66:i32 = load %50
+        %x_67:f32 = convert %x_66
+        %53:vec4<f32> = construct %x_67, %x_67, %x_67, %x_67
+        store %x_GLF_color, %53
+        exit_if  # if_3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b8 {
+  %b8 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %56:void = call %main_1
+    %57:vec4<f32> = load %x_GLF_color
+    %58:main_out = construct %57
+    ret %58
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

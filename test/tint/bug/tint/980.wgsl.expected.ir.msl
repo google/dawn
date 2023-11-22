@@ -1,0 +1,43 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  v:vec3<f32> @offset(0)
+  i:u32 @offset(12)
+}
+
+%b1 = block {  # root
+  %io:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%Bad = func(%index:u32, %rd:vec3<f32>):vec3<f32> -> %b2 {
+  %b2 = block {
+    %normal:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
+    %6:f32 = access %rd, %index
+    %7:f32 = sign %6
+    %8:f32 = negation %7
+    store_vector_element %normal, %index, %8
+    %9:vec3<f32> = load %normal
+    %10:vec3<f32> = normalize %9
+    ret %10
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void -> %b3 {
+  %b3 = block {
+    %13:ptr<storage, vec3<f32>, read_write> = access %io, 0u
+    %14:ptr<storage, u32, read_write> = access %io, 1u
+    %15:u32 = load %14
+    %16:ptr<storage, vec3<f32>, read_write> = access %io, 0u
+    %17:vec3<f32> = load %16
+    %18:vec3<f32> = call %Bad, %15, %17
+    store %13, %18
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

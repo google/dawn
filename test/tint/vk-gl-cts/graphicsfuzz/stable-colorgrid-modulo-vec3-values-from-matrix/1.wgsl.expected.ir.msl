@@ -1,0 +1,206 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  resolution:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_13:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%compute_value_f1_f1_ = func(%limit:ptr<function, f32, read_write>, %thirty_two:ptr<function, f32, read_write>):f32 -> %b2 {
+  %b2 = block {
+    %result:ptr<function, f32, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    store %result, -0.5f
+    store %i, 1i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_136:i32 = load %i
+        %10:bool = lt %x_136, 800i
+        if %10 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_139:i32 = load %i
+        %12:i32 = mod %x_139, 32i
+        %13:bool = eq %12, 0i
+        if %13 [t: %b7, f: %b8] {  # if_2
+          %b7 = block {  # true
+            %x_145:f32 = load %result
+            %15:f32 = add %x_145, 0.40000000596046447754f
+            store %result, %15
+            exit_if  # if_2
+          }
+          %b8 = block {  # false
+            %x_147:i32 = load %i
+            %x_149:f32 = load %thirty_two
+            %18:f32 = convert %x_147
+            %19:f32 = round %x_149
+            %20:f32 = convert %x_147
+            %21:f32 = round %x_149
+            %22:f32 = div %20, %21
+            %23:f32 = floor %22
+            %24:f32 = mul %19, %23
+            %25:f32 = sub %18, %24
+            %26:bool = lte %25, 0.00999999977648258209f
+            if %26 [t: %b9] {  # if_3
+              %b9 = block {  # true
+                %x_155:f32 = load %result
+                %28:f32 = add %x_155, 100.0f
+                store %result, %28
+                exit_if  # if_3
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        %x_157:i32 = load %i
+        %x_159:f32 = load %limit
+        %31:f32 = convert %x_157
+        %32:bool = gte %31, %x_159
+        if %32 [t: %b10] {  # if_4
+          %b10 = block {  # true
+            %x_163:f32 = load %result
+            ret %x_163
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_164:i32 = load %i
+        %35:i32 = add %x_164, 1i
+        store %i, %35
+        next_iteration %b3
+      }
+    }
+    %x_166:f32 = load %result
+    ret %x_166
+  }
+}
+%main_1 = func():void -> %b11 {
+  %b11 = block {
+    %c:ptr<function, vec3<f32>, read_write> = var
+    %thirty_two_1:ptr<function, f32, read_write> = var
+    %param:ptr<function, f32, read_write> = var
+    %param_1:ptr<function, f32, read_write> = var
+    %param_2:ptr<function, f32, read_write> = var
+    %param_3:ptr<function, f32, read_write> = var
+    %i_1:ptr<function, i32, read_write> = var
+    store %c, vec3<f32>(7.0f, 8.0f, 9.0f)
+    %45:ptr<uniform, vec2<f32>, read> = access %x_13, 0u
+    %x_63:f32 = load_vector_element %45, 0u
+    %47:f32 = div %x_63, 8.0f
+    %48:f32 = round %47
+    store %thirty_two_1, %48
+    %x_67:f32 = load_vector_element %gl_FragCoord, 0u
+    store %param, %x_67
+    %x_68:f32 = load %thirty_two_1
+    store %param_1, %x_68
+    %x_69:f32 = call %compute_value_f1_f1_, %param, %param_1
+    store_vector_element %c, 0u, %x_69
+    %x_72:f32 = load_vector_element %gl_FragCoord, 1u
+    store %param_2, %x_72
+    %x_73:f32 = load %thirty_two_1
+    store %param_3, %x_73
+    %x_74:f32 = call %compute_value_f1_f1_, %param_2, %param_3
+    store_vector_element %c, 1u, %x_74
+    %x_76:vec3<f32> = load %c
+    %x_79:vec3<f32> = load %c
+    %57:f32 = access %x_79, 0u
+    %58:f32 = access %x_79, 1u
+    %59:vec2<f32> = construct %57, %58
+    %60:f32 = access %x_79, 2u
+    %61:vec2<f32> = construct %60, 1.0f
+    %x_87:mat4x2<f32> = construct %59, %61, vec2<f32>(1.0f, 0.0f), vec2<f32>(1.0f, 0.0f)
+    %63:vec3<f32> = mul %x_76, mat3x3<f32>(vec3<f32>(1.0f, 0.0f, 0.0f), vec3<f32>(0.0f, 1.0f, 0.0f), vec3<f32>(0.0f, 0.0f, 1.0f))
+    %64:f32 = access %63, 0u
+    %65:f32 = access %x_87, 0u, 0u
+    %66:f32 = access %x_87, 0u, 1u
+    %67:f32 = access %x_87, 1u, 0u
+    %68:vec3<f32> = construct %65, %66, %67
+    %69:f32 = access %68, 1u
+    %70:f32 = add %64, %69
+    store_vector_element %c, 2u, %70
+    store %i_1, 0i
+    loop [b: %b12, c: %b13] {  # loop_2
+      %b12 = block {  # body
+        %x_99:i32 = load %i_1
+        %72:bool = lt %x_99, 3i
+        if %72 [t: %b14, f: %b15] {  # if_5
+          %b14 = block {  # true
+            exit_if  # if_5
+          }
+          %b15 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %x_102:i32 = load %i_1
+        %x_104:f32 = load_vector_element %c, %x_102
+        %75:bool = gte %x_104, 1.0f
+        if %75 [t: %b16] {  # if_6
+          %b16 = block {  # true
+            %x_108:i32 = load %i_1
+            %x_109:i32 = load %i_1
+            %x_111:f32 = load_vector_element %c, %x_109
+            %x_112:i32 = load %i_1
+            %x_114:f32 = load_vector_element %c, %x_112
+            %81:f32 = mul %x_111, %x_114
+            store_vector_element %c, %x_108, %81
+            %x_118:f32 = load_vector_element %gl_FragCoord, 1u
+            %83:bool = lt %x_118, 0.0f
+            if %83 [t: %b17] {  # if_7
+              %b17 = block {  # true
+                exit_loop  # loop_2
+              }
+            }
+            exit_if  # if_6
+          }
+        }
+        continue %b13
+      }
+      %b13 = block {  # continuing
+        %x_122:i32 = load %i_1
+        %85:i32 = add %x_122, 1i
+        store %i_1, %85
+        next_iteration %b12
+      }
+    }
+    %x_124:vec3<f32> = load %c
+    %87:vec3<f32> = abs %x_124
+    %x_126:vec3<f32> = normalize %87
+    %89:f32 = access %x_126, 0u
+    %90:f32 = access %x_126, 1u
+    %91:f32 = access %x_126, 2u
+    %92:vec4<f32> = construct %89, %90, %91, 1.0f
+    store %x_GLF_color, %92
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b18 {
+  %b18 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %95:void = call %main_1
+    %96:vec4<f32> = load %x_GLF_color
+    %97:main_out = construct %96
+    ret %97
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

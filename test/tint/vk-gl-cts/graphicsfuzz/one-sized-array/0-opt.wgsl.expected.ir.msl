@@ -1,0 +1,79 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  zero:i32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_10:ptr<function, array<i32, 1>, read_write> = var
+    %x_9:ptr<function, array<i32, 1>, read_write> = var
+    %x_7:ptr<function, i32, read_write> = var
+    %x_11_phi:ptr<function, i32, read_write> = var
+    %8:ptr<uniform, i32, read> = access %x_5, 0u
+    %x_6:i32 = load %8
+    %10:ptr<function, i32, read_write> = access %x_9, 0i
+    store %10, %x_6
+    %x_37:array<i32, 1> = load %x_9
+    store %x_10, %x_37
+    %12:ptr<function, i32, read_write> = access %x_9, 0i
+    %13:i32 = load %12
+    store %x_7, %13
+    switch 0u [c: (default, %b3)] {  # switch_1
+      %b3 = block {  # case
+        store %x_GLF_color, vec4<f32>(0.0f)
+        %14:ptr<function, i32, read_write> = access %x_10, 0i
+        %x_8:i32 = load %14
+        %16:i32 = load %x_7
+        %17:i32 = bitcast %16
+        %18:bool = eq %x_8, %17
+        if %18 [t: %b4] {  # if_1
+          %b4 = block {  # true
+            store %x_11_phi, 1i
+            exit_switch  # switch_1
+          }
+        }
+        store %x_11_phi, 2i
+        exit_switch  # switch_1
+      }
+    }
+    %x_11:i32 = load %x_11_phi
+    %20:bool = eq %x_11, 1i
+    if %20 [t: %b5, f: %b6] {  # if_2
+      %b5 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_2
+      }
+      %b6 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b7 {
+  %b7 = block {
+    %22:void = call %main_1
+    %23:vec4<f32> = load %x_GLF_color
+    %24:main_out = construct %23
+    ret %24
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

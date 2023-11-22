@@ -1,0 +1,855 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Camera = struct @align(16) {
+  projection:mat4x4<f32> @offset(0)
+  inverseProjection:mat4x4<f32> @offset(64)
+  view:mat4x4<f32> @offset(128)
+  position:vec3<f32> @offset(192)
+  time:f32 @offset(204)
+  outputSize:vec2<f32> @offset(208)
+  zNear:f32 @offset(216)
+  zFar:f32 @offset(220)
+}
+
+ClusterLights = struct @align(4) {
+  offset:u32 @offset(0)
+  count:u32 @offset(4)
+}
+
+ClusterLightGroup = struct @align(4) {
+  offset:u32 @offset(0)
+  lights:array<ClusterLights, 27648> @offset(4)
+  indices:array<u32, 1769472> @offset(221188)
+}
+
+Light = struct @align(16) {
+  position:vec3<f32> @offset(0)
+  range:f32 @offset(12)
+  color:vec3<f32> @offset(16)
+  intensity:f32 @offset(28)
+}
+
+GlobalLights = struct @align(16) {
+  ambient:vec3<f32> @offset(0)
+  dirColor:vec3<f32> @offset(16)
+  dirIntensity:f32 @offset(28)
+  dirDirection:vec3<f32> @offset(32)
+  lightCount:u32 @offset(44)
+  lights:array<Light> @offset(48)
+}
+
+LightShadowTable = struct @align(4) {
+  light:array<i32> @offset(0)
+}
+
+ShadowProperties = struct @align(16) {
+  viewport:vec4<f32> @offset(0)
+  viewProj:mat4x4<f32> @offset(16)
+}
+
+LightShadows = struct @align(16) {
+  properties:array<ShadowProperties> @offset(0)
+}
+
+Material = struct @align(16) {
+  baseColorFactor:vec4<f32> @offset(0)
+  emissiveFactor:vec3<f32> @offset(16)
+  occlusionStrength:f32 @offset(28)
+  metallicRoughnessFactor:vec2<f32> @offset(32)
+  alphaCutoff:f32 @offset(40)
+}
+
+SurfaceInfo = struct @align(16) {
+  baseColor:vec4<f32> @offset(0)
+  albedo:vec3<f32> @offset(16)
+  metallic:f32 @offset(28)
+  roughness:f32 @offset(32)
+  normal:vec3<f32> @offset(48)
+  f0:vec3<f32> @offset(64)
+  ao:f32 @offset(76)
+  emissive:vec3<f32> @offset(80)
+  v:vec3<f32> @offset(96)
+}
+
+VertexOutput = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  worldPos:vec3<f32> @offset(16), @location(0)
+  view:vec3<f32> @offset(32), @location(1)
+  texcoord:vec2<f32> @offset(48), @location(2)
+  texcoord2:vec2<f32> @offset(56), @location(3)
+  color:vec4<f32> @offset(64), @location(4)
+  instanceColor:vec4<f32> @offset(80), @location(5)
+  normal:vec3<f32> @offset(96), @location(6)
+  tangent:vec3<f32> @offset(112), @location(7)
+  bitangent:vec3<f32> @offset(128), @location(8)
+}
+
+PuctualLight = struct @align(16) {
+  lightType:u32 @offset(0)
+  pointToLight:vec3<f32> @offset(16)
+  range:f32 @offset(28)
+  color:vec3<f32> @offset(32)
+  intensity:f32 @offset(44)
+}
+
+FragmentOutput = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+  emissive:vec4<f32> @offset(16), @location(1)
+}
+
+%b1 = block {  # root
+  %camera:ptr<uniform, Camera, read> = var @binding_point(0, 0)
+  %clusterLights:ptr<storage, ClusterLightGroup, read> = var @binding_point(0, 1)
+  %globalLights:ptr<storage, GlobalLights, read> = var @binding_point(0, 2)
+  %defaultSampler:ptr<handle, sampler, read> = var @binding_point(0, 3)
+  %shadowTexture:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 4)
+  %shadowSampler:ptr<handle, sampler_comparison, read> = var @binding_point(0, 5)
+  %lightShadowTable:ptr<storage, LightShadowTable, read> = var @binding_point(0, 6)
+  %shadowSampleOffsets:ptr<private, array<vec2<f32>, 16>, read_write> = var, array<vec2<f32>, 16>(vec2<f32>(-1.5f), vec2<f32>(-1.5f, -0.5f), vec2<f32>(-1.5f, 0.5f), vec2<f32>(-1.5f, 1.5f), vec2<f32>(-0.5f, -1.5f), vec2<f32>(-0.5f), vec2<f32>(-0.5f, 0.5f), vec2<f32>(-0.5f, 1.5f), vec2<f32>(0.5f, -1.5f), vec2<f32>(0.5f, -0.5f), vec2<f32>(0.5f), vec2<f32>(0.5f, 1.5f), vec2<f32>(1.5f, -1.5f), vec2<f32>(1.5f, -0.5f), vec2<f32>(1.5f, 0.5f), vec2<f32>(1.5f))
+  %shadow:ptr<storage, LightShadows, read> = var @binding_point(0, 7)
+  %material:ptr<uniform, Material, read> = var @binding_point(0, 8)
+  %baseColorTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 9)
+  %baseColorSampler:ptr<handle, sampler, read> = var @binding_point(0, 10)
+  %normalTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 11)
+  %normalSampler:ptr<handle, sampler, read> = var @binding_point(0, 12)
+  %metallicRoughnessTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 13)
+  %metallicRoughnessSampler:ptr<handle, sampler, read> = var @binding_point(0, 14)
+  %occlusionTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 15)
+  %occlusionSampler:ptr<handle, sampler, read> = var @binding_point(0, 16)
+  %emissiveTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 17)
+  %emissiveSampler:ptr<handle, sampler, read> = var @binding_point(0, 18)
+  %ssaoTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 19)
+}
+
+%linearTosRGB = func(%linear:vec3<f32>):vec3<f32> -> %b2 {
+  %b2 = block {
+    %INV_GAMMA:f32 = let 0.45454543828964233398f
+    %25:vec3<f32> = construct %INV_GAMMA
+    %26:vec3<f32> = pow %linear, %25
+    ret %26
+  }
+}
+%sRGBToLinear = func(%srgb:vec3<f32>):vec3<f32> -> %b3 {
+  %b3 = block {
+    %29:vec3<f32> = pow %srgb, vec3<f32>(2.20000004768371582031f)
+    ret %29
+  }
+}
+%linearDepth = func(%depthSample:f32):f32 -> %b4 {
+  %b4 = block {
+    %32:ptr<uniform, f32, read> = access %camera, 7u
+    %33:f32 = load %32
+    %34:ptr<uniform, f32, read> = access %camera, 6u
+    %35:f32 = load %34
+    %36:f32 = mul %33, %35
+    %37:ptr<uniform, f32, read> = access %camera, 6u
+    %38:f32 = load %37
+    %39:ptr<uniform, f32, read> = access %camera, 7u
+    %40:f32 = load %39
+    %41:f32 = sub %38, %40
+    %42:ptr<uniform, f32, read> = access %camera, 7u
+    %43:f32 = load %42
+    %44:f32 = fma %depthSample, %41, %43
+    %45:f32 = div %36, %44
+    ret %45
+  }
+}
+%getTile = func(%fragCoord:vec4<f32>):vec3<u32> -> %b5 {
+  %b5 = block {
+    %48:ptr<uniform, f32, read> = access %camera, 7u
+    %49:f32 = load %48
+    %50:ptr<uniform, f32, read> = access %camera, 6u
+    %51:f32 = load %50
+    %52:f32 = div %49, %51
+    %53:f32 = log2 %52
+    %sliceScale:f32 = div 48.0f, %53
+    %55:ptr<uniform, f32, read> = access %camera, 6u
+    %56:f32 = load %55
+    %57:f32 = log2 %56
+    %58:f32 = mul 48.0f, %57
+    %59:ptr<uniform, f32, read> = access %camera, 7u
+    %60:f32 = load %59
+    %61:ptr<uniform, f32, read> = access %camera, 6u
+    %62:f32 = load %61
+    %63:f32 = div %60, %62
+    %64:f32 = log2 %63
+    %65:f32 = div %58, %64
+    %sliceBias:f32 = negation %65
+    %67:f32 = access %fragCoord, 2u
+    %68:f32 = call %linearDepth, %67
+    %69:f32 = log2 %68
+    %70:f32 = mul %69, %sliceScale
+    %71:f32 = add %70, %sliceBias
+    %72:f32 = max %71, 0.0f
+    %zTile:u32 = convert %72
+    %74:f32 = access %fragCoord, 0u
+    %75:ptr<uniform, vec2<f32>, read> = access %camera, 5u
+    %76:f32 = load_vector_element %75, 0u
+    %77:f32 = div %76, 32.0f
+    %78:f32 = div %74, %77
+    %79:u32 = convert %78
+    %80:f32 = access %fragCoord, 1u
+    %81:ptr<uniform, vec2<f32>, read> = access %camera, 5u
+    %82:f32 = load_vector_element %81, 1u
+    %83:f32 = div %82, 18.0f
+    %84:f32 = div %80, %83
+    %85:u32 = convert %84
+    %86:vec3<u32> = construct %79, %85, %zTile
+    ret %86
+  }
+}
+%getClusterIndex = func(%fragCoord_1:vec4<f32>):u32 -> %b6 {  # %fragCoord_1: 'fragCoord'
+  %b6 = block {
+    %tile:vec3<u32> = call %getTile, %fragCoord_1
+    %90:u32 = access %tile, 0u
+    %91:u32 = access %tile, 1u
+    %92:u32 = mul %91, 32u
+    %93:u32 = add %90, %92
+    %94:u32 = access %tile, 2u
+    %95:u32 = mul %94, 32u
+    %96:u32 = mul %95, 18u
+    %97:u32 = add %93, %96
+    ret %97
+  }
+}
+%dirLightVisibility = func(%worldPos:vec3<f32>):f32 -> %b7 {
+  %b7 = block {
+    %100:ptr<storage, i32, read> = access %lightShadowTable, 0u, 0u
+    %shadowIndex:i32 = load %100
+    %102:bool = eq %shadowIndex, -1i
+    if %102 [t: %b8] {  # if_1
+      %b8 = block {  # true
+        ret 1.0f
+      }
+    }
+    %103:ptr<storage, vec4<f32>, read> = access %shadow, 0u, %shadowIndex, 0u
+    %viewport:vec4<f32> = load %103
+    %105:ptr<storage, mat4x4<f32>, read> = access %shadow, 0u, %shadowIndex, 1u
+    %106:mat4x4<f32> = load %105
+    %107:vec4<f32> = construct %worldPos, 1.0f
+    %lightPos:vec4<f32> = mul %106, %107
+    %109:vec2<f32> = swizzle %lightPos, xy
+    %110:f32 = access %lightPos, 3u
+    %111:vec2<f32> = div %109, %110
+    %112:vec2<f32> = mul %111, vec2<f32>(0.5f, -0.5f)
+    %113:vec2<f32> = add %112, vec2<f32>(0.5f)
+    %114:f32 = access %lightPos, 2u
+    %115:f32 = access %lightPos, 3u
+    %116:f32 = div %114, %115
+    %shadowPos:vec3<f32> = construct %113, %116
+    %118:vec2<f32> = swizzle %viewport, xy
+    %119:vec2<f32> = swizzle %shadowPos, xy
+    %120:vec2<f32> = swizzle %viewport, zw
+    %121:vec2<f32> = mul %119, %120
+    %122:vec2<f32> = add %118, %121
+    %viewportPos:vec2<f32> = construct %122
+    %124:texture_depth_2d = load %shadowTexture
+    %125:vec2<u32> = textureDimensions %124, 0i
+    %126:vec2<f32> = convert %125
+    %texelSize:vec2<f32> = div 1.0f, %126
+    %128:vec2<f32> = swizzle %viewport, xy
+    %129:vec2<f32> = sub %128, %texelSize
+    %130:vec2<f32> = swizzle %viewport, xy
+    %131:vec2<f32> = swizzle %viewport, zw
+    %132:vec2<f32> = add %130, %131
+    %133:vec2<f32> = add %132, %texelSize
+    %clampRect:vec4<f32> = construct %129, %133
+    %visibility:ptr<function, f32, read_write> = var, 0.0f
+    loop [i: %b9, b: %b10, c: %b11] {  # loop_1
+      %b9 = block {  # initializer
+        %i:ptr<function, u32, read_write> = var, 0u
+        next_iteration %b10
+      }
+      %b10 = block {  # body
+        %137:u32 = load %i
+        %138:bool = lt %137, 16u
+        if %138 [t: %b12, f: %b13] {  # if_2
+          %b12 = block {  # true
+            exit_if  # if_2
+          }
+          %b13 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %139:f32 = load %visibility
+        %140:texture_depth_2d = load %shadowTexture
+        %141:sampler_comparison = load %shadowSampler
+        %142:u32 = load %i
+        %143:ptr<private, vec2<f32>, read_write> = access %shadowSampleOffsets, %142
+        %144:vec2<f32> = load %143
+        %145:vec2<f32> = mul %144, %texelSize
+        %146:vec2<f32> = add %viewportPos, %145
+        %147:vec2<f32> = swizzle %clampRect, xy
+        %148:vec2<f32> = swizzle %clampRect, zw
+        %149:vec2<f32> = clamp %146, %147, %148
+        %150:f32 = access %shadowPos, 2u
+        %151:f32 = sub %150, 0.00300000002607703209f
+        %152:f32 = textureSampleCompareLevel %140, %141, %149, %151
+        %153:f32 = add %139, %152
+        store %visibility, %153
+        continue %b11
+      }
+      %b11 = block {  # continuing
+        %154:u32 = load %i
+        %155:u32 = add %154, 1u
+        store %i, %155
+        next_iteration %b10
+      }
+    }
+    %156:f32 = load %visibility
+    %157:f32 = div %156, 16.0f
+    ret %157
+  }
+}
+%getCubeFace = func(%v:vec3<f32>):i32 -> %b14 {
+  %b14 = block {
+    %vAbs:vec3<f32> = abs %v
+    %161:f32 = access %vAbs, 2u
+    %162:f32 = access %vAbs, 0u
+    %163:bool = gte %161, %162
+    %164:bool = if %163 [t: %b15, f: %b16] {  # if_3
+      %b15 = block {  # true
+        %165:f32 = access %vAbs, 2u
+        %166:f32 = access %vAbs, 1u
+        %167:bool = gte %165, %166
+        exit_if %167  # if_3
+      }
+      %b16 = block {  # false
+        exit_if false  # if_3
+      }
+    }
+    if %164 [t: %b17] {  # if_4
+      %b17 = block {  # true
+        %168:f32 = access %v, 2u
+        %169:bool = lt %168, 0.0f
+        if %169 [t: %b18] {  # if_5
+          %b18 = block {  # true
+            ret 5i
+          }
+        }
+        ret 4i
+      }
+    }
+    %170:f32 = access %vAbs, 1u
+    %171:f32 = access %vAbs, 0u
+    %172:bool = gte %170, %171
+    if %172 [t: %b19] {  # if_6
+      %b19 = block {  # true
+        %173:f32 = access %v, 1u
+        %174:bool = lt %173, 0.0f
+        if %174 [t: %b20] {  # if_7
+          %b20 = block {  # true
+            ret 3i
+          }
+        }
+        ret 2i
+      }
+    }
+    %175:f32 = access %v, 0u
+    %176:bool = lt %175, 0.0f
+    if %176 [t: %b21] {  # if_8
+      %b21 = block {  # true
+        ret 1i
+      }
+    }
+    ret 0i
+  }
+}
+%pointLightVisibility = func(%lightIndex:u32, %worldPos_1:vec3<f32>, %pointToLight:vec3<f32>):f32 -> %b22 {  # %worldPos_1: 'worldPos'
+  %b22 = block {
+    %181:u32 = add %lightIndex, 1u
+    %182:ptr<storage, i32, read> = access %lightShadowTable, 0u, %181
+    %183:i32 = load %182
+    %shadowIndex_1:ptr<function, i32, read_write> = var, %183  # %shadowIndex_1: 'shadowIndex'
+    %185:i32 = load %shadowIndex_1
+    %186:bool = eq %185, -1i
+    if %186 [t: %b23] {  # if_9
+      %b23 = block {  # true
+        ret 1.0f
+      }
+    }
+    %187:i32 = load %shadowIndex_1
+    %188:vec3<f32> = mul %pointToLight, -1.0f
+    %189:i32 = call %getCubeFace, %188
+    %190:i32 = add %187, %189
+    store %shadowIndex_1, %190
+    %191:i32 = load %shadowIndex_1
+    %192:ptr<storage, vec4<f32>, read> = access %shadow, 0u, %191, 0u
+    %viewport_1:vec4<f32> = load %192  # %viewport_1: 'viewport'
+    %194:i32 = load %shadowIndex_1
+    %195:ptr<storage, mat4x4<f32>, read> = access %shadow, 0u, %194, 1u
+    %196:mat4x4<f32> = load %195
+    %197:vec4<f32> = construct %worldPos_1, 1.0f
+    %lightPos_1:vec4<f32> = mul %196, %197  # %lightPos_1: 'lightPos'
+    %199:vec2<f32> = swizzle %lightPos_1, xy
+    %200:f32 = access %lightPos_1, 3u
+    %201:vec2<f32> = div %199, %200
+    %202:vec2<f32> = mul %201, vec2<f32>(0.5f, -0.5f)
+    %203:vec2<f32> = add %202, vec2<f32>(0.5f)
+    %204:f32 = access %lightPos_1, 2u
+    %205:f32 = access %lightPos_1, 3u
+    %206:f32 = div %204, %205
+    %shadowPos_1:vec3<f32> = construct %203, %206  # %shadowPos_1: 'shadowPos'
+    %208:vec2<f32> = swizzle %viewport_1, xy
+    %209:vec2<f32> = swizzle %shadowPos_1, xy
+    %210:vec2<f32> = swizzle %viewport_1, zw
+    %211:vec2<f32> = mul %209, %210
+    %212:vec2<f32> = add %208, %211
+    %viewportPos_1:vec2<f32> = construct %212  # %viewportPos_1: 'viewportPos'
+    %214:texture_depth_2d = load %shadowTexture
+    %215:vec2<u32> = textureDimensions %214, 0i
+    %216:vec2<f32> = convert %215
+    %texelSize_1:vec2<f32> = div 1.0f, %216  # %texelSize_1: 'texelSize'
+    %218:vec2<f32> = swizzle %viewport_1, xy
+    %219:vec2<f32> = swizzle %viewport_1, xy
+    %220:vec2<f32> = swizzle %viewport_1, zw
+    %221:vec2<f32> = add %219, %220
+    %clampRect_1:vec4<f32> = construct %218, %221  # %clampRect_1: 'clampRect'
+    %visibility_1:ptr<function, f32, read_write> = var, 0.0f  # %visibility_1: 'visibility'
+    loop [i: %b24, b: %b25, c: %b26] {  # loop_2
+      %b24 = block {  # initializer
+        %i_1:ptr<function, u32, read_write> = var, 0u  # %i_1: 'i'
+        next_iteration %b25
+      }
+      %b25 = block {  # body
+        %225:u32 = load %i_1
+        %226:bool = lt %225, 16u
+        if %226 [t: %b27, f: %b28] {  # if_10
+          %b27 = block {  # true
+            exit_if  # if_10
+          }
+          %b28 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %227:f32 = load %visibility_1
+        %228:texture_depth_2d = load %shadowTexture
+        %229:sampler_comparison = load %shadowSampler
+        %230:u32 = load %i_1
+        %231:ptr<private, vec2<f32>, read_write> = access %shadowSampleOffsets, %230
+        %232:vec2<f32> = load %231
+        %233:vec2<f32> = mul %232, %texelSize_1
+        %234:vec2<f32> = add %viewportPos_1, %233
+        %235:vec2<f32> = swizzle %clampRect_1, xy
+        %236:vec2<f32> = swizzle %clampRect_1, zw
+        %237:vec2<f32> = clamp %234, %235, %236
+        %238:f32 = access %shadowPos_1, 2u
+        %239:f32 = sub %238, 0.00999999977648258209f
+        %240:f32 = textureSampleCompareLevel %228, %229, %237, %239
+        %241:f32 = add %227, %240
+        store %visibility_1, %241
+        continue %b26
+      }
+      %b26 = block {  # continuing
+        %242:u32 = load %i_1
+        %243:u32 = add %242, 1u
+        store %i_1, %243
+        next_iteration %b25
+      }
+    }
+    %244:f32 = load %visibility_1
+    %245:f32 = div %244, 16.0f
+    ret %245
+  }
+}
+%GetSurfaceInfo = func(%input:VertexOutput):SurfaceInfo -> %b29 {
+  %b29 = block {
+    %surface:ptr<function, SurfaceInfo, read_write> = var
+    %249:ptr<function, vec3<f32>, read_write> = access %surface, 8u
+    %250:vec3<f32> = access %input, 2u
+    %251:vec3<f32> = normalize %250
+    store %249, %251
+    %252:vec3<f32> = access %input, 8u
+    %253:vec3<f32> = access %input, 9u
+    %254:vec3<f32> = access %input, 7u
+    %tbn:mat3x3<f32> = construct %252, %253, %254
+    %256:texture_2d<f32> = load %normalTexture
+    %257:sampler = load %normalSampler
+    %258:vec2<f32> = access %input, 3u
+    %259:vec4<f32> = textureSample %256, %257, %258
+    %normalMap:vec3<f32> = swizzle %259, xyz
+    %261:ptr<function, vec3<f32>, read_write> = access %surface, 4u
+    %262:vec3<f32> = mul 2.0f, %normalMap
+    %263:vec3<f32> = sub %262, vec3<f32>(1.0f)
+    %264:vec3<f32> = mul %tbn, %263
+    %265:vec3<f32> = normalize %264
+    store %261, %265
+    %266:texture_2d<f32> = load %baseColorTexture
+    %267:sampler = load %baseColorSampler
+    %268:vec2<f32> = access %input, 3u
+    %baseColorMap:vec4<f32> = textureSample %266, %267, %268
+    %270:ptr<function, vec4<f32>, read_write> = access %surface, 0u
+    %271:vec4<f32> = access %input, 5u
+    %272:ptr<uniform, vec4<f32>, read> = access %material, 0u
+    %273:vec4<f32> = load %272
+    %274:vec4<f32> = mul %271, %273
+    %275:vec4<f32> = mul %274, %baseColorMap
+    store %270, %275
+    %276:ptr<function, vec4<f32>, read_write> = access %surface, 0u
+    %277:f32 = load_vector_element %276, 3u
+    %278:ptr<uniform, f32, read> = access %material, 4u
+    %279:f32 = load %278
+    %280:bool = lt %277, %279
+    if %280 [t: %b30] {  # if_11
+      %b30 = block {  # true
+        exit_if  # if_11
+      }
+    }
+    %281:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+    %282:ptr<function, vec4<f32>, read_write> = access %surface, 0u
+    %283:vec4<f32> = load %282
+    %284:vec3<f32> = swizzle %283, xyz
+    store %281, %284
+    %285:texture_2d<f32> = load %metallicRoughnessTexture
+    %286:sampler = load %metallicRoughnessSampler
+    %287:vec2<f32> = access %input, 3u
+    %metallicRoughnessMap:vec4<f32> = textureSample %285, %286, %287
+    %289:ptr<function, f32, read_write> = access %surface, 2u
+    %290:ptr<uniform, vec2<f32>, read> = access %material, 3u
+    %291:f32 = load_vector_element %290, 0u
+    %292:f32 = access %metallicRoughnessMap, 2u
+    %293:f32 = mul %291, %292
+    store %289, %293
+    %294:ptr<function, f32, read_write> = access %surface, 3u
+    %295:ptr<uniform, vec2<f32>, read> = access %material, 3u
+    %296:f32 = load_vector_element %295, 1u
+    %297:f32 = access %metallicRoughnessMap, 1u
+    %298:f32 = mul %296, %297
+    store %294, %298
+    %dielectricSpec:vec3<f32> = let vec3<f32>(0.03999999910593032837f)
+    %300:ptr<function, vec3<f32>, read_write> = access %surface, 5u
+    %301:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+    %302:vec3<f32> = load %301
+    %303:ptr<function, f32, read_write> = access %surface, 2u
+    %304:f32 = load %303
+    %305:vec3<f32> = construct %304
+    %306:vec3<f32> = mix %dielectricSpec, %302, %305
+    store %300, %306
+    %307:texture_2d<f32> = load %occlusionTexture
+    %308:sampler = load %occlusionSampler
+    %309:vec2<f32> = access %input, 3u
+    %occlusionMap:vec4<f32> = textureSample %307, %308, %309
+    %311:ptr<function, f32, read_write> = access %surface, 6u
+    %312:ptr<uniform, f32, read> = access %material, 2u
+    %313:f32 = load %312
+    %314:f32 = access %occlusionMap, 0u
+    %315:f32 = mul %313, %314
+    store %311, %315
+    %316:texture_2d<f32> = load %emissiveTexture
+    %317:sampler = load %emissiveSampler
+    %318:vec2<f32> = access %input, 3u
+    %emissiveMap:vec4<f32> = textureSample %316, %317, %318
+    %320:ptr<function, vec3<f32>, read_write> = access %surface, 7u
+    %321:ptr<uniform, vec3<f32>, read> = access %material, 1u
+    %322:vec3<f32> = load %321
+    %323:vec3<f32> = swizzle %emissiveMap, xyz
+    %324:vec3<f32> = mul %322, %323
+    store %320, %324
+    %325:f32 = access %input, 6u, 3u
+    %326:bool = eq %325, 0.0f
+    if %326 [t: %b31, f: %b32] {  # if_12
+      %b31 = block {  # true
+        %327:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+        %328:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+        %329:vec3<f32> = load %328
+        %330:vec4<f32> = access %input, 6u
+        %331:vec3<f32> = swizzle %330, xyz
+        %332:vec3<f32> = add %329, %331
+        store %327, %332
+        exit_if  # if_12
+      }
+      %b32 = block {  # false
+        %333:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+        %334:ptr<function, vec3<f32>, read_write> = access %surface, 1u
+        %335:vec3<f32> = load %334
+        %336:vec4<f32> = access %input, 6u
+        %337:vec3<f32> = swizzle %336, xyz
+        %338:vec3<f32> = mul %335, %337
+        store %333, %338
+        exit_if  # if_12
+      }
+    }
+    %339:SurfaceInfo = load %surface
+    ret %339
+  }
+}
+%FresnelSchlick = func(%cosTheta:f32, %F0:vec3<f32>):vec3<f32> -> %b33 {
+  %b33 = block {
+    %343:vec3<f32> = sub vec3<f32>(1.0f), %F0
+    %344:f32 = sub 1.0f, %cosTheta
+    %345:f32 = pow %344, 5.0f
+    %346:vec3<f32> = mul %343, %345
+    %347:vec3<f32> = add %F0, %346
+    ret %347
+  }
+}
+%DistributionGGX = func(%N:vec3<f32>, %H:vec3<f32>, %roughness:f32):f32 -> %b34 {
+  %b34 = block {
+    %a:f32 = mul %roughness, %roughness
+    %a2:f32 = mul %a, %a
+    %354:f32 = dot %N, %H
+    %NdotH:f32 = max %354, 0.0f
+    %NdotH2:f32 = mul %NdotH, %NdotH
+    %num:f32 = let %a2
+    %358:f32 = sub %a2, 1.0f
+    %359:f32 = mul %NdotH2, %358
+    %denom:f32 = add %359, 1.0f
+    %361:f32 = mul 3.14159274101257324219f, %denom
+    %362:f32 = mul %361, %denom
+    %363:f32 = div %num, %362
+    ret %363
+  }
+}
+%GeometrySchlickGGX = func(%NdotV:f32, %roughness_1:f32):f32 -> %b35 {  # %roughness_1: 'roughness'
+  %b35 = block {
+    %r:f32 = add %roughness_1, 1.0f
+    %368:f32 = mul %r, %r
+    %k:f32 = div %368, 8.0f
+    %num_1:f32 = let %NdotV  # %num_1: 'num'
+    %371:f32 = sub 1.0f, %k
+    %372:f32 = mul %NdotV, %371
+    %denom_1:f32 = add %372, %k  # %denom_1: 'denom'
+    %374:f32 = div %num_1, %denom_1
+    ret %374
+  }
+}
+%GeometrySmith = func(%N_1:vec3<f32>, %V:vec3<f32>, %L:vec3<f32>, %roughness_2:f32):f32 -> %b36 {  # %N_1: 'N', %roughness_2: 'roughness'
+  %b36 = block {
+    %380:f32 = dot %N_1, %V
+    %NdotV_1:f32 = max %380, 0.0f  # %NdotV_1: 'NdotV'
+    %382:f32 = dot %N_1, %L
+    %NdotL:f32 = max %382, 0.0f
+    %ggx2:f32 = call %GeometrySchlickGGX, %NdotV_1, %roughness_2
+    %ggx1:f32 = call %GeometrySchlickGGX, %NdotL, %roughness_2
+    %386:f32 = mul %ggx1, %ggx2
+    ret %386
+  }
+}
+%lightAttenuation = func(%light:PuctualLight):f32 -> %b37 {
+  %b37 = block {
+    %389:u32 = access %light, 0u
+    %390:bool = eq %389, 2u
+    if %390 [t: %b38] {  # if_13
+      %b38 = block {  # true
+        ret 1.0f
+      }
+    }
+    %391:vec3<f32> = access %light, 1u
+    %distance:f32 = length %391
+    %393:f32 = access %light, 2u
+    %394:bool = lte %393, 0.0f
+    if %394 [t: %b39] {  # if_14
+      %b39 = block {  # true
+        %395:f32 = pow %distance, 2.0f
+        %396:f32 = div 1.0f, %395
+        ret %396
+      }
+    }
+    %397:f32 = access %light, 2u
+    %398:f32 = div %distance, %397
+    %399:f32 = pow %398, 4.0f
+    %400:f32 = sub 1.0f, %399
+    %401:f32 = clamp %400, 0.0f, 1.0f
+    %402:f32 = pow %distance, 2.0f
+    %403:f32 = div %401, %402
+    ret %403
+  }
+}
+%lightRadiance = func(%light_1:PuctualLight, %surface_1:SurfaceInfo):vec3<f32> -> %b40 {  # %light_1: 'light', %surface_1: 'surface'
+  %b40 = block {
+    %407:vec3<f32> = access %light_1, 1u
+    %L_1:vec3<f32> = normalize %407  # %L_1: 'L'
+    %409:vec3<f32> = access %surface_1, 8u
+    %410:vec3<f32> = add %409, %L_1
+    %H_1:vec3<f32> = normalize %410  # %H_1: 'H'
+    %412:vec3<f32> = access %surface_1, 4u
+    %413:f32 = access %surface_1, 3u
+    %NDF:f32 = call %DistributionGGX, %412, %H_1, %413
+    %415:vec3<f32> = access %surface_1, 4u
+    %416:vec3<f32> = access %surface_1, 8u
+    %417:f32 = access %surface_1, 3u
+    %G:f32 = call %GeometrySmith, %415, %416, %L_1, %417
+    %419:vec3<f32> = access %surface_1, 8u
+    %420:f32 = dot %H_1, %419
+    %421:f32 = max %420, 0.0f
+    %422:vec3<f32> = access %surface_1, 5u
+    %F:vec3<f32> = call %FresnelSchlick, %421, %422
+    %424:vec3<f32> = sub vec3<f32>(1.0f), %F
+    %425:f32 = access %surface_1, 2u
+    %426:f32 = sub 1.0f, %425
+    %kD:vec3<f32> = mul %424, %426
+    %428:vec3<f32> = access %surface_1, 4u
+    %429:f32 = dot %428, %L_1
+    %NdotL_1:f32 = max %429, 0.0f  # %NdotL_1: 'NdotL'
+    %431:f32 = mul %NDF, %G
+    %numerator:vec3<f32> = mul %431, %F
+    %433:vec3<f32> = access %surface_1, 4u
+    %434:vec3<f32> = access %surface_1, 8u
+    %435:f32 = dot %433, %434
+    %436:f32 = max %435, 0.0f
+    %437:f32 = mul 4.0f, %436
+    %438:f32 = mul %437, %NdotL_1
+    %denominator:f32 = max %438, 0.00100000004749745131f
+    %440:vec3<f32> = construct %denominator
+    %specular:vec3<f32> = div %numerator, %440
+    %442:vec3<f32> = access %light_1, 3u
+    %443:f32 = access %light_1, 4u
+    %444:vec3<f32> = mul %442, %443
+    %445:f32 = call %lightAttenuation, %light_1
+    %radiance:vec3<f32> = mul %444, %445
+    %447:vec3<f32> = access %surface_1, 1u
+    %448:vec3<f32> = mul %kD, %447
+    %449:vec3<f32> = div %448, vec3<f32>(3.14159274101257324219f)
+    %450:vec3<f32> = add %449, %specular
+    %451:vec3<f32> = mul %450, %radiance
+    %452:vec3<f32> = mul %451, %NdotL_1
+    ret %452
+  }
+}
+%fragmentMain = @fragment func(%input_1:VertexOutput):FragmentOutput -> %b41 {  # %input_1: 'input'
+  %b41 = block {
+    %surface_2:SurfaceInfo = call %GetSurfaceInfo, %input_1  # %surface_2: 'surface'
+    %Lo:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
+    %457:ptr<storage, f32, read> = access %globalLights, 2u
+    %458:f32 = load %457
+    %459:bool = gt %458, 0.0f
+    if %459 [t: %b42] {  # if_15
+      %b42 = block {  # true
+        %light_2:ptr<function, PuctualLight, read_write> = var  # %light_2: 'light'
+        %461:ptr<function, u32, read_write> = access %light_2, 0u
+        store %461, 2u
+        %462:ptr<function, vec3<f32>, read_write> = access %light_2, 1u
+        %463:ptr<storage, vec3<f32>, read> = access %globalLights, 3u
+        %464:vec3<f32> = load %463
+        store %462, %464
+        %465:ptr<function, vec3<f32>, read_write> = access %light_2, 3u
+        %466:ptr<storage, vec3<f32>, read> = access %globalLights, 1u
+        %467:vec3<f32> = load %466
+        store %465, %467
+        %468:ptr<function, f32, read_write> = access %light_2, 4u
+        %469:ptr<storage, f32, read> = access %globalLights, 2u
+        %470:f32 = load %469
+        store %468, %470
+        %471:vec3<f32> = access %input_1, 1u
+        %lightVis:f32 = call %dirLightVisibility, %471
+        %473:vec3<f32> = load %Lo
+        %474:PuctualLight = load %light_2
+        %475:vec3<f32> = call %lightRadiance, %474, %surface_2
+        %476:vec3<f32> = mul %475, %lightVis
+        %477:vec3<f32> = add %473, %476
+        store %Lo, %477
+        exit_if  # if_15
+      }
+    }
+    %478:vec4<f32> = access %input_1, 0u
+    %clusterIndex:u32 = call %getClusterIndex, %478
+    %480:ptr<storage, u32, read> = access %clusterLights, 1u, %clusterIndex, 0u
+    %lightOffset:u32 = load %480
+    %482:ptr<storage, u32, read> = access %clusterLights, 1u, %clusterIndex, 1u
+    %lightCount:u32 = load %482
+    loop [i: %b43, b: %b44, c: %b45] {  # loop_3
+      %b43 = block {  # initializer
+        %lightIndex_1:ptr<function, u32, read_write> = var, 0u  # %lightIndex_1: 'lightIndex'
+        next_iteration %b44
+      }
+      %b44 = block {  # body
+        %485:u32 = load %lightIndex_1
+        %486:bool = lt %485, %lightCount
+        if %486 [t: %b46, f: %b47] {  # if_16
+          %b46 = block {  # true
+            exit_if  # if_16
+          }
+          %b47 = block {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %487:u32 = load %lightIndex_1
+        %488:u32 = add %lightOffset, %487
+        %489:ptr<storage, u32, read> = access %clusterLights, 2u, %488
+        %i_2:u32 = load %489  # %i_2: 'i'
+        %light_3:ptr<function, PuctualLight, read_write> = var  # %light_3: 'light'
+        %492:ptr<function, u32, read_write> = access %light_3, 0u
+        store %492, 0u
+        %493:ptr<function, vec3<f32>, read_write> = access %light_3, 1u
+        %494:ptr<storage, vec3<f32>, read> = access %globalLights, 5u, %i_2, 0u
+        %495:vec3<f32> = load %494
+        %496:vec3<f32> = swizzle %495, xyz
+        %497:vec3<f32> = access %input_1, 1u
+        %498:vec3<f32> = sub %496, %497
+        store %493, %498
+        %499:ptr<function, f32, read_write> = access %light_3, 2u
+        %500:ptr<storage, f32, read> = access %globalLights, 5u, %i_2, 1u
+        %501:f32 = load %500
+        store %499, %501
+        %502:ptr<function, vec3<f32>, read_write> = access %light_3, 3u
+        %503:ptr<storage, vec3<f32>, read> = access %globalLights, 5u, %i_2, 2u
+        %504:vec3<f32> = load %503
+        store %502, %504
+        %505:ptr<function, f32, read_write> = access %light_3, 4u
+        %506:ptr<storage, f32, read> = access %globalLights, 5u, %i_2, 3u
+        %507:f32 = load %506
+        store %505, %507
+        %508:vec3<f32> = access %input_1, 1u
+        %509:ptr<function, vec3<f32>, read_write> = access %light_3, 1u
+        %510:vec3<f32> = load %509
+        %lightVis_1:f32 = call %pointLightVisibility, %i_2, %508, %510  # %lightVis_1: 'lightVis'
+        %512:vec3<f32> = load %Lo
+        %513:PuctualLight = load %light_3
+        %514:vec3<f32> = call %lightRadiance, %513, %surface_2
+        %515:vec3<f32> = mul %514, %lightVis_1
+        %516:vec3<f32> = add %512, %515
+        store %Lo, %516
+        continue %b45
+      }
+      %b45 = block {  # continuing
+        %517:u32 = load %lightIndex_1
+        %518:u32 = add %517, 1u
+        store %lightIndex_1, %518
+        next_iteration %b44
+      }
+    }
+    %519:vec4<f32> = access %input_1, 0u
+    %520:vec2<f32> = swizzle %519, xy
+    %521:texture_2d<f32> = load %ssaoTexture
+    %522:vec2<u32> = textureDimensions %521
+    %523:vec2<u32> = swizzle %522, xy
+    %524:vec2<f32> = convert %523
+    %ssaoCoord:vec2<f32> = div %520, %524
+    %526:texture_2d<f32> = load %ssaoTexture
+    %527:sampler = load %defaultSampler
+    %528:vec4<f32> = textureSample %526, %527, %ssaoCoord
+    %ssaoFactor:f32 = access %528, 0u
+    %530:ptr<storage, vec3<f32>, read> = access %globalLights, 0u
+    %531:vec3<f32> = load %530
+    %532:vec3<f32> = access %surface_2, 1u
+    %533:vec3<f32> = mul %531, %532
+    %534:f32 = access %surface_2, 6u
+    %535:vec3<f32> = mul %533, %534
+    %ambient:vec3<f32> = mul %535, %ssaoFactor
+    %537:vec3<f32> = load %Lo
+    %538:vec3<f32> = add %537, %ambient
+    %539:vec3<f32> = access %surface_2, 7u
+    %540:vec3<f32> = add %538, %539
+    %color:vec3<f32> = call %linearTosRGB, %540
+    %out:ptr<function, FragmentOutput, read_write> = var
+    %543:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    %544:f32 = access %surface_2, 0u, 3u
+    %545:vec4<f32> = construct %color, %544
+    store %543, %545
+    %546:ptr<function, vec4<f32>, read_write> = access %out, 1u
+    %547:vec3<f32> = access %surface_2, 7u
+    %548:f32 = access %surface_2, 0u, 3u
+    %549:vec4<f32> = construct %547, %548
+    store %546, %549
+    %550:FragmentOutput = load %out
+    ret %550
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

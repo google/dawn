@@ -1,0 +1,107 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  a:array<vec4<i32>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %tint_symbol:ptr<storage, array<S>, read_write> = var @binding_point(0, 0)
+  %v:ptr<private, u32, read_write> = var
+}
+
+%idx1 = func():i32 -> %b2 {
+  %b2 = block {
+    %4:u32 = load %v
+    %5:u32 = add %4, 1u
+    store %v, %5
+    ret 1i
+  }
+}
+%idx2 = func():i32 -> %b3 {
+  %b3 = block {
+    %7:u32 = load %v
+    %8:u32 = add %7, 1u
+    store %v, %8
+    ret 2i
+  }
+}
+%idx3 = func():i32 -> %b4 {
+  %b4 = block {
+    %10:u32 = load %v
+    %11:u32 = add %10, 1u
+    store %v, %11
+    ret 3i
+  }
+}
+%idx4 = func():i32 -> %b5 {
+  %b5 = block {
+    %13:u32 = load %v
+    %14:u32 = add %13, 1u
+    store %v, %14
+    ret 4i
+  }
+}
+%idx5 = func():i32 -> %b6 {
+  %b6 = block {
+    %16:u32 = load %v
+    %17:u32 = add %16, 1u
+    store %v, %17
+    ret 0i
+  }
+}
+%idx6 = func():i32 -> %b7 {
+  %b7 = block {
+    %19:u32 = load %v
+    %20:u32 = add %19, 1u
+    store %v, %20
+    ret 2i
+  }
+}
+%tint_symbol_1 = func():void -> %b8 {
+  %b8 = block {
+    loop [i: %b9, b: %b10, c: %b11] {  # loop_1
+      %b9 = block {  # initializer
+        %22:i32 = call %idx1
+        %23:i32 = call %idx2
+        %24:ptr<storage, vec4<i32>, read_write> = access %tint_symbol, %22, 0u, %23
+        %25:i32 = call %idx3
+        %26:i32 = load_vector_element %24, %25
+        %27:i32 = add %26, 1i
+        store_vector_element %24, %25, %27
+        next_iteration %b10
+      }
+      %b10 = block {  # body
+        %28:u32 = load %v
+        %29:bool = lt %28, 10u
+        if %29 [t: %b12, f: %b13] {  # if_1
+          %b12 = block {  # true
+            exit_if  # if_1
+          }
+          %b13 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue %b11
+      }
+      %b11 = block {  # continuing
+        %30:i32 = call %idx4
+        %31:i32 = call %idx5
+        %32:ptr<storage, vec4<i32>, read_write> = access %tint_symbol, %30, 0u, %31
+        %33:i32 = call %idx6
+        %34:i32 = load_vector_element %32, %33
+        %35:i32 = add %34, 1i
+        store_vector_element %32, %33, %35
+        next_iteration %b10
+      }
+    }
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

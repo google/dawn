@@ -1,0 +1,191 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %odd_index:ptr<function, i32, read_write> = var
+    %even_index:ptr<function, i32, read_write> = var
+    %j:ptr<function, i32, read_write> = var
+    %ll:ptr<function, i32, read_write> = var
+    %x_59:ptr<function, bool, read_write> = var
+    %x_60_phi:ptr<function, bool, read_write> = var
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    %x_53:f32 = load_vector_element %gl_FragCoord, 0u
+    %x_54:bool = lt %x_53, 128.0f
+    store %x_60_phi, %x_54
+    if %x_54 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %x_58:f32 = load_vector_element %gl_FragCoord, 1u
+        %14:bool = lt %x_58, 128.0f
+        store %x_59, %14
+        %15:bool = load %x_59
+        store %x_60_phi, %15
+        exit_if  # if_1
+      }
+    }
+    %x_60:bool = load %x_60_phi
+    if %x_60 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        ret
+      }
+    }
+    store %odd_index, 0i
+    loop [b: %b5, c: %b6] {  # loop_1
+      %b5 = block {  # body
+        %x_11:i32 = load %odd_index
+        %18:bool = lte %x_11, 1i
+        if %18 [t: %b7, f: %b8] {  # if_3
+          %b7 = block {  # true
+            exit_if  # if_3
+          }
+          %b8 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_70:f32 = load_vector_element %x_GLF_color, 0u
+        %20:f32 = add %x_70, 0.25f
+        store_vector_element %x_GLF_color, 0u, %20
+        %x_12:i32 = load %odd_index
+        %22:i32 = add %x_12, 1i
+        store %odd_index, %22
+        continue %b6
+      }
+      %b6 = block {  # continuing
+        next_iteration %b5
+      }
+    }
+    store %even_index, 1i
+    loop [b: %b9, c: %b10] {  # loop_2
+      %b9 = block {  # body
+        %x_14:i32 = load %even_index
+        %24:bool = gte %x_14, 0i
+        if %24 [t: %b11, f: %b12] {  # if_4
+          %b11 = block {  # true
+            exit_if  # if_4
+          }
+          %b12 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %x_80:f32 = load_vector_element %x_GLF_color, 0u
+        %26:f32 = add %x_80, 0.25f
+        store_vector_element %x_GLF_color, 0u, %26
+        %27:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_84:f32 = load_vector_element %27, 0u
+        %29:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_86:f32 = load_vector_element %29, 1u
+        %31:bool = gt %x_84, %x_86
+        if %31 [t: %b13] {  # if_5
+          %b13 = block {  # true
+            continue %b10
+          }
+        }
+        %x_15:i32 = load %even_index
+        %33:bool = gte %x_15, 1i
+        if %33 [t: %b14] {  # if_6
+          %b14 = block {  # true
+            discard
+            exit_if  # if_6
+          }
+        }
+        store %j, 1i
+        loop [b: %b15, c: %b16] {  # loop_3
+          %b15 = block {  # body
+            if true [t: %b17, f: %b18] {  # if_7
+              %b17 = block {  # true
+                exit_if  # if_7
+              }
+              %b18 = block {  # false
+                exit_loop  # loop_3
+              }
+            }
+            %x_16:i32 = load %ll
+            %35:bool = gte %x_16, 3i
+            if %35 [t: %b19] {  # if_8
+              %b19 = block {  # true
+                exit_loop  # loop_3
+              }
+            }
+            %x_17:i32 = load %ll
+            %37:i32 = add %x_17, 1i
+            store %ll, %37
+            %x_19:i32 = load %j
+            %39:u32 = bitcast %x_19
+            %40:bool = lt %39, 1u
+            if %40 [t: %b20] {  # if_9
+              %b20 = block {  # true
+                continue %b16
+              }
+            }
+            %41:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %x_106:f32 = load_vector_element %41, 0u
+            %43:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %x_108:f32 = load_vector_element %43, 1u
+            %45:bool = gt %x_106, %x_108
+            if %45 [t: %b21] {  # if_10
+              %b21 = block {  # true
+                exit_loop  # loop_3
+              }
+            }
+            continue %b16
+          }
+          %b16 = block {  # continuing
+            %x_20:i32 = load %j
+            %47:i32 = add %x_20, 1i
+            store %j, %47
+            next_iteration %b15
+          }
+        }
+        %48:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_113:f32 = load_vector_element %48, 0u
+        %50:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_115:f32 = load_vector_element %50, 1u
+        %52:bool = gt %x_113, %x_115
+        if %52 [t: %b22] {  # if_11
+          %b22 = block {  # true
+            store %x_GLF_color, vec4<f32>(1.0f)
+            exit_if  # if_11
+          }
+        }
+        %x_22:i32 = load %even_index
+        %54:i32 = sub %x_22, 1i
+        store %even_index, %54
+        continue %b10
+      }
+      %b10 = block {  # continuing
+        next_iteration %b9
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b23 {
+  %b23 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %57:void = call %main_1
+    %58:vec4<f32> = load %x_GLF_color
+    %59:main_out = construct %58
+    ret %59
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

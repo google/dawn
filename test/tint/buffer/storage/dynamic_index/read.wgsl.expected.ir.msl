@@ -1,0 +1,92 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(16) {
+  scalar_f32:f32 @offset(0)
+  scalar_i32:i32 @offset(4)
+  scalar_u32:u32 @offset(8)
+  vec2_f32:vec2<f32> @offset(16)
+  vec2_i32:vec2<i32> @offset(24)
+  vec2_u32:vec2<u32> @offset(32)
+  vec3_f32:vec3<f32> @offset(48)
+  vec3_i32:vec3<i32> @offset(64)
+  vec3_u32:vec3<u32> @offset(80)
+  vec4_f32:vec4<f32> @offset(96)
+  vec4_i32:vec4<i32> @offset(112)
+  vec4_u32:vec4<u32> @offset(128)
+  mat2x2_f32:mat2x2<f32> @offset(144)
+  mat2x3_f32:mat2x3<f32> @offset(160)
+  mat2x4_f32:mat2x4<f32> @offset(192)
+  mat3x2_f32:mat3x2<f32> @offset(224)
+  mat3x3_f32:mat3x3<f32> @offset(256)
+  mat3x4_f32:mat3x4<f32> @offset(304)
+  mat4x2_f32:mat4x2<f32> @offset(352)
+  mat4x3_f32:mat4x3<f32> @offset(384)
+  mat4x4_f32:mat4x4<f32> @offset(448)
+  arr2_vec3_f32:array<vec3<f32>, 2> @offset(512)
+}
+
+S = struct @align(16) {
+  arr:array<Inner> @offset(0)
+}
+
+%b1 = block {  # root
+  %sb:ptr<storage, S, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void -> %b2 {
+  %b2 = block {
+    %4:ptr<storage, f32, read> = access %sb, 0u, %idx, 0u
+    %scalar_f32:f32 = load %4
+    %6:ptr<storage, i32, read> = access %sb, 0u, %idx, 1u
+    %scalar_i32:i32 = load %6
+    %8:ptr<storage, u32, read> = access %sb, 0u, %idx, 2u
+    %scalar_u32:u32 = load %8
+    %10:ptr<storage, vec2<f32>, read> = access %sb, 0u, %idx, 3u
+    %vec2_f32:vec2<f32> = load %10
+    %12:ptr<storage, vec2<i32>, read> = access %sb, 0u, %idx, 4u
+    %vec2_i32:vec2<i32> = load %12
+    %14:ptr<storage, vec2<u32>, read> = access %sb, 0u, %idx, 5u
+    %vec2_u32:vec2<u32> = load %14
+    %16:ptr<storage, vec3<f32>, read> = access %sb, 0u, %idx, 6u
+    %vec3_f32:vec3<f32> = load %16
+    %18:ptr<storage, vec3<i32>, read> = access %sb, 0u, %idx, 7u
+    %vec3_i32:vec3<i32> = load %18
+    %20:ptr<storage, vec3<u32>, read> = access %sb, 0u, %idx, 8u
+    %vec3_u32:vec3<u32> = load %20
+    %22:ptr<storage, vec4<f32>, read> = access %sb, 0u, %idx, 9u
+    %vec4_f32:vec4<f32> = load %22
+    %24:ptr<storage, vec4<i32>, read> = access %sb, 0u, %idx, 10u
+    %vec4_i32:vec4<i32> = load %24
+    %26:ptr<storage, vec4<u32>, read> = access %sb, 0u, %idx, 11u
+    %vec4_u32:vec4<u32> = load %26
+    %28:ptr<storage, mat2x2<f32>, read> = access %sb, 0u, %idx, 12u
+    %mat2x2_f32:mat2x2<f32> = load %28
+    %30:ptr<storage, mat2x3<f32>, read> = access %sb, 0u, %idx, 13u
+    %mat2x3_f32:mat2x3<f32> = load %30
+    %32:ptr<storage, mat2x4<f32>, read> = access %sb, 0u, %idx, 14u
+    %mat2x4_f32:mat2x4<f32> = load %32
+    %34:ptr<storage, mat3x2<f32>, read> = access %sb, 0u, %idx, 15u
+    %mat3x2_f32:mat3x2<f32> = load %34
+    %36:ptr<storage, mat3x3<f32>, read> = access %sb, 0u, %idx, 16u
+    %mat3x3_f32:mat3x3<f32> = load %36
+    %38:ptr<storage, mat3x4<f32>, read> = access %sb, 0u, %idx, 17u
+    %mat3x4_f32:mat3x4<f32> = load %38
+    %40:ptr<storage, mat4x2<f32>, read> = access %sb, 0u, %idx, 18u
+    %mat4x2_f32:mat4x2<f32> = load %40
+    %42:ptr<storage, mat4x3<f32>, read> = access %sb, 0u, %idx, 19u
+    %mat4x3_f32:mat4x3<f32> = load %42
+    %44:ptr<storage, mat4x4<f32>, read> = access %sb, 0u, %idx, 20u
+    %mat4x4_f32:mat4x4<f32> = load %44
+    %46:ptr<storage, array<vec3<f32>, 2>, read> = access %sb, 0u, %idx, 21u
+    %arr2_vec3_f32:array<vec3<f32>, 2> = load %46
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,50 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+}
+
+%select_fb7e53 = func():void -> %b2 {
+  %b2 = block {
+    %arg_0:ptr<function, vec2<bool>, read_write> = var, vec2<bool>(true)
+    %arg_1:ptr<function, vec2<bool>, read_write> = var, vec2<bool>(true)
+    %arg_2:ptr<function, bool, read_write> = var, true
+    %6:vec2<bool> = load %arg_0
+    %7:vec2<bool> = load %arg_1
+    %8:bool = load %arg_2
+    %9:vec2<bool> = select %6, %7, %8
+    %res:ptr<function, vec2<bool>, read_write> = var, %9
+    %11:vec2<bool> = load %res
+    %12:vec2<bool> = eq %11, vec2<bool>(false)
+    %13:bool = all %12
+    %14:i32 = select 0i, 1i, %13
+    store %prevent_dce, %14
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %16:void = call %select_fb7e53
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %18:void = call %select_fb7e53
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %20:void = call %select_fb7e53
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

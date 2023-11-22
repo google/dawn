@@ -1,0 +1,153 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+BinarySearchObject = struct @align(4) {
+  prime_numbers:array<i32, 10> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%binarySearch_struct_BinarySearchObject_i1_10_1_ = func(%obj:ptr<function, BinarySearchObject, read_write>):i32 -> %b2 {
+  %b2 = block {
+    %m:ptr<function, i32, read_write> = var
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %6:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %7:f32 = load_vector_element %6, 0u
+        %8:bool = gt %7, 1.0f
+        if %8 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %9:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %10:f32 = load_vector_element %9, 0u
+        %11:i32 = convert %10
+        store %m, %11
+        %12:i32 = load %m
+        %13:ptr<function, i32, read_write> = access %obj, 0u, %12
+        %14:i32 = load %13
+        %15:bool = eq %14, 1i
+        if %15 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            ret 1i
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    ret 1i
+  }
+}
+%main_1 = func():void -> %b8 {
+  %b8 = block {
+    %i:ptr<function, i32, read_write> = var
+    %obj_1:ptr<function, BinarySearchObject, read_write> = var
+    %param:ptr<function, BinarySearchObject, read_write> = var
+    store %i, 0i
+    loop [b: %b9, c: %b10] {  # loop_2
+      %b9 = block {  # body
+        %20:i32 = load %i
+        %21:bool = lt %20, 10i
+        if %21 [t: %b11, f: %b12] {  # if_3
+          %b11 = block {  # true
+            exit_if  # if_3
+          }
+          %b12 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %22:i32 = load %i
+        %23:bool = neq %22, 3i
+        if %23 [t: %b13] {  # if_4
+          %b13 = block {  # true
+            %24:i32 = load %i
+            %25:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %26:f32 = load_vector_element %25, 0u
+            %27:i32 = convert %26
+            %28:i32 = sub %24, %27
+            %29:bool = eq %28, 4i
+            if %29 [t: %b14, f: %b15] {  # if_5
+              %b14 = block {  # true
+                %x_21:i32 = load %i
+                %31:ptr<function, i32, read_write> = access %obj_1, 0u, %x_21
+                store %31, 11i
+                exit_if  # if_5
+              }
+              %b15 = block {  # false
+                %32:i32 = load %i
+                %33:bool = eq %32, 6i
+                if %33 [t: %b16] {  # if_6
+                  %b16 = block {  # true
+                    %x_23:i32 = load %i
+                    %35:ptr<function, i32, read_write> = access %obj_1, 0u, %x_23
+                    store %35, 17i
+                    exit_if  # if_6
+                  }
+                }
+                continue %b10
+              }
+            }
+            exit_if  # if_4
+          }
+        }
+        loop [b: %b17, c: %b18] {  # loop_3
+          %b17 = block {  # body
+            continue %b18
+          }
+          %b18 = block {  # continuing
+            %36:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %x_82:f32 = load_vector_element %36, 1u
+            %38:bool = gt 0.0f, %x_82
+            %39:bool = eq %38, false
+            break_if %39 %b17
+          }
+        }
+        continue %b10
+      }
+      %b10 = block {  # continuing
+        %40:i32 = load %i
+        %41:i32 = add %40, 1i
+        store %i, %41
+        next_iteration %b9
+      }
+    }
+    %42:BinarySearchObject = load %obj_1
+    store %param, %42
+    %x_26:i32 = call %binarySearch_struct_BinarySearchObject_i1_10_1_, %param
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b19 {
+  %b19 = block {
+    %45:void = call %main_1
+    %46:vec4<f32> = load %x_GLF_color
+    %47:main_out = construct %46
+    ret %47
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

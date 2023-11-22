@@ -1,0 +1,45 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %prevent_dce:ptr<storage, f16, read_write> = var @binding_point(2, 0)
+}
+
+%dot_d0d179 = func():void -> %b2 {
+  %b2 = block {
+    %arg_0:ptr<function, vec4<f16>, read_write> = var, vec4<f16>(1.0h)
+    %arg_1:ptr<function, vec4<f16>, read_write> = var, vec4<f16>(1.0h)
+    %5:vec4<f16> = load %arg_0
+    %6:vec4<f16> = load %arg_1
+    %7:f16 = dot %5, %6
+    %res:ptr<function, f16, read_write> = var, %7
+    %9:f16 = load %res
+    store %prevent_dce, %9
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %11:void = call %dot_d0d179
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %13:void = call %dot_d0d179
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %15:void = call %dot_d0d179
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

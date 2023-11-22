@@ -1,0 +1,47 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:679 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var @binding_point(1, 0)
+  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+}
+
+%textureLoad_6f8927 = func():void -> %b2 {
+  %b2 = block {
+    %arg_1:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
+    %arg_2:ptr<function, u32, read_write> = var, 1u
+    %6:texture_storage_2d_array<rgba32float, read_write> = load %arg_0
+    %7:vec2<i32> = load %arg_1
+    %8:u32 = load %arg_2
+    %9:vec4<f32> = textureLoad %6, %7, %8
+    %res:ptr<function, vec4<f32>, read_write> = var, %9
+    %11:vec4<f32> = load %res
+    store %prevent_dce, %11
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %13:void = call %textureLoad_6f8927
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %15:void = call %textureLoad_6f8927
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %17:void = call %textureLoad_6f8927
+    ret
+  }
+}
+
+invalid access control for storage texture
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

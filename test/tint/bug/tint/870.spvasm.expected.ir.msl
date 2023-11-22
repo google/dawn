@@ -1,0 +1,57 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: sspp962805860buildInformationS = struct @align(16) {
+  footprint:vec4<f32> @offset(0)
+  offset:vec4<f32> @offset(16)
+  essence:i32 @offset(32)
+  orientation:array<i32, 6> @offset(36)
+}
+
+x_B4_BuildInformation = struct @align(16) {
+  passthru:sspp962805860buildInformationS @offset(0)
+}
+
+%b1 = block {  # root
+  %sspp962805860buildInformation:ptr<storage, x_B4_BuildInformation, read> = var @binding_point(0, 2)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %orientation:ptr<function, array<i32, 6>, read_write> = var
+    %4:ptr<storage, array<i32, 6>, read> = access %sspp962805860buildInformation, 0u, 3u
+    %x_23:array<i32, 6> = load %4
+    %6:ptr<function, i32, read_write> = access %orientation, 0i
+    %7:i32 = access %x_23, 0u
+    store %6, %7
+    %8:ptr<function, i32, read_write> = access %orientation, 1i
+    %9:i32 = access %x_23, 1u
+    store %8, %9
+    %10:ptr<function, i32, read_write> = access %orientation, 2i
+    %11:i32 = access %x_23, 2u
+    store %10, %11
+    %12:ptr<function, i32, read_write> = access %orientation, 3i
+    %13:i32 = access %x_23, 3u
+    store %12, %13
+    %14:ptr<function, i32, read_write> = access %orientation, 4i
+    %15:i32 = access %x_23, 4u
+    store %14, %15
+    %16:ptr<function, i32, read_write> = access %orientation, 5i
+    %17:i32 = access %x_23, 5u
+    store %16, %17
+    ret
+  }
+}
+%tint_symbol = @fragment func():void -> %b3 {
+  %b3 = block {
+    %19:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

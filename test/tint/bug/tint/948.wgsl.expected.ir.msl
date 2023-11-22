@@ -1,0 +1,381 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: LeftOver = struct @align(16) {
+  time:f32 @offset(0)
+  padding:u32 @offset(4)
+  worldViewProjection:mat4x4<f32> @offset(16)
+  outputSize:vec2<f32> @offset(80)
+  stageSize:vec2<f32> @offset(88)
+  spriteMapSize:vec2<f32> @offset(96)
+  stageScale:f32 @offset(104)
+  spriteCount:f32 @offset(108)
+  colorMul:vec3<f32> @offset(112)
+}
+
+main_out = struct @align(16) {
+  glFragColor_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_20:ptr<uniform, LeftOver, read> = var @binding_point(2, 9)
+  %frameMapTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 3)
+  %frameMapSampler:ptr<handle, sampler, read> = var @binding_point(2, 2)
+  %tUV:ptr<private, vec2<f32>, read_write> = var
+  %tileMapsTexture0:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 5)
+  %tileMapsSampler:ptr<handle, sampler, read> = var @binding_point(2, 4)
+  %tileMapsTexture1:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 6)
+  %animationMapTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 8)
+  %animationMapSampler:ptr<handle, sampler, read> = var @binding_point(2, 7)
+  %mt:ptr<private, f32, read_write> = var
+  %spriteSheetTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 1)
+  %spriteSheetSampler:ptr<handle, sampler, read> = var @binding_point(2, 0)
+  %glFragColor:ptr<private, vec4<f32>, read_write> = var
+  %tileID_1:ptr<private, vec2<f32>, read_write> = var
+  %levelUnits:ptr<private, vec2<f32>, read_write> = var
+  %stageUnits_1:ptr<private, vec2<f32>, read_write> = var
+  %vPosition:ptr<private, vec3<f32>, read_write> = var
+  %vUV:ptr<private, vec2<f32>, read_write> = var
+}
+
+%getFrameData_f1_ = func(%frameID:ptr<function, f32, read_write>):mat4x4<f32> -> %b2 {
+  %b2 = block {
+    %fX:ptr<function, f32, read_write> = var
+    %x_15:f32 = load %frameID
+    %23:ptr<uniform, f32, read> = access %x_20, 7u
+    %x_25:f32 = load %23
+    %25:f32 = div %x_15, %x_25
+    store %fX, %25
+    %x_37:f32 = load %fX
+    %27:texture_2d<f32> = load %frameMapTexture
+    %28:sampler = load %frameMapSampler
+    %29:vec2<f32> = construct %x_37, 0.0f
+    %x_40:vec4<f32> = textureSampleBias %27, %28, %29, 0.0f
+    %x_44:f32 = load %fX
+    %32:texture_2d<f32> = load %frameMapTexture
+    %33:sampler = load %frameMapSampler
+    %34:vec2<f32> = construct %x_44, 0.25f
+    %x_47:vec4<f32> = textureSampleBias %32, %33, %34, 0.0f
+    %x_51:f32 = load %fX
+    %37:texture_2d<f32> = load %frameMapTexture
+    %38:sampler = load %frameMapSampler
+    %39:vec2<f32> = construct %x_51, 0.5f
+    %x_54:vec4<f32> = textureSampleBias %37, %38, %39, 0.0f
+    %41:f32 = access %x_40, 0u
+    %42:f32 = access %x_40, 1u
+    %43:f32 = access %x_40, 2u
+    %44:f32 = access %x_40, 3u
+    %45:vec4<f32> = construct %41, %42, %43, %44
+    %46:f32 = access %x_47, 0u
+    %47:f32 = access %x_47, 1u
+    %48:f32 = access %x_47, 2u
+    %49:f32 = access %x_47, 3u
+    %50:vec4<f32> = construct %46, %47, %48, %49
+    %51:f32 = access %x_54, 0u
+    %52:f32 = access %x_54, 1u
+    %53:f32 = access %x_54, 2u
+    %54:f32 = access %x_54, 3u
+    %55:vec4<f32> = construct %51, %52, %53, %54
+    %56:mat4x4<f32> = construct %45, %50, %55, vec4<f32>(0.0f)
+    ret %56
+  }
+}
+%main_1 = func():void -> %b3 {
+  %b3 = block {
+    %color:ptr<function, vec4<f32>, read_write> = var
+    %tileUV:ptr<function, vec2<f32>, read_write> = var
+    %tileID:ptr<function, vec2<f32>, read_write> = var
+    %sheetUnits:ptr<function, vec2<f32>, read_write> = var
+    %spriteUnits:ptr<function, f32, read_write> = var
+    %stageUnits:ptr<function, vec2<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %frameID_1:ptr<function, f32, read_write> = var
+    %animationData:ptr<function, vec4<f32>, read_write> = var
+    %f:ptr<function, f32, read_write> = var
+    %frameData:ptr<function, mat4x4<f32>, read_write> = var
+    %param:ptr<function, f32, read_write> = var
+    %frameSize:ptr<function, vec2<f32>, read_write> = var
+    %offset_1:ptr<function, vec2<f32>, read_write> = var
+    %ratio:ptr<function, vec2<f32>, read_write> = var
+    %nc:ptr<function, vec4<f32>, read_write> = var
+    %alpha:ptr<function, f32, read_write> = var
+    %mixed:ptr<function, vec3<f32>, read_write> = var
+    store %color, vec4<f32>(0.0f)
+    %x_86:vec2<f32> = load %tUV
+    %77:vec2<f32> = fract %x_86
+    store %tileUV, %77
+    %x_91:f32 = load_vector_element %tileUV, 1u
+    %79:f32 = sub 1.0f, %x_91
+    store_vector_element %tileUV, 1u, %79
+    %x_95:vec2<f32> = load %tUV
+    %81:vec2<f32> = floor %x_95
+    store %tileID, %81
+    %82:ptr<uniform, vec2<f32>, read> = access %x_20, 5u
+    %x_101:vec2<f32> = load %82
+    %84:vec2<f32> = div vec2<f32>(1.0f), %x_101
+    store %sheetUnits, %84
+    %85:ptr<uniform, f32, read> = access %x_20, 7u
+    %x_106:f32 = load %85
+    %87:f32 = div 1.0f, %x_106
+    store %spriteUnits, %87
+    %88:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
+    %x_111:vec2<f32> = load %88
+    %90:vec2<f32> = div vec2<f32>(1.0f), %x_111
+    store %stageUnits, %90
+    store %i, 0i
+    loop [b: %b4, c: %b5] {  # loop_1
+      %b4 = block {  # body
+        %x_122:i32 = load %i
+        %92:bool = lt %x_122, 2i
+        if %92 [t: %b6, f: %b7] {  # if_1
+          %b6 = block {  # true
+            exit_if  # if_1
+          }
+          %b7 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_126:i32 = load %i
+        switch %x_126 [c: (1i, %b8), c: (0i, %b9), c: (default, %b10)] {  # switch_1
+          %b8 = block {  # case
+            %x_150:vec2<f32> = load %tileID
+            %95:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
+            %x_154:vec2<f32> = load %95
+            %97:texture_2d<f32> = load %tileMapsTexture1
+            %98:sampler = load %tileMapsSampler
+            %99:vec2<f32> = add %x_150, vec2<f32>(0.5f)
+            %100:vec2<f32> = div %99, %x_154
+            %x_156:vec4<f32> = textureSampleBias %97, %98, %100, 0.0f
+            %102:f32 = access %x_156, 0u
+            store %frameID_1, %102
+            exit_switch  # switch_1
+          }
+          %b9 = block {  # case
+            %x_136:vec2<f32> = load %tileID
+            %104:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
+            %x_140:vec2<f32> = load %104
+            %106:texture_2d<f32> = load %tileMapsTexture0
+            %107:sampler = load %tileMapsSampler
+            %108:vec2<f32> = add %x_136, vec2<f32>(0.5f)
+            %109:vec2<f32> = div %108, %x_140
+            %x_142:vec4<f32> = textureSampleBias %106, %107, %109, 0.0f
+            %111:f32 = access %x_142, 0u
+            store %frameID_1, %111
+            exit_switch  # switch_1
+          }
+          %b10 = block {  # case
+            exit_switch  # switch_1
+          }
+        }
+        %x_166:f32 = load %frameID_1
+        %113:ptr<uniform, f32, read> = access %x_20, 7u
+        %x_169:f32 = load %113
+        %115:texture_2d<f32> = load %animationMapTexture
+        %116:sampler = load %animationMapSampler
+        %117:f32 = add %x_166, 0.5f
+        %118:f32 = div %117, %x_169
+        %119:vec2<f32> = construct %118, 0.0f
+        %x_172:vec4<f32> = textureSampleBias %115, %116, %119, 0.0f
+        store %animationData, %x_172
+        %x_174:f32 = load_vector_element %animationData, 1u
+        %122:bool = gt %x_174, 0.0f
+        if %122 [t: %b11] {  # if_2
+          %b11 = block {  # true
+            %123:ptr<uniform, f32, read> = access %x_20, 0u
+            %x_181:f32 = load %123
+            %x_184:f32 = load_vector_element %animationData, 2u
+            %126:f32 = mul %x_181, %x_184
+            %127:f32 = mod %126, 1.0f
+            store %mt, %127
+            store %f, 0.0f
+            loop [b: %b12, c: %b13] {  # loop_2
+              %b12 = block {  # body
+                %x_193:f32 = load %f
+                %129:bool = lt %x_193, 8.0f
+                if %129 [t: %b14, f: %b15] {  # if_3
+                  %b14 = block {  # true
+                    exit_if  # if_3
+                  }
+                  %b15 = block {  # false
+                    exit_loop  # loop_2
+                  }
+                }
+                %x_197:f32 = load_vector_element %animationData, 1u
+                %x_198:f32 = load %mt
+                %132:bool = gt %x_197, %x_198
+                if %132 [t: %b16] {  # if_4
+                  %b16 = block {  # true
+                    %x_203:f32 = load_vector_element %animationData, 0u
+                    store %frameID_1, %x_203
+                    exit_loop  # loop_2
+                  }
+                }
+                %x_208:f32 = load %frameID_1
+                %135:ptr<uniform, f32, read> = access %x_20, 7u
+                %x_211:f32 = load %135
+                %x_214:f32 = load %f
+                %x_217:vec4<f32> = let vec4<f32>(0.0f)
+                store %animationData, %x_217
+                continue %b13
+              }
+              %b13 = block {  # continuing
+                %x_218:f32 = load %f
+                %140:f32 = add %x_218, 1.0f
+                store %f, %140
+                next_iteration %b12
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        %x_222:f32 = load %frameID_1
+        %142:f32 = add %x_222, 0.5f
+        store %param, %142
+        %x_225:mat4x4<f32> = call %getFrameData_f1_, %param
+        store %frameData, %x_225
+        %144:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
+        %x_228:vec4<f32> = load %144
+        %146:ptr<uniform, vec2<f32>, read> = access %x_20, 5u
+        %x_231:vec2<f32> = load %146
+        %148:f32 = access %x_228, 3u
+        %149:f32 = access %x_228, 2u
+        %150:vec2<f32> = construct %148, %149
+        %151:vec2<f32> = div %150, %x_231
+        store %frameSize, %151
+        %152:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
+        %x_235:vec4<f32> = load %152
+        %x_237:vec2<f32> = load %sheetUnits
+        %155:f32 = access %x_235, 0u
+        %156:f32 = access %x_235, 1u
+        %157:vec2<f32> = construct %155, %156
+        %158:vec2<f32> = mul %157, %x_237
+        store %offset_1, %158
+        %159:ptr<function, vec4<f32>, read_write> = access %frameData, 2i
+        %x_241:vec4<f32> = load %159
+        %161:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
+        %x_244:vec4<f32> = load %161
+        %163:f32 = access %x_241, 0u
+        %164:f32 = access %x_241, 1u
+        %165:vec2<f32> = construct %163, %164
+        %166:f32 = access %x_244, 3u
+        %167:f32 = access %x_244, 2u
+        %168:vec2<f32> = construct %166, %167
+        %169:vec2<f32> = div %165, %168
+        store %ratio, %169
+        %170:ptr<function, vec4<f32>, read_write> = access %frameData, 2i
+        %x_248:f32 = load_vector_element %170, 2u
+        %172:bool = eq %x_248, 1.0f
+        if %172 [t: %b17] {  # if_5
+          %b17 = block {  # true
+            %x_252:vec2<f32> = load %tileUV
+            %174:f32 = access %x_252, 1u
+            %175:f32 = access %x_252, 0u
+            %176:vec2<f32> = construct %174, %175
+            store %tileUV, %176
+            exit_if  # if_5
+          }
+        }
+        %x_254:i32 = load %i
+        %178:bool = eq %x_254, 0i
+        if %178 [t: %b18, f: %b19] {  # if_6
+          %b18 = block {  # true
+            %x_263:vec2<f32> = load %tileUV
+            %x_264:vec2<f32> = load %frameSize
+            %x_266:vec2<f32> = load %offset_1
+            %182:texture_2d<f32> = load %spriteSheetTexture
+            %183:sampler = load %spriteSheetSampler
+            %184:vec2<f32> = mul %x_263, %x_264
+            %185:vec2<f32> = add %184, %x_266
+            %x_268:vec4<f32> = textureSample %182, %183, %185
+            store %color, %x_268
+            exit_if  # if_6
+          }
+          %b19 = block {  # false
+            %x_274:vec2<f32> = load %tileUV
+            %x_275:vec2<f32> = load %frameSize
+            %x_277:vec2<f32> = load %offset_1
+            %190:texture_2d<f32> = load %spriteSheetTexture
+            %191:sampler = load %spriteSheetSampler
+            %192:vec2<f32> = mul %x_274, %x_275
+            %193:vec2<f32> = add %192, %x_277
+            %x_279:vec4<f32> = textureSample %190, %191, %193
+            store %nc, %x_279
+            %x_283:f32 = load_vector_element %color, 3u
+            %x_285:f32 = load_vector_element %nc, 3u
+            %197:f32 = add %x_283, %x_285
+            %198:f32 = min %197, 1.0f
+            store %alpha, %198
+            %x_290:vec4<f32> = load %color
+            %x_292:vec4<f32> = load %nc
+            %x_295:f32 = load_vector_element %nc, 3u
+            %202:f32 = access %x_290, 0u
+            %203:f32 = access %x_290, 1u
+            %204:f32 = access %x_290, 2u
+            %205:vec3<f32> = construct %202, %203, %204
+            %206:f32 = access %x_292, 0u
+            %207:f32 = access %x_292, 1u
+            %208:f32 = access %x_292, 2u
+            %209:vec3<f32> = construct %206, %207, %208
+            %210:vec3<f32> = construct %x_295, %x_295, %x_295
+            %211:vec3<f32> = mix %205, %209, %210
+            store %mixed, %211
+            %x_298:vec3<f32> = load %mixed
+            %x_299:f32 = load %alpha
+            %214:f32 = access %x_298, 0u
+            %215:f32 = access %x_298, 1u
+            %216:f32 = access %x_298, 2u
+            %217:vec4<f32> = construct %214, %215, %216, %x_299
+            store %color, %217
+            exit_if  # if_6
+          }
+        }
+        continue %b5
+      }
+      %b5 = block {  # continuing
+        %x_304:i32 = load %i
+        %219:i32 = add %x_304, 1i
+        store %i, %219
+        next_iteration %b4
+      }
+    }
+    %220:ptr<uniform, vec3<f32>, read> = access %x_20, 8u
+    %x_310:vec3<f32> = load %220
+    %x_311:vec4<f32> = load %color
+    %223:f32 = access %x_311, 0u
+    %224:f32 = access %x_311, 1u
+    %225:f32 = access %x_311, 2u
+    %226:vec3<f32> = construct %223, %224, %225
+    %x_313:vec3<f32> = mul %226, %x_310
+    %x_314:vec4<f32> = load %color
+    %229:f32 = access %x_313, 0u
+    %230:f32 = access %x_313, 1u
+    %231:f32 = access %x_313, 2u
+    %232:f32 = access %x_314, 3u
+    %233:vec4<f32> = construct %229, %230, %231, %232
+    store %color, %233
+    %x_318:vec4<f32> = load %color
+    store %glFragColor, %x_318
+    ret
+  }
+}
+%tint_symbol = @fragment func(%tUV_param:vec2<f32> [@location(2)], %tileID_1_param:vec2<f32> [@location(5)], %levelUnits_param:vec2<f32> [@location(4)], %stageUnits_1_param:vec2<f32> [@location(3)], %vPosition_param:vec3<f32> [@location(0)], %vUV_param:vec2<f32> [@location(1)]):main_out -> %b20 {
+  %b20 = block {
+    store %tUV, %tUV_param
+    store %tileID_1, %tileID_1_param
+    store %levelUnits, %levelUnits_param
+    store %stageUnits_1, %stageUnits_1_param
+    store %vPosition, %vPosition_param
+    store %vUV, %vUV_param
+    %242:void = call %main_1
+    %243:vec4<f32> = load %glFragColor
+    %244:main_out = construct %243
+    ret %244
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

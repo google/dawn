@@ -1,0 +1,65 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RW_atomic = struct @align(4) {
+  arg_0:atomic<u32> @offset(0)
+}
+
+x__atomic_compare_exchange_resultu32 = struct @align(4) {
+  old_value:u32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+__atomic_compare_exchange_result_u32 = struct @align(4) {
+  old_value:u32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+%b1 = block {  # root
+  %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
+}
+
+%atomicCompareExchangeWeak_63d8e6 = func():void -> %b2 {
+  %b2 = block {
+    %res:ptr<function, x__atomic_compare_exchange_resultu32, read_write> = var, x__atomic_compare_exchange_resultu32(0u, false)
+    %4:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
+    %5:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %4, 1u, 1u
+    %old_value_1:u32 = access %5, 0u
+    %x_17:u32 = let %old_value_1
+    %8:bool = eq %x_17, 1u
+    %9:x__atomic_compare_exchange_resultu32 = construct %x_17, %8
+    store %res, %9
+    ret
+  }
+}
+%fragment_main_1 = func():void -> %b3 {
+  %b3 = block {
+    %11:void = call %atomicCompareExchangeWeak_63d8e6
+    ret
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %13:void = call %fragment_main_1
+    ret
+  }
+}
+%compute_main_1 = func():void -> %b5 {
+  %b5 = block {
+    %15:void = call %atomicCompareExchangeWeak_63d8e6
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+  %b6 = block {
+    %17:void = call %compute_main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

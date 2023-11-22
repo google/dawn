@@ -1,0 +1,71 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RW_atomic = struct @align(4) {
+  arg_0:atomic<i32> @offset(0)
+}
+
+x__atomic_compare_exchange_resulti32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+%b1 = block {  # root
+  %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
+}
+
+%atomicCompareExchangeWeak_1bd40a = func():void -> %b2 {
+  %b2 = block {
+    %arg_1:ptr<function, i32, read_write> = var, 0i
+    %arg_2:ptr<function, i32, read_write> = var, 0i
+    %res:ptr<function, x__atomic_compare_exchange_resulti32, read_write> = var, x__atomic_compare_exchange_resulti32(0i, false)
+    store %arg_1, 1i
+    store %arg_2, 1i
+    %x_23:i32 = load %arg_2
+    %x_24:i32 = load %arg_1
+    %8:ptr<storage, atomic<i32>, read_write> = access %sb_rw, 0u
+    %9:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %8, %x_24, %x_23
+    %old_value_1:i32 = access %9, 0u
+    %x_25:i32 = let %old_value_1
+    %12:bool = eq %x_25, %x_23
+    %13:x__atomic_compare_exchange_resulti32 = construct %x_25, %12
+    store %res, %13
+    ret
+  }
+}
+%fragment_main_1 = func():void -> %b3 {
+  %b3 = block {
+    %15:void = call %atomicCompareExchangeWeak_1bd40a
+    ret
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %17:void = call %fragment_main_1
+    ret
+  }
+}
+%compute_main_1 = func():void -> %b5 {
+  %b5 = block {
+    %19:void = call %atomicCompareExchangeWeak_1bd40a
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+  %b6 = block {
+    %21:void = call %compute_main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,156 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: In2 = struct @align(4) {
+  data_in2:array<i32, 8> @offset(0)
+}
+
+Out0 = struct @align(4) {
+  data_out0:array<i32, 1024> @offset(0)
+}
+
+In1 = struct @align(4) {
+  data_in1:array<i32, 512> @offset(0)
+}
+
+In0 = struct @align(4) {
+  data_in0:array<i32, 512> @offset(0)
+}
+
+%b1 = block {  # root
+  %gl_WorkGroupID:ptr<private, vec3<u32>, read_write> = var
+  %x_13:ptr<storage, In2, read> = var @binding_point(0, 2)
+  %x_15:ptr<storage, Out0, read_write> = var @binding_point(0, 3)
+  %x_17:ptr<storage, In1, read> = var @binding_point(0, 1)
+  %x_19:ptr<storage, In0, read> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %base_index_in:ptr<function, u32, read_write> = var
+    %base_index_out:ptr<function, u32, read_write> = var
+    %index_in0:ptr<function, i32, read_write> = var
+    %index_in1:ptr<function, i32, read_write> = var
+    %index_out0:ptr<function, i32, read_write> = var
+    %index_out1:ptr<function, i32, read_write> = var
+    %condition_index:ptr<function, i32, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %temp0:ptr<function, i32, read_write> = var
+    %temp1:ptr<function, i32, read_write> = var
+    %x_58:u32 = load_vector_element %gl_WorkGroupID, 0u
+    %18:u32 = mul 128u, %x_58
+    store %base_index_in, %18
+    %x_61:u32 = load_vector_element %gl_WorkGroupID, 0u
+    %20:u32 = mul 256u, %x_61
+    store %base_index_out, %20
+    store %index_in0, 127i
+    store %index_in1, 383i
+    store %index_out0, 255i
+    store %index_out1, 383i
+    store %condition_index, 0i
+    store %i, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_67:i32 = load %i
+        %22:bool = lt %x_67, 256i
+        if %22 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_70:i32 = load %condition_index
+        %24:ptr<storage, i32, read> = access %x_13, 0u, %x_70
+        %x_72:i32 = load %24
+        %26:bool = eq %x_72, 0i
+        if %26 [t: %b7, f: %b8] {  # if_2
+          %b7 = block {  # true
+            %x_77:u32 = load %base_index_out
+            %x_78:i32 = load %index_out0
+            %x_81:u32 = load %base_index_in
+            %x_82:i32 = load %index_in0
+            %31:u32 = bitcast %x_82
+            %32:u32 = add %x_81, %31
+            %33:ptr<storage, i32, read> = access %x_17, 0u, %32
+            %x_86:i32 = load %33
+            %35:u32 = bitcast %x_78
+            %36:u32 = add %x_77, %35
+            %37:ptr<storage, i32, read_write> = access %x_15, 0u, %36
+            store %37, %x_86
+            %x_88:i32 = load %index_out0
+            %39:i32 = sub %x_88, 1i
+            store %index_out0, %39
+            %x_90:i32 = load %index_in1
+            %41:i32 = sub %x_90, 1i
+            store %index_in1, %41
+            exit_if  # if_2
+          }
+          %b8 = block {  # false
+            %x_92:u32 = load %base_index_out
+            %x_93:i32 = load %index_out1
+            %x_96:u32 = load %base_index_in
+            %x_97:i32 = load %index_in1
+            %46:u32 = bitcast %x_97
+            %47:u32 = add %x_96, %46
+            %48:ptr<storage, i32, read> = access %x_19, 0u, %47
+            %x_101:i32 = load %48
+            %50:u32 = bitcast %x_93
+            %51:u32 = add %x_92, %50
+            %52:ptr<storage, i32, read_write> = access %x_15, 0u, %51
+            store %52, %x_101
+            %x_103:i32 = load %index_out1
+            %54:i32 = sub %x_103, 1i
+            store %index_out1, %54
+            %x_105:i32 = load %index_in1
+            %56:i32 = sub %x_105, 1i
+            store %index_in1, %56
+            exit_if  # if_2
+          }
+        }
+        %x_107:i32 = load %condition_index
+        %58:i32 = add %x_107, 1i
+        %59:ptr<storage, i32, read> = access %x_13, 0u, %58
+        %x_110:i32 = load %59
+        %x_111:i32 = load %condition_index
+        %62:i32 = add %x_111, %x_110
+        store %condition_index, %62
+        %x_113:i32 = load %index_in0
+        store %temp0, %x_113
+        %x_114:i32 = load %index_in1
+        store %index_in0, %x_114
+        %x_115:i32 = load %temp0
+        store %index_in1, %x_115
+        %x_116:i32 = load %index_out0
+        store %temp1, %x_116
+        %x_117:i32 = load %index_out1
+        store %index_out0, %x_117
+        %x_118:i32 = load %temp1
+        store %index_out1, %x_118
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_119:i32 = load %i
+        %70:i32 = add %x_119, 1i
+        store %i, %70
+        next_iteration %b3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(4, 1, 1) func(%gl_WorkGroupID_param:vec3<u32> [@workgroup_id]):void -> %b9 {
+  %b9 = block {
+    store %gl_WorkGroupID, %gl_WorkGroupID_param
+    %73:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

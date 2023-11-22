@@ -1,0 +1,134 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(16) {
+  scalar_f32:f32 @offset(0)
+  scalar_i32:i32 @offset(4)
+  scalar_u32:u32 @offset(8)
+  scalar_f16:f16 @offset(12)
+  vec2_f32:vec2<f32> @offset(16)
+  vec2_i32:vec2<i32> @offset(24)
+  vec2_u32:vec2<u32> @offset(32)
+  vec2_f16:vec2<f16> @offset(40)
+  vec3_f32:vec3<f32> @offset(48)
+  vec3_i32:vec3<i32> @offset(64)
+  vec3_u32:vec3<u32> @offset(80)
+  vec3_f16:vec3<f16> @offset(96)
+  vec4_f32:vec4<f32> @offset(112)
+  vec4_i32:vec4<i32> @offset(128)
+  vec4_u32:vec4<u32> @offset(144)
+  vec4_f16:vec4<f16> @offset(160)
+  mat2x2_f32:mat2x2<f32> @offset(168)
+  mat2x3_f32:mat2x3<f32> @offset(192)
+  mat2x4_f32:mat2x4<f32> @offset(224)
+  mat3x2_f32:mat3x2<f32> @offset(256)
+  mat3x3_f32:mat3x3<f32> @offset(288)
+  mat3x4_f32:mat3x4<f32> @offset(336)
+  mat4x2_f32:mat4x2<f32> @offset(384)
+  mat4x3_f32:mat4x3<f32> @offset(416)
+  mat4x4_f32:mat4x4<f32> @offset(480)
+  mat2x2_f16:mat2x2<f16> @offset(544)
+  mat2x3_f16:mat2x3<f16> @offset(552)
+  mat2x4_f16:mat2x4<f16> @offset(568)
+  mat3x2_f16:mat3x2<f16> @offset(584)
+  mat3x3_f16:mat3x3<f16> @offset(600)
+  mat3x4_f16:mat3x4<f16> @offset(624)
+  mat4x2_f16:mat4x2<f16> @offset(648)
+  mat4x3_f16:mat4x3<f16> @offset(664)
+  mat4x4_f16:mat4x4<f16> @offset(696)
+  arr2_vec3_f32:array<vec3<f32>, 2> @offset(736)
+  arr2_mat4x2_f16:array<mat4x2<f16>, 2> @offset(768)
+}
+
+S = struct @align(16) {
+  arr:array<Inner> @offset(0)
+}
+
+%b1 = block {  # root
+  %sb:ptr<storage, S, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void -> %b2 {
+  %b2 = block {
+    %4:ptr<storage, f32, read> = access %sb, 0u, %idx, 0u
+    %scalar_f32:f32 = load %4
+    %6:ptr<storage, i32, read> = access %sb, 0u, %idx, 1u
+    %scalar_i32:i32 = load %6
+    %8:ptr<storage, u32, read> = access %sb, 0u, %idx, 2u
+    %scalar_u32:u32 = load %8
+    %10:ptr<storage, f16, read> = access %sb, 0u, %idx, 3u
+    %scalar_f16:f16 = load %10
+    %12:ptr<storage, vec2<f32>, read> = access %sb, 0u, %idx, 4u
+    %vec2_f32:vec2<f32> = load %12
+    %14:ptr<storage, vec2<i32>, read> = access %sb, 0u, %idx, 5u
+    %vec2_i32:vec2<i32> = load %14
+    %16:ptr<storage, vec2<u32>, read> = access %sb, 0u, %idx, 6u
+    %vec2_u32:vec2<u32> = load %16
+    %18:ptr<storage, vec2<f16>, read> = access %sb, 0u, %idx, 7u
+    %vec2_f16:vec2<f16> = load %18
+    %20:ptr<storage, vec3<f32>, read> = access %sb, 0u, %idx, 8u
+    %vec3_f32:vec3<f32> = load %20
+    %22:ptr<storage, vec3<i32>, read> = access %sb, 0u, %idx, 9u
+    %vec3_i32:vec3<i32> = load %22
+    %24:ptr<storage, vec3<u32>, read> = access %sb, 0u, %idx, 10u
+    %vec3_u32:vec3<u32> = load %24
+    %26:ptr<storage, vec3<f16>, read> = access %sb, 0u, %idx, 11u
+    %vec3_f16:vec3<f16> = load %26
+    %28:ptr<storage, vec4<f32>, read> = access %sb, 0u, %idx, 12u
+    %vec4_f32:vec4<f32> = load %28
+    %30:ptr<storage, vec4<i32>, read> = access %sb, 0u, %idx, 13u
+    %vec4_i32:vec4<i32> = load %30
+    %32:ptr<storage, vec4<u32>, read> = access %sb, 0u, %idx, 14u
+    %vec4_u32:vec4<u32> = load %32
+    %34:ptr<storage, vec4<f16>, read> = access %sb, 0u, %idx, 15u
+    %vec4_f16:vec4<f16> = load %34
+    %36:ptr<storage, mat2x2<f32>, read> = access %sb, 0u, %idx, 16u
+    %mat2x2_f32:mat2x2<f32> = load %36
+    %38:ptr<storage, mat2x3<f32>, read> = access %sb, 0u, %idx, 17u
+    %mat2x3_f32:mat2x3<f32> = load %38
+    %40:ptr<storage, mat2x4<f32>, read> = access %sb, 0u, %idx, 18u
+    %mat2x4_f32:mat2x4<f32> = load %40
+    %42:ptr<storage, mat3x2<f32>, read> = access %sb, 0u, %idx, 19u
+    %mat3x2_f32:mat3x2<f32> = load %42
+    %44:ptr<storage, mat3x3<f32>, read> = access %sb, 0u, %idx, 20u
+    %mat3x3_f32:mat3x3<f32> = load %44
+    %46:ptr<storage, mat3x4<f32>, read> = access %sb, 0u, %idx, 21u
+    %mat3x4_f32:mat3x4<f32> = load %46
+    %48:ptr<storage, mat4x2<f32>, read> = access %sb, 0u, %idx, 22u
+    %mat4x2_f32:mat4x2<f32> = load %48
+    %50:ptr<storage, mat4x3<f32>, read> = access %sb, 0u, %idx, 23u
+    %mat4x3_f32:mat4x3<f32> = load %50
+    %52:ptr<storage, mat4x4<f32>, read> = access %sb, 0u, %idx, 24u
+    %mat4x4_f32:mat4x4<f32> = load %52
+    %54:ptr<storage, mat2x2<f16>, read> = access %sb, 0u, %idx, 25u
+    %mat2x2_f16:mat2x2<f16> = load %54
+    %56:ptr<storage, mat2x3<f16>, read> = access %sb, 0u, %idx, 26u
+    %mat2x3_f16:mat2x3<f16> = load %56
+    %58:ptr<storage, mat2x4<f16>, read> = access %sb, 0u, %idx, 27u
+    %mat2x4_f16:mat2x4<f16> = load %58
+    %60:ptr<storage, mat3x2<f16>, read> = access %sb, 0u, %idx, 28u
+    %mat3x2_f16:mat3x2<f16> = load %60
+    %62:ptr<storage, mat3x3<f16>, read> = access %sb, 0u, %idx, 29u
+    %mat3x3_f16:mat3x3<f16> = load %62
+    %64:ptr<storage, mat3x4<f16>, read> = access %sb, 0u, %idx, 30u
+    %mat3x4_f16:mat3x4<f16> = load %64
+    %66:ptr<storage, mat4x2<f16>, read> = access %sb, 0u, %idx, 31u
+    %mat4x2_f16:mat4x2<f16> = load %66
+    %68:ptr<storage, mat4x3<f16>, read> = access %sb, 0u, %idx, 32u
+    %mat4x3_f16:mat4x3<f16> = load %68
+    %70:ptr<storage, mat4x4<f16>, read> = access %sb, 0u, %idx, 33u
+    %mat4x4_f16:mat4x4<f16> = load %70
+    %72:ptr<storage, array<vec3<f32>, 2>, read> = access %sb, 0u, %idx, 34u
+    %arr2_vec3_f32:array<vec3<f32>, 2> = load %72
+    %74:ptr<storage, array<mat4x2<f16>, 2>, read> = access %sb, 0u, %idx, 35u
+    %arr2_mat4x2_f16:array<mat4x2<f16>, 2> = load %74
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

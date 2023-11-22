@@ -1,0 +1,121 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr, 3> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr_1, 3> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_9:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %numbers:ptr<function, array<i32, 3>, read_write> = var
+    %a:ptr<function, vec2<f32>, read_write> = var
+    %b:ptr<function, f32, read_write> = var
+    %8:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_38:i32 = load %8
+    %10:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_40:i32 = load %10
+    %12:ptr<function, i32, read_write> = access %numbers, %x_38
+    store %12, %x_40
+    %13:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_43:i32 = load %13
+    %15:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %x_45:i32 = load %15
+    %17:ptr<function, i32, read_write> = access %numbers, %x_43
+    store %17, %x_45
+    %18:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_48:i32 = load %18
+    %20:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %x_50:i32 = load %20
+    %22:ptr<function, i32, read_write> = access %numbers, %x_48
+    store %22, %x_50
+    %23:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+    %x_53:i32 = load %23
+    %25:ptr<uniform, f32, read> = access %x_9, 0u, 2i, 0u
+    %x_56:f32 = load %25
+    %27:bool = lt 0.0f, %x_56
+    %28:i32 = select 2i, 1i, %27
+    %29:ptr<function, i32, read_write> = access %numbers, %28
+    %x_60:i32 = load %29
+    %31:f32 = convert %x_53
+    %32:f32 = convert %x_60
+    %33:vec2<f32> = construct %31, %32
+    store %a, %33
+    %x_63:vec2<f32> = load %a
+    %35:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+    %x_65:f32 = load %35
+    %37:ptr<uniform, f32, read> = access %x_9, 0u, 1i, 0u
+    %x_67:f32 = load %37
+    %39:vec2<f32> = construct %x_65, %x_67
+    %40:f32 = dot %x_63, %39
+    store %b, %40
+    %x_70:f32 = load %b
+    %42:ptr<uniform, f32, read> = access %x_9, 0u, 0i, 0u
+    %x_72:f32 = load %42
+    %44:bool = eq %x_70, %x_72
+    if %44 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %45:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %x_78:i32 = load %45
+        %47:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_81:i32 = load %47
+        %49:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_84:i32 = load %49
+        %51:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %x_87:i32 = load %51
+        %53:f32 = convert %x_78
+        %54:f32 = convert %x_81
+        %55:f32 = convert %x_84
+        %56:f32 = convert %x_87
+        %57:vec4<f32> = construct %53, %54, %55, %56
+        store %x_GLF_color, %57
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %58:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %x_91:i32 = load %58
+        %x_92:f32 = convert %x_91
+        %61:vec4<f32> = construct %x_92, %x_92, %x_92, %x_92
+        store %x_GLF_color, %61
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b5 {
+  %b5 = block {
+    %63:void = call %main_1
+    %64:vec4<f32> = load %x_GLF_color
+    %65:main_out = construct %64
+    ret %65
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

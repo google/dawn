@@ -1,0 +1,250 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+tmp_struct = struct @align(4) {
+  nmb:array<i32, 1> @offset(0)
+}
+
+%b1 = block {  # root
+  %x_11:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_24:ptr<function, array<i32, 1>, read_write> = var
+    %x_68:ptr<function, bool, read_write> = var, false
+    %x_17:ptr<function, i32, read_write> = var
+    %x_18:ptr<function, i32, read_write> = var
+    %x_19:ptr<function, i32, read_write> = var
+    %x_20:ptr<function, i32, read_write> = var
+    %x_69:ptr<function, bool, read_write> = var, false
+    %tmp_float:ptr<function, f32, read_write> = var
+    %color:ptr<function, vec3<f32>, read_write> = var
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_25:ptr<function, i32, read_write> = var
+        %x_101:ptr<function, vec3<f32>, read_write> = var
+        %x_79_phi:ptr<function, bool, read_write> = var
+        %x_26_phi:ptr<function, i32, read_write> = var
+        %17:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
+        %x_75:f32 = load_vector_element %17, 1u
+        store %tmp_float, %x_75
+        %x_76:vec3<f32> = construct %x_75, %x_75, %x_75
+        store %color, %x_76
+        store %x_24, array<i32, 1>(0i)
+        store %x_68, false
+        store %x_79_phi, false
+        loop [b: %b5, c: %b6] {  # loop_2
+          %b5 = block {  # body
+            %x_21_phi:ptr<function, i32, read_write> = var
+            %x_25_phi:ptr<function, i32, read_write> = var
+            %x_93_phi:ptr<function, bool, read_write> = var
+            %x_79:bool = load %x_79_phi
+            store %x_18, 1i
+            store %x_21_phi, 1i
+            loop [b: %b7, c: %b8] {  # loop_3
+              %b7 = block {  # body
+                %x_21:i32 = load %x_21_phi
+                store %x_25_phi, 0i
+                store %x_93_phi, %x_79
+                %25:bool = gt %x_21, 10i
+                if %25 [t: %b9, f: %b10] {  # if_1
+                  %b9 = block {  # true
+                    exit_if  # if_1
+                  }
+                  %b10 = block {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                %x_22:i32 = sub %x_21, 1i
+                store %x_19, %x_22
+                %27:ptr<function, i32, read_write> = access %x_24, %x_22
+                %x_23:i32 = load %27
+                %29:bool = eq %x_23, 1i
+                if %29 [t: %b11] {  # if_2
+                  %b11 = block {  # true
+                    store %x_68, true
+                    store %x_17, 1i
+                    store %x_25_phi, 1i
+                    store %x_93_phi, true
+                    exit_loop  # loop_3
+                  }
+                }
+                store %x_18, %x_22
+                continue %b8
+              }
+              %b8 = block {  # continuing
+                store %x_21_phi, %x_22
+                next_iteration %b7
+              }
+            }
+            %30:i32 = load %x_25_phi
+            store %x_25, %30
+            %x_93:bool = load %x_93_phi
+            %32:i32 = load %x_25
+            store %x_26_phi, %32
+            if %x_93 [t: %b12] {  # if_3
+              %b12 = block {  # true
+                exit_loop  # loop_2
+              }
+            }
+            store %x_68, true
+            store %x_17, -1i
+            store %x_26_phi, -1i
+            exit_loop  # loop_2
+          }
+          %b6 = block {  # continuing
+            store %x_79_phi, false
+            next_iteration %b5
+          }
+        }
+        %x_26:i32 = load %x_26_phi
+        store %x_20, %x_26
+        %34:bool = eq %x_26, -1i
+        if %34 [t: %b13, f: %b14] {  # if_4
+          %b13 = block {  # true
+            discard
+            exit_if  # if_4
+          }
+          %b14 = block {  # false
+            store %x_GLF_color, vec4<f32>(0.0f)
+            %35:f32 = access %x_76, 1u
+            %36:f32 = access %x_76, 2u
+            %37:vec2<f32> = construct %35, %36
+            %x_100:vec2<f32> = add %37, vec2<f32>(1.0f)
+            %39:f32 = access %x_76, 0u
+            %40:f32 = access %x_100, 0u
+            %41:f32 = access %x_100, 1u
+            %42:vec3<f32> = construct %39, %40, %41
+            store %x_101, %42
+            %43:vec3<f32> = load %x_101
+            store %color, %43
+            %44:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
+            %x_103:f32 = load_vector_element %44, 0u
+            %46:bool = gt %x_103, 1.0f
+            if %46 [t: %b15] {  # if_5
+              %b15 = block {  # true
+                store %x_69, true
+                exit_loop  # loop_1
+              }
+            }
+            exit_if  # if_4
+          }
+        }
+        %47:f32 = load_vector_element %x_101, 0u
+        %48:f32 = load_vector_element %x_101, 1u
+        %49:f32 = load_vector_element %x_101, 2u
+        %50:vec4<f32> = construct %47, %48, %49, 1.0f
+        store %x_GLF_color, %50
+        store %x_69, true
+        exit_loop  # loop_1
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b16 {
+  %b16 = block {
+    %52:void = call %main_1
+    %53:vec4<f32> = load %x_GLF_color
+    %54:main_out = construct %53
+    ret %54
+  }
+}
+%binarySearch_struct_tmp_struct_i1_1_1_ = func(%obj:ptr<function, tmp_struct, read_write>):i32 -> %b17 {
+  %b17 = block {
+    %x_112:ptr<function, bool, read_write> = var, false
+    %x_16:ptr<function, i32, read_write> = var
+    %one:ptr<function, i32, read_write> = var
+    %zero:ptr<function, i32, read_write> = var
+    %x_27:ptr<function, i32, read_write> = var
+    %x_114_phi:ptr<function, bool, read_write> = var
+    %x_28_phi:ptr<function, i32, read_write> = var
+    store %x_114_phi, false
+    loop [b: %b18, c: %b19] {  # loop_4
+      %b18 = block {  # body
+        %x_15_phi:ptr<function, i32, read_write> = var
+        %x_27_phi:ptr<function, i32, read_write> = var
+        %x_128_phi:ptr<function, bool, read_write> = var
+        %x_114:bool = load %x_114_phi
+        store %one, 1i
+        store %x_15_phi, 1i
+        loop [b: %b20, c: %b21] {  # loop_5
+          %b20 = block {  # body
+            %x_15:i32 = load %x_15_phi
+            store %x_27_phi, 0i
+            store %x_128_phi, %x_114
+            %69:bool = gt %x_15, 10i
+            if %69 [t: %b22, f: %b23] {  # if_6
+              %b22 = block {  # true
+                exit_if  # if_6
+              }
+              %b23 = block {  # false
+                exit_loop  # loop_5
+              }
+            }
+            %x_13:i32 = sub %x_15, 1i
+            store %zero, %x_13
+            %71:ptr<function, i32, read_write> = access %obj, 0u, %x_13
+            %x_14:i32 = load %71
+            %73:bool = eq %x_14, 1i
+            if %73 [t: %b24] {  # if_7
+              %b24 = block {  # true
+                store %x_112, true
+                store %x_16, 1i
+                store %x_27_phi, 1i
+                store %x_128_phi, true
+                exit_loop  # loop_5
+              }
+            }
+            store %one, %x_13
+            continue %b21
+          }
+          %b21 = block {  # continuing
+            store %x_15_phi, %x_13
+            next_iteration %b20
+          }
+        }
+        %74:i32 = load %x_27_phi
+        store %x_27, %74
+        %x_128:bool = load %x_128_phi
+        %76:i32 = load %x_27
+        store %x_28_phi, %76
+        if %x_128 [t: %b25] {  # if_8
+          %b25 = block {  # true
+            exit_loop  # loop_4
+          }
+        }
+        store %x_112, true
+        store %x_16, -1i
+        store %x_28_phi, -1i
+        exit_loop  # loop_4
+      }
+      %b19 = block {  # continuing
+        store %x_114_phi, false
+        next_iteration %b18
+      }
+    }
+    %x_28:i32 = load %x_28_phi
+    ret %x_28
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

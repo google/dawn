@@ -1,0 +1,26 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: DeclaredAfterUsage = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+%b1 = block {  # root
+  %declared_after_usage:ptr<uniform, DeclaredAfterUsage, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @vertex func():vec4<f32> [@position] -> %b2 {
+  %b2 = block {
+    %3:ptr<uniform, f32, read> = access %declared_after_usage, 0u
+    %4:f32 = load %3
+    %5:vec4<f32> = construct %4
+    ret %5
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

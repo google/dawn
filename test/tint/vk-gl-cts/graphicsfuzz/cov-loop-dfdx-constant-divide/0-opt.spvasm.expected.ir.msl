@@ -1,0 +1,141 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+  el:f32 @offset(0)
+}
+
+buf0 = struct @align(4) {
+  x_GLF_uniform_float_values:array<strided_arr, 2> @offset(0)
+}
+
+strided_arr_1 = struct @align(4) {
+  el:i32 @offset(0)
+}
+
+buf1 = struct @align(4) {
+  x_GLF_uniform_int_values:array<strided_arr_1, 3> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_11:ptr<uniform, buf1, read> = var @binding_point(0, 1)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, f32, read_write> = var
+    %b:ptr<function, f32, read_write> = var
+    %c:ptr<function, f32, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %9:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %10:f32 = load %9
+    store %a, %10
+    %11:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %12:f32 = load %11
+    store %b, %12
+    %13:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %14:f32 = load %13
+    store %c, %14
+    %15:ptr<uniform, i32, read> = access %x_11, 0u, 1i, 0u
+    %16:i32 = load %15
+    store %i, %16
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %17:i32 = load %i
+        %18:ptr<uniform, i32, read> = access %x_11, 0u, 0i, 0u
+        %19:i32 = load %18
+        %20:bool = lt %17, %19
+        if %20 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %21:i32 = load %i
+        %22:ptr<uniform, i32, read> = access %x_11, 0u, 2i, 0u
+        %23:i32 = load %22
+        %24:bool = eq %21, %23
+        if %24 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            %25:f32 = load %a
+            %26:f32 = dpdx %25
+            %27:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+            %28:f32 = load %27
+            %29:f32 = add %26, %28
+            store %b, %29
+            exit_if  # if_2
+          }
+        }
+        %30:f32 = load %a
+        %31:f32 = dpdx %30
+        store %c, %31
+        %32:f32 = load %c
+        %33:f32 = load %b
+        %34:f32 = div %32, %33
+        store %a, %34
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %35:i32 = load %i
+        %36:i32 = add %35, 1i
+        store %i, %36
+        next_iteration %b3
+      }
+    }
+    %37:f32 = load %a
+    %38:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %39:f32 = load %38
+    %40:bool = eq %37, %39
+    if %40 [t: %b8, f: %b9] {  # if_3
+      %b8 = block {  # true
+        %41:ptr<uniform, i32, read> = access %x_11, 0u, 2i, 0u
+        %42:i32 = load %41
+        %43:f32 = convert %42
+        %44:ptr<uniform, i32, read> = access %x_11, 0u, 1i, 0u
+        %45:i32 = load %44
+        %46:f32 = convert %45
+        %47:ptr<uniform, i32, read> = access %x_11, 0u, 1i, 0u
+        %48:i32 = load %47
+        %49:f32 = convert %48
+        %50:ptr<uniform, i32, read> = access %x_11, 0u, 2i, 0u
+        %51:i32 = load %50
+        %52:f32 = convert %51
+        %53:vec4<f32> = construct %43, %46, %49, %52
+        store %x_GLF_color, %53
+        exit_if  # if_3
+      }
+      %b9 = block {  # false
+        %54:ptr<uniform, i32, read> = access %x_11, 0u, 1i, 0u
+        %55:i32 = load %54
+        %56:f32 = convert %55
+        %57:vec4<f32> = construct %56
+        store %x_GLF_color, %57
+        exit_if  # if_3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b10 {
+  %b10 = block {
+    %59:void = call %main_1
+    %60:vec4<f32> = load %x_GLF_color
+    %61:main_out = construct %60
+    ret %61
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,49 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %arg_1:ptr<handle, texture_2d_array<u32>, read> = var @binding_point(1, 1)
+  %arg_2:ptr<handle, sampler, read> = var @binding_point(1, 2)
+  %prevent_dce:ptr<storage, vec4<u32>, read_write> = var @binding_point(2, 0)
+}
+
+%textureGather_a0372b = func():void -> %b2 {
+  %b2 = block {
+    %arg_3:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
+    %arg_4:ptr<function, u32, read_write> = var, 1u
+    %7:texture_2d_array<u32> = load %arg_1
+    %8:sampler = load %arg_2
+    %9:vec2<f32> = load %arg_3
+    %10:u32 = load %arg_4
+    %11:vec4<u32> = textureGather 1i, %7, %8, %9, %10
+    %res:ptr<function, vec4<u32>, read_write> = var, %11
+    %13:vec4<u32> = load %res
+    store %prevent_dce, %13
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %15:void = call %textureGather_a0372b
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %17:void = call %textureGather_a0372b
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %19:void = call %textureGather_a0372b
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

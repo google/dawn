@@ -1,0 +1,104 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: doesNotMatter = struct @align(4) {
+  x_compute_data:array<f32> @offset(0)
+}
+
+%b1 = block {  # root
+  %x_9:ptr<storage, doesNotMatter, read_write> = var @binding_point(0, 0)
+}
+
+%nb_mod_ = func():f32 -> %b2 {
+  %b2 = block {
+    %s:ptr<function, f32, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %GLF_live1i:ptr<function, i32, read_write> = var
+    %GLF_live1_looplimiter2:ptr<function, i32, read_write> = var
+    %x_51:ptr<function, f32, read_write> = var
+    %x_56_phi:ptr<function, f32, read_write> = var
+    store %s, 0.0f
+    store %i, 5i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_50:ptr<function, f32, read_write> = var
+        %x_51_phi:ptr<function, f32, read_write> = var
+        store %x_56_phi, 0.0f
+        if true [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        store %GLF_live1i, 0i
+        loop [b: %b7, c: %b8] {  # loop_2
+          %b7 = block {  # body
+            store %x_51_phi, 0.0f
+            if true [t: %b9, f: %b10] {  # if_2
+              %b9 = block {  # true
+                exit_if  # if_2
+              }
+              %b10 = block {  # false
+                exit_loop  # loop_2
+              }
+            }
+            if false [t: %b11] {  # if_3
+              %b11 = block {  # true
+                store %x_50, 1.0f
+                %11:f32 = load %x_50
+                store %s, %11
+                %12:f32 = load %x_50
+                store %x_51_phi, %12
+                exit_loop  # loop_2
+              }
+            }
+            ret 42.0f
+          }
+          %b8 = block {  # continuing
+            next_iteration %b7
+          }
+        }
+        %13:f32 = load %x_51_phi
+        store %x_51, %13
+        %14:f32 = load %x_51
+        %15:bool = lte 5.0f, %14
+        if %15 [t: %b12] {  # if_4
+          %b12 = block {  # true
+            %16:f32 = load %x_51
+            store %x_56_phi, %16
+            exit_loop  # loop_1
+          }
+        }
+        ret 42.0f
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    %x_56:f32 = load %x_56_phi
+    ret %x_56
+  }
+}
+%main_1 = func():void -> %b13 {
+  %b13 = block {
+    %x_32:f32 = call %nb_mod_
+    %20:ptr<storage, f32, read_write> = access %x_9, 0u, 0i
+    store %20, %x_32
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b14 {
+  %b14 = block {
+    %22:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

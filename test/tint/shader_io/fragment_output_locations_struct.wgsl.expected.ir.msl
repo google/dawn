@@ -1,0 +1,22 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: FragmentOutputs = struct @align(16) {
+  loc0:i32 @offset(0), @location(0)
+  loc1:u32 @offset(4), @location(1)
+  loc2:f32 @offset(8), @location(2)
+  loc3:vec4<f32> @offset(16), @location(3)
+}
+
+%tint_symbol = @fragment func():FragmentOutputs -> %b1 {
+  %b1 = block {
+    ret FragmentOutputs(1i, 1u, 1.0f, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f))
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

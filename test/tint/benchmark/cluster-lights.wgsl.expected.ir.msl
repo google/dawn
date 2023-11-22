@@ -1,0 +1,352 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Camera = struct @align(16) {
+  projection:mat4x4<f32> @offset(0)
+  inverseProjection:mat4x4<f32> @offset(64)
+  view:mat4x4<f32> @offset(128)
+  position:vec3<f32> @offset(192)
+  time:f32 @offset(204)
+  outputSize:vec2<f32> @offset(208)
+  zNear:f32 @offset(216)
+  zFar:f32 @offset(220)
+}
+
+ClusterBounds = struct @align(16) {
+  minAABB:vec3<f32> @offset(0)
+  maxAABB:vec3<f32> @offset(16)
+}
+
+Clusters = struct @align(16) {
+  bounds:array<ClusterBounds, 27648> @offset(0)
+}
+
+ClusterLights = struct @align(4) {
+  offset:u32 @offset(0)
+  count:u32 @offset(4)
+}
+
+ClusterLightGroup = struct @align(4) {
+  offset:atomic<u32> @offset(0)
+  lights:array<ClusterLights, 27648> @offset(4)
+  indices:array<u32, 1769472> @offset(221188)
+}
+
+Light = struct @align(16) {
+  position:vec3<f32> @offset(0)
+  range:f32 @offset(12)
+  color:vec3<f32> @offset(16)
+  intensity:f32 @offset(28)
+}
+
+GlobalLights = struct @align(16) {
+  ambient:vec3<f32> @offset(0)
+  dirColor:vec3<f32> @offset(16)
+  dirIntensity:f32 @offset(28)
+  dirDirection:vec3<f32> @offset(32)
+  lightCount:u32 @offset(44)
+  lights:array<Light> @offset(48)
+}
+
+%b1 = block {  # root
+  %camera:ptr<uniform, Camera, read> = var @binding_point(0, 0)
+  %clusters:ptr<storage, Clusters, read> = var @binding_point(0, 1)
+  %clusterLights:ptr<storage, ClusterLightGroup, read_write> = var @binding_point(0, 2)
+  %globalLights:ptr<storage, GlobalLights, read> = var @binding_point(0, 3)
+}
+
+%linearDepth = func(%depthSample:f32):f32 -> %b2 {
+  %b2 = block {
+    %7:ptr<uniform, f32, read> = access %camera, 7u
+    %8:f32 = load %7
+    %9:ptr<uniform, f32, read> = access %camera, 6u
+    %10:f32 = load %9
+    %11:f32 = mul %8, %10
+    %12:ptr<uniform, f32, read> = access %camera, 6u
+    %13:f32 = load %12
+    %14:ptr<uniform, f32, read> = access %camera, 7u
+    %15:f32 = load %14
+    %16:f32 = sub %13, %15
+    %17:ptr<uniform, f32, read> = access %camera, 7u
+    %18:f32 = load %17
+    %19:f32 = fma %depthSample, %16, %18
+    %20:f32 = div %11, %19
+    ret %20
+  }
+}
+%getTile = func(%fragCoord:vec4<f32>):vec3<u32> -> %b3 {
+  %b3 = block {
+    %23:ptr<uniform, f32, read> = access %camera, 7u
+    %24:f32 = load %23
+    %25:ptr<uniform, f32, read> = access %camera, 6u
+    %26:f32 = load %25
+    %27:f32 = div %24, %26
+    %28:f32 = log2 %27
+    %sliceScale:f32 = div 48.0f, %28
+    %30:ptr<uniform, f32, read> = access %camera, 6u
+    %31:f32 = load %30
+    %32:f32 = log2 %31
+    %33:f32 = mul 48.0f, %32
+    %34:ptr<uniform, f32, read> = access %camera, 7u
+    %35:f32 = load %34
+    %36:ptr<uniform, f32, read> = access %camera, 6u
+    %37:f32 = load %36
+    %38:f32 = div %35, %37
+    %39:f32 = log2 %38
+    %40:f32 = div %33, %39
+    %sliceBias:f32 = negation %40
+    %42:f32 = access %fragCoord, 2u
+    %43:f32 = call %linearDepth, %42
+    %44:f32 = log2 %43
+    %45:f32 = mul %44, %sliceScale
+    %46:f32 = add %45, %sliceBias
+    %47:f32 = max %46, 0.0f
+    %zTile:u32 = convert %47
+    %49:f32 = access %fragCoord, 0u
+    %50:ptr<uniform, vec2<f32>, read> = access %camera, 5u
+    %51:f32 = load_vector_element %50, 0u
+    %52:f32 = div %51, 32.0f
+    %53:f32 = div %49, %52
+    %54:u32 = convert %53
+    %55:f32 = access %fragCoord, 1u
+    %56:ptr<uniform, vec2<f32>, read> = access %camera, 5u
+    %57:f32 = load_vector_element %56, 1u
+    %58:f32 = div %57, 18.0f
+    %59:f32 = div %55, %58
+    %60:u32 = convert %59
+    %61:vec3<u32> = construct %54, %60, %zTile
+    ret %61
+  }
+}
+%getClusterIndex = func(%fragCoord_1:vec4<f32>):u32 -> %b4 {  # %fragCoord_1: 'fragCoord'
+  %b4 = block {
+    %tile:vec3<u32> = call %getTile, %fragCoord_1
+    %65:u32 = access %tile, 0u
+    %66:u32 = access %tile, 1u
+    %67:u32 = mul %66, 32u
+    %68:u32 = add %65, %67
+    %69:u32 = access %tile, 2u
+    %70:u32 = mul %69, 32u
+    %71:u32 = mul %70, 18u
+    %72:u32 = add %68, %71
+    ret %72
+  }
+}
+%sqDistPointAABB = func(%p:vec3<f32>, %minAABB:vec3<f32>, %maxAABB:vec3<f32>):f32 -> %b5 {
+  %b5 = block {
+    %sqDist:ptr<function, f32, read_write> = var, 0.0f
+    loop [i: %b6, b: %b7, c: %b8] {  # loop_1
+      %b6 = block {  # initializer
+        %i:ptr<function, i32, read_write> = var, 0i
+        next_iteration %b7
+      }
+      %b7 = block {  # body
+        %79:i32 = load %i
+        %80:bool = lt %79, 3i
+        if %80 [t: %b9, f: %b10] {  # if_1
+          %b9 = block {  # true
+            exit_if  # if_1
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %81:i32 = load %i
+        %v:f32 = access %p, %81
+        %83:i32 = load %i
+        %84:f32 = access %minAABB, %83
+        %85:bool = lt %v, %84
+        if %85 [t: %b11] {  # if_2
+          %b11 = block {  # true
+            %86:f32 = load %sqDist
+            %87:i32 = load %i
+            %88:f32 = access %minAABB, %87
+            %89:f32 = sub %88, %v
+            %90:i32 = load %i
+            %91:f32 = access %minAABB, %90
+            %92:f32 = sub %91, %v
+            %93:f32 = mul %89, %92
+            %94:f32 = add %86, %93
+            store %sqDist, %94
+            exit_if  # if_2
+          }
+        }
+        %95:i32 = load %i
+        %96:f32 = access %maxAABB, %95
+        %97:bool = gt %v, %96
+        if %97 [t: %b12] {  # if_3
+          %b12 = block {  # true
+            %98:f32 = load %sqDist
+            %99:i32 = load %i
+            %100:f32 = access %maxAABB, %99
+            %101:f32 = sub %v, %100
+            %102:i32 = load %i
+            %103:f32 = access %maxAABB, %102
+            %104:f32 = sub %v, %103
+            %105:f32 = mul %101, %104
+            %106:f32 = add %98, %105
+            store %sqDist, %106
+            exit_if  # if_3
+          }
+        }
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %107:i32 = load %i
+        %108:i32 = add %107, 1i
+        store %i, %108
+        next_iteration %b7
+      }
+    }
+    %109:f32 = load %sqDist
+    ret %109
+  }
+}
+%computeMain = @compute @workgroup_size(4, 2, 4) func(%global_id:vec3<u32> [@global_invocation_id]):void -> %b13 {
+  %b13 = block {
+    %112:u32 = access %global_id, 0u
+    %113:u32 = access %global_id, 1u
+    %114:u32 = mul %113, 32u
+    %115:u32 = add %112, %114
+    %116:u32 = access %global_id, 2u
+    %117:u32 = mul %116, 32u
+    %118:u32 = mul %117, 18u
+    %tileIndex:u32 = add %115, %118
+    %clusterLightCount:ptr<function, u32, read_write> = var, 0u
+    %cluserLightIndices:ptr<function, array<u32, 256>, read_write> = var
+    loop [i: %b14, b: %b15, c: %b16] {  # loop_2
+      %b14 = block {  # initializer
+        %i_1:ptr<function, u32, read_write> = var, 0u  # %i_1: 'i'
+        next_iteration %b15
+      }
+      %b15 = block {  # body
+        %123:u32 = load %i_1
+        %124:ptr<storage, u32, read> = access %globalLights, 4u
+        %125:u32 = load %124
+        %126:bool = lt %123, %125
+        if %126 [t: %b17, f: %b18] {  # if_4
+          %b17 = block {  # true
+            exit_if  # if_4
+          }
+          %b18 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %127:u32 = load %i_1
+        %128:ptr<storage, f32, read> = access %globalLights, 5u, %127, 1u
+        %range:f32 = load %128
+        %130:bool = lte %range, 0.0f
+        %lightInCluster:ptr<function, bool, read_write> = var, %130
+        %132:bool = load %lightInCluster
+        %133:bool = eq %132, false
+        if %133 [t: %b19] {  # if_5
+          %b19 = block {  # true
+            %134:ptr<uniform, mat4x4<f32>, read> = access %camera, 2u
+            %135:mat4x4<f32> = load %134
+            %136:u32 = load %i_1
+            %137:ptr<storage, vec3<f32>, read> = access %globalLights, 5u, %136, 0u
+            %138:vec3<f32> = load %137
+            %139:vec4<f32> = construct %138, 1.0f
+            %lightViewPos:vec4<f32> = mul %135, %139
+            %141:vec3<f32> = swizzle %lightViewPos, xyz
+            %142:ptr<storage, vec3<f32>, read> = access %clusters, 0u, %tileIndex, 0u
+            %143:vec3<f32> = load %142
+            %144:ptr<storage, vec3<f32>, read> = access %clusters, 0u, %tileIndex, 1u
+            %145:vec3<f32> = load %144
+            %sqDist_1:f32 = call %sqDistPointAABB, %141, %143, %145  # %sqDist_1: 'sqDist'
+            %147:f32 = mul %range, %range
+            %148:bool = lte %sqDist_1, %147
+            store %lightInCluster, %148
+            exit_if  # if_5
+          }
+        }
+        %149:bool = load %lightInCluster
+        if %149 [t: %b20] {  # if_6
+          %b20 = block {  # true
+            %150:u32 = load %clusterLightCount
+            %151:ptr<function, u32, read_write> = access %cluserLightIndices, %150
+            %152:u32 = load %i_1
+            store %151, %152
+            %153:u32 = load %clusterLightCount
+            %154:u32 = add %153, 1u
+            store %clusterLightCount, %154
+            exit_if  # if_6
+          }
+        }
+        %155:u32 = load %clusterLightCount
+        %156:bool = eq %155, 256u
+        if %156 [t: %b21] {  # if_7
+          %b21 = block {  # true
+            exit_loop  # loop_2
+          }
+        }
+        continue %b16
+      }
+      %b16 = block {  # continuing
+        %157:u32 = load %i_1
+        %158:u32 = add %157, 1u
+        store %i_1, %158
+        next_iteration %b15
+      }
+    }
+    %lightCount:u32 = load %clusterLightCount
+    %160:ptr<storage, atomic<u32>, read_write> = access %clusterLights, 0u
+    %161:u32 = atomicAdd %160, %lightCount
+    %offset:ptr<function, u32, read_write> = var, %161
+    %163:u32 = load %offset
+    %164:bool = gte %163, 1769472u
+    if %164 [t: %b22] {  # if_8
+      %b22 = block {  # true
+        ret
+      }
+    }
+    loop [i: %b23, b: %b24, c: %b25] {  # loop_3
+      %b23 = block {  # initializer
+        %i_2:ptr<function, u32, read_write> = var, 0u  # %i_2: 'i'
+        next_iteration %b24
+      }
+      %b24 = block {  # body
+        %166:u32 = load %i_2
+        %167:u32 = load %clusterLightCount
+        %168:bool = lt %166, %167
+        if %168 [t: %b26, f: %b27] {  # if_9
+          %b26 = block {  # true
+            exit_if  # if_9
+          }
+          %b27 = block {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %169:u32 = load %offset
+        %170:u32 = load %i_2
+        %171:u32 = add %169, %170
+        %172:ptr<storage, u32, read_write> = access %clusterLights, 2u, %171
+        %173:u32 = load %i_2
+        %174:ptr<function, u32, read_write> = access %cluserLightIndices, %173
+        %175:u32 = load %174
+        store %172, %175
+        continue %b25
+      }
+      %b25 = block {  # continuing
+        %176:u32 = load %i_2
+        %177:u32 = add %176, 1u
+        store %i_2, %177
+        next_iteration %b24
+      }
+    }
+    %178:ptr<storage, u32, read_write> = access %clusterLights, 1u, %tileIndex, 0u
+    %179:u32 = load %offset
+    store %178, %179
+    %180:ptr<storage, u32, read_write> = access %clusterLights, 1u, %tileIndex, 1u
+    %181:u32 = load %clusterLightCount
+    store %180, %181
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

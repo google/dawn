@@ -1,0 +1,22 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %i:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+}
+
+%tint_symbol = func():void -> %b2 {
+  %b2 = block {
+    %3:u32 = load %i
+    %4:u32 = sub %3, 1u
+    store %i, %4
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

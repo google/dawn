@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(4) {
+  first:u32 @offset(0)
+  rtarr:array<u32> @offset(4)
+}
+
+%b1 = block {  # root
+  %myvar:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<u32>, read_write> = access %myvar, 1u
+    %x_1:u32 = arrayLength %3
+    ret
+  }
+}
+%tint_symbol = @fragment func():void -> %b3 {
+  %b3 = block {
+    %6:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

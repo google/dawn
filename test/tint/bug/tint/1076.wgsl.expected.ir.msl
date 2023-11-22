@@ -1,0 +1,28 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: FragIn = struct @align(4) {
+  a:f32 @offset(0), @location(0)
+  mask:u32 @offset(4), @builtin(sample_mask)
+}
+
+%tint_symbol = @fragment func(%in:FragIn, %b:f32 [@location(1)]):FragIn -> %b1 {
+  %b1 = block {
+    %4:u32 = access %in, 1u
+    %5:bool = eq %4, 0u
+    if %5 [t: %b2] {  # if_1
+      %b2 = block {  # true
+        ret %in
+      }
+    }
+    %6:FragIn = construct %b, 1u
+    ret %6
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

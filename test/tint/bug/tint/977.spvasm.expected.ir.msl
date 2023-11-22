@@ -1,0 +1,105 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: ResultMatrix = struct @align(4) {
+  numbers:array<f32> @offset(0)
+}
+
+FirstMatrix = struct @align(4) {
+  numbers:array<f32> @offset(0)
+}
+
+SecondMatrix = struct @align(4) {
+  numbers:array<f32> @offset(0)
+}
+
+Uniforms = struct @align(4) {
+  tint_symbol:f32 @offset(0)
+  sizeA:i32 @offset(4)
+  sizeB:i32 @offset(8)
+}
+
+%b1 = block {  # root
+  %gl_GlobalInvocationID:ptr<private, vec3<u32>, read_write> = var
+  %resultMatrix:ptr<storage, ResultMatrix, read_write> = var @binding_point(0, 2)
+  %firstMatrix:ptr<storage, FirstMatrix, read> = var @binding_point(0, 0)
+  %secondMatrix:ptr<storage, SecondMatrix, read> = var @binding_point(0, 1)
+  %x_46:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
+}
+
+%binaryOperation_f1_f1_ = func(%a:ptr<function, f32, read_write>, %b:ptr<function, f32, read_write>):f32 -> %b2 {
+  %b2 = block {
+    %x_26:ptr<function, f32, read_write> = var
+    %10:f32 = load %b
+    %11:bool = eq %10, 0.0f
+    if %11 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        ret 1.0f
+      }
+    }
+    %x_21:f32 = load %b
+    %13:f32 = div %x_21, 2.0f
+    %14:f32 = floor %13
+    %15:f32 = mul 2.0f, %14
+    %16:f32 = sub %x_21, %15
+    %17:f32 = round %16
+    %18:bool = eq %17, 1.0f
+    %19:bool = eq %18, false
+    if %19 [t: %b4, f: %b5] {  # if_2
+      %b4 = block {  # true
+        %20:f32 = load %a
+        %21:f32 = abs %20
+        %22:f32 = load %b
+        %23:f32 = pow %21, %22
+        store %x_26, %23
+        exit_if  # if_2
+      }
+      %b5 = block {  # false
+        %24:f32 = load %a
+        %25:f32 = sign %24
+        %26:f32 = load %a
+        %27:f32 = abs %26
+        %28:f32 = load %b
+        %29:f32 = pow %27, %28
+        %30:f32 = mul %25, %29
+        store %x_26, %30
+        exit_if  # if_2
+      }
+    }
+    %x_41:f32 = load %x_26
+    ret %x_41
+  }
+}
+%main_1 = func():void -> %b6 {
+  %b6 = block {
+    %index:ptr<function, i32, read_write> = var
+    %a_1:ptr<function, i32, read_write> = var
+    %param:ptr<function, f32, read_write> = var
+    %param_1:ptr<function, f32, read_write> = var
+    %37:u32 = load_vector_element %gl_GlobalInvocationID, 0u
+    %38:i32 = bitcast %37
+    store %index, %38
+    store %a_1, -10i
+    %x_63:i32 = load %index
+    store %param, -4.0f
+    store %param_1, -3.0f
+    %x_68:f32 = call %binaryOperation_f1_f1_, %param, %param_1
+    %41:ptr<storage, f32, read_write> = access %resultMatrix, 0u, %x_63
+    store %41, %x_68
+    ret
+  }
+}
+%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID_param:vec3<u32> [@global_invocation_id]):void -> %b7 {
+  %b7 = block {
+    store %gl_GlobalInvocationID, %gl_GlobalInvocationID_param
+    %44:void = call %main_1
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

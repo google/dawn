@@ -1,0 +1,140 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %i:ptr<function, i32, read_write> = var
+    %i_1:ptr<function, i32, read_write> = var
+    %i_2:ptr<function, i32, read_write> = var
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    store %i, 0i
+    %8:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %9:f32 = load_vector_element %8, 1u
+    %10:bool = lt %9, 0.0f
+    if %10 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %x_42:ptr<function, bool, read_write> = var
+        %12:f32 = load_vector_element %gl_FragCoord, 1u
+        %13:bool = lt %12, -1.0f
+        store %x_42, %13
+        %14:bool = load %x_42
+        if %14 [t: %b5, f: %b6] {  # if_2
+          %b5 = block {  # true
+            exit_if  # if_2
+          }
+          %b6 = block {  # false
+            loop [b: %b7, c: %b8] {  # loop_1
+              %b7 = block {  # body
+                %15:i32 = load %i
+                %16:bool = gte %15, 256i
+                if %16 [t: %b9] {  # if_3
+                  %b9 = block {  # true
+                    exit_loop  # loop_1
+                  }
+                }
+                loop [b: %b10, c: %b11] {  # loop_2
+                  %b10 = block {  # body
+                    store %i_1, 0i
+                    loop [b: %b12, c: %b13] {  # loop_3
+                      %b12 = block {  # body
+                        %17:i32 = load %i_1
+                        %18:bool = lt %17, 1i
+                        if %18 [t: %b14, f: %b15] {  # if_4
+                          %b14 = block {  # true
+                            exit_if  # if_4
+                          }
+                          %b15 = block {  # false
+                            exit_loop  # loop_3
+                          }
+                        }
+                        %19:bool = load %x_42
+                        if %19 [t: %b16] {  # if_5
+                          %b16 = block {  # true
+                            store %i_2, 0i
+                            loop [b: %b17, c: %b18] {  # loop_4
+                              %b17 = block {  # body
+                                %20:i32 = load %i_2
+                                %21:bool = lt %20, 1i
+                                if %21 [t: %b19, f: %b20] {  # if_6
+                                  %b19 = block {  # true
+                                    exit_if  # if_6
+                                  }
+                                  %b20 = block {  # false
+                                    exit_loop  # loop_4
+                                  }
+                                }
+                                continue %b18
+                              }
+                              %b18 = block {  # continuing
+                                %22:i32 = load %i_2
+                                %23:i32 = add %22, 1i
+                                store %i_2, %23
+                                next_iteration %b17
+                              }
+                            }
+                            continue %b13
+                          }
+                        }
+                        ret
+                      }
+                      %b13 = block {  # continuing
+                        %24:i32 = load %i_1
+                        %25:i32 = add %24, 1i
+                        store %i_1, %25
+                        next_iteration %b12
+                      }
+                    }
+                    continue %b11
+                  }
+                  %b11 = block {  # continuing
+                    break_if true %b10
+                  }
+                }
+                continue %b8
+              }
+              %b8 = block {  # continuing
+                break_if true %b7
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b21 {
+  %b21 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %28:void = call %main_1
+    %29:vec4<f32> = load %x_GLF_color
+    %30:main_out = construct %29
+    ret %30
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

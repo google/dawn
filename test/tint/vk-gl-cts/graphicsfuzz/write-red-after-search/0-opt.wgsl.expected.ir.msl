@@ -1,0 +1,617 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: BST = struct @align(4) {
+  data:i32 @offset(0)
+  leftIndex:i32 @offset(4)
+  rightIndex:i32 @offset(8)
+}
+
+buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+Obj = struct @align(4) {
+  odd_numbers:array<f32, 10> @offset(0)
+  even_numbers:array<f32, 10> @offset(40)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %tree_1:ptr<private, array<BST, 10>, read_write> = var
+  %x_27:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%makeTreeNode_struct_BST_i1_i1_i11_i1_ = func(%tree:ptr<function, BST, read_write>, %data:ptr<function, i32, read_write>):void -> %b2 {
+  %b2 = block {
+    %x_74:i32 = load %data
+    %9:ptr<function, i32, read_write> = access %tree, 0u
+    store %9, %x_74
+    %10:ptr<function, i32, read_write> = access %tree, 1u
+    store %10, -1i
+    %11:ptr<function, i32, read_write> = access %tree, 2u
+    store %11, -1i
+    ret
+  }
+}
+%insert_i1_i1_ = func(%treeIndex:ptr<function, i32, read_write>, %data_1:ptr<function, i32, read_write>):void -> %b3 {
+  %b3 = block {
+    %baseIndex:ptr<function, i32, read_write> = var
+    %param:ptr<function, BST, read_write> = var
+    %param_1:ptr<function, i32, read_write> = var
+    %param_2:ptr<function, BST, read_write> = var
+    %param_3:ptr<function, i32, read_write> = var
+    %GLF_live8i:ptr<function, i32, read_write> = var
+    %GLF_live8A:ptr<function, array<f32, 50>, read_write> = var
+    store %baseIndex, 0i
+    loop [b: %b4, c: %b5] {  # loop_1
+      %b4 = block {  # body
+        %x_75:i32 = load %baseIndex
+        %x_76:i32 = load %treeIndex
+        %24:bool = lte %x_75, %x_76
+        if %24 [t: %b6, f: %b7] {  # if_1
+          %b6 = block {  # true
+            exit_if  # if_1
+          }
+          %b7 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %x_77:i32 = load %data_1
+        %x_78:i32 = load %baseIndex
+        %27:ptr<private, i32, read_write> = access %tree_1, %x_78, 0u
+        %x_79:i32 = load %27
+        %29:bool = lte %x_77, %x_79
+        if %29 [t: %b8, f: %b9] {  # if_2
+          %b8 = block {  # true
+            %x_80:i32 = load %baseIndex
+            %31:ptr<private, i32, read_write> = access %tree_1, %x_80, 1u
+            %x_81:i32 = load %31
+            %33:bool = eq %x_81, -1i
+            if %33 [t: %b10, f: %b11] {  # if_3
+              %b10 = block {  # true
+                %x_82:i32 = load %baseIndex
+                %x_83:i32 = load %treeIndex
+                %36:ptr<private, i32, read_write> = access %tree_1, %x_82, 1u
+                store %36, %x_83
+                %x_84:i32 = load %treeIndex
+                %38:ptr<private, BST, read_write> = access %tree_1, %x_84
+                %x_350:BST = load %38
+                store %param, %x_350
+                %x_85:i32 = load %data_1
+                store %param_1, %x_85
+                %41:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param, %param_1
+                %x_352:BST = load %param
+                %43:ptr<private, BST, read_write> = access %tree_1, %x_84
+                store %43, %x_352
+                ret
+              }
+              %b11 = block {  # false
+                %x_86:i32 = load %baseIndex
+                %45:ptr<private, i32, read_write> = access %tree_1, %x_86, 1u
+                %x_87:i32 = load %45
+                store %baseIndex, %x_87
+                continue %b5
+              }
+            }
+            exit_if  # if_2
+          }
+          %b9 = block {  # false
+            %x_88:i32 = load %baseIndex
+            %48:ptr<private, i32, read_write> = access %tree_1, %x_88, 2u
+            %x_89:i32 = load %48
+            %50:bool = eq %x_89, -1i
+            if %50 [t: %b12, f: %b13] {  # if_4
+              %b12 = block {  # true
+                %x_90:i32 = load %baseIndex
+                %x_91:i32 = load %treeIndex
+                %53:ptr<private, i32, read_write> = access %tree_1, %x_90, 2u
+                store %53, %x_91
+                %x_92:i32 = load %treeIndex
+                %55:ptr<private, BST, read_write> = access %tree_1, %x_92
+                %x_362:BST = load %55
+                store %param_2, %x_362
+                %x_93:i32 = load %data_1
+                store %param_3, %x_93
+                %58:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_2, %param_3
+                %x_364:BST = load %param_2
+                %60:ptr<private, BST, read_write> = access %tree_1, %x_92
+                store %60, %x_364
+                ret
+              }
+              %b13 = block {  # false
+                store %GLF_live8i, 1i
+                %x_94:i32 = load %GLF_live8i
+                %x_95:i32 = load %GLF_live8i
+                %x_96:i32 = load %GLF_live8i
+                %64:bool = gte %x_94, 0i
+                %65:bool = lt %x_95, 50i
+                %66:bool = and %64, %65
+                %x_369:i32 = select 0i, %x_96, %66
+                %68:ptr<function, f32, read_write> = access %GLF_live8A, 0i
+                %x_371:f32 = load %68
+                %70:ptr<function, f32, read_write> = access %GLF_live8A, %x_369
+                %x_373:f32 = load %70
+                %72:ptr<function, f32, read_write> = access %GLF_live8A, %x_369
+                %73:f32 = add %x_373, %x_371
+                store %72, %73
+                loop [b: %b14, c: %b15] {  # loop_2
+                  %b14 = block {  # body
+                    %x_97:i32 = load %baseIndex
+                    %75:ptr<private, i32, read_write> = access %tree_1, %x_97, 2u
+                    %x_98:i32 = load %75
+                    store %baseIndex, %x_98
+                    continue %b15
+                  }
+                  %b15 = block {  # continuing
+                    %77:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+                    %x_382:f32 = load_vector_element %77, 0u
+                    %79:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+                    %x_384:f32 = load_vector_element %79, 1u
+                    %81:bool = gt %x_382, %x_384
+                    %82:bool = eq %81, false
+                    break_if %82 %b14
+                  }
+                }
+                continue %b5
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        continue %b5
+      }
+      %b5 = block {  # continuing
+        next_iteration %b4
+      }
+    }
+    ret
+  }
+}
+%search_i1_ = func(%t:ptr<function, i32, read_write>):i32 -> %b16 {
+  %b16 = block {
+    %index:ptr<function, i32, read_write> = var
+    %currentNode:ptr<function, BST, read_write> = var
+    %x_387:ptr<function, i32, read_write> = var
+    store %index, 0i
+    loop [b: %b17, c: %b18] {  # loop_3
+      %b17 = block {  # body
+        %x_99:i32 = load %index
+        %89:bool = neq %x_99, -1i
+        if %89 [t: %b19, f: %b20] {  # if_5
+          %b19 = block {  # true
+            exit_if  # if_5
+          }
+          %b20 = block {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %x_100:i32 = load %index
+        %91:ptr<private, BST, read_write> = access %tree_1, %x_100
+        %x_395:BST = load %91
+        store %currentNode, %x_395
+        %93:ptr<function, i32, read_write> = access %currentNode, 0u
+        %x_101:i32 = load %93
+        %x_102:i32 = load %t
+        %96:bool = eq %x_101, %x_102
+        if %96 [t: %b21] {  # if_6
+          %b21 = block {  # true
+            %x_103:i32 = load %t
+            ret %x_103
+          }
+        }
+        %x_104:i32 = load %t
+        %99:ptr<function, i32, read_write> = access %currentNode, 0u
+        %x_105:i32 = load %99
+        %101:bool = gt %x_104, %x_105
+        if %101 [t: %b22, f: %b23] {  # if_7
+          %b22 = block {  # true
+            %102:ptr<function, i32, read_write> = access %currentNode, 2u
+            %x_106:i32 = load %102
+            store %x_387, %x_106
+            exit_if  # if_7
+          }
+          %b23 = block {  # false
+            %104:ptr<function, i32, read_write> = access %currentNode, 1u
+            %x_107:i32 = load %104
+            store %x_387, %x_107
+            exit_if  # if_7
+          }
+        }
+        %x_108:i32 = load %x_387
+        store %index, %x_108
+        continue %b18
+      }
+      %b18 = block {  # continuing
+        next_iteration %b17
+      }
+    }
+    ret -1i
+  }
+}
+%makeFrame_f1_ = func(%v:ptr<function, f32, read_write>):f32 -> %b24 {
+  %b24 = block {
+    %param_5:ptr<function, i32, read_write> = var
+    %param_6:ptr<function, i32, read_write> = var
+    %param_7:ptr<function, i32, read_write> = var
+    %x_418:f32 = load %v
+    %113:f32 = mul %x_418, 6.5f
+    store %v, %113
+    %x_420:f32 = load %v
+    %115:bool = lt %x_420, 1.5f
+    if %115 [t: %b25] {  # if_8
+      %b25 = block {  # true
+        store %param_5, 100i
+        %x_110:i32 = call %search_i1_, %param_5
+        %117:f32 = convert %x_110
+        ret %117
+      }
+    }
+    %x_425:f32 = load %v
+    %119:bool = lt %x_425, 4.0f
+    if %119 [t: %b26] {  # if_9
+      %b26 = block {  # true
+        ret 0.0f
+      }
+    }
+    %x_429:f32 = load %v
+    store %param_6, 6i
+    %x_111:i32 = call %search_i1_, %param_6
+    %122:f32 = convert %x_111
+    %123:bool = lt %x_429, %122
+    if %123 [t: %b27] {  # if_10
+      %b27 = block {  # true
+        ret 1.0f
+      }
+    }
+    store %param_7, 30i
+    %x_112:i32 = call %search_i1_, %param_7
+    %125:f32 = convert %x_112
+    %126:f32 = add 10.0f, %125
+    ret %126
+  }
+}
+%hueColor_f1_ = func(%angle:ptr<function, f32, read_write>):vec3<f32> -> %b28 {
+  %b28 = block {
+    %nodeData:ptr<function, f32, read_write> = var
+    %param_4:ptr<function, i32, read_write> = var
+    store %param_4, 15i
+    %x_109:i32 = call %search_i1_, %param_4
+    %132:f32 = convert %x_109
+    store %nodeData, %132
+    %x_409:f32 = load %angle
+    %x_410:f32 = load %nodeData
+    %135:vec3<f32> = construct 1.0f, 5.0f, %x_410
+    %136:vec3<f32> = mul %135, %x_409
+    %137:vec3<f32> = add vec3<f32>(30.0f), %136
+    %138:vec3<f32> = div %137, vec3<f32>(50.0f)
+    ret %138
+  }
+}
+%main_1 = func():void -> %b29 {
+  %b29 = block {
+    %treeIndex_1:ptr<function, i32, read_write> = var
+    %param_8:ptr<function, BST, read_write> = var
+    %param_9:ptr<function, i32, read_write> = var
+    %param_10:ptr<function, i32, read_write> = var
+    %param_11:ptr<function, i32, read_write> = var
+    %GLF_live1_looplimiter2:ptr<function, i32, read_write> = var
+    %GLF_live1i:ptr<function, i32, read_write> = var
+    %param_12:ptr<function, i32, read_write> = var
+    %param_13:ptr<function, i32, read_write> = var
+    %param_14:ptr<function, i32, read_write> = var
+    %param_15:ptr<function, i32, read_write> = var
+    %param_16:ptr<function, i32, read_write> = var
+    %param_17:ptr<function, i32, read_write> = var
+    %param_18:ptr<function, i32, read_write> = var
+    %param_19:ptr<function, i32, read_write> = var
+    %param_20:ptr<function, i32, read_write> = var
+    %param_21:ptr<function, i32, read_write> = var
+    %param_22:ptr<function, i32, read_write> = var
+    %param_23:ptr<function, i32, read_write> = var
+    %GLF_live4_looplimiter3:ptr<function, i32, read_write> = var
+    %GLF_live4i:ptr<function, i32, read_write> = var
+    %GLF_live4index:ptr<function, i32, read_write> = var
+    %GLF_live4obj:ptr<function, Obj, read_write> = var
+    %param_24:ptr<function, i32, read_write> = var
+    %param_25:ptr<function, i32, read_write> = var
+    %param_26:ptr<function, i32, read_write> = var
+    %param_27:ptr<function, i32, read_write> = var
+    %z:ptr<function, vec2<f32>, read_write> = var
+    %x:ptr<function, f32, read_write> = var
+    %param_28:ptr<function, f32, read_write> = var
+    %y:ptr<function, f32, read_write> = var
+    %param_29:ptr<function, f32, read_write> = var
+    %sum:ptr<function, i32, read_write> = var
+    %t_1:ptr<function, i32, read_write> = var
+    %result:ptr<function, i32, read_write> = var
+    %param_30:ptr<function, i32, read_write> = var
+    %a:ptr<function, f32, read_write> = var
+    %x_235:ptr<function, vec3<f32>, read_write> = var
+    %param_31:ptr<function, f32, read_write> = var
+    store %treeIndex_1, 0i
+    %179:ptr<private, BST, read_write> = access %tree_1, 0i
+    %x_237:BST = load %179
+    store %param_8, %x_237
+    store %param_9, 9i
+    %181:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_8, %param_9
+    %x_239:BST = load %param_8
+    %183:ptr<private, BST, read_write> = access %tree_1, 0i
+    store %183, %x_239
+    %x_113:i32 = load %treeIndex_1
+    %185:i32 = add %x_113, 1i
+    store %treeIndex_1, %185
+    %x_115:i32 = load %treeIndex_1
+    store %param_10, %x_115
+    store %param_11, 5i
+    %187:void = call %insert_i1_i1_, %param_10, %param_11
+    %x_116:i32 = load %treeIndex_1
+    %189:i32 = add %x_116, 1i
+    store %treeIndex_1, %189
+    store %GLF_live1_looplimiter2, 0i
+    store %GLF_live1i, 0i
+    loop [b: %b30, c: %b31] {  # loop_4
+      %b30 = block {  # body
+        if true [t: %b32, f: %b33] {  # if_11
+          %b32 = block {  # true
+            exit_if  # if_11
+          }
+          %b33 = block {  # false
+            exit_loop  # loop_4
+          }
+        }
+        %x_118:i32 = load %GLF_live1_looplimiter2
+        %191:bool = gte %x_118, 7i
+        if %191 [t: %b34] {  # if_12
+          %b34 = block {  # true
+            exit_loop  # loop_4
+          }
+        }
+        %x_119:i32 = load %GLF_live1_looplimiter2
+        %193:i32 = add %x_119, 1i
+        store %GLF_live1_looplimiter2, %193
+        continue %b31
+      }
+      %b31 = block {  # continuing
+        %x_121:i32 = load %GLF_live1i
+        %195:i32 = add %x_121, 1i
+        store %GLF_live1i, %195
+        next_iteration %b30
+      }
+    }
+    %x_123:i32 = load %treeIndex_1
+    store %param_12, %x_123
+    store %param_13, 12i
+    %197:void = call %insert_i1_i1_, %param_12, %param_13
+    %x_124:i32 = load %treeIndex_1
+    %199:i32 = add %x_124, 1i
+    store %treeIndex_1, %199
+    %x_126:i32 = load %treeIndex_1
+    store %param_14, %x_126
+    store %param_15, 15i
+    %201:void = call %insert_i1_i1_, %param_14, %param_15
+    %x_127:i32 = load %treeIndex_1
+    %203:i32 = add %x_127, 1i
+    store %treeIndex_1, %203
+    %x_129:i32 = load %treeIndex_1
+    store %param_16, %x_129
+    store %param_17, 7i
+    %205:void = call %insert_i1_i1_, %param_16, %param_17
+    %x_130:i32 = load %treeIndex_1
+    %207:i32 = add %x_130, 1i
+    store %treeIndex_1, %207
+    %x_132:i32 = load %treeIndex_1
+    store %param_18, %x_132
+    store %param_19, 8i
+    %209:void = call %insert_i1_i1_, %param_18, %param_19
+    %x_133:i32 = load %treeIndex_1
+    %211:i32 = add %x_133, 1i
+    store %treeIndex_1, %211
+    %x_135:i32 = load %treeIndex_1
+    store %param_20, %x_135
+    store %param_21, 2i
+    %213:void = call %insert_i1_i1_, %param_20, %param_21
+    %x_136:i32 = load %treeIndex_1
+    %215:i32 = add %x_136, 1i
+    store %treeIndex_1, %215
+    %x_138:i32 = load %treeIndex_1
+    store %param_22, %x_138
+    store %param_23, 6i
+    %217:void = call %insert_i1_i1_, %param_22, %param_23
+    %x_139:i32 = load %treeIndex_1
+    %219:i32 = add %x_139, 1i
+    store %treeIndex_1, %219
+    store %GLF_live4_looplimiter3, 0i
+    store %GLF_live4i, 0i
+    loop [b: %b35, c: %b36] {  # loop_5
+      %b35 = block {  # body
+        if true [t: %b37, f: %b38] {  # if_13
+          %b37 = block {  # true
+            exit_if  # if_13
+          }
+          %b38 = block {  # false
+            exit_loop  # loop_5
+          }
+        }
+        %x_141:i32 = load %GLF_live4_looplimiter3
+        %221:bool = gte %x_141, 3i
+        if %221 [t: %b39] {  # if_14
+          %b39 = block {  # true
+            exit_loop  # loop_5
+          }
+        }
+        %x_142:i32 = load %GLF_live4_looplimiter3
+        %223:i32 = add %x_142, 1i
+        store %GLF_live4_looplimiter3, %223
+        store %GLF_live4index, 1i
+        %x_144:i32 = load %GLF_live4index
+        %x_145:i32 = load %GLF_live4index
+        %x_146:i32 = load %GLF_live4index
+        %227:ptr<function, f32, read_write> = access %GLF_live4obj, 1u, 1i
+        %x_269:f32 = load %227
+        %229:bool = gte %x_144, 0i
+        %230:bool = lt %x_145, 10i
+        %231:bool = and %229, %230
+        %232:i32 = select 0i, %x_146, %231
+        %233:ptr<function, f32, read_write> = access %GLF_live4obj, 1u, %232
+        store %233, %x_269
+        %x_147:i32 = load %GLF_live4i
+        %x_148:i32 = load %GLF_live4i
+        %x_149:i32 = load %GLF_live4i
+        %237:bool = gte %x_147, 0i
+        %238:bool = lt %x_148, 10i
+        %239:bool = and %237, %238
+        %240:i32 = select 0i, %x_149, %239
+        %241:ptr<function, f32, read_write> = access %GLF_live4obj, 1u, %240
+        store %241, 1.0f
+        continue %b36
+      }
+      %b36 = block {  # continuing
+        %x_150:i32 = load %GLF_live4i
+        %243:i32 = add %x_150, 1i
+        store %GLF_live4i, %243
+        next_iteration %b35
+      }
+    }
+    %x_152:i32 = load %treeIndex_1
+    store %param_24, %x_152
+    store %param_25, 17i
+    %245:void = call %insert_i1_i1_, %param_24, %param_25
+    %246:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+    %x_278:f32 = load_vector_element %246, 0u
+    %248:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+    %x_280:f32 = load_vector_element %248, 1u
+    %250:bool = gt %x_278, %x_280
+    if %250 [t: %b40] {  # if_15
+      %b40 = block {  # true
+        ret
+      }
+    }
+    %x_153:i32 = load %treeIndex_1
+    %252:i32 = add %x_153, 1i
+    store %treeIndex_1, %252
+    %x_155:i32 = load %treeIndex_1
+    store %param_26, %x_155
+    store %param_27, 13i
+    %254:void = call %insert_i1_i1_, %param_26, %param_27
+    %x_285:vec4<f32> = load %gl_FragCoord
+    %256:f32 = access %x_285, 1u
+    %257:f32 = access %x_285, 0u
+    %258:vec2<f32> = construct %256, %257
+    %259:vec2<f32> = div %258, vec2<f32>(256.0f)
+    store %z, %259
+    %x_289:f32 = load_vector_element %z, 0u
+    store %param_28, %x_289
+    %x_290:f32 = call %makeFrame_f1_, %param_28
+    store %x, %x_290
+    %x_292:f32 = load_vector_element %z, 1u
+    store %param_29, %x_292
+    %x_293:f32 = call %makeFrame_f1_, %param_29
+    store %y, %x_293
+    store %sum, -100i
+    store %t_1, 0i
+    loop [b: %b41, c: %b42] {  # loop_6
+      %b41 = block {  # body
+        %x_156:i32 = load %t_1
+        %265:bool = lt %x_156, 20i
+        if %265 [t: %b43, f: %b44] {  # if_16
+          %b43 = block {  # true
+            exit_if  # if_16
+          }
+          %b44 = block {  # false
+            exit_loop  # loop_6
+          }
+        }
+        %x_157:i32 = load %t_1
+        store %param_30, %x_157
+        %x_158:i32 = call %search_i1_, %param_30
+        store %result, %x_158
+        %x_159:i32 = load %result
+        %269:bool = gt %x_159, 0i
+        if %269 [t: %b45, f: %b46] {  # if_17
+          %b45 = block {  # true
+            exit_if  # if_17
+          }
+          %b46 = block {  # false
+            %x_160:i32 = load %result
+            switch %x_160 [c: (0i, %b47), c: (-1i, %b48), c: (default, %b49)] {  # switch_1
+              %b47 = block {  # case
+                ret
+              }
+              %b48 = block {  # case
+                %x_161:i32 = load %sum
+                %272:i32 = add %x_161, 1i
+                store %sum, %272
+                exit_switch  # switch_1
+              }
+              %b49 = block {  # case
+                exit_switch  # switch_1
+              }
+            }
+            exit_if  # if_17
+          }
+        }
+        continue %b42
+      }
+      %b42 = block {  # continuing
+        %x_163:i32 = load %t_1
+        %274:i32 = add %x_163, 1i
+        store %t_1, %274
+        next_iteration %b41
+      }
+    }
+    %x_307:f32 = load %x
+    %x_308:f32 = load %y
+    %x_165:i32 = load %sum
+    %278:f32 = convert %x_165
+    %279:f32 = mul %x_308, %278
+    %280:f32 = add %x_307, %279
+    store %a, %280
+    %281:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+    %x_313:f32 = load_vector_element %281, 0u
+    %283:ptr<uniform, vec2<f32>, read> = access %x_27, 0u
+    %x_315:f32 = load_vector_element %283, 1u
+    %285:bool = lt %x_313, %x_315
+    if %285 [t: %b50, f: %b51] {  # if_18
+      %b50 = block {  # true
+        store %x_235, vec3<f32>(1.0f, 0.0f, 0.0f)
+        exit_if  # if_18
+      }
+      %b51 = block {  # false
+        %x_320:f32 = load %a
+        store %param_31, %x_320
+        %x_321:vec3<f32> = call %hueColor_f1_, %param_31
+        store %x_235, %x_321
+        exit_if  # if_18
+      }
+    }
+    %x_322:vec3<f32> = load %x_235
+    %289:f32 = access %x_322, 0u
+    %290:f32 = access %x_322, 1u
+    %291:f32 = access %x_322, 2u
+    %292:vec4<f32> = construct %289, %290, %291, 1.0f
+    store %x_GLF_color, %292
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b52 {
+  %b52 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %295:void = call %main_1
+    %296:vec4<f32> = load %x_GLF_color
+    %297:main_out = construct %296
+    ret %297
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,45 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %arg_0:ptr<handle, texture_storage_1d<rg32sint, read>, read> = var @binding_point(1, 0)
+  %prevent_dce:ptr<storage, vec4<i32>, read_write> = var @binding_point(2, 0)
+}
+
+%textureLoad_2d6cf7 = func():void -> %b2 {
+  %b2 = block {
+    %arg_1:ptr<function, i32, read_write> = var, 1i
+    %5:texture_storage_1d<rg32sint, read> = load %arg_0
+    %6:i32 = load %arg_1
+    %7:vec4<i32> = textureLoad %5, %6
+    %res:ptr<function, vec4<i32>, read_write> = var, %7
+    %9:vec4<i32> = load %res
+    store %prevent_dce, %9
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
+  %b3 = block {
+    %11:void = call %textureLoad_2d6cf7
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void -> %b4 {
+  %b4 = block {
+    %13:void = call %textureLoad_2d6cf7
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %15:void = call %textureLoad_2d6cf7
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

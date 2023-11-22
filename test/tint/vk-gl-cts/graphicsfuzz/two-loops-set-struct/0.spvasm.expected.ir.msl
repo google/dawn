@@ -1,0 +1,126 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+StructType = struct @align(16) {
+  col:vec3<f32> @offset(0)
+  bbbb:vec4<bool> @offset(16)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %x_33:ptr<function, StructType, read_write> = var
+    %x_9:ptr<function, i32, read_write> = var
+    %x_38:ptr<function, i32, read_write> = var
+    %x_42:ptr<function, StructType, read_write> = var
+    %x_10:ptr<function, i32, read_write> = var
+    store %x_33, StructType(vec3<f32>(0.0f), vec4<bool>(false))
+    store %x_9, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_34:ptr<function, StructType, read_write> = var
+        %x_7:ptr<function, i32, read_write> = var
+        %11:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
+        %12:f32 = load_vector_element %11, 1u
+        %13:i32 = convert %12
+        store %x_38, %13
+        %14:i32 = load %x_9
+        %15:i32 = load %x_38
+        %16:bool = lt %14, %15
+        if %16 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %17:StructType = load %x_33
+        store %x_34, %17
+        %18:ptr<function, vec3<f32>, read_write> = access %x_34, 0u
+        store %18, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %19:i32 = load %x_9
+        %20:i32 = add %19, 1i
+        store %x_7, %20
+        %21:StructType = load %x_34
+        store %x_33, %21
+        %22:i32 = load %x_7
+        store %x_9, %22
+        next_iteration %b3
+      }
+    }
+    %23:StructType = load %x_33
+    store %x_42, %23
+    store %x_10, 0i
+    loop [b: %b7, c: %b8] {  # loop_2
+      %b7 = block {  # body
+        %x_43:ptr<function, StructType, read_write> = var
+        %x_8:ptr<function, i32, read_write> = var
+        %26:i32 = load %x_10
+        %27:i32 = load %x_38
+        %28:bool = lt %26, %27
+        if %28 [t: %b9, f: %b10] {  # if_2
+          %b9 = block {  # true
+            exit_if  # if_2
+          }
+          %b10 = block {  # false
+            exit_loop  # loop_2
+          }
+        }
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %29:StructType = load %x_42
+        store %x_43, %29
+        %30:ptr<function, vec3<f32>, read_write> = access %x_43, 0u
+        store %30, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %31:i32 = load %x_10
+        %32:i32 = add %31, 1i
+        store %x_8, %32
+        %33:StructType = load %x_43
+        store %x_42, %33
+        %34:i32 = load %x_8
+        store %x_10, %34
+        next_iteration %b7
+      }
+    }
+    %35:ptr<function, vec3<f32>, read_write> = access %x_42, 0u
+    %x_47:vec3<f32> = load %35
+    %37:f32 = access %x_47, 0u
+    %38:f32 = access %x_47, 1u
+    %39:f32 = access %x_47, 2u
+    %40:vec4<f32> = construct %37, %38, %39, 1.0f
+    store %x_GLF_color, %40
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b11 {
+  %b11 = block {
+    %42:void = call %main_1
+    %43:vec4<f32> = load %x_GLF_color
+    %44:main_out = construct %43
+    ret %44
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,147 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+  one:u32 @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, u32, read_write> = var
+    %d:ptr<function, u32, read_write> = var
+    %e:ptr<function, u32, read_write> = var
+    %f:ptr<function, u32, read_write> = var
+    %10:ptr<uniform, u32, read> = access %x_6, 0u
+    %11:u32 = load %10
+    %12:u32 = add 77u, %11
+    %13:u32 = shiftr %12, 32u
+    store %a, %13
+    %14:ptr<uniform, u32, read> = access %x_6, 0u
+    %15:u32 = load %14
+    %16:u32 = add 3243u, %15
+    %17:u32 = shiftr %16, 33u
+    store %b, %17
+    %18:ptr<uniform, u32, read> = access %x_6, 0u
+    %19:u32 = load %18
+    %20:u32 = add 23u, %19
+    %21:u32 = shiftr %20, 345u
+    store %c, %21
+    %22:ptr<uniform, u32, read> = access %x_6, 0u
+    %23:u32 = load %22
+    %24:u32 = add 2395u, %23
+    %25:u32 = shiftl %24, 32u
+    store %d, %25
+    %26:ptr<uniform, u32, read> = access %x_6, 0u
+    %27:u32 = load %26
+    %28:u32 = add 290485u, %27
+    %29:u32 = shiftl %28, 33u
+    store %e, %29
+    %30:ptr<uniform, u32, read> = access %x_6, 0u
+    %31:u32 = load %30
+    %32:u32 = add 44321u, %31
+    %33:u32 = shiftl %32, 345u
+    store %f, %33
+    %34:u32 = load %a
+    %35:bool = neq %34, 1u
+    if %35 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        store %a, 1u
+        exit_if  # if_1
+      }
+    }
+    %36:u32 = load %b
+    %37:bool = neq %36, 0u
+    if %37 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        store %b, 0u
+        exit_if  # if_2
+      }
+    }
+    %38:u32 = load %c
+    %39:bool = neq %38, 1u
+    if %39 [t: %b5] {  # if_3
+      %b5 = block {  # true
+        store %c, 1u
+        exit_if  # if_3
+      }
+    }
+    %40:u32 = load %d
+    %41:bool = neq %40, 0u
+    if %41 [t: %b6] {  # if_4
+      %b6 = block {  # true
+        store %d, 0u
+        exit_if  # if_4
+      }
+    }
+    %42:u32 = load %e
+    %43:bool = neq %42, 1u
+    if %43 [t: %b7] {  # if_5
+      %b7 = block {  # true
+        store %e, 1u
+        exit_if  # if_5
+      }
+    }
+    %44:u32 = load %f
+    %45:bool = neq %44, 0u
+    if %45 [t: %b8] {  # if_6
+      %b8 = block {  # true
+        store %f, 0u
+        exit_if  # if_6
+      }
+    }
+    %46:u32 = load %a
+    %47:bool = eq %46, 1u
+    %48:u32 = load %b
+    %49:bool = eq %48, 0u
+    %50:bool = and %47, %49
+    %51:u32 = load %c
+    %52:bool = eq %51, 1u
+    %53:bool = and %50, %52
+    %54:u32 = load %d
+    %55:bool = eq %54, 0u
+    %56:bool = and %53, %55
+    %57:u32 = load %e
+    %58:bool = eq %57, 1u
+    %59:bool = and %56, %58
+    %60:u32 = load %f
+    %61:bool = eq %60, 0u
+    %62:bool = and %59, %61
+    if %62 [t: %b9, f: %b10] {  # if_7
+      %b9 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_7
+      }
+      %b10 = block {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_7
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b11 {
+  %b11 = block {
+    %64:void = call %main_1
+    %65:vec4<f32> = load %x_GLF_color
+    %66:main_out = construct %65
+    ret %66
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

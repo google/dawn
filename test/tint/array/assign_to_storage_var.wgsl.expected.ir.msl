@@ -1,0 +1,78 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+  arr:array<vec4<i32>, 4> @offset(0)
+}
+
+S_nested = struct @align(4) {
+  arr:array<array<array<i32, 2>, 3>, 4> @offset(0)
+}
+
+%b1 = block {  # root
+  %src_private:ptr<private, array<vec4<i32>, 4>, read_write> = var
+  %src_workgroup:ptr<workgroup, array<vec4<i32>, 4>, read_write> = var
+  %src_uniform:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %src_storage:ptr<storage, S, read_write> = var @binding_point(0, 1)
+  %dst:ptr<storage, S, read_write> = var @binding_point(0, 2)
+  %dst_nested:ptr<storage, S_nested, read_write> = var @binding_point(0, 3)
+}
+
+%ret_arr = func():array<vec4<i32>, 4> -> %b2 {
+  %b2 = block {
+    ret array<vec4<i32>, 4>(vec4<i32>(0i))
+  }
+}
+%ret_struct_arr = func():S -> %b3 {
+  %b3 = block {
+    ret S(array<vec4<i32>, 4>(vec4<i32>(0i)))
+  }
+}
+%foo = func(%src_param:array<vec4<i32>, 4>):void -> %b4 {
+  %b4 = block {
+    %src_function:ptr<function, array<vec4<i32>, 4>, read_write> = var
+    %12:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    store %12, array<vec4<i32>, 4>(vec4<i32>(1i), vec4<i32>(2i), vec4<i32>(3i), vec4<i32>(3i))
+    %13:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    store %13, %src_param
+    %14:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %15:array<vec4<i32>, 4> = call %ret_arr
+    store %14, %15
+    %src_let:array<vec4<i32>, 4> = let array<vec4<i32>, 4>(vec4<i32>(0i))
+    %17:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    store %17, %src_let
+    %18:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %19:array<vec4<i32>, 4> = load %src_function
+    store %18, %19
+    %20:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %21:array<vec4<i32>, 4> = load %src_private
+    store %20, %21
+    %22:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %23:array<vec4<i32>, 4> = load %src_workgroup
+    store %22, %23
+    %24:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %25:S = call %ret_struct_arr
+    %26:array<vec4<i32>, 4> = access %25, 0u
+    store %24, %26
+    %27:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %28:ptr<uniform, array<vec4<i32>, 4>, read> = access %src_uniform, 0u
+    %29:array<vec4<i32>, 4> = load %28
+    store %27, %29
+    %30:ptr<storage, array<vec4<i32>, 4>, read_write> = access %dst, 0u
+    %31:ptr<storage, array<vec4<i32>, 4>, read_write> = access %src_storage, 0u
+    %32:array<vec4<i32>, 4> = load %31
+    store %30, %32
+    %src_nested:ptr<function, array<array<array<i32, 2>, 3>, 4>, read_write> = var
+    %34:ptr<storage, array<array<array<i32, 2>, 3>, 4>, read_write> = access %dst_nested, 0u
+    %35:array<array<array<i32, 2>, 3>, 4> = load %src_nested
+    store %34, %35
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

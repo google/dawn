@@ -1,0 +1,42 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %out:ptr<storage, f32, read_write> = var @binding_point(0, 0)
+}
+
+%bar = func(%p:ptr<function, f32, read_write>):void -> %b2 {
+  %b2 = block {
+    %a:f32 = let 1.0f
+    %b:f32 = let 2.0f
+    %6:bool = gte %a, 0.0f
+    %cond:bool = if %6 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %8:bool = gte %b, 0.0f
+        exit_if %8  # if_1
+      }
+      %b4 = block {  # false
+        exit_if false  # if_1
+      }
+    }
+    %9:f32 = select %a, %b, %cond
+    store %p, %9
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %param:ptr<function, f32, read_write> = var
+    %12:void = call %bar, %param
+    %13:f32 = load %param
+    store %out, %13
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

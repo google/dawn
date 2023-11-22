@@ -1,0 +1,36 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: __atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+%b1 = block {  # root
+  %a:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():i32 [@location(0)] -> %b2 {
+  %b2 = block {
+    discard
+    %x:ptr<function, i32, read_write> = var, 0i
+    %result:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %a, 0i, 1i
+    %5:bool = access %result, 1u
+    if %5 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        %6:i32 = access %result, 0u
+        store %x, %6
+        exit_if  # if_1
+      }
+    }
+    %7:i32 = load %x
+    ret %7
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

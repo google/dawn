@@ -1,0 +1,191 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %i:ptr<function, i32, read_write> = var
+    %GLF_dead5cols:ptr<function, i32, read_write> = var
+    %GLF_dead5rows:ptr<function, i32, read_write> = var
+    %GLF_dead5c:ptr<function, i32, read_write> = var
+    %GLF_dead5r:ptr<function, i32, read_write> = var
+    %msb10:ptr<function, i32, read_write> = var
+    %donor_replacementGLF_dead5sums:ptr<function, array<f32, 9>, read_write> = var
+    store %i, 0i
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_45:i32 = load %i
+        %12:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+        %x_47:f32 = load_vector_element %12, 0u
+        %14:i32 = convert %x_47
+        %15:bool = gte %x_45, %14
+        if %15 [t: %b5] {  # if_1
+          %b5 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %16:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+        %x_53:f32 = load_vector_element %16, 1u
+        %18:bool = gt 0.0f, %x_53
+        if %18 [t: %b6] {  # if_2
+          %b6 = block {  # true
+            store %GLF_dead5cols, 2i
+            loop [b: %b7, c: %b8] {  # loop_2
+              %b7 = block {  # body
+                %x_61:i32 = load %GLF_dead5cols
+                %20:bool = lte %x_61, 4i
+                if %20 [t: %b9, f: %b10] {  # if_3
+                  %b9 = block {  # true
+                    exit_if  # if_3
+                  }
+                  %b10 = block {  # false
+                    exit_loop  # loop_2
+                  }
+                }
+                store %GLF_dead5rows, 2i
+                loop [b: %b11, c: %b12] {  # loop_3
+                  %b11 = block {  # body
+                    %x_68:i32 = load %GLF_dead5rows
+                    %22:bool = lte %x_68, 4i
+                    if %22 [t: %b13, f: %b14] {  # if_4
+                      %b13 = block {  # true
+                        exit_if  # if_4
+                      }
+                      %b14 = block {  # false
+                        exit_loop  # loop_3
+                      }
+                    }
+                    store %GLF_dead5c, 0i
+                    loop [b: %b15, c: %b16] {  # loop_4
+                      %b15 = block {  # body
+                        %x_75:i32 = load %GLF_dead5c
+                        %x_76:i32 = load %GLF_dead5cols
+                        %25:bool = lt %x_75, %x_76
+                        if %25 [t: %b17, f: %b18] {  # if_5
+                          %b17 = block {  # true
+                            exit_if  # if_5
+                          }
+                          %b18 = block {  # false
+                            exit_loop  # loop_4
+                          }
+                        }
+                        store %GLF_dead5r, 0i
+                        loop [b: %b19, c: %b20] {  # loop_5
+                          %b19 = block {  # body
+                            %x_83:i32 = load %GLF_dead5r
+                            %x_84:i32 = load %GLF_dead5rows
+                            %28:bool = lt %x_83, %x_84
+                            if %28 [t: %b21, f: %b22] {  # if_6
+                              %b21 = block {  # true
+                                exit_if  # if_6
+                              }
+                              %b22 = block {  # false
+                                exit_loop  # loop_5
+                              }
+                            }
+                            %x_87:i32 = load %msb10
+                            switch %x_87 [c: (1i 8i, %b23), c: (default, %b24)] {  # switch_1
+                              %b23 = block {  # case
+                                %x_90:i32 = load %msb10
+                                %x_92:i32 = load %msb10
+                                %x_95:i32 = load %msb10
+                                %33:bool = gte %x_90, 0i
+                                %34:bool = lt %x_92, 9i
+                                %35:bool = and %33, %34
+                                %x_96:i32 = select 0i, %x_95, %35
+                                %37:ptr<function, f32, read_write> = access %donor_replacementGLF_dead5sums, %x_96
+                                %x_98:f32 = load %37
+                                %39:ptr<function, f32, read_write> = access %donor_replacementGLF_dead5sums, %x_96
+                                %40:f32 = add %x_98, 1.0f
+                                store %39, %40
+                                exit_switch  # switch_1
+                              }
+                              %b24 = block {  # case
+                                exit_switch  # switch_1
+                              }
+                            }
+                            continue %b20
+                          }
+                          %b20 = block {  # continuing
+                            %x_101:i32 = load %GLF_dead5r
+                            %42:i32 = add %x_101, 1i
+                            store %GLF_dead5r, %42
+                            next_iteration %b19
+                          }
+                        }
+                        continue %b16
+                      }
+                      %b16 = block {  # continuing
+                        %x_103:i32 = load %GLF_dead5c
+                        %44:i32 = add %x_103, 1i
+                        store %GLF_dead5c, %44
+                        next_iteration %b15
+                      }
+                    }
+                    %x_105:i32 = load %msb10
+                    %46:i32 = add %x_105, 1i
+                    store %msb10, %46
+                    continue %b12
+                  }
+                  %b12 = block {  # continuing
+                    %x_107:i32 = load %GLF_dead5rows
+                    %48:i32 = add %x_107, 1i
+                    store %GLF_dead5rows, %48
+                    next_iteration %b11
+                  }
+                }
+                continue %b8
+              }
+              %b8 = block {  # continuing
+                %x_109:i32 = load %GLF_dead5cols
+                %50:i32 = add %x_109, 1i
+                store %GLF_dead5cols, %50
+                next_iteration %b7
+              }
+            }
+            exit_if  # if_2
+          }
+        }
+        %x_111:i32 = load %i
+        %52:i32 = add %x_111, 1i
+        store %i, %52
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %x_113:i32 = load %i
+        %54:bool = lt %x_113, 200i
+        %55:bool = eq %54, false
+        break_if %55 %b3
+      }
+    }
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b25 {
+  %b25 = block {
+    %57:void = call %main_1
+    %58:vec4<f32> = load %x_GLF_color
+    %59:main_out = construct %58
+    ret %59
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

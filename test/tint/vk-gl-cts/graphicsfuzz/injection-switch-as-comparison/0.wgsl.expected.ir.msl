@@ -1,0 +1,176 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%makeFrame_ = func():f32 -> %b2 {
+  %b2 = block {
+    %x_60:ptr<function, f32, read_write> = var
+    %x_63_phi:ptr<function, f32, read_write> = var
+    loop [b: %b3, c: %b4] {  # loop_1
+      %b3 = block {  # body
+        %x_41:ptr<function, bool, read_write> = var
+        %x_44:ptr<function, f32, read_write> = var
+        %x_45:ptr<function, f32, read_write> = var
+        %x_42:ptr<function, bool, read_write> = var
+        %x_41_phi:ptr<function, bool, read_write> = var
+        %x_8_phi:ptr<function, i32, read_write> = var
+        %x_44_phi:ptr<function, f32, read_write> = var
+        %x_60_phi:ptr<function, f32, read_write> = var
+        %x_61_phi:ptr<function, bool, read_write> = var
+        store %x_41_phi, false
+        store %x_8_phi, 0i
+        store %x_44_phi, 0.0f
+        loop [b: %b5, c: %b6] {  # loop_2
+          %b5 = block {  # body
+            %x_50:ptr<function, f32, read_write> = var
+            %x_9:ptr<function, i32, read_write> = var
+            %x_52:ptr<function, bool, read_write> = var
+            %x_7:ptr<function, i32, read_write> = var
+            %x_50_phi:ptr<function, f32, read_write> = var
+            %x_9_phi:ptr<function, i32, read_write> = var
+            %x_52_phi:ptr<function, bool, read_write> = var
+            %x_45_phi:ptr<function, f32, read_write> = var
+            %x_42_phi:ptr<function, bool, read_write> = var
+            %24:bool = load %x_41_phi
+            store %x_41, %24
+            %x_8:i32 = load %x_8_phi
+            %26:f32 = load %x_44_phi
+            store %x_44, %26
+            %27:f32 = load %x_44
+            store %x_60_phi, %27
+            %28:bool = load %x_41
+            store %x_61_phi, %28
+            %29:bool = lt %x_8, 1i
+            if %29 [t: %b7, f: %b8] {  # if_1
+              %b7 = block {  # true
+                exit_if  # if_1
+              }
+              %b8 = block {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %30:f32 = load %x_44
+            store %x_50_phi, %30
+            store %x_9_phi, %x_8
+            %31:bool = load %x_41
+            store %x_52_phi, %31
+            loop [b: %b9, c: %b10] {  # loop_3
+              %b9 = block {  # body
+                %32:f32 = load %x_50_phi
+                store %x_50, %32
+                %33:i32 = load %x_9_phi
+                store %x_9, %33
+                %34:bool = load %x_52_phi
+                store %x_52, %34
+                %35:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+                %x_54:f32 = load_vector_element %35, 1u
+                %37:f32 = load %x_50
+                store %x_45_phi, %37
+                %38:bool = load %x_52
+                store %x_42_phi, %38
+                %39:i32 = convert %x_54
+                %40:bool = lt 1i, %39
+                if %40 [t: %b11, f: %b12] {  # if_2
+                  %b11 = block {  # true
+                    exit_if  # if_2
+                  }
+                  %b12 = block {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                store %x_45_phi, 1.0f
+                store %x_42_phi, true
+                exit_loop  # loop_3
+              }
+              %b10 = block {  # continuing
+                store %x_50_phi, 0.0f
+                store %x_9_phi, 0i
+                store %x_52_phi, false
+                next_iteration %b9
+              }
+            }
+            %41:f32 = load %x_45_phi
+            store %x_45, %41
+            %42:bool = load %x_42_phi
+            store %x_42, %42
+            %43:f32 = load %x_45
+            store %x_60_phi, %43
+            %44:bool = load %x_42
+            store %x_61_phi, %44
+            %45:bool = load %x_42
+            if %45 [t: %b13] {  # if_3
+              %b13 = block {  # true
+                exit_loop  # loop_2
+              }
+            }
+            continue %b6
+          }
+          %b6 = block {  # continuing
+            %46:i32 = load %x_9
+            %47:i32 = add %46, 1i
+            %48:i32 = bitcast %47
+            store %x_7, %48
+            %49:bool = load %x_42
+            store %x_41_phi, %49
+            %50:i32 = load %x_7
+            store %x_8_phi, %50
+            %51:f32 = load %x_45
+            store %x_44_phi, %51
+            next_iteration %b5
+          }
+        }
+        %52:f32 = load %x_60_phi
+        store %x_60, %52
+        %x_61:bool = load %x_61_phi
+        %54:f32 = load %x_60
+        store %x_63_phi, %54
+        if %x_61 [t: %b14] {  # if_4
+          %b14 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        store %x_63_phi, 1.0f
+        exit_loop  # loop_1
+      }
+      %b4 = block {  # continuing
+        next_iteration %b3
+      }
+    }
+    %x_63:f32 = load %x_63_phi
+    ret %x_63
+  }
+}
+%main_1 = func():void -> %b15 {
+  %b15 = block {
+    %x_34:f32 = call %makeFrame_
+    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b16 {
+  %b16 = block {
+    %59:void = call %main_1
+    %60:vec4<f32> = load %x_GLF_color
+    %61:main_out = construct %60
+    ret %61
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,84 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: struct_base = struct @align(4) {
+  data:i32 @offset(0)
+  leftIndex:i32 @offset(4)
+  rightIndex:i32 @offset(8)
+}
+
+buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %struct_array:ptr<private, array<struct_base, 3>, read_write> = var
+  %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void -> %b2 {
+  %b2 = block {
+    %index:ptr<function, i32, read_write> = var
+    store %struct_array, array<struct_base, 3>(struct_base(1i))
+    store %index, 1i
+    %6:ptr<private, i32, read_write> = access %struct_array, 1i, 2u
+    store %6, 1i
+    %7:ptr<private, i32, read_write> = access %struct_array, 1i, 1u
+    %x_39:i32 = load %7
+    %9:bool = eq %x_39, 1i
+    if %9 [t: %b3, f: %b4] {  # if_1
+      %b3 = block {  # true
+        %10:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_45:f32 = load_vector_element %10, 0u
+        %12:i32 = convert %x_45
+        %13:ptr<private, i32, read_write> = access %struct_array, %12, 2u
+        %x_48:i32 = load %13
+        store %index, %x_48
+        exit_if  # if_1
+      }
+      %b4 = block {  # false
+        %15:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %x_50:f32 = load_vector_element %15, 1u
+        %17:i32 = convert %x_50
+        %18:ptr<private, i32, read_write> = access %struct_array, %17, 1u
+        %x_53:i32 = load %18
+        store %index, %x_53
+        exit_if  # if_1
+      }
+    }
+    %20:ptr<private, i32, read_write> = access %struct_array, 1i, 1u
+    %x_55:i32 = load %20
+    %22:bool = eq %x_55, 1i
+    if %22 [t: %b5, f: %b6] {  # if_2
+      %b5 = block {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_2
+      }
+      %b6 = block {  # false
+        store %x_GLF_color, vec4<f32>(1.0f)
+        exit_if  # if_2
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out -> %b7 {
+  %b7 = block {
+    %24:void = call %main_1
+    %25:vec4<f32> = load %x_GLF_color
+    %26:main_out = construct %25
+    ret %26
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

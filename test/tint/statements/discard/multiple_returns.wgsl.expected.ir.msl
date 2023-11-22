@@ -1,0 +1,63 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+  %non_uniform_global:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+  %output:ptr<storage, f32, read_write> = var @binding_point(0, 1)
+}
+
+%tint_symbol = @fragment func():void -> %b2 {
+  %b2 = block {
+    %4:i32 = load %non_uniform_global
+    %5:bool = lt %4, 0i
+    if %5 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        discard
+        exit_if  # if_1
+      }
+    }
+    %6:f32 = dpdx 1.0f
+    store %output, %6
+    %7:f32 = load %output
+    %8:bool = lt %7, 0.0f
+    if %8 [t: %b4] {  # if_2
+      %b4 = block {  # true
+        %i:ptr<function, i32, read_write> = var, 0i
+        loop [b: %b5, c: %b6] {  # loop_1
+          %b5 = block {  # body
+            %10:f32 = load %output
+            %11:i32 = load %i
+            %12:f32 = convert %11
+            %13:bool = gt %10, %12
+            if %13 [t: %b7] {  # if_3
+              %b7 = block {  # true
+                %14:i32 = load %i
+                %15:f32 = convert %14
+                store %output, %15
+                ret
+              }
+            }
+            continue %b6
+          }
+          %b6 = block {  # continuing
+            %16:i32 = load %i
+            %17:i32 = add %16, 1i
+            store %i, %17
+            %18:i32 = load %i
+            %19:bool = eq %18, 5i
+            break_if %19 %b5
+          }
+        }
+        ret
+      }
+    }
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

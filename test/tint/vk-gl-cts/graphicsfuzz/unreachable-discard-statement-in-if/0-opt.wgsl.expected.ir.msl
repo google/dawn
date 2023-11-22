@@ -1,0 +1,75 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+  injectionSwitch:vec2<f32> @offset(0)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+%b1 = block {  # root
+  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%computePoint_ = func():vec3<f32> -> %b2 {
+  %b2 = block {
+    %5:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_48:f32 = load_vector_element %5, 0u
+    %7:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+    %x_50:f32 = load_vector_element %7, 1u
+    %9:bool = gt %x_48, %x_50
+    if %9 [t: %b3] {  # if_1
+      %b3 = block {  # true
+        discard
+        exit_if  # if_1
+      }
+    }
+    ret vec3<f32>(0.0f)
+  }
+}
+%main_1 = func():void -> %b4 {
+  %b4 = block {
+    %x_34:ptr<function, bool, read_write> = var, false
+    loop [b: %b5, c: %b6] {  # loop_1
+      %b5 = block {  # body
+        %x_36:vec3<f32> = call %computePoint_
+        %x_41:f32 = load_vector_element %gl_FragCoord, 0u
+        %14:bool = lt %x_41, 0.0f
+        if %14 [t: %b7] {  # if_2
+          %b7 = block {  # true
+            store %x_34, true
+            exit_loop  # loop_1
+          }
+        }
+        %x_45:vec3<f32> = call %computePoint_
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        store %x_34, true
+        exit_loop  # loop_1
+      }
+      %b6 = block {  # continuing
+        next_iteration %b5
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b8 {
+  %b8 = block {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %18:void = call %main_1
+    %19:vec4<f32> = load %x_GLF_color
+    %20:main_out = construct %19
+    ret %20
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
