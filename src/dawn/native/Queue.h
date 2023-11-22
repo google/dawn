@@ -112,7 +112,6 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
     QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     void DestroyImpl() override;
-    virtual SystemEventReceiver InsertWorkDoneEvent();
 
   private:
     MaybeError WriteTextureInternal(const ImageCopyTexture* destination,

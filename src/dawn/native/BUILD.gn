@@ -378,6 +378,7 @@ source_set("sources") {
     "Toggles.h",
     "UsageValidationMode.h",
     "VisitableMembers.h",
+    "WaitAnySystemEvent.h",
     "dawn_platform.h",
     "stream/BlobSource.cpp",
     "stream/BlobSource.h",

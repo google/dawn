@@ -33,6 +33,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/MetalBackend.h"
+#include "dawn/native/WaitAnySystemEvent.h"
 #include "dawn/native/metal/CommandBufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -49,7 +50,7 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
 Queue::Queue(Device* device, const QueueDescriptor* descriptor)
     : QueueBase(device, descriptor), mCompletedSerial(0) {}
 
-Queue::~Queue() {}
+Queue::~Queue() = default;
 
 void Queue::DestroyImpl() {
     // Forget all pending commands.
@@ -80,40 +81,12 @@ MaybeError Queue::Initialize() {
 }
 
 void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
-    DAWN_ASSERT(mCompletedSerial >= uint64_t(completedSerial) ||
-                completedSerial == kMaxExecutionSerial);
-    mWaitingEvents.Use([&](auto waitingEvents) {
-        for (auto& waiting : waitingEvents->IterateUpTo(completedSerial)) {
-            std::move(waiting).Signal();
+    mWaitingEvents.Use([&](auto events) {
+        for (auto& s : events->IterateUpTo(completedSerial)) {
+            std::move(s)->Signal();
         }
-        waitingEvents->ClearUpTo(completedSerial);
+        events->ClearUpTo(completedSerial);
     });
-}
-
-SystemEventReceiver Queue::InsertWorkDoneEvent() {
-    ExecutionSerial serial = GetScheduledWorkDoneSerial();
-
-    // TODO(crbug.com/dawn/2051): Optimize to not create a pipe for every WorkDone/MapAsync event.
-    // Possible ways to do this:
-    // - Don't create the pipe until needed (see the todo on TrackedEvent::mReceiver).
-    // - Dedup event pipes when one serial is needed for multiple events (and add a
-    //   SystemEventReceiver::Duplicate() method which dup()s its underlying pipe receiver).
-    // - Create a pipe each for each new serial instead of for each requested event (tradeoff).
-    SystemEventPipeSender sender;
-    SystemEventReceiver receiver;
-    std::tie(sender, receiver) = CreateSystemEventPipe();
-
-    mWaitingEvents.Use([&](auto waitingEvents) {
-        // Check for device loss while the lock is held. Otherwise, we could enqueue the event
-        // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
-        if (GetDevice()->IsLost() || mCompletedSerial >= uint64_t(serial)) {
-            std::move(sender).Signal();
-        } else {
-            waitingEvents->Enqueue(std::move(sender), serial);
-        }
-    });
-
-    return receiver;
 }
 
 MaybeError Queue::WaitForIdleForDestruction() {
@@ -193,7 +166,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
         TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                uint64_t(pendingSerial));
         DAWN_ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
-        this->mCompletedSerial = uint64_t(pendingSerial);
+        this->mCompletedSerial.store(uint64_t(pendingSerial), std::memory_order_release);
 
         this->UpdateWaitingEvents(pendingSerial);
     }];
@@ -266,6 +239,34 @@ void Queue::ForceEventualFlushOfCommands() {
     if (mCommandContext.WasUsed()) {
         mCommandContext.SetNeedsSubmit();
     }
+}
+
+Ref<SystemEvent> Queue::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
+    Ref<SystemEvent> completionEvent = AcquireRef(new SystemEvent());
+    mWaitingEvents.Use([&](auto events) {
+        SystemEventReceiver receiver;
+        // Now that we hold the lock, check against mCompletedSerial before inserting.
+        // This serial may have just completed. If it did, mark the event complete.
+        // Also check for device loss. Otherwise, we could enqueue the event
+        // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
+        if (GetDevice()->IsLost() ||
+            serial <= ExecutionSerial(mCompletedSerial.load(std::memory_order_acquire))) {
+            completionEvent->Signal();
+        } else {
+            // Insert the event into the list which will be signaled inside Metal's queue
+            // completion handler.
+            events->Enqueue(completionEvent, serial);
+        }
+    });
+    return completionEvent;
+}
+
+ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
+    Ref<SystemEvent> event = CreateWorkDoneSystemEvent(serial);
+    bool ready = false;
+    std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
+        {{event->GetOrCreateSystemEventReceiver(), &ready}}};
+    return WaitAnySystemEvent(events.begin(), events.end(), timeout);
 }
 
 }  // namespace dawn::native::metal

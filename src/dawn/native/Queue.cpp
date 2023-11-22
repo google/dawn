@@ -196,19 +196,19 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
     WGPUQueueWorkDoneCallback mCallback;
     void* mUserdata;
 
-    // Create an event backed by the given SystemEventReceiver.
-    WorkDoneEvent(DeviceBase* device,
-                  const QueueWorkDoneCallbackInfo& callbackInfo,
-                  SystemEventReceiver&& receiver)
-        : TrackedEvent(device, callbackInfo.mode, std::move(receiver)),
+    // Create an event backed by the given queue execution serial.
+    WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,
+                  QueueBase* queue,
+                  ExecutionSerial serial)
+        : TrackedEvent(callbackInfo.mode, queue, serial),
           mCallback(callbackInfo.callback),
           mUserdata(callbackInfo.userdata) {}
 
     // Create an event that's ready at creation (for errors, etc.)
-    WorkDoneEvent(DeviceBase* device,
-                  const QueueWorkDoneCallbackInfo& callbackInfo,
+    WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,
+                  QueueBase* queue,
                   wgpu::QueueWorkDoneStatus earlyStatus)
-        : TrackedEvent(device, callbackInfo.mode, SystemEventReceiver::CreateAlreadySignaled()),
+        : TrackedEvent(callbackInfo.mode, queue, kBeginningOfGPUTime),
           mEarlyStatus(earlyStatus),
           mCallback(callbackInfo.callback),
           mUserdata(callbackInfo.userdata) {
@@ -216,10 +216,6 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
     }
 
     ~WorkDoneEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
-
-    // TODO(crbug.com/dawn/2062): When adding support for mixed sources, return false here when
-    // the device has the mixed sources feature enabled, and so can expose the fence as an OS event.
-    bool MustWaitUsingDevice() const override { return true; }
 
     void Complete(EventCompletionType completionType) override {
         // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
@@ -319,20 +315,15 @@ Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callb
         }
 
         // Note: if the callback is spontaneous, it'll get called in here.
-        event = AcquireRef(new WorkDoneEvent(GetDevice(), callbackInfo, validationEarlyStatus));
+        event = AcquireRef(new WorkDoneEvent(callbackInfo, this, validationEarlyStatus));
     } else {
-        event = AcquireRef(new WorkDoneEvent(GetDevice(), callbackInfo, InsertWorkDoneEvent()));
+        event = AcquireRef(new WorkDoneEvent(callbackInfo, this, GetScheduledWorkDoneSerial()));
     }
 
     FutureID futureID =
         GetInstance()->GetEventManager()->TrackEvent(callbackInfo.mode, std::move(event));
 
     return {futureID};
-}
-
-SystemEventReceiver QueueBase::InsertWorkDoneEvent() {
-    // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
-    DAWN_CHECK(false);
 }
 
 void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial) {

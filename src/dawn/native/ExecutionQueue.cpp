@@ -74,6 +74,17 @@ bool ExecutionQueueBase::HasScheduledCommands() const {
            HasPendingCommands();
 }
 
+Ref<SystemEvent> ExecutionQueueBase::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
+    // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
+    DAWN_CHECK(false);
+}
+
+ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial serial,
+                                                           Nanoseconds timeout) {
+    // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
+    return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
+}
+
 // All prevously submitted works at the moment will supposedly complete at this serial.
 // Internally the serial is computed according to whether frontend and backend have pending
 // commands. There are 4 cases of combination:

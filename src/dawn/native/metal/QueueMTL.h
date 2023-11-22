@@ -29,9 +29,11 @@
 #define SRC_DAWN_NATIVE_METAL_QUEUEMTL_H_
 
 #import <Metal/Metal.h>
+#include <map>
 
 #include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialQueue.h"
+#include "dawn/common/SerialMap.h"
+#include "dawn/native/EventManager.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
@@ -50,6 +52,9 @@ class Queue final : public QueueBase {
     void WaitForCommandsToBeScheduled();
     void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
 
+    Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial) override;
+    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
     ~Queue() override;
@@ -57,7 +62,6 @@ class Queue final : public QueueBase {
     MaybeError Initialize();
     void UpdateWaitingEvents(ExecutionSerial completedSerial);
 
-    SystemEventReceiver InsertWorkDoneEvent() override;
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
@@ -77,15 +81,16 @@ class Queue final : public QueueBase {
     // different thread, so it needs to be atomic.
     std::atomic<uint64_t> mCompletedSerial;
 
-    // A shared event that can be exported for synchronization with other users of Metal.
-    // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
-    NSPRef<id> mMtlSharedEvent = nullptr;
-
-    // This mutex must be held to access mWaitingEvents (which may happen in a Metal driver thread).
+    // This mutex must be held to access mWaitingEvents (which may happen in a Metal driver
+    // thread).
     // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
     // mWaitingEvents serials, we could avoid taking this lock sometimes. Optimize if needed.
     // See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
-    MutexProtected<SerialQueue<ExecutionSerial, SystemEventPipeSender>> mWaitingEvents;
+    MutexProtected<SerialMap<ExecutionSerial, Ref<SystemEvent>>> mWaitingEvents;
+
+    // A shared event that can be exported for synchronization with other users of Metal.
+    // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
+    NSPRef<id> mMtlSharedEvent = nullptr;
 };
 
 }  // namespace dawn::native::metal

@@ -208,13 +208,13 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
         switch (GetParam().mWaitTypeAndCallbackMode) {
             case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
             case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
-                return TestWaitImpl(WaitType::TimedWaitAny);
+                return TestWaitImpl(WaitType::TimedWaitAny, loopOnlyOnce);
             case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
             case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
-                return TestWaitImpl(WaitType::SpinWaitAny);
+                return TestWaitImpl(WaitType::SpinWaitAny, loopOnlyOnce);
             case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
             case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
-                return TestWaitImpl(WaitType::SpinProcessEvents);
+                return TestWaitImpl(WaitType::SpinProcessEvents, loopOnlyOnce);
         }
     }
 
@@ -398,7 +398,7 @@ TEST_P(EventCompletionTests, WorkDoneOutOfOrder) {
     TrackForTest(f2);
     TestWaitAll();
     TrackForTest(f1);
-    TestWaitAll(true);
+    TestWaitAll(/*loopOnlyOnce=*/true);
 }
 
 constexpr WGPUQueueWorkDoneStatus kStatusUninitialized =

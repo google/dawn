@@ -230,6 +230,7 @@ target_sources(dawn_native
     "Toggles.h"
     "UsageValidationMode.h"
     "VisitableMembers.h"
+    "WaitAnySystemEvent.h"
     "dawn_platform.h"
     "webgpu_absl_format.cpp"
     "webgpu_absl_format.h"

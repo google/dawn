@@ -28,10 +28,13 @@
 #ifndef SRC_DAWN_NATIVE_SYSTEMEVENT_H_
 #define SRC_DAWN_NATIVE_SYSTEMEVENT_H_
 
+#include <optional>
 #include <utility>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/SystemHandle.h"
 
@@ -57,7 +60,8 @@ class SystemEventReceiver final : NonCopyable {
     SystemEventReceiver& operator=(SystemEventReceiver&&) = default;
 
   private:
-    friend bool WaitAnySystemEvent(size_t, TrackedFutureWaitInfo*, Nanoseconds);
+    template <typename It>
+    friend bool WaitAnySystemEvent(It begin, It end, Nanoseconds timeout);
     friend std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
     SystemHandle mPrimitive;
 };
@@ -70,18 +74,13 @@ class SystemEventPipeSender final : NonCopyable {
     SystemEventPipeSender& operator=(SystemEventPipeSender&&) = default;
     ~SystemEventPipeSender();
 
+    bool IsValid() const;
     void Signal() &&;
 
   private:
     friend std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
     SystemHandle mPrimitive;
 };
-
-// Implementation of WaitAny when backed by SystemEventReceiver.
-// Returns true if some future is now ready, false if not (it timed out).
-[[nodiscard]] bool WaitAnySystemEvent(size_t count,
-                                      TrackedFutureWaitInfo* futures,
-                                      Nanoseconds timeout);
 
 // CreateSystemEventPipe provides an SystemEventReceiver that can be signalled by Dawn code. This is
 // useful for queue completions on Metal (where Metal signals us by calling a callback) and for
@@ -101,6 +100,23 @@ class SystemEventPipeSender final : NonCopyable {
 // - On POSIX, SystemEventReceiver is a file descriptor (fd), so we can create one with pipe(), and
 //   signal it by write()ing into the pipe (to make it become readable, though we won't read() it).
 std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
+
+class SystemEvent : public RefCounted {
+  public:
+    bool IsSignaled() const;
+    void Signal();
+
+    // Lazily create a system event receiver. Immediately after this receiver
+    // is signaled, IsSignaled should always return true.
+    const SystemEventReceiver& GetOrCreateSystemEventReceiver();
+
+  private:
+    // mSignaled indicates whether the event has already been signaled.
+    // It is stored outside the mPipe mutex so its status can quickly be checked without
+    // acquiring a lock.
+    std::atomic<bool> mSignaled{false};
+    MutexProtected<std::optional<std::pair<SystemEventPipeSender, SystemEventReceiver>>> mPipe;
+};
 
 }  // namespace dawn::native
 
