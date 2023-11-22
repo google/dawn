@@ -1,0 +1,10 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+texture1d<float, access::sample> t_f;
+texture1d<int, access::sample> t_i;
+texture1d<uint, access::sample> t_u;
+void tint_symbol() {
+}

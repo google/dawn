@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  half a = 4.0h;
+  half3 b = half3(0.0h, 2.0h, 0.0h);
+}

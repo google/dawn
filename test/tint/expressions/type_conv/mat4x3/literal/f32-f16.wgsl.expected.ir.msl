@@ -1,0 +1,6 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread half4x3 u = half4x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h), half3(7.0h, 8.0h, 9.0h), half3(10.0h, 11.0h, 12.0h));

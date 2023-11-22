@@ -1,0 +1,6 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread int2 v = int2(0, 1);

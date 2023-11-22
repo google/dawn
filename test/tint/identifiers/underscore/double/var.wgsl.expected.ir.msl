@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread int a = 1;
+thread int a__ = 2;
+void f() {
+  int b = a;
+  int b__ = a__;
+}

@@ -1,0 +1,6 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread uint u = 1u;

@@ -1,0 +1,6 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread half2x2 u = half2x2(half2(1.0h, 2.0h), half2(3.0h, 4.0h));

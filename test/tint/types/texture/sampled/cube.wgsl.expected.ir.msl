@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+using namespace metal;
+
+texturecube<float, access::sample> t_f;
+texturecube<int, access::sample> t_i;
+texturecube<uint, access::sample> t_u;
+void tint_symbol() {
+}

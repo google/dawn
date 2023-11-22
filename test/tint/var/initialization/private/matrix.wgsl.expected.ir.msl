@@ -1,0 +1,8 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread float2x3 v = float2x3(0.0f);
+void tint_symbol() {
+}

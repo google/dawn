@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  int a = 0;
+  int b = a;
+  int a = 0;
+  int b = a;
+}

@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+using namespace metal;
+struct VertexOutputs {
+  float4 position [[position]];
+};
+
+VertexOutputs tint_symbol() {
+  return VertexOutputs{.position=float4(1.0f, 2.0f, 3.0f, 4.0f)};
+}

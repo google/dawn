@@ -1,0 +1,10 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+texture2d_array<float, access::sample> t_f;
+texture2d_array<int, access::sample> t_i;
+texture2d_array<uint, access::sample> t_u;
+void tint_symbol() {
+}

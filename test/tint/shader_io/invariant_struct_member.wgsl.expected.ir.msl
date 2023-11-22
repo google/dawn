@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+struct Out {
+  float4 pos [[position]] TINT_INVARIANT;
+};
+
+Out tint_symbol() {
+  return Out{};
+}

@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int m;
+};
+
+void f() {
+  S v = {};
+}

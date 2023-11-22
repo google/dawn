@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  int const A = 1;
+  int const _A = 2;
+  int const B = A;
+  int const _B = _A;
+}

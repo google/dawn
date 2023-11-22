@@ -1,0 +1,12 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  bool e;
+};
+
+void tint_symbol() {
+  bool b = false;
+  S v = {.e=(true & b)};
+}

@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  int3 const a = int3(1, 2, 3);
+  int const b = 0;
+}

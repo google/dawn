@@ -1,0 +1,8 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread float2 f = float2(0.0f);
+thread int2 i = int2(0);
+thread uint2 u = uint2(0u);

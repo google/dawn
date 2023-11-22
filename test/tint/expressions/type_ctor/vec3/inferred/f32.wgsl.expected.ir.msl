@@ -1,0 +1,6 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread float3 v = float3(0.0f, 1.0f, 2.0f);

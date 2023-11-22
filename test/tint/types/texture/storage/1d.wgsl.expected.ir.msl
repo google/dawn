@@ -1,0 +1,23 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+texture1d<float, access::write> t_rgba8unorm;
+texture1d<float, access::write> t_rgba8snorm;
+texture1d<uint, access::write> t_rgba8uint;
+texture1d<int, access::write> t_rgba8sint;
+texture1d<uint, access::write> t_rgba16uint;
+texture1d<int, access::write> t_rgba16sint;
+texture1d<float, access::write> t_rgba16float;
+texture1d<uint, access::write> t_r32uint;
+texture1d<int, access::write> t_r32sint;
+texture1d<float, access::write> t_r32float;
+texture1d<uint, access::write> t_rg32uint;
+texture1d<int, access::write> t_rg32sint;
+texture1d<float, access::write> t_rg32float;
+texture1d<uint, access::write> t_rgba32uint;
+texture1d<int, access::write> t_rgba32sint;
+texture1d<float, access::write> t_rgba32float;
+void tint_symbol() {
+}

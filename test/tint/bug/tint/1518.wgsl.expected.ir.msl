@@ -1,0 +1,379 @@
+#include <metal_stdlib>
+using namespace metal;
+
+void tint_symbol() {
+  if (false) {
+  } else {
+    if (false) {
+    } else {
+      if (false) {
+      } else {
+        if (false) {
+        } else {
+          if (false) {
+          } else {
+            if (false) {
+            } else {
+              if (false) {
+              } else {
+                if (false) {
+                } else {
+                  if (false) {
+                  } else {
+                    if (false) {
+                    } else {
+                      if (false) {
+                      } else {
+                        if (false) {
+                        } else {
+                          if (false) {
+                          } else {
+                            if (false) {
+                            } else {
+                              if (false) {
+                              } else {
+                                if (false) {
+                                } else {
+                                  if (false) {
+                                  } else {
+                                    if (false) {
+                                    } else {
+                                      if (false) {
+                                      } else {
+                                        if (false) {
+                                        } else {
+                                          if (false) {
+                                          } else {
+                                            if (false) {
+                                            } else {
+                                              if (false) {
+                                              } else {
+                                                if (false) {
+                                                } else {
+                                                  if (false) {
+                                                  } else {
+                                                    if (false) {
+                                                    } else {
+                                                      if (false) {
+                                                      } else {
+                                                        if (false) {
+                                                        } else {
+                                                          if (false) {
+                                                          } else {
+                                                            if (false) {
+                                                            } else {
+                                                              if (false) {
+                                                              } else {
+                                                                if (false) {
+                                                                } else {
+                                                                  if (false) {
+                                                                  } else {
+                                                                    if (false) {
+                                                                    } else {
+                                                                      if (false) {
+                                                                      } else {
+                                                                        if (false) {
+                                                                        } else {
+                                                                          if (false) {
+                                                                          } else {
+                                                                            if (false) {
+                                                                            } else {
+                                                                              if (false) {
+                                                                              } else {
+                                                                                if (false) {
+                                                                                } else {
+                                                                                  if (false) {
+                                                                                  } else {
+                                                                                    if (false) {
+                                                                                    } else {
+                                                                                      if (false) {
+                                                                                      } else {
+                                                                                        if (false) {
+                                                                                        } else {
+                                                                                          if (false) {
+                                                                                          } else {
+                                                                                            if (false) {
+                                                                                            } else {
+                                                                                              if (false) {
+                                                                                              } else {
+                                                                                                if (false) {
+                                                                                                } else {
+                                                                                                  if (false) {
+                                                                                                  } else {
+                                                                                                    if (false) {
+                                                                                                    } else {
+                                                                                                      if (false) {
+                                                                                                      } else {
+                                                                                                        if (false) {
+                                                                                                        } else {
+                                                                                                          if (false) {
+                                                                                                          } else {
+                                                                                                            if (false) {
+                                                                                                            } else {
+                                                                                                              if (false) {
+                                                                                                              } else {
+                                                                                                                if (false) {
+                                                                                                                } else {
+                                                                                                                  if (false) {
+                                                                                                                  } else {
+                                                                                                                    if (false) {
+                                                                                                                    } else {
+                                                                                                                      if (false) {
+                                                                                                                      } else {
+                                                                                                                        if (false) {
+                                                                                                                        } else {
+                                                                                                                          if (false) {
+                                                                                                                          } else {
+                                                                                                                            if (false) {
+                                                                                                                            } else {
+                                                                                                                              if (false) {
+                                                                                                                              } else {
+                                                                                                                                if (false) {
+                                                                                                                                } else {
+                                                                                                                                  if (false) {
+                                                                                                                                  } else {
+                                                                                                                                    if (false) {
+                                                                                                                                    } else {
+                                                                                                                                      if (false) {
+                                                                                                                                      } else {
+                                                                                                                                        if (false) {
+                                                                                                                                        } else {
+                                                                                                                                          if (false) {
+                                                                                                                                          } else {
+                                                                                                                                            if (false) {
+                                                                                                                                            } else {
+                                                                                                                                              if (false) {
+                                                                                                                                              } else {
+                                                                                                                                                if (false) {
+                                                                                                                                                } else {
+                                                                                                                                                  if (false) {
+                                                                                                                                                  } else {
+                                                                                                                                                    if (false) {
+                                                                                                                                                    } else {
+                                                                                                                                                      if (false) {
+                                                                                                                                                      } else {
+                                                                                                                                                        if (false) {
+                                                                                                                                                        } else {
+                                                                                                                                                          if (false) {
+                                                                                                                                                          } else {
+                                                                                                                                                            if (false) {
+                                                                                                                                                            } else {
+                                                                                                                                                              if (false) {
+                                                                                                                                                              } else {
+                                                                                                                                                                if (false) {
+                                                                                                                                                                } else {
+                                                                                                                                                                  if (false) {
+                                                                                                                                                                  } else {
+                                                                                                                                                                    if (false) {
+                                                                                                                                                                    } else {
+                                                                                                                                                                      if (false) {
+                                                                                                                                                                      } else {
+                                                                                                                                                                        if (false) {
+                                                                                                                                                                        } else {
+                                                                                                                                                                          if (false) {
+                                                                                                                                                                          } else {
+                                                                                                                                                                            if (false) {
+                                                                                                                                                                            } else {
+                                                                                                                                                                              if (false) {
+                                                                                                                                                                              } else {
+                                                                                                                                                                                if (false) {
+                                                                                                                                                                                } else {
+                                                                                                                                                                                  if (false) {
+                                                                                                                                                                                  } else {
+                                                                                                                                                                                    if (false) {
+                                                                                                                                                                                    } else {
+                                                                                                                                                                                      if (false) {
+                                                                                                                                                                                      } else {
+                                                                                                                                                                                        if (false) {
+                                                                                                                                                                                        } else {
+                                                                                                                                                                                          if (false) {
+                                                                                                                                                                                          } else {
+                                                                                                                                                                                            if (false) {
+                                                                                                                                                                                            } else {
+                                                                                                                                                                                              if (false) {
+                                                                                                                                                                                              } else {
+                                                                                                                                                                                                if (false) {
+                                                                                                                                                                                                } else {
+                                                                                                                                                                                                  if (false) {
+                                                                                                                                                                                                  } else {
+                                                                                                                                                                                                    if (false) {
+                                                                                                                                                                                                    } else {
+                                                                                                                                                                                                      if (false) {
+                                                                                                                                                                                                      } else {
+                                                                                                                                                                                                        if (false) {
+                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                          if (false) {
+                                                                                                                                                                                                          } else {
+                                                                                                                                                                                                            if (false) {
+                                                                                                                                                                                                            } else {
+                                                                                                                                                                                                              if (false) {
+                                                                                                                                                                                                              } else {
+                                                                                                                                                                                                                if (false) {
+                                                                                                                                                                                                                } else {
+                                                                                                                                                                                                                  if (false) {
+                                                                                                                                                                                                                  } else {
+                                                                                                                                                                                                                    if (false) {
+                                                                                                                                                                                                                    } else {
+                                                                                                                                                                                                                      if (false) {
+                                                                                                                                                                                                                      } else {
+                                                                                                                                                                                                                        if (false) {
+                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                          if (false) {
+                                                                                                                                                                                                                          } else {
+                                                                                                                                                                                                                            if (false) {
+                                                                                                                                                                                                                            } else {
+                                                                                                                                                                                                                              if (false) {
+                                                                                                                                                                                                                              } else {
+                                                                                                                                                                                                                                if (false) {
+                                                                                                                                                                                                                                } else {
+                                                                                                                                                                                                                                  if (false) {
+                                                                                                                                                                                                                                  } else {
+                                                                                                                                                                                                                                    if (false) {
+                                                                                                                                                                                                                                    } else {
+                                                                                                                                                                                                                                      if (false) {
+                                                                                                                                                                                                                                      } else {
+                                                                                                                                                                                                                                        if (false) {
+                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                          if (false) {
+                                                                                                                                                                                                                                          } else {
+                                                                                                                                                                                                                                            if (false) {
+                                                                                                                                                                                                                                            } else {
+                                                                                                                                                                                                                                              if (false) {
+                                                                                                                                                                                                                                              } else {
+                                                                                                                                                                                                                                                if (false) {
+                                                                                                                                                                                                                                                } else {
+                                                                                                                                                                                                                                                  if (false) {
+                                                                                                                                                                                                                                                  } else {
+                                                                                                                                                                                                                                                    if (false) {
+                                                                                                                                                                                                                                                    } else {
+                                                                                                                                                                                                                                                      if (false) {
+                                                                                                                                                                                                                                                      } else {
+                                                                                                                                                                                                                                                        if (false) {
+                                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                                          if (false) {
+                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                      }
+                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                      }
+                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                      }
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                }
+                                                                                                                                                                                                              }
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                  }
+                                                                                                                                                                                                }
+                                                                                                                                                                                              }
+                                                                                                                                                                                            }
+                                                                                                                                                                                          }
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    }
+                                                                                                                                                                                  }
+                                                                                                                                                                                }
+                                                                                                                                                                              }
+                                                                                                                                                                            }
+                                                                                                                                                                          }
+                                                                                                                                                                        }
+                                                                                                                                                                      }
+                                                                                                                                                                    }
+                                                                                                                                                                  }
+                                                                                                                                                                }
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                  }
+                                                                                                                }
+                                                                                                              }
+                                                                                                            }
+                                                                                                          }
+                                                                                                        }
+                                                                                                      }
+                                                                                                    }
+                                                                                                  }
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                          }
+                                                                                        }
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

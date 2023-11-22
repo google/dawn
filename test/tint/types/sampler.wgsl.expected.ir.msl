@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+sampler s;
+sampler sc;
+void tint_symbol() {
+}

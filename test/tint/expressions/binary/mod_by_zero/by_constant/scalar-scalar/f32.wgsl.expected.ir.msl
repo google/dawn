@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  float const a = 1.0f;
+  float const b = 0.0f;
+}

@@ -1,0 +1,8 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+depth2d_array<float, access::sample> t_f;
+void tint_symbol() {
+}

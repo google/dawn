@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+thread int i = 123;
+void tint_symbol() {
+  thread int* const p = i;
+}

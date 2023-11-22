@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  uint3 const a = uint3(1u, 2u, 3u);
+  uint const b = 4u;
+}
