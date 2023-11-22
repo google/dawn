@@ -3643,7 +3643,7 @@
     "whole size" : {
         "category": "constant",
         "type": "uint64_t",
-        "value":  "(0xffffffffffffffffULL)"
+        "value":  "UINT64_MAX"
     },
     "whole map size" : {
         "category": "constant",
@@ -3653,32 +3653,32 @@
     "copy stride undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "limit u32 undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "limit u64 undefined" : {
         "category": "constant",
         "type": "uint64_t",
-        "value":  "(0xffffffffffffffffULL)"
+        "value":  "UINT64_MAX"
     },
     "array layer count undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "mip level count undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "query set index undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "ObjectType": {
       "_comment": "Only used for the wire",
