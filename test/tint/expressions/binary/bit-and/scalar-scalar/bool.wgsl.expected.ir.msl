@@ -1,9 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f() {
   bool const a = true;
   bool const b = false;
+  bool const r = (a & b);
 }

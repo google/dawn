@@ -1,9 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f() {
   half const a = 1.0h;
   half const b = 2.0h;
+  half const r = (a + b);
 }

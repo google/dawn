@@ -6,4 +6,9 @@ using namespace metal;
 void f() {
   float a = 1.0f;
   float b = 0.0f;
+  float const r = (a % (b + b));
 }
+program_source:7:22: error: invalid operands to binary expression ('float' and 'float')
+  float const r = (a % (b + b));
+                   ~ ^ ~~~~~~~
+

@@ -240,31 +240,46 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
 
-                [&](core::ir::Binary*) { /* skip */ },     //
-                [&](core::ir::Let* l) { EmitLet(l); },     //
-                [&](core::ir::Load*) { /* skip */ },       //
-                [&](core::ir::Construct*) { /* skip */ },  //
+                [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },     //
+                [&](core::ir::Let* l) { EmitLet(l); },                      //
+                [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
+                [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
 
-    void EmitValue(StringStream& out, core::ir::Value* v) {
+    // If the instruction is named, we need to emit it. If it is un-named, then we'll use it
+    // and inline it later.
+    void MaybeEmitInstruction(const core::ir::Instruction* inst) {
+        auto name = ir_.NameOf(inst->Result());
+        if (!name.IsValid()) {
+            return;
+        }
+
+        auto out = Line();
+        EmitType(out, inst->Result()->Type());
+        out << " const " << name.Name() << " = ";
+        EmitValue(out, inst->Result());
+        out << ";";
+    }
+
+    void EmitValue(StringStream& out, const core::ir::Value* v) {
         Switch(
-            v,                                                     //
-            [&](core::ir::Constant* c) { EmitConstant(out, c); },  //
+            v,                                                           //
+            [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
             // [&](core::ir::FunctionParam* fp) {},                   //
-            [&](core::ir::InstructionResult* r) {
+            [&](const core::ir::InstructionResult* r) {
                 Switch(
-                    r->Source(),                                       //
-                    [&](core::ir::Binary* b) { EmitBinary(out, b); },  //
-                    [&](core::ir::Let* l) {
+                    r->Source(),                                             //
+                    [&](const core::ir::Binary* b) { EmitBinary(out, b); },  //
+                    [&](const core::ir::Let* l) {
                         auto name = ir_.NameOf(l->Result());
                         TINT_ASSERT(name.IsValid());
                         out << name.Name();
-                    },                                                       //
-                    [&](core::ir::Load* l) { EmitValue(out, l->From()); },   //
-                    [&](core::ir::Construct* c) { EmitConstruct(out, c); },  //
-                    [&](core::ir::Var* var) { EmitVarName(out, var); },      //
+                    },                                                             //
+                    [&](const core::ir::Load* l) { EmitValue(out, l->From()); },   //
+                    [&](const core::ir::Construct* c) { EmitConstruct(out, c); },  //
+                    [&](const core::ir::Var* var) { EmitVarName(out, var); },      //
                     TINT_ICE_ON_NO_MATCH);
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -272,7 +287,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a binary instruction
     /// @param b the binary instruction
-    void EmitBinary(StringStream& out, core::ir::Binary* b) {
+    void EmitBinary(StringStream& out, const core::ir::Binary* b) {
         if (b->Op() == core::ir::BinaryOp::kEqual) {
             auto* rhs = b->RHS()->As<core::ir::Constant>();
             if (rhs && rhs->Type()->Is<core::type::Bool>() &&
@@ -330,7 +345,7 @@ class Printer : public tint::TextGenerator {
         out << ")";
     }
 
-    void EmitVarName(StringStream& out, core::ir::Var* v) { out << ir_.NameOf(v).Name(); }
+    void EmitVarName(StringStream& out, const core::ir::Var* v) { out << ir_.NameOf(v).Name(); }
 
     /// Emit a var instruction
     /// @param v the var instruction
@@ -452,7 +467,7 @@ class Printer : public tint::TextGenerator {
     void EmitDiscard() { Line() << "discard_fragment();"; }
 
     /// Emit a constructor
-    void EmitConstruct(StringStream& out, core::ir::Construct* c) {
+    void EmitConstruct(StringStream& out, const core::ir::Construct* c) {
         Switch(
             c->Result()->Type(),
             [&](const core::type::Array*) {
@@ -835,7 +850,9 @@ class Printer : public tint::TextGenerator {
     /// Handles core::ir::Constant values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
-    void EmitConstant(StringStream& out, core::ir::Constant* c) { EmitConstant(out, c->Value()); }
+    void EmitConstant(StringStream& out, const core::ir::Constant* c) {
+        EmitConstant(out, c->Value());
+    }
 
     /// Handles core::constant::Value values
     /// @param out the stream to write the constant too

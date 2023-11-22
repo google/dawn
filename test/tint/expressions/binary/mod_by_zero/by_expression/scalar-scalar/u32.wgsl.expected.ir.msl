@@ -1,9 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f() {
   uint a = 1u;
   uint b = 0u;
+  uint const r = (a % (b + b));
 }

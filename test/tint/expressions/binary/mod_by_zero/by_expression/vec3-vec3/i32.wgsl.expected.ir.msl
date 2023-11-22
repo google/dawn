@@ -1,9 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f() {
   int3 a = int3(1, 2, 3);
   int3 b = int3(0, 5, 0);
+  int3 const r = (a % (b + b));
 }
