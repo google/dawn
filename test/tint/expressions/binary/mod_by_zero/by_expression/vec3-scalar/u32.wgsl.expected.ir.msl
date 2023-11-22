@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-void f() {
+kernel void f() {
   uint3 a = uint3(1u, 2u, 3u);
   uint b = 0u;
   uint3 const r = (a % (b + b));

@@ -205,7 +205,20 @@ class Printer : public tint::TextGenerator {
         {
             auto out = Line();
 
-            // TODO(dsinclair): Emit function stage if any
+            switch (func->Stage()) {
+                case core::ir::Function::PipelineStage::kCompute:
+                    out << "kernel ";
+                    break;
+                case core::ir::Function::PipelineStage::kFragment:
+                    out << "fragment ";
+                    break;
+                case core::ir::Function::PipelineStage::kVertex:
+                    out << "vertex ";
+                    break;
+                case core::ir::Function::PipelineStage::kUndefined:
+                    break;
+            }
+
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
