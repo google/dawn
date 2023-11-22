@@ -191,7 +191,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "This helps more efficiently implement algorithms that would otherwise require ping-ponging"
       "between render targets. The coherent version of this extension means that no barrier calls"
       "are needed to prevent data races between fragment shaders on the same pixel.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1704",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "pixel_local_storage.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::PixelLocalStorageNonCoherent,
      {"Supports passing information between invocation in a render pass that cover the same pixel."
@@ -199,7 +200,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "between render targets. The non-coherent version of this extension means that barrier calls"
       "are needed to prevent data races between fragment shaders on the same pixels (note that "
       "overlapping fragments from the same draw cannot be made data race free).",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1704",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "pixel_local_storage.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::Norm16TextureFormats,
      {"Supports R/RG/RGBA16 norm texture formats",
