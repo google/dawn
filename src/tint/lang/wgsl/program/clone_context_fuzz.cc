@@ -30,7 +30,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 

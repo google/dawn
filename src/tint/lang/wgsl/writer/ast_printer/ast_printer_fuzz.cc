@@ -29,7 +29,7 @@
 
 #include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
 
-#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 
 namespace tint::wgsl::writer {
 namespace {

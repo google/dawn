@@ -40,8 +40,8 @@ import("${tint_src_dir}/tint.gni")
 if (tint_build_wgsl_reader) {
   tint_fuzz_source_set("fuzz") {
     sources = [
-      "wgsl_fuzz.cc",
-      "wgsl_fuzz.h",
+      "fuzz.cc",
+      "fuzz.h",
     ]
     deps = [
       "${tint_src_dir}:thread",

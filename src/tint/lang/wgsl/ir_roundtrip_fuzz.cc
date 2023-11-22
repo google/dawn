@@ -29,7 +29,7 @@
 
 #include <iostream>
 
-#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"

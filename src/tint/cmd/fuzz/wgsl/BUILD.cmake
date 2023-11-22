@@ -93,8 +93,8 @@ if(TINT_BUILD_WGSL_READER)
 # Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_wgsl_fuzz fuzz
-  cmd/fuzz/wgsl/wgsl_fuzz.cc
-  cmd/fuzz/wgsl/wgsl_fuzz.h
+  cmd/fuzz/wgsl/fuzz.cc
+  cmd/fuzz/wgsl/fuzz.h
 )
 
 tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz fuzz

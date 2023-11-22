@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 
-#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 
 namespace tint::ast::transform {

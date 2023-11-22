@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-#include "src/tint/cmd/fuzz/wgsl/wgsl_fuzz.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/utils/cli/cli.h"
 
 namespace {
