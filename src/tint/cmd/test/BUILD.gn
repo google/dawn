@@ -66,6 +66,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
       "${tint_src_dir}/lang/wgsl/writer/raise:unittests",
+      "${tint_src_dir}/utils/bytes:unittests",
       "${tint_src_dir}/utils/cli:unittests",
       "${tint_src_dir}/utils/command:unittests",
       "${tint_src_dir}/utils/containers:unittests",

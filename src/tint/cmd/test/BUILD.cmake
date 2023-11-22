@@ -61,6 +61,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_wgsl_writer_ir_to_program_test
   tint_lang_wgsl_writer_raise_test
   tint_lang_wgsl_test
+  tint_utils_bytes_test
   tint_utils_cli_test
   tint_utils_command_test
   tint_utils_containers_test

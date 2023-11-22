@@ -60,6 +60,7 @@ cc_binary(
     "//src/tint/lang/wgsl/writer/ir_to_program:test",
     "//src/tint/lang/wgsl/writer/raise:test",
     "//src/tint/lang/wgsl:test",
+    "//src/tint/utils/bytes:test",
     "//src/tint/utils/cli:test",
     "//src/tint/utils/command:test",
     "//src/tint/utils/containers:test",

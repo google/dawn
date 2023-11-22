@@ -118,6 +118,16 @@ TEST(TintSliceTest, CtorCArray) {
     EXPECT_FALSE(slice.IsEmpty());
 }
 
+TEST(TintSliceTest, CtorStdArray) {
+    std::array elements{1, 2, 3};
+
+    auto slice = Slice{elements};
+    EXPECT_EQ(slice.data, &elements[0]);
+    EXPECT_EQ(slice.len, 3u);
+    EXPECT_EQ(slice.cap, 3u);
+    EXPECT_FALSE(slice.IsEmpty());
+}
+
 TEST(TintSliceTest, Index) {
     int elements[] = {1, 2, 3};
 

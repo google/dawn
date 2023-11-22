@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_UTILS_CONTAINERS_SLICE_H_
 #define SRC_TINT_UTILS_CONTAINERS_SLICE_H_
 
+#include <array>
 #include <cstdint>
 #include <iterator>
 
@@ -157,6 +158,12 @@ struct Slice {
     template <size_t N>
     constexpr Slice(T (&elements)[N])  // NOLINT
         : data(elements), len(N), cap(N) {}
+
+    /// Constructor
+    /// @param array std::array of elements
+    template <size_t N>
+    constexpr Slice(std::array<T, N>& array)  // NOLINT
+        : data(array.data()), len(N), cap(N) {}
 
     /// Reinterprets this slice as `const Slice<TO>&`
     /// @returns the reinterpreted slice
