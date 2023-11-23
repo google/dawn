@@ -37,16 +37,20 @@
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
+#include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
+#include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
+#include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/ice.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/unreachable.h"
@@ -171,6 +175,9 @@ class Printer : public tint::TextGenerator {
     /// Values that can be inlined.
     Hashset<core::ir::Value*, 64> can_inline_;
 
+    /// Block to emit for a continuing
+    std::function<void()> emit_continuing_;
+
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName() {
         if (!array_template_name_.empty()) {
@@ -265,11 +272,16 @@ class Printer : public tint::TextGenerator {
                 inst,                                                //
                 [&](core::ir::ExitIf* e) { EmitExitIf(e); },         //
                 [&](core::ir::If* if_) { EmitIf(if_); },             //
+                [&](core::ir::Loop* l) { EmitLoop(l); },             //
                 [&](core::ir::Return* r) { EmitReturn(r); },         //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
                 [&](core::ir::Store* s) { EmitStore(s); },           //
+                [&](core::ir::Continue*) { EmitContinue(); },        //
+                [&](core::ir::NextIteration*) { /* do nothing */ },  //
+                [&](core::ir::BreakIf* b) { EmitBreakIf(b); },       //
+                [&](core::ir::ExitLoop*) { EmitExitLoop(); },        //
 
                 [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },    //
                 [&](core::ir::Unary*) { MaybeEmitInstruction(inst); },      //
@@ -461,6 +473,51 @@ class Printer : public tint::TextGenerator {
         out << " const " << name.Name() << " = ";
         EmitValue(out, l->Value());
         out << ";";
+    }
+
+    void EmitExitLoop() { Line() << "break;"; }
+
+    void EmitBreakIf(core::ir::BreakIf* b) {
+        auto out = Line();
+        out << "if ";
+        EmitValue(out, b->Condition());
+        out << " { break; }";
+    }
+
+    void EmitContinue() {
+        if (emit_continuing_) {
+            emit_continuing_();
+        }
+        Line() << "continue;";
+    }
+
+    void EmitLoop(core::ir::Loop* l) {
+        // Note, we can't just emit the continuing inside a conditional at the top of the loop
+        // because any variable declared in the block must be visible to the continuing.
+        //
+        // loop {
+        //   var a = 3;
+        //   continue {
+        //     let y = a;
+        //   }
+        // }
+
+        auto emit_continuing = [&] { EmitBlock(l->Continuing()); };
+        TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+
+        Line() << "{";
+        {
+            ScopedIndent init(current_buffer_);
+            EmitBlock(l->Initializer());
+
+            Line() << "while(true) {";
+            {
+                ScopedIndent si(current_buffer_);
+                EmitBlock(l->Body());
+            }
+            Line() << "}";
+        }
+        Line() << "}";
     }
 
     /// Emit an if instruction
