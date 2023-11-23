@@ -1,9 +1,499 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int3 v;
+};
+
+thread S P = {};
+void f() {
+  int3 v = P.v;
+  int x = P.v[0u];
+  int y = P.v[1u];
+  int z = P.v[2u];
+  int2 xx = P.v.xx;
+  int2 xy = P.v.xy;
+  int2 xz = P.v.xz;
+  int2 yx = P.v.yx;
+  int2 yy = P.v.yy;
+  int2 yz = P.v.yz;
+  int2 zx = P.v.zx;
+  int2 zy = P.v.zy;
+  int2 zz = P.v.zz;
+  int3 xxx = P.v.xxx;
+  int3 xxy = P.v.xxy;
+  int3 xxz = P.v.xxz;
+  int3 xyx = P.v.xyx;
+  int3 xyy = P.v.xyy;
+  int3 xyz = P.v.xyz;
+  int3 xzx = P.v.xzx;
+  int3 xzy = P.v.xzy;
+  int3 xzz = P.v.xzz;
+  int3 yxx = P.v.yxx;
+  int3 yxy = P.v.yxy;
+  int3 yxz = P.v.yxz;
+  int3 yyx = P.v.yyx;
+  int3 yyy = P.v.yyy;
+  int3 yyz = P.v.yyz;
+  int3 yzx = P.v.yzx;
+  int3 yzy = P.v.yzy;
+  int3 yzz = P.v.yzz;
+  int3 zxx = P.v.zxx;
+  int3 zxy = P.v.zxy;
+  int3 zxz = P.v.zxz;
+  int3 zyx = P.v.zyx;
+  int3 zyy = P.v.zyy;
+  int3 zyz = P.v.zyz;
+  int3 zzx = P.v.zzx;
+  int3 zzy = P.v.zzy;
+  int3 zzz = P.v.zzz;
+  int4 xxxx = P.v.xxxx;
+  int4 xxxy = P.v.xxxy;
+  int4 xxxz = P.v.xxxz;
+  int4 xxyx = P.v.xxyx;
+  int4 xxyy = P.v.xxyy;
+  int4 xxyz = P.v.xxyz;
+  int4 xxzx = P.v.xxzx;
+  int4 xxzy = P.v.xxzy;
+  int4 xxzz = P.v.xxzz;
+  int4 xyxx = P.v.xyxx;
+  int4 xyxy = P.v.xyxy;
+  int4 xyxz = P.v.xyxz;
+  int4 xyyx = P.v.xyyx;
+  int4 xyyy = P.v.xyyy;
+  int4 xyyz = P.v.xyyz;
+  int4 xyzx = P.v.xyzx;
+  int4 xyzy = P.v.xyzy;
+  int4 xyzz = P.v.xyzz;
+  int4 xzxx = P.v.xzxx;
+  int4 xzxy = P.v.xzxy;
+  int4 xzxz = P.v.xzxz;
+  int4 xzyx = P.v.xzyx;
+  int4 xzyy = P.v.xzyy;
+  int4 xzyz = P.v.xzyz;
+  int4 xzzx = P.v.xzzx;
+  int4 xzzy = P.v.xzzy;
+  int4 xzzz = P.v.xzzz;
+  int4 yxxx = P.v.yxxx;
+  int4 yxxy = P.v.yxxy;
+  int4 yxxz = P.v.yxxz;
+  int4 yxyx = P.v.yxyx;
+  int4 yxyy = P.v.yxyy;
+  int4 yxyz = P.v.yxyz;
+  int4 yxzx = P.v.yxzx;
+  int4 yxzy = P.v.yxzy;
+  int4 yxzz = P.v.yxzz;
+  int4 yyxx = P.v.yyxx;
+  int4 yyxy = P.v.yyxy;
+  int4 yyxz = P.v.yyxz;
+  int4 yyyx = P.v.yyyx;
+  int4 yyyy = P.v.yyyy;
+  int4 yyyz = P.v.yyyz;
+  int4 yyzx = P.v.yyzx;
+  int4 yyzy = P.v.yyzy;
+  int4 yyzz = P.v.yyzz;
+  int4 yzxx = P.v.yzxx;
+  int4 yzxy = P.v.yzxy;
+  int4 yzxz = P.v.yzxz;
+  int4 yzyx = P.v.yzyx;
+  int4 yzyy = P.v.yzyy;
+  int4 yzyz = P.v.yzyz;
+  int4 yzzx = P.v.yzzx;
+  int4 yzzy = P.v.yzzy;
+  int4 yzzz = P.v.yzzz;
+  int4 zxxx = P.v.zxxx;
+  int4 zxxy = P.v.zxxy;
+  int4 zxxz = P.v.zxxz;
+  int4 zxyx = P.v.zxyx;
+  int4 zxyy = P.v.zxyy;
+  int4 zxyz = P.v.zxyz;
+  int4 zxzx = P.v.zxzx;
+  int4 zxzy = P.v.zxzy;
+  int4 zxzz = P.v.zxzz;
+  int4 zyxx = P.v.zyxx;
+  int4 zyxy = P.v.zyxy;
+  int4 zyxz = P.v.zyxz;
+  int4 zyyx = P.v.zyyx;
+  int4 zyyy = P.v.zyyy;
+  int4 zyyz = P.v.zyyz;
+  int4 zyzx = P.v.zyzx;
+  int4 zyzy = P.v.zyzy;
+  int4 zyzz = P.v.zyzz;
+  int4 zzxx = P.v.zzxx;
+  int4 zzxy = P.v.zzxy;
+  int4 zzxz = P.v.zzxz;
+  int4 zzyx = P.v.zzyx;
+  int4 zzyy = P.v.zzyy;
+  int4 zzyz = P.v.zzyz;
+  int4 zzzx = P.v.zzzx;
+  int4 zzzy = P.v.zzzy;
+  int4 zzzz = P.v.zzzz;
+}
+program_source:7:10: error: program scope variable must reside in constant address space
+thread S P = {};
+         ^
+program_source:9:8: warning: unused variable 'v' [-Wunused-variable]
+  int3 v = P.v;
+       ^
+program_source:10:7: warning: unused variable 'x' [-Wunused-variable]
+  int x = P.v[0u];
+      ^
+program_source:11:7: warning: unused variable 'y' [-Wunused-variable]
+  int y = P.v[1u];
+      ^
+program_source:12:7: warning: unused variable 'z' [-Wunused-variable]
+  int z = P.v[2u];
+      ^
+program_source:13:8: warning: unused variable 'xx' [-Wunused-variable]
+  int2 xx = P.v.xx;
+       ^
+program_source:14:8: warning: unused variable 'xy' [-Wunused-variable]
+  int2 xy = P.v.xy;
+       ^
+program_source:15:8: warning: unused variable 'xz' [-Wunused-variable]
+  int2 xz = P.v.xz;
+       ^
+program_source:16:8: warning: unused variable 'yx' [-Wunused-variable]
+  int2 yx = P.v.yx;
+       ^
+program_source:17:8: warning: unused variable 'yy' [-Wunused-variable]
+  int2 yy = P.v.yy;
+       ^
+program_source:18:8: warning: unused variable 'yz' [-Wunused-variable]
+  int2 yz = P.v.yz;
+       ^
+program_source:19:8: warning: unused variable 'zx' [-Wunused-variable]
+  int2 zx = P.v.zx;
+       ^
+program_source:20:8: warning: unused variable 'zy' [-Wunused-variable]
+  int2 zy = P.v.zy;
+       ^
+program_source:21:8: warning: unused variable 'zz' [-Wunused-variable]
+  int2 zz = P.v.zz;
+       ^
+program_source:22:8: warning: unused variable 'xxx' [-Wunused-variable]
+  int3 xxx = P.v.xxx;
+       ^
+program_source:23:8: warning: unused variable 'xxy' [-Wunused-variable]
+  int3 xxy = P.v.xxy;
+       ^
+program_source:24:8: warning: unused variable 'xxz' [-Wunused-variable]
+  int3 xxz = P.v.xxz;
+       ^
+program_source:25:8: warning: unused variable 'xyx' [-Wunused-variable]
+  int3 xyx = P.v.xyx;
+       ^
+program_source:26:8: warning: unused variable 'xyy' [-Wunused-variable]
+  int3 xyy = P.v.xyy;
+       ^
+program_source:27:8: warning: unused variable 'xyz' [-Wunused-variable]
+  int3 xyz = P.v.xyz;
+       ^
+program_source:28:8: warning: unused variable 'xzx' [-Wunused-variable]
+  int3 xzx = P.v.xzx;
+       ^
+program_source:29:8: warning: unused variable 'xzy' [-Wunused-variable]
+  int3 xzy = P.v.xzy;
+       ^
+program_source:30:8: warning: unused variable 'xzz' [-Wunused-variable]
+  int3 xzz = P.v.xzz;
+       ^
+program_source:31:8: warning: unused variable 'yxx' [-Wunused-variable]
+  int3 yxx = P.v.yxx;
+       ^
+program_source:32:8: warning: unused variable 'yxy' [-Wunused-variable]
+  int3 yxy = P.v.yxy;
+       ^
+program_source:33:8: warning: unused variable 'yxz' [-Wunused-variable]
+  int3 yxz = P.v.yxz;
+       ^
+program_source:34:8: warning: unused variable 'yyx' [-Wunused-variable]
+  int3 yyx = P.v.yyx;
+       ^
+program_source:35:8: warning: unused variable 'yyy' [-Wunused-variable]
+  int3 yyy = P.v.yyy;
+       ^
+program_source:36:8: warning: unused variable 'yyz' [-Wunused-variable]
+  int3 yyz = P.v.yyz;
+       ^
+program_source:37:8: warning: unused variable 'yzx' [-Wunused-variable]
+  int3 yzx = P.v.yzx;
+       ^
+program_source:38:8: warning: unused variable 'yzy' [-Wunused-variable]
+  int3 yzy = P.v.yzy;
+       ^
+program_source:39:8: warning: unused variable 'yzz' [-Wunused-variable]
+  int3 yzz = P.v.yzz;
+       ^
+program_source:40:8: warning: unused variable 'zxx' [-Wunused-variable]
+  int3 zxx = P.v.zxx;
+       ^
+program_source:41:8: warning: unused variable 'zxy' [-Wunused-variable]
+  int3 zxy = P.v.zxy;
+       ^
+program_source:42:8: warning: unused variable 'zxz' [-Wunused-variable]
+  int3 zxz = P.v.zxz;
+       ^
+program_source:43:8: warning: unused variable 'zyx' [-Wunused-variable]
+  int3 zyx = P.v.zyx;
+       ^
+program_source:44:8: warning: unused variable 'zyy' [-Wunused-variable]
+  int3 zyy = P.v.zyy;
+       ^
+program_source:45:8: warning: unused variable 'zyz' [-Wunused-variable]
+  int3 zyz = P.v.zyz;
+       ^
+program_source:46:8: warning: unused variable 'zzx' [-Wunused-variable]
+  int3 zzx = P.v.zzx;
+       ^
+program_source:47:8: warning: unused variable 'zzy' [-Wunused-variable]
+  int3 zzy = P.v.zzy;
+       ^
+program_source:48:8: warning: unused variable 'zzz' [-Wunused-variable]
+  int3 zzz = P.v.zzz;
+       ^
+program_source:49:8: warning: unused variable 'xxxx' [-Wunused-variable]
+  int4 xxxx = P.v.xxxx;
+       ^
+program_source:50:8: warning: unused variable 'xxxy' [-Wunused-variable]
+  int4 xxxy = P.v.xxxy;
+       ^
+program_source:51:8: warning: unused variable 'xxxz' [-Wunused-variable]
+  int4 xxxz = P.v.xxxz;
+       ^
+program_source:52:8: warning: unused variable 'xxyx' [-Wunused-variable]
+  int4 xxyx = P.v.xxyx;
+       ^
+program_source:53:8: warning: unused variable 'xxyy' [-Wunused-variable]
+  int4 xxyy = P.v.xxyy;
+       ^
+program_source:54:8: warning: unused variable 'xxyz' [-Wunused-variable]
+  int4 xxyz = P.v.xxyz;
+       ^
+program_source:55:8: warning: unused variable 'xxzx' [-Wunused-variable]
+  int4 xxzx = P.v.xxzx;
+       ^
+program_source:56:8: warning: unused variable 'xxzy' [-Wunused-variable]
+  int4 xxzy = P.v.xxzy;
+       ^
+program_source:57:8: warning: unused variable 'xxzz' [-Wunused-variable]
+  int4 xxzz = P.v.xxzz;
+       ^
+program_source:58:8: warning: unused variable 'xyxx' [-Wunused-variable]
+  int4 xyxx = P.v.xyxx;
+       ^
+program_source:59:8: warning: unused variable 'xyxy' [-Wunused-variable]
+  int4 xyxy = P.v.xyxy;
+       ^
+program_source:60:8: warning: unused variable 'xyxz' [-Wunused-variable]
+  int4 xyxz = P.v.xyxz;
+       ^
+program_source:61:8: warning: unused variable 'xyyx' [-Wunused-variable]
+  int4 xyyx = P.v.xyyx;
+       ^
+program_source:62:8: warning: unused variable 'xyyy' [-Wunused-variable]
+  int4 xyyy = P.v.xyyy;
+       ^
+program_source:63:8: warning: unused variable 'xyyz' [-Wunused-variable]
+  int4 xyyz = P.v.xyyz;
+       ^
+program_source:64:8: warning: unused variable 'xyzx' [-Wunused-variable]
+  int4 xyzx = P.v.xyzx;
+       ^
+program_source:65:8: warning: unused variable 'xyzy' [-Wunused-variable]
+  int4 xyzy = P.v.xyzy;
+       ^
+program_source:66:8: warning: unused variable 'xyzz' [-Wunused-variable]
+  int4 xyzz = P.v.xyzz;
+       ^
+program_source:67:8: warning: unused variable 'xzxx' [-Wunused-variable]
+  int4 xzxx = P.v.xzxx;
+       ^
+program_source:68:8: warning: unused variable 'xzxy' [-Wunused-variable]
+  int4 xzxy = P.v.xzxy;
+       ^
+program_source:69:8: warning: unused variable 'xzxz' [-Wunused-variable]
+  int4 xzxz = P.v.xzxz;
+       ^
+program_source:70:8: warning: unused variable 'xzyx' [-Wunused-variable]
+  int4 xzyx = P.v.xzyx;
+       ^
+program_source:71:8: warning: unused variable 'xzyy' [-Wunused-variable]
+  int4 xzyy = P.v.xzyy;
+       ^
+program_source:72:8: warning: unused variable 'xzyz' [-Wunused-variable]
+  int4 xzyz = P.v.xzyz;
+       ^
+program_source:73:8: warning: unused variable 'xzzx' [-Wunused-variable]
+  int4 xzzx = P.v.xzzx;
+       ^
+program_source:74:8: warning: unused variable 'xzzy' [-Wunused-variable]
+  int4 xzzy = P.v.xzzy;
+       ^
+program_source:75:8: warning: unused variable 'xzzz' [-Wunused-variable]
+  int4 xzzz = P.v.xzzz;
+       ^
+program_source:76:8: warning: unused variable 'yxxx' [-Wunused-variable]
+  int4 yxxx = P.v.yxxx;
+       ^
+program_source:77:8: warning: unused variable 'yxxy' [-Wunused-variable]
+  int4 yxxy = P.v.yxxy;
+       ^
+program_source:78:8: warning: unused variable 'yxxz' [-Wunused-variable]
+  int4 yxxz = P.v.yxxz;
+       ^
+program_source:79:8: warning: unused variable 'yxyx' [-Wunused-variable]
+  int4 yxyx = P.v.yxyx;
+       ^
+program_source:80:8: warning: unused variable 'yxyy' [-Wunused-variable]
+  int4 yxyy = P.v.yxyy;
+       ^
+program_source:81:8: warning: unused variable 'yxyz' [-Wunused-variable]
+  int4 yxyz = P.v.yxyz;
+       ^
+program_source:82:8: warning: unused variable 'yxzx' [-Wunused-variable]
+  int4 yxzx = P.v.yxzx;
+       ^
+program_source:83:8: warning: unused variable 'yxzy' [-Wunused-variable]
+  int4 yxzy = P.v.yxzy;
+       ^
+program_source:84:8: warning: unused variable 'yxzz' [-Wunused-variable]
+  int4 yxzz = P.v.yxzz;
+       ^
+program_source:85:8: warning: unused variable 'yyxx' [-Wunused-variable]
+  int4 yyxx = P.v.yyxx;
+       ^
+program_source:86:8: warning: unused variable 'yyxy' [-Wunused-variable]
+  int4 yyxy = P.v.yyxy;
+       ^
+program_source:87:8: warning: unused variable 'yyxz' [-Wunused-variable]
+  int4 yyxz = P.v.yyxz;
+       ^
+program_source:88:8: warning: unused variable 'yyyx' [-Wunused-variable]
+  int4 yyyx = P.v.yyyx;
+       ^
+program_source:89:8: warning: unused variable 'yyyy' [-Wunused-variable]
+  int4 yyyy = P.v.yyyy;
+       ^
+program_source:90:8: warning: unused variable 'yyyz' [-Wunused-variable]
+  int4 yyyz = P.v.yyyz;
+       ^
+program_source:91:8: warning: unused variable 'yyzx' [-Wunused-variable]
+  int4 yyzx = P.v.yyzx;
+       ^
+program_source:92:8: warning: unused variable 'yyzy' [-Wunused-variable]
+  int4 yyzy = P.v.yyzy;
+       ^
+program_source:93:8: warning: unused variable 'yyzz' [-Wunused-variable]
+  int4 yyzz = P.v.yyzz;
+       ^
+program_source:94:8: warning: unused variable 'yzxx' [-Wunused-variable]
+  int4 yzxx = P.v.yzxx;
+       ^
+program_source:95:8: warning: unused variable 'yzxy' [-Wunused-variable]
+  int4 yzxy = P.v.yzxy;
+       ^
+program_source:96:8: warning: unused variable 'yzxz' [-Wunused-variable]
+  int4 yzxz = P.v.yzxz;
+       ^
+program_source:97:8: warning: unused variable 'yzyx' [-Wunused-variable]
+  int4 yzyx = P.v.yzyx;
+       ^
+program_source:98:8: warning: unused variable 'yzyy' [-Wunused-variable]
+  int4 yzyy = P.v.yzyy;
+       ^
+program_source:99:8: warning: unused variable 'yzyz' [-Wunused-variable]
+  int4 yzyz = P.v.yzyz;
+       ^
+program_source:100:8: warning: unused variable 'yzzx' [-Wunused-variable]
+  int4 yzzx = P.v.yzzx;
+       ^
+program_source:101:8: warning: unused variable 'yzzy' [-Wunused-variable]
+  int4 yzzy = P.v.yzzy;
+       ^
+program_source:102:8: warning: unused variable 'yzzz' [-Wunused-variable]
+  int4 yzzz = P.v.yzzz;
+       ^
+program_source:103:8: warning: unused variable 'zxxx' [-Wunused-variable]
+  int4 zxxx = P.v.zxxx;
+       ^
+program_source:104:8: warning: unused variable 'zxxy' [-Wunused-variable]
+  int4 zxxy = P.v.zxxy;
+       ^
+program_source:105:8: warning: unused variable 'zxxz' [-Wunused-variable]
+  int4 zxxz = P.v.zxxz;
+       ^
+program_source:106:8: warning: unused variable 'zxyx' [-Wunused-variable]
+  int4 zxyx = P.v.zxyx;
+       ^
+program_source:107:8: warning: unused variable 'zxyy' [-Wunused-variable]
+  int4 zxyy = P.v.zxyy;
+       ^
+program_source:108:8: warning: unused variable 'zxyz' [-Wunused-variable]
+  int4 zxyz = P.v.zxyz;
+       ^
+program_source:109:8: warning: unused variable 'zxzx' [-Wunused-variable]
+  int4 zxzx = P.v.zxzx;
+       ^
+program_source:110:8: warning: unused variable 'zxzy' [-Wunused-variable]
+  int4 zxzy = P.v.zxzy;
+       ^
+program_source:111:8: warning: unused variable 'zxzz' [-Wunused-variable]
+  int4 zxzz = P.v.zxzz;
+       ^
+program_source:112:8: warning: unused variable 'zyxx' [-Wunused-variable]
+  int4 zyxx = P.v.zyxx;
+       ^
+program_source:113:8: warning: unused variable 'zyxy' [-Wunused-variable]
+  int4 zyxy = P.v.zyxy;
+       ^
+program_source:114:8: warning: unused variable 'zyxz' [-Wunused-variable]
+  int4 zyxz = P.v.zyxz;
+       ^
+program_source:115:8: warning: unused variable 'zyyx' [-Wunused-variable]
+  int4 zyyx = P.v.zyyx;
+       ^
+program_source:116:8: warning: unused variable 'zyyy' [-Wunused-variable]
+  int4 zyyy = P.v.zyyy;
+       ^
+program_source:117:8: warning: unused variable 'zyyz' [-Wunused-variable]
+  int4 zyyz = P.v.zyyz;
+       ^
+program_source:118:8: warning: unused variable 'zyzx' [-Wunused-variable]
+  int4 zyzx = P.v.zyzx;
+       ^
+program_source:119:8: warning: unused variable 'zyzy' [-Wunused-variable]
+  int4 zyzy = P.v.zyzy;
+       ^
+program_source:120:8: warning: unused variable 'zyzz' [-Wunused-variable]
+  int4 zyzz = P.v.zyzz;
+       ^
+program_source:121:8: warning: unused variable 'zzxx' [-Wunused-variable]
+  int4 zzxx = P.v.zzxx;
+       ^
+program_source:122:8: warning: unused variable 'zzxy' [-Wunused-variable]
+  int4 zzxy = P.v.zzxy;
+       ^
+program_source:123:8: warning: unused variable 'zzxz' [-Wunused-variable]
+  int4 zzxz = P.v.zzxz;
+       ^
+program_source:124:8: warning: unused variable 'zzyx' [-Wunused-variable]
+  int4 zzyx = P.v.zzyx;
+       ^
+program_source:125:8: warning: unused variable 'zzyy' [-Wunused-variable]
+  int4 zzyy = P.v.zzyy;
+       ^
+program_source:126:8: warning: unused variable 'zzyz' [-Wunused-variable]
+  int4 zzyz = P.v.zzyz;
+       ^
+program_source:127:8: warning: unused variable 'zzzx' [-Wunused-variable]
+  int4 zzzx = P.v.zzzx;
+       ^
+program_source:128:8: warning: unused variable 'zzzy' [-Wunused-variable]
+  int4 zzzy = P.v.zzzy;
+       ^
+program_source:129:8: warning: unused variable 'zzzz' [-Wunused-variable]
+  int4 zzzz = P.v.zzzz;
+       ^
+

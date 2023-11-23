@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(8) {
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:458 internal compiler error: S = struct @align(8) {
   v:vec3<f16> @offset(0)
 }
 

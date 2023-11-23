@@ -1,0 +1,54 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %a "a"
+               OpName %a_1 "a_1"
+               OpName %S "S"
+               OpMemberName %S 0 "val"
+               OpName %d "d"
+               OpMemberDecorate %S 0 Offset 0
+               OpDecorate %_arr_v3float_uint_3 ArrayStride 16
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v4int = OpTypeVector %int 4
+          %9 = OpConstantNull %v4int
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_int = OpTypePointer Function %int
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+     %uint_3 = OpConstant %uint 3
+%_arr_v3float_uint_3 = OpTypeArray %v3float %uint_3
+          %S = OpTypeStruct %_arr_v3float_uint_3
+         %24 = OpConstantNull %S
+%_ptr_Function_S = OpTypePointer Function %S
+      %int_2 = OpConstant %int 2
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %a = OpFunction %void None %1
+          %6 = OpLabel
+        %a_1 = OpVariable %_ptr_Function_v4int Function %9
+          %d = OpVariable %_ptr_Function_S Function %24
+               OpStore %a_1 %9
+         %15 = OpAccessChain %_ptr_Function_int %a_1 %uint_0
+         %16 = OpLoad %int %15
+         %17 = OpLoad %v4int %a_1
+         %18 = OpVectorShuffle %v4int %17 %17 2 2 1 1
+               OpStore %d %24
+         %29 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %int_2
+         %30 = OpLoad %v3float %29
+         %31 = OpVectorShuffle %v3float %30 %30 1 2 0
+               OpReturn
+               OpFunctionEnd

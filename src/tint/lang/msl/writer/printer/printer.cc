@@ -49,12 +49,15 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
+#include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
+#include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -271,30 +274,33 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                //
-                [&](core::ir::ExitIf* e) { EmitExitIf(e); },         //
-                [&](core::ir::If* if_) { EmitIf(if_); },             //
-                [&](core::ir::Loop* l) { EmitLoop(l); },             //
-                [&](core::ir::Return* r) { EmitReturn(r); },         //
-                [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
-                [&](core::ir::Var* v) { EmitVar(v); },               //
-                [&](core::ir::Discard*) { EmitDiscard(); },          //
-                [&](core::ir::Store* s) { EmitStore(s); },           //
-                [&](core::ir::Continue*) { EmitContinue(); },        //
-                [&](core::ir::NextIteration*) { /* do nothing */ },  //
-                [&](core::ir::BreakIf* b) { EmitBreakIf(b); },       //
-                [&](core::ir::ExitLoop*) { EmitExitLoop(); },        //
-                [&](core::ir::ExitSwitch*) { EmitExitSwitch(); },    //
-                [&](core::ir::Switch* s) { EmitSwitch(s); },         //
-
-                [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },    //
-                [&](core::ir::Unary*) { MaybeEmitInstruction(inst); },      //
-                [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },     //
-                [&](core::ir::Let* l) { EmitLet(l); },                      //
-                [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
-                [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
-                [&](core::ir::Access*) { MaybeEmitInstruction(inst); },     //
-                [&](core::ir::UserCall* c) {                                //
+                inst,                                                                 //
+                [&](core::ir::ExitIf* e) { EmitExitIf(e); },                          //
+                [&](core::ir::If* if_) { EmitIf(if_); },                              //
+                [&](core::ir::Loop* l) { EmitLoop(l); },                              //
+                [&](core::ir::Return* r) { EmitReturn(r); },                          //
+                [&](core::ir::Unreachable*) { EmitUnreachable(); },                   //
+                [&](core::ir::Var* v) { EmitVar(v); },                                //
+                [&](core::ir::Discard*) { EmitDiscard(); },                           //
+                [&](core::ir::Store* s) { EmitStore(s); },                            //
+                [&](core::ir::Continue*) { EmitContinue(); },                         //
+                [&](core::ir::NextIteration*) { /* do nothing */ },                   //
+                [&](core::ir::BreakIf* b) { EmitBreakIf(b); },                        //
+                [&](core::ir::ExitLoop*) { EmitExitLoop(); },                         //
+                [&](core::ir::ExitSwitch*) { EmitExitSwitch(); },                     //
+                [&](core::ir::Switch* s) { EmitSwitch(s); },                          //
+                                                                                      //
+                [&](core::ir::LoadVectorElement* e) { MaybeEmitInstruction(e); },     //
+                [&](core::ir::StoreVectorElement* e) { EmitStoreVectorElement(e); },  //
+                [&](core::ir::Swizzle* s) { MaybeEmitInstruction(s); },               //
+                [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },              //
+                [&](core::ir::Unary*) { MaybeEmitInstruction(inst); },                //
+                [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },               //
+                [&](core::ir::Let* l) { EmitLet(l); },                                //
+                [&](core::ir::Load*) { MaybeEmitInstruction(inst); },                 //
+                [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },            //
+                [&](core::ir::Access*) { MaybeEmitInstruction(inst); },               //
+                [&](core::ir::UserCall* c) {                                          //
                     if (c->Result()->Type()->Is<core::type::Void>()) {
                         auto out = Line();
                         EmitValue(out, c->Result());
@@ -343,6 +349,10 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },      //
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },        //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
+                    [&](const core::ir::LoadVectorElement* e) {
+                        EmitLoadVectorElement(out, e);
+                    },                                                         //
+                    [&](const core::ir::Swizzle* s) { EmitSwizzle(out, s); },  //
                     TINT_ICE_ON_NO_MATCH);
             },                                                                     //
             [&](const core::ir::FunctionParam* p) { EmitFunctionParam(out, p); },  //
@@ -555,6 +565,47 @@ class Printer : public tint::TextGenerator {
             }
         }
         Line() << "}";
+    }
+
+    void EmitSwizzle(StringStream& out, const core::ir::Swizzle* swizzle) {
+        EmitValue(out, swizzle->Object());
+        out << ".";
+        for (const auto i : swizzle->Indices()) {
+            switch (i) {
+                case 0:
+                    out << "x";
+                    break;
+                case 1:
+                    out << "y";
+                    break;
+                case 2:
+                    out << "z";
+                    break;
+                case 3:
+                    out << "w";
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+        }
+    }
+
+    void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
+        auto out = Line();
+
+        EmitValue(out, l->To());
+        out << "[";
+        EmitValue(out, l->Index());
+        out << "] = ";
+        EmitValue(out, l->Value());
+        out << ";";
+    }
+
+    void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
+        EmitValue(out, l->From());
+        out << "[";
+        EmitValue(out, l->Index());
+        out << "]";
     }
 
     /// Emit an if instruction

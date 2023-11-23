@@ -1,9 +1,499 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  half3 v;
+};
+
+thread S P = {};
+void f() {
+  half3 v = P.v;
+  half x = P.v[0u];
+  half y = P.v[1u];
+  half z = P.v[2u];
+  half2 xx = P.v.xx;
+  half2 xy = P.v.xy;
+  half2 xz = P.v.xz;
+  half2 yx = P.v.yx;
+  half2 yy = P.v.yy;
+  half2 yz = P.v.yz;
+  half2 zx = P.v.zx;
+  half2 zy = P.v.zy;
+  half2 zz = P.v.zz;
+  half3 xxx = P.v.xxx;
+  half3 xxy = P.v.xxy;
+  half3 xxz = P.v.xxz;
+  half3 xyx = P.v.xyx;
+  half3 xyy = P.v.xyy;
+  half3 xyz = P.v.xyz;
+  half3 xzx = P.v.xzx;
+  half3 xzy = P.v.xzy;
+  half3 xzz = P.v.xzz;
+  half3 yxx = P.v.yxx;
+  half3 yxy = P.v.yxy;
+  half3 yxz = P.v.yxz;
+  half3 yyx = P.v.yyx;
+  half3 yyy = P.v.yyy;
+  half3 yyz = P.v.yyz;
+  half3 yzx = P.v.yzx;
+  half3 yzy = P.v.yzy;
+  half3 yzz = P.v.yzz;
+  half3 zxx = P.v.zxx;
+  half3 zxy = P.v.zxy;
+  half3 zxz = P.v.zxz;
+  half3 zyx = P.v.zyx;
+  half3 zyy = P.v.zyy;
+  half3 zyz = P.v.zyz;
+  half3 zzx = P.v.zzx;
+  half3 zzy = P.v.zzy;
+  half3 zzz = P.v.zzz;
+  half4 xxxx = P.v.xxxx;
+  half4 xxxy = P.v.xxxy;
+  half4 xxxz = P.v.xxxz;
+  half4 xxyx = P.v.xxyx;
+  half4 xxyy = P.v.xxyy;
+  half4 xxyz = P.v.xxyz;
+  half4 xxzx = P.v.xxzx;
+  half4 xxzy = P.v.xxzy;
+  half4 xxzz = P.v.xxzz;
+  half4 xyxx = P.v.xyxx;
+  half4 xyxy = P.v.xyxy;
+  half4 xyxz = P.v.xyxz;
+  half4 xyyx = P.v.xyyx;
+  half4 xyyy = P.v.xyyy;
+  half4 xyyz = P.v.xyyz;
+  half4 xyzx = P.v.xyzx;
+  half4 xyzy = P.v.xyzy;
+  half4 xyzz = P.v.xyzz;
+  half4 xzxx = P.v.xzxx;
+  half4 xzxy = P.v.xzxy;
+  half4 xzxz = P.v.xzxz;
+  half4 xzyx = P.v.xzyx;
+  half4 xzyy = P.v.xzyy;
+  half4 xzyz = P.v.xzyz;
+  half4 xzzx = P.v.xzzx;
+  half4 xzzy = P.v.xzzy;
+  half4 xzzz = P.v.xzzz;
+  half4 yxxx = P.v.yxxx;
+  half4 yxxy = P.v.yxxy;
+  half4 yxxz = P.v.yxxz;
+  half4 yxyx = P.v.yxyx;
+  half4 yxyy = P.v.yxyy;
+  half4 yxyz = P.v.yxyz;
+  half4 yxzx = P.v.yxzx;
+  half4 yxzy = P.v.yxzy;
+  half4 yxzz = P.v.yxzz;
+  half4 yyxx = P.v.yyxx;
+  half4 yyxy = P.v.yyxy;
+  half4 yyxz = P.v.yyxz;
+  half4 yyyx = P.v.yyyx;
+  half4 yyyy = P.v.yyyy;
+  half4 yyyz = P.v.yyyz;
+  half4 yyzx = P.v.yyzx;
+  half4 yyzy = P.v.yyzy;
+  half4 yyzz = P.v.yyzz;
+  half4 yzxx = P.v.yzxx;
+  half4 yzxy = P.v.yzxy;
+  half4 yzxz = P.v.yzxz;
+  half4 yzyx = P.v.yzyx;
+  half4 yzyy = P.v.yzyy;
+  half4 yzyz = P.v.yzyz;
+  half4 yzzx = P.v.yzzx;
+  half4 yzzy = P.v.yzzy;
+  half4 yzzz = P.v.yzzz;
+  half4 zxxx = P.v.zxxx;
+  half4 zxxy = P.v.zxxy;
+  half4 zxxz = P.v.zxxz;
+  half4 zxyx = P.v.zxyx;
+  half4 zxyy = P.v.zxyy;
+  half4 zxyz = P.v.zxyz;
+  half4 zxzx = P.v.zxzx;
+  half4 zxzy = P.v.zxzy;
+  half4 zxzz = P.v.zxzz;
+  half4 zyxx = P.v.zyxx;
+  half4 zyxy = P.v.zyxy;
+  half4 zyxz = P.v.zyxz;
+  half4 zyyx = P.v.zyyx;
+  half4 zyyy = P.v.zyyy;
+  half4 zyyz = P.v.zyyz;
+  half4 zyzx = P.v.zyzx;
+  half4 zyzy = P.v.zyzy;
+  half4 zyzz = P.v.zyzz;
+  half4 zzxx = P.v.zzxx;
+  half4 zzxy = P.v.zzxy;
+  half4 zzxz = P.v.zzxz;
+  half4 zzyx = P.v.zzyx;
+  half4 zzyy = P.v.zzyy;
+  half4 zzyz = P.v.zzyz;
+  half4 zzzx = P.v.zzzx;
+  half4 zzzy = P.v.zzzy;
+  half4 zzzz = P.v.zzzz;
+}
+program_source:7:10: error: program scope variable must reside in constant address space
+thread S P = {};
+         ^
+program_source:9:9: warning: unused variable 'v' [-Wunused-variable]
+  half3 v = P.v;
+        ^
+program_source:10:8: warning: unused variable 'x' [-Wunused-variable]
+  half x = P.v[0u];
+       ^
+program_source:11:8: warning: unused variable 'y' [-Wunused-variable]
+  half y = P.v[1u];
+       ^
+program_source:12:8: warning: unused variable 'z' [-Wunused-variable]
+  half z = P.v[2u];
+       ^
+program_source:13:9: warning: unused variable 'xx' [-Wunused-variable]
+  half2 xx = P.v.xx;
+        ^
+program_source:14:9: warning: unused variable 'xy' [-Wunused-variable]
+  half2 xy = P.v.xy;
+        ^
+program_source:15:9: warning: unused variable 'xz' [-Wunused-variable]
+  half2 xz = P.v.xz;
+        ^
+program_source:16:9: warning: unused variable 'yx' [-Wunused-variable]
+  half2 yx = P.v.yx;
+        ^
+program_source:17:9: warning: unused variable 'yy' [-Wunused-variable]
+  half2 yy = P.v.yy;
+        ^
+program_source:18:9: warning: unused variable 'yz' [-Wunused-variable]
+  half2 yz = P.v.yz;
+        ^
+program_source:19:9: warning: unused variable 'zx' [-Wunused-variable]
+  half2 zx = P.v.zx;
+        ^
+program_source:20:9: warning: unused variable 'zy' [-Wunused-variable]
+  half2 zy = P.v.zy;
+        ^
+program_source:21:9: warning: unused variable 'zz' [-Wunused-variable]
+  half2 zz = P.v.zz;
+        ^
+program_source:22:9: warning: unused variable 'xxx' [-Wunused-variable]
+  half3 xxx = P.v.xxx;
+        ^
+program_source:23:9: warning: unused variable 'xxy' [-Wunused-variable]
+  half3 xxy = P.v.xxy;
+        ^
+program_source:24:9: warning: unused variable 'xxz' [-Wunused-variable]
+  half3 xxz = P.v.xxz;
+        ^
+program_source:25:9: warning: unused variable 'xyx' [-Wunused-variable]
+  half3 xyx = P.v.xyx;
+        ^
+program_source:26:9: warning: unused variable 'xyy' [-Wunused-variable]
+  half3 xyy = P.v.xyy;
+        ^
+program_source:27:9: warning: unused variable 'xyz' [-Wunused-variable]
+  half3 xyz = P.v.xyz;
+        ^
+program_source:28:9: warning: unused variable 'xzx' [-Wunused-variable]
+  half3 xzx = P.v.xzx;
+        ^
+program_source:29:9: warning: unused variable 'xzy' [-Wunused-variable]
+  half3 xzy = P.v.xzy;
+        ^
+program_source:30:9: warning: unused variable 'xzz' [-Wunused-variable]
+  half3 xzz = P.v.xzz;
+        ^
+program_source:31:9: warning: unused variable 'yxx' [-Wunused-variable]
+  half3 yxx = P.v.yxx;
+        ^
+program_source:32:9: warning: unused variable 'yxy' [-Wunused-variable]
+  half3 yxy = P.v.yxy;
+        ^
+program_source:33:9: warning: unused variable 'yxz' [-Wunused-variable]
+  half3 yxz = P.v.yxz;
+        ^
+program_source:34:9: warning: unused variable 'yyx' [-Wunused-variable]
+  half3 yyx = P.v.yyx;
+        ^
+program_source:35:9: warning: unused variable 'yyy' [-Wunused-variable]
+  half3 yyy = P.v.yyy;
+        ^
+program_source:36:9: warning: unused variable 'yyz' [-Wunused-variable]
+  half3 yyz = P.v.yyz;
+        ^
+program_source:37:9: warning: unused variable 'yzx' [-Wunused-variable]
+  half3 yzx = P.v.yzx;
+        ^
+program_source:38:9: warning: unused variable 'yzy' [-Wunused-variable]
+  half3 yzy = P.v.yzy;
+        ^
+program_source:39:9: warning: unused variable 'yzz' [-Wunused-variable]
+  half3 yzz = P.v.yzz;
+        ^
+program_source:40:9: warning: unused variable 'zxx' [-Wunused-variable]
+  half3 zxx = P.v.zxx;
+        ^
+program_source:41:9: warning: unused variable 'zxy' [-Wunused-variable]
+  half3 zxy = P.v.zxy;
+        ^
+program_source:42:9: warning: unused variable 'zxz' [-Wunused-variable]
+  half3 zxz = P.v.zxz;
+        ^
+program_source:43:9: warning: unused variable 'zyx' [-Wunused-variable]
+  half3 zyx = P.v.zyx;
+        ^
+program_source:44:9: warning: unused variable 'zyy' [-Wunused-variable]
+  half3 zyy = P.v.zyy;
+        ^
+program_source:45:9: warning: unused variable 'zyz' [-Wunused-variable]
+  half3 zyz = P.v.zyz;
+        ^
+program_source:46:9: warning: unused variable 'zzx' [-Wunused-variable]
+  half3 zzx = P.v.zzx;
+        ^
+program_source:47:9: warning: unused variable 'zzy' [-Wunused-variable]
+  half3 zzy = P.v.zzy;
+        ^
+program_source:48:9: warning: unused variable 'zzz' [-Wunused-variable]
+  half3 zzz = P.v.zzz;
+        ^
+program_source:49:9: warning: unused variable 'xxxx' [-Wunused-variable]
+  half4 xxxx = P.v.xxxx;
+        ^
+program_source:50:9: warning: unused variable 'xxxy' [-Wunused-variable]
+  half4 xxxy = P.v.xxxy;
+        ^
+program_source:51:9: warning: unused variable 'xxxz' [-Wunused-variable]
+  half4 xxxz = P.v.xxxz;
+        ^
+program_source:52:9: warning: unused variable 'xxyx' [-Wunused-variable]
+  half4 xxyx = P.v.xxyx;
+        ^
+program_source:53:9: warning: unused variable 'xxyy' [-Wunused-variable]
+  half4 xxyy = P.v.xxyy;
+        ^
+program_source:54:9: warning: unused variable 'xxyz' [-Wunused-variable]
+  half4 xxyz = P.v.xxyz;
+        ^
+program_source:55:9: warning: unused variable 'xxzx' [-Wunused-variable]
+  half4 xxzx = P.v.xxzx;
+        ^
+program_source:56:9: warning: unused variable 'xxzy' [-Wunused-variable]
+  half4 xxzy = P.v.xxzy;
+        ^
+program_source:57:9: warning: unused variable 'xxzz' [-Wunused-variable]
+  half4 xxzz = P.v.xxzz;
+        ^
+program_source:58:9: warning: unused variable 'xyxx' [-Wunused-variable]
+  half4 xyxx = P.v.xyxx;
+        ^
+program_source:59:9: warning: unused variable 'xyxy' [-Wunused-variable]
+  half4 xyxy = P.v.xyxy;
+        ^
+program_source:60:9: warning: unused variable 'xyxz' [-Wunused-variable]
+  half4 xyxz = P.v.xyxz;
+        ^
+program_source:61:9: warning: unused variable 'xyyx' [-Wunused-variable]
+  half4 xyyx = P.v.xyyx;
+        ^
+program_source:62:9: warning: unused variable 'xyyy' [-Wunused-variable]
+  half4 xyyy = P.v.xyyy;
+        ^
+program_source:63:9: warning: unused variable 'xyyz' [-Wunused-variable]
+  half4 xyyz = P.v.xyyz;
+        ^
+program_source:64:9: warning: unused variable 'xyzx' [-Wunused-variable]
+  half4 xyzx = P.v.xyzx;
+        ^
+program_source:65:9: warning: unused variable 'xyzy' [-Wunused-variable]
+  half4 xyzy = P.v.xyzy;
+        ^
+program_source:66:9: warning: unused variable 'xyzz' [-Wunused-variable]
+  half4 xyzz = P.v.xyzz;
+        ^
+program_source:67:9: warning: unused variable 'xzxx' [-Wunused-variable]
+  half4 xzxx = P.v.xzxx;
+        ^
+program_source:68:9: warning: unused variable 'xzxy' [-Wunused-variable]
+  half4 xzxy = P.v.xzxy;
+        ^
+program_source:69:9: warning: unused variable 'xzxz' [-Wunused-variable]
+  half4 xzxz = P.v.xzxz;
+        ^
+program_source:70:9: warning: unused variable 'xzyx' [-Wunused-variable]
+  half4 xzyx = P.v.xzyx;
+        ^
+program_source:71:9: warning: unused variable 'xzyy' [-Wunused-variable]
+  half4 xzyy = P.v.xzyy;
+        ^
+program_source:72:9: warning: unused variable 'xzyz' [-Wunused-variable]
+  half4 xzyz = P.v.xzyz;
+        ^
+program_source:73:9: warning: unused variable 'xzzx' [-Wunused-variable]
+  half4 xzzx = P.v.xzzx;
+        ^
+program_source:74:9: warning: unused variable 'xzzy' [-Wunused-variable]
+  half4 xzzy = P.v.xzzy;
+        ^
+program_source:75:9: warning: unused variable 'xzzz' [-Wunused-variable]
+  half4 xzzz = P.v.xzzz;
+        ^
+program_source:76:9: warning: unused variable 'yxxx' [-Wunused-variable]
+  half4 yxxx = P.v.yxxx;
+        ^
+program_source:77:9: warning: unused variable 'yxxy' [-Wunused-variable]
+  half4 yxxy = P.v.yxxy;
+        ^
+program_source:78:9: warning: unused variable 'yxxz' [-Wunused-variable]
+  half4 yxxz = P.v.yxxz;
+        ^
+program_source:79:9: warning: unused variable 'yxyx' [-Wunused-variable]
+  half4 yxyx = P.v.yxyx;
+        ^
+program_source:80:9: warning: unused variable 'yxyy' [-Wunused-variable]
+  half4 yxyy = P.v.yxyy;
+        ^
+program_source:81:9: warning: unused variable 'yxyz' [-Wunused-variable]
+  half4 yxyz = P.v.yxyz;
+        ^
+program_source:82:9: warning: unused variable 'yxzx' [-Wunused-variable]
+  half4 yxzx = P.v.yxzx;
+        ^
+program_source:83:9: warning: unused variable 'yxzy' [-Wunused-variable]
+  half4 yxzy = P.v.yxzy;
+        ^
+program_source:84:9: warning: unused variable 'yxzz' [-Wunused-variable]
+  half4 yxzz = P.v.yxzz;
+        ^
+program_source:85:9: warning: unused variable 'yyxx' [-Wunused-variable]
+  half4 yyxx = P.v.yyxx;
+        ^
+program_source:86:9: warning: unused variable 'yyxy' [-Wunused-variable]
+  half4 yyxy = P.v.yyxy;
+        ^
+program_source:87:9: warning: unused variable 'yyxz' [-Wunused-variable]
+  half4 yyxz = P.v.yyxz;
+        ^
+program_source:88:9: warning: unused variable 'yyyx' [-Wunused-variable]
+  half4 yyyx = P.v.yyyx;
+        ^
+program_source:89:9: warning: unused variable 'yyyy' [-Wunused-variable]
+  half4 yyyy = P.v.yyyy;
+        ^
+program_source:90:9: warning: unused variable 'yyyz' [-Wunused-variable]
+  half4 yyyz = P.v.yyyz;
+        ^
+program_source:91:9: warning: unused variable 'yyzx' [-Wunused-variable]
+  half4 yyzx = P.v.yyzx;
+        ^
+program_source:92:9: warning: unused variable 'yyzy' [-Wunused-variable]
+  half4 yyzy = P.v.yyzy;
+        ^
+program_source:93:9: warning: unused variable 'yyzz' [-Wunused-variable]
+  half4 yyzz = P.v.yyzz;
+        ^
+program_source:94:9: warning: unused variable 'yzxx' [-Wunused-variable]
+  half4 yzxx = P.v.yzxx;
+        ^
+program_source:95:9: warning: unused variable 'yzxy' [-Wunused-variable]
+  half4 yzxy = P.v.yzxy;
+        ^
+program_source:96:9: warning: unused variable 'yzxz' [-Wunused-variable]
+  half4 yzxz = P.v.yzxz;
+        ^
+program_source:97:9: warning: unused variable 'yzyx' [-Wunused-variable]
+  half4 yzyx = P.v.yzyx;
+        ^
+program_source:98:9: warning: unused variable 'yzyy' [-Wunused-variable]
+  half4 yzyy = P.v.yzyy;
+        ^
+program_source:99:9: warning: unused variable 'yzyz' [-Wunused-variable]
+  half4 yzyz = P.v.yzyz;
+        ^
+program_source:100:9: warning: unused variable 'yzzx' [-Wunused-variable]
+  half4 yzzx = P.v.yzzx;
+        ^
+program_source:101:9: warning: unused variable 'yzzy' [-Wunused-variable]
+  half4 yzzy = P.v.yzzy;
+        ^
+program_source:102:9: warning: unused variable 'yzzz' [-Wunused-variable]
+  half4 yzzz = P.v.yzzz;
+        ^
+program_source:103:9: warning: unused variable 'zxxx' [-Wunused-variable]
+  half4 zxxx = P.v.zxxx;
+        ^
+program_source:104:9: warning: unused variable 'zxxy' [-Wunused-variable]
+  half4 zxxy = P.v.zxxy;
+        ^
+program_source:105:9: warning: unused variable 'zxxz' [-Wunused-variable]
+  half4 zxxz = P.v.zxxz;
+        ^
+program_source:106:9: warning: unused variable 'zxyx' [-Wunused-variable]
+  half4 zxyx = P.v.zxyx;
+        ^
+program_source:107:9: warning: unused variable 'zxyy' [-Wunused-variable]
+  half4 zxyy = P.v.zxyy;
+        ^
+program_source:108:9: warning: unused variable 'zxyz' [-Wunused-variable]
+  half4 zxyz = P.v.zxyz;
+        ^
+program_source:109:9: warning: unused variable 'zxzx' [-Wunused-variable]
+  half4 zxzx = P.v.zxzx;
+        ^
+program_source:110:9: warning: unused variable 'zxzy' [-Wunused-variable]
+  half4 zxzy = P.v.zxzy;
+        ^
+program_source:111:9: warning: unused variable 'zxzz' [-Wunused-variable]
+  half4 zxzz = P.v.zxzz;
+        ^
+program_source:112:9: warning: unused variable 'zyxx' [-Wunused-variable]
+  half4 zyxx = P.v.zyxx;
+        ^
+program_source:113:9: warning: unused variable 'zyxy' [-Wunused-variable]
+  half4 zyxy = P.v.zyxy;
+        ^
+program_source:114:9: warning: unused variable 'zyxz' [-Wunused-variable]
+  half4 zyxz = P.v.zyxz;
+        ^
+program_source:115:9: warning: unused variable 'zyyx' [-Wunused-variable]
+  half4 zyyx = P.v.zyyx;
+        ^
+program_source:116:9: warning: unused variable 'zyyy' [-Wunused-variable]
+  half4 zyyy = P.v.zyyy;
+        ^
+program_source:117:9: warning: unused variable 'zyyz' [-Wunused-variable]
+  half4 zyyz = P.v.zyyz;
+        ^
+program_source:118:9: warning: unused variable 'zyzx' [-Wunused-variable]
+  half4 zyzx = P.v.zyzx;
+        ^
+program_source:119:9: warning: unused variable 'zyzy' [-Wunused-variable]
+  half4 zyzy = P.v.zyzy;
+        ^
+program_source:120:9: warning: unused variable 'zyzz' [-Wunused-variable]
+  half4 zyzz = P.v.zyzz;
+        ^
+program_source:121:9: warning: unused variable 'zzxx' [-Wunused-variable]
+  half4 zzxx = P.v.zzxx;
+        ^
+program_source:122:9: warning: unused variable 'zzxy' [-Wunused-variable]
+  half4 zzxy = P.v.zzxy;
+        ^
+program_source:123:9: warning: unused variable 'zzxz' [-Wunused-variable]
+  half4 zzxz = P.v.zzxz;
+        ^
+program_source:124:9: warning: unused variable 'zzyx' [-Wunused-variable]
+  half4 zzyx = P.v.zzyx;
+        ^
+program_source:125:9: warning: unused variable 'zzyy' [-Wunused-variable]
+  half4 zzyy = P.v.zzyy;
+        ^
+program_source:126:9: warning: unused variable 'zzyz' [-Wunused-variable]
+  half4 zzyz = P.v.zzyz;
+        ^
+program_source:127:9: warning: unused variable 'zzzx' [-Wunused-variable]
+  half4 zzzx = P.v.zzzx;
+        ^
+program_source:128:9: warning: unused variable 'zzzy' [-Wunused-variable]
+  half4 zzzy = P.v.zzzy;
+        ^
+program_source:129:9: warning: unused variable 'zzzz' [-Wunused-variable]
+  half4 zzzz = P.v.zzzz;
+        ^
+
