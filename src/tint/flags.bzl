@@ -61,7 +61,7 @@ def declare_os_flag():
         )
         selects.config_setting_group(
             name = "tint_build_is_{}_false".format(os),
-            match_any = [ "is_{}_true".format(other) for other in OSes if other != os],
+            match_any = [ "tint_build_is_{}_true".format(other) for other in OSes if other != os],
             visibility = ["//visibility:public"],
         )
 
