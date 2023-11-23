@@ -33,12 +33,28 @@
 namespace tint::diag {
 namespace {
 
+TEST(DiagListTest, CtorInitializerList) {
+    Diagnostic err_a, err_b;
+    err_a.severity = Severity::Error;
+    err_b.severity = Severity::Fatal;
+    List list{err_a, err_b};
+    EXPECT_EQ(list.count(), 2u);
+}
+
+TEST(DiagListTest, CtorVectorRef) {
+    Diagnostic err_a, err_b;
+    err_a.severity = Severity::Error;
+    err_b.severity = Severity::Fatal;
+    List list(Vector{err_a, err_b});
+    EXPECT_EQ(list.count(), 2u);
+}
+
 TEST(DiagListTest, OwnedFilesShared) {
     auto file = std::make_shared<Source::File>("path", "content");
 
-    diag::List list_a, list_b;
+    List list_a, list_b;
     {
-        diag::Diagnostic diag{};
+        Diagnostic diag{};
         diag.source = Source{Source::Range{{0, 0}}, file.get()};
         list_a.add(std::move(diag));
     }

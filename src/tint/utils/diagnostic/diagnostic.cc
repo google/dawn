@@ -33,13 +33,29 @@
 
 namespace tint::diag {
 
+namespace {
+size_t CountErrors(VectorRef<Diagnostic> diags) {
+    size_t count = 0;
+    for (auto& diag : diags) {
+        if (diag.severity >= Severity::Error) {
+            count++;
+        }
+    }
+    return count;
+}
+}  // namespace
+
 Diagnostic::Diagnostic() = default;
 Diagnostic::Diagnostic(const Diagnostic&) = default;
 Diagnostic::~Diagnostic() = default;
 Diagnostic& Diagnostic::operator=(const Diagnostic&) = default;
 
 List::List() = default;
-List::List(std::initializer_list<Diagnostic> list) : entries_(list) {}
+List::List(std::initializer_list<Diagnostic> list)
+    : entries_(list), error_count_(CountErrors(entries_)) {}
+List::List(VectorRef<Diagnostic> list)
+    : entries_(std::move(list)), error_count_(CountErrors(entries_)) {}
+
 List::List(const List& rhs) = default;
 
 List::List(List&& rhs) = default;

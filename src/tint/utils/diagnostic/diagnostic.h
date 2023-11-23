@@ -108,28 +108,31 @@ class List {
     /// Constructs the list with no elements.
     List();
 
-    /// Copy constructor. Copies the diagnostics from `list` into this list.
+    /// Constructor. Copies the diagnostics from @p list into this list.
     /// @param list the list of diagnostics to copy into this list.
     List(std::initializer_list<Diagnostic> list);
 
-    /// Copy constructor. Copies the diagnostics from `list` into this list.
+    /// Constructor. Copies the diagnostics from @p list into this list.
+    /// @param list the list of diagnostics to copy into this list.
+    explicit List(VectorRef<Diagnostic> list);
+
+    /// Copy constructor. Copies the diagnostics from @p list into this list.
     /// @param list the list of diagnostics to copy into this list.
     List(const List& list);
 
-    /// Move constructor. Moves the diagnostics from `list` into this list.
+    /// Move constructor. Moves the diagnostics from @p list into this list.
     /// @param list the list of diagnostics to move into this list.
     List(List&& list);
 
     /// Destructor
     ~List();
 
-    /// Assignment operator. Copies the diagnostics from `list` into this list.
+    /// Assignment operator. Copies the diagnostics from @p list into this list.
     /// @param list the list to copy into this list.
     /// @return this list.
     List& operator=(const List& list);
 
-    /// Assignment move operator. Moves the diagnostics from `list` into this
-    /// list.
+    /// Assignment move operator. Moves the diagnostics from @p list into this list.
     /// @param list the list to move into this list.
     /// @return this list.
     List& operator=(List&& list);
