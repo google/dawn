@@ -40,6 +40,8 @@ import("${tint_src_dir}/tint.gni")
 if (tint_build_spv_writer) {
   libtint_source_set("helpers") {
     sources = [
+      "ast_generate_bindings.cc",
+      "ast_generate_bindings.h",
       "generate_bindings.cc",
       "generate_bindings.h",
     ]
@@ -47,6 +49,7 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",

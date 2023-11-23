@@ -28,78 +28,76 @@
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 
 #include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
-#include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::spirv::writer {
 
-Bindings GenerateBindings(const Program& program) {
-    // TODO(tint:1491): Use Inspector once we can get binding info for all
-    // variables, not just those referenced by entry points.
-
+Bindings GenerateBindings(const core::ir::Module& module) {
     Bindings bindings{};
+    if (!module.root_block) {
+        return bindings;
+    }
 
     // Collect next valid binding number per group
     Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
     Vector<tint::BindingPoint, 4> ext_tex_bps;
-    for (auto* var : program.AST().GlobalVariables()) {
-        if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
-            if (auto bp = sem_var->Attributes().binding_point) {
-                if (auto val = group_to_next_binding_number.Find(bp->group)) {
-                    *val = std::max(*val, bp->binding + 1);
-                } else {
-                    group_to_next_binding_number.Add(bp->group, bp->binding + 1);
-                }
+    for (auto* inst : *module.root_block) {
+        if (!inst->Alive()) {
+            continue;
+        }
+        auto* var = inst->As<core::ir::Var>();
+        if (auto bp = var->BindingPoint()) {
+            if (auto val = group_to_next_binding_number.Find(bp->group)) {
+                *val = std::max(*val, bp->binding + 1);
+            } else {
+                group_to_next_binding_number.Add(bp->group, bp->binding + 1);
+            }
 
-                // Store up the external textures, we'll add them in the next step
-                if (sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
-                    ext_tex_bps.Push(*bp);
-                    continue;
-                }
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            auto* ty = ptr->UnwrapPtr();
 
-                binding::BindingInfo info{bp->group, bp->binding};
-                switch (sem_var->AddressSpace()) {
-                    case core::AddressSpace::kHandle:
-                        Switch(
-                            sem_var->Type()->UnwrapRef(),  //
-                            [&](const core::type::Sampler*) {
-                                bindings.sampler.emplace(*bp, info);
-                            },
-                            [&](const core::type::StorageTexture*) {
-                                bindings.storage_texture.emplace(*bp, info);
-                            },
-                            [&](const core::type::Texture*) {
-                                bindings.texture.emplace(*bp, info);
-                            });
-                        break;
-                    case core::AddressSpace::kStorage:
-                        bindings.storage.emplace(*bp, info);
-                        break;
-                    case core::AddressSpace::kUniform:
-                        bindings.uniform.emplace(*bp, info);
-                        break;
+            // Store up the external textures, we'll add them in the next step
+            if (ty->Is<core::type::ExternalTexture>()) {
+                ext_tex_bps.Push(*bp);
+                continue;
+            }
 
-                    case core::AddressSpace::kUndefined:
-                    case core::AddressSpace::kPixelLocal:
-                    case core::AddressSpace::kPrivate:
-                    case core::AddressSpace::kPushConstant:
-                    case core::AddressSpace::kIn:
-                    case core::AddressSpace::kOut:
-                    case core::AddressSpace::kFunction:
-                    case core::AddressSpace::kWorkgroup:
-                        break;
-                }
+            binding::BindingInfo info{bp->group, bp->binding};
+            switch (ptr->AddressSpace()) {
+                case core::AddressSpace::kHandle:
+                    Switch(
+                        ptr->UnwrapPtr(),  //
+                        [&](const core::type::Sampler*) { bindings.sampler.emplace(*bp, info); },
+                        [&](const core::type::StorageTexture*) {
+                            bindings.storage_texture.emplace(*bp, info);
+                        },
+                        [&](const core::type::Texture*) { bindings.texture.emplace(*bp, info); });
+                    break;
+                case core::AddressSpace::kStorage:
+                    bindings.storage.emplace(*bp, info);
+                    break;
+                case core::AddressSpace::kUniform:
+                    bindings.uniform.emplace(*bp, info);
+                    break;
+
+                case core::AddressSpace::kUndefined:
+                case core::AddressSpace::kPixelLocal:
+                case core::AddressSpace::kPrivate:
+                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kIn:
+                case core::AddressSpace::kOut:
+                case core::AddressSpace::kFunction:
+                case core::AddressSpace::kWorkgroup:
+                    break;
             }
         }
     }

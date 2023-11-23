@@ -25,20 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_HELPERS_GENERATE_BINDINGS_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_HELPERS_GENERATE_BINDINGS_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_HELPERS_AST_GENERATE_BINDINGS_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_HELPERS_AST_GENERATE_BINDINGS_H_
 
 #include "src/tint/lang/spirv/writer/common/options.h"
 
 // Forward declarations
-namespace tint::core::ir {
-class Module;
+namespace tint {
+class Program;
 }
 
 namespace tint::spirv::writer {
 
-Bindings GenerateBindings(const core::ir::Module& module);
+Bindings GenerateBindings(const Program& program);
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_HELPERS_GENERATE_BINDINGS_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_HELPERS_AST_GENERATE_BINDINGS_H_
