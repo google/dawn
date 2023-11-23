@@ -390,6 +390,50 @@ TEST_P(SharedTextureMemoryTests, GetPropertiesErrorMemory) {
     EXPECT_EQ(properties.format, wgpu::TextureFormat::Undefined);
 }
 
+// Tests that a SharedTextureMemory supports expected texture usages.
+TEST_P(SharedTextureMemoryTests, TextureUsages) {
+    for (wgpu::SharedTextureMemory memory :
+         GetParam().mBackend->CreateSharedTextureMemories(device)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        // CopySrc and TextureBinding should always be supported.
+        // TODO(crbug.com/dawn/2262): TextureBinding support on D3D11/D3D12 is actually
+        // dependent on the flags passed to the underlying texture (the relevant
+        // flag is currently always passed in the test context). Add tests where
+        // the D3D texture is not created with the relevant flag.
+        wgpu::TextureUsage expectedUsage =
+            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding;
+
+        // Additional usages are potentially supported for single-planar
+        // formats.
+        if (!utils::IsMultiPlanarFormat(properties.format)) {
+            expectedUsage |= wgpu::TextureUsage::CopyDst;
+
+            // TODO(crbug.com/dawn/2262): RenderAttachment support on D3D11/D3D12 is
+            // additionally dependent on the flags passed to the underlying
+            // texture (the relevant flag is currently always passed in the test
+            // context). Add tests where the D3D texture is not created with the
+            // relevant flag.
+            if (utils::IsRenderableFormat(device, properties.format)) {
+                expectedUsage |= wgpu::TextureUsage::RenderAttachment;
+            }
+
+            // TODO(crbug.com/dawn/2262): StorageBinding support on D3D11/D3D12 is
+            // additionally dependent on the flags passed to the underlying
+            // texture (the relevant flag is currently always passed in the test
+            // context). Add tests where the D3D texture is not created with the
+            // relevant flag.
+            if (utils::TextureFormatSupportsStorageTexture(properties.format,
+                                                           IsCompatibilityMode())) {
+                expectedUsage |= wgpu::TextureUsage::StorageBinding;
+            }
+        }
+
+        EXPECT_EQ(properties.usage, expectedUsage) << properties.format;
+    }
+}
+
 // Test calling GetProperties with an invalid chained struct. An error is
 // generated, but the properties are still populated.
 TEST_P(SharedTextureMemoryTests, GetPropertiesInvalidChain) {

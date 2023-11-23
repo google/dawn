@@ -280,6 +280,7 @@ bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat);
 
 bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat);
+bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureFormat);
 
 bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
                                         wgpu::TextureFormat textureFormat);
