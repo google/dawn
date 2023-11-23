@@ -410,7 +410,7 @@ struct State {
                 value,  //
                 [&](InstructionResult* res) {
                     // value was emitted by an instruction
-                    auto* inst = res->Source();
+                    auto* inst = res->Instruction();
                     return tint::Switch(
                         inst,
                         [&](Access* access) {
@@ -649,7 +649,7 @@ struct State {
                 return;  // Only instructions can be removed.
             }
             value = tint::Switch(
-                inst_res->Source(),  //
+                inst_res->Instruction(),  //
                 [&](Access* access) {
                     TINT_DEFER(access->Destroy());
                     return access->Object();

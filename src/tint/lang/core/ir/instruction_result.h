@@ -56,18 +56,18 @@ class InstructionResult : public Castable<InstructionResult, Value> {
     /// @param type the new type of the value
     void SetType(const core::type::Type* type) { type_ = type; }
 
-    /// Sets the source instruction for this value
+    /// Sets the instruction for this value
     /// @param inst the instruction to set
-    void SetSource(Instruction* inst) { source_ = inst; }
+    void SetInstruction(Instruction* inst) { instruction_ = inst; }
 
-    /// @returns the source instruction, if any
-    Instruction* Source() { return source_; }
+    /// @returns the instruction, if any
+    ir::Instruction* Instruction() { return instruction_; }
 
-    /// @returns the source instruction, if any
-    const Instruction* Source() const { return source_; }
+    /// @returns the instruction, if any
+    const ir::Instruction* Instruction() const { return instruction_; }
 
   private:
-    Instruction* source_ = nullptr;
+    ir::Instruction* instruction_ = nullptr;
     const core::type::Type* type_ = nullptr;
 };
 

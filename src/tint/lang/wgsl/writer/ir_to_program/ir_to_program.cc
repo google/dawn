@@ -1214,7 +1214,7 @@ class State {
 
         auto res = arg->As<core::ir::InstructionResult>();
         while (res) {
-            auto* inst = res->Source();
+            auto* inst = res->Instruction();
             if (inst->Is<core::ir::Access>()) {
                 return true;  // Passing pointer into sub-object
             }

@@ -50,8 +50,8 @@ TEST_F(IR_LoadTest, Create) {
 
     auto* result = inst->From()->As<InstructionResult>();
     ASSERT_NE(result, nullptr);
-    ASSERT_TRUE(result->Source()->Is<ir::Var>());
-    EXPECT_EQ(result->Source(), var);
+    ASSERT_TRUE(result->Instruction()->Is<ir::Var>());
+    EXPECT_EQ(result->Instruction(), var);
 }
 
 TEST_F(IR_LoadTest, Usage) {
@@ -68,7 +68,7 @@ TEST_F(IR_LoadTest, Results) {
 
     EXPECT_EQ(inst->Results().Length(), 1u);
     EXPECT_TRUE(inst->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(inst->Result(0)->Source(), inst);
+    EXPECT_EQ(inst->Result(0)->Instruction(), inst);
 }
 
 TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {

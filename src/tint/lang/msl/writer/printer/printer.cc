@@ -329,7 +329,7 @@ class Printer : public tint::TextGenerator {
             // [&](core::ir::FunctionParam* fp) {},                   //
             [&](const core::ir::InstructionResult* r) {
                 Switch(
-                    r->Source(),                                             //
+                    r->Instruction(),                                        //
                     [&](const core::ir::Unary* u) { EmitUnary(out, u); },    //
                     [&](const core::ir::Binary* b) { EmitBinary(out, b); },  //
                     [&](const core::ir::Let* l) {

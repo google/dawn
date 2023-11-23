@@ -52,7 +52,7 @@ TEST_F(IR_CoreBuiltinCallTest, Result) {
 
     EXPECT_EQ(builtin->Results().Length(), 1u);
     EXPECT_TRUE(builtin->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(builtin->Result(0)->Source(), builtin);
+    EXPECT_EQ(builtin->Result(0)->Instruction(), builtin);
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {

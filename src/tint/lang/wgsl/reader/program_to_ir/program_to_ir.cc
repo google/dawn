@@ -991,7 +991,7 @@ class Impl {
                 // of another access, then we can just append the index to that access.
                 if (!impl.mod.NameOf(obj).IsValid()) {
                     if (auto* inst_res = obj->As<core::ir::InstructionResult>()) {
-                        if (auto* access = inst_res->Source()->As<core::ir::Access>()) {
+                        if (auto* access = inst_res->Instruction()->As<core::ir::Access>()) {
                             access->AddIndex(index);
                             access->Result(0)->SetType(ty);
                             bindings_.Remove(expr->object);
@@ -1225,7 +1225,7 @@ class Impl {
 
             void EndShortCircuit(const ast::BinaryExpression* b) {
                 auto res = GetValue(b);
-                auto* src = res->As<core::ir::InstructionResult>()->Source();
+                auto* src = res->As<core::ir::InstructionResult>()->Instruction();
                 auto* if_ = src->As<core::ir::If>();
                 TINT_ASSERT_OR_RETURN(if_);
                 auto rhs = GetValue(b->rhs);

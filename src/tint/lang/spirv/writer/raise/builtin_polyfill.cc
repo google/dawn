@@ -199,12 +199,12 @@ struct State {
     core::ir::Value* ArrayLength(core::ir::CoreBuiltinCall* builtin) {
         // Strip away any let instructions to get to the original struct member access instruction.
         auto* ptr = builtin->Args()[0]->As<core::ir::InstructionResult>();
-        while (auto* let = tint::As<core::ir::Let>(ptr->Source())) {
+        while (auto* let = tint::As<core::ir::Let>(ptr->Instruction())) {
             ptr = let->Value()->As<core::ir::InstructionResult>();
         }
         TINT_ASSERT_OR_RETURN_VALUE(ptr, nullptr);
 
-        auto* access = ptr->Source()->As<core::ir::Access>();
+        auto* access = ptr->Instruction()->As<core::ir::Access>();
         TINT_ASSERT_OR_RETURN_VALUE(access, nullptr);
         TINT_ASSERT_OR_RETURN_VALUE(access->Indices().Length() == 1u, nullptr);
         TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>(),

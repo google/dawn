@@ -44,12 +44,12 @@ InstructionResult::InstructionResult(const core::type::Type* type) : type_(type)
 InstructionResult::~InstructionResult() = default;
 
 void InstructionResult::Destroy() {
-    TINT_ASSERT(source_ == nullptr);
+    TINT_ASSERT(instruction_ == nullptr);
     Base::Destroy();
 }
 
 InstructionResult* InstructionResult::Clone(CloneContext& ctx) {
-    // Do not clone the `Source`. It will be set when this result is placed in the new parent
+    // Do not clone the `Instruction`. It will be set when this result is placed in the new parent
     // instruction.
     return ctx.ir.values.Create<InstructionResult>(type_);
 }

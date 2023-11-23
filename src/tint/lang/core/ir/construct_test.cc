@@ -53,7 +53,7 @@ TEST_F(IR_ConstructTest, Result) {
 
     EXPECT_EQ(c->Results().Length(), 1u);
     EXPECT_TRUE(c->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(c, c->Result(0)->Source());
+    EXPECT_EQ(c, c->Result(0)->Instruction());
 }
 
 TEST_F(IR_ConstructTest, Fail_NullType) {

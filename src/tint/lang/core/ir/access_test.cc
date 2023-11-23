@@ -58,7 +58,7 @@ TEST_F(IR_AccessTest, Result) {
     EXPECT_EQ(a->Results().Length(), 1u);
 
     EXPECT_TRUE(a->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(a, a->Result(0)->Source());
+    EXPECT_EQ(a, a->Result(0)->Instruction());
 }
 
 TEST_F(IR_AccessTest, Fail_NullType) {

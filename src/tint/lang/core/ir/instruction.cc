@@ -44,7 +44,7 @@ void Instruction::Destroy() {
         Remove();
     }
     for (auto* result : Results()) {
-        result->SetSource(nullptr);
+        result->SetInstruction(nullptr);
         result->Destroy();
     }
     flags_.Add(Flag::kDead);

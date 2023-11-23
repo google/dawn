@@ -1112,7 +1112,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullSource) {
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
-    v->Result(0)->SetSource(nullptr);
+    v->Result(0)->SetInstruction(nullptr);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);

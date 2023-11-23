@@ -50,7 +50,7 @@ TEST_F(IR_ConvertTest, Results) {
 
     EXPECT_EQ(c->Results().Length(), 1u);
     EXPECT_TRUE(c->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(c->Result(0)->Source(), c);
+    EXPECT_EQ(c->Result(0)->Instruction(), c);
 }
 
 TEST_F(IR_ConvertTest, Clone) {

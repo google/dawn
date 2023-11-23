@@ -145,7 +145,7 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
     /// @param value the value to append
     void AddResult(InstructionResult* value) {
         if (value) {
-            value->SetSource(this);
+            value->SetInstruction(this);
         }
         results_.Push(value);
     }

@@ -488,9 +488,9 @@ void Validator::CheckInstruction(const Instruction* inst) {
             continue;
         }
 
-        if (res->Source() == nullptr) {
+        if (res->Instruction() == nullptr) {
             AddResultError(inst, i, InstError(inst, "instruction result source is undefined"));
-        } else if (res->Source() != inst) {
+        } else if (res->Instruction() != inst) {
             AddResultError(inst, i,
                            InstError(inst, "instruction result source has wrong instruction"));
         }

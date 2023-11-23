@@ -57,7 +57,7 @@ TEST_F(IR_LetTest, Results) {
     auto* let = b.Let("l", value);
     EXPECT_EQ(let->Results().Length(), 1u);
     EXPECT_TRUE(let->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(let->Result(0)->Source(), let);
+    EXPECT_EQ(let->Result(0)->Instruction(), let);
     EXPECT_EQ(let->Result(0)->Type(), value->Type());
 }
 

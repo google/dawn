@@ -59,13 +59,13 @@ class ControlInstruction : public Castable<ControlInstruction, OperandInstructio
     void SetResults(VectorRef<InstructionResult*> values) {
         for (auto* value : results_) {
             if (value) {
-                value->SetSource(nullptr);
+                value->SetInstruction(nullptr);
             }
         }
         results_ = std::move(values);
         for (auto* value : results_) {
             if (value) {
-                value->SetSource(this);
+                value->SetInstruction(this);
             }
         }
     }

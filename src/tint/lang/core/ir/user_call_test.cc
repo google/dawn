@@ -55,7 +55,7 @@ TEST_F(IR_UserCallTest, Results) {
 
     EXPECT_EQ(e->Results().Length(), 1u);
     EXPECT_TRUE(e->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(e->Result(0)->Source(), e);
+    EXPECT_EQ(e->Result(0)->Instruction(), e);
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {

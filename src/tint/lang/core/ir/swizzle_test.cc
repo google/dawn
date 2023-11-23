@@ -51,7 +51,7 @@ TEST_F(IR_SwizzleTest, Results) {
 
     EXPECT_EQ(a->Results().Length(), 1u);
     EXPECT_TRUE(a->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(a->Result(0)->Source(), a);
+    EXPECT_EQ(a->Result(0)->Instruction(), a);
 }
 
 TEST_F(IR_SwizzleTest, Fail_NullType) {
