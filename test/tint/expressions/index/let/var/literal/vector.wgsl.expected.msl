@@ -2,8 +2,8 @@
 
 using namespace metal;
 float f() {
-  float3 v = float3(1.0f, 2.0f, 3.0f);
-  int const i = 1;
+  float3 const v = float3(1.0f, 2.0f, 3.0f);
+  int i = 1;
   return v[i];
 }
 
