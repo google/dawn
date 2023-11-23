@@ -443,6 +443,32 @@ func applyDirectoryConfigs(p *Project) error {
 	return nil
 }
 
+// checkInclude checks that the include statement is valid
+// file is the file that contains the include
+// include is the include statement
+// includeCondition holds the required conditions for the include
+func checkInclude(file *File, include Include, includeCondition Condition) error {
+	noneIfEmpty := func(cond Condition) string {
+		if len(cond) == 0 {
+			return "<none>"
+		}
+		return cond.String()
+	}
+	sourceConditions := cnf.And(cnf.And(include.Condition, file.Condition), file.Target.Condition)
+	targetConditions := includeCondition
+	if missing := targetConditions.AssumeTrue(sourceConditions); len(missing) > 0 {
+		return fmt.Errorf(`%v:%v #include "%v" requires guard: #if %v
+
+%v build conditions: %v
+%v build conditions: %v`,
+			file.Path(), include.Line, include.Path, strings.ToUpper(missing.String()),
+			file.Path(), noneIfEmpty(sourceConditions),
+			include.Path, targetConditions,
+		)
+	}
+	return nil
+}
+
 // buildDependencies walks all the #includes in all files, building the dependency information for
 // all targets and files in the project. Errors if any cyclic includes are found.
 func buildDependencies(p *Project) error {
@@ -509,30 +535,19 @@ func buildDependencies(p *Project) error {
 						addExternalDependency(dependency)
 					}
 
-					noneIfEmpty := func(cond Condition) string {
-						if len(cond) == 0 {
-							return "<none>"
-						}
-						return cond.String()
+					includeCondition := cnf.And(includeFile.Condition, includeFile.Target.Condition)
+					if err := checkInclude(file, include, includeCondition); err != nil {
+						return err
 					}
-					sourceConditions := cnf.And(cnf.And(include.Condition, file.Condition), file.Target.Condition)
-					targetConditions := cnf.And(includeFile.Condition, includeFile.Target.Condition)
-					if missing := targetConditions.Remove(sourceConditions); len(missing) > 0 {
-						return fmt.Errorf(`%v:%v #include "%v" requires guard: #if %v
-
-%v build conditions: %v
-%v build conditions: %v`,
-							file.Path(), include.Line, include.Path, strings.ToUpper(missing.String()),
-							file.Path(), noneIfEmpty(sourceConditions),
-							include.Path, targetConditions,
-						)
-					}
-
 				} else {
 					// Check for external includes
 					for _, external := range p.externals.Values() {
 						if external.includePatternMatch(include.Path) {
 							addExternalDependency(external)
+
+							if err := checkInclude(file, include, external.Condition); err != nil {
+								return err
+							}
 						}
 					}
 				}
