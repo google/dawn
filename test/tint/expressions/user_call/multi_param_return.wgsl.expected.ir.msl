@@ -1,9 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:315 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+int c(int x, int y, int z) {
+  int a = (((1 + x) + y) + z);
+  a = (a + 2);
+  return a;
+}
+void b() {
+  int b = c(2, 3, 4);
+  b = (b + c(3, 4, 5));
+}

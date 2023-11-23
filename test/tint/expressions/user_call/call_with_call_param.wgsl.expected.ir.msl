@@ -1,27 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-float b() {
+float b(int i) {
   return 2.29999995231628417969f;
 }
-int c() {
+int c(uint u) {
   return 1;
 }
 void a() {
   float a = b(c(2u));
 }
-program_source:11:15: error: no matching function for call to 'c'
-  float a = b(c(2u));
-              ^
-program_source:7:5: note: candidate function not viable: requires 0 arguments, but 1 was provided
-int c() {
-    ^
-program_source:11:13: error: no matching function for call to 'b'
-  float a = b(c(2u));
-            ^
-program_source:4:7: note: candidate function not viable: requires 0 arguments, but 1 was provided
-float b() {
-      ^
-

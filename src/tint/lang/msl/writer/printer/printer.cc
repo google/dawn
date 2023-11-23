@@ -48,6 +48,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -225,9 +226,22 @@ class Printer : public tint::TextGenerator {
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
-            out << " " << ir_.NameOf(func).Name() << "() {";
+            out << " " << ir_.NameOf(func).Name() << "(";
 
-            // TODO(dsinclair): Emit Function parameters
+            size_t i = 0;
+            for (auto* param : func->Params()) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                ++i;
+
+                // TODO(dsinclair): Handle parameter attributes
+                EmitType(out, param->Type());
+                out << " ";
+                EmitFunctionParam(out, param);
+            }
+
+            out << ") {";
         }
         {
             ScopedIndent si(current_buffer_);
@@ -255,6 +269,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](core::ir::Var* v) { EmitVar(v); },               //
                 [&](core::ir::Discard*) { EmitDiscard(); },          //
+                [&](core::ir::Store* s) { EmitStore(s); },           //
 
                 [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },    //
                 [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },     //
@@ -262,7 +277,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
                 [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
                 [&](core::ir::Access*) { MaybeEmitInstruction(inst); },     //
-                [&](core::ir::UserCall* c) {
+                [&](core::ir::UserCall* c) {                                //
                     if (c->Result()->Type()->Is<core::type::Void>()) {
                         auto out = Line();
                         EmitValue(out, c->Result());
@@ -311,7 +326,8 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },        //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
                     TINT_ICE_ON_NO_MATCH);
-            },  //
+            },                                                                     //
+            [&](const core::ir::FunctionParam* p) { EmitFunctionParam(out, p); },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -496,6 +512,16 @@ class Printer : public tint::TextGenerator {
     /// Emit a discard instruction
     void EmitDiscard() { Line() << "discard_fragment();"; }
 
+    /// Emit a store
+    void EmitStore(core::ir::Store* s) {
+        auto out = Line();
+
+        EmitValue(out, s->To());
+        out << " = ";
+        EmitValue(out, s->From());
+        out << ";";
+    }
+
     /// Emit a bitcast instruction
     void EmitBitcast(StringStream& out, const core::ir::Bitcast* b) {
         out << "as_type<";
@@ -544,6 +570,11 @@ class Printer : public tint::TextGenerator {
             EmitValue(out, arg);
         }
         out << ")";
+    }
+
+    /// Emit a function parameter
+    void EmitFunctionParam(StringStream& out, const core::ir::FunctionParam* p) {
+        out << ir_.NameOf(p).Name();
     }
 
     /// Emit a constructor
