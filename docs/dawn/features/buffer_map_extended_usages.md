@@ -1,8 +1,7 @@
 # Buffer Map Extended Usages
 
 ## Overview:
- - The `wgpu::Feature::BufferMapExtendedUsages` feature allows creating a buffer with `wgpu::BufferUsage::MapRead` or `wgpu::BufferUsage::MapWrite` and any other `wgpu::BufferUsage`.
- - Exception is that `wgpu::BufferUsage::MapRead` cannot be combined with `wgpu::BufferUsage::MapWrite` and vice versa.
+ - The `wgpu::Feature::BufferMapExtendedUsages` feature allows creating a buffer with `wgpu::BufferUsage::MapRead` and/or `wgpu::BufferUsage::MapWrite` and any other `wgpu::BufferUsage`.
 
 ### Example Usage:
 ```

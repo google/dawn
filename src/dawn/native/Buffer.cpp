@@ -247,17 +247,7 @@ MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* 
 
     DAWN_INVALID_IF(usage == wgpu::BufferUsage::None, "Buffer usages must not be 0.");
 
-    if (device->HasFeature(Feature::BufferMapExtendedUsages)) {
-        // Note with BufferMapExtendedUsages, we only restrict that MapRead & MapWrite cannot be
-        // combined together. This makes it easier to optimize the storage in the backends. For
-        // example, D3D11 has specialized resource usage for GPU write-only or CPU write-only
-        // buffers.
-        DAWN_INVALID_IF(
-            !HasZeroOrOneBits(static_cast<wgpu::BufferUsage>(usage & kMappableBufferUsages)),
-            "Buffer usages (%s) is invalid. A buffer usage can contain either %s or %s "
-            "but not both.",
-            usage, wgpu::BufferUsage::MapRead, wgpu::BufferUsage::MapWrite);
-    } else {
+    if (!device->HasFeature(Feature::BufferMapExtendedUsages)) {
         const wgpu::BufferUsage kMapWriteAllowedUsages =
             wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
         DAWN_INVALID_IF(

@@ -1409,20 +1409,17 @@ TEST_F(BufferMapExtendedUsagesValidationTest, CreationMapUsageReadOrWriteNoRestr
             device.CreateBuffer(&descriptor);
         }
     }
-}
 
-// Test that a buffer creation with both MapRead and MapWrite will fail
-TEST_F(BufferMapExtendedUsagesValidationTest, CreationMapUsageReadAndWriteFails) {
-    // MapRead | MapWrite cannot be combined
+    // MapRead | MapWrite with anything is ok
     {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
 
-        descriptor.usage =
-            wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopyDst;
+        for (const auto otherUsage : kNonMapUsages) {
+            descriptor.usage =
+                wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite | otherUsage;
 
-        ASSERT_DEVICE_ERROR(
-            device.CreateBuffer(&descriptor),
-            testing::HasSubstr("either BufferUsage::MapRead or BufferUsage::MapWrite"));
+            device.CreateBuffer(&descriptor);
+        }
     }
 }

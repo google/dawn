@@ -1588,9 +1588,10 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteUniformBufferAndDraw) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, greenRenderPass.color, 0, 0);
 }
 
-// Test that modifying a storage buffer on GPU, then map read it on CPU works.
-TEST_P(BufferMapExtendedUsagesTests, GPUWriteStorageBufferThenMapRead) {
-    const uint32_t kExpectedValue = 1;
+// Test that map write a storage buffer, modifying it on GPU, then map read it on CPU works.
+TEST_P(BufferMapExtendedUsagesTests, MapWriteThenGPUWriteStorageBufferThenMapRead) {
+    const uint32_t kInitialValue = 1;
+    const uint32_t kExpectedValue = 2;
     constexpr size_t kSize = sizeof(kExpectedValue);
 
     wgpu::ComputePipeline pipeline;
@@ -1603,22 +1604,30 @@ TEST_P(BufferMapExtendedUsagesTests, GPUWriteStorageBufferThenMapRead) {
             @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
             @compute @workgroup_size(1) fn main() {
-                ssbo.value = 1u;
+                ssbo.value += 1u;
             })");
         csDesc.compute.entryPoint = "main";
 
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 
+    // Create buffer and write initial value.
     wgpu::Buffer ssbo;
     {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = kSize;
 
-        descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead;
+        descriptor.usage =
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
         ssbo = device.CreateBuffer(&descriptor);
+
+        MapAsyncAndWait(ssbo, wgpu::MapMode::Write, 0, 4);
+        ASSERT_NE(nullptr, ssbo.GetMappedRange());
+        memcpy(ssbo.GetMappedRange(), &kInitialValue, sizeof(kInitialValue));
+        ssbo.Unmap();
     }
 
+    // Modify the buffer's value in compute shader.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -1638,6 +1647,7 @@ TEST_P(BufferMapExtendedUsagesTests, GPUWriteStorageBufferThenMapRead) {
         queue.Submit(1, &commands);
     }
 
+    // Read the modified value.
     MapAsyncAndWait(ssbo, wgpu::MapMode::Read, 0, 4);
     CheckMapping(ssbo.GetConstMappedRange(0, kSize), &kExpectedValue, kSize);
     ssbo.Unmap();
