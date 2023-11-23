@@ -1163,7 +1163,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_WGSL_READER
     if (options.dump_ir) {
-        auto result = tint::wgsl::reader::ProgramToIR(info.program);
+        auto result = tint::wgsl::reader::ProgramToLoweredIR(info.program);
         if (!result) {
             std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
         } else {
