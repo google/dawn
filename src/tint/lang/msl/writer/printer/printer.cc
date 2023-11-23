@@ -272,6 +272,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Store* s) { EmitStore(s); },           //
 
                 [&](core::ir::Bitcast*) { MaybeEmitInstruction(inst); },    //
+                [&](core::ir::Unary*) { MaybeEmitInstruction(inst); },      //
                 [&](core::ir::Binary*) { MaybeEmitInstruction(inst); },     //
                 [&](core::ir::Let* l) { EmitLet(l); },                      //
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
@@ -313,6 +314,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Source(),                                             //
+                    [&](const core::ir::Unary* u) { EmitUnary(out, u); },    //
                     [&](const core::ir::Binary* b) { EmitBinary(out, b); },  //
                     [&](const core::ir::Let* l) {
                         auto name = ir_.NameOf(l->Result());
@@ -329,6 +331,20 @@ class Printer : public tint::TextGenerator {
             },                                                                     //
             [&](const core::ir::FunctionParam* p) { EmitFunctionParam(out, p); },  //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitUnary(StringStream& out, const core::ir::Unary* u) {
+        switch (u->Op()) {
+            case core::ir::UnaryOp::kNegation:
+                out << "-";
+                break;
+            case core::ir::UnaryOp::kComplement:
+                out << "~";
+                break;
+        }
+        out << "(";
+        EmitValue(out, u->Val());
+        out << ")";
     }
 
     /// Emit a binary instruction
