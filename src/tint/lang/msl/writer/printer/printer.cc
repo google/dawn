@@ -262,7 +262,15 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
                 [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
                 [&](core::ir::Access*) { MaybeEmitInstruction(inst); },     //
-                [&](core::ir::UserCall*) { MaybeEmitInstruction(inst); },   //
+                [&](core::ir::UserCall* c) {
+                    if (c->Result()->Type()->Is<core::type::Void>()) {
+                        auto out = Line();
+                        EmitValue(out, c->Result());
+                        out << ";";
+                    } else {
+                        MaybeEmitInstruction(inst);
+                    }
+                },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }

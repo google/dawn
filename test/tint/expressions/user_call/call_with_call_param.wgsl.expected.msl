@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float b(int i) {
+  return 2.29999995231628417969f;
+}
+
+int c(uint u) {
+  return 1;
+}
+
+void a() {
+  int const tint_symbol = c(2u);
+  float a_1 = b(tint_symbol);
+}
+
