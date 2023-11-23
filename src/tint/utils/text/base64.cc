@@ -25,44 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_UTILS_TEXT_BASE64_H_
-#define SRC_TINT_UTILS_TEXT_BASE64_H_
+#include <string>
 
-#include <cstdint>
-#include <optional>
-
-#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/text/base64.h"
 
 namespace tint {
 
-/// Decodes a byte from a base64 encoded character
-/// @param c the character to decode
-/// @return the decoded value, or std::nullopt if the character is padding ('=') or an invalid
-/// character.
-inline std::optional<uint8_t> DecodeBase64(char c) {
-    if (c >= 'A' && c <= 'Z') {
-        return static_cast<uint8_t>(c - 'A');
+Vector<std::byte, 0> DecodeBase64FromComments(std::string_view wgsl) {
+    Vector<std::byte, 0> out;
+    size_t block_nesting = 0;
+    bool line_comment = false;
+    for (size_t i = 0, n = wgsl.length(); i < n; i++) {
+        char curr = wgsl[i];
+        if (curr == '\n') {
+            line_comment = false;
+            continue;
+        }
+
+        char next = (i + 1) < n ? wgsl[i + 1] : 0;
+        if (curr == '/' && next == '*') {
+            block_nesting++;
+            i++;  // skip '*'
+            continue;
+        }
+        if (block_nesting > 0 && curr == '*' && next == '/') {
+            block_nesting--;
+            i++;  // skip '/'
+            continue;
+        }
+        if (block_nesting == 0 && curr == '/' && next == '/') {
+            line_comment = true;
+            i++;  // skip '/'
+            continue;
+        }
+
+        if (block_nesting > 0 || line_comment) {
+            if (auto v = DecodeBase64(curr)) {
+                out.Push(std::byte{*v});
+            }
+        }
     }
-    if (c >= 'a' && c <= 'z') {
-        return static_cast<uint8_t>(26 + c - 'a');
-    }
-    if (c >= '0' && c <= '9') {
-        return static_cast<uint8_t>(52 + c - '0');
-    }
-    if (c == '+') {
-        return 62;
-    }
-    if (c == '/') {
-        return 63;
-    }
-    return std::nullopt;
+    return out;
 }
-/// DecodeBase64FromComments parses all the comments from the WGSL source string as a base64 byte
-/// stream. Non-base64 characters are skipped
-/// @param wgsl the WGSL source
-/// @return the base64 decoded bytes
-Vector<std::byte, 0> DecodeBase64FromComments(std::string_view wgsl);
 
 }  // namespace tint
-
-#endif  // SRC_TINT_UTILS_TEXT_BASE64_H_

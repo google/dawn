@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "text",
   srcs = [
+    "base64.cc",
     "string.cc",
     "string_stream.cc",
     "unicode.cc",

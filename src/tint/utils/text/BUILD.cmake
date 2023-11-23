@@ -39,6 +39,7 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_text lib
+  utils/text/base64.cc
   utils/text/base64.h
   utils/text/string.cc
   utils/text/string.h
