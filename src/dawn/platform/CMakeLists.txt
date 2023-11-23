@@ -33,6 +33,10 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_platform PRIVATE "DAWN_PLATFORM_SHARED_LIBRARY")
 endif()
 
+if (DAWN_USE_BUILT_DXC)
+  target_compile_definitions(dawn_platform PRIVATE "DAWN_USE_BUILT_DXC")
+endif()
+
 target_sources(dawn_platform PRIVATE
   PUBLIC
     "${DAWN_INCLUDE_DIR}/dawn/platform/DawnPlatform.h"

@@ -256,9 +256,16 @@ func run() error {
 		{defaultMSLExe, "msl", &xcrunPath},
 	} {
 		if *tool.path == "" {
-			p, err := exec.LookPath(tool.name)
+			// Look first in the directory of the tint executable
+			p, err := exec.LookPath(filepath.Join(filepath.Dir(tintPath), tool.name))
 			if err == nil && fileutils.IsExe(p) {
 				*tool.path = p
+			} else {
+				// Look in PATH
+				p, err := exec.LookPath(tool.name)
+				if err == nil && fileutils.IsExe(p) {
+					*tool.path = p
+				}
 			}
 		} else if !fileutils.IsExe(*tool.path) {
 			return fmt.Errorf("%v not found at '%v'", tool.name, *tool.path)

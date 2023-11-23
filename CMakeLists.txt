@@ -196,6 +196,7 @@ option_if_not_defined(DAWN_USE_WAYLAND "Enable support for Wayland surface" ${US
 option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 option_if_not_defined(DAWN_USE_GLFW "Enable compilation of the GLFW windowing utils" ${DAWN_SUPPORTS_GLFW_FOR_WINDOWING})
 option_if_not_defined(DAWN_USE_WINDOWS_UI "Enable support for Windows UI surface" ${USE_WINDOWS_UI})
+option_if_not_defined(DAWN_USE_BUILT_DXC "Enable building and using DXC by the D3D12 backend" OFF)
 option_if_not_defined(DAWN_TARGET_MACOS "Manually link Apple core frameworks" ${TARGET_MACOS})
 
 option_if_not_defined(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
@@ -332,6 +333,7 @@ message(STATUS "Dawn build Wayland support: ${DAWN_USE_WAYLAND}")
 message(STATUS "Dawn build X11 support: ${DAWN_USE_X11}")
 message(STATUS "Dawn build GLFW support: ${DAWN_USE_GLFW}")
 message(STATUS "Dawn build Windows UI support: ${DAWN_USE_WINDOWS_UI}")
+message(STATUS "Dawn build and use DXC: ${DAWN_USE_BUILT_DXC}")
 
 message(STATUS "Dawn build samples: ${DAWN_BUILD_SAMPLES}")
 message(STATUS "Dawn build Node bindings: ${DAWN_BUILD_NODE_BINDINGS}")

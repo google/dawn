@@ -465,6 +465,11 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/d3d12_platform.h"
     )
     target_link_libraries(dawn_native PRIVATE dxguid.lib)
+    if (DAWN_USE_BUILT_DXC)
+        target_compile_definitions(dawn_native PRIVATE "DAWN_USE_BUILT_DXC")
+        target_link_libraries(dawn_native PRIVATE dxcompiler)
+        add_dependencies(dawn_native copy_dxil_dll)
+    endif()
 endif()
 
 if (DAWN_ENABLE_METAL)
