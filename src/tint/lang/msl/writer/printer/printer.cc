@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/constant.h"
@@ -259,6 +260,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Let* l) { EmitLet(l); },                      //
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
                 [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
+                [&](core::ir::Access*) { MaybeEmitInstruction(inst); },     //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -296,6 +298,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Construct* c) { EmitConstruct(out, c); },  //
                     [&](const core::ir::Var* var) { EmitVarName(out, var); },      //
                     [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },      //
+                    [&](const core::ir::Access* a) { EmitAccess(out, a); },        //
                     TINT_ICE_ON_NO_MATCH);
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -489,6 +492,28 @@ class Printer : public tint::TextGenerator {
         out << ">(";
         EmitValue(out, b->Val());
         out << ")";
+    }
+
+    /// Emit an accessor
+    void EmitAccess(StringStream& out, const core::ir::Access* a) {
+        EmitValue(out, a->Object());
+
+        auto* current_type = a->Result()->Type();
+        for (auto* index : a->Indices()) {
+            Switch(
+                current_type,  //
+                [&](const core::type::Struct* s) {
+                    auto* c = index->As<core::ir::Constant>();
+                    auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
+                    out << "." << member->Name().Name();
+                    current_type = member->Type();
+                },
+                [&](Default) {
+                    out << "[";
+                    EmitValue(out, index);
+                    out << "]";
+                });
+        }
     }
 
     /// Emit a constructor
