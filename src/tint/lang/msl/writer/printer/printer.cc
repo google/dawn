@@ -49,6 +49,7 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/unreachable.h"
+#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
@@ -261,6 +262,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Load*) { MaybeEmitInstruction(inst); },       //
                 [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },  //
                 [&](core::ir::Access*) { MaybeEmitInstruction(inst); },     //
+                [&](core::ir::UserCall*) { MaybeEmitInstruction(inst); },   //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -299,6 +301,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { EmitVarName(out, var); },      //
                     [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },      //
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },        //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
                     TINT_ICE_ON_NO_MATCH);
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -518,6 +521,21 @@ class Printer : public tint::TextGenerator {
                     current_type = current_type->Element(0);
                 });
         }
+    }
+
+    /// Emits a user call instruction
+    void EmitUserCall(StringStream& out, const core::ir::UserCall* c) {
+        out << ir_.NameOf(c->Target()).Name() << "(";
+        size_t i = 0;
+        for (const auto* arg : c->Args()) {
+            if (i > 0) {
+                out << ", ";
+            }
+            ++i;
+
+            EmitValue(out, arg);
+        }
+        out << ")";
     }
 
     /// Emit a constructor
