@@ -440,15 +440,17 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
     }
 }
 
-// Depth slice index must be within the depth range of 3D color attachment and must be 0 for non-3D
-// color attachment.
+// Check that depthSlice must be set correctly for 3D color attachments and must not be set for
+// non-3D color attachments.
 TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
     constexpr uint32_t kSize = 8;
     constexpr uint32_t kDepthOrArrayLayers = 4;
+    constexpr uint32_t kMipLevelCounts = 4;
     constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-    wgpu::Texture colorTexture3D = CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat,
-                                                 kSize, kSize, kDepthOrArrayLayers, 2);
+    wgpu::Texture colorTexture3D =
+        CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat, kSize, kSize,
+                      kDepthOrArrayLayers, kMipLevelCounts);
 
     wgpu::TextureView colorView2D = Create2DAttachment(device, kSize, kSize, kColorFormat);
 
@@ -459,7 +461,8 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
     baseDescriptor.baseMipLevel = 0;
     baseDescriptor.mipLevelCount = 1;
 
-    // Control case: Depth slice index within the depth range of 3D color attachment is valid.
+    // Control case: It's valid if depthSlice is set within the depth range of a 3D color
+    // attachment.
     {
         wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
         utils::ComboRenderPassDescriptor renderPass({view});
@@ -467,7 +470,14 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
         AssertBeginRenderPassSuccess(&renderPass);
     }
 
-    // Depth slice index out of the depth range of 3D color attachment is invalid.
+    // It's invalid if depthSlice is not set for a 3D color attachment.
+    {
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        utils::ComboRenderPassDescriptor renderPass({view});
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // It's invalid if depthSlice is out of the depth range of a 3D color attachment.
     {
         wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
         utils::ComboRenderPassDescriptor renderPass({view});
@@ -475,28 +485,84 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
         AssertBeginRenderPassError(&renderPass);
     }
 
-    // Depth slice index out of the depth range of 3D color attachment with non-zero mip level is
-    // invalid.
+    // It's invalid if depthSlice is out of the depth range of a 3D color attachment with non-zero
+    // mip level.
     {
         wgpu::TextureViewDescriptor descriptor = baseDescriptor;
-        descriptor.baseMipLevel = 1;
+        descriptor.baseMipLevel = 2;
         wgpu::TextureView view = colorTexture3D.CreateView(&descriptor);
         utils::ComboRenderPassDescriptor renderPass({view});
-        renderPass.cColorAttachments[0].depthSlice = kDepthOrArrayLayers >> 1;
+        renderPass.cColorAttachments[0].depthSlice = kDepthOrArrayLayers >> 2;
         AssertBeginRenderPassError(&renderPass);
     }
 
-    // Control case: Depth slice must be 0 for non-3D color attachment.
+    // TODO(dawn:1020): Add tests to check depthSlice must not be set for non-3D attachments.
+}
+
+// Check that the depth slices of a 3D color attachment cannot overlap in same render pass.
+TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceOverlaps) {
+    constexpr uint32_t kSize = 8;
+    constexpr uint32_t kDepthOrArrayLayers = 2;
+    constexpr uint32_t kMipLevelCounts = 2;
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::Texture colorTexture3D =
+        CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat, kSize, kSize,
+                      kDepthOrArrayLayers, kMipLevelCounts);
+
+    wgpu::TextureViewDescriptor baseDescriptor;
+    baseDescriptor.dimension = wgpu::TextureViewDimension::e3D;
+    baseDescriptor.baseArrayLayer = 0;
+    baseDescriptor.arrayLayerCount = 1;
+    baseDescriptor.baseMipLevel = 0;
+    baseDescriptor.mipLevelCount = 1;
+
+    // Control case: It's valid if different depth slices of a texture are set in a render pass.
     {
-        utils::ComboRenderPassDescriptor renderPass({colorView2D});
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        utils::ComboRenderPassDescriptor renderPass({view, view});
         renderPass.cColorAttachments[0].depthSlice = 0;
+        renderPass.cColorAttachments[1].depthSlice = 1;
         AssertBeginRenderPassSuccess(&renderPass);
     }
 
-    // Non-zero depth slice is invalid for non-3D color attachment.
+    // It's valid if same depth slice of different mip levels from a texture with size [1, 1, n] is
+    // set in a render pass.
     {
-        utils::ComboRenderPassDescriptor renderPass({colorView2D});
-        renderPass.cColorAttachments[0].depthSlice = 1;
+        wgpu::Texture texture = CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat, 1,
+                                              1, kDepthOrArrayLayers, kMipLevelCounts);
+        wgpu::TextureView view = texture.CreateView(&baseDescriptor);
+        wgpu::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.baseMipLevel = 1;
+        wgpu::TextureView view2 = texture.CreateView(&descriptor);
+
+        utils::ComboRenderPassDescriptor renderPass({view, view2});
+        renderPass.cColorAttachments[0].depthSlice = 0;
+        renderPass.cColorAttachments[1].depthSlice = 0;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It's valid if same depth slice of different textures is set in a render pass.
+    {
+        wgpu::Texture otherColorTexture3D =
+            CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat, kSize, kSize,
+                          kDepthOrArrayLayers, kMipLevelCounts);
+
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        wgpu::TextureView view2 = otherColorTexture3D.CreateView(&baseDescriptor);
+
+        utils::ComboRenderPassDescriptor renderPass({view, view2});
+        renderPass.cColorAttachments[0].depthSlice = 0;
+        renderPass.cColorAttachments[1].depthSlice = 0;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It's invalid if same depth slice of a texture is set twice in a render pass.
+    {
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        utils::ComboRenderPassDescriptor renderPass({view, view});
+        renderPass.cColorAttachments[0].depthSlice = 0;
+        renderPass.cColorAttachments[1].depthSlice = 0;
         AssertBeginRenderPassError(&renderPass);
     }
 }
@@ -1020,6 +1086,34 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest,
         utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
         renderPass.cColorAttachments[0].resolveTarget = resolveTextureView;
         AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
+// Test the overlaps of multiple resolve target.
+TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsedTwice) {
+    wgpu::TextureView resolveTextureView = CreateNonMultisampledColorTextureView();
+    wgpu::TextureView colorTextureView1 = CreateMultisampledColorTextureView();
+    wgpu::TextureView colorTextureView2 = CreateMultisampledColorTextureView();
+
+    // It is allowed to use different resolve targets in a render pass.
+    {
+        wgpu::TextureView anotherResolveTextureView = CreateNonMultisampledColorTextureView();
+        utils::ComboRenderPassDescriptor renderPass =
+            utils::ComboRenderPassDescriptor({colorTextureView1, colorTextureView2});
+        renderPass.cColorAttachments[0].resolveTarget = resolveTextureView;
+        renderPass.cColorAttachments[1].resolveTarget = anotherResolveTextureView;
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It is not allowed to use a resolve target twice in a render pass.
+    {
+        utils::ComboRenderPassDescriptor renderPass =
+            utils::ComboRenderPassDescriptor({colorTextureView1, colorTextureView2});
+        renderPass.cColorAttachments[0].resolveTarget = resolveTextureView;
+        renderPass.cColorAttachments[1].resolveTarget = resolveTextureView;
+
+        AssertBeginRenderPassError(&renderPass);
     }
 }
 

@@ -2545,7 +2545,7 @@
         "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view", "optional": true},
-            {"name": "depth slice", "type": "uint32_t", "default": "0", "tags": ["dawn"]},
+            {"name": "depth slice", "type": "uint32_t", "default": "WGPU_DEPTH_SLICE_UNDEFINED"},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
@@ -3674,6 +3674,11 @@
         "category": "constant",
         "type": "uint32_t",
         "value":  "UINT32_MAX"
+    },
+    "depth slice undefined" : {
+        "category": "constant",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
     },
     "query set index undefined" : {
         "category": "constant",
