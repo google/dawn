@@ -164,6 +164,7 @@ tint_fuzz_source_set("fuzz") {
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
     "${tint_src_dir}/lang/wgsl/writer/raise",
+    "${tint_src_dir}/utils/bytes",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",

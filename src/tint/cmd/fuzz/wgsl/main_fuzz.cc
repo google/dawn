@@ -29,17 +29,20 @@
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/text/base64.h"
 
 namespace {
 
 tint::fuzz::wgsl::Options options;
 
-}
+}  // namespace
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     if (size > 0) {
-        std::string_view wgsl(reinterpret_cast<const char*>(data), size);
-        tint::fuzz::wgsl::Run(wgsl, options);
+        std::string_view wgsl(reinterpret_cast<const char*>(input), size);
+        auto data = tint::DecodeBase64FromComments(wgsl);
+        tint::fuzz::wgsl::Run(wgsl, data.Slice(), options);
     }
     return 0;
 }

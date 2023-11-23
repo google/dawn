@@ -29,22 +29,47 @@
 #define SRC_TINT_CMD_FUZZ_WGSL_FUZZ_H_
 
 #include <string>
+#include <tuple>
+#include <utility>
 
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/macros/static_init.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::fuzz::wgsl {
 
 /// ProgramFuzzer describes a fuzzer function that takes a WGSL program as input
 struct ProgramFuzzer {
-    /// The function signature
-    using Fn = void(const Program&);
+    /// @param name the name of the fuzzer
+    /// @param fn the fuzzer function
+    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, along with any
+    /// additional arguments which are deserialized from the fuzzer input.
+    template <typename... ARGS>
+    static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
+        if constexpr (sizeof...(ARGS) > 0) {
+            auto fn_with_decode = [fn](const Program& program, Slice<const std::byte> data) {
+                bytes::Reader reader{data};
+                if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader)) {
+                    auto all_args =
+                        std::tuple_cat(std::tuple<const Program&>{program}, data_args.Get());
+                    std::apply(*fn, all_args);
+                }
+            };
+            return ProgramFuzzer{name, std::move(fn_with_decode)};
+        } else {
+            return ProgramFuzzer{
+                name,
+                [fn](const Program& program, Slice<const std::byte>) { fn(program); },
+            };
+        }
+    }
 
     /// Name of the fuzzer function
     std::string_view name;
-    /// The fuzzer function pointer
-    Fn* fn = nullptr;
+    /// The fuzzer function
+    std::function<void(const Program&, Slice<const std::byte> data)> fn;
 };
 
 /// Options for Run()
@@ -55,16 +80,18 @@ struct Options {
 
 /// Runs all the registered WGSL fuzzers with the supplied WGSL
 /// @param wgsl the input WGSL
+/// @param data additional data used for fuzzing
 /// @param options the options for running the fuzzers
-void Run(std::string_view wgsl, const Options& options);
+void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& options);
 
 /// Registers the fuzzer function with the WGSL fuzzer executable.
 /// @param fuzzer the fuzzer
 void Register(const ProgramFuzzer& fuzzer);
 
 /// TINT_WGSL_PROGRAM_FUZZER registers the fuzzer function to run as part of `tint_wgsl_fuzzer`
-#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION) \
-    TINT_STATIC_INIT(::tint::fuzz::wgsl::Register({#FUNCTION, FUNCTION}))
+#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION)         \
+    TINT_STATIC_INIT(::tint::fuzz::wgsl::Register( \
+        ::tint::fuzz::wgsl::ProgramFuzzer::Create(#FUNCTION, FUNCTION)))
 
 }  // namespace tint::fuzz::wgsl
 
