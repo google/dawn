@@ -38,7 +38,14 @@
 namespace tint::fuzz::wgsl {
 namespace {
 
-Vector<ProgramFuzzer, 32> fuzzers;
+/// @returns a reference to the static list of registered ProgramFuzzers.
+/// @note this is not a global, as the static initializers that register fuzzers may be called
+/// before this vector is constructed.
+Vector<ProgramFuzzer, 32>& Fuzzers() {
+    static Vector<ProgramFuzzer, 32> fuzzers;
+    return fuzzers;
+}
+
 thread_local std::string_view currently_running;
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
@@ -50,7 +57,7 @@ thread_local std::string_view currently_running;
 }  // namespace
 
 void Register(const ProgramFuzzer& fuzzer) {
-    fuzzers.Push(fuzzer);
+    Fuzzers().Push(fuzzer);
 }
 
 void Run(std::string_view wgsl, const Options& options) {
@@ -58,7 +65,7 @@ void Run(std::string_view wgsl, const Options& options) {
 
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
     // leading to non-determinism, which we must avoid.
-    TINT_STATIC_INIT(fuzzers.Sort([](auto& a, auto& b) { return a.name < b.name; }));
+    TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));
 
     // Create a Source::File to hand to the parser.
     tint::Source::File file("test.wgsl", wgsl);
@@ -71,12 +78,12 @@ void Run(std::string_view wgsl, const Options& options) {
 
     // Run each of the program fuzzer functions
     if (options.run_concurrently) {
-        size_t n = fuzzers.Length();
+        size_t n = Fuzzers().Length();
         tint::Vector<std::thread, 32> threads;
         threads.Resize(n);
         for (size_t i = 0; i < n; i++) {
             threads[i] = std::thread([i, &program] {
-                auto& fuzzer = fuzzers[i];
+                auto& fuzzer = Fuzzers()[i];
                 currently_running = fuzzer.name;
                 fuzzer.fn(program);
             });
@@ -86,7 +93,7 @@ void Run(std::string_view wgsl, const Options& options) {
         }
     } else {
         TINT_DEFER(currently_running = "");
-        for (auto& fuzzer : fuzzers) {
+        for (auto& fuzzer : Fuzzers()) {
             currently_running = fuzzer.name;
             fuzzer.fn(program);
         }
