@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  int a = 0;
+  switch(a) {
+    case 0:
+    {
+      break;
+    }
+    case 1:
+    {
+      return;
+    }
+    default:
+    {
+      a = (a + 2);
+      break;
+    }
+  }
+}
