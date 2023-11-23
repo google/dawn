@@ -17,7 +17,7 @@
         "IncludePatterns": [
             "Metal/Metal.h"
         ],
-        "Condition": "is_mac",
+        "Condition": "tint_build_is_mac",
     },
     "thread": {
         "IncludePatterns": [
@@ -64,6 +64,6 @@
         "IncludePatterns": [
             "winsock2.h"
         ],
-        "Condition": "is_win",
+        "Condition": "tint_build_is_win",
     },
 }

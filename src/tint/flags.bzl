@@ -35,7 +35,7 @@ def declare_bool_flag(name, default):
 
 def declare_os_flag():
     """Creates the 'os' string flag that specifies the OS to target, and a pair of
-    'is_<os>_true' and 'is_<os>_false' targets.
+    'tint_build_is_<os>_true' and 'tint_build_is_<os>_false' targets.
 
     The OS flag can be specified on the command line with '--//src/tint:os=<os>'
     """
@@ -55,12 +55,12 @@ def declare_os_flag():
 
     for os in OSes:
         native.config_setting(
-            name = "is_{}_true".format(os),
+            name = "tint_build_is_{}_true".format(os),
             flag_values = { ":os": os },
             visibility = ["//visibility:public"],
         )
         selects.config_setting_group(
-            name = "is_{}_false".format(os),
+            name = "tint_build_is_{}_false".format(os),
             match_any = [ "is_{}_true".format(other) for other in OSes if other != os],
             visibility = ["//visibility:public"],
         )

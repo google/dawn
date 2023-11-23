@@ -30,7 +30,7 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/socket/rwmutex.h"
 
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -44,7 +44,7 @@
 #include <cstdio>
 #endif
 
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
 #include <atomic>
 namespace {
 std::atomic<int> wsa_init_count = {0};
@@ -60,7 +60,7 @@ namespace tint::socket {
 namespace {
 constexpr SOCKET InvalidSocket = static_cast<SOCKET>(-1);
 void Init() {
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
     if (wsa_init_count++ == 0) {
         WSADATA winsock_data;
         (void)WSAStartup(MAKEWORD(2, 2), &winsock_data);
@@ -69,7 +69,7 @@ void Init() {
 }
 
 void Term() {
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
     if (--wsa_init_count == 0) {
         WSACleanup();
     }
@@ -77,7 +77,7 @@ void Term() {
 }
 
 bool SetBlocking(SOCKET s, bool blocking) {
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
     u_long mode = blocking ? 0 : 1;
     return ioctlsocket(s, FIONBIO, &mode) == NO_ERROR;
 #else
@@ -113,7 +113,7 @@ class Impl : public Socket {
 
         addrinfo* info = nullptr;
         auto err = getaddrinfo(address, port, &hints, &info);
-#if !defined(_WIN32)
+#if !TINT_BUILD_IS_WIN
         if (err) {
             printf("getaddrinfo(%s, %s) error: %s\n", address, port, gai_strerror(err));
         }
@@ -158,7 +158,7 @@ class Impl : public Socket {
 
         int enable = 1;
 
-#if !defined(_WIN32)
+#if !TINT_BUILD_IS_WIN
         // Prevent sockets lingering after process termination, causing
         // reconnection issues on the same port.
         setsockopt(s, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char*>(&enable), sizeof(enable));
@@ -168,7 +168,7 @@ class Impl : public Socket {
             int l_linger; /* how many seconds to linger for */
         } linger = {false, 0};
         setsockopt(s, SOL_SOCKET, SO_LINGER, reinterpret_cast<char*>(&linger), sizeof(linger));
-#endif  // !defined(_WIN32)
+#endif  // !TINT_BUILD_IS_WIN
 
         // Enable TCP_NODELAY.
         setsockopt(s, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char*>(&enable), sizeof(enable));
@@ -190,7 +190,7 @@ class Impl : public Socket {
         {
             RLock l(mutex);
             if (s != InvalidSocket) {
-#if defined(_WIN32)
+#if TINT_BUILD_IS_WIN
                 closesocket(s);
 #else
                 ::shutdown(s, SHUT_RDWR);
@@ -200,7 +200,7 @@ class Impl : public Socket {
 
         WLock l(mutex);
         if (s != InvalidSocket) {
-#if !defined(_WIN32)
+#if !TINT_BUILD_IS_WIN
             ::close(s);
 #endif
             s = InvalidSocket;

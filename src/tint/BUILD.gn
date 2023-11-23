@@ -108,6 +108,24 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=0" ]
   }
 
+  if (tint_build_is_win) {
+    defines += [ "TINT_BUILD_IS_WIN=1" ]
+  } else {
+    defines += [ "TINT_BUILD_IS_WIN=0" ]
+  }
+
+  if (tint_build_is_mac) {
+    defines += [ "TINT_BUILD_IS_MAC=1" ]
+  } else {
+    defines += [ "TINT_BUILD_IS_MAC=0" ]
+  }
+
+  if (tint_build_is_linux) {
+    defines += [ "TINT_BUILD_IS_LINUX=1" ]
+  } else {
+    defines += [ "TINT_BUILD_IS_LINUX=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",

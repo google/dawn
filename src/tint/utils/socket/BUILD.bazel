@@ -48,7 +48,7 @@ cc_library(
   deps = [
     "//src/tint/utils/macros",
   ] + select({
-    ":is_win": [
+    ":tint_build_is_win": [
       
     ],
     "//conditions:default": [],
@@ -58,7 +58,7 @@ cc_library(
 )
 
 alias(
-  name = "is_win",
-  actual = "//src/tint:is_win_true",
+  name = "tint_build_is_win",
+  actual = "//src/tint:tint_build_is_win_true",
 )
 

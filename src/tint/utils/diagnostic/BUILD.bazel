@@ -44,17 +44,17 @@ cc_library(
     "printer.cc",
     "source.cc",
   ] + select({
-    ":_not_is_linux__and__not_is_mac__and__not_is_win_": [
+    ":_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_": [
       "printer_other.cc",
     ],
     "//conditions:default": [],
   }) + select({
-    ":is_linux_or_is_mac": [
+    ":tint_build_is_linux_or_tint_build_is_mac": [
       "printer_posix.cc",
     ],
     "//conditions:default": [],
   }) + select({
-    ":is_win": [
+    ":tint_build_is_win": [
       "printer_windows.cc",
     ],
     "//conditions:default": [],
@@ -104,49 +104,49 @@ cc_library(
 )
 
 alias(
-  name = "is_linux",
-  actual = "//src/tint:is_linux_true",
+  name = "tint_build_is_linux",
+  actual = "//src/tint:tint_build_is_linux_true",
 )
 
 alias(
-  name = "_not_is_linux_",
-  actual = "//src/tint:is_linux_false",
+  name = "_not_tint_build_is_linux_",
+  actual = "//src/tint:tint_build_is_linux_false",
 )
 
 alias(
-  name = "is_mac",
-  actual = "//src/tint:is_mac_true",
+  name = "tint_build_is_mac",
+  actual = "//src/tint:tint_build_is_mac_true",
 )
 
 alias(
-  name = "_not_is_mac_",
-  actual = "//src/tint:is_mac_false",
+  name = "_not_tint_build_is_mac_",
+  actual = "//src/tint:tint_build_is_mac_false",
 )
 
 alias(
-  name = "is_win",
-  actual = "//src/tint:is_win_true",
+  name = "tint_build_is_win",
+  actual = "//src/tint:tint_build_is_win_true",
 )
 
 alias(
-  name = "_not_is_win_",
-  actual = "//src/tint:is_win_false",
+  name = "_not_tint_build_is_win_",
+  actual = "//src/tint:tint_build_is_win_false",
 )
 
 selects.config_setting_group(
-    name = "is_linux_or_is_mac",
+    name = "tint_build_is_linux_or_tint_build_is_mac",
     match_any = [
-        "is_linux",
-        "is_mac",
+        "tint_build_is_linux",
+        "tint_build_is_mac",
     ],
 )
 
 selects.config_setting_group(
-    name = "_not_is_linux__and__not_is_mac__and__not_is_win_",
+    name = "_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_",
     match_all = [
-        ":_not_is_linux_",
-        ":_not_is_mac_",
-        ":_not_is_win_",
+        ":_not_tint_build_is_linux_",
+        ":_not_tint_build_is_mac_",
+        ":_not_tint_build_is_win_",
     ],
 )
 

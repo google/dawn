@@ -46,7 +46,7 @@ libtint_source_set("socket") {
   ]
   deps = [ "${tint_src_dir}/utils/macros" ]
 
-  if (is_win) {
+  if (tint_build_is_win) {
     deps += [ "${tint_src_dir}:winsock" ]
   }
 }

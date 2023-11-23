@@ -48,8 +48,8 @@ tint_target_add_dependencies(tint_utils_socket lib
   tint_utils_macros
 )
 
-if(IS_WIN)
+if(TINT_BUILD_IS_WIN)
   tint_target_add_external_dependencies(tint_utils_socket lib
     "winsock"
   )
-endif(IS_WIN)
+endif(TINT_BUILD_IS_WIN)

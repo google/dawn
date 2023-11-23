@@ -49,15 +49,15 @@ libtint_source_set("command") {
     "${tint_src_dir}/utils/text",
   ]
 
-  if (!is_linux && !is_mac && !is_win) {
+  if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
     sources += [ "command_other.cc" ]
   }
 
-  if (is_linux || is_mac) {
+  if (tint_build_is_linux || tint_build_is_mac) {
     sources += [ "command_posix.cc" ]
   }
 
-  if (is_win) {
+  if (tint_build_is_win) {
     sources += [ "command_windows.cc" ]
   }
 }

@@ -64,15 +64,15 @@ libtint_source_set("diagnostic") {
     "${tint_src_dir}/utils/traits",
   ]
 
-  if (!is_linux && !is_mac && !is_win) {
+  if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
     sources += [ "printer_other.cc" ]
   }
 
-  if (is_linux || is_mac) {
+  if (tint_build_is_linux || tint_build_is_mac) {
     sources += [ "printer_posix.cc" ]
   }
 
-  if (is_win) {
+  if (tint_build_is_win) {
     sources += [ "printer_windows.cc" ]
   }
 }
