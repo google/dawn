@@ -168,7 +168,7 @@ call :status "Testing end-to-end tests"
 cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC, FXC and Metal validation
 set OLD_PATH=%PATH%
-set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
+set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%DXC_PATH%;%D3DCOMPILER_PATH%;%PATH%
 if "%BUILD_TYPE%" == "Debug" (
     rem TODO(crbug.com/2034): Add back glsl once we fix the ~7x slowdown in Windows Debug builds
     set TEST_ALL_FORMATS=wgsl,spvasm,msl,hlsl
