@@ -39,6 +39,7 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_text lib
+  utils/text/base64.h
   utils/text/string.cc
   utils/text/string.h
   utils/text/string_stream.cc
@@ -62,6 +63,7 @@ tint_target_add_dependencies(tint_utils_text lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_utils_text_test test
+  utils/text/base64_test.cc
   utils/text/string_stream_test.cc
   utils/text/string_test.cc
   utils/text/unicode_test.cc

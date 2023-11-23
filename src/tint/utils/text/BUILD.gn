@@ -44,6 +44,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("text") {
   sources = [
+    "base64.h",
     "string.cc",
     "string.h",
     "string_stream.cc",
@@ -64,6 +65,7 @@ libtint_source_set("text") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "base64_test.cc",
       "string_stream_test.cc",
       "string_test.cc",
       "unicode_test.cc",
