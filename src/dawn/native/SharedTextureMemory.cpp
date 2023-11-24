@@ -88,10 +88,12 @@ SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
     if (!internalFormat.supportsStorageUsage || internalFormat.IsMultiPlanar()) {
         mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::StorageBinding;
     }
-    if (!internalFormat.isRenderable || internalFormat.IsMultiPlanar()) {
+    if (!internalFormat.isRenderable || (internalFormat.IsMultiPlanar() &&
+                                         !device->HasFeature(Feature::MultiPlanarRenderTargets))) {
         mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::RenderAttachment;
     }
-    if (internalFormat.IsMultiPlanar()) {
+    if (internalFormat.IsMultiPlanar() &&
+        !device->HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
         mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::CopyDst;
     }
 

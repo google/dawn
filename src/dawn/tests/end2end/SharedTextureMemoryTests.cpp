@@ -44,9 +44,18 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     if (!SupportsFeatures(features)) {
         return {};
     }
-    if (SupportsFeatures({wgpu::FeatureName::TransientAttachments})) {
-        features.push_back(wgpu::FeatureName::TransientAttachments);
+
+    const wgpu::FeatureName kOptionalFeatures[] = {
+        wgpu::FeatureName::MultiPlanarFormatExtendedUsages,
+        wgpu::FeatureName::MultiPlanarRenderTargets,
+        wgpu::FeatureName::TransientAttachments,
+    };
+    for (auto feature : kOptionalFeatures) {
+        if (SupportsFeatures({feature})) {
+            features.push_back(feature);
+        }
     }
+
     return features;
 }
 
@@ -66,6 +75,22 @@ std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSha
     return memories;
 }
 
+std::vector<wgpu::SharedTextureMemory>
+SharedTextureMemoryTestBackend::CreateSinglePlanarSharedTextureMemories(wgpu::Device& device) {
+    std::vector<wgpu::SharedTextureMemory> out;
+    for (auto& memory : CreateSharedTextureMemories(device)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        if (utils::IsMultiPlanarFormat(properties.format)) {
+            continue;
+        }
+
+        out.push_back(std::move(memory));
+    }
+    return out;
+}
+
 std::vector<std::vector<wgpu::SharedTextureMemory>>
 SharedTextureMemoryTestBackend::CreatePerDeviceSharedTextureMemoriesFilterByUsage(
     const std::vector<wgpu::Device>& devices,
@@ -76,7 +101,17 @@ SharedTextureMemoryTestBackend::CreatePerDeviceSharedTextureMemoriesFilterByUsag
         memories[0].GetProperties(&properties);
 
         if ((properties.usage & requiredUsage) == requiredUsage) {
-            out.push_back(std::move(memories));
+            // Tests using RenderAttachment will get a TextureView from the
+            // texture. This currently doesn't work with multiplanar textures. The
+            // superficial problem is that the plane would need to be passed for
+            // multiplanar formats, and the deep problem is that the tests fail to
+            // create valid backing textures for some multiplanar formats (e.g.,
+            // on Apple), which results in a crash when accessing plane 0.
+            // TODO(crbug.com/dawn/2263): Fix this and remove this short-circuit.
+            if (!utils::IsMultiPlanarFormat(properties.format) &&
+                (requiredUsage & wgpu::TextureUsage::RenderAttachment)) {
+                out.push_back(std::move(memories));
+            }
         }
     }
     return out;
@@ -405,29 +440,31 @@ TEST_P(SharedTextureMemoryTests, TextureUsages) {
         wgpu::TextureUsage expectedUsage =
             wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding;
 
-        // Additional usages are potentially supported for single-planar
-        // formats.
-        if (!utils::IsMultiPlanarFormat(properties.format)) {
+        bool isSinglePlanar = !utils::IsMultiPlanarFormat(properties.format);
+
+        if (isSinglePlanar ||
+            device.HasFeature(wgpu::FeatureName::MultiPlanarFormatExtendedUsages)) {
             expectedUsage |= wgpu::TextureUsage::CopyDst;
+        }
 
-            // TODO(crbug.com/dawn/2262): RenderAttachment support on D3D11/D3D12 is
-            // additionally dependent on the flags passed to the underlying
-            // texture (the relevant flag is currently always passed in the test
-            // context). Add tests where the D3D texture is not created with the
-            // relevant flag.
-            if (utils::IsRenderableFormat(device, properties.format)) {
-                expectedUsage |= wgpu::TextureUsage::RenderAttachment;
-            }
+        // TODO(crbug.com/dawn/2262): RenderAttachment support on D3D11/D3D12 is
+        // additionally dependent on the flags passed to the underlying
+        // texture (the relevant flag is currently always passed in the test
+        // context). Add tests where the D3D texture is not created with the
+        // relevant flag.
+        if ((isSinglePlanar || device.HasFeature(wgpu::FeatureName::MultiPlanarRenderTargets)) &&
+            utils::IsRenderableFormat(device, properties.format)) {
+            expectedUsage |= wgpu::TextureUsage::RenderAttachment;
+        }
 
-            // TODO(crbug.com/dawn/2262): StorageBinding support on D3D11/D3D12 is
-            // additionally dependent on the flags passed to the underlying
-            // texture (the relevant flag is currently always passed in the test
-            // context). Add tests where the D3D texture is not created with the
-            // relevant flag.
-            if (utils::TextureFormatSupportsStorageTexture(properties.format,
-                                                           IsCompatibilityMode())) {
-                expectedUsage |= wgpu::TextureUsage::StorageBinding;
-            }
+        // TODO(crbug.com/dawn/2262): StorageBinding support on D3D11/D3D12 is
+        // additionally dependent on the flags passed to the underlying
+        // texture (the relevant flag is currently always passed in the test
+        // context). Add tests where the D3D texture is not created with the
+        // relevant flag.
+        if (isSinglePlanar &&
+            utils::TextureFormatSupportsStorageTexture(properties.format, IsCompatibilityMode())) {
+            expectedUsage |= wgpu::TextureUsage::StorageBinding;
         }
 
         EXPECT_EQ(properties.usage, expectedUsage) << properties.format;
@@ -706,8 +743,10 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
 
 // Test that it is valid (does not crash) if the memory is dropped while a texture access has begun.
 TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
+    // NOTE: UseInRenderPass()/UseInCopy() do not currently support multiplanar
+    // formats.
     for (wgpu::SharedTextureMemory memory :
-         GetParam().mBackend->CreateSharedTextureMemories(device)) {
+         GetParam().mBackend->CreateSinglePlanarSharedTextureMemories(device)) {
         wgpu::SharedTextureMemoryProperties properties;
         memory.GetProperties(&properties);
 
@@ -722,9 +761,7 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
         // Use the texture on the GPU; it should not crash.
         if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
             UseInRenderPass(device, texture);
-        } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm &&
-                   properties.format != wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm &&
-                   properties.format != wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {
+        } else {
             DAWN_ASSERT(properties.usage & wgpu::TextureUsage::CopySrc);
             UseInCopy(device, texture);
         }
@@ -819,15 +856,24 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
 
 // Test that if the texture is uninitialized, EndAccess writes the state out as uninitialized.
 TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
+    // It is not possible to run these tests for multiplanar formats for
+    // multiple reasons:
+    // * Test basic begin+end access exports the state as uninitialized
+    // if it starts as uninitialized. Multiplanar formats must be initialized on import.
+    // * RenderAttachment gets a TextureView from the texture. This has a
+    // superficial problem and a deep problem: The superficial problem is that
+    // the plane would need to be passed for multiplanar formats, and the deep
+    // problem is that the tests fail to create valid backing textures for some multiplanar
+    // formats (e.g., on Apple), which results in a crash when accessing plane
+    // 0.
+    // TODO(crbug.com/dawn/2263): Fix this and change the below to
+    // CreateSharedTextureMemories().
     for (wgpu::SharedTextureMemory memory :
-         GetParam().mBackend->CreateSharedTextureMemories(device)) {
+         GetParam().mBackend->CreateSinglePlanarSharedTextureMemories(device)) {
         wgpu::SharedTextureMemoryProperties properties;
         memory.GetProperties(&properties);
 
-        // Test basic begin+end access exports the state as uninitialized
-        // if it starts as uninitialized. Skipped for multiplanar formats
-        // because those must be initialized on import.
-        if (!utils::IsMultiPlanarFormat(properties.format)) {
+        {
             wgpu::Texture texture = memory.CreateTexture();
 
             wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};

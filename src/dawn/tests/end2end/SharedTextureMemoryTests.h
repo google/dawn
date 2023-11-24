@@ -63,6 +63,11 @@ class SharedTextureMemoryTestBackend {
     // device.
     std::vector<wgpu::SharedTextureMemory> CreateSharedTextureMemories(wgpu::Device& device);
 
+    // Wrapper around CreateSharedTextureMemories() that restricts the returned
+    // vector to only the single-planar instances.
+    std::vector<wgpu::SharedTextureMemory> CreateSinglePlanarSharedTextureMemories(
+        wgpu::Device& device);
+
     // Wrapper around CreatePerDeviceSharedTextureMemories that filters the memories by
     // usage to ensure they have `requiredUsage`.
     std::vector<std::vector<wgpu::SharedTextureMemory>>
