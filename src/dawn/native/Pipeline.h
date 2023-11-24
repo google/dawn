@@ -45,13 +45,13 @@
 
 namespace dawn::native {
 
-MaybeError ValidateProgrammableStage(DeviceBase* device,
-                                     const ShaderModuleBase* module,
-                                     const std::string& entryPoint,
-                                     uint32_t constantCount,
-                                     const ConstantEntry* constants,
-                                     const PipelineLayoutBase* layout,
-                                     SingleShaderStage stage);
+ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
+                                                                const ShaderModuleBase* module,
+                                                                const char* entryPointName,
+                                                                uint32_t constantCount,
+                                                                const ConstantEntry* constants,
+                                                                const PipelineLayoutBase* layout,
+                                                                SingleShaderStage stage);
 
 WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error);
 

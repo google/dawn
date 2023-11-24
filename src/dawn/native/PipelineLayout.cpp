@@ -92,6 +92,17 @@ MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
     return {};
 }
 
+StageAndDescriptor::StageAndDescriptor(SingleShaderStage shaderStage,
+                                       ShaderModuleBase* module,
+                                       const char* entryPoint,
+                                       size_t constantCount,
+                                       ConstantEntry const* constants)
+    : shaderStage(shaderStage),
+      module(module),
+      entryPoint(module->ReifyEntryPointName(entryPoint, shaderStage).name),
+      constantCount(constantCount),
+      constants(constants) {}
+
 // PipelineLayoutBase
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,

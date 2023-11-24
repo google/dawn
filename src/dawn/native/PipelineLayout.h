@@ -56,6 +56,12 @@ using BindGroupLayoutArray = ityp::array<BindGroupIndex, Ref<BindGroupLayoutBase
 using BindGroupLayoutMask = ityp::bitset<BindGroupIndex, kMaxBindGroups>;
 
 struct StageAndDescriptor {
+    StageAndDescriptor(SingleShaderStage shaderStage,
+                       ShaderModuleBase* module,
+                       const char* entryPoint,
+                       size_t constantCount,
+                       ConstantEntry const* constants);
+
     SingleShaderStage shaderStage;
     ShaderModuleBase* module;
     std::string entryPoint;

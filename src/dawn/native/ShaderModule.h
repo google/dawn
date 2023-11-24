@@ -120,6 +120,11 @@ struct ShaderModuleParseResult {
     std::unique_ptr<TintSource> tintSource;
 };
 
+struct ShaderModuleEntryPoint {
+    bool defaulted;
+    std::string name;
+};
+
 MaybeError ValidateAndParseShaderModule(DeviceBase* device,
                                         const ShaderModuleDescriptor* descriptor,
                                         ShaderModuleParseResult* parseResult,
@@ -298,6 +303,13 @@ class ShaderModuleBase : public ApiObjectBase,
     // Return true iff the program has an entrypoint called `entryPoint`.
     bool HasEntryPoint(const std::string& entryPoint) const;
 
+    // Return the number of entry points for a stage.
+    size_t GetEntryPointCount(SingleShaderStage stage) const { return mEntryPointCounts[stage]; }
+
+    // Return the entry point for a stage. If no entry point name, returns the default one.
+    ShaderModuleEntryPoint ReifyEntryPointName(const char* entryPointName,
+                                               SingleShaderStage stage) const;
+
     // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
     // must be true.
     const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
@@ -334,6 +346,8 @@ class ShaderModuleBase : public ApiObjectBase,
     std::string mWgsl;
 
     EntryPointMetadataTable mEntryPoints;
+    PerStage<std::string> mDefaultEntryPointNames;
+    PerStage<size_t> mEntryPointCounts;
     WGSLExtensionSet mEnabledWGSLExtensions;
     std::unique_ptr<tint::Program> mTintProgram;
     std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive

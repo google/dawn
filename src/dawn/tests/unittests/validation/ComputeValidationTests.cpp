@@ -101,5 +101,56 @@ TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_InvalidAll) {
     ASSERT_DEVICE_ERROR(TestDispatch(max + 1, max + 1, max + 1));
 }
 
+class ComputeValidationEntryPointTest : public ValidationTest {};
+
+// Check that entry points are optional.
+TEST_F(ComputeValidationEntryPointTest, EntryPointNameOptional) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() {}
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = nullptr;
+
+    device.CreateComputePipeline(&csDesc);
+
+    csDesc.layout = nullptr;
+    device.CreateComputePipeline(&csDesc);
+}
+
+// Check that entry points are required if module has multiple entry points.
+TEST_F(ComputeValidationEntryPointTest, EntryPointNameRequiredIfMultipleEntryPoints) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main1() {}
+        @compute @workgroup_size(1) fn main2() {}
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main1";
+
+    device.CreateComputePipeline(&csDesc);
+
+    csDesc.compute.entryPoint = "nullptr";
+    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+}
+
+// Check that entry points are required if module has no compatible entry points.
+TEST_F(ComputeValidationEntryPointTest, EntryPointNameRequiredIfNoCompatibleEntryPoints) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @fragment fn main() {}
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = nullptr;
+
+    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+}
+
 }  // anonymous namespace
 }  // namespace dawn

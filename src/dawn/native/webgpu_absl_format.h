@@ -94,6 +94,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct ShaderModuleEntryPoint;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const ShaderModuleEntryPoint* value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 //
 // Objects
 //
