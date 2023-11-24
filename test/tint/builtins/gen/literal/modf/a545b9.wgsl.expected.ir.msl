@@ -1,9 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct modf_result_vec2_f16 {
+  half2 fract;
+  half2 whole;
+};
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::UserCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void modf_a545b9() {
+  modf_result_vec2_f16 res = modf_result_vec2_f16{.fract=half2(-0.5h), .whole=half2(-1.0h)};
+}
+vertex float4 vertex_main() {
+  modf_a545b9();
+  return float4(0.0f);
+}
+fragment void fragment_main() {
+  modf_a545b9();
+}
+kernel void compute_main() {
+  modf_a545b9();
+}

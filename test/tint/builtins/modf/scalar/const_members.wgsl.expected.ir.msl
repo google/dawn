@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-void tint_symbol() {
+kernel void tint_symbol() {
   float const fract = 0.25f;
   float const whole = 1.0f;
 }

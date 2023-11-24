@@ -1,9 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct frexp_result_vec3_f16 {
+  half3 fract;
+  int3 exp;
+};
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::UserCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void frexp_ae4a66() {
+  frexp_result_vec3_f16 res = frexp_result_vec3_f16{.fract=half3(0.5h), .exp=int3(1)};
+}
+vertex float4 vertex_main() {
+  frexp_ae4a66();
+  return float4(0.0f);
+}
+fragment void fragment_main() {
+  frexp_ae4a66();
+}
+kernel void compute_main() {
+  frexp_ae4a66();
+}

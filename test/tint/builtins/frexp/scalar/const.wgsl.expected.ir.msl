@@ -1,9 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct frexp_result_f32 {
+  float fract;
+  int exp;
+};
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+kernel void tint_symbol() {
+  frexp_result_f32 const res = frexp_result_f32{.fract=0.625f, .exp=1};
+  float const fract = res.fract;
+  int const exp = res.exp;
+}

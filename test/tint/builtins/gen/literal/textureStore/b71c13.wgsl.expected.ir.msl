@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:679 internal compiler error: %b1 = block {  # root
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:1110 internal compiler error: %b1 = block {  # root
   %arg_0:ptr<handle, texture_storage_2d_array<rg32float, read_write>, read> = var @binding_point(1, 0)
 }
 

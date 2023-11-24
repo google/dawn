@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
   %arg_0:ptr<handle, texture_depth_cube, read> = var @binding_point(1, 0)
   %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
   %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)

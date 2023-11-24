@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:861 internal compiler error: TINT_UNREACHABLE unhandled: textureStore
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

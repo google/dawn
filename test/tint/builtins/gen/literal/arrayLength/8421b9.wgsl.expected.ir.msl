@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RO = struct @align(2) {
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: SB_RO = struct @align(2) {
   arg_0:array<f16> @offset(0)
 }
 
