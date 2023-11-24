@@ -40,6 +40,15 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SurfaceCapabilities:
         case WGPUFeatureName_D3D11MultithreadProtected:
         case WGPUFeatureName_HostMappedPointer:
+        case WGPUFeatureName_BufferMapExtendedUsages:
+            return false;
+        // NOTE: SharedTextureMemory/SharedFence are not actually intended
+        // for usage over the wire (and are not exposed over the wire as
+        // they're marked as native in dawn.json). However, embedders need
+        // to use these features on the server-side for WebGPU devices. To
+        // do so they need to add the features on such devices, which requires
+        // that the features be listed as wire-supported here to avoid
+        // device creation failure that would otherwise occur.
         case WGPUFeatureName_SharedTextureMemoryVkDedicatedAllocation:
         case WGPUFeatureName_SharedTextureMemoryAHardwareBuffer:
         case WGPUFeatureName_SharedTextureMemoryDmaBuf:
@@ -54,8 +63,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SharedFenceVkSemaphoreZirconHandle:
         case WGPUFeatureName_SharedFenceDXGISharedHandle:
         case WGPUFeatureName_SharedFenceMTLSharedEvent:
-        case WGPUFeatureName_BufferMapExtendedUsages:
-            return false;
+
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:
         case WGPUFeatureName_ChromiumExperimentalTimestampQueryInsidePasses:
