@@ -74,27 +74,22 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     DAWN_TRY_ASSIGN(properties.format, d3d::FromUncompressedColorDXGITextureFormat(desc.Format));
 
-    const Format* internalFormat = nullptr;
-    DAWN_TRY_ASSIGN(internalFormat, device->GetInternalFormat(properties.format));
-
+    // The usages that the underlying D3D12 texture supports are partially
+    // dependent on its creation flags. Note that the SharedTextureMemory
+    // frontend takes care of stripping out any usages that are not supported
+    // for `format`.
     wgpu::TextureUsage storageBindingUsage =
-        internalFormat->supportsStorageUsage &&
-                (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
+        (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
             ? wgpu::TextureUsage::StorageBinding
             : wgpu::TextureUsage::None;
-
     wgpu::TextureUsage renderAttachmentUsage =
-        internalFormat->isRenderable && (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+        (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
             ? wgpu::TextureUsage::RenderAttachment
             : wgpu::TextureUsage::None;
 
-    if (internalFormat->IsMultiPlanar()) {
-        properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding;
-    } else {
-        properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                           wgpu::TextureUsage::TextureBinding | storageBindingUsage |
-                           renderAttachmentUsage;
-    }
+    properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                       wgpu::TextureUsage::TextureBinding | storageBindingUsage |
+                       renderAttachmentUsage;
 
     auto result =
         AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d12Resource)));

@@ -87,7 +87,7 @@ class SharedTextureMemoryBase : public ApiObjectBase,
 
     void DestroyImpl() override;
 
-    const SharedTextureMemoryProperties mProperties;
+    SharedTextureMemoryProperties mProperties;
 
     Ref<TextureBase> mCurrentAccess;
 

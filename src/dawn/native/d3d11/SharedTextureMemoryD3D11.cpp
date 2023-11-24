@@ -65,29 +65,22 @@ ResultOrError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
 
     DAWN_TRY_ASSIGN(properties.format, d3d::FromUncompressedColorDXGITextureFormat(desc.Format));
 
-    const Format* internalFormat = nullptr;
-    DAWN_TRY_ASSIGN(internalFormat, device->GetInternalFormat(properties.format));
-
+    // The usages that the underlying D3D11 texture supports are partially
+    // dependent on its creation flags. Note that the SharedTextureMemory
+    // frontend takes care of stripping out any usages that are not supported
+    // for `format`.
     wgpu::TextureUsage textureBindingUsage = (desc.BindFlags & D3D11_BIND_SHADER_RESOURCE)
                                                  ? wgpu::TextureUsage::TextureBinding
                                                  : wgpu::TextureUsage::None;
+    wgpu::TextureUsage storageBindingUsage = (desc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+                                                 ? wgpu::TextureUsage::StorageBinding
+                                                 : wgpu::TextureUsage::None;
+    wgpu::TextureUsage renderAttachmentUsage = (desc.BindFlags & D3D11_BIND_RENDER_TARGET)
+                                                   ? wgpu::TextureUsage::RenderAttachment
+                                                   : wgpu::TextureUsage::None;
 
-    wgpu::TextureUsage storageBindingUsage =
-        internalFormat->supportsStorageUsage && (desc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
-            ? wgpu::TextureUsage::StorageBinding
-            : wgpu::TextureUsage::None;
-
-    wgpu::TextureUsage renderAttachmentUsage =
-        internalFormat->isRenderable && (desc.BindFlags & D3D11_BIND_RENDER_TARGET)
-            ? wgpu::TextureUsage::RenderAttachment
-            : wgpu::TextureUsage::None;
-
-    if (internalFormat->IsMultiPlanar()) {
-        properties.usage = wgpu::TextureUsage::CopySrc | textureBindingUsage;
-    } else {
-        properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                           textureBindingUsage | storageBindingUsage | renderAttachmentUsage;
-    }
+    properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                       textureBindingUsage | storageBindingUsage | renderAttachmentUsage;
     return properties;
 }
 
