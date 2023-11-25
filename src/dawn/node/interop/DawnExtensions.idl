@@ -40,3 +40,7 @@ dictionary GPURequestAdapterOptions {
 interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
 };
+
+interface GPUCommandEncoder {
+    undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
+};
