@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -7,7 +5,7 @@ void constant_with_non_constant() {
   float a = 0.0f;
   float2 b = float2(1.0f, a);
 }
-void tint_symbol() {
+kernel void tint_symbol() {
   bool bool_var1 = true;
   bool bool_var2 = true;
   bool bool_var3 = true;

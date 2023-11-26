@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -15,6 +13,6 @@ struct tint_array {
 };
 
 
-void tint_symbol() {
+fragment void tint_symbol() {
   tint_array<int, 5> a = {};
 }

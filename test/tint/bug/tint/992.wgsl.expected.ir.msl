@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-float4 frag_main() {
+fragment float4 frag_main() {
   float b = 0.0f;
   float3 v = float3(b);
   return float4(v, 1.0f);

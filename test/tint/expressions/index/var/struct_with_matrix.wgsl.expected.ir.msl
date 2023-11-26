@@ -1,9 +1,11 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int m;
+  float4x4 n;
+};
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:264 internal compiler error: Switch() matched no cases. Type: tint::core::ir::LoadVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+float f() {
+  S a = S{};
+  return a.n[2][1];
+}

@@ -1,11 +1,9 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-float main1() {
+fragment float main1() {
   return 1.0f;
 }
-uint main2() {
+fragment uint main2() {
   return 1u;
 }

@@ -1,9 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void f_1() {
+  uint v = 0u;
+  uint offset_1 = 0u;
+  uint count = 0u;
+  uint const x_11 = extract_bits(v, offset_1, count);
+}
+kernel void f() {
+  f_1();
+}

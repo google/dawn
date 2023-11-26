@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -48,5 +46,5 @@ tint_array<float, 4> ret_arr() {
 S ret_struct() {
   return S{};
 }
-void tint_symbol() {
+kernel void tint_symbol() {
 }

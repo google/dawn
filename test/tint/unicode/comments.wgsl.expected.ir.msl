@@ -1,7 +1,5 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-void tint_symbol() {
+fragment void tint_symbol() {
 }

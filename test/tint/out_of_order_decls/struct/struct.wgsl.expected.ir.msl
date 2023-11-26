@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct S2 {
@@ -9,6 +7,6 @@ struct S1 {
   S2 m;
 };
 
-void f() {
+fragment void f() {
   S1 v = {};
 }
