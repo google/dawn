@@ -263,6 +263,9 @@ class Printer : public tint::TextGenerator {
                 if (param->Builtin().has_value()) {
                     out << " [[";
                     switch (param->Builtin().value()) {
+                        case core::ir::FunctionParam::Builtin::kFrontFacing:
+                            out << "front_facing";
+                            break;
                         case core::ir::FunctionParam::Builtin::kGlobalInvocationId:
                             out << "thread_position_in_grid";
                             break;
@@ -274,6 +277,15 @@ class Printer : public tint::TextGenerator {
                             break;
                         case core::ir::FunctionParam::Builtin::kNumWorkgroups:
                             out << "threadgroups_per_grid";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kPosition:
+                            out << "position";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kSampleIndex:
+                            out << "sample_id";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kSampleMask:
+                            out << "sample_mask";
                             break;
                         case core::ir::FunctionParam::Builtin::kWorkgroupId:
                             out << "threadgroup_position_in_grid";
