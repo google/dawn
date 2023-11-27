@@ -1,9 +1,6 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+kernel void tint_symbol(uint3 local_invocation_id [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], uint3 workgroup_id [[threadgroup_position_in_grid]], uint3 num_workgroups [[threadgroups_per_grid]]) {
+  uint const foo = ((((local_invocation_id[0u] + local_invocation_index) + global_invocation_id[0u]) + workgroup_id[0u]) + num_workgroups[0u]);
+}

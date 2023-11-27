@@ -259,6 +259,31 @@ class Printer : public tint::TextGenerator {
                 }
 
                 EmitFunctionParam(out, param);
+
+                if (param->Builtin().has_value()) {
+                    out << " [[";
+                    switch (param->Builtin().value()) {
+                        case core::ir::FunctionParam::Builtin::kGlobalInvocationId:
+                            out << "thread_position_in_grid";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kLocalInvocationId:
+                            out << "thread_position_in_threadgroup";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kLocalInvocationIndex:
+                            out << "thread_index_in_threadgroup";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kNumWorkgroups:
+                            out << "threadgroups_per_grid";
+                            break;
+                        case core::ir::FunctionParam::Builtin::kWorkgroupId:
+                            out << "threadgroup_position_in_grid";
+                            break;
+
+                        default:
+                            break;
+                    }
+                    out << "]]";
+                }
             }
 
             out << ") {";
