@@ -1,8 +1,3 @@
-SKIP: FAILED
-
-### Lost the `const` on the three `param_ptr` variables
-
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -21,7 +16,7 @@ struct S {
   float a;
 };
 
-void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 param_v2i32, uint3 param_v3u32, float4 param_v4f32, float2x3 param_m2x3, tint_array<float, 4> param_arr, S param_struct, thread float* param_ptr_f32, thread float4* param_ptr_vec, thread tint_array<float, 4>* param_ptr_arr) {
+void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 param_v2i32, uint3 param_v3u32, float4 param_v4f32, float2x3 param_m2x3, tint_array<float, 4> param_arr, S param_struct, thread float* const param_ptr_f32, thread float4* const param_ptr_vec, thread tint_array<float, 4>* const param_ptr_arr) {
 }
 kernel void tint_symbol() {
 }

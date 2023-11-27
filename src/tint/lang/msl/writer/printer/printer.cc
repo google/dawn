@@ -251,6 +251,13 @@ class Printer : public tint::TextGenerator {
                 // TODO(dsinclair): Handle parameter attributes
                 EmitType(out, param->Type());
                 out << " ";
+
+                // Non-entrypoint pointers are set to `const` for the value
+                if (func->Stage() == core::ir::Function::PipelineStage::kUndefined &&
+                    param->Type()->Is<core::type::Pointer>()) {
+                    out << "const ";
+                }
+
                 EmitFunctionParam(out, param);
             }
 
