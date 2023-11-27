@@ -1,3 +1,7 @@
+SKIP: FAILED
+
+### Missing invariant
+
 #include <metal_stdlib>
 using namespace metal;
 

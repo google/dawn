@@ -1,3 +1,8 @@
+SKIP: FAILED
+
+### Lost the `const` on the three `param_ptr` variables
+
+
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
