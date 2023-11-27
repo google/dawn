@@ -39,9 +39,6 @@ if (enable_vulkan_validation_layers) {
   import("//build_overrides/vulkan_validation_layers.gni")
 }
 
-# ANGLE is an optional dependency; only use it if the path has been set.
-use_angle = dawn_use_angle && defined(dawn_angle_dir)
-
 # Swiftshader is an optional dependency, only use it if the path has been set.
 use_swiftshader = dawn_use_swiftshader && dawn_swiftshader_dir != ""
 if (use_swiftshader) {
@@ -871,13 +868,6 @@ source_set("sources") {
     if (dawn_enable_spirv_validation) {
       defines += [ "DAWN_ENABLE_SPIRV_VALIDATION" ]
     }
-  }
-
-  if (use_angle) {
-    data_deps += [
-      "${dawn_angle_dir}:libEGL",
-      "${dawn_angle_dir}:libGLESv2",
-    ]
   }
 }
 

@@ -772,6 +772,13 @@ dawn_test("dawn_end2end_tests") {
     ":white_box_tests_sources",
   ]
 
+  if (dawn_use_angle && defined(dawn_angle_dir)) {
+    data_deps = [
+      "${dawn_angle_dir}:libEGL",
+      "${dawn_angle_dir}:libGLESv2",
+    ]
+  }
+
   sources = []
   libs = []
 
