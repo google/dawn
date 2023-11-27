@@ -60,9 +60,6 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
     }
-    if (str == "chromium_experimental_read_write_storage_texture") {
-        return Extension::kChromiumExperimentalReadWriteStorageTexture;
-    }
     if (str == "chromium_experimental_subgroups") {
         return Extension::kChromiumExperimentalSubgroups;
     }
@@ -94,8 +91,6 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_pixel_local";
         case Extension::kChromiumExperimentalPushConstant:
             return "chromium_experimental_push_constant";
-        case Extension::kChromiumExperimentalReadWriteStorageTexture:
-            return "chromium_experimental_read_write_storage_texture";
         case Extension::kChromiumExperimentalSubgroups:
             return "chromium_experimental_subgroups";
         case Extension::kChromiumInternalDualSourceBlending:

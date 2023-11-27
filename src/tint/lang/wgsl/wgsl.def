@@ -78,8 +78,6 @@ enum extension {
   // A Chromium-specific extension that enables passing of uniform, storage and workgroup
   // address-spaced pointers as parameters, as well as pointers into sub-objects.
   chromium_experimental_full_ptr_parameters
-  // A Chromium-specific extension that adds support for read-write storage textures.
-  chromium_experimental_read_write_storage_texture
   // A Chromium-specific extension that adds basic subgroup functionality.
   chromium_experimental_subgroups
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.

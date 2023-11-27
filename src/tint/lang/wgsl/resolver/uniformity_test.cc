@@ -305,8 +305,6 @@ TEST_P(BasicTest, ConditionalFunctionCall) {
     auto condition = static_cast<Condition>(std::get<0>(GetParam()));
     auto function = static_cast<Function>(std::get<1>(GetParam()));
     std::string src = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 var<private> p : i32;
 var<workgroup> w : i32;
 @group(0) @binding(0) var<uniform> u : i32;
@@ -8247,8 +8245,6 @@ test:5:7 note: return value of 'atomicAdd' may be non-uniform
 
 TEST_F(UniformityAnalysisTest, StorageTextureLoad_ReadOnly) {
     std::string src = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var t : texture_storage_2d<r32sint, read>;
 
 fn foo() {
@@ -8263,8 +8259,6 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, StorageTextureLoad_ReadWrite) {
     std::string src = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var t : texture_storage_2d<r32sint, read_write>;
 
 fn foo() {
@@ -8276,15 +8270,15 @@ fn foo() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:8:5 error: 'storageBarrier' must only be called from uniform control flow
+              R"(test:6:5 error: 'storageBarrier' must only be called from uniform control flow
     storageBarrier();
     ^^^^^^^^^^^^^^
 
-test:7:3 note: control flow depends on possibly non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (textureLoad(t, vec2()).r == 0) {
   ^^
 
-test:7:7 note: return value of 'textureLoad' may be non-uniform
+test:5:7 note: return value of 'textureLoad' may be non-uniform
   if (textureLoad(t, vec2()).r == 0) {
       ^^^^^^^^^^^^^^^^^^^^^^
 )");

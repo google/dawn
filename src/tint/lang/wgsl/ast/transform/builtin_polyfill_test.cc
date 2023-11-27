@@ -456,8 +456,6 @@ fn f(tex : texture_storage_3d<rgba8unorm, write>) {
 
 TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureLoad) {
     auto* src = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, read>;
 
 fn f(coords : vec2<i32>) -> vec4<f32> {
@@ -466,8 +464,6 @@ fn f(coords : vec2<i32>) -> vec4<f32> {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, read>;
 
 fn f(coords : vec2<i32>) -> vec4<f32> {
@@ -554,8 +550,6 @@ fn f(coords : vec2<i32>, value : vec4<f32>) {
 
 TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureLoadAndStore) {
     auto* src = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, read_write>;
 
 fn f(coords : vec2<i32>) {
@@ -564,8 +558,6 @@ fn f(coords : vec2<i32>) {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_read_write_storage_texture;
-
 @group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, read_write>;
 
 fn f(coords : vec2<i32>) {
