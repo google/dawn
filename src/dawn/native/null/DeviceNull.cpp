@@ -90,6 +90,17 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* ada
     return Device::Create(adapter, descriptor, deviceToggles);
 }
 
+void PhysicalDevice::PopulateMemoryHeapInfo(
+    AdapterPropertiesMemoryHeaps* memoryHeapProperties) const {
+    auto* heapInfo = new MemoryHeapInfo[1];
+    memoryHeapProperties->heapCount = 1;
+    memoryHeapProperties->heapInfo = heapInfo;
+
+    heapInfo[0].size = 1024 * 1024 * 1024;
+    heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                             wgpu::HeapProperty::HostCached;
+}
+
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {

@@ -44,9 +44,12 @@ struct DeviceInfo {
     uint32_t shaderModel;
     PerStage<std::wstring> shaderProfiles;
     bool supportsSharedResourceCapabilityTier2;
+    size_t dedicatedVideoMemory;
+    size_t sharedSystemMemory;
 };
 
-ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device);
+ResultOrError<DeviceInfo> GatherDeviceInfo(IDXGIAdapter3* adapter,
+                                           const ComPtr<ID3D11Device>& device);
 }  // namespace dawn::native::d3d11
 
 #endif  // SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_

@@ -72,6 +72,10 @@ class WireAdapterTests : public WireTest {
         apiAdapter = api.GetNewAdapter();
         EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
             .WillOnce(InvokeWithoutArgs([&] {
+                EXPECT_CALL(api, AdapterHasFeature(apiAdapter,
+                                                   WGPUFeatureName_AdapterPropertiesMemoryHeaps))
+                    .WillOnce(Return(false));
+
                 EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                     .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                         *properties = {};

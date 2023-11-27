@@ -546,6 +546,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::Depth32FloatStencil8);
         }
 
+        if (@available(macOS 10.12, iOS 16.0, *)) {
+            EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
+        }
+
         // Uses newTextureWithDescriptor::iosurface::plane which is available
         // on ios 11.0+ and macOS 11.0+
         if (@available(macOS 10.11, iOS 11.0, *)) {
@@ -882,6 +886,37 @@ class PhysicalDevice : public PhysicalDeviceBase {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override {
         return {};
+    }
+
+    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override {
+        if ([*mDevice hasUnifiedMemory]) {
+            auto* heapInfo = new MemoryHeapInfo[1];
+            memoryHeapProperties->heapCount = 1;
+            memoryHeapProperties->heapInfo = heapInfo;
+
+            heapInfo[0].properties =
+                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
+            heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
+        } else {
+            auto* heapInfo = new MemoryHeapInfo[2];
+            memoryHeapProperties->heapCount = 2;
+            memoryHeapProperties->heapInfo = heapInfo;
+
+            heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
+            heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
+
+            mach_msg_type_number_t hostBasicInfoMsg = HOST_BASIC_INFO_COUNT;
+            host_basic_info_data_t hostInfo{};
+            DAWN_CHECK(host_info(mach_host_self(), HOST_BASIC_INFO,
+                                 reinterpret_cast<host_info_t>(&hostInfo),
+                                 &hostBasicInfoMsg) == KERN_SUCCESS);
+
+            heapInfo[1].properties = wgpu::HeapProperty::HostVisible |
+                                     wgpu::HeapProperty::HostCoherent |
+                                     wgpu::HeapProperty::HostCached;
+            heapInfo[1].size = hostInfo.max_mem;
+        }
     }
 
     NSPRef<id<MTLDevice>> mDevice;

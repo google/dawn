@@ -208,6 +208,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
                                                     const DeviceDescriptor* descriptor,
                                                     const TogglesState& deviceToggles) override;
+
+    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
 };
 
 // Helper class so |BindGroup| can allocate memory for its binding data,

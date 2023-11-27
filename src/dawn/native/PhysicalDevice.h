@@ -106,6 +106,11 @@ class PhysicalDeviceBase : public RefCounted {
     FeatureValidationResult ValidateFeatureSupportedWithToggles(wgpu::FeatureName feature,
                                                                 const TogglesState& toggles) const;
 
+    // Populate information about the memory heaps. Ownership of allocations written to
+    // `memoryHeapProperties` are owned by the caller.
+    virtual void PopulateMemoryHeapInfo(
+        AdapterPropertiesMemoryHeaps* memoryHeapProperties) const = 0;
+
   protected:
     uint32_t mVendorId = 0xFFFFFFFF;
     std::string mVendorName;

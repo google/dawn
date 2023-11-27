@@ -717,7 +717,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
     // Override procs to provide harness-specific behavior to always select the adapter required in
     // testing parameter, and to allow fixture-specific overriding of the test device with
     // CreateDeviceImpl.
-    procs.instanceRequestAdapter = [](WGPUInstance instance, const WGPURequestAdapterOptions*,
+    procs.instanceRequestAdapter = [](WGPUInstance cInstance, const WGPURequestAdapterOptions*,
                                       WGPURequestAdapterCallback callback, void* userdata) {
         DAWN_ASSERT(gCurrentTest);
 
@@ -738,9 +738,9 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         // Find the adapter that exactly matches our adapter properties.
         const auto& adapters = gTestEnv->GetInstance()->EnumerateAdapters(&adapterOptions);
         const auto& it =
-            std::find_if(adapters.begin(), adapters.end(), [&](const native::Adapter& adapter) {
+            std::find_if(adapters.begin(), adapters.end(), [&](const native::Adapter& candidate) {
                 wgpu::AdapterProperties properties;
-                adapter.GetProperties(&properties);
+                candidate.GetProperties(&properties);
 
                 const auto& param = gCurrentTest->mParam;
                 return (param.adapterProperties.selected &&
@@ -758,7 +758,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
     };
 
-    procs.adapterRequestDevice = [](WGPUAdapter adapter, const WGPUDeviceDescriptor* descriptor,
+    procs.adapterRequestDevice = [](WGPUAdapter cAdapter, const WGPUDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback, void* userdata) {
         DAWN_ASSERT(gCurrentTest);
 
@@ -784,8 +784,8 @@ DawnTestBase::~DawnTestBase() {
     mReadbackSlots.clear();
     queue = nullptr;
     device = nullptr;
-    mAdapter = nullptr;
-    mInstance = nullptr;
+    adapter = nullptr;
+    instance = nullptr;
 
     // D3D11 and D3D12's GPU-based validation will accumulate objects over time if the backend
     // device is not destroyed and recreated, so we reset it here.
@@ -1001,7 +1001,7 @@ wgpu::BackendType DawnTestBase::GetBackendTypeFilter() const {
 }
 
 const wgpu::Instance& DawnTestBase::GetInstance() const {
-    return mInstance;
+    return instance;
 }
 
 native::Adapter DawnTestBase::GetAdapter() const {
@@ -1022,7 +1022,7 @@ const TestAdapterProperties& DawnTestBase::GetAdapterProperties() const {
 
 wgpu::SupportedLimits DawnTestBase::GetAdapterLimits() {
     wgpu::SupportedLimits supportedLimits = {};
-    mAdapter.GetLimits(&supportedLimits);
+    adapter.GetLimits(&supportedLimits);
     return supportedLimits;
 }
 
@@ -1104,7 +1104,7 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     deviceDesc.deviceLostCallback = mDeviceLostCallback.Callback();
     deviceDesc.deviceLostUserdata = mDeviceLostCallback.MakeUserdata(deviceUserdata);
 
-    mAdapter.RequestDevice(
+    adapter.RequestDevice(
         &deviceDesc,
         [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
@@ -1150,7 +1150,7 @@ void DawnTestBase::SetUp() {
     mTestPlatform = CreateTestPlatform();
     native::FromAPI(gTestEnv->GetInstance()->Get())->SetPlatformForTesting(mTestPlatform.get());
 
-    mInstance = mWireHelper->RegisterInstance(gTestEnv->GetInstance()->Get());
+    instance = mWireHelper->RegisterInstance(gTestEnv->GetInstance()->Get());
 
     std::string traceName =
         std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
@@ -1158,14 +1158,14 @@ void DawnTestBase::SetUp() {
     mWireHelper->BeginWireTrace(traceName.c_str());
 
     // RequestAdapter is overriden to ignore RequestAdapterOptions, and select based on test params.
-    mInstance.RequestAdapter(
+    instance.RequestAdapter(
         nullptr,
         [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
             *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
         },
-        &mAdapter);
+        &adapter);
     FlushWire();
-    DAWN_ASSERT(mAdapter);
+    DAWN_ASSERT(adapter);
 
     device = CreateDevice();
     backendDevice = mLastCreatedBackendDevice;
@@ -1575,7 +1575,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
 
 void DawnTestBase::WaitABit(wgpu::Instance targetInstance) {
     if (targetInstance == nullptr) {
-        targetInstance = mInstance;
+        targetInstance = instance;
     }
     if (targetInstance != nullptr) {
         targetInstance.ProcessEvents();

@@ -38,6 +38,7 @@ class PhysicalDevice;
 
 struct D3D12DeviceInfo {
     bool isUMA;
+    bool isCacheCoherentUMA;
     uint32_t resourceHeapTier;
     bool supportsRenderPass;
     bool supportsShaderF16;
@@ -60,6 +61,8 @@ struct D3D12DeviceInfo {
     // unclear. Reference:
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
     uint32_t waveLaneCountMax;
+    size_t dedicatedVideoMemory;
+    size_t sharedSystemMemory;
 };
 
 ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice);

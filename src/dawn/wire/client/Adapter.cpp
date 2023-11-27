@@ -69,9 +69,51 @@ void Adapter::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCoun
 void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
     mProperties = *properties;
     mProperties.nextInChain = nullptr;
+
+    // Loop through the chained struct.
+    WGPUChainedStructOut* chain = properties->nextInChain;
+    while (chain != nullptr) {
+        switch (chain->sType) {
+            case WGPUSType_AdapterPropertiesMemoryHeaps: {
+                // Make a copy of the heap info in `mMemoryHeapInfo`.
+                const auto* memoryHeapProperties =
+                    reinterpret_cast<const WGPUAdapterPropertiesMemoryHeaps*>(chain);
+                mMemoryHeapInfo = {
+                    memoryHeapProperties->heapInfo,
+                    memoryHeapProperties->heapInfo + memoryHeapProperties->heapCount};
+                break;
+            }
+            default:
+                DAWN_UNREACHABLE();
+                break;
+        }
+        chain = chain->next;
+    }
 }
 
 void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
+    // Loop through the chained struct.
+    WGPUChainedStructOut* chain = properties->nextInChain;
+    while (chain != nullptr) {
+        switch (chain->sType) {
+            case WGPUSType_AdapterPropertiesMemoryHeaps: {
+                // Copy `mMemoryHeapInfo` into a new allocation.
+                auto* memoryHeapProperties =
+                    reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(chain);
+                size_t heapCount = mMemoryHeapInfo.size();
+                auto* heapInfo = new WGPUMemoryHeapInfo[heapCount];
+                memcpy(heapInfo, mMemoryHeapInfo.data(), sizeof(WGPUMemoryHeapInfo) * heapCount);
+                // Write out the pointer and count to the heap properties out-struct.
+                memoryHeapProperties->heapCount = heapCount;
+                memoryHeapProperties->heapInfo = heapInfo;
+                break;
+            }
+            default:
+                break;
+        }
+        chain = chain->next;
+    }
+
     *properties = mProperties;
 
     // Get lengths, with null terminators.
@@ -103,6 +145,11 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
 void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
     // This single delete is enough because everything is a single allocation.
     delete[] properties.vendorName;
+}
+
+void ClientAdapterPropertiesMemoryHeapsFreeMembers(
+    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
+    delete[] memoryHeapProperties.heapInfo;
 }
 
 void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,

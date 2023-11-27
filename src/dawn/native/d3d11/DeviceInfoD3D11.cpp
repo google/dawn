@@ -34,7 +34,8 @@
 
 namespace dawn::native::d3d11 {
 
-ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device) {
+ResultOrError<DeviceInfo> GatherDeviceInfo(IDXGIAdapter3* adapter,
+                                           const ComPtr<ID3D11Device>& device) {
     DeviceInfo info = {};
 
     D3D11_FEATURE_DATA_D3D11_OPTIONS2 options2;
@@ -61,6 +62,11 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device) {
                           "D3D11_FEATURE_D3D11_OPTIONS5"));
     info.supportsSharedResourceCapabilityTier2 =
         featureOptions5.SharedResourceTier >= D3D11_SHARED_RESOURCE_TIER_2;
+
+    DXGI_ADAPTER_DESC adapterDesc;
+    DAWN_TRY(CheckHRESULT(adapter->GetDesc(&adapterDesc), "IDXGIAdapter3::GetDesc"));
+    info.dedicatedVideoMemory = adapterDesc.DedicatedVideoMemory;
+    info.sharedSystemMemory = adapterDesc.SharedSystemMemory;
 
     return std::move(info);
 }

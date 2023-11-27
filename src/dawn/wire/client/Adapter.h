@@ -28,8 +28,9 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 #define SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 
-#include "dawn/webgpu.h"
+#include <vector>
 
+#include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/LimitsAndFeatures.h"
@@ -70,6 +71,7 @@ class Adapter final : public ObjectBase {
   private:
     LimitsAndFeatures mLimitsAndFeatures;
     WGPUAdapterProperties mProperties;
+    std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
 
     struct RequestDeviceData {
         WGPURequestDeviceCallback callback = nullptr;
@@ -80,6 +82,7 @@ class Adapter final : public ObjectBase {
 };
 
 void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties);
+void ClientAdapterPropertiesMemoryHeapsFreeMembers(WGPUAdapterPropertiesMemoryHeaps);
 
 }  // namespace dawn::wire::client
 

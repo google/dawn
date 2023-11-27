@@ -75,6 +75,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
 
+    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+
     const bool mIsSharedD3D11Device;
     ComPtr<ID3D11Device> mD3D11Device;
     D3D_FEATURE_LEVEL mFeatureLevel;

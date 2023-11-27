@@ -1920,6 +1920,7 @@
             {"value": 1024, "name": "multi planar format nv12a", "tags": ["dawn"]},
             {"value": 1025, "name": "framebuffer fetch", "tags": ["dawn"]},
             {"value": 1026, "name": "buffer map extended usages", "tags": ["dawn"]},
+            {"value": 1027, "name": "adapter properties memory heaps", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3287,6 +3288,7 @@
             {"value": 1016, "name": "pipeline layout pixel local storage", "tags": ["dawn"]},
             {"value": 1017, "name": "buffer host mapped pointer", "tags": ["dawn"]},
             {"value": 1018, "name": "dawn experimental subgroup limits", "tags": ["dawn"]},
+            {"value": 1019, "name": "adapter properties memory heaps", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
@@ -3753,6 +3755,36 @@
         "tags": ["dawn"],
         "members": [
             {"name": "power preference", "type": "power preference", "default": "undefined"}
+        ]
+    },
+    "heap property": {
+        "category": "bitmask",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "undefined", "valid": false},
+            {"value": 1, "name": "device local"},
+            {"value": 2, "name": "host visible"},
+            {"value": 4, "name": "host coherent"},
+            {"value": 8, "name": "host uncached"},
+            {"value": 16, "name": "host cached"}
+        ]
+    },
+    "memory heap info": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "properties", "type": "heap property"},
+            {"name": "size", "type": "uint64_t"}
+        ]
+    },
+    "adapter properties memory heaps": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter properties"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "heap count", "type": "size_t"},
+            {"name": "heap info", "type": "memory heap info", "annotation": "const*", "length": "heap count"}
         ]
     },
     "dawn buffer descriptor error info from wire client": {

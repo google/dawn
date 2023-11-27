@@ -566,6 +566,7 @@ source_set("end2end_tests_sources") {
     "end2end/IndexFormatTests.cpp",
     "end2end/MaxLimitTests.cpp",
     "end2end/MemoryAllocationStressTests.cpp",
+    "end2end/MemoryHeapPropertiesTests.cpp",
     "end2end/MultisampledRenderingTests.cpp",
     "end2end/MultisampledSamplingTests.cpp",
     "end2end/MultithreadTests.cpp",

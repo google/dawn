@@ -40,6 +40,7 @@
 namespace dawn::wire {
 namespace {
 
+using testing::_;
 using testing::Invoke;
 using testing::InvokeWithoutArgs;
 using testing::MockCallback;
@@ -142,6 +143,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     WGPUAdapter apiAdapter = api.GetNewAdapter();
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
         .WillOnce(InvokeWithoutArgs([&] {
+            EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
+
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(SetArgPointee<1>(fakeProperties));
 
@@ -204,6 +207,100 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     });
 }
 
+// Test that RequestAdapter forwards the memory heap properties to the client.
+TEST_P(WireInstanceTests, RequestAdapterPassesMemoryHeapProperties) {
+    WGPURequestAdapterOptions options = {};
+    InstanceRequestAdapter(instance, &options, nullptr);
+
+    WGPUMemoryHeapInfo fakeHeapInfo[3] = {
+        {WGPUHeapProperty_DeviceLocal, 64},
+        {WGPUHeapProperty_DeviceLocal | WGPUHeapProperty_HostVisible, 136},
+        {WGPUHeapProperty_HostCached | WGPUHeapProperty_HostVisible, 460},
+    };
+
+    WGPUAdapterPropertiesMemoryHeaps fakeMemoryHeapProperties = {};
+    fakeMemoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
+    fakeMemoryHeapProperties.heapCount = 3;
+    fakeMemoryHeapProperties.heapInfo = fakeHeapInfo;
+
+    std::initializer_list<WGPUFeatureName> fakeFeatures = {
+        WGPUFeatureName_AdapterPropertiesMemoryHeaps,
+    };
+
+    // Expect the server to receive the message. Then, mock a fake reply.
+    WGPUAdapter apiAdapter = api.GetNewAdapter();
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
+        .WillOnce(InvokeWithoutArgs([&] {
+            EXPECT_CALL(api,
+                        AdapterHasFeature(apiAdapter, WGPUFeatureName_AdapterPropertiesMemoryHeaps))
+                .WillOnce(Return(true));
+
+            EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
+                    properties->vendorName = "fake-vendor";
+                    properties->architecture = "fake-architecture";
+                    properties->name = "fake adapter";
+                    properties->driverDescription = "hello world";
+
+                    EXPECT_EQ(properties->nextInChain->sType,
+                              WGPUSType_AdapterPropertiesMemoryHeaps);
+                    *reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(properties->nextInChain) =
+                        fakeMemoryHeapProperties;
+                })));
+
+            EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
+                    *limits = {};
+                    return true;
+                })));
+
+            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
+                .WillOnce(Return(fakeFeatures.size()));
+
+            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
+                    for (WGPUFeatureName feature : fakeFeatures) {
+                        *(features++) = feature;
+                    }
+                    return fakeFeatures.size();
+                })));
+            api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
+                                                   apiAdapter, nullptr);
+        }));
+
+    FlushClient();
+    FlushFutures();
+
+    // Expect the callback in the client and the adapter information to match.
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
+                // Request properties without a chained struct.
+                // It should be nullptr.
+                WGPUAdapterProperties properties = {};
+                wgpuAdapterGetProperties(adapter, &properties);
+                EXPECT_EQ(properties.nextInChain, nullptr);
+
+                // Request the memory heap properties.
+                WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties = {};
+                memoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
+                properties.nextInChain = &memoryHeapProperties.chain;
+                wgpuAdapterGetProperties(adapter, &properties);
+
+                // Expect everything matches the fake properties returned by the server.
+                EXPECT_EQ(memoryHeapProperties.heapCount, fakeMemoryHeapProperties.heapCount);
+                for (size_t i = 0; i < fakeMemoryHeapProperties.heapCount; ++i) {
+                    EXPECT_EQ(memoryHeapProperties.heapInfo[i].properties,
+                              fakeMemoryHeapProperties.heapInfo[i].properties);
+                    EXPECT_EQ(memoryHeapProperties.heapInfo[i].size,
+                              fakeMemoryHeapProperties.heapInfo[i].size);
+                }
+            })));
+
+        FlushCallbacks();
+    });
+}
+
 // Test that features returned by the implementation that aren't supported in the wire are not
 // exposed.
 TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
@@ -220,6 +317,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
     WGPUAdapter apiAdapter = api.GetNewAdapter();
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
         .WillOnce(InvokeWithoutArgs([&] {
+            EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
+
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                     *properties = {};

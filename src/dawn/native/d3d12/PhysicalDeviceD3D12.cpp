@@ -141,6 +141,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::Float32Filterable);
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Norm16TextureFormats);
+    EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
@@ -708,6 +709,42 @@ MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
     DAWN_TRY(Initialize());
 
     return {};
+}
+
+void PhysicalDevice::PopulateMemoryHeapInfo(
+    AdapterPropertiesMemoryHeaps* memoryHeapProperties) const {
+    // https://microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html describes
+    // the properties of D3D12 Default/Upload/Readback heaps.
+    if (mDeviceInfo.isUMA) {
+        auto* heapInfo = new MemoryHeapInfo[1];
+        memoryHeapProperties->heapCount = 1;
+        memoryHeapProperties->heapInfo = heapInfo;
+
+        heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory != 0 ? mDeviceInfo.dedicatedVideoMemory
+                                                                 : mDeviceInfo.sharedSystemMemory;
+
+        if (mDeviceInfo.isCacheCoherentUMA) {
+            heapInfo[0].properties =
+                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
+        } else {
+            heapInfo[0].properties =
+                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
+        }
+    } else {
+        auto* heapInfo = new MemoryHeapInfo[2];
+        memoryHeapProperties->heapCount = 2;
+        memoryHeapProperties->heapInfo = heapInfo;
+
+        heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
+        heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
+
+        heapInfo[1].size = mDeviceInfo.sharedSystemMemory;
+        heapInfo[1].properties = wgpu::HeapProperty::HostVisible |
+                                 wgpu::HeapProperty::HostCoherent |
+                                 wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
+    }
 }
 
 }  // namespace dawn::native::d3d12

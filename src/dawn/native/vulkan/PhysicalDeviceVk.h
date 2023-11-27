@@ -78,6 +78,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     uint32_t FindDefaultComputeSubgroupSize() const;
 
+    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};

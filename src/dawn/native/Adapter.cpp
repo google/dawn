@@ -118,8 +118,9 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     DAWN_ASSERT(properties != nullptr);
 
-    MaybeError result = ValidateSingleSType(properties->nextInChain,
-                                            wgpu::SType::DawnAdapterPropertiesPowerPreference);
+    MaybeError result = ValidateSTypes(properties->nextInChain,
+                                       {{wgpu::SType::DawnAdapterPropertiesPowerPreference},
+                                        {wgpu::SType::AdapterPropertiesMemoryHeaps}});
     if (result.IsError()) {
         mPhysicalDevice->GetInstance()->ConsumedError(result.AcquireError());
         return;
@@ -127,6 +128,15 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
 
     DawnAdapterPropertiesPowerPreference* powerPreferenceDesc = nullptr;
     FindInChain(properties->nextInChain, &powerPreferenceDesc);
+
+    AdapterPropertiesMemoryHeaps* memoryHeaps = nullptr;
+    FindInChain(properties->nextInChain, &memoryHeaps);
+
+    if (memoryHeaps != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
+        mPhysicalDevice->GetInstance()->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
+    }
 
     if (powerPreferenceDesc != nullptr) {
         powerPreferenceDesc->powerPreference = mPowerPreference;
@@ -161,11 +171,20 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     properties->driverDescription = ptr;
     memcpy(ptr, mPhysicalDevice->GetDriverDescription().c_str(), driverDescriptionCLen);
     ptr += driverDescriptionCLen;
+
+    if (memoryHeaps != nullptr) {
+        mPhysicalDevice->PopulateMemoryHeapInfo(memoryHeaps);
+    }
 }
 
 void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
     // This single delete is enough because everything is a single allocation.
     delete[] properties.vendorName;
+}
+
+void APIAdapterPropertiesMemoryHeapsFreeMembers(
+    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
+    delete[] memoryHeapProperties.heapInfo;
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {

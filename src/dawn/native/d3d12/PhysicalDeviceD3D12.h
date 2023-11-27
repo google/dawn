@@ -76,6 +76,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
 
+    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+
     ComPtr<ID3D12Device> mD3d12Device;
 
     D3D12DeviceInfo mDeviceInfo = {};

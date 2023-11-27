@@ -301,6 +301,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     wgpu::TextureUsage APIGetSupportedSurfaceUsage(Surface* surface);
+    size_t APIQueryMemoryHeapInfo(MemoryHeapInfo* info);
 
     InternalPipelineStore* GetInternalPipelineStore();
 
