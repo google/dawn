@@ -29,18 +29,80 @@
 
 #include <utility>
 
-namespace tint::msl::raise {
+#include "src/tint/lang/core/ir/transform/binary_polyfill.h"
+#include "src/tint/lang/core/ir/transform/binding_remapper.h"
+#include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
+#include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
+#include "src/tint/lang/core/ir/transform/demote_to_helper.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/preserve_padding.h"
+#include "src/tint/lang/core/ir/transform/robustness.h"
+#include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
+#include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/msl/writer/common/option_helpers.h"
 
-Result<SuccessType> Raise(core::ir::Module&) {
-    // #define RUN_TRANSFORM(name)
-    //     do {
-    //         auto result = core::ir::transform::name(module);
-    //         if (!result) {
-    //             return result;
-    //         }
-    //     } while (false)
+namespace tint::msl::writer::raise {
+
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+#define RUN_TRANSFORM(name, ...)         \
+    do {                                 \
+        auto result = name(__VA_ARGS__); \
+        if (!result) {                   \
+            return result;               \
+        }                                \
+    } while (false)
+
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+
+    {
+        core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
+        binary_polyfills.int_div_mod = true;
+        binary_polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
+        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
+    }
+
+    {
+        core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
+        core_polyfills.clamp_int = true;
+        core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
+        core_polyfills.first_leading_bit = true;
+        core_polyfills.first_trailing_bit = true;
+        core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
+        core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
+        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+    }
+    // polyfills.sign_int = true;
+
+    {
+        core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
+        conversion_polyfills.ftoi = true;
+        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
+    }
+
+    if (!options.disable_robustness) {
+        core::ir::transform::RobustnessConfig config{};
+        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+    }
+
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
+                  external_texture_options);
+
+    if (!options.disable_workgroup_init) {
+        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
+    }
+
+    // PreservePadding must come before DirectVariableAccess.
+    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
+
+    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
+
+    // DemoteToHelper must come before any transform that introduces non-core instructions.
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     return Success;
 }
 
-}  // namespace tint::msl::raise
+}  // namespace tint::msl::writer::raise

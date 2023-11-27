@@ -53,7 +53,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect to MSL-dialect.
-    if (auto res = raise::Raise(ir); !res) {
+    if (auto res = raise::Raise(ir, options); !res) {
         return res.Failure();
     }
 

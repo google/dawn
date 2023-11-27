@@ -37,22 +37,31 @@
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+if (tint_build_msl_writer) {
+  libtint_source_set("raise") {
+    sources = [
+      "raise.cc",
+      "raise.h",
+    ]
+    deps = [
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/options",
+      "${tint_src_dir}/lang/core/ir/transform",
+      "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/text",
+      "${tint_src_dir}/utils/traits",
+    ]
 
-libtint_source_set("raise") {
-  sources = [
-    "raise.cc",
-    "raise.h",
-  ]
-  deps = [
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/result",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
-  ]
+    if (tint_build_msl_writer) {
+      deps += [ "${tint_src_dir}/lang/msl/writer/common" ]
+    }
+  }
 }

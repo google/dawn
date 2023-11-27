@@ -76,13 +76,95 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(BinaryData{"(left + right)", core::ir::BinaryOp::kAdd},
                     BinaryData{"(left - right)", core::ir::BinaryOp::kSubtract},
                     BinaryData{"(left * right)", core::ir::BinaryOp::kMultiply},
-                    BinaryData{"(left / right)", core::ir::BinaryOp::kDivide},
-                    BinaryData{"(left % right)", core::ir::BinaryOp::kModulo},
                     BinaryData{"(left & right)", core::ir::BinaryOp::kAnd},
                     BinaryData{"(left | right)", core::ir::BinaryOp::kOr},
-                    BinaryData{"(left ^ right)", core::ir::BinaryOp::kXor},
-                    BinaryData{"(left << right)", core::ir::BinaryOp::kShiftLeft},
-                    BinaryData{"(left >> right)", core::ir::BinaryOp::kShiftRight}));
+                    BinaryData{"(left ^ right)", core::ir::BinaryOp::kXor}));
+
+TEST_F(MslPrinterTest, BinaryDivU32) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Constant(1_u));
+        auto* r = b.Let("right", b.Constant(2_u));
+        auto* bin = b.Binary(core::ir::BinaryOp::kDivide, ty.u32(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+void foo() {
+  uint const left = 1u;
+  uint const right = 2u;
+  uint const val = tint_div_u32(left, right);
+}
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
+}
+)");
+}
+
+TEST_F(MslPrinterTest, BinaryModU32) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Constant(1_u));
+        auto* r = b.Let("right", b.Constant(2_u));
+        auto* bin = b.Binary(core::ir::BinaryOp::kModulo, ty.u32(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+void foo() {
+  uint const left = 1u;
+  uint const right = 2u;
+  uint const val = tint_mod_u32(left, right);
+}
+uint tint_mod_u32(uint lhs, uint rhs) {
+  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
+}
+)");
+}
+
+TEST_F(MslPrinterTest, BinaryShiftLeft) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Constant(1_u));
+        auto* r = b.Let("right", b.Constant(2_u));
+        auto* bin = b.Binary(core::ir::BinaryOp::kShiftLeft, ty.u32(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+void foo() {
+  uint const left = 1u;
+  uint const right = 2u;
+  uint const val = (left << (right & 31u));
+}
+)");
+}
+
+TEST_F(MslPrinterTest, BinaryShiftRight) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Constant(1_u));
+        auto* r = b.Let("right", b.Constant(2_u));
+        auto* bin = b.Binary(core::ir::BinaryOp::kShiftRight, ty.u32(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+void foo() {
+  uint const left = 1u;
+  uint const right = 2u;
+  uint const val = (left >> (right & 31u));
+}
+)");
+}
 
 using MslPrinterBinaryBoolTest = MslPrinterTestWithParam<BinaryData>;
 TEST_P(MslPrinterBinaryBoolTest, Emit) {

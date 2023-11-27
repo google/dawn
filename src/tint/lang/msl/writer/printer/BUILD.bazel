@@ -91,12 +91,12 @@ cc_library(
   ],
   deps = [
     "//src/tint/api/common",
+    "//src/tint/api/options",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/msl/writer/raise",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
@@ -113,7 +113,9 @@ cc_library(
     "@gtest",
   ] + select({
     ":tint_build_msl_writer": [
+      "//src/tint/lang/msl/writer/common",
       "//src/tint/lang/msl/writer/printer",
+      "//src/tint/lang/msl/writer/raise",
     ],
     "//conditions:default": [],
   }),

@@ -43,10 +43,24 @@ TEST_F(MslPrinterTest, Discard) {
         b.Return(func);
     });
 
+    auto* ep = b.Function("main", ty.void_());
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
+thread bool continue_execution = true;
 void foo() {
   if (true) {
+    continue_execution = false;
+  }
+}
+fragment void main() {
+  foo();
+  if (!(continue_execution)) {
     discard_fragment();
   }
 }

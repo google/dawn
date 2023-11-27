@@ -56,7 +56,6 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/msl/writer/raise",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
@@ -83,6 +82,7 @@ if (tint_build_msl_writer) {
         "${tint_src_dir}/lang/msl/writer/ast_printer",
         "${tint_src_dir}/lang/msl/writer/common",
         "${tint_src_dir}/lang/msl/writer/printer",
+        "${tint_src_dir}/lang/msl/writer/raise",
       ]
     }
 

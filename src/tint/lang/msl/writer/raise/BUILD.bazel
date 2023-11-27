@@ -45,18 +45,32 @@ cc_library(
     "raise.h",
   ],
   deps = [
+    "//src/tint/api/common",
+    "//src/tint/api/options",
+    "//src/tint/lang/core/ir/transform",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
+    "//src/tint/utils/reflection",
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
-  ],
+  ] + select({
+    ":tint_build_msl_writer": [
+      "//src/tint/lang/msl/writer/common",
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_msl_writer",
+  actual = "//src/tint:tint_build_msl_writer_true",
 )
 

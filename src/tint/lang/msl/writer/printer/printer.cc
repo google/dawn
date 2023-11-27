@@ -59,6 +59,7 @@
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
+#include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -326,7 +327,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Return* r) { EmitReturn(r); },                          //
                 [&](core::ir::Unreachable*) { EmitUnreachable(); },                   //
                 [&](core::ir::Var* v) { EmitVar(v); },                                //
-                [&](core::ir::Discard*) { EmitDiscard(); },                           //
+                [&](core::ir::TerminateInvocation*) { EmitDiscard(); },               //
                 [&](core::ir::Store* s) { EmitStore(s); },                            //
                 [&](core::ir::Continue*) { EmitContinue(); },                         //
                 [&](core::ir::NextIteration*) { /* do nothing */ },                   //
