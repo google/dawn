@@ -203,9 +203,10 @@ if (tint_build_benchmarks) {
 }
 if (tint_build_spv_writer) {
   tint_fuzz_source_set("fuzz") {
-    sources = []
+    sources = [ "writer_fuzz.cc" ]
     deps = [
       "${tint_src_dir}/api/common",
+      "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
@@ -239,6 +240,7 @@ if (tint_build_spv_writer) {
       deps += [
         "${tint_src_dir}/lang/spirv/writer",
         "${tint_src_dir}/lang/spirv/writer/common",
+        "${tint_src_dir}/lang/spirv/writer/helpers",
       ]
     }
 

@@ -230,10 +230,12 @@ if(TINT_BUILD_SPV_WRITER)
 # Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer_fuzz fuzz
+  lang/spirv/writer/writer_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
   tint_api_common
+  tint_cmd_fuzz_ir_fuzz
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
@@ -269,6 +271,7 @@ if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
     tint_lang_spirv_writer
     tint_lang_spirv_writer_common
+    tint_lang_spirv_writer_helpers
   )
 endif(TINT_BUILD_SPV_WRITER)
 
