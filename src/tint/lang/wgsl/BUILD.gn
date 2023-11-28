@@ -150,6 +150,7 @@ tint_fuzz_source_set("fuzz") {
   sources = []
   deps = [
     "${tint_src_dir}/api/common",
+    "${tint_src_dir}/cmd/fuzz/ir:fuzz",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/ir",
@@ -157,7 +158,6 @@ tint_fuzz_source_set("fuzz") {
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
-    "${tint_src_dir}/lang/wgsl/helpers",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/reader/lower",
     "${tint_src_dir}/lang/wgsl/resolver",
@@ -182,7 +182,6 @@ tint_fuzz_source_set("fuzz") {
 
   if (tint_build_wgsl_reader) {
     deps += [
-      "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",
       "${tint_src_dir}/lang/wgsl/reader/parser",
       "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     ]
