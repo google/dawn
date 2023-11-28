@@ -49,6 +49,9 @@ class Let final : public Castable<Let, OperandInstruction<1, 1>> {
     /// @copydoc Instruction::Clone()
     Let* Clone(CloneContext& ctx) override;
 
+    /// @param value the new let value
+    void SetValue(ir::Value* value) { SetOperand(kValueOperandOffset, value); }
+
     /// @returns the value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
 

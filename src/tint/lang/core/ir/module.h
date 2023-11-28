@@ -92,6 +92,10 @@ class Module {
     /// @param name the desired name of the value
     void SetName(Value* value, Symbol name);
 
+    /// Removes the name from @p value
+    /// @param value the value to remove the name from
+    void ClearName(Value* value);
+
     /// @return the type manager for the module
     core::type::Manager& Types() { return constant_values.types; }
 

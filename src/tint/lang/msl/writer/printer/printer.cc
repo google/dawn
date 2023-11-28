@@ -387,7 +387,6 @@ class Printer : public tint::TextGenerator {
         Switch(
             v,                                                           //
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
-            // [&](core::ir::FunctionParam* fp) {},                   //
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),                                        //
