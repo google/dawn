@@ -12,17 +12,17 @@ See:
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 {{- $enum := ($I.Sem.Enum "language_feature") -}}
 
-#ifndef SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_
-#define SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_
+#ifndef SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_
+#define SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_
 
-#include "src/tint/utils/traits/traits.h"
-#include "src/tint/utils/containers/unique_vector.h"
+#include <cstdint>
+#include <string>
 
 namespace tint::wgsl {
 
 /// An enumerator of WGSL language features
 /// @see src/tint/lang/wgsl/intrinsics.def for language feature descriptions
-{{ Eval "DeclareEnum" $enum}}
+{{ Eval "DeclareEnum" "Enum" $enum "EmitOStream" false}}
 
 /// All features
 static constexpr LanguageFeature kAllLanguageFeatures[] = {
@@ -31,9 +31,6 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
 {{-   end }}
 };
 
-/// A unique vector of language features
-using LanguageFeatures = UniqueVector<LanguageFeature, 4>;
-
 }  // namespace tint::wgsl
 
-#endif  // SRC_TINT_LANG_WGSL_LANGUAGE_FEATURE_H_
+#endif  // SRC_TINT_LANG_WGSL_FEATURES_LANGUAGE_FEATURE_H_

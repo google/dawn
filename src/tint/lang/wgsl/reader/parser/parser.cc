@@ -474,7 +474,7 @@ Maybe<Void> Parser::requires_directive() {
             return add_error(t.source(), "requires directives don't take parenthesis");
         }
 
-        wgsl::LanguageFeatures features;
+        ast::Requires::LanguageFeatures features;
         while (continue_parsing()) {
             auto& t2 = next();
             if (handle_error(t2)) {

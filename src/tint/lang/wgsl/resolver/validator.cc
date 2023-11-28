@@ -1850,7 +1850,7 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
     if (feature != wgsl::LanguageFeature::kUndefined) {
         if (!allowed_features_.features.count(feature)) {
             AddError("built-in function '" + std::string(builtin->str()) + "' requires the " +
-                         tint::ToString(feature) +
+                         std::string(wgsl::ToString(feature)) +
                          " language feature, which is not allowed in the current environment",
                      call->Declaration()->source);
             return false;

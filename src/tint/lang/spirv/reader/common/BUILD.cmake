@@ -46,6 +46,7 @@ tint_add_target(tint_lang_spirv_reader_common lib
 tint_target_add_dependencies(tint_lang_spirv_reader_common lib
   tint_lang_wgsl
   tint_lang_wgsl_common
+  tint_lang_wgsl_features
   tint_utils_containers
   tint_utils_ice
   tint_utils_macros

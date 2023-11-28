@@ -62,6 +62,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_lang_glsl_writer_raise
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -108,6 +109,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers

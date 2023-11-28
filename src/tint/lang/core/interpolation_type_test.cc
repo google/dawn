@@ -89,7 +89,7 @@ using InterpolationTypePrintTest = testing::TestWithParam<Case>;
 TEST_P(InterpolationTypePrintTest, Print) {
     InterpolationType value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, InterpolationTypePrintTest, testing::ValuesIn(kValidCases));

@@ -1623,7 +1623,7 @@ class Builder {
     /// @param feature the feature to require
     /// @return a `ast::Requires` requiring the given language feature.
     const ast::Requires* Require(wgsl::LanguageFeature feature) {
-        auto* req = create<ast::Requires>(wgsl::LanguageFeatures({feature}));
+        auto* req = create<ast::Requires>(Requires::LanguageFeatures({feature}));
         AST().AddRequires(req);
         return req;
     }
@@ -1633,7 +1633,7 @@ class Builder {
     /// @param feature the feature to require
     /// @return a `ast::Requires` requiring the given language feature.
     const ast::Requires* Require(const Source& source, wgsl::LanguageFeature feature) {
-        auto* req = create<ast::Requires>(source, wgsl::LanguageFeatures({feature}));
+        auto* req = create<ast::Requires>(source, Requires::LanguageFeatures({feature}));
         AST().AddRequires(req);
         return req;
     }

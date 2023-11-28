@@ -84,7 +84,7 @@ using CoreDiagnosticRulePrintTest = testing::TestWithParam<Case>;
 TEST_P(CoreDiagnosticRulePrintTest, Print) {
     CoreDiagnosticRule value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, CoreDiagnosticRulePrintTest, testing::ValuesIn(kValidCases));
@@ -136,7 +136,7 @@ using ChromiumDiagnosticRulePrintTest = testing::TestWithParam<Case>;
 TEST_P(ChromiumDiagnosticRulePrintTest, Print) {
     ChromiumDiagnosticRule value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases,

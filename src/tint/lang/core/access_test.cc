@@ -86,7 +86,7 @@ using AccessPrintTest = testing::TestWithParam<Case>;
 TEST_P(AccessPrintTest, Print) {
     Access value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, AccessPrintTest, testing::ValuesIn(kValidCases));

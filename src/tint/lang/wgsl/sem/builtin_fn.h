@@ -33,7 +33,7 @@
 
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
-#include "src/tint/lang/wgsl/language_feature.h"
+#include "src/tint/lang/wgsl/features/language_feature.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
 #include "src/tint/utils/math/hash.h"

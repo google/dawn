@@ -33,7 +33,8 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/node.h"
-#include "src/tint/lang/wgsl/language_feature.h"
+#include "src/tint/lang/wgsl/features/language_feature.h"
+#include "src/tint/utils/containers/unique_vector.h"
 
 namespace tint::ast {
 
@@ -44,12 +45,15 @@ namespace tint::ast {
 /// ```
 class Requires final : public Castable<Requires, Node> {
   public:
+    /// A unique list of WGSL language features
+    using LanguageFeatures = UniqueVector<wgsl::LanguageFeature, 4>;
+
     /// Create a requires directive
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param feats the language features being required by this directive
-    Requires(GenerationID pid, NodeID nid, const Source& src, wgsl::LanguageFeatures feats);
+    Requires(GenerationID pid, NodeID nid, const Source& src, LanguageFeatures feats);
 
     /// Destructor
     ~Requires() override;
@@ -60,7 +64,7 @@ class Requires final : public Castable<Requires, Node> {
     const Requires* Clone(CloneContext& ctx) const override;
 
     /// The features being required by this directive.
-    const wgsl::LanguageFeatures features;
+    const LanguageFeatures features;
 };
 
 }  // namespace tint::ast

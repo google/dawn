@@ -55,6 +55,7 @@ libtint_source_set("api") {
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
+    "${tint_src_dir}/lang/wgsl/features",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/utils/containers",

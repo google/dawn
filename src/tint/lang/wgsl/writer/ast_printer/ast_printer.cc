@@ -161,7 +161,7 @@ void ASTPrinter::EmitRequires(const ast::Requires* req) {
         if (!first) {
             out << ", ";
         }
-        out << feature;
+        out << wgsl::ToString(feature);
         first = false;
     }
     out << ";";

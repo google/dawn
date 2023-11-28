@@ -38,34 +38,47 @@
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                         define "DeclareEnum"                             -}}
 {{- /* Declares the 'enum class' for the provided sem.Enum argument.      */ -}}
+{{- /* The argument can also be a key-value pair with the following keys: */ -}}
+{{- /*   "Enum"        - the sem.Enum argument                            */ -}}
+{{- /*   "EmitOStream" - (default: true) should operator<< be emitted?    */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{- $enum := Eval "EnumName" $ -}}
-enum class {{$enum}} : uint8_t {
+{{- $enum := $ -}}
+{{- $emit_ostream := true -}}
+{{- if Is $ "Map" -}}
+{{-   $enum = $.Enum -}}
+{{-   $emit_ostream = $.EmitOStream -}}
+{{- end }}
+
+{{- $name := Eval "EnumName" $enum -}}
+enum class {{$name}} : uint8_t {
     kUndefined,
-{{-   range $entry := $.Entries }}
+{{-   range $entry := $enum.Entries }}
     k{{PascalCase $entry.Name}},{{if $entry.IsInternal}}  // Tint-internal enum entry - not parsed{{end}}
 {{-   end }}
 };
 
 /// @param value the enum value
 /// @returns the string for the given enum value
-std::string_view ToString({{$enum}} value);
+std::string_view ToString({{$name}} value);
+
+{{- if $emit_ostream}}
 
 /// @param out the stream to write to
-/// @param value the {{$enum}}
+/// @param value the {{$name}}
 /// @returns @p out so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, {{$enum}} value) {
+auto& operator<<(STREAM& out, {{$name}} value) {
     return out << ToString(value);
 }
+{{- end}}
 
-/// Parse{{$enum}} parses a {{$enum}} from a string.
+/// Parse{{$name}} parses a {{$name}} from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or {{$enum}}::kUndefined if the string could not be parsed.
-{{$enum}} Parse{{$enum}}(std::string_view str);
+/// @returns the parsed enum, or {{$name}}::kUndefined if the string could not be parsed.
+{{$name}} Parse{{$name}}(std::string_view str);
 
-constexpr std::string_view k{{$enum}}Strings[] = {
-{{-   range $entry := $.Entries }}
+constexpr std::string_view k{{$name}}Strings[] = {
+{{-   range $entry := $enum.Entries }}
 {{-     if not $entry.IsInternal}}
     "{{$entry.Name}}",
 {{-     end }}
@@ -163,7 +176,7 @@ using {{$enum}}PrintTest = testing::TestWithParam<Case>;
 TEST_P({{$enum}}PrintTest, Print) {
     {{$enum}} value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, {{$enum}}PrintTest, testing::ValuesIn(kValidCases));

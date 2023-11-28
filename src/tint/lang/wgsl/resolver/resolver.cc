@@ -4017,7 +4017,8 @@ bool Resolver::Requires(const ast::Requires* req) {
     for (auto feature : req->features) {
         if (!allowed_features_.features.count(feature)) {
             StringStream ss;
-            ss << "language feature '" << feature << "' is not allowed in the current environment";
+            ss << "language feature '" << wgsl::ToString(feature)
+               << "' is not allowed in the current environment";
             AddError(ss.str(), req->source);
             return false;
         }

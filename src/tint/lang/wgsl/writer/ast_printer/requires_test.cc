@@ -47,9 +47,9 @@ TEST_F(WgslASTPrinterTest, Emit_Requires) {
 
 // TODO(jrprice): Enable this once we have multiple language features.
 TEST_F(WgslASTPrinterTest, DISABLED_Emit_Requires_Multiple) {
-    auto* req = create<ast::Requires>(
-        wgsl::LanguageFeatures({wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures,
-                                wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures}));
+    auto* req = create<ast::Requires>(ast::Requires::LanguageFeatures(
+        {wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures,
+         wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures}));
     AST().AddRequires(req);
 
     ASTPrinter& gen = Build();

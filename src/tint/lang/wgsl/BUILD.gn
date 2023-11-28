@@ -52,8 +52,6 @@ libtint_source_set("wgsl") {
     "diagnostic_severity.h",
     "extension.cc",
     "extension.h",
-    "language_feature.cc",
-    "language_feature.h",
   ]
   deps = [
     "${tint_src_dir}/utils/containers",
@@ -73,7 +71,6 @@ if (tint_build_unittests) {
       "diagnostic_rule_test.cc",
       "diagnostic_severity_test.cc",
       "extension_test.cc",
-      "language_feature_test.cc",
       "wgsl_test.cc",
     ]
     deps = [
@@ -86,6 +83,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/common",
+      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/helpers:unittests",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader/lower",
@@ -158,6 +156,7 @@ tint_fuzz_source_set("fuzz") {
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
+    "${tint_src_dir}/lang/wgsl/features",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/reader/lower",
     "${tint_src_dir}/lang/wgsl/resolver",

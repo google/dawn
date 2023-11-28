@@ -36,6 +36,7 @@
 
 include(lang/wgsl/ast/BUILD.cmake)
 include(lang/wgsl/common/BUILD.cmake)
+include(lang/wgsl/features/BUILD.cmake)
 include(lang/wgsl/helpers/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
 include(lang/wgsl/intrinsic/BUILD.cmake)
@@ -59,8 +60,6 @@ tint_add_target(tint_lang_wgsl lib
   lang/wgsl/diagnostic_severity.h
   lang/wgsl/extension.cc
   lang/wgsl/extension.h
-  lang/wgsl/language_feature.cc
-  lang/wgsl/language_feature.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl lib
@@ -83,7 +82,6 @@ tint_add_target(tint_lang_wgsl_test test
   lang/wgsl/diagnostic_rule_test.cc
   lang/wgsl/diagnostic_severity_test.cc
   lang/wgsl/extension_test.cc
-  lang/wgsl/language_feature_test.cc
   lang/wgsl/wgsl_test.cc
 )
 
@@ -96,6 +94,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
+  tint_lang_wgsl_features
   tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
@@ -184,6 +183,7 @@ tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
+  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
   tint_lang_wgsl_resolver

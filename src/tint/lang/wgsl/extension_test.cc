@@ -119,7 +119,7 @@ using ExtensionPrintTest = testing::TestWithParam<Case>;
 TEST_P(ExtensionPrintTest, Print) {
     Extension value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, tint::ToString(value));
+    EXPECT_EQ(expect, ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, ExtensionPrintTest, testing::ValuesIn(kValidCases));
