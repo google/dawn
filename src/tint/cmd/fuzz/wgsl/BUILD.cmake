@@ -72,6 +72,12 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_utils_traits
 )
 
+if(TINT_BUILD_SPV_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
+    tint_lang_spirv_writer_fuzz
+  )
+endif(TINT_BUILD_SPV_WRITER)
+
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
     tint_cmd_fuzz_wgsl_fuzz
