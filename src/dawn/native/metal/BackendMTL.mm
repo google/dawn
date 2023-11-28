@@ -897,8 +897,16 @@ class PhysicalDevice : public PhysicalDeviceBase {
             heapInfo[0].properties =
                 wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                 wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
-            heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
+            if (@available(macOS 10.12, iOS 16.0, *)) {
+                heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
+            } else {
+                // Since AdapterPropertiesMemoryHeaps is already gated on the
+                // availability above, we should never reach this case, however
+                // excluding the conditional causes build errors.
+                DAWN_UNREACHABLE();
+            }
         } else {
+#if DAWN_PLATFORM_IS(MACOS)
             auto* heapInfo = new MemoryHeapInfo[2];
             memoryHeapProperties->heapCount = 2;
             memoryHeapProperties->heapInfo = heapInfo;
@@ -916,6 +924,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                      wgpu::HeapProperty::HostCoherent |
                                      wgpu::HeapProperty::HostCached;
             heapInfo[1].size = hostInfo.max_mem;
+#else
+            DAWN_UNREACHABLE();
+#endif
         }
     }
 
