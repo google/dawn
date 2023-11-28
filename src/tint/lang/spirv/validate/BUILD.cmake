@@ -34,22 +34,68 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/spirv/intrinsic/BUILD.cmake)
-include(lang/spirv/ir/BUILD.cmake)
-include(lang/spirv/reader/BUILD.cmake)
-include(lang/spirv/type/BUILD.cmake)
-include(lang/spirv/validate/BUILD.cmake)
-include(lang/spirv/writer/BUILD.cmake)
-
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 ################################################################################
-# Target:    tint_lang_spirv
+# Target:    tint_lang_spirv_validate
 # Kind:      lib
+# Condition: TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER
 ################################################################################
-tint_add_target(tint_lang_spirv lib
-  lang/spirv/builtin_fn.cc
-  lang/spirv/builtin_fn.h
+tint_add_target(tint_lang_spirv_validate lib
+  lang/spirv/validate/validate.cc
+  lang/spirv/validate/validate.h
 )
 
-tint_target_add_dependencies(tint_lang_spirv lib
+tint_target_add_dependencies(tint_lang_spirv_validate lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
   tint_utils_traits
 )
+
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+  tint_target_add_external_dependencies(tint_lang_spirv_validate lib
+    "spirv-tools"
+  )
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+################################################################################
+# Target:    tint_lang_spirv_validate_test
+# Kind:      test
+# Condition: TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER
+################################################################################
+tint_add_target(tint_lang_spirv_validate_test test
+  lang/spirv/validate/validate_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_spirv_validate_test test
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_spirv_validate_test test
+  "gtest"
+)
+
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+  tint_target_add_dependencies(tint_lang_spirv_validate_test test
+    tint_lang_spirv_validate
+  )
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)

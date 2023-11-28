@@ -61,7 +61,7 @@ struct Result {
     std::string output;
 };
 
-/// Msl attempts to compile the shader with the Metal Shader Compiler,
+/// Validate attempts to compile the shader with the Metal Shader Compiler,
 /// verifying that the shader compiles successfully.
 /// @param xcrun_path path to xcrun
 /// @param source the generated MSL source
@@ -70,7 +70,7 @@ struct Result {
 Result Validate(const std::string& xcrun_path, const std::string& source, MslVersion version);
 
 #ifdef __APPLE__
-/// Msl attempts to compile the shader with the runtime Metal Shader Compiler
+/// ValidateUsingMetal attempts to compile the shader with the runtime Metal Shader Compiler
 /// API, verifying that the shader compiles successfully.
 /// @param source the generated MSL source
 /// @param version the version of MSL to validate against
