@@ -86,9 +86,9 @@ var directoryGlobs = []string{
 // is uninteresting.
 // These paths use unix-style slashes and do not contain the '/test/tint' prefix.
 var dirsWithNoPassExpectations = []string{
-	dawnRoot + "/test/tint/benchmark/",
-	dawnRoot + "/test/tint/unittest/",
-	dawnRoot + "/test/tint/vk-gl-cts/",
+	filepath.ToSlash(dawnRoot) + "/test/tint/benchmark/",
+	filepath.ToSlash(dawnRoot) + "/test/tint/unittest/",
+	filepath.ToSlash(dawnRoot) + "/test/tint/vk-gl-cts/",
 }
 
 func main() {
@@ -725,7 +725,7 @@ func (j job) run(cfg runConfig) {
 
 		canEmitPassExpectationFile := true
 		for _, noPass := range dirsWithNoPassExpectations {
-			if strings.HasPrefix(j.file, noPass) {
+			if strings.HasPrefix(filepath.ToSlash(j.file), noPass) {
 				canEmitPassExpectationFile = false
 				break
 			}
