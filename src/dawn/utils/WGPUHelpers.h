@@ -30,6 +30,7 @@
 
 #include <array>
 #include <initializer_list>
+#include <string>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -47,6 +48,7 @@ wgpu::ShaderModule CreateShaderModuleFromASM(
     wgpu::DawnShaderModuleSPIRVOptionsDescriptor* spirv_options = nullptr);
 #endif
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source);
+wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::string& source);
 
 wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                   const void* data,

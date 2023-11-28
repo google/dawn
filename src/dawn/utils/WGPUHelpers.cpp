@@ -103,6 +103,10 @@ wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* so
     return device.CreateShaderModule(&descriptor);
 }
 
+wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::string& source) {
+    return CreateShaderModule(device, source.c_str());
+}
+
 wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                   const void* data,
                                   uint64_t size,

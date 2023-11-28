@@ -843,6 +843,7 @@ extern template class ExpectEq<uint8_t>;
 extern template class ExpectEq<int16_t>;
 extern template class ExpectEq<uint32_t>;
 extern template class ExpectEq<uint64_t>;
+extern template class ExpectEq<int32_t>;
 extern template class ExpectEq<utils::RGBA8>;
 extern template class ExpectEq<float>;
 extern template class ExpectEq<float, uint16_t>;
