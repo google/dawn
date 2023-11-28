@@ -499,6 +499,28 @@ TEST_P(PixelLocalStorageTests, LoadOp) {
         DoTest(spec);
     }
 
+    {
+        PLSSpec spec = {4, {{0, wgpu::TextureFormat::R32Sint}}};
+        spec.attachments[0].loadOp = wgpu::LoadOp::Clear;
+
+        spec.attachments[0].clearValue.r = 42;
+        DoTest(spec);
+
+        spec.attachments[0].clearValue.r = -38;
+        DoTest(spec);
+    }
+
+    {
+        PLSSpec spec = {4, {{0, wgpu::TextureFormat::R32Float}}};
+        spec.attachments[0].loadOp = wgpu::LoadOp::Clear;
+
+        spec.attachments[0].clearValue.r = 4.0;
+        DoTest(spec);
+
+        spec.attachments[0].clearValue.r = -3.0;
+        DoTest(spec);
+    }
+
     // Test LoadOp::Load (the test helper clears the texture to clearValue).
     {
         PLSSpec spec = {4, {{0, wgpu::TextureFormat::R32Uint}}};
@@ -624,7 +646,7 @@ TEST_P(PixelLocalStorageTests, CopyToRenderAttachmentWithStorageAttachments) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(PixelLocalStorageTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(PixelLocalStorageTests, D3D11Backend(), MetalBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

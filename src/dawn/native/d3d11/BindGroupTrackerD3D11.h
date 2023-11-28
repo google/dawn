@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_BINDGROUPTRACKERD3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_BINDGROUPTRACKERD3D11_H_
 
+#include <vector>
+
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
@@ -36,11 +38,16 @@ namespace dawn::native::d3d11 {
 class ScopedSwapStateCommandRecordingContext;
 
 // We need convert WebGPU bind slot to d3d11 bind slot according a map in PipelineLayout, so we
-// cannot inherit BindGroupTrackerGroups.
+// cannot inherit BindGroupTrackerGroups. Currently we arrange all the RTVs and UAVs when calling
+// OMSetRenderTargetsAndUnorderedAccessViews() with below rules:
+// - RTVs from the first register (r0)
+// - UAVs in bind groups
+// - Pixel Local Storage UAVs
 class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/true, uint64_t> {
   public:
     BindGroupTracker(const ScopedSwapStateCommandRecordingContext* commandContext,
-                     bool isRenderPass);
+                     bool isRenderPass,
+                     std::vector<ComPtr<ID3D11UnorderedAccessView>> pixelLocalStorageUAVs = {});
     ~BindGroupTracker();
     MaybeError Apply();
 
@@ -51,6 +58,8 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
     const ScopedSwapStateCommandRecordingContext* mCommandContext;
     const bool mIsRenderPass;
     const wgpu::ShaderStage mVisibleStages;
+    // All the pixel local storage UAVs
+    const std::vector<ComPtr<ID3D11UnorderedAccessView>> mPixelLocalStorageUAVs;
 };
 
 }  // namespace dawn::native::d3d11

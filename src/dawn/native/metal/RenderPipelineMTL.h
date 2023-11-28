@@ -62,7 +62,6 @@ class RenderPipeline final : public RenderPipelineBase {
     uint32_t GetMtlVertexBufferIndex(VertexBufferSlot slot) const;
 
     wgpu::ShaderStage GetStagesRequiringStorageBufferLength() const;
-    static constexpr wgpu::TextureFormat kImplicitPLSSlotFormat = wgpu::TextureFormat::R32Uint;
 
     MaybeError Initialize() override;
 

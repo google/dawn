@@ -62,6 +62,9 @@ UINT D3D11TextureBindFlags(wgpu::TextureUsage usage, const Format& format) {
     if (usage & wgpu::TextureUsage::RenderAttachment) {
         bindFlags |= isDepthOrStencilFormat ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
     }
+    if (usage & wgpu::TextureUsage::StorageAttachment) {
+        bindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+    }
     return bindFlags;
 }
 

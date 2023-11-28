@@ -142,6 +142,8 @@ class RenderPipelineBase : public PipelineBase,
         bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
     };
 
+    static constexpr wgpu::TextureFormat kImplicitPLSSlotFormat = wgpu::TextureFormat::R32Uint;
+
   protected:
     void DestroyImpl() override;
 

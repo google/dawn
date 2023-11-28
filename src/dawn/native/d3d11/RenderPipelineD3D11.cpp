@@ -462,13 +462,57 @@ MaybeError RenderPipeline::InitializeShaders() {
         mUsesInstanceIndex = compiledShader[SingleShaderStage::Vertex].usesInstanceIndex;
     }
 
+    std::optional<tint::PixelLocalOptions> pixelLocalOptions;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
+        pixelLocalOptions = tint::PixelLocalOptions();
+        // HLSL SM5.0 doesn't support groups, so we set group index to 0.
+        pixelLocalOptions->pixel_local_group_index = 0;
+
+        if (GetAttachmentState()->HasPixelLocalStorage()) {
+            const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
+                GetAttachmentState()->GetStorageAttachmentSlots();
+            DAWN_ASSERT(ToBackend(GetLayout())->GetTotalUAVBindingCount() >
+                        storageAttachmentSlots.size());
+            // Currently all the pixel local storage UAVs are allocated at the last several UAV
+            // slots. For example, when there are 4 pixel local storage attachments, we will
+            // allocate register u60 to u63 for them.
+            uint32_t basePixelLocalAttachmentIndex =
+                ToBackend(GetLayout())->GetTotalUAVBindingCount() -
+                static_cast<uint32_t>(storageAttachmentSlots.size());
+            for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
+                pixelLocalOptions->attachments[i] = basePixelLocalAttachmentIndex + i;
+
+                static_assert(
+                    RenderPipelineBase::kImplicitPLSSlotFormat == wgpu::TextureFormat::R32Uint,
+                    "The implicit Pixel Local Storage format should be R32Uint.");
+                switch (storageAttachmentSlots[i]) {
+                        // We use R32Uint as default pixel local storage attachment format
+                    case wgpu::TextureFormat::Undefined:
+                    case wgpu::TextureFormat::R32Uint:
+                        pixelLocalOptions->attachment_formats[i] =
+                            tint::PixelLocalOptions::TexelFormat::kR32Uint;
+                        break;
+                    case wgpu::TextureFormat::R32Sint:
+                        pixelLocalOptions->attachment_formats[i] =
+                            tint::PixelLocalOptions::TexelFormat::kR32Sint;
+                        break;
+                    case wgpu::TextureFormat::R32Float:
+                        pixelLocalOptions->attachment_formats[i] =
+                            tint::PixelLocalOptions::TexelFormat::kR32Float;
+                        break;
+                    default:
+                        DAWN_UNREACHABLE();
+                        break;
+                }
+            }
+        }
+
         const ProgrammableStage& programmableStage = GetStage(SingleShaderStage::Fragment);
         DAWN_TRY_ASSIGN(
             compiledShader[SingleShaderStage::Fragment],
             ToBackend(programmableStage.module)
                 ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
-                          compileFlags, usedInterstageVariables));
+                          compileFlags, usedInterstageVariables, pixelLocalOptions));
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreatePixelShader(
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Data(),
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Size(),

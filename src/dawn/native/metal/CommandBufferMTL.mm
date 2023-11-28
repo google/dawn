@@ -352,7 +352,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     DAWN_UNREACHABLE();
                 }
                 texDesc.pixelFormat =
-                    MetalPixelFormat(device, RenderPipeline::kImplicitPLSSlotFormat);
+                    MetalPixelFormat(device, RenderPipelineBase::kImplicitPLSSlotFormat);
 
                 NSPRef<id<MTLTexture>> implicitAttachment =
                     AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:texDesc]);

@@ -50,9 +50,11 @@ MaybeError PipelineLayout::Initialize(Device* device) {
     // resource slots when being written out. So we assign UAV binding index decreasingly here.
     // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-omsetrendertargetsandunorderedaccessviews
     // TODO(dawn:1818): Support testing on both FL11_0 and FL11_1.
-    uint32_t unorderedAccessViewIndex = device->GetUAVSlotCount();
-    mTotalUAVBindingCount = unorderedAccessViewIndex;
+    mTotalUAVBindingCount = device->GetUAVSlotCount();
 
+    // Reserve last several UAV slots for Pixel Local Storage attachments.
+    uint32_t unorderedAccessViewIndex =
+        mTotalUAVBindingCount - static_cast<uint32_t>(GetStorageAttachmentSlots().size());
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mIndexInfo[group].resize(bgl->GetBindingCount());

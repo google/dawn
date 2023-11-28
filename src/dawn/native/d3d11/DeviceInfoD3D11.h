@@ -44,6 +44,7 @@ struct DeviceInfo {
     uint32_t shaderModel;
     PerStage<std::wstring> shaderProfiles;
     bool supportsSharedResourceCapabilityTier2;
+    bool supportsROV;
     size_t dedicatedVideoMemory;
     size_t sharedSystemMemory;
 };

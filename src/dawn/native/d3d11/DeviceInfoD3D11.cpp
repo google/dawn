@@ -44,6 +44,7 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(IDXGIAdapter3* adapter,
         "D3D11_FEATURE_D3D11_OPTIONS2"));
 
     info.isUMA = options2.UnifiedMemoryArchitecture;
+    info.supportsROV = options2.ROVsSupported;
 
     info.shaderModel = 50;
     // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add
