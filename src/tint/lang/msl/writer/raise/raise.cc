@@ -44,24 +44,24 @@
 namespace tint::msl::writer::raise {
 
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)         \
-    do {                                 \
-        auto result = name(__VA_ARGS__); \
-        if (!result) {                   \
-            return result;               \
-        }                                \
+#define RUN_TRANSFORM(name, ...)                   \
+    do {                                           \
+        auto result = name(module, ##__VA_ARGS__); \
+        if (!result) {                             \
+            return result;                         \
+        }                                          \
     } while (false)
 
     ExternalTextureOptions external_texture_options{};
     RemapperData remapper_data{};
     PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, remapper_data);
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
         binary_polyfills.int_div_mod = true;
         binary_polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
-        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
+        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, binary_polyfills);
     }
 
     {
@@ -72,35 +72,34 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.first_trailing_bit = true;
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, core_polyfills);
     }
     // polyfills.sign_int = true;
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
         conversion_polyfills.ftoi = true;
-        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
+        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, conversion_polyfills);
     }
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
-        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+        RUN_TRANSFORM(core::ir::transform::Robustness, config);
     }
 
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
-                  external_texture_options);
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, external_texture_options);
 
     if (!options.disable_workgroup_init) {
-        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
+        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory);
     }
 
     // PreservePadding must come before DirectVariableAccess.
-    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
+    RUN_TRANSFORM(core::ir::transform::PreservePadding);
 
-    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
+    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper);
 
     return Success;
 }
