@@ -56,7 +56,8 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:f32 = call %my_func
-    %tint_symbol:f32 = bitcast %3
+    %4:f32 = bitcast %3
+    %tint_symbol:f32 = let %4
     ret
   }
 }
@@ -119,7 +120,8 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:i32 = load %i
-    %tint_symbol:f32 = convert %3
+    %4:f32 = convert %3
+    %tint_symbol:f32 = let %4
     ret
   }
 }
@@ -155,7 +157,8 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Construct) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:f32 = load %i
-    %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %3
+    %4:vec3<f32> = construct 2.0f, 3.0f, %3
+    %tint_symbol:vec3<f32> = let %4
     ret
   }
 }

@@ -2168,7 +2168,7 @@ fn len_S() -> u32 {
 }
 
 fn f() {
-  len_S();
+  let n = len_S();
 }
 )";
 
@@ -2200,7 +2200,7 @@ fn load_W() -> f32 {
 }
 
 fn f() {
-  load_W();
+  let v = load_W();
 }
 )";
 
@@ -2369,33 +2369,33 @@ fn fn_w_W_arr_arr_X_X(p_indices : array<u32, 2u>) -> vec4<i32> {
 fn b() {
   let I = 3i;
   let J = 4i;
-  fn_u_U();
-  fn_u_U_str_i();
-  fn_u_U_arr_X(array<u32, 1u>(u32(0i)));
-  fn_u_U_arr_X(array<u32, 1u>(u32(1i)));
-  fn_u_U_arr_X(array<u32, 1u>(u32(I)));
-  fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
-  fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
-  fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
-  fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
-  fn_s_S();
-  fn_s_S_str_i();
-  fn_s_S_arr_X(array<u32, 1u>(u32(0i)));
-  fn_s_S_arr_X(array<u32, 1u>(u32(1i)));
-  fn_s_S_arr_X(array<u32, 1u>(u32(I)));
-  fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
-  fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
-  fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
-  fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
-  fn_w_W();
-  fn_w_W_str_i();
-  fn_w_W_arr_X(array<u32, 1u>(u32(0i)));
-  fn_w_W_arr_X(array<u32, 1u>(u32(1i)));
-  fn_w_W_arr_X(array<u32, 1u>(u32(I)));
-  fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
-  fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
-  fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
-  fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
+  let u = fn_u_U();
+  let u_str = fn_u_U_str_i();
+  let u_arr0 = fn_u_U_arr_X(array<u32, 1u>(u32(0i)));
+  let u_arr1 = fn_u_U_arr_X(array<u32, 1u>(u32(1i)));
+  let u_arrI = fn_u_U_arr_X(array<u32, 1u>(u32(I)));
+  let u_arr1_arr0 = fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
+  let u_arr2_arrI = fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
+  let u_arrI_arr2 = fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
+  let u_arrI_arrJ = fn_u_U_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
+  let s = fn_s_S();
+  let s_str = fn_s_S_str_i();
+  let s_arr0 = fn_s_S_arr_X(array<u32, 1u>(u32(0i)));
+  let s_arr1 = fn_s_S_arr_X(array<u32, 1u>(u32(1i)));
+  let s_arrI = fn_s_S_arr_X(array<u32, 1u>(u32(I)));
+  let s_arr1_arr0 = fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
+  let s_arr2_arrI = fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
+  let s_arrI_arr2 = fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
+  let s_arrI_arrJ = fn_s_S_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
+  let w = fn_w_W();
+  let w_str = fn_w_W_str_i();
+  let w_arr0 = fn_w_W_arr_X(array<u32, 1u>(u32(0i)));
+  let w_arr1 = fn_w_W_arr_X(array<u32, 1u>(u32(1i)));
+  let w_arrI = fn_w_W_arr_X(array<u32, 1u>(u32(I)));
+  let w_arr1_arr0 = fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(1i), u32(0i)));
+  let w_arr2_arrI = fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(2i), u32(I)));
+  let w_arrI_arr2 = fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(I), u32(2i)));
+  let w_arrI_arrJ = fn_w_W_arr_arr_X_X(array<u32, 2u>(u32(I), u32(J)));
 }
 )";
 
@@ -2436,7 +2436,7 @@ fn b_S_X(p_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  b_S_X(array<u32, 1u>(u32(42i)));
+  let v = b_S_X(array<u32, 1u>(u32(42i)));
 }
 )";
 
@@ -2481,7 +2481,7 @@ fn b_S_X(p_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  b_S_X(array<u32, 1u>(u32(42i)));
+  let v = b_S_X(array<u32, 1u>(u32(42i)));
 }
 )";
 
@@ -2525,7 +2525,7 @@ fn b_S_X_U_X(s_indices : array<u32, 1u>, u_indices : array<u32, 1u>) -> i32 {
 }
 
 fn c() {
-  b_S_X_U_X(array<u32, 1u>(u32(42i)), array<u32, 1u>(u32(24i)));
+  let v = b_S_X_U_X(array<u32, 1u>(u32(42i)), array<u32, 1u>(u32(24i)));
 }
 )";
 

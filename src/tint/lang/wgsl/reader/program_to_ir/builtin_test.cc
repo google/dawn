@@ -53,7 +53,8 @@ TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:f32 = load %i
-    %tint_symbol:f32 = asin %3
+    %4:f32 = asin %3
+    %tint_symbol:f32 = let %4
     ret
   }
 }

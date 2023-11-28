@@ -1334,28 +1334,15 @@ class Impl {
                 builder_.ir.SetName(val, v->name->symbol.Name());
             },
             [&](const ast::Let* l) {
-                auto* last_stmt = current_block_->Back();
                 auto init = EmitValueExpression(l->initializer);
                 if (!init) {
                     return;
                 }
 
-                auto* value = init;
-                if (current_block_->Back() == last_stmt) {
-                    // Emitting the let's initializer didn't create an instruction.
-                    // Create an core::ir::Let to give the let an instruction. This gives the let a
-                    // place of declaration and name, which preserves runtime semantics of the
-                    // let, and can be used by consumers of the IR to produce a variable or
-                    // debug info.
-                    auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), value));
-                    value = let->Result(0);
-                } else {
-                    // Record the original name of the let
-                    builder_.ir.SetName(value, l->name->symbol.Name());
-                }
+                auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), init));
 
                 // Store the results of the initialization
-                scopes_.Set(l->name->symbol, value);
+                scopes_.Set(l->name->symbol, let->Result(0));
             },
             [&](const ast::Override*) {
                 add_error(var->source,

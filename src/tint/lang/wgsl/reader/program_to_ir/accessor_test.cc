@@ -58,7 +58,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex) {
   %b1 = block {
     %a:ptr<function, array<u32, 3>, read_write> = var
     %3:ptr<function, u32, read_write> = access %a, 2u
-    %b:u32 = load %3
+    %4:u32 = load %3
+    %b:u32 = let %4
     ret
   }
 }
@@ -83,8 +84,10 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Multiple) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:vec3<u32> = let vec3<u32>(0u)
-    %b:u32 = access %a, 2u
-    %c:u32 = access %a, 1u
+    %3:u32 = access %a, 2u
+    %b:u32 = let %3
+    %5:u32 = access %a, 1u
+    %c:u32 = let %5
     ret
   }
 }
@@ -106,7 +109,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, vec3<u32>, read_write> = var
-    %b:u32 = load_vector_element %a, 2u
+    %3:u32 = load_vector_element %a, 2u
+    %b:u32 = let %3
     ret
   }
 }
@@ -129,7 +133,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex) {
   %b1 = block {
     %a:ptr<function, array<array<f32, 4>, 3>, read_write> = var
     %3:ptr<function, f32, read_write> = access %a, 2u, 3u
-    %b:f32 = load %3
+    %4:f32 = load %3
+    %b:f32 = let %4
     ret
   }
 }
@@ -152,7 +157,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MatrixMultiIndex) {
   %b1 = block {
     %a:ptr<function, mat3x4<f32>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %a, 2u
-    %b:f32 = load_vector_element %3, 3u
+    %4:f32 = load_vector_element %3, 3u
+    %b:f32 = let %4
     ret
   }
 }
@@ -183,7 +189,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
   %b1 = block {
     %a:ptr<function, MyStruct, read_write> = var
     %3:ptr<function, i32, read_write> = access %a, 0u
-    %b:i32 = load %3
+    %4:i32 = load %3
+    %b:i32 = let %4
     ret
   }
 }
@@ -224,7 +231,8 @@ Outer = struct @align(4) {
   %b1 = block {
     %a:ptr<function, Outer, read_write> = var
     %3:ptr<function, f32, read_write> = access %a, 1u, 0u
-    %b:f32 = load %3
+    %4:f32 = load %3
+    %b:f32 = let %4
     ret
   }
 }
@@ -271,7 +279,8 @@ Outer = struct @align(16) {
   %b1 = block {
     %a:ptr<function, array<Outer, 4>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %a, 0u, 1u, 1u, 2u
-    %b:vec4<f32> = load %3
+    %4:vec4<f32> = load %3
+    %b:vec4<f32> = let %4
     ret
   }
 }
@@ -316,7 +325,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, vec2<f32>, read_write> = var
-    %b:f32 = load_vector_element %a, 1u
+    %3:f32 = load_vector_element %a, 1u
+    %b:f32 = let %3
     ret
   }
 }
@@ -339,7 +349,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle) {
   %b1 = block {
     %a:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %a
-    %b:vec4<f32> = swizzle %3, zyxz
+    %4:vec4<f32> = swizzle %3, zyxz
+    %b:vec4<f32> = let %4
     ret
   }
 }
@@ -363,7 +374,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     %a:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %a
     %4:vec3<f32> = swizzle %3, zyx
-    %b:vec2<f32> = swizzle %4, yy
+    %5:vec2<f32> = swizzle %4, yy
+    %b:vec2<f32> = let %5
     ret
   }
 }
@@ -401,7 +413,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
     %4:vec4<f32> = load %3
     %5:vec3<f32> = swizzle %4, zyx
     %6:vec2<f32> = swizzle %5, yx
-    %b:f32 = access %6, 0u
+    %7:f32 = access %6, 0u
+    %b:f32 = let %7
     ret
   }
 }
@@ -422,7 +435,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:vec3<u32> = let vec3<u32>(0u)
-    %b:u32 = access %a, 2u
+    %3:u32 = access %a, 2u
+    %b:u32 = let %3
     ret
   }
 }
@@ -444,7 +458,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiIndex) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:mat3x4<f32> = let mat3x4<f32>(vec4<f32>(0.0f))
-    %b:f32 = access %a, 2u, 3u
+    %3:f32 = access %a, 2u, 3u
+    %b:f32 = let %3
     ret
   }
 }
@@ -474,7 +489,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:MyStruct = let MyStruct(0i)
-    %b:i32 = access %a, 0u
+    %3:i32 = access %a, 0u
+    %b:i32 = let %3
     ret
   }
 }
@@ -514,7 +530,8 @@ Outer = struct @align(4) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:Outer = let Outer(0i, Inner(0.0f))
-    %b:f32 = access %a, 1u, 0u
+    %3:f32 = access %a, 1u, 0u
+    %b:f32 = let %3
     ret
   }
 }
@@ -560,7 +577,8 @@ Outer = struct @align(16) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:array<Outer, 4> = let array<Outer, 4>(Outer(0i, array<Inner, 4>(Inner(0i, 0.0f, vec4<f32>(0.0f)))))
-    %b:vec4<f32> = access %a, 0u, 1u, 1u, 2u
+    %3:vec4<f32> = access %a, 0u, 1u, 1u, 2u
+    %b:vec4<f32> = let %3
     ret
   }
 }
@@ -582,7 +600,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleElement) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:vec2<f32> = let vec2<f32>(0.0f)
-    %b:f32 = access %a, 1u
+    %3:f32 = access %a, 1u
+    %b:f32 = let %3
     ret
   }
 }
@@ -604,7 +623,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:vec3<f32> = let vec3<f32>(0.0f)
-    %b:vec4<f32> = swizzle %a, zyxz
+    %3:vec4<f32> = swizzle %a, zyxz
+    %b:vec4<f32> = let %3
     ret
   }
 }
@@ -627,7 +647,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
   %b1 = block {
     %a:vec3<f32> = let vec3<f32>(0.0f)
     %3:vec3<f32> = swizzle %a, zyx
-    %b:vec2<f32> = swizzle %3, yy
+    %4:vec2<f32> = swizzle %3, yy
+    %b:vec2<f32> = let %4
     ret
   }
 }
@@ -664,7 +685,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) 
     %3:vec4<f32> = access %a, 1u
     %4:vec3<f32> = swizzle %3, zyx
     %5:vec2<f32> = swizzle %4, yx
-    %b:f32 = access %5, 0u
+    %6:f32 = access %5, 0u
+    %b:f32 = let %6
     ret
   }
 }
