@@ -727,3 +727,7 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:in
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=4 [ Failure ]
+
+# Flaky on all platforms
+# KEEP
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
