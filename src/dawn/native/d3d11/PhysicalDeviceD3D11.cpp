@@ -27,6 +27,7 @@
 
 #include "dawn/native/d3d11/PhysicalDeviceD3D11.h"
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -335,8 +336,8 @@ void PhysicalDevice::PopulateMemoryHeapInfo(
         memoryHeapProperties->heapCount = 1;
         memoryHeapProperties->heapInfo = heapInfo;
 
-        heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory != 0 ? mDeviceInfo.dedicatedVideoMemory
-                                                                 : mDeviceInfo.sharedSystemMemory;
+        heapInfo[0].size =
+            std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
         heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                                  wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
     } else {
