@@ -347,18 +347,18 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::Construct*) { MaybeEmitInstruction(inst); },            //
                 [&](core::ir::Access*) { MaybeEmitInstruction(inst); },               //
                 [&](core::ir::CoreBuiltinCall* c) {
-                    if (c->Result()->Type()->Is<core::type::Void>()) {
+                    if (c->Result(0)->Type()->Is<core::type::Void>()) {
                         auto out = Line();
-                        EmitValue(out, c->Result());
+                        EmitValue(out, c->Result(0));
                         out << ";";
                     } else {
                         MaybeEmitInstruction(inst);
                     }
                 },                            //
                 [&](core::ir::UserCall* c) {  //
-                    if (c->Result()->Type()->Is<core::type::Void>()) {
+                    if (c->Result(0)->Type()->Is<core::type::Void>()) {
                         auto out = Line();
-                        EmitValue(out, c->Result());
+                        EmitValue(out, c->Result(0));
                         out << ";";
                     } else {
                         MaybeEmitInstruction(inst);
@@ -371,15 +371,15 @@ class Printer : public tint::TextGenerator {
     // If the instruction is named, we need to emit it. If it is un-named, then we'll use it
     // and inline it later.
     void MaybeEmitInstruction(const core::ir::Instruction* inst) {
-        auto name = ir_.NameOf(inst->Result());
+        auto name = ir_.NameOf(inst->Result(0));
         if (!name.IsValid()) {
             return;
         }
 
         auto out = Line();
-        EmitType(out, inst->Result()->Type());
+        EmitType(out, inst->Result(0)->Type());
         out << " const " << name.Name() << " = ";
-        EmitValue(out, inst->Result());
+        EmitValue(out, inst->Result(0));
         out << ";";
     }
 
@@ -394,7 +394,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Unary* u) { EmitUnary(out, u); },    //
                     [&](const core::ir::Binary* b) { EmitBinary(out, b); },  //
                     [&](const core::ir::Let* l) {
-                        auto name = ir_.NameOf(l->Result());
+                        auto name = ir_.NameOf(l->Result(0));
                         TINT_ASSERT(name.IsValid());
                         out << name.Name();
                     },                                                                         //
@@ -496,7 +496,7 @@ class Printer : public tint::TextGenerator {
     void EmitVar(core::ir::Var* v) {
         auto out = Line();
 
-        auto* ptr = v->Result()->Type()->As<core::type::Pointer>();
+        auto* ptr = v->Result(0)->Type()->As<core::type::Pointer>();
         TINT_ASSERT_OR_RETURN(ptr);
 
         auto space = ptr->AddressSpace();
@@ -535,11 +535,11 @@ class Printer : public tint::TextGenerator {
     /// Emit a let instruction
     /// @param l the let instruction
     void EmitLet(core::ir::Let* l) {
-        auto name = ir_.NameOf(l->Result());
+        auto name = ir_.NameOf(l->Result(0));
         TINT_ASSERT(name.IsValid());
 
         auto out = Line();
-        EmitType(out, l->Result()->Type());
+        EmitType(out, l->Result(0)->Type());
         out << " const " << name.Name() << " = ";
         EmitValue(out, l->Value());
         out << ";";
@@ -742,7 +742,7 @@ class Printer : public tint::TextGenerator {
     /// Emit a bitcast instruction
     void EmitBitcast(StringStream& out, const core::ir::Bitcast* b) {
         out << "as_type<";
-        EmitType(out, b->Result()->Type());
+        EmitType(out, b->Result(0)->Type());
         out << ">(";
         EmitValue(out, b->Val());
         out << ")";
@@ -930,9 +930,9 @@ class Printer : public tint::TextGenerator {
     /// Emit a constructor
     void EmitConstruct(StringStream& out, const core::ir::Construct* c) {
         Switch(
-            c->Result()->Type(),
+            c->Result(0)->Type(),
             [&](const core::type::Array*) {
-                EmitType(out, c->Result()->Type());
+                EmitType(out, c->Result(0)->Type());
                 out << "{";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {
@@ -960,7 +960,7 @@ class Printer : public tint::TextGenerator {
                 out << "}";
             },
             [&](Default) {
-                EmitType(out, c->Result()->Type());
+                EmitType(out, c->Result(0)->Type());
                 out << "(";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {

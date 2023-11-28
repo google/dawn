@@ -46,7 +46,7 @@ UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> 
 UserCall::~UserCall() = default;
 
 UserCall* UserCall::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
+    auto* new_result = ctx.Clone(Result(0));
     auto* target = ctx.Remap(Target());
     auto args = ctx.Remap<UserCall::kDefaultNumOperands>(Args());
     return ctx.ir.instructions.Create<UserCall>(new_result, target, args);

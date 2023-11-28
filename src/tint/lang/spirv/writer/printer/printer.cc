@@ -781,7 +781,7 @@ class Printer {
                 continue;
             }
 
-            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
             if (!(ptr->AddressSpace() == core::AddressSpace::kIn ||
                   ptr->AddressSpace() == core::AddressSpace::kOut)) {
                 continue;
@@ -789,7 +789,7 @@ class Printer {
 
             // Determine if this IO variable is used by the entry point.
             bool used = false;
-            for (const auto& use : var->Result()->Usages()) {
+            for (const auto& use : var->Result(0)->Usages()) {
                 auto* block = use.instruction->Block();
                 while (block->Parent()) {
                     block = block->Parent()->Block();
@@ -1010,7 +1010,7 @@ class Printer {
     /// Emit an access instruction
     /// @param access the access instruction to emit
     void EmitAccess(core::ir::Access* access) {
-        auto* ty = access->Result()->Type();
+        auto* ty = access->Result(0)->Type();
 
         auto id = Value(access);
         OperandList operands = {Type(ty), id, Value(access->Object())};
@@ -1064,7 +1064,7 @@ class Printer {
         auto id = Value(binary);
         auto lhs = Value(binary->LHS());
         auto rhs = Value(binary->RHS());
-        auto* ty = binary->Result()->Type();
+        auto* ty = binary->Result(0)->Type();
         auto* lhs_ty = binary->LHS()->Type();
 
         // Determine the opcode.
@@ -1210,9 +1210,9 @@ class Printer {
     /// Emit a bitcast instruction.
     /// @param bitcast the bitcast instruction to emit
     void EmitBitcast(core::ir::Bitcast* bitcast) {
-        auto* ty = bitcast->Result()->Type();
+        auto* ty = bitcast->Result(0)->Type();
         if (ty == bitcast->Val()->Type()) {
-            values_.Add(bitcast->Result(), Value(bitcast->Val()));
+            values_.Add(bitcast->Result(0), Value(bitcast->Val()));
             return;
         }
         current_function_.push_inst(spv::Op::OpBitcast,
@@ -1345,8 +1345,8 @@ class Printer {
         }
 
         OperandList operands;
-        if (!builtin->Result()->Type()->Is<core::type::Void>()) {
-            operands = {Type(builtin->Result()->Type()), id};
+        if (!builtin->Result(0)->Type()->Is<core::type::Void>()) {
+            operands = {Type(builtin->Result(0)->Type()), id};
         }
         for (auto* arg : builtin->Args()) {
             operands.push_back(Value(arg));
@@ -1357,19 +1357,19 @@ class Printer {
     /// Emit a builtin function call instruction.
     /// @param builtin the builtin call instruction to emit
     void EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* builtin) {
-        auto* result_ty = builtin->Result()->Type();
+        auto* result_ty = builtin->Result(0)->Type();
 
         if (builtin->Func() == core::BuiltinFn::kAbs &&
             result_ty->is_unsigned_integer_scalar_or_vector()) {
             // abs() is a no-op for unsigned integers.
-            values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+            values_.Add(builtin->Result(0), Value(builtin->Args()[0]));
             return;
         }
         if ((builtin->Func() == core::BuiltinFn::kAll ||
              builtin->Func() == core::BuiltinFn::kAny) &&
             builtin->Args()[0]->Type()->Is<core::type::Bool>()) {
             // all() and any() are passthroughs for scalar arguments.
-            values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+            values_.Add(builtin->Result(0), Value(builtin->Args()[0]));
             return;
         }
 
@@ -1714,12 +1714,12 @@ class Printer {
         // If there is just a single argument with the same type as the result, this is an identity
         // constructor and we can just pass through the ID of the argument.
         if (construct->Args().Length() == 1 &&
-            construct->Result()->Type() == construct->Args()[0]->Type()) {
-            values_.Add(construct->Result(), Value(construct->Args()[0]));
+            construct->Result(0)->Type() == construct->Args()[0]->Type()) {
+            values_.Add(construct->Result(0), Value(construct->Args()[0]));
             return;
         }
 
-        OperandList operands = {Type(construct->Result()->Type()), Value(construct)};
+        OperandList operands = {Type(construct->Result(0)->Type()), Value(construct)};
         for (auto* arg : construct->Args()) {
             operands.push_back(Value(arg));
         }
@@ -1729,10 +1729,10 @@ class Printer {
     /// Emit a convert instruction.
     /// @param convert the convert instruction to emit
     void EmitConvert(core::ir::Convert* convert) {
-        auto* res_ty = convert->Result()->Type();
+        auto* res_ty = convert->Result(0)->Type();
         auto* arg_ty = convert->Args()[0]->Type();
 
-        OperandList operands = {Type(convert->Result()->Type()), Value(convert)};
+        OperandList operands = {Type(convert->Result(0)->Type()), Value(convert)};
         for (auto* arg : convert->Args()) {
             operands.push_back(Value(arg));
         }
@@ -1814,21 +1814,21 @@ class Printer {
     /// @param load the load instruction to emit
     void EmitLoad(core::ir::Load* load) {
         current_function_.push_inst(
-            spv::Op::OpLoad, {Type(load->Result()->Type()), Value(load), Value(load->From())});
+            spv::Op::OpLoad, {Type(load->Result(0)->Type()), Value(load), Value(load->From())});
     }
 
     /// Emit a load vector element instruction.
     /// @param load the load vector element instruction to emit
     void EmitLoadVectorElement(core::ir::LoadVectorElement* load) {
         auto* vec_ptr_ty = load->From()->Type()->As<core::type::Pointer>();
-        auto* el_ty = load->Result()->Type();
+        auto* el_ty = load->Result(0)->Type();
         auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
         auto el_ptr_id = module_.NextId();
         current_function_.push_inst(
             spv::Op::OpAccessChain,
             {Type(el_ptr_ty), el_ptr_id, Value(load->From()), Value(load->Index())});
         current_function_.push_inst(spv::Op::OpLoad,
-                                    {Type(load->Result()->Type()), Value(load), el_ptr_id});
+                                    {Type(load->Result(0)->Type()), Value(load), el_ptr_id});
     }
 
     /// Emit a loop instruction.
@@ -1933,7 +1933,7 @@ class Printer {
     void EmitSwizzle(core::ir::Swizzle* swizzle) {
         auto id = Value(swizzle);
         auto obj = Value(swizzle->Object());
-        OperandList operands = {Type(swizzle->Result()->Type()), id, obj, obj};
+        OperandList operands = {Type(swizzle->Result(0)->Type()), id, obj, obj};
         for (auto idx : swizzle->Indices()) {
             operands.push_back(idx);
         }
@@ -1963,7 +1963,7 @@ class Printer {
     /// @param unary the unary instruction to emit
     void EmitUnary(core::ir::Unary* unary) {
         auto id = Value(unary);
-        auto* ty = unary->Result()->Type();
+        auto* ty = unary->Result(0)->Type();
         spv::Op op = spv::Op::Max;
         switch (unary->Op()) {
             case core::ir::UnaryOp::kComplement:
@@ -1984,7 +1984,7 @@ class Printer {
     /// @param call the user call instruction to emit
     void EmitUserCall(core::ir::UserCall* call) {
         auto id = Value(call);
-        OperandList operands = {Type(call->Result()->Type()), id, Value(call->Target())};
+        OperandList operands = {Type(call->Result(0)->Type()), id, Value(call->Target())};
         for (auto* arg : call->Args()) {
             operands.push_back(Value(arg));
         }
@@ -2045,7 +2045,7 @@ class Printer {
     /// @param var the var instruction to emit
     void EmitVar(core::ir::Var* var) {
         auto id = Value(var);
-        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         auto* store_ty = ptr->StoreType();
         auto ty = Type(ptr);
 
@@ -2143,7 +2143,7 @@ class Printer {
     /// @param let the let instruction to emit
     void EmitLet(core::ir::Let* let) {
         auto id = Value(let->Value());
-        values_.Add(let->Result(), id);
+        values_.Add(let->Result(0), id);
     }
 
     /// Emit the OpPhis for the given flow control instruction.

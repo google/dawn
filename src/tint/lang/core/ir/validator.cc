@@ -538,7 +538,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
 }
 
 void Validator::CheckVar(const Var* var) {
-    if (var->Result() && var->Initializer()) {
+    if (var->Result(0) && var->Initializer()) {
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtr()) {
             AddError(var, InstError(var, "initializer has incorrect type"));
         }

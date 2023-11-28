@@ -391,7 +391,7 @@ TEST_F(SpirvWriterTest, Switch_Phi_NestedIf) {
                 b.ExitIf(inner, 20_i);
             });
 
-            b.ExitSwitch(s, inner->Result());
+            b.ExitSwitch(s, inner->Result(0));
         });
 
         auto* case_b = b.Case(s, Vector{b.Constant(2_i)});

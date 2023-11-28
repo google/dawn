@@ -244,7 +244,7 @@ struct State {
         // Change the function return to unconditionally load 'return_val' and return it
         auto* load = b.Load(return_val);
         load->InsertBefore(ret);
-        ret->SetValue(load->Result());
+        ret->SetValue(load->Result(0));
     }
 
     /// Transforms the return instruction that is found in a control instruction.

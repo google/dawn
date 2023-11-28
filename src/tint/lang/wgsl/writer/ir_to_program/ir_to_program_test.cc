@@ -1870,11 +1870,11 @@ TEST_F(IRToProgramTest, FunctionScopeVar_Chained) {
         auto* va = b.Var("a", ty.ptr<function, i32>());
         va->SetInitializer(b.Constant(42_i));
 
-        auto* la = b.Load(va)->Result();
+        auto* la = b.Load(va)->Result(0);
         auto* vb = b.Var("b", ty.ptr<function, i32>());
         vb->SetInitializer(la);
 
-        auto* lb = b.Load(vb)->Result();
+        auto* lb = b.Load(vb)->Result(0);
         auto* vc = b.Var("c", ty.ptr<function, i32>());
         vc->SetInitializer(lb);
 
@@ -2671,7 +2671,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
         auto* loop = b.Loop();
 
         b.Append(loop->Initializer(), [&] {
-            auto* n_0 = b.Call(ty.i32(), fn_n, 0_i)->Result();
+            auto* n_0 = b.Call(ty.i32(), fn_n, 0_i)->Result(0);
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(n_0);
             b.NextIteration(loop);

@@ -94,7 +94,7 @@ void WalkAccessChain(core::ir::Access* access, CALLBACK&& callback) {
 }
 
 std::optional<AccessToReplace> ShouldReplace(core::ir::Access* access) {
-    if (access->Result()->Type()->Is<core::type::Pointer>()) {
+    if (access->Result(0)->Type()->Is<core::type::Pointer>()) {
         // No need to modify accesses into pointer types.
         return {};
     }
@@ -153,7 +153,7 @@ void Run(core::ir::Module& ir) {
                 auto* intermediate_source = builder.Access(to_replace.dynamic_index_source_type,
                                                            source_object, partial_access.indices);
                 intermediate_source->InsertBefore(access);
-                return intermediate_source->Result();
+                return intermediate_source->Result(0);
             });
         }
 
@@ -163,13 +163,13 @@ void Run(core::ir::Module& ir) {
                 core::AddressSpace::kFunction, source_object->Type(), core::Access::kReadWrite));
             decl->SetInitializer(source_object);
             decl->InsertBefore(access);
-            return decl->Result();
+            return decl->Result(0);
         });
 
         // Create a new access instruction using the local variable as the source.
         Vector<core::ir::Value*, 4> indices{
             access->Indices().Offset(to_replace.first_dynamic_index)};
-        const core::type::Type* access_type = access->Result()->Type();
+        const core::type::Type* access_type = access->Result(0)->Type();
         core::ir::Value* vector_index = nullptr;
         if (to_replace.vector_access_type) {
             // The old access indexed the element of a vector.
@@ -195,7 +195,7 @@ void Run(core::ir::Module& ir) {
         }
 
         // Replace all uses of the old access instruction with the loaded result.
-        access->Result()->ReplaceAllUsesWith(load->Result(0));
+        access->Result(0)->ReplaceAllUsesWith(load->Result(0));
         access->ReplaceWith(load);
         access->Destroy();
     }

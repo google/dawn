@@ -43,7 +43,7 @@ Let::Let(InstructionResult* result, ir::Value* value) {
 Let::~Let() = default;
 
 Let* Let::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
+    auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Value());
     auto* new_let = ctx.ir.instructions.Create<Let>(new_result, val);
 

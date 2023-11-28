@@ -105,7 +105,7 @@ struct State {
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
-                        if (builtin->Result()->Type()->Is<core::type::Vector>()) {
+                        if (builtin->Result(0)->Type()->Is<core::type::Vector>()) {
                             worklist.Push(builtin);
                         }
                         break;
@@ -178,10 +178,10 @@ struct State {
             TINT_ASSERT_OR_RETURN(replacement);
 
             // Replace the old builtin result with the new value.
-            if (auto name = ir.NameOf(builtin->Result())) {
+            if (auto name = ir.NameOf(builtin->Result(0))) {
                 ir.SetName(replacement, name);
             }
-            builtin->Result()->ReplaceAllUsesWith(replacement);
+            builtin->Result(0)->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
         }
     }
@@ -213,17 +213,17 @@ struct State {
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
         auto* call = b.Call<spirv::ir::BuiltinCall>(
-            builtin->Result()->Type(), spirv::BuiltinFn::kArrayLength,
+            builtin->Result(0)->Type(), spirv::BuiltinFn::kArrayLength,
             Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
         call->InsertBefore(builtin);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// Handle an atomic*() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
     core::ir::Value* Atomic(core::ir::CoreBuiltinCall* builtin) {
-        auto* result_ty = builtin->Result()->Type();
+        auto* result_ty = builtin->Result(0)->Type();
 
         auto* pointer = builtin->Args()[0];
         auto* memory = [&]() -> core::ir::Value* {
@@ -267,14 +267,14 @@ struct State {
                 call->InsertBefore(builtin);
 
                 // Compare the original value to the comparator to see if an exchange happened.
-                auto* original = call->Result();
+                auto* original = call->Result(0);
                 auto* compare = b.Equal(ty.bool_(), original, cmp);
                 compare->InsertBefore(builtin);
 
                 // Construct the atomicCompareExchange result structure.
                 call = b.Construct(
                     core::type::CreateAtomicCompareExchangeResult(ty, ir.symbols, int_ty),
-                    Vector{original, compare->Result()});
+                    Vector{original, compare->Result(0)});
                 break;
             }
             case core::BuiltinFn::kAtomicExchange:
@@ -321,7 +321,7 @@ struct State {
         }
 
         call->InsertBefore(builtin);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// Handle a `dot()` builtin.
@@ -330,7 +330,7 @@ struct State {
     core::ir::Value* Dot(core::ir::CoreBuiltinCall* builtin) {
         // OpDot only supports floating point operands, so we need to polyfill the integer case.
         // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
-        if (builtin->Result()->Type()->is_integer_scalar()) {
+        if (builtin->Result(0)->Type()->is_integer_scalar()) {
             core::ir::Instruction* sum = nullptr;
 
             auto* v1 = builtin->Args()[0];
@@ -354,10 +354,10 @@ struct State {
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.
         auto args = Vector<core::ir::Value*, 4>(builtin->Args());
-        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result()->Type(),
+        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result(0)->Type(),
                                                     spirv::BuiltinFn::kDot, std::move(args));
         call->InsertBefore(builtin);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// Handle a `dot4{I,U}8Packed()` builtin.
@@ -365,7 +365,7 @@ struct State {
     /// @returns the replacement value
     core::ir::Value* DotPacked4x8(core::ir::CoreBuiltinCall* builtin) {
         // Replace the builtin call with a call to the spirv.{s,u}dot intrinsic.
-        auto* type = builtin->Result()->Type();
+        auto* type = builtin->Result(0)->Type();
         auto is_signed = builtin->Func() == core::BuiltinFn::kDot4I8Packed;
         auto inst = is_signed ? spirv::BuiltinFn::kSdot : spirv::BuiltinFn::kUdot;
 
@@ -374,7 +374,7 @@ struct State {
 
         auto* call = b.Call<spirv::ir::BuiltinCall>(type, inst, std::move(args));
         call->InsertBefore(builtin);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// Handle a `select()` builtin.
@@ -391,21 +391,21 @@ struct State {
         // If the condition is scalar and the objects are vectors, we need to splat the condition
         // into a vector of the same size.
         // TODO(jrprice): We don't need to do this if we're targeting SPIR-V 1.4 or newer.
-        auto* vec = builtin->Result()->Type()->As<core::type::Vector>();
+        auto* vec = builtin->Result(0)->Type()->As<core::type::Vector>();
         if (vec && args[0]->Type()->Is<core::type::Scalar>()) {
             Vector<core::ir::Value*, 4> elements;
             elements.Resize(vec->Width(), args[0]);
 
             auto* construct = b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
             construct->InsertBefore(builtin);
-            args[0] = construct->Result();
+            args[0] = construct->Result(0);
         }
 
         // Replace the builtin call with a call to the spirv.select intrinsic.
-        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result()->Type(),
+        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result(0)->Type(),
                                                     spirv::BuiltinFn::kSelect, std::move(args));
         call->InsertBefore(builtin);
-        return call->Result();
+        return call->Result(0);
     }
 
     /// ImageOperands represents the optional image operands for an image instruction.
@@ -449,7 +449,7 @@ struct State {
             if (requires_float_lod && operands.lod->Type()->is_integer_scalar()) {
                 auto* convert = b.Convert(ty.f32(), operands.lod);
                 convert->InsertBefore(insertion_point);
-                operands.lod = convert->Result();
+                operands.lod = convert->Result(0);
             }
             args.Push(operands.lod);
         }
@@ -486,7 +486,7 @@ struct State {
         if (array_idx->Type() != element_ty) {
             auto* array_idx_converted = b.Convert(element_ty, array_idx);
             array_idx_converted->InsertBefore(insertion_point);
-            array_idx = array_idx_converted->Result();
+            array_idx = array_idx_converted->Result(0);
         }
 
         // Construct a new coordinate vector.
@@ -494,7 +494,7 @@ struct State {
         auto* coord_ty = ty.vec(element_ty, num_coords + 1);
         auto* construct = b.Construct(coord_ty, Vector{coords, array_idx});
         construct->InsertBefore(insertion_point);
-        return construct->Result();
+        return construct->Result(0);
     }
 
     /// Handle a textureSample*() builtin.
@@ -568,7 +568,7 @@ struct State {
         // The first two operands are always the sampled image and then the coordinates, followed by
         // the depth reference if used.
         Vector<core::ir::Value*, 8> function_args;
-        function_args.Push(sampled_image->Result());
+        function_args.Push(sampled_image->Result(0));
         function_args.Push(coords);
         if (depth) {
             function_args.Push(depth);
@@ -584,7 +584,7 @@ struct State {
             b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
-        auto* result = texture_call->Result();
+        auto* result = texture_call->Result(0);
 
         // If this is not a depth comparison but we are sampling a depth texture, extract the first
         // component to get the scalar f32 that SPIR-V expects.
@@ -592,7 +592,7 @@ struct State {
             texture_ty->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
             auto* extract = b.Access(ty.f32(), result, 0_u);
             extract->InsertBefore(builtin);
-            result = extract->Result();
+            result = extract->Result(0);
         }
 
         return result;
@@ -654,7 +654,7 @@ struct State {
         // The first two operands are always the sampled image and then the coordinates, followed by
         // either the depth reference or the component.
         Vector<core::ir::Value*, 8> function_args;
-        function_args.Push(sampled_image->Result());
+        function_args.Push(sampled_image->Result(0));
         function_args.Push(coords);
         if (depth) {
             function_args.Push(depth);
@@ -666,11 +666,11 @@ struct State {
         AppendImageOperands(operands, function_args, builtin, /* requires_float_lod */ true);
 
         // Call the function.
-        auto* result_ty = builtin->Result()->Type();
+        auto* result_ty = builtin->Result(0)->Type();
         auto* texture_call =
             b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         texture_call->InsertBefore(builtin);
-        return texture_call->Result();
+        return texture_call->Result(0);
     }
 
     /// Handle a textureLoad() builtin.
@@ -711,7 +711,7 @@ struct State {
 
         // Call the builtin.
         // The result is always a vec4 in SPIR-V.
-        auto* result_ty = builtin->Result()->Type();
+        auto* result_ty = builtin->Result(0)->Type();
         bool expects_scalar_result = result_ty->Is<core::type::Scalar>();
         if (expects_scalar_result) {
             result_ty = ty.vec4(result_ty);
@@ -721,13 +721,13 @@ struct State {
         auto* texture_call =
             b.Call<spirv::ir::BuiltinCall>(result_ty, kind, std::move(builtin_args));
         texture_call->InsertBefore(builtin);
-        auto* result = texture_call->Result();
+        auto* result = texture_call->Result(0);
 
         // If we are expecting a scalar result, extract the first component.
         if (expects_scalar_result) {
             auto* extract = b.Access(ty.f32(), result, 0_u);
             extract->InsertBefore(builtin);
-            result = extract->Result();
+            result = extract->Result(0);
         }
 
         return result;
@@ -769,7 +769,7 @@ struct State {
         auto* texture_call = b.Call<spirv::ir::BuiltinCall>(
             ty.void_(), spirv::BuiltinFn::kImageWrite, std::move(function_args));
         texture_call->InsertBefore(builtin);
-        return texture_call->Result();
+        return texture_call->Result(0);
     }
 
     /// Handle a textureDimensions() builtin.
@@ -805,7 +805,7 @@ struct State {
         }
 
         // Add an extra component to the result vector for arrayed textures.
-        auto* result_ty = builtin->Result()->Type();
+        auto* result_ty = builtin->Result(0)->Type();
         if (core::type::IsTextureArray(texture_ty->dim())) {
             auto* vec = result_ty->As<core::type::Vector>();
             result_ty = ty.vec(vec->type(), vec->Width() + 1);
@@ -816,13 +816,13 @@ struct State {
             b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
-        auto* result = texture_call->Result();
+        auto* result = texture_call->Result(0);
 
         // Swizzle the first two components from the result for arrayed textures.
         if (core::type::IsTextureArray(texture_ty->dim())) {
-            auto* swizzle = b.Swizzle(builtin->Result()->Type(), result, {0, 1});
+            auto* swizzle = b.Swizzle(builtin->Result(0)->Type(), result, {0, 1});
             swizzle->InsertBefore(builtin);
-            result = swizzle->Result();
+            result = swizzle->Result(0);
         }
 
         return result;
@@ -855,9 +855,9 @@ struct State {
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.
-        auto* extract = b.Access(ty.u32(), texture_call->Result(), 2_u);
+        auto* extract = b.Access(ty.u32(), texture_call->Result(0), 2_u);
         extract->InsertBefore(builtin);
-        return extract->Result();
+        return extract->Result(0);
     }
 
     /// Scalarize the vector form of a `quantizeToF16()` builtin.
@@ -874,13 +874,13 @@ struct State {
         for (uint32_t i = 0; i < vec->Width(); i++) {
             auto* el = b.Access(ty.f32(), arg, u32(i));
             auto* scalar_call = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, el);
-            args.Push(scalar_call->Result());
+            args.Push(scalar_call->Result(0));
             el->InsertBefore(builtin);
             scalar_call->InsertBefore(builtin);
         }
         auto* construct = b.Construct(vec, std::move(args));
         construct->InsertBefore(builtin);
-        return construct->Result();
+        return construct->Result(0);
     }
 };
 

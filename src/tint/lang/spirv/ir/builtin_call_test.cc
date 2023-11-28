@@ -43,8 +43,8 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
     auto* new_b = clone_ctx.Clone(builtin);
 
     EXPECT_NE(builtin, new_b);
-    EXPECT_NE(builtin->Result(), new_b->Result());
-    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
+    EXPECT_NE(builtin->Result(0), new_b->Result(0));
+    EXPECT_EQ(mod.Types().f32(), new_b->Result(0)->Type());
 
     EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
 
@@ -62,8 +62,8 @@ TEST_F(IR_SpirvBuiltinCallTest, CloneNoArgs) {
     auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), BuiltinFn::kArrayLength);
 
     auto* new_b = clone_ctx.Clone(builtin);
-    EXPECT_NE(builtin->Result(), new_b->Result());
-    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
+    EXPECT_NE(builtin->Result(0), new_b->Result(0));
+    EXPECT_EQ(mod.Types().f32(), new_b->Result(0)->Type());
 
     EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
 

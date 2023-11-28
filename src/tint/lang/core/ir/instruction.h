@@ -118,7 +118,7 @@ class Instruction : public Castable<Instruction> {
     /// @param idx the index of the operand
     /// @returns the operand with index @p idx, or `nullptr` if there are no operands or the index
     /// is out of bounds.
-    const Value* Operand(size_t idx = 0) const {
+    const Value* Operand(size_t idx) const {
         auto res = Operands();
         return idx < res.Length() ? res[idx] : nullptr;
     }
@@ -134,7 +134,7 @@ class Instruction : public Castable<Instruction> {
     /// @param idx the index of the result
     /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
     /// out of bounds.
-    const InstructionResult* Result(size_t idx = 0) const {
+    const InstructionResult* Result(size_t idx) const {
         auto res = Results();
         return idx < res.Length() ? res[idx] : nullptr;
     }

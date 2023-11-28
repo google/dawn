@@ -42,7 +42,7 @@ Unary::Unary(InstructionResult* result, UnaryOp op, Value* val) : op_(op) {
 Unary::~Unary() = default;
 
 Unary* Unary::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
+    auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Val());
     return ctx.ir.instructions.Create<Unary>(new_result, op_, val);
 }

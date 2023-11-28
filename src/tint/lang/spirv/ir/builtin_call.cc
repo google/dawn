@@ -48,7 +48,7 @@ BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
 BuiltinCall::~BuiltinCall() = default;
 
 BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
+    auto* new_result = ctx.Clone(Result(0));
     auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
     return ctx.ir.instructions.Create<BuiltinCall>(new_result, func_, new_args);
 }

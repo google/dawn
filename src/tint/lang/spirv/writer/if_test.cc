@@ -343,7 +343,7 @@ TEST_F(SpirvWriterTest, If_Phi_Nested) {
             b.Append(inner->False(), [&] {  //
                 b.ExitIf(inner, 20_i);
             });
-            b.ExitIf(outer, inner->Result());
+            b.ExitIf(outer, inner->Result(0));
         });
         b.Append(outer->False(), [&] {  //
             b.ExitIf(outer, 30_i);

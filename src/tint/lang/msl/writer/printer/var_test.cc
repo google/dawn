@@ -254,9 +254,9 @@ TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* ld = b.Load(v->Result());
+        auto* ld = b.Load(v->Result(0));
         auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
-        a->SetInitializer(ld->Result());
+        a->SetInitializer(ld->Result(0));
         b.Return(func);
     });
 
@@ -281,9 +281,9 @@ TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* ld = b.Load(v->Result());
+        auto* ld = b.Load(v->Result(0));
         auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
-        a->SetInitializer(ld->Result());
+        a->SetInitializer(ld->Result(0));
         b.Return(func);
     });
 

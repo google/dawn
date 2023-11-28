@@ -49,7 +49,7 @@ Load::Load(InstructionResult* result, Value* from) {
 Load::~Load() = default;
 
 Load* Load::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result());
+    auto* new_result = ctx.Clone(Result(0));
     auto* from = ctx.Remap(From());
     return ctx.ir.instructions.Create<Load>(new_result, from);
 }

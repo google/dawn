@@ -46,7 +46,7 @@ Access::Access(InstructionResult* result, Value* object, VectorRef<Value*> indic
 Access::~Access() = default;
 
 Access* Access::Clone(CloneContext& ctx) {
-    auto new_result = ctx.Clone(Result());
+    auto new_result = ctx.Clone(Result(0));
     auto obj = ctx.Remap(Object());
     auto indices = ctx.Remap<Access::kDefaultNumOperands>(Indices());
     return ctx.ir.instructions.Create<Access>(new_result, obj, indices);
