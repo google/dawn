@@ -95,6 +95,14 @@ class span {
     Index mSize;
 };
 
+// ityp::SpanFromUntyped<Index>(myValues, myValueCount) creates a span<Index, Value> from a C-style
+// span that's without a TypedInteger index. It is useful at the interface between code that doesn't
+// use ityp and code that does.
+template <typename Index, typename Value>
+span<Index, Value> SpanFromUntyped(Value* data, size_t size) {
+    return {data, Index{static_cast<UnderlyingType<Index>>(size)}};
+}
+
 }  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_ITYP_SPAN_H_
