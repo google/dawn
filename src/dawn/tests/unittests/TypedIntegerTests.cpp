@@ -167,6 +167,12 @@ TEST_F(TypedIntegerTest, UnderlyingType) {
     static_assert(std::is_same<UnderlyingType<Signed>, int32_t>::value);
 }
 
+TEST_F(TypedIntegerTest, PlusOne) {
+    Signed seven(7);
+    EXPECT_EQ(Signed(8), ityp::PlusOne(seven));
+    EXPECT_EQ(Signed(9), ityp::PlusOne(ityp::PlusOne(seven)));
+}
+
 // Tests for bounds assertions on arithmetic overflow and underflow.
 #if defined(DAWN_ENABLE_ASSERTS)
 

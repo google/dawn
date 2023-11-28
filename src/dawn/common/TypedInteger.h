@@ -263,6 +263,13 @@ constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> Sub(
         static_cast<T>(::dawn::detail::TypedIntegerImpl<Tag, T>::SubImpl(lhs, rhs)));
 }
 
+template <typename Tag, typename T>
+constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> PlusOne(
+    ::dawn::detail::TypedIntegerImpl<Tag, T> value) {
+    T one = 1;
+    return Add(value, ::dawn::detail::TypedIntegerImpl<Tag, T>(one));
+}
+
 template <typename T>
 constexpr std::enable_if_t<std::is_integral<T>::value, T> Add(T lhs, T rhs) {
     return static_cast<T>(lhs + rhs);
@@ -271,6 +278,11 @@ constexpr std::enable_if_t<std::is_integral<T>::value, T> Add(T lhs, T rhs) {
 template <typename T>
 constexpr std::enable_if_t<std::is_integral<T>::value, T> Sub(T lhs, T rhs) {
     return static_cast<T>(lhs - rhs);
+}
+
+template <typename T>
+constexpr std::enable_if_t<std::is_integral<T>::value, T> PlusOne(T value) {
+    return static_cast<T>(value + 1);
 }
 
 }  // namespace dawn::ityp
