@@ -5,4 +5,5 @@ int4 g() {
   return int4(0);
 }
 fragment void tint_symbol() {
+  g();
 }

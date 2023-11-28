@@ -5,4 +5,5 @@ int f(int a, int b, int c) {
   return ((a * b) + c);
 }
 kernel void tint_symbol() {
+  f(1, 2, 3);
 }

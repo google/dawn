@@ -121,7 +121,8 @@ void foo() {
   uint const val = tint_mod_u32(left, right);
 }
 uint tint_mod_u32(uint lhs, uint rhs) {
-  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
+  uint const v = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v) * v));
 }
 )");
 }

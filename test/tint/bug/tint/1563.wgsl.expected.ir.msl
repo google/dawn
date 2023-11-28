@@ -5,6 +5,6 @@ float foo() {
   int const oob = 99;
   float const b = float4(0.0f)[oob];
   float4 v = 0.0f;
-  v[oob] = float4(0.0f)[oob];
-  return float4(0.0f)[oob];
+  v[oob] = b;
+  return b;
 }

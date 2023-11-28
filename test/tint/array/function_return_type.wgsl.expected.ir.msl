@@ -17,10 +17,13 @@ tint_array<float, 4> f1() {
   return tint_array<float, 4>{};
 }
 tint_array<tint_array<float, 4>, 3> f2() {
-  return tint_array<tint_array<float, 4>, 3>{f1(), f1(), f1()};
+  tint_array<float, 4> const v = f1();
+  tint_array<float, 4> const v_1 = f1();
+  return tint_array<tint_array<float, 4>, 3>{v, v_1, f1()};
 }
 tint_array<tint_array<tint_array<float, 4>, 3>, 2> f3() {
-  return tint_array<tint_array<tint_array<float, 4>, 3>, 2>{f2(), f2()};
+  tint_array<tint_array<float, 4>, 3> const v_2 = f2();
+  return tint_array<tint_array<tint_array<float, 4>, 3>, 2>{v_2, f2()};
 }
 kernel void tint_symbol() {
   tint_array<float, 4> const a1 = f1();
