@@ -460,7 +460,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
 
 DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
                         // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
-                        {MetalBackend()},
+                        {MetalBackend(), VulkanBackend()},
                         {
                             WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly,
                             WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous,
@@ -576,7 +576,8 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
 
 DAWN_INSTANTIATE_TEST(WaitAnyTests,
                       // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
-                      MetalBackend());
+                      MetalBackend(),
+                      VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

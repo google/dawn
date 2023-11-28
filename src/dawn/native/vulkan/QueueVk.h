@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_QUEUEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_QUEUEVK_H_
 
-#include <queue>
+#include <deque>
 #include <utility>
 #include <vector>
 
@@ -57,6 +57,8 @@ class Queue final : public QueueBase {
 
     void RecycleCompletedCommands(ExecutionSerial completedSerial);
 
+    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+
   private:
     Queue(Device* device, const QueueDescriptor* descriptor, uint32_t family);
     ~Queue() override;
@@ -80,7 +82,7 @@ class Queue final : public QueueBase {
     // This works only because we have a single queue. Each submit to a queue is associated
     // to a serial and a fence, such that when the fence is "ready" we know the operations
     // have finished.
-    std::queue<std::pair<VkFence, ExecutionSerial>> mFencesInFlight;
+    MutexProtected<std::deque<std::pair<VkFence, ExecutionSerial>>> mFencesInFlight;
     // Fences in the unused list aren't reset yet.
     std::vector<VkFence> mUnusedFences;
 
