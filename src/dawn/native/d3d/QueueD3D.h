@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
-#define SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
+#ifndef SRC_DAWN_NATIVE_D3D_QUEUED3D_H_
+#define SRC_DAWN_NATIVE_D3D_QUEUED3D_H_
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
+#include "dawn/common/windows_with_undefs.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
-#include "dawn/native/d3d/QueueD3D.h"
-#include "dawn/native/d3d12/CommandRecordingContext.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d {
 
-class Device;
-
-class Queue final : public d3d::Queue {
+class Queue : public QueueBase {
   public:
-    static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
+    using QueueBase::QueueBase;
+    ~Queue() override;
 
   private:
-    using d3d::Queue::Queue;
+    virtual void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) = 0;
 
-    void Initialize();
+    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-    bool HasPendingCommands() const override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
-    void ForceEventualFlushOfCommands() override;
-    MaybeError WaitForIdleForDestruction() override;
-
-    void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
-
-    // Dawn API
-    void SetLabelImpl() override;
+    MutexProtected<SerialMap<ExecutionSerial, SystemEventReceiver>> mSystemEventReceivers;
 };
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d
 
-#endif  // SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
+#endif  // SRC_DAWN_NATIVE_D3D_QUEUED3D_H_

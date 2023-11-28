@@ -76,6 +76,7 @@ class Device final : public d3d::Device {
     MaybeError TickImpl() override;
 
     ID3D12Device* GetD3D12Device() const;
+    ID3D12Fence* GetD3D12Fence() const;
     ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
     ID3D12SharingContract* GetSharingContract() const;
 

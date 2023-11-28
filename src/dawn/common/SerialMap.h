@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_SERIALMAP_H_
 
 #include <map>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -59,6 +60,8 @@ class SerialMap : public SerialStorage<SerialMap<Serial, Value>> {
     void Enqueue(Value&& value, Serial serial);
     void Enqueue(const std::vector<Value>& values, Serial serial);
     void Enqueue(std::vector<Value>&& values, Serial serial);
+
+    std::optional<Value> TakeOne(Serial serial);
 };
 
 // SerialMap
@@ -87,6 +90,24 @@ void SerialMap<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial seria
     for (Value& value : values) {
         Enqueue(std::move(value), serial);
     }
+}
+
+template <typename Serial, typename Value>
+std::optional<Value> SerialMap<Serial, Value>::TakeOne(Serial serial) {
+    auto it = this->mStorage.find(serial);
+    if (it == this->mStorage.end()) {
+        return std::nullopt;
+    }
+    auto& vec = it->second;
+    if (vec.empty()) {
+        return std::nullopt;
+    }
+    Value value = std::move(vec.back());
+    vec.pop_back();
+    if (vec.empty()) {
+        this->mStorage.erase(it);
+    }
+    return value;
 }
 
 }  // namespace dawn

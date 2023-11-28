@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
-#define SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
-
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/SerialMap.h"
-#include "dawn/native/SystemEvent.h"
 #include "dawn/native/d3d/QueueD3D.h"
-#include "dawn/native/d3d12/CommandRecordingContext.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
 
-namespace dawn::native::d3d12 {
+#include <utility>
 
-class Device;
+#include "dawn/native/WaitAnySystemEvent.h"
 
-class Queue final : public d3d::Queue {
-  public:
-    static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
+namespace dawn::native::d3d {
 
-  private:
-    using d3d::Queue::Queue;
+Queue::~Queue() = default;
 
-    void Initialize();
+ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
+    ExecutionSerial completedSerial = GetCompletedCommandSerial();
+    if (serial <= completedSerial) {
+        return true;
+    }
 
-    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-    bool HasPendingCommands() const override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
-    void ForceEventualFlushOfCommands() override;
-    MaybeError WaitForIdleForDestruction() override;
+    auto receiver = mSystemEventReceivers->TakeOne(serial);
+    if (!receiver) {
+        // Anytime we may create an event, clear out any completed receivers so the list doesn't
+        // grow forever.
+        mSystemEventReceivers->ClearUpTo(completedSerial);
 
-    void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
+        HANDLE fenceEvent =
+            ::CreateEvent(nullptr, /*bManualReset=*/true, /*bInitialState=*/false, nullptr);
+        DAWN_INVALID_IF(fenceEvent == nullptr, "CreateEvent failed");
+        SetEventOnCompletion(serial, fenceEvent);
 
-    // Dawn API
-    void SetLabelImpl() override;
-};
+        receiver = SystemEventReceiver(SystemHandle::Acquire(fenceEvent));
+    }
 
-}  // namespace dawn::native::d3d12
+    bool ready = false;
+    std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
+        {{*receiver, &ready}}};
+    DAWN_ASSERT(serial <= GetLastSubmittedCommandSerial());
+    bool didComplete = WaitAnySystemEvent(events.begin(), events.end(), timeout);
+    if (!didComplete) {
+        // Return the SystemEventReceiver to the pool of receivers so it can be re-waited in the
+        // future.
+        mSystemEventReceivers->Enqueue(std::move(*receiver), serial);
+    }
+    return didComplete;
+}
 
-#endif  // SRC_DAWN_NATIVE_D3D12_QUEUED3D12_H_
+}  // namespace dawn::native::d3d

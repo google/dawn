@@ -27,6 +27,8 @@
 
 #include "dawn/native/d3d11/QueueD3D11.h"
 
+#include <utility>
+
 #include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/CommandBufferD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
@@ -117,6 +119,12 @@ void Queue::ForceEventualFlushOfCommands() {
 
 MaybeError Queue::WaitForIdleForDestruction() {
     return ToBackend(GetDevice())->WaitForIdleForDestruction();
+}
+
+void Queue::SetEventOnCompletion(ExecutionSerial serial, HANDLE event) {
+    ToBackend(GetDevice())
+        ->GetD3D11Fence()
+        ->SetEventOnCompletion(static_cast<uint64_t>(serial), event);
 }
 
 }  // namespace dawn::native::d3d11

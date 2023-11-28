@@ -37,7 +37,7 @@
 namespace dawn {
 namespace {
 
-std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescriptor* desc) {
+wgpu::Device CreateExtraDevice(wgpu::Instance instance) {
     // IMPORTANT: DawnTest overrides RequestAdapter and RequestDevice and mixes
     // up the two instances. We use these to bypass the override.
     auto* requestAdapter = reinterpret_cast<WGPUProcInstanceRequestAdapter>(
@@ -45,11 +45,9 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
     auto* requestDevice = reinterpret_cast<WGPUProcAdapterRequestDevice>(
         wgpuGetProcAddress(nullptr, "wgpuAdapterRequestDevice"));
 
-    wgpu::Instance instance2 = wgpu::CreateInstance(desc);
-
     wgpu::Adapter adapter2;
     requestAdapter(
-        instance2.Get(), nullptr,
+        instance.Get(), nullptr,
         [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char*, void* userdata) {
             ASSERT_EQ(status, WGPURequestAdapterStatus_Success);
             *reinterpret_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(adapter);
@@ -65,6 +63,15 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
             *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(device);
         },
         &device2);
+    DAWN_ASSERT(device2);
+
+    return device2;
+}
+
+std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescriptor* desc) {
+    wgpu::Instance instance2 = wgpu::CreateInstance(desc);
+
+    wgpu::Device device2 = CreateExtraDevice(instance2);
     DAWN_ASSERT(device2);
 
     return std::pair(std::move(instance2), std::move(device2));
@@ -460,7 +467,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
 
 DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
                         // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
-                        {MetalBackend(), VulkanBackend()},
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend()},
                         {
                             WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly,
                             WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous,
@@ -525,17 +532,34 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
 }
 
 TEST_P(WaitAnyTests, UnsupportedCount) {
+    wgpu::Instance instance2;
+    wgpu::Device device2;
+    wgpu::Queue queue2;
+
+    if (UsesWire()) {
+        // The wire (currently) never supports timedWaitAnyEnable, so we can run this test on the
+        // default instance/device.
+        instance2 = GetInstance();
+        device2 = device;
+        queue2 = queue;
+    } else {
+        wgpu::InstanceDescriptor desc;
+        desc.features.timedWaitAnyEnable = true;
+        std::tie(instance2, device2) = CreateExtraInstance(&desc);
+        queue2 = device2.GetQueue();
+    }
+
     for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
         // We don't support values higher than the default (64), and if you ask for lower than 64
         // you still get 64. DawnTest doesn't request anything (so requests 0) so gets 64.
         for (size_t count : {kTimedWaitAnyMaxCountDefault, kTimedWaitAnyMaxCountDefault + 1}) {
             std::vector<wgpu::FutureWaitInfo> infos;
             for (size_t i = 0; i < count; ++i) {
-                infos.push_back(
-                    {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
-                                                 [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})});
+                infos.push_back({queue2.OnSubmittedWorkDoneF(
+                    {nullptr, wgpu::CallbackMode::WaitAnyOnly,
+                     [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})});
             }
-            wgpu::WaitStatus status = GetInstance().WaitAny(infos.size(), infos.data(), timeout);
+            wgpu::WaitStatus status = instance2.WaitAny(infos.size(), infos.data(), timeout);
             if (timeout == 0) {
                 ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                             status == wgpu::WaitStatus::TimedOut);
@@ -552,16 +576,37 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
 }
 
 TEST_P(WaitAnyTests, UnsupportedMixedSources) {
-    wgpu::Device device2 = CreateDevice();
-    wgpu::Queue queue2 = device2.GetQueue();
+    wgpu::Instance instance2;
+    wgpu::Device device2;
+    wgpu::Queue queue2;
+    wgpu::Device device3;
+    wgpu::Queue queue3;
+
+    if (UsesWire()) {
+        // The wire (currently) never supports timedWaitAnyEnable, so we can run this test on the
+        // default instance/device.
+        instance2 = GetInstance();
+        device2 = device;
+        queue2 = queue;
+        device3 = CreateDevice();
+        queue3 = device3.GetQueue();
+    } else {
+        wgpu::InstanceDescriptor desc;
+        desc.features.timedWaitAnyEnable = true;
+        std::tie(instance2, device2) = CreateExtraInstance(&desc);
+        queue2 = device2.GetQueue();
+        device3 = CreateExtraDevice(instance2);
+        queue3 = device3.GetQueue();
+    }
+
     for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
         std::vector<wgpu::FutureWaitInfo> infos{{
-            {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
-                                         [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})},
             {queue2.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
                                           [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})},
+            {queue3.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
+                                          [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})},
         }};
-        wgpu::WaitStatus status = GetInstance().WaitAny(infos.size(), infos.data(), timeout);
+        wgpu::WaitStatus status = instance2.WaitAny(infos.size(), infos.data(), timeout);
         if (timeout == 0) {
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                         status == wgpu::WaitStatus::TimedOut);
@@ -576,6 +621,8 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
 
 DAWN_INSTANTIATE_TEST(WaitAnyTests,
                       // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
+                      D3D11Backend(),
+                      D3D12Backend(),
                       MetalBackend(),
                       VulkanBackend());
 

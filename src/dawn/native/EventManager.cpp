@@ -75,6 +75,10 @@ class SystemEventAndReadyStateIterator {
         return mWrappedIt - rhs.mWrappedIt;
     }
 
+    SystemEventAndReadyStateIterator operator+(difference_type rhs) {
+        return SystemEventAndReadyStateIterator{mWrappedIt + rhs};
+    }
+
     SystemEventAndReadyStateIterator& operator++() {
         ++mWrappedIt;
         return *this;

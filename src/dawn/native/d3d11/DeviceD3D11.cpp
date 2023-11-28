@@ -158,6 +158,10 @@ ID3D11Device5* Device::GetD3D11Device5() const {
     return mD3d11Device5.Get();
 }
 
+ID3D11Fence* Device::GetD3D11Fence() const {
+    return mFence.Get();
+}
+
 ScopedCommandRecordingContext Device::GetScopedPendingCommandContext(SubmitMode submitMode) {
     // Callers of GetPendingCommandList do so to record commands. Only reserve a command
     // allocator when it is needed so we don't submit empty command lists

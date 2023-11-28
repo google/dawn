@@ -307,6 +307,8 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/PhysicalDeviceD3D.h"
         "d3d/PlatformFunctions.cpp"
         "d3d/PlatformFunctions.h"
+        "d3d/QueueD3D.cpp"
+        "d3d/QueueD3D.h"
         "d3d/ShaderUtils.cpp"
         "d3d/ShaderUtils.h"
         "d3d/SharedFenceD3D.cpp"

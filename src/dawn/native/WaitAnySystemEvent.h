@@ -59,7 +59,7 @@ T ToMillisecondsGeneric(Nanoseconds timeout) {
 }
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-// #define ToMilliseconds ToMillisecondsGeneric<DWORD, INFINITE>
+#define ToMilliseconds ToMillisecondsGeneric<DWORD, INFINITE>
 #elif DAWN_PLATFORM_IS(POSIX)
 #define ToMilliseconds ToMillisecondsGeneric<int, -1>
 #endif
@@ -75,8 +75,22 @@ template <typename It>
         return false;
     }
 #if DAWN_PLATFORM_IS(WINDOWS)
-    // TODO(crbug.com/dawn/2054): Implement this.
-    DAWN_CHECK(false);
+    StackVector<HANDLE, 4 /* avoid heap allocation for small waits */> handles;
+    handles->reserve(count);
+    for (auto it = begin; it != end; ++it) {
+        handles->push_back((*it).first.mPrimitive.Get());
+    }
+    DAWN_ASSERT(handles->size() <= MAXIMUM_WAIT_OBJECTS);
+    DWORD status = WaitForMultipleObjects(handles->size(), handles->data(), /*bWaitAll=*/false,
+                                          ToMilliseconds(timeout));
+    if (status == WAIT_TIMEOUT) {
+        return false;
+    }
+    DAWN_CHECK(WAIT_OBJECT_0 <= status && status < WAIT_OBJECT_0 + count);
+    const size_t completedIndex = status - WAIT_OBJECT_0;
+
+    *(*(begin + completedIndex)).second = true;
+    return true;
 #elif DAWN_PLATFORM_IS(POSIX)
     StackVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
     pollfds->reserve(count);

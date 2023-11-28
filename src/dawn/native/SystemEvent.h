@@ -56,6 +56,7 @@ class SystemEventReceiver final : NonCopyable {
     static SystemEventReceiver CreateAlreadySignaled();
 
     SystemEventReceiver() = default;
+    explicit SystemEventReceiver(SystemHandle primitive);
     SystemEventReceiver(SystemEventReceiver&&) = default;
     SystemEventReceiver& operator=(SystemEventReceiver&&) = default;
 

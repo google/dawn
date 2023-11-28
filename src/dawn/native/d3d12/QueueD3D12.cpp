@@ -27,6 +27,8 @@
 
 #include "dawn/native/d3d12/QueueD3D12.h"
 
+#include <utility>
+
 #include "dawn/common/Math.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
@@ -46,8 +48,6 @@ Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
     queue->Initialize();
     return queue;
 }
-
-Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
 
 void Queue::Initialize() {
     SetLabelImpl();
@@ -95,6 +95,12 @@ void Queue::SetLabelImpl() {
     // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
     // so it doesn't always change the default queue's label.
     SetDebugName(device, device->GetCommandQueue().Get(), "Dawn_Queue", GetLabel());
+}
+
+void Queue::SetEventOnCompletion(ExecutionSerial serial, HANDLE event) {
+    ToBackend(GetDevice())
+        ->GetD3D12Fence()
+        ->SetEventOnCompletion(static_cast<uint64_t>(serial), event);
 }
 
 }  // namespace dawn::native::d3d12

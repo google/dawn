@@ -28,18 +28,21 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_QUEUED3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_QUEUED3D11_H_
 
-#include "dawn/native/Queue.h"
+#include "dawn/common/MutexProtected.h"
+#include "dawn/common/SerialMap.h"
+#include "dawn/native/SystemEvent.h"
+#include "dawn/native/d3d/QueueD3D.h"
 
 namespace dawn::native::d3d11 {
 
 class Device;
 
-class Queue final : public QueueBase {
+class Queue final : public d3d::Queue {
   public:
     static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
 
   private:
-    using QueueBase::QueueBase;
+    using d3d::Queue::Queue;
 
     ~Queue() override = default;
 
@@ -57,6 +60,8 @@ class Queue final : public QueueBase {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
+
+    void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
 };
 
 }  // namespace dawn::native::d3d11

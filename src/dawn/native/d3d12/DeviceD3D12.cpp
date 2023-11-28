@@ -217,6 +217,10 @@ ID3D12Device* Device::GetD3D12Device() const {
     return mD3d12Device.Get();
 }
 
+ID3D12Fence* Device::GetD3D12Fence() const {
+    return mFence.Get();
+}
+
 ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {
     return mCommandQueue;
 }
