@@ -81,6 +81,7 @@ if (tint_build_wgsl_reader) {
     output_name = "tint_wgsl_fuzzer"
     sources = [ "main_fuzz.cc" ]
     deps = [
+      "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
