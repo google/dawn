@@ -40,8 +40,11 @@
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/RenderPipeline.h"
-#include "dawn/native/SpirvValidation.h"
 #include "dawn/native/TintUtils.h"
+
+#ifdef DAWN_ENABLE_SPIRV_VALIDATION
+#include "dawn/native/SpirvValidation.h"
+#endif
 
 #include "tint/tint.h"
 
