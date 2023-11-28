@@ -40,7 +40,7 @@ void SharedTextureMemoryNoFeatureTests::SetUp() {
 }
 
 std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
-    auto features = GetParam().mBackend->RequiredFeatures();
+    auto features = GetParam().mBackend->RequiredFeatures(GetAdapter().Get());
     if (!SupportsFeatures(features)) {
         return {};
     }
@@ -49,6 +49,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::MultiPlanarFormatExtendedUsages,
         wgpu::FeatureName::MultiPlanarRenderTargets,
         wgpu::FeatureName::TransientAttachments,
+        wgpu::FeatureName::Norm16TextureFormats,
     };
     for (auto feature : kOptionalFeatures) {
         if (SupportsFeatures({feature})) {
@@ -62,7 +63,8 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
-    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures(GetParam().mBackend->RequiredFeatures()));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
 }
 
 std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSharedTextureMemories(
@@ -305,6 +307,7 @@ void SharedTextureMemoryTests::CheckFourColors(wgpu::Device& deviceObj,
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kYellow, colorTarget, br, {1, 1});
             break;
         case wgpu::TextureFormat::RG16Float:
+        case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RG8Unorm:
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kGreen, colorTarget, tl, {1, 1});
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, bl, {1, 1});
@@ -312,6 +315,7 @@ void SharedTextureMemoryTests::CheckFourColors(wgpu::Device& deviceObj,
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kYellow, colorTarget, br, {1, 1});
             break;
         case wgpu::TextureFormat::R16Float:
+        case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::R8Unorm:
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kBlack, colorTarget, tl, {1, 1});
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, bl, {1, 1});

@@ -971,6 +971,32 @@ TEST_F(Norm16TextureFormatsValidationTests, RenderAndSample) {
     device.CreateTexture(&descriptor);
 }
 
+// Test that the Norm16 formats are not available even for just TextureBinding when the optional
+// feature is not specified.
+TEST_F(TextureValidationTest, Norm16NotAvailableWithoutExtension) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+
+    descriptor.format = wgpu::TextureFormat::R16Unorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+
+    descriptor.format = wgpu::TextureFormat::RG16Unorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+
+    descriptor.format = wgpu::TextureFormat::RGBA16Unorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+
+    descriptor.format = wgpu::TextureFormat::R16Snorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+
+    descriptor.format = wgpu::TextureFormat::RG16Snorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+
+    descriptor.format = wgpu::TextureFormat::RGBA16Snorm;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+}
+
 static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
                                           const wgpu::TextureDescriptor& desc) {
     EXPECT_EQ(desc.size.width, tex.GetWidth());

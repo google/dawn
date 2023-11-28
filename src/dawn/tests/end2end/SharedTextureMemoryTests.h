@@ -43,10 +43,10 @@ class SharedTextureMemoryTestBackend {
     virtual std::string Name() const = 0;
 
     // The required features for testing this backend.
-    virtual std::vector<wgpu::FeatureName> RequiredFeatures() const = 0;
+    virtual std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const = 0;
 
     // Create one basic shared texture memory. It should support most operations.
-    virtual wgpu::SharedTextureMemory CreateSharedTextureMemory(wgpu::Device& device) = 0;
+    virtual wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) = 0;
 
     // Create a variety of valid SharedTextureMemory for testing, one on each device.
     // Backends should return all interesting types of shared texture memory here, including

@@ -53,15 +53,20 @@ class Backend : public SharedTextureMemoryTestBackend {
 
     std::string Name() const override { return "IOSurface"; }
 
-    std::vector<wgpu::FeatureName> RequiredFeatures() const override {
-        return {wgpu::FeatureName::SharedTextureMemoryIOSurface,
-                wgpu::FeatureName::SharedFenceMTLSharedEvent,
-                wgpu::FeatureName::DawnMultiPlanarFormats,
-                wgpu::FeatureName::MultiPlanarFormatNv12a};
+    std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const override {
+        std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::SharedTextureMemoryIOSurface,
+                                                   wgpu::FeatureName::SharedFenceMTLSharedEvent,
+                                                   wgpu::FeatureName::DawnMultiPlanarFormats};
+
+        if (device.HasFeature(wgpu::FeatureName::MultiPlanarFormatNv12a)) {
+            features.push_back(wgpu::FeatureName::MultiPlanarFormatNv12a);
+        }
+
+        return features;
     }
 
     // Create one basic shared texture memory. It should support most operations.
-    wgpu::SharedTextureMemory CreateSharedTextureMemory(wgpu::Device& device) override {
+    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) override {
         auto dict = AcquireCFRef(CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
                                                            &kCFTypeDictionaryKeyCallBacks,
                                                            &kCFTypeDictionaryValueCallBacks));
@@ -82,30 +87,39 @@ class Backend : public SharedTextureMemoryTestBackend {
     std::vector<std::vector<wgpu::SharedTextureMemory>> CreatePerDeviceSharedTextureMemories(
         const std::vector<wgpu::Device>& devices) override {
         std::vector<std::vector<wgpu::SharedTextureMemory>> memories;
-        for (auto [format, bytesPerElement] : {
-                 std::make_pair(kCVPixelFormatType_64RGBAHalf, 8),
-                 std::make_pair(kCVPixelFormatType_TwoComponent16Half, 4),
-                 std::make_pair(kCVPixelFormatType_OneComponent16Half, 2),
-                 std::make_pair(kCVPixelFormatType_TwoComponent16, 4),
-                 std::make_pair(kCVPixelFormatType_OneComponent16, 2),
-                 std::make_pair(kCVPixelFormatType_ARGB2101010LEPacked, 4),
-                 std::make_pair(kCVPixelFormatType_32RGBA, 4),
-                 std::make_pair(kCVPixelFormatType_32BGRA, 4),
-                 std::make_pair(kCVPixelFormatType_TwoComponent8, 2),
-                 std::make_pair(kCVPixelFormatType_OneComponent8, 1),
-                 // Below bytes per element isn't correct.
-                 std::make_pair(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, 4),
-                 std::make_pair(kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar, 4),
-                 // TODO(dawn:551): Add R10X6BG10X6Biplanar420Unorm support.
-             }) {
+
+        struct IOSurfaceFormat {
+            uint32_t format;
+            uint32_t bytesPerElement;
+            wgpu::FeatureName requiredFeature = wgpu::FeatureName::Undefined;
+        };
+        const std::array<IOSurfaceFormat, 12> kFormats{{
+            {kCVPixelFormatType_64RGBAHalf, 8},
+            {kCVPixelFormatType_TwoComponent16Half, 4},
+            {kCVPixelFormatType_OneComponent16Half, 2},
+            {kCVPixelFormatType_TwoComponent16, 4, wgpu::FeatureName::Norm16TextureFormats},
+            {kCVPixelFormatType_OneComponent16, 2, wgpu::FeatureName::Norm16TextureFormats},
+            {kCVPixelFormatType_ARGB2101010LEPacked, 4},
+            {kCVPixelFormatType_32RGBA, 4},
+            {kCVPixelFormatType_32BGRA, 4},
+            {kCVPixelFormatType_TwoComponent8, 2},
+            {kCVPixelFormatType_OneComponent8, 1},
+            // Below bytes per element isn't correct.
+            {kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, 4},
+            {kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar, 4,
+             wgpu::FeatureName::MultiPlanarFormatNv12a},
+            // TODO(dawn:551): Add R10X6BG10X6Biplanar420Unorm support.
+        }};
+
+        for (auto f : kFormats) {
             for (uint32_t size : {4, 64}) {
                 auto dict = AcquireCFRef(CFDictionaryCreateMutable(
                     kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
                     &kCFTypeDictionaryValueCallBacks));
                 AddIntegerValue(dict.Get(), kIOSurfaceWidth, size);
                 AddIntegerValue(dict.Get(), kIOSurfaceHeight, size);
-                AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, format);
-                AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, bytesPerElement);
+                AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, f.format);
+                AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, f.bytesPerElement);
 
                 wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
                 ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
@@ -113,7 +127,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                 // Internally, the CV enums are defined as their fourcc values. Cast to that and use
                 // it as the label. The fourcc value is a four-character name that can be
                 // interpreted as a 32-bit integer enum ('ABGR', 'r011', etc.)
-                std::string label = std::string(reinterpret_cast<char*>(&format), 4) + " " +
+                std::string label = std::string(reinterpret_cast<char*>(&f.format), 4) + " " +
                                     std::to_string(size) + "x" + std::to_string(size);
                 wgpu::SharedTextureMemoryDescriptor desc;
                 desc.label = label.c_str();
@@ -121,9 +135,17 @@ class Backend : public SharedTextureMemoryTestBackend {
 
                 std::vector<wgpu::SharedTextureMemory> perDeviceMemories;
                 for (auto& device : devices) {
+                    if (f.requiredFeature != wgpu::FeatureName::Undefined &&
+                        !device.HasFeature(f.requiredFeature)) {
+                        continue;
+                    }
+
                     perDeviceMemories.push_back(device.ImportSharedTextureMemory(&desc));
                 }
-                memories.push_back(std::move(perDeviceMemories));
+
+                if (!perDeviceMemories.empty()) {
+                    memories.push_back(std::move(perDeviceMemories));
+                }
             }
         }
 

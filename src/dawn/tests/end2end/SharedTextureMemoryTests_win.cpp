@@ -77,7 +77,7 @@ class Backend : public SharedTextureMemoryTestBackend {
     bool UseSameDevice() const override { return mMode == Mode::D3D11Texture2D; }
     bool SupportsConcurrentRead() const override { return !mUseKeyedMutex; }
 
-    std::vector<wgpu::FeatureName> RequiredFeatures() const override {
+    std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& adapter) const override {
         switch (mMode) {
             case Mode::D3D11Texture2D: {
                 return {wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D,
@@ -121,7 +121,7 @@ class Backend : public SharedTextureMemoryTestBackend {
     }
 
     // Create one basic shared texture memory. It should support most operations.
-    wgpu::SharedTextureMemory CreateSharedTextureMemory(wgpu::Device& device) override {
+    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) override {
         ComPtr<ID3D11Device> d3d11Device = MakeD3D11Device(device);
 
         // Create a DX11 texture with data then wrap it in a shared handle.
@@ -200,18 +200,28 @@ class Backend : public SharedTextureMemoryTestBackend {
             }
         }
 
-        std::vector<DXGI_FORMAT> formats = {
-            DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16_FLOAT,
-            DXGI_FORMAT_R16_FLOAT,          DXGI_FORMAT_R8G8B8A8_UNORM,
-            DXGI_FORMAT_B8G8R8A8_UNORM,     DXGI_FORMAT_R10G10B10A2_UNORM,
-            DXGI_FORMAT_R8G8_UNORM,         DXGI_FORMAT_R8_UNORM,
+        struct D3DFormat {
+            DXGI_FORMAT format;
+            wgpu::FeatureName requiredFeature = wgpu::FeatureName::Undefined;
         };
+        std::vector<D3DFormat> formats = {{
+            {DXGI_FORMAT_R16G16B16A16_FLOAT},
+            {DXGI_FORMAT_R16G16_FLOAT},
+            {DXGI_FORMAT_R16_FLOAT},
+            {DXGI_FORMAT_R8G8B8A8_UNORM},
+            {DXGI_FORMAT_B8G8R8A8_UNORM},
+            {DXGI_FORMAT_R10G10B10A2_UNORM},
+            {DXGI_FORMAT_R16G16_UNORM, wgpu::FeatureName::Norm16TextureFormats},
+            {DXGI_FORMAT_R16_UNORM, wgpu::FeatureName::Norm16TextureFormats},
+            {DXGI_FORMAT_R8G8_UNORM},
+            {DXGI_FORMAT_R8_UNORM},
+        }};
 
         if (supportsNV12Sharing) {
-            formats.push_back(DXGI_FORMAT_NV12);
+            formats.push_back({DXGI_FORMAT_NV12});
         }
 
-        for (DXGI_FORMAT format : formats) {
+        for (auto f : formats) {
             for (uint32_t size : {4, 64}) {
                 // Create a DX11 texture with data then wrap it in a shared handle.
                 D3D11_TEXTURE2D_DESC d3dDescriptor;
@@ -219,7 +229,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                 d3dDescriptor.Height = size;
                 d3dDescriptor.MipLevels = 1;
                 d3dDescriptor.ArraySize = 1;
-                d3dDescriptor.Format = format;
+                d3dDescriptor.Format = f.format;
                 d3dDescriptor.SampleDesc.Count = 1;
                 d3dDescriptor.SampleDesc.Quality = 0;
                 d3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
@@ -233,6 +243,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                 ComPtr<ID3D11Texture2D> d3d11Texture;
                 HRESULT hr = d3d11Device->CreateTexture2D(&d3dDescriptor, nullptr, &d3d11Texture);
 
+                std::vector<wgpu::SharedTextureMemory> perDeviceMemories;
                 switch (mMode) {
                     case Mode::D3D11Texture2D: {
                         native::d3d11::SharedTextureMemoryD3D11Texture2DDescriptor texture2DDesc;
@@ -241,11 +252,14 @@ class Backend : public SharedTextureMemoryTestBackend {
                         wgpu::SharedTextureMemoryDescriptor desc;
                         desc.nextInChain = &texture2DDesc;
 
-                        std::vector<wgpu::SharedTextureMemory> perDeviceMemories;
                         for (auto& device : devices) {
+                            if (f.requiredFeature != wgpu::FeatureName::Undefined &&
+                                !device.HasFeature(f.requiredFeature)) {
+                                continue;
+                            }
+
                             perDeviceMemories.push_back(device.ImportSharedTextureMemory(&desc));
                         }
-                        memories.push_back(std::move(perDeviceMemories));
                         break;
                     }
                     case Mode::DXGISharedHandle: {
@@ -262,21 +276,27 @@ class Backend : public SharedTextureMemoryTestBackend {
                         wgpu::SharedTextureMemoryDXGISharedHandleDescriptor sharedHandleDesc;
                         sharedHandleDesc.handle = sharedHandle;
 
-                        std::string label = LabelName(format, size);
+                        std::string label = LabelName(f.format, size);
 
                         wgpu::SharedTextureMemoryDescriptor desc;
                         desc.nextInChain = &sharedHandleDesc;
                         desc.label = label.c_str();
 
-                        std::vector<wgpu::SharedTextureMemory> perDeviceMemories;
                         for (auto& device : devices) {
+                            if (f.requiredFeature != wgpu::FeatureName::Undefined &&
+                                !device.HasFeature(f.requiredFeature)) {
+                                continue;
+                            }
+
                             perDeviceMemories.push_back(device.ImportSharedTextureMemory(&desc));
                         }
-                        memories.push_back(std::move(perDeviceMemories));
 
                         ::CloseHandle(sharedHandle);
                         break;
                     }
+                }
+                if (!perDeviceMemories.empty()) {
+                    memories.push_back(std::move(perDeviceMemories));
                 }
             }
         }
