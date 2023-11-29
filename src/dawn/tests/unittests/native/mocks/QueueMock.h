@@ -56,6 +56,10 @@ class QueueMock : public QueueBase {
     MOCK_METHOD(bool, HasPendingCommands, (), (const, override));
     MOCK_METHOD(void, ForceEventualFlushOfCommands, (), (override));
     MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
+    MOCK_METHOD(ResultOrError<bool>,
+                WaitForQueueSerial,
+                (ExecutionSerial, Nanoseconds),
+                (override));
 };
 
 }  // namespace dawn::native

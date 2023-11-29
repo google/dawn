@@ -466,8 +466,8 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
 // - Other tests?
 
 DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
-                        // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend()},
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), VulkanBackend(),
+                         OpenGLBackend(), OpenGLESBackend()},
                         {
                             WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly,
                             WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous,
@@ -620,11 +620,12 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
 }
 
 DAWN_INSTANTIATE_TEST(WaitAnyTests,
-                      // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

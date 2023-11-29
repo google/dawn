@@ -76,7 +76,7 @@ class ExecutionQueueBase {
 
     // Wait at most `timeout` synchronously for the ExecutionSerial to pass. Returns true
     // if the serial passed.
-    virtual ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout);
+    virtual ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) = 0;
 
     // In the 'Normal' mode, currently recorded commands in the backend submitted in the next Tick.
     // However in the 'Passive' mode, the submission will be postponed as late as possible, for

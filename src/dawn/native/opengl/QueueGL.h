@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_QUEUEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_QUEUEGL_H_
 
-#include <queue>
+#include <deque>
 #include <utility>
 
 #include "dawn/native/Queue.h"
@@ -58,12 +58,16 @@ class Queue final : public QueueBase {
                                 const TextureDataLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 
+    GLenum ClientWaitSync(GLsync sync, Nanoseconds timeout);
+
+    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
 
-    std::queue<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
+    std::deque<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
 
     // Has pending GL commands which are not associated with a fence.
     bool mHasPendingCommands = false;

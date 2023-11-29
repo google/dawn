@@ -48,7 +48,6 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
         DAWN_TRY(ToBackend(commands[i])->Execute());
     }
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
-
     return {};
 }
 
@@ -92,6 +91,46 @@ void Queue::OnGLUsed() {
     mHasPendingCommands = true;
 }
 
+GLenum Queue::ClientWaitSync(GLsync sync, Nanoseconds timeout) {
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+    // TODO(crbug.com/dawn/633): Remove this workaround after the deadlock issue is fixed.
+    if (GetDevice()->IsToggleEnabled(Toggle::FlushBeforeClientWaitSync)) {
+        gl.Flush();
+    }
+    return gl.ClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, uint64_t(timeout));
+}
+
+ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
+    // Search for the first fence >= serial.
+    GLsync waitSync = nullptr;
+    for (auto it = mFencesInFlight.begin(); it != mFencesInFlight.end(); ++it) {
+        if (it->second >= serial) {
+            waitSync = it->first;
+            break;
+        }
+    }
+    if (waitSync == nullptr) {
+        // Fence sync not found. This serial must have already completed.
+        // Return a success status.
+        DAWN_ASSERT(serial <= GetCompletedCommandSerial());
+        return true;
+    }
+
+    // Wait for the fence sync.
+    GLenum result = ClientWaitSync(waitSync, timeout);
+    switch (result) {
+        case GL_TIMEOUT_EXPIRED:
+            return false;
+        case GL_CONDITION_SATISFIED:
+        case GL_ALREADY_SIGNALED:
+            return true;
+        case GL_WAIT_FAILED:
+            return DAWN_INTERNAL_ERROR("glClientWaitSync failed");
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 void Queue::SubmitFenceSync() {
     if (!mHasPendingCommands) {
         return;
@@ -100,7 +139,7 @@ void Queue::SubmitFenceSync() {
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     GLsync sync = gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     IncrementLastSubmittedCommandSerial();
-    mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
+    mFencesInFlight.emplace_back(sync, GetLastSubmittedCommandSerial());
     mHasPendingCommands = false;
 }
 
@@ -118,12 +157,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 
         // Fence are added in order, so we can stop searching as soon
         // as we see one that's not ready.
-
-        // TODO(crbug.com/dawn/633): Remove this workaround after the deadlock issue is fixed.
-        if (device->IsToggleEnabled(Toggle::FlushBeforeClientWaitSync)) {
-            gl.Flush();
-        }
-        GLenum result = gl.ClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
+        GLenum result = ClientWaitSync(sync, Nanoseconds(0));
         if (result == GL_TIMEOUT_EXPIRED) {
             return fenceSerial;
         }
@@ -132,7 +166,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 
         gl.DeleteSync(sync);
 
-        mFencesInFlight.pop();
+        mFencesInFlight.pop_front();
 
         DAWN_ASSERT(fenceSerial > GetCompletedCommandSerial());
     }
