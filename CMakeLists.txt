@@ -257,8 +257,9 @@ set_if_not_defined(DAWN_VULKAN_DEPS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps" "D
 set_if_not_defined(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" "Directory in which to find Abseil")
 set_if_not_defined(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" "Directory in which to find GLFW")
 set_if_not_defined(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja2" "Directory in which to find Jinja2")
-set_if_not_defined(DAWN_MARKUPSAFE_DIR "${DAWN_THIRD_PARTY_DIR}/markupsafe" "Directory in which to find MarkupSafe")
 set_if_not_defined(DAWN_KHRONOS_DIR "${DAWN_THIRD_PARTY_DIR}/khronos" "Directory in which to find Khronos GL headers")
+set_if_not_defined(DAWN_MARKUPSAFE_DIR "${DAWN_THIRD_PARTY_DIR}/markupsafe" "Directory in which to find MarkupSafe")
+set_if_not_defined(DAWN_PARTITION_ALLOC_DIR "${DAWN_THIRD_PARTY_DIR}/partition_alloc" "Directory in which to find PartitionAlloc")
 set_if_not_defined(DAWN_SWIFTSHADER_DIR "${DAWN_THIRD_PARTY_DIR}/swiftshader" "Directory in which to find swiftshader")
 set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directory in which to find protobuf")
 
@@ -451,6 +452,7 @@ target_include_directories(dawn_internal_config INTERFACE
     "${DAWN_BUILD_GEN_DIR}/src"
 )
 target_link_libraries(dawn_internal_config INTERFACE dawn_public_config)
+target_link_libraries(dawn_internal_config INTERFACE partition_alloc)
 
 # Compile definitions for the internal config
 if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)

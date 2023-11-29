@@ -42,8 +42,8 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
-
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -63,7 +63,7 @@ struct StageAndDescriptor {
                        ConstantEntry const* constants);
 
     SingleShaderStage shaderStage;
-    ShaderModuleBase* module;
+    raw_ptr<ShaderModuleBase> module;
     std::string entryPoint;
     size_t constantCount = 0u;
     ConstantEntry const* constants = nullptr;

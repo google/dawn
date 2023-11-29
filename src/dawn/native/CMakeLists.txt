@@ -247,6 +247,7 @@ target_sources(dawn_native
 )
 target_link_libraries(dawn_native
     PUBLIC dawncpp_headers
+           partition_alloc
     PRIVATE dawn_common
             dawn_platform
             dawn_internal_config

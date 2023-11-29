@@ -104,6 +104,130 @@ if (NOT TARGET libabsl)
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
+if (NOT TARGET partition_alloc)
+    message(STATUS "Dawn: using partition_alloc at ${DAWN_PARTITION_ALLOC_DIR}")
+
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(HAS_64_BIT_POINTERS 1)
+    else()
+      set(HAS_64_BIT_POINTERS 0)
+    endif()
+
+    # CMake counterpart of the GN action: "buildflag_header(...)"
+    # See //build/buildflag_header.gni
+    #
+    # CMake usage:
+    #   BuildFlagHeader(
+    #     OUTPUT <output_filename>
+    #     FLAGS
+    #       <key1>=<value1>
+    #       <key2>=<value2>
+    #   )
+    function(BuildFlagHeader)
+      cmake_parse_arguments(ARGUMENT "" "OUTPUT" "FLAGS" "${ARGN}")
+
+      # Create directory in the generated folder if doesn't exist yet.
+      get_filename_component(GEN_DIR
+        "${DAWN_BUILD_GEN_DIR}/include_partition_alloc/${ARGUMENT_OUTPUT}.h"
+        DIRECTORY)
+      file(MAKE_DIRECTORY "${GEN_DIR}")
+
+      # Create the .definitions file used as input for
+      # `write_buildflag_header.py"
+      string(REPLACE ";" "\n" definitions "--flags;${ARGUMENT_FLAGS}")
+      file(WRITE
+          "${DAWN_BUILD_GEN_DIR}/include/partition_alloc/${ARGUMENT_OUTPUT}.definitions"
+          "${definitions}"
+      )
+
+      # Generate the build flag header.
+      execute_process(
+        COMMAND
+          ${PYTHON_EXECUTABLE}
+          "${Dawn_SOURCE_DIR}/build/write_buildflag_header.py"
+          "--definition" "${DAWN_BUILD_GEN_DIR}/include/partition_alloc/${ARGUMENT_OUTPUT}.definitions"
+          "--rulename" "${ARGUMENT_OUTPUT}"
+          "--gen-dir" "${DAWN_BUILD_GEN_DIR}"
+          "--output" "${DAWN_BUILD_GEN_DIR}/include/partition_alloc/${ARGUMENT_OUTPUT}.h"
+      )
+    endfunction()
+
+    BuildFlagHeader(
+      OUTPUT "raw_ptr_buildflags"
+      FLAGS
+        RAW_PTR_ZERO_ON_CONSTRUCT=1
+        RAW_PTR_ZERO_ON_MOVE=1
+        RAW_PTR_ZERO_ON_DESTRUCT=0
+    )
+
+    BuildFlagHeader(
+      OUTPUT "partition_alloc_buildflags"
+      FLAGS
+        BACKUP_REF_PTR_POISON_OOB_PTR=0
+        ENABLE_BACKUP_REF_PTR_FEATURE_FLAG=0
+        ENABLE_BACKUP_REF_PTR_SLOW_CHECKS=0
+        ENABLE_BACKUP_REF_PTR_SUPPORT=0
+        ENABLE_DANGLING_RAW_PTR_CHECKS=0
+        ENABLE_DANGLING_RAW_PTR_FEATURE_FLAG=0
+        ENABLE_DANGLING_RAW_PTR_PERF_EXPERIMENT=0
+        ENABLE_GWP_ASAN_SUPPORT=0
+        ENABLE_PKEYS=0
+        ENABLE_POINTER_ARITHMETIC_TRAIT_CHECK=0
+        ENABLE_POINTER_COMPRESSION=0
+        ENABLE_POINTER_SUBTRACTION_CHECK=0
+        ENABLE_SHADOW_METADATA_FOR_64_BITS_POINTERS=0
+        ENABLE_THREAD_ISOLATION=0
+        FORCE_ENABLE_RAW_PTR_EXCLUSION=0
+        FORCIBLY_ENABLE_BACKUP_REF_PTR_IN_ALL_PROCESSES=0
+        GLUE_CORE_POOLS=0
+        HAS_64_BIT_POINTERS=${HAS_64_BIT_POINTERS}
+        PCSCAN_STACK_SUPPORTED=0
+        PUT_REF_COUNT_IN_PREVIOUS_SLOT=0
+        RECORD_ALLOC_INFO=0
+        USE_ALLOCATOR_SHIM=0
+        USE_ASAN_BACKUP_REF_PTR=0
+        USE_ASAN_UNOWNED_PTR=0
+        USE_FREELIST_POOL_OFFSETS=0
+        USE_FREESLOT_BITMAP=0
+        USE_HOOKABLE_RAW_PTR=0
+        USE_PARTITION_ALLOC=0
+        USE_PARTITION_ALLOC_AS_MALLOC=0
+        USE_STARSCAN=0
+    )
+
+    BuildFlagHeader(
+      OUTPUT "partition_alloc_base/debug/debugging_buildflags"
+      FLAGS
+        PA_DCHECK_IS_ON=0
+        PA_EXPENSIVE_DCHECKS_ARE_ON=0
+        PA_DCHECK_IS_CONFIGURABLE=0
+        PA_CAN_UNWIND_WITH_FRAME_POINTERS=0
+    )
+
+    BuildFlagHeader(
+      OUTPUT "chromecast_buildflags"
+      FLAGS
+        PA_IS_CAST_ANDROID=0
+        PA_IS_CASTOS=0
+    )
+
+    # This corresponds exactly to the "partition_alloc:raw_ptr" GN target with:
+    # - enable_backup_ref_ptr_support=false
+    # - use_asan_unowned_ptr=false
+    # - use_hookable_raw_ptr=false
+    # - use_partition_alloc=false
+    #
+    # This is a header only library. You can use the files:
+    # - partition_alloc/pointers/raw_ptr.h
+    # - partition_alloc/pointers/raw_ptr_cast.h"
+    # - partition_alloc/pointers/raw_ptr_exclusion.h"
+    # - partition_alloc/pointers/raw_ref.h"
+    add_library(partition_alloc INTERFACE)
+    target_include_directories(partition_alloc
+      INTERFACE "${DAWN_PARTITION_ALLOC_DIR}/src"
+    )
+endif()
+
 if (NOT TARGET Vulkan-Headers)
     message(STATUS "Dawn: using Vulkan-Headers at ${DAWN_VULKAN_HEADERS_DIR}")
     add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers")
