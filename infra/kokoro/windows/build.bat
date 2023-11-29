@@ -73,13 +73,6 @@ if exist %TEMP_DIR% (
 )
 mkdir %TEMP_DIR% || goto :error
 
-call :status "Fetching and installing DXC"
-@echo on
-set DXC_RELEASE="https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2207/dxc_2022_07_18.zip"
-curl -k -L %DXC_RELEASE% --output "%TEMP_DIR%\dxc_release.zip" || goto :error
-powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\dxc_release.zip' -DestinationPath '%TEMP_DIR%\dxc'" || goto :error
-set DXC_PATH=%TEMP_DIR%\dxc\bin\x64
-
 call :status "Fetching and installing Windows SDK for d3dcompiler DLL"
 @echo on
 set WINSDK_DLL_INSTALLER=https://go.microsoft.com/fwlink/?linkid=2164145
@@ -139,7 +132,8 @@ set COMMON_CMAKE_FLAGS=             ^
     -DTINT_BUILD_MSL_WRITER=1       ^
     -DTINT_BUILD_SPV_WRITER=1       ^
     -DTINT_BUILD_WGSL_WRITER=1      ^
-    -DTINT_RANDOMIZE_HASHES=1
+    -DTINT_RANDOMIZE_HASHES=1       ^
+    -DDAWN_USE_BUILT_DXC=1
 
 @echo off
 
@@ -168,7 +162,7 @@ call :status "Testing end-to-end tests"
 cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC, FXC and Metal validation
 set OLD_PATH=%PATH%
-set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%DXC_PATH%;%D3DCOMPILER_PATH%;%PATH%
+set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%D3DCOMPILER_PATH%;%PATH%
 if "%BUILD_TYPE%" == "Debug" (
     rem TODO(crbug.com/2034): Add back glsl once we fix the ~7x slowdown in Windows Debug builds
     set TEST_ALL_FORMATS=wgsl,spvasm,msl,hlsl
