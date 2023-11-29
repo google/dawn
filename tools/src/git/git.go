@@ -293,6 +293,23 @@ func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
 	return ParseHash(out)
 }
 
+// Optional settings for Repository.Clean
+type CleanOptions struct {
+	// Timeout for the operation
+	Timeout time.Duration
+}
+
+// Clean deletes all the untracked files in the repo
+func (r Repository) Clean(opt *CleanOptions) error {
+	if opt == nil {
+		opt = &CleanOptions{}
+	}
+	if _, err := r.run(nil, opt.Timeout, "clean", "-fd"); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Optional settings for Repository.Checkout
 type CheckoutOptions struct {
 	// Timeout for the operation

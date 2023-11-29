@@ -409,20 +409,18 @@ func (e env) changesToBenchmark() ([]HashAndDesc, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to obtain dawn log:\n  %w", err)
 	}
+	log.Println(len(allChanges), "changes between", e.cfg.RootChange.String(), "and", latest.String())
 	changesWithBenchmarks, err := e.changesWithBenchmarks()
 	if err != nil {
 		return nil, fmt.Errorf("failed to gather changes with existing benchmarks:\n  %w", err)
 	}
+	log.Println(len(changesWithBenchmarks), "changes with existing benchmarks")
+
 	changesToBenchmark := make([]HashAndDesc, 0, len(allChanges))
 	for _, c := range allChanges {
 		if _, exists := changesWithBenchmarks[c.Hash]; !exists {
 			changesToBenchmark = append(changesToBenchmark, HashAndDesc{c.Hash, c.Subject})
 		}
-	}
-	// Reverse the order of changesToBenchmark, so that the oldest comes first.
-	for i := len(changesToBenchmark)/2 - 1; i >= 0; i-- {
-		j := len(changesToBenchmark) - 1 - i
-		changesToBenchmark[i], changesToBenchmark[j] = changesToBenchmark[j], changesToBenchmark[i]
 	}
 
 	return changesToBenchmark, nil
@@ -1136,6 +1134,9 @@ func fetchAndCheckoutLatest(repo *git.Repository, cfg GitConfig) error {
 // Note: call fetch() to ensure that this is the latest change on the
 // branch.
 func checkout(hash git.Hash, repo *git.Repository) error {
+	if err := repo.Clean(nil); err != nil {
+		return fmt.Errorf("failed to clean repo '%v':\n  %w", hash, err)
+	}
 	if err := repo.Checkout(hash.String(), nil); err != nil {
 		return fmt.Errorf("failed to checkout '%v':\n  %w", hash, err)
 	}
