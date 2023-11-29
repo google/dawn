@@ -34,27 +34,54 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# Target:    tint_lang_msl_writer_raise
+# Target:    tint_lang_msl_ir
 # Kind:      lib
-# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target(tint_lang_msl_writer_raise lib
-  lang/msl/writer/raise/builtin_polyfill.cc
-  lang/msl/writer/raise/builtin_polyfill.h
-  lang/msl/writer/raise/raise.cc
-  lang/msl/writer/raise/raise.h
+tint_add_target(tint_lang_msl_ir lib
+  lang/msl/ir/builtin_call.cc
+  lang/msl/ir/builtin_call.h
 )
 
-tint_target_add_dependencies(tint_lang_msl_writer_raise lib
+tint_target_add_dependencies(tint_lang_msl_ir lib
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_transform
+  tint_lang_core_type
+  tint_lang_msl
+  tint_lang_msl_intrinsic
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+################################################################################
+# Target:    tint_lang_msl_ir_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_lang_msl_ir_test test
+  lang/msl/ir/builtin_call_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_msl_ir_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_ir
+  tint_lang_core_ir_test
   tint_lang_core_type
   tint_lang_msl
   tint_lang_msl_intrinsic
@@ -74,54 +101,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_raise lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer_raise lib
-    tint_lang_msl_writer_common
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-endif(TINT_BUILD_MSL_WRITER)
-if(TINT_BUILD_MSL_WRITER)
-################################################################################
-# Target:    tint_lang_msl_writer_raise_test
-# Kind:      test
-# Condition: TINT_BUILD_MSL_WRITER
-################################################################################
-tint_add_target(tint_lang_msl_writer_raise_test test
-  lang/msl/writer/raise/builtin_polyfill_test.cc
-)
-
-tint_target_add_dependencies(tint_lang_msl_writer_raise_test test
-  tint_api_common
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_intrinsic
-  tint_lang_core_ir
-  tint_lang_core_ir_transform_test
-  tint_lang_core_type
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_id
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-  tint_utils_traits
-)
-
-tint_target_add_external_dependencies(tint_lang_msl_writer_raise_test test
+tint_target_add_external_dependencies(tint_lang_msl_ir_test test
   "gtest"
 )
-
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer_raise_test test
-    tint_lang_msl_writer_raise
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-endif(TINT_BUILD_MSL_WRITER)

@@ -37,3 +37,12 @@
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("msl") {
+  sources = [
+    "barrier_type.h",
+    "builtin_fn.cc",
+    "builtin_fn.h",
+  ]
+  deps = [ "${tint_src_dir}/utils/traits" ]
+}

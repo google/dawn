@@ -83,6 +83,8 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/msl/barrier_type.h"
+#include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -372,6 +374,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
                     [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },                  //
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },                    //
+                    [&](const msl::ir::BuiltinCall* c) { EmitMslBuiltinCall(out, c); },        //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
                     [&](const core::ir::LoadVectorElement* e) {
@@ -750,6 +753,37 @@ class Printer : public tint::TextGenerator {
             auto out = Line();
             EmitValue(out, c->Result(0));
             out << ";";
+        }
+    }
+
+    void EmitMslBuiltinCall(StringStream& out, const msl::ir::BuiltinCall* c) {
+        switch (c->Func()) {
+            case msl::BuiltinFn::kThreadgroupBarrier: {
+                auto flags = c->Args()[0]->As<core::ir::Constant>()->Value()->ValueAs<uint8_t>();
+                out << "threadgroup_barrier(";
+                bool emitted_flag = false;
+
+                auto emit = [&](BarrierType type, const std::string& name) {
+                    if ((flags & type) != type) {
+                        return;
+                    }
+
+                    if (emitted_flag) {
+                        out << " | ";
+                    }
+                    emitted_flag = true;
+                    out << "mem_flags::mem_" << name;
+                };
+                emit(BarrierType::kDevice, "device");
+                emit(BarrierType::kThreadGroup, "threadgroup");
+                emit(BarrierType::kTexture, "texture");
+
+                out << ")";
+                return;
+            }
+            default:
+                TINT_ICE() << "undefined MSL ir function";
+                return;
         }
     }
 
