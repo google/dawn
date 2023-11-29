@@ -98,6 +98,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool quantize_to_vec_f16 = false;
         /// Should `workgroupUniformLoad()` be polyfilled?
         bool workgroup_uniform_load = false;
+        /// Should `dot4I8Packed()` and `dot4U8Packed()` be polyfilled?
+        bool dot_4x8_packed = false;
     };
 
     /// Config is consumed by the BuiltinPolyfill transform.

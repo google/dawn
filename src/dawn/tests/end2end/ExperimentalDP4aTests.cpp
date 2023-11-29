@@ -86,8 +86,8 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
 
         @compute @workgroup_size(1)
         fn main() {
-            var a = 0xFFFFFFFFu;
-            var b = 0xFFFFFFFEu;
+            var a = 0xFFFEFDFCu;
+            var b = 0xFBFAF9F8u;
             var c = 0x01020304u;
             buf.data1 = dot4I8Packed(a, b);
             buf.data2 = dot4U8Packed(a, b);
@@ -137,13 +137,14 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    uint32_t expected[] = {5, 259845, static_cast<uint32_t>(-10), 2550};
+    uint32_t expected[] = {70, 252998, static_cast<uint32_t>(-30), 2530};
     EXPECT_BUFFER_U32_RANGE_EQ(expected, bufferOut, 0, 4);
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
                         {
+                            D3D11Backend(),
                             D3D12Backend(),
                             D3D12Backend({}, {"use_dxc"}),
                             MetalBackend(),

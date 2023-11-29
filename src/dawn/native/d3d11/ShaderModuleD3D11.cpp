@@ -209,6 +209,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     // TODO(dawn:1705): do we need to support it?
     req.hlsl.tintOptions.polyfill_reflect_vec2_f32 = false;
+    req.hlsl.tintOptions.polyfill_dot_4x8_packed = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
     MaybeError compileError = [&]() -> MaybeError {

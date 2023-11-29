@@ -71,6 +71,9 @@ struct Options {
     /// Set to `true` to generate polyfill for `reflect` builtin for vec2<f32>
     bool polyfill_reflect_vec2_f32 = false;
 
+    /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
+    bool polyfill_dot_4x8_packed = false;
+
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
@@ -102,6 +105,7 @@ struct Options {
                  disable_workgroup_init,
                  truncate_interstage_variables,
                  polyfill_reflect_vec2_f32,
+                 polyfill_dot_4x8_packed,
                  array_length_from_uniform,
                  interstage_locations,
                  root_constant_binding_point,
