@@ -33,6 +33,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
@@ -763,10 +764,19 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     gen_options.pixel_local_options = options.pixel_local_options;
     gen_options.bindings = tint::msl::writer::GenerateBindings(*input_program);
     gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
-                                                                          0);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
-                                                                          1);
+
+    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
+    std::unordered_set<tint::BindingPoint> storage_bindings;
+    for (auto* var : program.AST().GlobalVariables()) {
+        auto* sem_var = program.Sem().Get<tint::sem::GlobalVariable>(var);
+        if (!sem_var->Type()->UnwrapRef()->HasFixedFootprint()) {
+            auto bp = sem_var->Attributes().binding_point.value();
+            if (storage_bindings.insert(bp).second) {
+                gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                    bp, static_cast<uint32_t>(storage_bindings.size() - 1));
+            }
+        }
+    }
 
     tint::Result<tint::msl::writer::Output> result;
     if (options.use_ir) {

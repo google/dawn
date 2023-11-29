@@ -23,7 +23,7 @@ struct SB_RO {
 };
 
 void arrayLength_1588cd(const constant tint_symbol_1* const tint_symbol_3, device uint* const tint_symbol_4) {
-  uint res = (((*(tint_symbol_3)).buffer_size[0u][1u] - 0u) / 4u);
+  uint res = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
   *(tint_symbol_4) = res;
 }
 
