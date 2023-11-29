@@ -197,7 +197,14 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
                                 pixelLocalStorageUAV.Get(), clearValue);
                             break;
                         }
-                        case wgpu::TextureFormat::R32Sint:
+                        case wgpu::TextureFormat::R32Sint: {
+                            uint32_t clearValue[4] = {static_cast<uint32_t>(static_cast<int32_t>(
+                                                          attachmentInfo.clearColor.r)),
+                                                      0, 0, 0};
+                            d3d11DeviceContext->ClearUnorderedAccessViewUint(
+                                pixelLocalStorageUAV.Get(), clearValue);
+                            break;
+                        }
                         case wgpu::TextureFormat::R32Uint: {
                             uint32_t clearValue[4] = {
                                 static_cast<uint32_t>(attachmentInfo.clearColor.r), 0, 0, 0};

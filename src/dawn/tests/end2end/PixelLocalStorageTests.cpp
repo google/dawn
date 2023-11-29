@@ -284,7 +284,7 @@ class PixelLocalStorageTests : public DawnTest {
 
             // Compute the expected value depending on load/store ops by "replaying" the operations
             // that would be done.
-            uint32_t expectedValue = 0;
+            int32_t expectedValue = 0;
             if (!attachment.discardAfterInit) {
                 expectedValue = attachment.clearValue.r;
             }
