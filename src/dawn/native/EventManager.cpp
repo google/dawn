@@ -114,6 +114,7 @@ bool WaitQueueSerialsImpl(DeviceBase* device,
                 // TODO(dawn:1413): This doesn't need to be a full tick. It just needs to
                 // flush work up to `waitSerial`. This should be done after the
                 // ExecutionQueue / ExecutionContext refactor.
+                auto guard = device->GetScopedLock();
                 queue->ForceEventualFlushOfCommands();
                 DAWN_TRY(device->Tick());
             }
