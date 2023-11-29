@@ -255,6 +255,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "CoreFoundationRef.h",
       "DynamicLib.cpp",
       "DynamicLib.h",
+      "Enumerator.h",
       "FutureUtils.h",
       "GPUInfo.cpp",
       "GPUInfo.h",

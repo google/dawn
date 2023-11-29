@@ -58,6 +58,7 @@ target_sources(dawn_common PRIVATE
     "CoreFoundationRef.h"
     "DynamicLib.cpp"
     "DynamicLib.h"
+    "Enumerator.h"
     "FutureUtils.h"
     "GPUInfo.cpp"
     "GPUInfo.h"
