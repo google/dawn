@@ -57,14 +57,35 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 }
 
 static constexpr Case kValidCases[] = {
+    {"chromium_testing_experimental", LanguageFeature::kChromiumTestingExperimental},
+    {"chromium_testing_shipped", LanguageFeature::kChromiumTestingShipped},
+    {"chromium_testing_shipped_with_killswitch",
+     LanguageFeature::kChromiumTestingShippedWithKillswitch},
+    {"chromium_testing_unimplemented", LanguageFeature::kChromiumTestingUnimplemented},
+    {"chromium_testing_unsafe_experimental", LanguageFeature::kChromiumTestingUnsafeExperimental},
     {"readonly_and_readwrite_storage_textures",
      LanguageFeature::kReadonlyAndReadwriteStorageTextures},
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"eadonly_and_readwrite_stccrage_textures", LanguageFeature::kUndefined},
-    {"rladonly_a3readrite_storage_textures", LanguageFeature::kUndefined},
-    {"readonly_and_readwriVe_storage_textures", LanguageFeature::kUndefined},
+    {"chccomium_esting_experimental", LanguageFeature::kUndefined},
+    {"cr3mium_testlg_experimentl", LanguageFeature::kUndefined},
+    {"cVromium_testing_experimental", LanguageFeature::kUndefined},
+    {"1hromium_testing_shipped", LanguageFeature::kUndefined},
+    {"chromium_testing_hJpqqed", LanguageFeature::kUndefined},
+    {"cllromium_te77ting_shipped", LanguageFeature::kUndefined},
+    {"chromippm_testing_sHHipped_with_kqqlswitch", LanguageFeature::kUndefined},
+    {"chromicm_esting_shippvd_with_kilsitch", LanguageFeature::kUndefined},
+    {"chrbmium_testing_shGpped_wih_killswitch", LanguageFeature::kUndefined},
+    {"chromium_testing_iinimplemevted", LanguageFeature::kUndefined},
+    {"chromiumWWtesting_unimp8emented", LanguageFeature::kUndefined},
+    {"chxxoium_tMsting_unimplemented", LanguageFeature::kUndefined},
+    {"chXggmium_testing_unsafe_expermental", LanguageFeature::kUndefined},
+    {"Xhomiuu_testng_unsafe_experimental", LanguageFeature::kUndefined},
+    {"chromium_3esting_unsafe_experimental", LanguageFeature::kUndefined},
+    {"readonly_and_readwrite_stErage_textures", LanguageFeature::kUndefined},
+    {"readoTTly_and_readwrite_strage_tPPxtures", LanguageFeature::kUndefined},
+    {"readoly_and_redddwrite_storaxxe_textures", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<Case>;

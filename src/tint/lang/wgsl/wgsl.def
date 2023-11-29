@@ -95,6 +95,13 @@ enum extension {
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
 enum language_feature {
   readonly_and_readwrite_storage_textures
+
+  // Language features used only for testing whose status will never change.
+  chromium_testing_unimplemented
+  chromium_testing_unsafe_experimental
+  chromium_testing_experimental
+  chromium_testing_shipped_with_killswitch
+  chromium_testing_shipped
 }
 
 ////////////////////////////////////////////////////////////////////////////////

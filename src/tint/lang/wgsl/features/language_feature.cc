@@ -42,6 +42,21 @@ namespace tint::wgsl {
 /// @param str the string to parse
 /// @returns the parsed enum, or LanguageFeature::kUndefined if the string could not be parsed.
 LanguageFeature ParseLanguageFeature(std::string_view str) {
+    if (str == "chromium_testing_experimental") {
+        return LanguageFeature::kChromiumTestingExperimental;
+    }
+    if (str == "chromium_testing_shipped") {
+        return LanguageFeature::kChromiumTestingShipped;
+    }
+    if (str == "chromium_testing_shipped_with_killswitch") {
+        return LanguageFeature::kChromiumTestingShippedWithKillswitch;
+    }
+    if (str == "chromium_testing_unimplemented") {
+        return LanguageFeature::kChromiumTestingUnimplemented;
+    }
+    if (str == "chromium_testing_unsafe_experimental") {
+        return LanguageFeature::kChromiumTestingUnsafeExperimental;
+    }
     if (str == "readonly_and_readwrite_storage_textures") {
         return LanguageFeature::kReadonlyAndReadwriteStorageTextures;
     }
@@ -52,6 +67,16 @@ std::string_view ToString(LanguageFeature value) {
     switch (value) {
         case LanguageFeature::kUndefined:
             return "undefined";
+        case LanguageFeature::kChromiumTestingExperimental:
+            return "chromium_testing_experimental";
+        case LanguageFeature::kChromiumTestingShipped:
+            return "chromium_testing_shipped";
+        case LanguageFeature::kChromiumTestingShippedWithKillswitch:
+            return "chromium_testing_shipped_with_killswitch";
+        case LanguageFeature::kChromiumTestingUnimplemented:
+            return "chromium_testing_unimplemented";
+        case LanguageFeature::kChromiumTestingUnsafeExperimental:
+            return "chromium_testing_unsafe_experimental";
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
             return "readonly_and_readwrite_storage_textures";
     }

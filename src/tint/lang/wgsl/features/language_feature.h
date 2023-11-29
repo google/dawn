@@ -46,6 +46,11 @@ namespace tint::wgsl {
 /// @see src/tint/lang/wgsl/intrinsics.def for language feature descriptions
 enum class LanguageFeature : uint8_t {
     kUndefined,
+    kChromiumTestingExperimental,
+    kChromiumTestingShipped,
+    kChromiumTestingShippedWithKillswitch,
+    kChromiumTestingUnimplemented,
+    kChromiumTestingUnsafeExperimental,
     kReadonlyAndReadwriteStorageTextures,
 };
 
@@ -59,11 +64,21 @@ std::string_view ToString(LanguageFeature value);
 LanguageFeature ParseLanguageFeature(std::string_view str);
 
 constexpr std::string_view kLanguageFeatureStrings[] = {
+    "chromium_testing_experimental",
+    "chromium_testing_shipped",
+    "chromium_testing_shipped_with_killswitch",
+    "chromium_testing_unimplemented",
+    "chromium_testing_unsafe_experimental",
     "readonly_and_readwrite_storage_textures",
 };
 
 /// All features
 static constexpr LanguageFeature kAllLanguageFeatures[] = {
+    LanguageFeature::kChromiumTestingExperimental,
+    LanguageFeature::kChromiumTestingShipped,
+    LanguageFeature::kChromiumTestingShippedWithKillswitch,
+    LanguageFeature::kChromiumTestingUnimplemented,
+    LanguageFeature::kChromiumTestingUnsafeExperimental,
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,
 };
 

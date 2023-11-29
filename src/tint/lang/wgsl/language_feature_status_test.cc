@@ -39,5 +39,20 @@ TEST(LanguageFeatureStatusTest, AllFeaturesAreKnown) {
     }
 }
 
+TEST(LanguageFeatureStatusTest, ChromiumTestingValues) {
+    EXPECT_EQ(FeatureStatus::kUnimplemented,
+              GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumTestingUnimplemented));
+    EXPECT_EQ(
+        FeatureStatus::kUnsafeExperimental,
+        GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumTestingUnsafeExperimental));
+    EXPECT_EQ(FeatureStatus::kExperimental,
+              GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumTestingExperimental));
+    EXPECT_EQ(FeatureStatus::kShippedWithKillswitch,
+              GetLanguageFeatureStatus(
+                  tint::wgsl::LanguageFeature::kChromiumTestingShippedWithKillswitch));
+    EXPECT_EQ(FeatureStatus::kShipped,
+              GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumTestingShipped));
+}
+
 }  // namespace
 }  // namespace tint::wgsl
