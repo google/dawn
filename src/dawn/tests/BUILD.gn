@@ -174,6 +174,16 @@ template("dawn_test") {
 
     configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
+    if (dawn_tests_use_angle && defined(dawn_angle_dir)) {
+      if (!defined(data_deps)) {
+        data_deps = []
+      }
+      data_deps += [
+        "${dawn_angle_dir}:libEGL",
+        "${dawn_angle_dir}:libGLESv2",
+      ]
+    }
+
     # Running Dawn tests within Chromium in Windows may require DXC, copy DXC
     # binary from Windows SDK.
     if (build_with_chromium && is_win &&
@@ -773,13 +783,6 @@ dawn_test("dawn_end2end_tests") {
     ":test_infra_sources",
     ":white_box_tests_sources",
   ]
-
-  if (dawn_use_angle && defined(dawn_angle_dir)) {
-    data_deps = [
-      "${dawn_angle_dir}:libEGL",
-      "${dawn_angle_dir}:libGLESv2",
-    ]
-  }
 
   sources = []
   libs = []
