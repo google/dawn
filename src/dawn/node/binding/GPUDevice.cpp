@@ -377,13 +377,11 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
                                       interop::GPUComputePipelineDescriptor descriptor) {
     using Promise = interop::Promise<interop::Interface<interop::GPUComputePipeline>>;
 
-    Converter conv(env, device_, true);
+    Converter conv(env, device_);
 
     wgpu::ComputePipelineDescriptor desc{};
     if (!conv(desc, descriptor)) {
-        Promise promise(env, PROMISE_INFO);
-        promise.Reject(conv.AcquireException());
-        return promise;
+        return {env, interop::kUnusedPromise};
     }
 
     struct Context {
@@ -422,13 +420,11 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
                                      interop::GPURenderPipelineDescriptor descriptor) {
     using Promise = interop::Promise<interop::Interface<interop::GPURenderPipeline>>;
 
-    Converter conv(env, device_, true);
+    Converter conv(env, device_);
 
     wgpu::RenderPipelineDescriptor desc{};
     if (!conv(desc, descriptor)) {
-        Promise promise(env, PROMISE_INFO);
-        promise.Reject(conv.AcquireException());
-        return promise;
+        return {env, interop::kUnusedPromise};
     }
 
     struct Context {

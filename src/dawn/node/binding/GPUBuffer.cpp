@@ -56,12 +56,10 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                                            interop::GPUSize64 offset,
                                            std::optional<interop::GPUSize64> size) {
     // Convert the mapMode and reject with the TypeError if it happens.
-    Converter conv(env, device_, true);
+    Converter conv(env, device_);
     wgpu::MapMode mode;
     if (!conv(mode, modeIn)) {
-        auto promise = interop::Promise<void>(env, PROMISE_INFO);
-        promise.Reject(conv.AcquireException());
-        return promise;
+        return {env, interop::kUnusedPromise};
     }
 
     // Early rejection when there is already a mapping pending.

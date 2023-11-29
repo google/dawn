@@ -124,7 +124,6 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     Napi::Env env,
     interop::GPUDeviceDescriptor descriptor) {
     wgpu::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
-    interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
     Converter conv(env);
     std::vector<wgpu::FeatureName> requiredFeatures;
@@ -134,15 +133,13 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         // requiredFeatures is a "sequence<GPUFeatureName>" so a Javascript exception should be
         // thrown if one of the strings isn't one of the known features.
         if (!conv(feature, required)) {
-            Napi::Error::New(env, "invalid value for GPUFeatureName").ThrowAsJavaScriptException();
-            return promise;
+            return {env, interop::kUnusedPromise};
         }
 
         requiredFeatures.emplace_back(feature);
     }
     if (!conv(desc.label, descriptor.label)) {
-        Napi::Error::New(env, "invalid value for label").ThrowAsJavaScriptException();
-        return promise;
+        return {env, interop::kUnusedPromise};
     }
 
     wgpu::RequiredLimits limits;
@@ -154,6 +151,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT
 
+    interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
     for (auto [key, _] : descriptor.requiredLimits) {
         promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
         return promise;

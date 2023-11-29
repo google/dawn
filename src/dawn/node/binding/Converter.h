@@ -82,8 +82,8 @@ using ImplOf = typename ImplOfTraits<T>::type;
 class Converter {
   public:
     explicit Converter(Napi::Env e) : env(e) {}
-    Converter(Napi::Env e, wgpu::Device extensionDevice, bool retainExceptionIn = false)
-        : env(e), device(std::move(extensionDevice)), retainException(retainExceptionIn) {}
+    Converter(Napi::Env e, wgpu::Device extensionDevice)
+        : env(e), device(std::move(extensionDevice)) {}
     ~Converter();
 
     // Conversion function. Converts the interop type IN to the Dawn type OUT.
@@ -107,10 +107,6 @@ class Converter {
 
     // Returns the Env that this Converter was constructed with.
     inline Napi::Env Env() const { return env; }
-
-    // Returns the Napi::Error stored from previous conversion and clears it. (Converter checks any
-    // retained exception is acquired)
-    Napi::Error AcquireException();
 
     // BufferSource is the converted type of interop::BufferSource.
     struct BufferSource {
@@ -445,9 +441,6 @@ class Converter {
     Napi::Env env;
     wgpu::Device device = nullptr;
 
-    bool retainException = false;
-    Napi::Error exception;
-
     bool HasFeature(wgpu::FeatureName feature);
 
     // Function to be used when throwing a JavaScript exception because of issues during the
@@ -457,9 +450,6 @@ class Converter {
     //    if (some error case) {
     //        return Throw("Some error case description");
     //    }
-    //
-    // A variant also exists that doesn't take a string_view, so that more specific error types
-    // can be thrown.
     [[nodiscard]] bool Throw(std::string&& message);
     [[nodiscard]] bool Throw(Napi::Error&& error);
 

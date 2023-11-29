@@ -31,6 +31,7 @@
 #ifndef SRC_DAWN_NODE_INTEROP_CORE_H_
 #define SRC_DAWN_NODE_INTEROP_CORE_H_
 
+#include <cassert>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -261,6 +262,10 @@ class PromiseBase {
 };
 }  // namespace detail
 
+// A tag used in a Promise constructor to say it won't be used and doesn't need to be initialized.
+struct UnusedPromiseTag {};
+static constexpr UnusedPromiseTag kUnusedPromise;
+
 // Promise<T> is a templated wrapper around a JavaScript promise, which can
 // resolve to the template type T.
 template <typename T>
@@ -268,6 +273,9 @@ class Promise : public detail::PromiseBase {
   public:
     // Constructor
     Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {}
+    Promise(Napi::Env env, UnusedPromiseTag) : PromiseBase(env, PROMISE_INFO) {
+        Reject("Unused Promise, you should never see this!");
+    }
 
     // Resolve() fulfills the promise with the given value.
     void Resolve(T&& value) const {
@@ -281,6 +289,9 @@ class Promise<void> : public detail::PromiseBase {
   public:
     // Constructor
     Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {}
+    Promise(Napi::Env env, UnusedPromiseTag) : PromiseBase(env, PROMISE_INFO) {
+        Reject("Unused Promise, you should never see this!");
+    }
 
     // Resolve() fulfills the promise.
     void Resolve() const { PromiseBase::Resolve(state_->deferred.Env().Undefined()); }
@@ -769,6 +780,25 @@ inline Result FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
     } else {
         return Success;
     }
+}
+
+// Calls a promise-returning function f, catching exceptions and returning them into a rejected
+// promise instead. This is used to implement the WebIDL semantics for exceptions in
+// promise-returning functions.
+template <typename F>
+Napi::Value CatchExceptionIntoPromise(Napi::Env env, F&& f) {
+    Napi::Value result = f();
+    assert(result.IsEmpty() || result.IsPromise());
+    if (!env.IsExceptionPending()) {
+        return result;
+    }
+
+    // For some reason these two calls MUST be in this order or Node crashes in Reject().
+    Napi::Error error = env.GetAndClearPendingException();
+    Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+
+    deferred.Reject(error.Value());
+    return deferred.Promise();
 }
 
 }  // namespace wgpu::interop

@@ -44,12 +44,6 @@ Converter::~Converter() {
     for (auto& free : free_) {
         free();
     }
-    assert(exception == nullptr);
-}
-
-Napi::Error Converter::AcquireException() {
-    assert(exception != nullptr);
-    return std::move(exception);
 }
 
 bool Converter::HasFeature(wgpu::FeatureName feature) {
@@ -1648,13 +1642,7 @@ bool Converter::Throw(std::string&& message) {
 }
 
 bool Converter::Throw(Napi::Error&& error) {
-    if (retainException) {
-        assert(exception == nullptr);
-        exception = std::move(error);
-    } else {
-        error.ThrowAsJavaScriptException();
-    }
-
+    error.ThrowAsJavaScriptException();
     return false;
 }
 

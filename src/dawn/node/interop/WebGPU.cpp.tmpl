@@ -197,7 +197,14 @@ Wrappers* Wrappers::instance = nullptr;
     }
 {{-  end}}
 {{-  range $m := $methods}}
+{{-    $implSuffix := ""}}
+{{-    if ReturnsPromise $m}}
+{{-      $implSuffix = "Inner"}}
     Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
+      return CatchExceptionIntoPromise(info.Env(), [&]() -> auto { return {{$m.Name}}Inner(info); });
+    }
+{{-    end}}
+    Napi::Value {{$m.Name}}{{$implSuffix}}(const Napi::CallbackInfo& info) {
       std::string error;
 {{-    range $overload_idx, $o := $m.Overloads}}
 {{- $overloaded := gt (len $m.Overloads) 1}}

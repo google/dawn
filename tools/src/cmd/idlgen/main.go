@@ -149,6 +149,7 @@ func run() error {
 		"IsUnionType":                is(ast.UnionType{}),
 		"Lookup":                     g.lookup,
 		"MethodsOf":                  methodsOf,
+		"ReturnsPromise":             returnsPromise,
 		"SetlikeOf":                  setlikeOf,
 		"Title":                      strings.Title,
 	}
@@ -707,6 +708,31 @@ func (g *generator) flattenedConstantsOf(obj interface{}) []*ast.Member {
 	default:
 		return constantsOf(obj)
 	}
+}
+
+// isPromiseType returns true if the type is 'Promise<T>'
+func isPromiseType(ty ast.Type) bool {
+	if ty, ok := ty.(*ast.ParametrizedType); ok {
+		return ty.Name == "Promise"
+	}
+	return false
+}
+
+// returnsPromise returns true if the ast.Method returns a Promise.
+func returnsPromise(obj interface{}) bool {
+	method, ok := obj.(*Method)
+	if !ok {
+		panic("Unhandled AST node type in hasAnnotation")
+	}
+
+	firstIsPromise := isPromiseType(method.Overloads[0].Type)
+	for _, o := range method.Overloads {
+		if isPromiseType(o.Type) != firstIsPromise {
+			panic("IDL has overloads that are not consistently returning Promises")
+		}
+	}
+
+	return firstIsPromise
 }
 
 // setlikeOf returns the setlike ast.Pattern, if obj is a setlike interface.
