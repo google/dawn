@@ -399,9 +399,8 @@ MaybeError RenderPipeline::Initialize() {
         descriptorD3D12.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
         descriptorD3D12.BlendState.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;
     }
-    ColorAttachmentIndex highestColorAttachmentIndexPlusOne =
-        GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
-    for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+    auto highestColorAttachmentIndexPlusOne = GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
+    for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
         descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
             d3d::DXGITextureFormat(GetColorAttachmentFormat(i));
         descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =

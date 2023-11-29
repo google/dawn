@@ -402,7 +402,7 @@ MaybeError RenderPipeline::Initialize() {
         }
 
         const auto& fragmentOutputMask = fragmentStage.metadata->fragmentOutputMask;
-        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
                 MetalPixelFormat(GetDevice(), GetColorAttachmentFormat(i));
             const ColorTargetState* descriptor = GetColorTargetState(i);

@@ -43,11 +43,9 @@ constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindin
 using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
 using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
-
 constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
 using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>;
-
 constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
     ColorAttachmentIndex(kMaxColorAttachments);
 

@@ -34,6 +34,7 @@
 #include <optional>
 #include <utility>
 
+#include "dawn/common/Range.h"
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/ShaderUtils.h"
@@ -357,10 +358,10 @@ MaybeError RenderPipeline::InitializeBlendState() {
     blendDesc.IndependentBlendEnable = TRUE;
 
     static_assert(kMaxColorAttachments == std::size(blendDesc.RenderTarget));
-    for (ColorAttachmentIndex i(0Ui8); i < ColorAttachmentIndex(kMaxColorAttachments); ++i) {
+    for (auto i : Range(kMaxColorAttachmentsTyped)) {
         D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc =
             blendDesc.RenderTarget[static_cast<uint8_t>(i)];
-        const ColorTargetState* descriptor = GetColorTargetState(ColorAttachmentIndex(i));
+        const ColorTargetState* descriptor = GetColorTargetState(i);
         rtBlendDesc.BlendEnable = descriptor->blend != nullptr;
         if (rtBlendDesc.BlendEnable) {
             rtBlendDesc.SrcBlend = D3DBlendFactor(descriptor->blend->color.srcFactor);

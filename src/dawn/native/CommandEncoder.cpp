@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Enumerator.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
@@ -647,13 +648,15 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         "Color attachment count (%u) exceeds the maximum number of color attachments (%u).",
         descriptor->colorAttachmentCount, maxColorAttachments);
 
+    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+        descriptor->colorAttachments, descriptor->colorAttachmentCount);
     ColorAttachmentFormats colorAttachmentFormats;
-    for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-        DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, descriptor->colorAttachments[i],
-                                                           usageValidationMode, validationState),
+    for (auto [i, attachment] : Enumerate(colorAttachments)) {
+        DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, attachment, usageValidationMode,
+                                                           validationState),
                          "validating colorAttachments[%u].", i);
-        if (descriptor->colorAttachments[i].view) {
-            colorAttachmentFormats->push_back(&descriptor->colorAttachments[i].view->GetFormat());
+        if (attachment.view) {
+            colorAttachmentFormats->push_back(&attachment.view->GetFormat());
         }
     }
     DAWN_TRY_CONTEXT(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats),
@@ -1092,43 +1095,43 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
             attachmentState = cmd->attachmentState;
 
-            for (ColorAttachmentIndex index :
-                 IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
-                uint8_t i = static_cast<uint8_t>(index);
+            auto descColorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+                descriptor->colorAttachments, descriptor->colorAttachmentCount);
+            for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+                auto& descColorAttachment = descColorAttachments[i];
+                auto& cmdColorAttachment = cmd->colorAttachments[i];
+
                 TextureViewBase* colorTarget;
                 TextureViewBase* resolveTarget;
 
                 if (validationState.GetImplicitSampleCount() <= 1) {
-                    colorTarget = descriptor->colorAttachments[i].view;
-                    resolveTarget = descriptor->colorAttachments[i].resolveTarget;
+                    colorTarget = descColorAttachment.view;
+                    resolveTarget = descColorAttachment.resolveTarget;
 
-                    cmd->colorAttachments[index].view = colorTarget;
-                    cmd->colorAttachments[index].depthSlice =
-                        descriptor->colorAttachments[i].depthSlice;
-                    cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
-                    cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
+                    cmdColorAttachment.view = colorTarget;
+                    cmdColorAttachment.depthSlice = descColorAttachment.depthSlice;
+                    cmdColorAttachment.loadOp = descColorAttachment.loadOp;
+                    cmdColorAttachment.storeOp = descColorAttachment.storeOp;
                 } else {
                     // We use an implicit MSAA texture and resolve to the client supplied
                     // attachment.
-                    resolveTarget = descriptor->colorAttachments[i].view;
+                    resolveTarget = descColorAttachment.view;
                     Ref<TextureViewBase> implicitMSAATargetRef;
                     DAWN_TRY_ASSIGN(implicitMSAATargetRef,
                                     device->CreateImplicitMSAARenderTextureViewFor(
                                         resolveTarget, validationState.GetImplicitSampleCount()));
                     colorTarget = implicitMSAATargetRef.Get();
 
-                    cmd->colorAttachments[index].view = std::move(implicitMSAATargetRef);
+                    cmdColorAttachment.view = std::move(implicitMSAATargetRef);
                     // Without explicitly setting depthSlice to zero, its value would be undefined.
-                    cmd->colorAttachments[index].depthSlice = 0;
-                    cmd->colorAttachments[index].loadOp = wgpu::LoadOp::Clear;
-                    cmd->colorAttachments[index].storeOp = wgpu::StoreOp::Discard;
+                    cmdColorAttachment.depthSlice = 0;
+                    cmdColorAttachment.loadOp = wgpu::LoadOp::Clear;
+                    cmdColorAttachment.storeOp = wgpu::StoreOp::Discard;
                 }
 
-                cmd->colorAttachments[index].resolveTarget = resolveTarget;
-
-                Color color = descriptor->colorAttachments[i].clearValue;
-                cmd->colorAttachments[index].clearColor =
-                    ClampClearColorValueToLegalRange(color, colorTarget->GetFormat());
+                cmdColorAttachment.resolveTarget = resolveTarget;
+                cmdColorAttachment.clearColor = ClampClearColorValueToLegalRange(
+                    descColorAttachment.clearValue, colorTarget->GetFormat());
 
                 usageTracker.TextureViewUsedAs(colorTarget, wgpu::TextureUsage::RenderAttachment);
 
@@ -1325,8 +1328,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
 
         // This workaround needs to apply if there are multiple MSAA color targets (checked above)
         // and at least one resolve target.
-        for (ColorAttachmentIndex i :
-             IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+        for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
             if (cmd->colorAttachments[i].resolveTarget.Get() != nullptr) {
                 splitResolvesIntoSeparatePasses = true;
                 break;
@@ -1336,8 +1338,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
         if (splitResolvesIntoSeparatePasses) {
             std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-            for (ColorAttachmentIndex i :
-                 IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+            for (auto i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
                 auto& attachmentInfo = cmd->colorAttachments[i];
                 TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
                 if (resolveTarget != nullptr) {
@@ -1392,8 +1393,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
     if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
         std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-        for (ColorAttachmentIndex index :
-             IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+        for (auto index : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
             TextureViewBase* resolveTarget = cmd->colorAttachments[index].resolveTarget.Get();
 
             if (resolveTarget != nullptr && (resolveTarget->GetBaseMipLevel() != 0 ||

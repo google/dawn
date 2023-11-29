@@ -490,9 +490,9 @@ MaybeError RenderPipeline::Initialize() {
 
         const auto& fragmentOutputMask =
             GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputMask;
-        ColorAttachmentIndex highestColorAttachmentIndexPlusOne =
+        auto highestColorAttachmentIndexPlusOne =
             GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
-        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorTargetState* target = GetColorTargetState(i);
             colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
         }
@@ -533,7 +533,7 @@ MaybeError RenderPipeline::Initialize() {
     {
         RenderPassCacheQuery query;
 
-        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto i : IterateBitSet(GetColorAttachmentsMask())) {
             query.SetColor(i, GetColorAttachmentFormat(i), wgpu::LoadOp::Load, wgpu::StoreOp::Store,
                            false);
         }

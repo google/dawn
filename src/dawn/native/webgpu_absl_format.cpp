@@ -230,10 +230,10 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
     s->Append("{ colorFormats: [");
 
-    ColorAttachmentIndex nextColorIndex(uint8_t(0));
+    ColorAttachmentIndex nextColorIndex{};
 
     bool needsComma = false;
-    for (ColorAttachmentIndex i : IterateBitSet(value->GetColorAttachmentsMask())) {
+    for (auto i : IterateBitSet(value->GetColorAttachmentsMask())) {
         if (needsComma) {
             s->Append(", ");
         }

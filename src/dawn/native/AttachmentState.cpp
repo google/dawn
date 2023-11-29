@@ -28,6 +28,8 @@
 #include "dawn/native/AttachmentState.h"
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Enumerator.h"
+#include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
@@ -40,9 +42,10 @@ AttachmentState::AttachmentState(DeviceBase* device,
                                  const RenderBundleEncoderDescriptor* descriptor)
     : ObjectBase(device), mSampleCount(descriptor->sampleCount) {
     DAWN_ASSERT(descriptor->colorFormatCount <= kMaxColorAttachments);
-    for (ColorAttachmentIndex i(uint8_t(0));
-         i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatCount)); ++i) {
-        wgpu::TextureFormat format = descriptor->colorFormats[static_cast<uint8_t>(i)];
+    auto colorFormats = ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->colorFormats,
+                                                                    descriptor->colorFormatCount);
+
+    for (auto [i, format] : Enumerate(colorFormats)) {
         if (format != wgpu::TextureFormat::Undefined) {
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = format;
@@ -68,11 +71,11 @@ AttachmentState::AttachmentState(DeviceBase* device,
 
     if (descriptor->fragment != nullptr) {
         DAWN_ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
-        for (ColorAttachmentIndex i(uint8_t(0));
-             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
-             ++i) {
-            wgpu::TextureFormat format =
-                descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
+        auto targets = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+            descriptor->fragment->targets, descriptor->fragment->targetCount);
+
+        for (auto [i, target] : Enumerate(targets)) {
+            wgpu::TextureFormat format = target.format;
             if (format != wgpu::TextureFormat::Undefined) {
                 mColorAttachmentsSet.set(i);
                 mColorFormats[i] = format;
@@ -91,10 +94,9 @@ AttachmentState::AttachmentState(DeviceBase* device,
 
 AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor* descriptor)
     : ObjectBase(device) {
-    for (ColorAttachmentIndex i(uint8_t(0));
-         i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount)); ++i) {
-        const RenderPassColorAttachment& colorAttachment =
-            descriptor->colorAttachments[static_cast<uint8_t>(i)];
+    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+        descriptor->colorAttachments, descriptor->colorAttachmentCount);
+    for (auto [i, colorAttachment] : Enumerate(colorAttachments)) {
         TextureViewBase* attachment = colorAttachment.view;
         if (attachment == nullptr) {
             continue;
@@ -181,7 +183,7 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
     }
 
     // Check color formats
-    for (ColorAttachmentIndex i : IterateBitSet(a->mColorAttachmentsSet)) {
+    for (auto i : IterateBitSet(a->mColorAttachmentsSet)) {
         if (a->mColorFormats[i] != b->mColorFormats[i]) {
             return false;
         }
@@ -223,7 +225,7 @@ size_t AttachmentState::ComputeContentHash() {
 
     // Hash color formats
     HashCombine(&hash, mColorAttachmentsSet);
-    for (ColorAttachmentIndex i : IterateBitSet(mColorAttachmentsSet)) {
+    for (auto i : IterateBitSet(mColorAttachmentsSet)) {
         HashCombine(&hash, mColorFormats[i]);
     }
 

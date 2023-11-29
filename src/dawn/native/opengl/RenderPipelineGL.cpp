@@ -338,12 +338,12 @@ void RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) 
     }
 
     if (!GetDevice()->IsToggleEnabled(Toggle::DisableIndexedDrawBuffers)) {
-        for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ApplyColorState(gl, attachmentSlot, GetColorTargetState(attachmentSlot));
         }
     } else {
         const ColorTargetState* prevDescriptor = nullptr;
-        for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
+        for (auto attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorTargetState* descriptor = GetColorTargetState(attachmentSlot);
             if (!prevDescriptor) {
                 ApplyColorState(gl, descriptor);

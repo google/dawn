@@ -31,6 +31,7 @@
 #include <cmath>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
@@ -582,13 +583,13 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
                     "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
                     maxColorAttachments);
-    ityp::span<ColorAttachmentIndex, const ColorTargetState> targets(
-        descriptor->targets, ColorAttachmentIndex(uint8_t(descriptor->targetCount)));
+    auto targets =
+        ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> targetMask;
-    for (ColorAttachmentIndex i{}; i < targets.size(); ++i) {
-        if (targets[i].format == wgpu::TextureFormat::Undefined) {
-            DAWN_INVALID_IF(targets[i].blend,
+    for (auto [i, target] : Enumerate(targets)) {
+        if (target.format == wgpu::TextureFormat::Undefined) {
+            DAWN_INVALID_IF(target.blend,
                             "Color target[%u] blend state is set when the format is undefined.", i);
         } else {
             targetMask.set(i);
@@ -596,7 +597,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     }
 
     ColorAttachmentFormats colorAttachmentFormats;
-    for (ColorAttachmentIndex i : IterateBitSet(targetMask)) {
+    for (auto i : IterateBitSet(targetMask)) {
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(targets[i].format));
 
@@ -649,7 +650,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         // Check that all the color target states match.
         ColorAttachmentIndex firstColorTargetIndex{};
         const ColorTargetState* firstColorTargetState = nullptr;
-        for (ColorAttachmentIndex i : IterateBitSet(targetMask)) {
+        for (auto i : IterateBitSet(targetMask)) {
             if (!firstColorTargetState) {
                 firstColorTargetState = &targets[i];
                 firstColorTargetIndex = i;
@@ -944,7 +945,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         mDepthStencil.depthBiasClamp = 0.0f;
     }
 
-    for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
+    for (auto i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
         // Vertex-only render pipeline have no color attachment. For a render pipeline with
         // color attachments, there must be a valid FragmentState.
         DAWN_ASSERT(descriptor->fragment != nullptr);
@@ -1171,7 +1172,7 @@ size_t RenderPipelineBase::ComputeContentHash() {
     recorder.Record(mAttachmentState->GetContentHash());
 
     // Record attachments
-    for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
+    for (auto i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
         const ColorTargetState& desc = *GetColorTargetState(i);
         recorder.Record(desc.writeMask);
         if (desc.blend != nullptr) {
@@ -1231,8 +1232,7 @@ bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
     }
 
     if (a->mAttachmentState.Get() != nullptr) {
-        for (ColorAttachmentIndex i :
-             IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
+        for (auto i : IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
             const ColorTargetState& descA = *a->GetColorTargetState(i);
             const ColorTargetState& descB = *b->GetColorTargetState(i);
             if (descA.writeMask != descB.writeMask) {

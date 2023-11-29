@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Enumerator.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"
@@ -500,8 +501,8 @@ bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEnt
 bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindings) {
     BindingIndex lastBufferIndex{0};
     BindingIndex firstNonBufferIndex = std::numeric_limits<BindingIndex>::max();
-    for (BindingIndex i{0}; i < bindings.size(); ++i) {
-        if (bindings[i].bindingType == BindingInfoType::Buffer) {
+    for (auto [i, binding] : Enumerate(bindings)) {
+        if (binding.bindingType == BindingInfoType::Buffer) {
             lastBufferIndex = std::max(i, lastBufferIndex);
         } else {
             firstNonBufferIndex = std::min(i, firstNonBufferIndex);
