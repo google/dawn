@@ -38,6 +38,8 @@ source_set("features") {
   sources = [
     "language_feature.cc",
     "language_feature.h",
+    "status.cc",
+    "status.h",
   ]
   deps = []
 

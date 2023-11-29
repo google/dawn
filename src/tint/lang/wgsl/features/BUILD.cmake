@@ -41,28 +41,6 @@
 tint_add_target(tint_lang_wgsl_features lib
   lang/wgsl/features/language_feature.cc
   lang/wgsl/features/language_feature.h
-)
-
-################################################################################
-# Target:    tint_lang_wgsl_features_test
-# Kind:      test
-################################################################################
-tint_add_target(tint_lang_wgsl_features_test test
-  lang/wgsl/features/language_feature_test.cc
-)
-
-tint_target_add_dependencies(tint_lang_wgsl_features_test test
-  tint_lang_wgsl_features
-  tint_utils_containers
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-  tint_utils_text
-  tint_utils_traits
-)
-
-tint_target_add_external_dependencies(tint_lang_wgsl_features_test test
-  "gtest"
+  lang/wgsl/features/status.cc
+  lang/wgsl/features/status.h
 )

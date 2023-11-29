@@ -71,6 +71,8 @@ if (tint_build_unittests) {
       "diagnostic_rule_test.cc",
       "diagnostic_severity_test.cc",
       "extension_test.cc",
+      "language_feature_status_test.cc",
+      "language_feature_test.cc",
       "wgsl_test.cc",
     ]
     deps = [

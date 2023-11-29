@@ -40,32 +40,13 @@ cc_library(
   name = "features",
   srcs = [
     "language_feature.cc",
+    "status.cc",
   ],
   hdrs = [
     "language_feature.h",
+    "status.h",
   ],
   deps = [
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
-cc_library(
-  name = "test",
-  alwayslink = True,
-  srcs = [
-    "language_feature_test.cc",
-  ],
-  deps = [
-    "//src/tint/lang/wgsl/features",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
-    "//src/tint/utils/traits",
-    "@gtest",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

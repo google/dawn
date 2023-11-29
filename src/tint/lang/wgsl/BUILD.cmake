@@ -82,6 +82,8 @@ tint_add_target(tint_lang_wgsl_test test
   lang/wgsl/diagnostic_rule_test.cc
   lang/wgsl/diagnostic_severity_test.cc
   lang/wgsl/extension_test.cc
+  lang/wgsl/language_feature_status_test.cc
+  lang/wgsl/language_feature_test.cc
   lang/wgsl/wgsl_test.cc
 )
 
