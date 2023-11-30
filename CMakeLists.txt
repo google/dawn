@@ -571,7 +571,7 @@ endif()
 ################################################################################
 # Run on all subdirectories
 ################################################################################
-if (EXISTS "${DAWN_PROTOBUF_DIR}")
+if (EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
   # Needs to come before SPIR-V Tools
   include("third_party/protobuf.cmake")
 endif()
