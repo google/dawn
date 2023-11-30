@@ -25,45 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
-#define SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_REFCOUNTEDVKHANDLE_H_
+#define SRC_DAWN_NATIVE_VULKAN_REFCOUNTEDVKHANDLE_H_
 
-#include <IOSurface/IOSurfaceRef.h>
-#include <vector>
+#include "dawn/common/RefCounted.h"
+#include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/FencedDeleter.h"
 
-#include "dawn/common/CoreFoundationRef.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/SharedTextureMemory.h"
+namespace dawn::native::vulkan {
 
-namespace dawn::native::metal {
-
-class Device;
-class CommandRecordingContext;
-
-class SharedTextureMemory final : public SharedTextureMemoryBase {
+// RefCountedVkHandle is used to wrap a Vulkan object that is shared between multiple systems.
+// The object is kept alive until all refs are dropped; then it is sent to the fenced deleter
+// for destruction.
+template <typename Handle>
+class RefCountedVkHandle : public RefCounted {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
+    RefCountedVkHandle(Device* device, Handle handle) : mDevice(device), mHandle(handle) {}
 
-    IOSurfaceRef GetIOSurface() const;
+    ~RefCountedVkHandle() override {
+        if (mHandle != VK_NULL_HANDLE) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+        }
+    }
+
+    Handle Get() const { return mHandle; }
 
   private:
-    SharedTextureMemory(Device* device,
-                        const char* label,
-                        const SharedTextureMemoryProperties& properties,
-                        IOSurfaceRef ioSurface);
-    void DestroyImpl() override;
-
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
-    MaybeError BeginAccessImpl(TextureBase* texture, const BeginAccessDescriptor*) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     EndAccessState* state) override;
-
-    CFRef<IOSurfaceRef> mIOSurface;
+    Ref<Device> mDevice;
+    Handle mHandle = VK_NULL_HANDLE;
 };
 
-}  // namespace dawn::native::metal
+}  // namespace dawn::native::vulkan
 
-#endif  // SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_REFCOUNTEDVKHANDLE_H_

@@ -367,6 +367,27 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         // https://vulkan.gpuinfo.org/displayextensionproperty.php?platform=linux&extensionname=VK_EXT_external_memory_host&extensionproperty=minImportedHostPointerAlignment
         EnableFeature(Feature::HostMappedPointer);
     }
+
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryDmaBuf) &&
+        mDeviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier)) {
+        EnableFeature(Feature::SharedTextureMemoryDmaBuf);
+    }
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
+        EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
+    }
+
+    if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreZirconHandle,
+                              VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA)) {
+        EnableFeature(Feature::SharedFenceVkSemaphoreZirconHandle);
+    }
+    if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreFD,
+                              VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT_KHR)) {
+        EnableFeature(Feature::SharedFenceVkSemaphoreSyncFD);
+    }
+    if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreFD,
+                              VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR)) {
+        EnableFeature(Feature::SharedFenceVkSemaphoreOpaqueFD);
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -747,6 +768,30 @@ uint32_t PhysicalDevice::FindDefaultComputeSubgroupSize() const {
     } else {
         return ext.minSubgroupSize;
     }
+}
+
+bool PhysicalDevice::CheckSemaphoreSupport(DeviceExt deviceExt,
+                                           VkExternalSemaphoreHandleTypeFlagBits handleType) const {
+    if (!mDeviceInfo.HasExt(deviceExt)) {
+        return false;
+    }
+
+    constexpr VkFlags kRequiredSemaphoreFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
+                                                VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
+
+    VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
+    semaphoreInfo.pNext = nullptr;
+
+    VkExternalSemaphorePropertiesKHR semaphoreProperties;
+    semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
+    semaphoreProperties.pNext = nullptr;
+
+    semaphoreInfo.handleType = handleType;
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceExternalSemaphoreProperties(
+        mVkPhysicalDevice, &semaphoreInfo, &semaphoreProperties);
+
+    return IsSubset(kRequiredSemaphoreFlags, semaphoreProperties.externalSemaphoreFeatures);
 }
 
 uint32_t PhysicalDevice::GetDefaultComputeSubgroupSize() const {

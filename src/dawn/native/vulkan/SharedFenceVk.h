@@ -25,45 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
-#define SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
+#define SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_
 
-#include <IOSurface/IOSurfaceRef.h>
-#include <vector>
-
-#include "dawn/common/CoreFoundationRef.h"
+#include "dawn/common/Platform.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/SharedTextureMemory.h"
+#include "dawn/native/SharedFence.h"
+#include "dawn/native/SystemHandle.h"
 
-namespace dawn::native::metal {
+namespace dawn::native::vulkan {
 
 class Device;
-class CommandRecordingContext;
 
-class SharedTextureMemory final : public SharedTextureMemoryBase {
+class SharedFence final : public SharedFenceBase {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
+    static ResultOrError<Ref<SharedFence>> Create(
         Device* device,
         const char* label,
-        const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
+        const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor);
 
-    IOSurfaceRef GetIOSurface() const;
+    static ResultOrError<Ref<SharedFence>> Create(
+        Device* device,
+        const char* label,
+        const SharedFenceVkSemaphoreSyncFDDescriptor* descriptor);
+
+    static ResultOrError<Ref<SharedFence>> Create(
+        Device* device,
+        const char* label,
+        const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);
+
+    const SystemHandle& GetHandle() const;
 
   private:
-    SharedTextureMemory(Device* device,
-                        const char* label,
-                        const SharedTextureMemoryProperties& properties,
-                        IOSurfaceRef ioSurface);
+    SharedFence(Device* device, const char* label, SystemHandle handle);
     void DestroyImpl() override;
 
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
-    MaybeError BeginAccessImpl(TextureBase* texture, const BeginAccessDescriptor*) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     EndAccessState* state) override;
+    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override;
 
-    CFRef<IOSurfaceRef> mIOSurface;
+    wgpu::SharedFenceType mType;
+    SystemHandle mHandle;
 };
 
-}  // namespace dawn::native::metal
+}  // namespace dawn::native::vulkan
 
-#endif  // SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREFENCEVk_H_

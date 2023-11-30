@@ -25,35 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
-#define SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREMEMORYVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREMEMORYVK_H_
 
-#include <IOSurface/IOSurfaceRef.h>
-#include <vector>
-
-#include "dawn/common/CoreFoundationRef.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/SharedTextureMemory.h"
+#include "dawn/native/vulkan/RefCountedVkHandle.h"
 
-namespace dawn::native::metal {
+namespace dawn::native::vulkan {
 
 class Device;
-class CommandRecordingContext;
 
 class SharedTextureMemory final : public SharedTextureMemoryBase {
   public:
     static ResultOrError<Ref<SharedTextureMemory>> Create(
         Device* device,
         const char* label,
-        const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
+        const SharedTextureMemoryDmaBufDescriptor* descriptor);
 
-    IOSurfaceRef GetIOSurface() const;
+    RefCountedVkHandle<VkDeviceMemory>* GetVkDeviceMemory() const;
+    RefCountedVkHandle<VkImage>* GetVkImage() const;
+    uint32_t GetQueueFamilyIndex() const;
 
   private:
     SharedTextureMemory(Device* device,
                         const char* label,
-                        const SharedTextureMemoryProperties& properties,
-                        IOSurfaceRef ioSurface);
+                        const SharedTextureMemoryProperties& properties);
     void DestroyImpl() override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
@@ -61,9 +59,11 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
                                                      EndAccessState* state) override;
 
-    CFRef<IOSurfaceRef> mIOSurface;
+    Ref<RefCountedVkHandle<VkImage>> mVkImage;
+    Ref<RefCountedVkHandle<VkDeviceMemory>> mVkDeviceMemory;
+    uint32_t mQueueFamilyIndex;
 };
 
-}  // namespace dawn::native::metal
+}  // namespace dawn::native::vulkan
 
-#endif  // SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_SHAREDTEXTUREMEMORYVK_H_

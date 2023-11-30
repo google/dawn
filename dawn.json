@@ -1644,18 +1644,26 @@
             {"name": "handle", "type": "void *"}
         ]
     },
+    "shared texture memory dma buf plane": {
+        "category": "structure",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "fd", "type": "int"},
+            {"name": "offset", "type": "uint64_t"},
+            {"name": "stride", "type": "uint32_t"}
+        ]
+    },
     "shared texture memory dma buf descriptor": {
         "category": "structure",
         "chained": "in",
         "chain roots": ["shared texture memory descriptor"],
         "tags": ["dawn", "native"],
         "members": [
-            {"name": "memory FD", "type": "int"},
-            {"name": "allocation size", "type": "uint64_t"},
+            {"name": "size", "type": "extent 3D"},
+            {"name": "drm format", "type": "uint32_t"},
             {"name": "drm modifier", "type": "uint64_t"},
             {"name": "plane count", "type": "size_t"},
-            {"name": "plane offsets", "type": "uint64_t", "annotation": "const*", "length": "plane count"},
-            {"name": "plane strides", "type": "uint32_t", "annotation": "const*", "length": "plane count"}
+            {"name": "planes", "type": "shared texture memory dma buf plane", "annotation": "const*", "length": "plane count"}
         ]
     },
     "shared texture memory opaque FD descriptor": {

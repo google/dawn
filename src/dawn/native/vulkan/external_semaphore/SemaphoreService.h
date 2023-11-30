@@ -44,7 +44,7 @@ class ServiceImplementation;
 
 class Service {
   public:
-    explicit Service(Device* device);
+    Service(Device* device, VkExternalSemaphoreHandleTypeFlagBits handleType);
     ~Service();
 
     static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,

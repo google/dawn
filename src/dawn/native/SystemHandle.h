@@ -82,14 +82,16 @@ class SystemHandle : public NonCopyable {
     ~SystemHandle();
 
   private:
+    struct ErrorTag {};
+
     explicit SystemHandle(Handle handle);
+    explicit SystemHandle(ErrorTag tag);
 
     // Constructor when the type does not match the Handle type on this platform.
     template <typename Arg, typename = std::enable_if_t<!std::is_same_v<Arg, Handle>>>
-    explicit SystemHandle(Arg) : SystemHandle() {
-        static_assert(std::is_same_v<Arg, Handle>,
-                      "SystemHandle constucted from incorrect handle type.");
-    }
+    explicit SystemHandle(Arg) : SystemHandle(ErrorTag{}) {}
+
+    void LogIncorrectHandleType();
 
     Handle mHandle;
 };

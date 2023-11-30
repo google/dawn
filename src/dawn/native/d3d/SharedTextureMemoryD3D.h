@@ -45,7 +45,8 @@ class SharedTextureMemory : public SharedTextureMemoryBase {
   protected:
     MaybeError BeginAccessImpl(TextureBase* texture,
                                const BeginAccessDescriptor* descriptor) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture) override;
+    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
+                                                     EndAccessState* state) override;
 
   private:
     virtual ResultOrError<Ref<SharedFenceBase>> CreateFenceImpl(

@@ -29,6 +29,7 @@
 
 #include <CoreVideo/CVPixelBuffer.h>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/QueueMTL.h"
@@ -136,6 +137,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
 
 MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
                                                 const BeginAccessDescriptor* descriptor) {
+    DAWN_TRY(ValidateSTypes(descriptor->nextInChain, {}));
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         SharedFenceBase* fence = descriptor->fences[i];
 
@@ -155,7 +157,9 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBase* texture) {
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBase* texture,
+                                                                      EndAccessState* state) {
+    DAWN_TRY(ValidateSTypes(state->nextInChain, {}));
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceMTLSharedEvent),
                     "Required feature (%s) is missing.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);

@@ -52,7 +52,8 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
                                const BeginAccessDescriptor* descriptor) override {
         DAWN_UNREACHABLE();
     }
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture) override {
+    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
+                                                     EndAccessState* state) override {
         DAWN_UNREACHABLE();
     }
 };
@@ -320,7 +321,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemoryBase::EndAccessInternal(
     EndAccessState* state) {
     DAWN_TRY(GetDevice()->ValidateObject(texture));
     DAWN_TRY(ValidateTextureCreatedFromSelf(texture));
-    return EndAccessImpl(texture);
+    return EndAccessImpl(texture, state);
 }
 
 // SharedTextureMemoryContents

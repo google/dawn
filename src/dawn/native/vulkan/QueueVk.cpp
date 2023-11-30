@@ -36,6 +36,7 @@
 #include "dawn/native/vulkan/CommandRecordingContext.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/SharedFenceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -361,6 +362,32 @@ MaybeError Queue::SubmitPendingCommands() {
         std::vector<VkSemaphore> waitRequirements = texture->AcquireWaitRequirements();
         mRecordingContext.waitSemaphores.insert(mRecordingContext.waitSemaphores.end(),
                                                 waitRequirements.begin(), waitRequirements.end());
+
+        SharedTextureMemoryContents* contents = texture->GetSharedTextureMemoryContents();
+        if (contents != nullptr) {
+            SharedTextureMemoryBase::PendingFenceList fences;
+            contents->AcquirePendingFences(&fences);
+
+            for (const auto& fence : fences) {
+                // All semaphores are binary semaphores.
+                DAWN_ASSERT(fence.signaledValue == 1u);
+                ExternalSemaphoreHandle semaphoreHandle = [&]() {
+                    if constexpr (std::is_same_v<ExternalSemaphoreHandle, SystemHandle::Handle>) {
+                        return ToBackend(fence.object)->GetHandle().Get();
+                    } else {
+                        // TODO(crbug.com/dawn/1745): Remove this path and make the semaphore
+                        // service use SystemHandle.
+                        DAWN_UNREACHABLE();
+                        return ExternalSemaphoreHandle{};
+                    }
+                }();
+
+                VkSemaphore semaphore;
+                DAWN_TRY_ASSIGN(semaphore, device->GetExternalSemaphoreService()->ImportSemaphore(
+                                               semaphoreHandle));
+                mRecordingContext.waitSemaphores.push_back(semaphore);
+            }
+        }
     }
 
     DAWN_TRY(CheckVkSuccess(device->fn.EndCommandBuffer(mRecordingContext.commandBuffer),

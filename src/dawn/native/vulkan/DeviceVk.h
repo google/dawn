@@ -170,6 +170,11 @@ class Device final : public DeviceBase {
     ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
         const Surface* surface) const override;
 
+    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        const SharedTextureMemoryDescriptor* baseDescriptor) override;
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        const SharedFenceDescriptor* baseDescriptor) override;
+
     ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice vkPhysicalDevice);
 
     MaybeError CheckDebugLayerAndGenerateErrors();

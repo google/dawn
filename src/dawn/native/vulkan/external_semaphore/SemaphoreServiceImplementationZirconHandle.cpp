@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <zircon/syscalls.h>
 #include <utility>
 
+#include "dawn/native/SystemHandle.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
@@ -96,10 +96,19 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
             VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_ZIRCON_HANDLE_INFO_FUCHSIA;
         importSemaphoreHandleInfo.pNext = nullptr;
         importSemaphoreHandleInfo.semaphore = semaphore;
-        importSemaphoreHandleInfo.flags = 0;
+        // A temporary import means that after we wait on this semaphore, the semaphore payload
+        // will be restored to its prior permanent state - which is signaled.
+        // Note that this is different from how Vulkan binary semaphores usually work - where
+        // waiting on them resets them to unsignaled.
+        // For Zircon events we use temporary because it enables concurrent waiting.
+        // Multiple waiters can wait on the same semaphore and all be unblocked because after
+        // one waiter is woken, the state resets back to signaled for the next waiter to be woken.
+        importSemaphoreHandleInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
         importSemaphoreHandleInfo.handleType =
             VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA;
-        importSemaphoreHandleInfo.handle = handle;
+        SystemHandle handleCopy;
+        DAWN_TRY_ASSIGN(handleCopy, SystemHandle::Duplicate(handle));
+        importSemaphoreHandleInfo.handle = handleCopy.Get();
 
         MaybeError status = CheckVkSuccess(mDevice->fn.ImportSemaphoreZirconHandleFUCHSIA(
                                                mDevice->GetVkDevice(), &importSemaphoreHandleInfo),
@@ -110,6 +119,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
             DAWN_TRY(std::move(status));
         }
 
+        handleCopy.Detach();  // Ownership transfered to the semaphore.
         return semaphore;
     }
 

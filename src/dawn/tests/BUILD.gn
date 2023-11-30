@@ -691,6 +691,10 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_vulkan && is_chromeos) {
     sources += [ "end2end/VideoViewsTests_gbm.cpp" ]
   }
+
+  if (is_linux || is_chromeos) {
+    sources += [ "end2end/SharedTextureMemoryTests_linux.cpp" ]
+  }
 }
 
 source_set("white_box_tests_sources") {

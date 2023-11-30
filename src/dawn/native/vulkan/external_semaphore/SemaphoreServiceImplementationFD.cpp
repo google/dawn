@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <utility>
 
+#include "dawn/native/SystemHandle.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
@@ -35,7 +36,7 @@
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
 
-static constexpr VkExternalSemaphoreHandleTypeFlagBits kHandleType =
+static constexpr VkExternalSemaphoreHandleTypeFlagBits kDefaultHandleType =
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
     VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
 #else
@@ -46,8 +47,10 @@ namespace dawn::native::vulkan::external_semaphore {
 
 class ServiceImplementationFD : public ServiceImplementation {
   public:
-    explicit ServiceImplementationFD(Device* device)
+    explicit ServiceImplementationFD(Device* device,
+                                     VkExternalSemaphoreHandleTypeFlagBits handleType)
         : ServiceImplementation(device),
+          mHandleType(handleType),
           mSupported(CheckSupport(device->GetDeviceInfo(),
                                   ToBackend(device->GetPhysicalDevice())->GetVkPhysicalDevice(),
                                   device->fn)) {}
@@ -64,7 +67,7 @@ class ServiceImplementationFD : public ServiceImplementation {
         VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
         semaphoreInfo.pNext = nullptr;
-        semaphoreInfo.handleType = kHandleType;
+        semaphoreInfo.handleType = kDefaultHandleType;
 
         VkExternalSemaphorePropertiesKHR semaphoreProperties;
         semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
@@ -100,9 +103,23 @@ class ServiceImplementationFD : public ServiceImplementation {
         importSemaphoreFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
         importSemaphoreFdInfo.pNext = nullptr;
         importSemaphoreFdInfo.semaphore = semaphore;
-        importSemaphoreFdInfo.flags = 0;
-        importSemaphoreFdInfo.handleType = kHandleType;
-        importSemaphoreFdInfo.fd = handle;
+        // A temporary import means that after we wait on this semaphore, the semaphore payload
+        // will be restored to its prior permanent state - which is signaled.
+        // Note that this is different from how Vulkan binary semaphores usually work - where
+        // waiting on them resets them to unsignaled.
+        // Note that temporary semaphores is the only valid flag for sync fds because the semantic
+        // of sync FDs in Linux are that they can only transition from unsignaled to signaled but
+        // not the other direction, which matches the semantics of temporary where the payload is
+        // signaled once and then is detached so it cannot be reset.
+        // Opaque fds support both but we use temporary because it enables concurrent waiting.
+        // Multiple waiters can wait on the same semaphore and all be unblocked because after
+        // one waiter is woken, the state resets back to signaled for the next waiter to be woken.
+        importSemaphoreFdInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+        importSemaphoreFdInfo.handleType = mHandleType;
+        // vkImportSemaphoreFdKHR takes ownership, so make a dup of the handle.
+        SystemHandle handleCopy;
+        DAWN_TRY_ASSIGN(handleCopy, SystemHandle::Duplicate(handle));
+        importSemaphoreFdInfo.fd = handleCopy.Get();
 
         MaybeError status = CheckVkSuccess(
             mDevice->fn.ImportSemaphoreFdKHR(mDevice->GetVkDevice(), &importSemaphoreFdInfo),
@@ -113,6 +130,7 @@ class ServiceImplementationFD : public ServiceImplementation {
             DAWN_TRY(std::move(status));
         }
 
+        handleCopy.Detach();  // Ownership transfered to the semaphore.
         return semaphore;
     }
 
@@ -121,7 +139,7 @@ class ServiceImplementationFD : public ServiceImplementation {
         VkExportSemaphoreCreateInfoKHR exportSemaphoreInfo;
         exportSemaphoreInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
         exportSemaphoreInfo.pNext = nullptr;
-        exportSemaphoreInfo.handleTypes = kHandleType;
+        exportSemaphoreInfo.handleTypes = mHandleType;
 
         VkSemaphoreCreateInfo semaphoreCreateInfo;
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -142,7 +160,7 @@ class ServiceImplementationFD : public ServiceImplementation {
         semaphoreGetFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
         semaphoreGetFdInfo.pNext = nullptr;
         semaphoreGetFdInfo.semaphore = semaphore;
-        semaphoreGetFdInfo.handleType = kHandleType;
+        semaphoreGetFdInfo.handleType = mHandleType;
 
         int fd = -1;
         DAWN_TRY(CheckVkSuccess(
@@ -166,11 +184,14 @@ class ServiceImplementationFD : public ServiceImplementation {
     }
 
   private:
+    const VkExternalSemaphoreHandleTypeFlagBits mHandleType;
     bool mSupported = false;
 };
 
-std::unique_ptr<ServiceImplementation> CreateFDService(Device* device) {
-    return std::make_unique<ServiceImplementationFD>(device);
+std::unique_ptr<ServiceImplementation> CreateFDService(
+    Device* device,
+    VkExternalSemaphoreHandleTypeFlagBits handleType) {
+    return std::make_unique<ServiceImplementationFD>(device, handleType);
 }
 
 bool CheckFDSupport(const VulkanDeviceInfo& deviceInfo,

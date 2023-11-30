@@ -520,16 +520,17 @@ void DeviceBase::Destroy() {
     // implementations of DestroyImpl checks that we are disconnected before doing work.
     mState = State::Disconnected;
 
-    // Note: mQueue is not released here since the application may still get it after calling
-    // Destroy() via APIGetQueue.
     mDynamicUploader = nullptr;
     mEmptyBindGroupLayout = nullptr;
     mEmptyPipelineLayout = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
 
+    // Note: mQueue is not released here since the application may still get it after calling
+    // Destroy() via APIGetQueue.
     if (mQueue != nullptr) {
         mQueue->AssumeCommandsComplete();
+        mQueue->Destroy();
     }
 
     // Now that the GPU timeline is empty, destroy the backend device.

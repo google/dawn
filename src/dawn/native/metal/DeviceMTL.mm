@@ -402,8 +402,6 @@ void Device::DestroyImpl() {
     //   other threads using the device since there are no other live refs.
     mMtlDevice = nullptr;
     mMockBlitMtlBuffer = nullptr;
-
-    GetQueue()->Destroy();
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {

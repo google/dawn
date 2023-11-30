@@ -53,11 +53,12 @@ bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
 #endif
 }
 
-Service::Service(Device* device) {
+Service::Service(Device* device, VkExternalSemaphoreHandleTypeFlagBits handleType) {
 #if DAWN_PLATFORM_IS(FUCHSIA)  // Fuchsia
+    DAWN_ASSERT(handleType == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA);
     mServiceImpl = CreateZirconHandleService(device);
 #elif DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(CHROMEOS)  // Android, ChromeOS and Linux
-    mServiceImpl = CreateFDService(device);
+    mServiceImpl = CreateFDService(device, handleType);
 #endif
 }
 

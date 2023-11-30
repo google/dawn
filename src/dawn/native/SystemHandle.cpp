@@ -112,6 +112,11 @@ inline MaybeError CloseHandle(int handle) {
 SystemHandle::SystemHandle() : mHandle(kInvalidHandle) {}
 SystemHandle::SystemHandle(Handle handle) : mHandle(handle) {}
 
+SystemHandle::SystemHandle(ErrorTag tag) : SystemHandle() {
+    dawn::ErrorLog() << "SystemHandle constructed from incorrect handle type.";
+    DAWN_ASSERT(false);
+}
+
 bool SystemHandle::IsValid() const {
     return IsHandleValid(mHandle);
 }

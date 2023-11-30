@@ -37,6 +37,7 @@ namespace dawn {
 void SharedTextureMemoryNoFeatureTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
+    GetParam().mBackend->SetUp();
 }
 
 std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
@@ -65,6 +66,17 @@ void SharedTextureMemoryTests::SetUp() {
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
+    GetParam().mBackend->SetUp();
+}
+
+void SharedTextureMemoryNoFeatureTests::TearDown() {
+    DawnTestWithParams<SharedTextureMemoryTestParams>::TearDown();
+    GetParam().mBackend->TearDown();
+}
+
+void SharedTextureMemoryTests::TearDown() {
+    DawnTestWithParams<SharedTextureMemoryTestParams>::TearDown();
+    GetParam().mBackend->TearDown();
 }
 
 std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSharedTextureMemories(
@@ -196,15 +208,15 @@ wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsClearCommandBuffer(
       @fragment fn frag_main(in: FragmentIn) -> @location(0) vec4f {
           if (in.uv.x < 0.5) {
             if (in.uv.y < 0.5) {
-              return vec4f(0.0, 1.0, 0.0, 1.0);
+              return vec4f(0.0, 1.0, 0.0, 0.501);
             } else {
-              return vec4f(1.0, 0.0, 0.0, 1.0);
+              return vec4f(1.0, 0.0, 0.0, 0.501);
             }
           } else {
             if (in.uv.y < 0.5) {
-              return vec4f(0.0, 0.0, 1.0, 1.0);
+              return vec4f(0.0, 0.0, 1.0, 0.501);
             } else {
-              return vec4f(1.0, 1.0, 0.0, 1.0);
+              return vec4f(1.0, 1.0, 0.0, 0.501);
             }
           }
       }
@@ -296,35 +308,63 @@ void SharedTextureMemoryTests::CheckFourColors(wgpu::Device& deviceObj,
     wgpu::Origin3D tr = {3 * colorTarget.GetWidth() / 4, colorTarget.GetHeight() / 4};
     wgpu::Origin3D br = {3 * colorTarget.GetWidth() / 4, 3 * colorTarget.GetHeight() / 4};
 
+    std::array<utils::RGBA8, 4> expectedColors;
+    uint8_t expectedAlpha;
     switch (format) {
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            expectedColors = {
+                utils::RGBA8::kGreen,
+                utils::RGBA8::kRed,
+                utils::RGBA8::kBlue,
+                utils::RGBA8::kYellow,
+            };
+            expectedAlpha = 0xAA;
+            break;
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::BGRA8Unorm:
-        case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::RGBA16Float:
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kGreen, colorTarget, tl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, bl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kBlue, colorTarget, tr, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kYellow, colorTarget, br, {1, 1});
+            expectedColors = {
+                utils::RGBA8::kGreen,
+                utils::RGBA8::kRed,
+                utils::RGBA8::kBlue,
+                utils::RGBA8::kYellow,
+            };
+            expectedAlpha = 0x80;
             break;
         case wgpu::TextureFormat::RG16Float:
         case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RG8Unorm:
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kGreen, colorTarget, tl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, bl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kBlack, colorTarget, tr, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kYellow, colorTarget, br, {1, 1});
+            expectedColors = {
+                utils::RGBA8::kGreen,
+                utils::RGBA8::kRed,
+                utils::RGBA8::kBlack,
+                utils::RGBA8::kYellow,
+            };
+            expectedAlpha = 0xFF;
             break;
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::R8Unorm:
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kBlack, colorTarget, tl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, bl, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kBlack, colorTarget, tr, {1, 1});
-            EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, br, {1, 1});
+            expectedColors = {
+                utils::RGBA8::kBlack,
+                utils::RGBA8::kRed,
+                utils::RGBA8::kBlack,
+                utils::RGBA8::kRed,
+            };
+            expectedAlpha = 0xFF;
             break;
         default:
             DAWN_UNREACHABLE();
     }
+    expectedColors[0].a = expectedAlpha;
+    expectedColors[1].a = expectedAlpha;
+    expectedColors[2].a = expectedAlpha;
+    expectedColors[3].a = expectedAlpha;
+
+    EXPECT_TEXTURE_EQ(deviceObj, &expectedColors[0], colorTarget, tl, {1, 1});
+    EXPECT_TEXTURE_EQ(deviceObj, &expectedColors[1], colorTarget, bl, {1, 1});
+    EXPECT_TEXTURE_EQ(deviceObj, &expectedColors[2], colorTarget, tr, {1, 1});
+    EXPECT_TEXTURE_EQ(deviceObj, &expectedColors[3], colorTarget, br, {1, 1});
 }
 
 // Allow tests to be uninstantiated since it's possible no backends are available.
@@ -664,6 +704,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccess) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     // It should be an error to BeginAccess twice in a row.
     EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc));
@@ -679,6 +720,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTextures) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     // It should be an error to BeginAccess twice in a row.
     EXPECT_TRUE(memory.BeginAccess(texture1, &beginDesc));
@@ -693,10 +735,12 @@ TEST_P(SharedTextureMemoryTests, DoubleEndAccess) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc));
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
+    auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
     EXPECT_TRUE(memory.EndAccess(texture, &endState));
 
     // Invalid to end access a second time.
@@ -713,10 +757,12 @@ TEST_P(SharedTextureMemoryTests, BeginThenEndOnDifferentTexture) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     EXPECT_TRUE(memory.BeginAccess(texture1, &beginDesc));
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
+    auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
     ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.EndAccess(texture2, &endState)),
                             HasSubstr("Cannot end access"));
 }
@@ -727,6 +773,7 @@ TEST_P(SharedTextureMemoryTests, EndAccessWithoutBegin) {
     wgpu::Texture texture = memory.CreateTexture();
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
+    auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
     ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.EndAccess(texture, &endState)),
                             HasSubstr("Cannot end access"));
 }
@@ -776,6 +823,7 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = true;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
         // Begin access on a texture, and drop the memory.
         wgpu::Texture texture = memory.CreateTexture();
@@ -809,7 +857,10 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         wgpu::Texture texture = memory.CreateTexture();
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
 
         // First fill the texture with data, so we can check that using it uninitialized
         // makes it black.
@@ -827,6 +878,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         beginDesc.fences = endState.fences;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = false;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
         memory.BeginAccess(texture, &beginDesc);
 
         // Use the texture on the GPU which should lazy clear it.
@@ -851,6 +903,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
             beginDesc.signaledValues = endState.signaledValues;
             beginDesc.initialized = endState.initialized;
 
+            backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
             memory.BeginAccess(texture, &beginDesc);
             device.GetQueue().Submit(1, &commandBuffer);
             memory.EndAccess(texture, &endState);
@@ -897,14 +950,16 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
         wgpu::SharedTextureMemoryProperties properties;
         memory.GetProperties(&properties);
 
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         {
             wgpu::Texture texture = memory.CreateTexture();
-
-            wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
             beginDesc.initialized = false;
             memory.BeginAccess(texture, &beginDesc);
 
-            wgpu::SharedTextureMemoryEndAccessState endState = {};
             AsNonConst(endState.initialized) = true;  // should be overrwritten
             memory.EndAccess(texture, &endState);
             EXPECT_FALSE(endState.initialized);
@@ -916,8 +971,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
         if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
             wgpu::Texture texture = memory.CreateTexture();
 
-            wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+            beginDesc = {};
             beginDesc.initialized = true;
+            backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
             memory.BeginAccess(texture, &beginDesc);
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -929,7 +985,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
             wgpu::CommandBuffer commandBuffer = encoder.Finish();
             device.GetQueue().Submit(1, &commandBuffer);
 
-            wgpu::SharedTextureMemoryEndAccessState endState = {};
+            endState = {};
             AsNonConst(endState.initialized) = true;  // should be overrwritten
             memory.EndAccess(texture, &endState);
             EXPECT_FALSE(endState.initialized);
@@ -949,6 +1005,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
         memories[0].BeginAccess(texture, &beginDesc);
 
         // Clear the texture
@@ -956,6 +1013,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
         devices[0].GetQueue().Submit(1, &commandBuffer);
 
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(texture, &endState);
 
         // Sample from the texture
@@ -968,6 +1026,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 
         texture = memories[1].CreateTexture();
 
@@ -1001,11 +1060,13 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
         memories[0].BeginAccess(textures[0], &beginDesc);
 
         devices[0].GetQueue().Submit(1, &commandBuffer0);
 
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
 
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
@@ -1016,6 +1077,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 
         memories[1].BeginAccess(textures[1], &beginDesc);
         devices[1].GetQueue().Submit(1, &commandBuffer1);
@@ -1045,6 +1107,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
         memories[0].BeginAccess(textures[0], &beginDesc);
 
         devices[0].GetQueue().Submit(1, &commandBuffer0);
@@ -1053,6 +1116,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
         textures[0].Destroy();
 
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
 
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
@@ -1063,6 +1127,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 
         memories[1].BeginAccess(textures[1], &beginDesc);
         devices[1].GetQueue().Submit(1, &commandBuffer1);
@@ -1090,7 +1155,10 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         // Render to the texture.
         {
             memories[0].BeginAccess(textures[0], &beginDesc);
@@ -1106,6 +1174,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 
         // Begin access, then drop all memories.
         memories[1].BeginAccess(textures[1], &beginDesc);
@@ -1146,6 +1215,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
         memories[0].BeginAccess(textures[0], &beginDesc);
 
         devices[0].GetQueue().Submit(1, &commandBuffer0);
@@ -1154,6 +1224,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         DestroyOrLoseDevice(devices[0]);
 
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
         EXPECT_GT(endState.fenceCount, 0u);
 
@@ -1165,6 +1236,7 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 
         memories[1].BeginAccess(textures[1], &beginDesc);
         devices[1].GetQueue().Submit(1, &commandBuffer1);
@@ -1237,6 +1309,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
         // Begin access on texture 0
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
         memories[0].BeginAccess(textures[0], &beginDesc);
 
         // Write
@@ -1244,6 +1317,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
 
         // End access on texture 0
         wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
         EXPECT_TRUE(endState.initialized);
 
@@ -1256,6 +1330,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = true;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
         memories[1].BeginAccess(textures[1], &beginDesc);
 
         // Import fences to devices[2] and begin access.
@@ -1272,11 +1347,13 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
 
         // End access on texture 1
         wgpu::SharedTextureMemoryEndAccessState endState1;
+        auto backendEndState1 = GetParam().mBackend->ChainEndState(&endState1);
         memories[1].EndAccess(textures[1], &endState1);
         EXPECT_TRUE(endState1.initialized);
 
         // End access on texture 2
         wgpu::SharedTextureMemoryEndAccessState endState2;
+        auto backendEndState2 = GetParam().mBackend->ChainEndState(&endState2);
         memories[2].EndAccess(textures[2], &endState2);
         EXPECT_TRUE(endState2.initialized);
 
@@ -1298,6 +1375,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = signaledValues.data();
         beginDesc.initialized = true;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState2);
 
         // Begin access on texture 0
         memories[0].BeginAccess(textures[0], &beginDesc);
@@ -1306,6 +1384,47 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
         devices[0].GetQueue().Submit(1, &clearToGrayCommandBuffer0);
     }
 }
+
+class SharedTextureMemoryVulkanTests : public DawnTest {};
+
+// Test that only a single Vulkan fence feature may be enabled at once.
+TEST_P(SharedTextureMemoryVulkanTests, SingleFenceFeature) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    std::vector<wgpu::FeatureName> fenceFeatures;
+
+    wgpu::Adapter adapter(GetAdapter().Get());
+    for (wgpu::FeatureName f : {
+             wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
+             wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
+             wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle,
+         }) {
+        if (adapter.HasFeature(f)) {
+            fenceFeatures.push_back(f);
+        }
+    }
+
+    // Test that creating a device with each feature is valid.
+    for (wgpu::FeatureName f : fenceFeatures) {
+        wgpu::DeviceDescriptor deviceDesc;
+        deviceDesc.requiredFeatureCount = 1;
+        deviceDesc.requiredFeatures = &f;
+        EXPECT_NE(adapter.CreateDevice(&deviceDesc), nullptr);
+    }
+
+    // Test that any combination of two features is invalid.
+    for (size_t i = 0; i < fenceFeatures.size(); ++i) {
+        for (size_t j = i + 1; j < fenceFeatures.size(); ++j) {
+            wgpu::FeatureName features[] = {fenceFeatures[i], fenceFeatures[j]};
+            wgpu::DeviceDescriptor deviceDesc;
+            deviceDesc.requiredFeatureCount = 2;
+            deviceDesc.requiredFeatures = features;
+            EXPECT_EQ(adapter.CreateDevice(&deviceDesc), nullptr);
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST(SharedTextureMemoryVulkanTests, VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
