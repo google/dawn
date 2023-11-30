@@ -252,6 +252,17 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
         !conv(desc.viewFormats, desc.viewFormatCount, descriptor.viewFormats)) {
         return {};
     }
+
+    wgpu::TextureBindingViewDimensionDescriptor texture_binding_view_dimension_desc{};
+    wgpu::TextureViewDimension texture_binding_view_dimension;
+    if (descriptor.textureBindingViewDimension.has_value() &&
+        conv(texture_binding_view_dimension, descriptor.textureBindingViewDimension)) {
+        texture_binding_view_dimension_desc.textureBindingViewDimension =
+            texture_binding_view_dimension;
+        desc.nextInChain =
+            reinterpret_cast<wgpu::ChainedStruct*>(&texture_binding_view_dimension_desc);
+    }
+
     return interop::GPUTexture::Create<GPUTexture>(env, device_, desc,
                                                    device_.CreateTexture(&desc));
 }

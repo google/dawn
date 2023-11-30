@@ -44,3 +44,7 @@ interface GPUAdapter {
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
 };
+
+dictionary GPUTextureDescriptor {
+    GPUTextureViewDimension? textureBindingViewDimension;
+};
