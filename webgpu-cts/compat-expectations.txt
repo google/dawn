@@ -494,12 +494,17 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.5 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.75 [ Failure ]
 
-# Memory Sync failures on Intel
+# Flaky memory_sync failures on Intel
+# KEEP
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 
 # Intel getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
