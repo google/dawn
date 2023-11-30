@@ -546,9 +546,12 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::Depth32FloatStencil8);
         }
 
+// TODO(dawn:2249): Enable on iOS. Some XCode or SDK versions seem to not match the docs.
+#if DAWN_PLATFORM_IS(MACOS)
         if (@available(macOS 10.12, iOS 16.0, *)) {
             EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
         }
+#endif
 
         // Uses newTextureWithDescriptor::iosurface::plane which is available
         // on ios 11.0+ and macOS 11.0+
@@ -897,11 +900,15 @@ class PhysicalDevice : public PhysicalDeviceBase {
             heapInfo[0].properties =
                 wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
                 wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
+// TODO(dawn:2249): Enable on iOS. Some XCode or SDK versions seem to not match the docs.
+#if DAWN_PLATFORM_IS(MACOS)
             if (@available(macOS 10.12, iOS 16.0, *)) {
                 heapInfo[0].size = [*mDevice recommendedMaxWorkingSetSize];
-            } else {
+            } else
+#endif
+            {
                 // Since AdapterPropertiesMemoryHeaps is already gated on the
-                // availability above, we should never reach this case, however
+                // availability and #ifdef above, we should never reach this case, however
                 // excluding the conditional causes build errors.
                 DAWN_UNREACHABLE();
             }
