@@ -102,7 +102,6 @@ def main(args):
         'third_party/khronos/EGL-Registry',
         'third_party/khronos/OpenGL-Registry',
         'third_party/markupsafe',
-        'third_party/partition_alloc',
         'third_party/vulkan-deps',
         'third_party/vulkan-deps/glslang/src',
         'third_party/vulkan-deps/spirv-headers/src',
