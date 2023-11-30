@@ -223,6 +223,10 @@ bool SharedTextureMemoryBase::APIBeginAccess(TextureBase* texture,
     return didBegin;
 }
 
+bool SharedTextureMemoryBase::APIIsDeviceLost() {
+    return GetDevice()->IsLost();
+}
+
 MaybeError SharedTextureMemoryBase::BeginAccess(TextureBase* texture,
                                                 const BeginAccessDescriptor* descriptor) {
     // Append begin fences first. Fences should be tracked regardless of whether later errors occur.

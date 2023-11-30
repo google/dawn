@@ -405,6 +405,26 @@ TEST_P(SharedTextureMemoryTests, ImportSharedTextureMemoryDeviceDestroyed) {
         HasSubstr("lost"));
 }
 
+// Test that SharedTextureMemory::IsDeviceLost() returns the expected value before and
+// after destroying the device.
+TEST_P(SharedTextureMemoryTests, CheckIsDeviceLostBeforeAndAfterDestroyingDevice) {
+    wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
+
+    EXPECT_FALSE(memory.IsDeviceLost());
+    device.Destroy();
+    EXPECT_TRUE(memory.IsDeviceLost());
+}
+
+// Test that SharedTextureMemory::IsDeviceLost() returns the expected value before and
+// after losing the device.
+TEST_P(SharedTextureMemoryTests, CheckIsDeviceLostBeforeAndAfterLosingDevice) {
+    wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
+
+    EXPECT_FALSE(memory.IsDeviceLost());
+    LoseDeviceForTesting(device);
+    EXPECT_TRUE(memory.IsDeviceLost());
+}
+
 // Test that it is an error to import a shared fence when the device is destroyed
 TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
     device.Destroy();
