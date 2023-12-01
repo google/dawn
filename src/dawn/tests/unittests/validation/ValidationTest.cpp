@@ -123,8 +123,10 @@ ValidationTest::ValidationTest() {
     procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback, void* userdata) {
         DAWN_ASSERT(gCurrentTest);
-        wgpu::DeviceDescriptor deviceDesc =
-            *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
+        wgpu::DeviceDescriptor deviceDesc = {};
+        if (descriptor != nullptr) {
+            deviceDesc = *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
+        }
         WGPUDevice cDevice = gCurrentTest->CreateTestDevice(
             dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(self)), deviceDesc);
         DAWN_ASSERT(cDevice != nullptr);

@@ -123,6 +123,7 @@ enum class Toggle {
     UseTintIR,
     D3DDisableIEEEStrictness,
     PolyFillPacked4x8DotProduct,
+    ExposeWGSLTestingFeatures,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

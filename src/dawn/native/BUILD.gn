@@ -159,6 +159,7 @@ source_set("sources") {
     ":utils_gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/api",
+    "${dawn_root}/src/tint/lang/wgsl/features",
 
     # TODO(dawn:286): These should only be necessary if SPIR-V validation is
     # enabled with dawn_enable_spirv_validation

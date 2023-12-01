@@ -1181,18 +1181,40 @@ TEST_F(ReadWriteStorageTextureDisallowUnsafeAPITests, StorageAccessInBindGroupLa
 }
 
 // Check that both read-only and read-write storage textures are validated as unsafe in render and
-// compute pipelines.
-TEST_F(ReadWriteStorageTextureDisallowUnsafeAPITests, ReadWriteStorageTextureInPipeline) {
+// compute pipelines when the layout is defaulted.
+TEST_F(ReadWriteStorageTextureDisallowUnsafeAPITests, ReadWriteStorageTextureInDefaultedLayout) {
     constexpr std::array<wgpu::StorageTextureAccess, 2> kStorageTextureAccesses = {
         {wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::ReadWrite}};
-    constexpr std::array<wgpu::ShaderStage, 3> kShaderStages = {
-        {wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment, wgpu::ShaderStage::Compute}};
 
     for (wgpu::StorageTextureAccess access : kStorageTextureAccesses) {
-        for (wgpu::ShaderStage shaderStage : kShaderStages) {
-            std::string shader = CreateShaderWithStorageTexture(
-                access, wgpu::TextureFormat::R32Float, "texture_storage_2d", shaderStage);
-            ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
+        // Compute stage
+        {
+            wgpu::ComputePipelineDescriptor desc;
+            desc.compute.module = utils::CreateShaderModule(
+                device,
+                CreateShaderWithStorageTexture(access, wgpu::TextureFormat::R32Float,
+                                               "texture_storage_2d", wgpu::ShaderStage::Compute));
+            ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&desc));
+        }
+        // Vertex stage
+        {
+            utils::ComboRenderPipelineDescriptor desc;
+            desc.vertex.module = utils::CreateShaderModule(
+                device,
+                CreateShaderWithStorageTexture(access, wgpu::TextureFormat::R32Float,
+                                               "texture_storage_2d", wgpu::ShaderStage::Vertex));
+            desc.cFragment.module = mDefaultFSModule;
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+        }
+        // Fragment stage
+        {
+            utils::ComboRenderPipelineDescriptor desc;
+            desc.cFragment.module = utils::CreateShaderModule(
+                device,
+                CreateShaderWithStorageTexture(access, wgpu::TextureFormat::R32Float,
+                                               "texture_storage_2d", wgpu::ShaderStage::Fragment));
+            desc.vertex.module = mDefaultVSModule;
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
         }
     }
 }

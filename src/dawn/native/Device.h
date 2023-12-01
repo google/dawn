@@ -74,8 +74,6 @@ struct InternalPipelineStore;
 struct ShaderModuleParseResult;
 struct TrackedFutureWaitInfo;
 
-using WGSLExtensionSet = std::unordered_set<std::string>;
-
 class DeviceBase : public RefCountedWithExternalCount {
   public:
     DeviceBase(AdapterBase* adapter,

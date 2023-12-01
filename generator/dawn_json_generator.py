@@ -63,7 +63,7 @@ class Name:
         return chunk[0].upper() + chunk[1:]
 
     def canonical_case(self):
-        return (' '.join(self.chunks)).lower()
+        return ' '.join(self.chunks)
 
     def concatcase(self):
         return ''.join(self.chunks)

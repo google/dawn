@@ -216,6 +216,8 @@
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "DeviceSetLoggingCallback",
+            "InstanceEnumerateWGSLLanguageFeatures",
+            "InstanceHasWGSLLanguageFeature",
             "InstanceRequestAdapter",
             "InstanceRequestAdapterF",
             "ShaderModuleGetCompilationInfo",

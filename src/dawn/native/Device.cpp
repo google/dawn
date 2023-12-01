@@ -1465,10 +1465,6 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumDisableUniformityAnalysis);
-
-        // Allow language features that are still under development.
-        mWGSLAllowedFeatures.features.insert(
-            tint::wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures);
     }
     if (mEnabledFeatures.IsEnabled(Feature::DualSourceBlending)) {
         mWGSLAllowedFeatures.extensions.insert(
@@ -1482,6 +1478,13 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::FramebufferFetch)) {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+    }
+
+    // Language features are enabled instance-wide.
+    // mAdapter is not set for mock test devices.
+    // TODO(crbug.com/dawn/1702): using a mock adapter and instance could avoid the null checking.
+    if (mAdapter != nullptr) {
+        mWGSLAllowedFeatures.features = GetInstance()->GetAllowedWGSLLanguageFeatures();
     }
 }
 

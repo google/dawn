@@ -58,6 +58,11 @@ class Instance final : public ObjectBase {
 
     void ProcessEvents();
     WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
+
+    bool HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const;
+    // Always writes the full list when features is not nullptr.
+    // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
+    size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
 };
 
 }  // namespace dawn::wire::client
