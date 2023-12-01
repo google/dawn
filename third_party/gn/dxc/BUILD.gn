@@ -2338,9 +2338,11 @@ executable("dxc") {
 
   data_deps = [ ":dxcompiler" ]
 
-  # Set rpath to executable_path to be able to find dxcompiler.so on MacOS
+  # Set rpath to be able to find the dxcompiler shared library
   if (is_mac) {
     ldflags = [ "-Wl,-rpath,@executable_path" ]
+  } else if (is_linux) {
+    ldflags = [ "-Wl,-rpath=\$ORIGIN" ]
   }
 
   if (is_win) {
