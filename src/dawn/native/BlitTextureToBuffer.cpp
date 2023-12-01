@@ -27,6 +27,7 @@
 
 #include "dawn/native/BlitTextureToBuffer.h"
 
+#include <array>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -41,6 +42,7 @@
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Queue.h"
+#include "dawn/native/Sampler.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 
 namespace dawn::native {
@@ -79,6 +81,29 @@ fn textureLoadGeneral(tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f
     return textureLoad(tex, coords, level);
 }
 @group(0) @binding(0) var src_tex : texture_3d<f32>;
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+// Cube map reference: https://en.wikipedia.org/wiki/Cube_mapping
+constexpr std::string_view kFloatTextureCube = R"(
+@group(1) @binding(0) var default_sampler: sampler;
+fn textureLoadGeneral(tex: texture_cube<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    var st = (vec2f(coords.xy) + vec2f(0.5, 0.5)) / vec2f(params.levelSize.xy);
+    st.y = 1. - st.y;
+    st = st * 2. - 1.;
+    var sample_coords: vec3f;
+    switch(coords.z) {
+        case 0: { sample_coords = vec3f(1., st.y, -st.x); } // Positive X
+        case 1: { sample_coords = vec3f(-1., st.y, st.x); } // Negative X
+        case 2: { sample_coords = vec3f(st.x, 1., -st.y); } // Positive Y
+        case 3: { sample_coords = vec3f(st.x, -1., st.y); } // Negative Y
+        case 4: { sample_coords = vec3f(st.x, st.y, 1.); }  // Positive Z
+        case 5: { sample_coords = vec3f(-st.x, st.y, -1.);} // Negative Z
+        default: { return vec4f(0.); } // Unreachable
+    }
+    return textureSampleLevel(tex, default_sampler, sample_coords, f32(level));
+}
+@group(0) @binding(0) var src_tex : texture_cube<f32>;
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
@@ -144,6 +169,10 @@ struct Params {
     indicesPerRow: u32,
     rowsPerImage: u32,
     indicesOffset: u32,
+    pad0: u32,
+    // Used for cube sample
+    levelSize: vec3u,
+    pad1: u32,
 };
 
 @group(0) @binding(2) var<uniform> params : Params;
@@ -391,6 +420,9 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             case wgpu::TextureViewDimension::e3D:
                 shader += kFloatTexture3D;
                 break;
+            case wgpu::TextureViewDimension::Cube:
+                shader += kFloatTextureCube;
+                break;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -402,6 +434,9 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                 break;
             case wgpu::TextureViewDimension::e2DArray:
                 shader += kDepthTextureArray;
+                break;
+            case wgpu::TextureViewDimension::Cube:
+                // TODO(dawn:2182): Add shader variations
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -415,6 +450,9 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             case wgpu::TextureViewDimension::e2DArray:
                 shader += kDepth32FloatTextureArray;
                 break;
+            case wgpu::TextureViewDimension::Cube:
+                // TODO(dawn:2182): Add shader variations
+                break;
             default:
                 DAWN_UNREACHABLE();
         }
@@ -426,6 +464,9 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                 break;
             case wgpu::TextureViewDimension::e2DArray:
                 shader += kStencilTextureArray;
+                break;
+            case wgpu::TextureViewDimension::Cube:
+                // TODO(dawn:2182): Add shader variations
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -522,8 +563,8 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
-    Ref<BindGroupLayoutBase> bindGroupLayout;
-    DAWN_TRY_ASSIGN(bindGroupLayout,
+    Ref<BindGroupLayoutBase> bindGroupLayout0;
+    DAWN_TRY_ASSIGN(bindGroupLayout0,
                     utils::MakeBindGroupLayout(
                         device,
                         {
@@ -534,7 +575,27 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                         /* allowInternalBinding */ true));
 
     Ref<PipelineLayoutBase> pipelineLayout;
-    DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout));
+    if (viewDimension == wgpu::TextureViewDimension::Cube) {
+        // Cube texture requires an extra sampler to call textureSampleLevel
+        Ref<BindGroupLayoutBase> bindGroupLayout1;
+        DAWN_TRY_ASSIGN(bindGroupLayout1,
+                        utils::MakeBindGroupLayout(device,
+                                                   {
+                                                       {0, wgpu::ShaderStage::Compute,
+                                                        wgpu::SamplerBindingType::NonFiltering},
+                                                   },
+                                                   /* allowInternalBinding */ true));
+
+        std::array<BindGroupLayoutBase*, 2> bindGroupLayouts = {bindGroupLayout0.Get(),
+                                                                bindGroupLayout1.Get()};
+
+        PipelineLayoutDescriptor descriptor;
+        descriptor.bindGroupLayoutCount = bindGroupLayouts.size();
+        descriptor.bindGroupLayouts = bindGroupLayouts.data();
+        DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&descriptor));
+    } else {
+        DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout0));
+    }
 
     ComputePipelineDescriptor computePipelineDescriptor = {};
     computePipelineDescriptor.layout = pipelineLayout.Get();
@@ -587,6 +648,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             }
         }
     }
+    DAWN_ASSERT(textureViewDimension != wgpu::TextureViewDimension::Undefined &&
+                textureViewDimension != wgpu::TextureViewDimension::CubeArray);
 
     Ref<ComputePipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline,
@@ -640,14 +703,11 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     // and buffer as a storage binding.
     auto scope = commandEncoder->MakeInternalUsageScope();
 
-    Ref<BindGroupLayoutBase> bindGroupLayout;
-    DAWN_TRY_ASSIGN(bindGroupLayout, pipeline->GetBindGroupLayout(0));
-
     Ref<BufferBase> uniformBuffer;
     {
         BufferDescriptor bufferDesc = {};
         // Uniform buffer size needs to be multiple of 16 bytes
-        bufferDesc.size = sizeof(uint32_t) * 12;
+        bufferDesc.size = sizeof(uint32_t) * 16;
         bufferDesc.usage = wgpu::BufferUsage::Uniform;
         bufferDesc.mappedAtCreation = true;
         DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&bufferDesc));
@@ -674,6 +734,19 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         params[9] = dst.rowsPerImage;
         params[10] = dst.offset / 4;
 
+        // params[11]: pad0
+
+        if (textureViewDimension == wgpu::TextureViewDimension::Cube) {
+            // cube need texture size to convert texel coord to sample location
+            auto levelSize =
+                src.texture->GetMipLevelSingleSubresourceVirtualSize(src.mipLevel, Aspect::Color);
+            params[12] = levelSize.width;
+            params[13] = levelSize.height;
+            params[14] = levelSize.depthOrArrayLayers;
+        }
+
+        // params[15]: pad1
+
         DAWN_TRY(uniformBuffer->Unmap());
     }
 
@@ -696,7 +769,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     viewDesc.baseMipLevel = 0;
     viewDesc.mipLevelCount = src.texture->GetNumMipLevels();
     viewDesc.baseArrayLayer = 0;
-    if (viewDesc.dimension == wgpu::TextureViewDimension::e2DArray) {
+    if (viewDesc.dimension == wgpu::TextureViewDimension::e2DArray ||
+        viewDesc.dimension == wgpu::TextureViewDimension::Cube) {
         viewDesc.arrayLayerCount = src.texture->GetArrayLayers();
     } else {
         viewDesc.arrayLayerCount = 1;
@@ -705,18 +779,40 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     Ref<TextureViewBase> srcView;
     DAWN_TRY_ASSIGN(srcView, src.texture->CreateView(&viewDesc));
 
-    Ref<BindGroupBase> bindGroup;
-    DAWN_TRY_ASSIGN(bindGroup, utils::MakeBindGroup(device, bindGroupLayout,
-                                                    {
-                                                        {0, srcView},
-                                                        {1, destinationBuffer},
-                                                        {2, uniformBuffer},
-                                                    },
-                                                    UsageValidationMode::Internal));
+    Ref<BindGroupLayoutBase> bindGroupLayout0;
+    DAWN_TRY_ASSIGN(bindGroupLayout0, pipeline->GetBindGroupLayout(0));
+    Ref<BindGroupBase> bindGroup0;
+    DAWN_TRY_ASSIGN(bindGroup0, utils::MakeBindGroup(device, bindGroupLayout0,
+                                                     {
+                                                         {0, srcView},
+                                                         {1, destinationBuffer},
+                                                         {2, uniformBuffer},
+                                                     },
+                                                     UsageValidationMode::Internal));
+
+    Ref<BindGroupLayoutBase> bindGroupLayout1;
+    Ref<BindGroupBase> bindGroup1;
+    if (textureViewDimension == wgpu::TextureViewDimension::Cube) {
+        // Cube texture requires an extra sampler to call textureSampleLevel
+        DAWN_TRY_ASSIGN(bindGroupLayout1, pipeline->GetBindGroupLayout(1));
+
+        SamplerDescriptor samplerDesc = {};
+        Ref<SamplerBase> sampler;
+        DAWN_TRY_ASSIGN(sampler, device->CreateSampler(&samplerDesc));
+
+        DAWN_TRY_ASSIGN(bindGroup1, utils::MakeBindGroup(device, bindGroupLayout1,
+                                                         {
+                                                             {0, sampler},
+                                                         },
+                                                         UsageValidationMode::Internal));
+    }
 
     Ref<ComputePassEncoder> pass = commandEncoder->BeginComputePass();
     pass->APISetPipeline(pipeline.Get());
-    pass->APISetBindGroup(0, bindGroup.Get());
+    pass->APISetBindGroup(0, bindGroup0.Get());
+    if (textureViewDimension == wgpu::TextureViewDimension::Cube) {
+        pass->APISetBindGroup(1, bindGroup1.Get());
+    }
     pass->APIDispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
     pass->APIEnd();
 

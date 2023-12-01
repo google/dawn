@@ -293,10 +293,12 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
                                             GetParam().mTextureFormat);
     }
 
-    void DoTest(const TextureSpec& textureSpec,
-                const BufferSpec& bufferSpec,
-                const wgpu::Extent3D& copySize,
-                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
+    void DoTest(
+        const TextureSpec& textureSpec,
+        const BufferSpec& bufferSpec,
+        const wgpu::Extent3D& copySize,
+        wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D,
+        wgpu::TextureViewDimension bindingViewDimension = wgpu::TextureViewDimension::Undefined) {
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor;
@@ -306,6 +308,15 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         descriptor.format = textureSpec.format;
         descriptor.mipLevelCount = textureSpec.levelCount;
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+
+        // Test cube texture copy for compat.
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode() &&
+            bindingViewDimension != wgpu::TextureViewDimension::Undefined) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension = bindingViewDimension;
+            descriptor.nextInChain = &textureBindingViewDimensionDesc;
+        }
+
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         // Layout for initial data upload to texture.
@@ -650,10 +661,6 @@ class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFor
         // TODO(dawn:2129): Fail for Win ANGLE D3D11
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
                               IsANGLED3D11() && IsWindows());
-
-        // TODO(dawn:1877): blit texture to copy path failing some tests on ANGLE Swiftshader
-        DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                              IsANGLESwiftShader());
     }
 };
 
@@ -1584,6 +1591,110 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
 
                             // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
                             wgpu::TextureFormat::BGRA8Unorm,
+                        });
+
+class CopyTests_T2B_Compat : public CopyTests_T2B {
+  protected:
+    void SetUp() override {
+        CopyTests_T2B::SetUp();
+        DAWN_SUPPRESS_TEST_IF(!IsCompatibilityMode());
+        DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+        // TODO(dawn:2131): remove once fully implemented, so cube texture doesn't require a copy.
+        DAWN_SUPPRESS_TEST_IF((IsOpenGL() || IsOpenGLES()) &&
+                              (GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat));
+    }
+};
+
+// Test that copying 2d texture array with binding view dimension set to cube.
+TEST_P(CopyTests_T2B_Compat, TextureCubeFull) {
+    constexpr uint32_t kWidth = 32;
+    constexpr uint32_t kHeight = 32;
+    constexpr uint32_t kLayers = 6;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kLayers};
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kLayers), {kWidth, kHeight, kLayers},
+           wgpu::TextureDimension::e2D, wgpu::TextureViewDimension::Cube);
+}
+
+// Test that copying a range of cube texture layers in one texture-to-buffer-copy works.
+TEST_P(CopyTests_T2B_Compat, TextureCubeSubRegion) {
+    constexpr uint32_t kWidth = 32;
+    constexpr uint32_t kHeight = 32;
+    constexpr uint32_t kLayers = 6;
+    constexpr uint32_t kBaseLayer = 2;
+    constexpr uint32_t kCopyLayers = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, kBaseLayer};
+    textureSpec.textureSize = {kWidth, kHeight, kLayers};
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kCopyLayers),
+           {kWidth, kHeight, kCopyLayers}, wgpu::TextureDimension::e2D,
+           wgpu::TextureViewDimension::Cube);
+}
+
+// Test that copying texture 2D array mips with 256-byte aligned sizes works
+TEST_P(CopyTests_T2B_Compat, TextureCubeMip) {
+    constexpr uint32_t kWidth = 32;
+    constexpr uint32_t kHeight = 32;
+    constexpr uint32_t kLayers = 6;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, kLayers};
+
+    for (unsigned int i = 1; i < 4; ++i) {
+        TextureSpec textureSpec = defaultTextureSpec;
+        textureSpec.copyLevel = i;
+        textureSpec.levelCount = i + 1;
+
+        DoTest(textureSpec, MinimumBufferSpec(kWidth >> i, kHeight >> i, kLayers),
+               {kWidth >> i, kHeight >> i, kLayers}, wgpu::TextureDimension::e2D,
+               wgpu::TextureViewDimension::Cube);
+    }
+}
+
+// Test that copying from a range of texture 2D array layers in one texture-to-buffer-copy when
+// RowsPerImage is not equal to the height of the texture works.
+TEST_P(CopyTests_T2B_Compat, TextureCubeRegionNonzeroRowsPerImage) {
+    constexpr uint32_t kWidth = 32;
+    constexpr uint32_t kHeight = 32;
+    constexpr uint32_t kLayers = 6;
+    constexpr uint32_t kBaseLayer = 2;
+    constexpr uint32_t kCopyLayers = 3;
+
+    constexpr uint32_t kRowsPerImage = kHeight * 2;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, kBaseLayer};
+    textureSpec.textureSize = {kWidth, kHeight, kLayers};
+
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kRowsPerImage, kCopyLayers);
+    bufferSpec.rowsPerImage = kRowsPerImage;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kCopyLayers}, wgpu::TextureDimension::e2D,
+           wgpu::TextureViewDimension::Cube);
+}
+
+DAWN_INSTANTIATE_TEST_P(CopyTests_T2B_Compat,
+                        {
+                            OpenGLBackend(),
+                            OpenGLESBackend(),
+                        },
+                        {
+                            // Control case: format not using blit workaround
+                            wgpu::TextureFormat::RGBA8Unorm,
+
+                            // Testing OpenGL compat Toggle::UseBlitForSnormTextureToBufferCopy
+                            wgpu::TextureFormat::R8Snorm,
+                            wgpu::TextureFormat::RG8Snorm,
+                            wgpu::TextureFormat::RGBA8Snorm,
+
+                            // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
+                            wgpu::TextureFormat::BGRA8Unorm,
+
+                            // Testing OpenGL compat Toggle::UseBlitForRGB9E5UfloatTextureCopy
+                            wgpu::TextureFormat::RGB9E5Ufloat,
                         });
 
 // Test that copying an entire texture with 256-byte aligned dimensions works

@@ -141,6 +141,8 @@ bool RequiresCreatingNewTextureView(const TextureBase* texture,
         return true;
     }
 
+    // TODO(dawn:2131): remove once compatibility texture binding view dimension is fully
+    // implemented.
     switch (textureViewDescriptor->dimension) {
         case wgpu::TextureViewDimension::Cube:
         case wgpu::TextureViewDimension::CubeArray:
