@@ -1183,56 +1183,6 @@ TEST_P(CopyTests_T2B, BytesPerRowShouldNotCauseBufferOOBIfCopyHeightIsOne) {
     }
 }
 
-// A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
-// copy one row with the texture format Depth32Float.
-TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
-    // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
-    // depth.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
-
-    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
-    constexpr uint32_t kPixelsPerRow = 4u;
-
-    wgpu::TextureDescriptor textureDescriptor;
-    textureDescriptor.format = kFormat;
-    textureDescriptor.size = {kPixelsPerRow, 1, 1};
-    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
-    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-    // Initialize the depth texture with 0.5f.
-    constexpr float kClearDepthValue = 0.5f;
-    utils::ComboRenderPassDescriptor renderPass({}, texture.CreateView());
-    renderPass.UnsetDepthStencilLoadStoreOpsForFormat(kFormat);
-    renderPass.cDepthStencilAttachmentInfo.depthClearValue = kClearDepthValue;
-    renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
-    renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-    wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPass);
-    renderPassEncoder.End();
-
-    constexpr uint32_t kBufferCopyOffset = kTextureBytesPerRowAlignment;
-    const uint32_t kBufferSize =
-        kBufferCopyOffset + utils::GetTexelBlockSizeInBytes(kFormat) * kPixelsPerRow;
-    wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = kBufferSize;
-    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
-
-    wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-
-    wgpu::Extent3D copySize = textureDescriptor.size;
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    std::array<float, kPixelsPerRow> expectedValues;
-    std::fill(expectedValues.begin(), expectedValues.end(), kClearDepthValue);
-    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, kBufferCopyOffset, kPixelsPerRow);
-}
-
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArrayFull) {
     constexpr uint32_t kWidth = 256;
@@ -1592,6 +1542,63 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
                             // Testing OpenGL compat Toggle::UseBlitForBGRA8UnormTextureToBufferCopy
                             wgpu::TextureFormat::BGRA8Unorm,
                         });
+
+class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {};
+
+// A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
+// copy one row with the texture format Depth32Float.
+TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
+    constexpr uint32_t kPixelsPerRow = 4u;
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.format = kFormat;
+    textureDescriptor.size = {kPixelsPerRow, 1, 1};
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Initialize the depth texture with 0.5f.
+    constexpr float kClearDepthValue = 0.5f;
+    utils::ComboRenderPassDescriptor renderPass({}, texture.CreateView());
+    renderPass.UnsetDepthStencilLoadStoreOpsForFormat(kFormat);
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = kClearDepthValue;
+    renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
+    renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+    wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPass);
+    renderPassEncoder.End();
+
+    constexpr uint32_t kBufferCopyOffset = kTextureBytesPerRowAlignment;
+    const uint32_t kBufferSize =
+        kBufferCopyOffset + utils::GetTexelBlockSizeInBytes(kFormat) * kPixelsPerRow;
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = kBufferSize;
+    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+    wgpu::ImageCopyBuffer imageCopyBuffer =
+        utils::CreateImageCopyBuffer(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
+    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+
+    wgpu::Extent3D copySize = textureDescriptor.size;
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    std::array<float, kPixelsPerRow> expectedValues;
+    std::fill(expectedValues.begin(), expectedValues.end(), kClearDepthValue);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, kBufferCopyOffset, kPixelsPerRow);
+}
+
+DAWN_INSTANTIATE_TEST(CopyTests_T2B_No_Format_Param,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend(),
+                      VulkanBackend({"use_blit_for_depth32float_texture_to_buffer_copy"}));
 
 class CopyTests_T2B_Compat : public CopyTests_T2B {
   protected:

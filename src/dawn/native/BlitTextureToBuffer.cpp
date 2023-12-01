@@ -52,12 +52,20 @@ namespace {
 constexpr uint32_t kWorkgroupSizeX = 8;
 constexpr uint32_t kWorkgroupSizeY = 8;
 
+constexpr std::string_view kDstBufferU32 = R"(
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+// For DepthFloat32 we can directly use f32 for the buffer array data type as we don't need packing.
+constexpr std::string_view kDstBufferF32 = R"(
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<f32>;
+)";
+
 constexpr std::string_view kFloatTexture1D = R"(
 fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords.x, level);
 }
 @group(0) @binding(0) var src_tex : texture_1d<f32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kFloatTexture2D = R"(
@@ -65,7 +73,6 @@ fn textureLoadGeneral(tex: texture_2d<f32>, coords: vec3u, level: u32) -> vec4<f
     return textureLoad(tex, coords.xy, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d<f32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kFloatTexture2DArray = R"(
@@ -73,7 +80,6 @@ fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> 
     return textureLoad(tex, coords.xy, coords.z, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d_array<f32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kFloatTexture3D = R"(
@@ -81,13 +87,12 @@ fn textureLoadGeneral(tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f
     return textureLoad(tex, coords, level);
 }
 @group(0) @binding(0) var src_tex : texture_3d<f32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 // Cube map reference: https://en.wikipedia.org/wiki/Cube_mapping
-constexpr std::string_view kFloatTextureCube = R"(
-@group(1) @binding(0) var default_sampler: sampler;
-fn textureLoadGeneral(tex: texture_cube<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+// Function converting texel coord to sample st coord for cube texture.
+constexpr std::string_view kCubeCoordCommon = R"(
+fn coordToCubeSampleST(coords: vec3u, size: vec3u) -> vec3<f32> {
     var st = (vec2f(coords.xy) + vec2f(0.5, 0.5)) / vec2f(params.levelSize.xy);
     st.y = 1. - st.y;
     st = st * 2. - 1.;
@@ -99,62 +104,42 @@ fn textureLoadGeneral(tex: texture_cube<f32>, coords: vec3u, level: u32) -> vec4
         case 3: { sample_coords = vec3f(st.x, -1., st.y); } // Negative Y
         case 4: { sample_coords = vec3f(st.x, st.y, 1.); }  // Positive Z
         case 5: { sample_coords = vec3f(-st.x, st.y, -1.);} // Negative Z
-        default: { return vec4f(0.); } // Unreachable
+        default: { return vec3f(0.); } // Unreachable
     }
+    return sample_coords;
+}
+)";
+
+constexpr std::string_view kFloatTextureCube = R"(
+@group(1) @binding(0) var default_sampler: sampler;
+fn textureLoadGeneral(tex: texture_cube<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    let sample_coords = coordToCubeSampleST(coords, params.levelSize);
     return textureSampleLevel(tex, default_sampler, sample_coords, f32(level));
 }
 @group(0) @binding(0) var src_tex : texture_cube<f32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
-constexpr std::string_view kStencilTexture = R"(
+constexpr std::string_view kUintTexture = R"(
 fn textureLoadGeneral(tex: texture_2d<u32>, coords: vec3u, level: u32) -> vec4<u32> {
     return textureLoad(tex, coords.xy, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d<u32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
-constexpr std::string_view kStencilTextureArray = R"(
+constexpr std::string_view kUintTextureArray = R"(
 fn textureLoadGeneral(tex: texture_2d_array<u32>, coords: vec3u, level: u32) -> vec4<u32> {
     return textureLoad(tex, coords.xy, coords.z, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
-constexpr std::string_view kDepthTexture = R"(
-fn textureLoadGeneral(tex: texture_depth_2d, coords: vec3u, level: u32) -> f32 {
-    return textureLoad(tex, coords.xy, level);
+constexpr std::string_view kUintTextureCube = R"(
+@group(1) @binding(0) var default_sampler: sampler;
+fn textureLoadGeneral(tex: texture_cube<u32>, coords: vec3u, level: u32) -> vec4<u32> {
+    let sample_coords = coordToCubeSampleST(coords, params.levelSize);
+    return textureSampleLevel(tex, default_sampler, sample_coords, f32(level));
 }
-@group(0) @binding(0) var src_tex : texture_depth_2d;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
-)";
-
-constexpr std::string_view kDepthTextureArray = R"(
-fn textureLoadGeneral(tex: texture_depth_2d_array, coords: vec3u, level: u32) -> f32 {
-    return textureLoad(tex, coords.xy, coords.z, level);
-}
-@group(0) @binding(0) var src_tex : texture_depth_2d_array;
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
-)";
-
-constexpr std::string_view kDepth32FloatTexture = R"(
-fn textureLoadGeneral(tex: texture_depth_2d, coords: vec3u, level: u32) -> f32 {
-    return textureLoad(tex, coords.xy, level);
-}
-@group(0) @binding(0) var src_tex : texture_depth_2d;
-// Can directly use f32 for the buffer array data type
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<f32>;
-)";
-
-constexpr std::string_view kDepth32FloatTextureArray = R"(
-fn textureLoadGeneral(tex: texture_depth_2d_array, coords: vec3u, level: u32) -> f32 {
-    return textureLoad(tex, coords.xy, coords.z, level);
-}
-@group(0) @binding(0) var src_tex : texture_depth_2d_array;
-// Can directly use f32 for the buffer array data type
-@group(0) @binding(1) var<storage, read_write> dst_buf : array<f32>;
+@group(0) @binding(0) var src_tex : texture_cube<u32>;
 )";
 
 constexpr std::string_view kCommon = R"(
@@ -293,19 +278,18 @@ constexpr std::string_view kPackRG8SnormToU32 = R"(
 // As a result we are using f32 and array<u32> to do all the math and byte manipulation.
 // If we have 2-byte scalar type (f16, u16) it can be a bit easier when writing to the storage
 // buffer.
-
 constexpr std::string_view kPackDepth16UnormToU32 = R"(
     // Result bits to store into dst_buf
     var result: u32 = 0u;
     // Storing depth16unorm texel values
     // later called by pack2x16unorm to convert to u32.
     var v: vec2<f32>;
-    v[0] = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    v[0] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
 
     let coord1 = coord0 + vec3u(1, 0, 0);
     if (coord1.x < srcBoundary.x) {
         // Make sure coord1 is still within the copy boundary.
-        v[1] = textureLoadGeneral(src_tex, coord1, params.mipLevel);
+        v[1] = textureLoadGeneral(src_tex, coord1, params.mipLevel).r;
         result = pack2x16unorm(v);
     } else {
         // Otherwise, srcExtent.x is not a multiple of 2 and this thread is at right edge of the texture
@@ -382,7 +366,7 @@ constexpr std::string_view kPackRGB9E5UfloatToU32 = R"(
 // Directly loading depth32float values into dst_buf
 // No bit manipulation and packing is needed.
 constexpr std::string_view kLoadDepth32Float = R"(
-    dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
 }
 )";
 
@@ -421,37 +405,8 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                 shader += kFloatTexture3D;
                 break;
             case wgpu::TextureViewDimension::Cube:
+                shader += kCubeCoordCommon;
                 shader += kFloatTextureCube;
-                break;
-            default:
-                DAWN_UNREACHABLE();
-        }
-    };
-    auto AppendDepthTextureHead = [&]() {
-        switch (viewDimension) {
-            case wgpu::TextureViewDimension::e2D:
-                shader += kDepthTexture;
-                break;
-            case wgpu::TextureViewDimension::e2DArray:
-                shader += kDepthTextureArray;
-                break;
-            case wgpu::TextureViewDimension::Cube:
-                // TODO(dawn:2182): Add shader variations
-                break;
-            default:
-                DAWN_UNREACHABLE();
-        }
-    };
-    auto AppendDepth32FloatTextureHead = [&]() {
-        switch (viewDimension) {
-            case wgpu::TextureViewDimension::e2D:
-                shader += kDepth32FloatTexture;
-                break;
-            case wgpu::TextureViewDimension::e2DArray:
-                shader += kDepth32FloatTextureArray;
-                break;
-            case wgpu::TextureViewDimension::Cube:
-                // TODO(dawn:2182): Add shader variations
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -459,14 +414,16 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     };
     auto AppendStencilTextureHead = [&]() {
         switch (viewDimension) {
+            // Stencil cannot have e1D texture.
             case wgpu::TextureViewDimension::e2D:
-                shader += kStencilTexture;
+                shader += kUintTexture;
                 break;
             case wgpu::TextureViewDimension::e2DArray:
-                shader += kStencilTextureArray;
+                shader += kUintTextureArray;
                 break;
             case wgpu::TextureViewDimension::Cube:
-                // TODO(dawn:2182): Add shader variations
+                shader += kCubeCoordCommon;
+                shader += kUintTextureCube;
                 break;
             default:
                 DAWN_UNREACHABLE();
@@ -476,6 +433,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     switch (format.format) {
         case wgpu::TextureFormat::R8Snorm:
             AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackR8SnormToU32;
             shader += kCommonEnd;
@@ -483,6 +441,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             break;
         case wgpu::TextureFormat::RG8Snorm:
             AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackRG8SnormToU32;
             shader += kCommonEnd;
@@ -490,6 +449,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             break;
         case wgpu::TextureFormat::RGBA8Snorm:
             AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackRGBA8SnormToU32;
             shader += kCommonEnd;
@@ -497,6 +457,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             break;
         case wgpu::TextureFormat::BGRA8Unorm:
             AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackBGRA8UnormToU32;
             shader += kCommonEnd;
@@ -504,28 +465,32 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             break;
         case wgpu::TextureFormat::RGB9E5Ufloat:
             AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackRGB9E5UfloatToU32;
             shader += kCommonEnd;
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::Depth16Unorm:
-            AppendDepthTextureHead();
+            AppendFloatTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackDepth16UnormToU32;
             shader += kCommonEnd;
-            textureSampleType = wgpu::TextureSampleType::Depth;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Depth32Float:
-            AppendDepth32FloatTextureHead();
+            AppendFloatTextureHead();
+            shader += kDstBufferF32;
             shader += kCommon;
             shader += kLoadDepth32Float;
-            textureSampleType = wgpu::TextureSampleType::Depth;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
             AppendStencilTextureHead();
+            shader += kDstBufferU32;
             shader += kCommon;
             shader += kPackStencil8ToU32;
             shader += kCommonEnd;
@@ -537,13 +502,15 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             // backends.
             switch (src.aspect) {
                 case Aspect::Depth:
-                    AppendDepth32FloatTextureHead();
+                    AppendFloatTextureHead();
+                    shader += kDstBufferF32;
                     shader += kCommon;
                     shader += kLoadDepth32Float;
-                    textureSampleType = wgpu::TextureSampleType::Depth;
+                    textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
                     break;
                 case Aspect::Stencil:
                     AppendStencilTextureHead();
+                    shader += kDstBufferU32;
                     shader += kCommon;
                     shader += kPackStencil8ToU32;
                     shader += kCommonEnd;
