@@ -1519,12 +1519,58 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::HostMappedPointer:
         case wgpu::FeatureName::MultiPlanarRenderTargets:
+        case wgpu::FeatureName::FramebufferFetch:
+        case wgpu::FeatureName::BufferMapExtendedUsages:
+        case wgpu::FeatureName::AdapterPropertiesMemoryHeaps:
         case wgpu::FeatureName::Undefined:
             return false;
     }
     return false;
 }
 
+bool Converter::Convert(wgpu::WGSLFeatureName& out, interop::WGSLFeatureName in) {
+    switch (in) {
+        case interop::WGSLFeatureName::kReadonlyAndReadwriteStorageTextures:
+            out = wgpu::WGSLFeatureName::ReadonlyAndReadwriteStorageTextures;
+            return true;
+        case interop::WGSLFeatureName::kPacked4X8IntegerDotProduct:
+            out = wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct;
+            return true;
+        case interop::WGSLFeatureName::kUnrestrictedPointerParameters:
+            out = wgpu::WGSLFeatureName::UnrestrictedPointerParameters;
+            return true;
+        case interop::WGSLFeatureName::kPointerCompositeAccess:
+            out = wgpu::WGSLFeatureName::PointerCompositeAccess;
+            return true;
+    }
+    return false;
+}
+
+bool Converter::Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in) {
+    switch (in) {
+        case wgpu::WGSLFeatureName::ReadonlyAndReadwriteStorageTextures:
+            out = interop::WGSLFeatureName::kReadonlyAndReadwriteStorageTextures;
+            return true;
+        case wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct:
+            out = interop::WGSLFeatureName::kPacked4X8IntegerDotProduct;
+            return true;
+        case wgpu::WGSLFeatureName::UnrestrictedPointerParameters:
+            out = interop::WGSLFeatureName::kUnrestrictedPointerParameters;
+            return true;
+        case wgpu::WGSLFeatureName::PointerCompositeAccess:
+            out = interop::WGSLFeatureName::kPointerCompositeAccess;
+            return true;
+
+        case wgpu::WGSLFeatureName::Undefined:
+        case wgpu::WGSLFeatureName::ChromiumTestingUnimplemented:
+        case wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental:
+        case wgpu::WGSLFeatureName::ChromiumTestingExperimental:
+        case wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch:
+        case wgpu::WGSLFeatureName::ChromiumTestingShipped:
+            return false;
+    }
+    return false;
+}
 bool Converter::Convert(interop::GPUQueryType& out, wgpu::QueryType in) {
     switch (in) {
         case wgpu::QueryType::Occlusion:

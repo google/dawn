@@ -35,7 +35,8 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUSupportedFeatures
 ////////////////////////////////////////////////////////////////////////////////
 
-GPUSupportedFeatures::GPUSupportedFeatures(Napi::Env env, std::vector<wgpu::FeatureName> features) {
+GPUSupportedFeatures::GPUSupportedFeatures(Napi::Env env,
+                                           const std::vector<wgpu::FeatureName>& features) {
     Converter conv(env);
 
     // Add all known GPUFeatureNames that are known by dawn.node and skip the other ones are they

@@ -48,3 +48,10 @@ interface GPUCommandEncoder {
 dictionary GPUTextureDescriptor {
     GPUTextureViewDimension? textureBindingViewDimension;
 };
+
+enum WGSLFeatureName {
+    "readonly_and_readwrite_storage_textures",
+    "packed_4x8_integer_dot_product",
+    "unrestricted_pointer_parameters",
+    "pointer_composite_access",
+};
