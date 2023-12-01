@@ -696,9 +696,6 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,cross:abstract_float:* [ RetryOnFailure ]
 
 ################################################################################
