@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/core/ir/binary/BUILD.cmake)
 include(lang/core/ir/transform/BUILD.cmake)
 
 ################################################################################

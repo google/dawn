@@ -158,6 +158,8 @@ function(generate_protos)
       set(COMMENT "${COMMENT}, plugin-options: ${PLUGIN_OPTIONS}")
     endif()
 
+    file(MAKE_DIRECTORY "${ARGS_PROTOC_OUT_DIR}/${REL_DIR}")
+
     add_custom_command(
       OUTPUT ${GENERATED_SRCS}
       COMMAND protobuf::protoc

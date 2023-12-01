@@ -25,45 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/return.h"
+#ifndef SRC_TINT_LANG_CORE_IR_BINARY_ENCODE_H_
+#define SRC_TINT_LANG_CORE_IR_BINARY_ENCODE_H_
 
-#include <utility>
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/result/result.h"
 
-#include "src/tint/lang/core/ir/clone_context.h"
-#include "src/tint/lang/core/ir/function.h"
-#include "src/tint/lang/core/ir/module.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Return);
-
+// Forward declarartion
 namespace tint::core::ir {
-
-Return::Return() = default;
-
-Return::Return(Function* func) {
-    AddOperand(Return::kFunctionOperandOffset, func);
-}
-
-Return::Return(Function* func, ir::Value* arg) {
-    AddOperand(Return::kFunctionOperandOffset, func);
-    AddOperand(Return::kArgsOperandOffset, arg);
-}
-
-Return::~Return() = default;
-
-Return* Return::Clone(CloneContext& ctx) {
-    auto* fn = ctx.Remap(Func());
-    if (auto* val = Value()) {
-        return ctx.ir.instructions.Create<Return>(fn, ctx.Remap(val));
-    }
-    return ctx.ir.instructions.Create<Return>(fn);
-}
-
-Function* Return::Func() {
-    return tint::As<Function>(operands_[kFunctionOperandOffset]);
-}
-
-const Function* Return::Func() const {
-    return tint::As<Function>(operands_[kFunctionOperandOffset]);
-}
-
+class Module;
 }  // namespace tint::core::ir
+
+namespace tint::core::ir::binary {
+
+Result<Vector<std::byte, 0>> Encode(const Module& module);
+
+}  // namespace tint::core::ir::binary
+
+#endif  // SRC_TINT_LANG_CORE_IR_BINARY_ENCODE_H_

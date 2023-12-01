@@ -121,6 +121,8 @@ class Manager final {
             return Get<core::type::F16>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, bool>) {
             return Get<core::type::Bool>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, void>) {
+            return Get<core::type::Void>(std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsVector<T>) {
             return vec<typename T::type, T::width>(std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsMatrix<T>) {

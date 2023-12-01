@@ -49,6 +49,9 @@ class Return final : public Castable<Return, Terminator> {
     /// The offset in Operands() for the return argument
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// Constructor (no operands)
+    Return();
+
     /// Constructor (no return value)
     /// @param func the function being returned
     explicit Return(Function* func);

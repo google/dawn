@@ -36,6 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Function);
 
 namespace tint::core::ir {
 
+Function::Function() = default;
+
 Function::Function(const core::type::Type* rt,
                    PipelineStage stage,
                    std::optional<std::array<uint32_t, 3>> wg_size)
