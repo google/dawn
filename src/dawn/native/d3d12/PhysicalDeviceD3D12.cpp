@@ -143,20 +143,17 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Norm16TextureFormats);
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
+    EnableFeature(Feature::ChromiumExperimentalDp4a);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
         EnableFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
     }
 
-    // Both Dp4a and ShaderF16 features require DXC version being 1.4 or higher
-    if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
-        if (mDeviceInfo.supportsDP4a) {
-            EnableFeature(Feature::ChromiumExperimentalDp4a);
-        }
-        if (mDeviceInfo.supportsShaderF16) {
-            EnableFeature(Feature::ShaderF16);
-        }
+    // ShaderF16 features require DXC version being 1.4 or higher
+    if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4) &&
+        mDeviceInfo.supportsShaderF16) {
+        EnableFeature(Feature::ShaderF16);
     }
 
     // ChromiumExperimentalSubgroups requires SM >= 6.0 and capabilities flags.
@@ -380,15 +377,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
-    // shader-f16 feature and chromium-experimental-dp4a feature require DXC 1.4 or higher for
-    // D3D12. Note that DXC version is checked in InitializeSupportedFeaturesImpl.
-    if (feature == wgpu::FeatureName::ShaderF16 ||
-        feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
-        if (!toggles.IsEnabled(Toggle::UseDXC)) {
-            return FeatureValidationResult(
-                absl::StrFormat("Feature %s requires DXC for D3D12.",
-                                GetInstance()->GetFeatureInfo(feature)->name));
-        }
+    // The feature `shader-f16` requires DXC 1.4 or higher. Note that DXC version is checked in
+    // InitializeSupportedFeaturesImpl.
+    if (feature == wgpu::FeatureName::ShaderF16 && !toggles.IsEnabled(Toggle::UseDXC)) {
+        return FeatureValidationResult(absl::StrFormat(
+            "Feature %s requires DXC for D3D12.", GetInstance()->GetFeatureInfo(feature)->name));
     }
     return {};
 }
@@ -570,6 +563,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     }
     deviceToggles->Default(Toggle::D3D12CreateNotZeroedHeap,
                            GetDeviceInfo().supportsHeapFlagCreateNotZeroed);
+
+    if (!GetDeviceInfo().supportsDP4a || !deviceToggles->IsEnabled(Toggle::UseDXC) ||
+        !GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
+        deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
+    }
 
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();

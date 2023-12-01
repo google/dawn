@@ -314,6 +314,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     req.hlsl.tintOptions.polyfill_reflect_vec2_f32 =
         device->IsToggleEnabled(Toggle::D3D12PolyfillReflectVec2F32);
+    req.hlsl.tintOptions.polyfill_dot_4x8_packed =
+        device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
 
     const CombinedLimits& limits = device->GetLimits();
     req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);

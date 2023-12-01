@@ -486,6 +486,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "workaround issues where FXC can miscompile code that depends on special float values (NaN, "
       "INF, etc).",
       "https://crbug.com/tint/976", ToggleStage::Device}},
+    {Toggle::PolyFillPacked4x8DotProduct,
+     {"polyfill_packed_4x8_dot_product",
+      "Always use the polyfill version of dot4I8Packed() and dot4U8Packed().",
+      "https://crbug.com/tint/1497", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

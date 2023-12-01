@@ -209,6 +209,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     // TODO(dawn:1705): do we need to support it?
     req.hlsl.tintOptions.polyfill_reflect_vec2_f32 = false;
+
+    DAWN_ASSERT(device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct));
     req.hlsl.tintOptions.polyfill_dot_4x8_packed = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
