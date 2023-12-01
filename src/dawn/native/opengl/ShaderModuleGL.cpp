@@ -358,8 +358,9 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             if (r.stage == SingleShaderStage::Compute) {
                 // Validate workgroup size after program runs transforms.
                 Extent3D _;
-                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits));
+                DAWN_TRY_ASSIGN(
+                    _, ValidateComputeStageWorkgroupSize(program, remappedEntryPoint.c_str(),
+                                                         r.limits, /* fullSubgroups */ {}));
             }
 
             auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);

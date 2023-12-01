@@ -77,6 +77,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     GetDefaultLimitsForSupportedFeatureLevel(&limits->v1);
+    // Set the subgroups limit, as DeviceNull should support subgroups feature.
+    limits->experimentalSubgroupLimits.minSubgroupSize = 4;
+    limits->experimentalSubgroupLimits.maxSubgroupSize = 128;
     return {};
 }
 
@@ -465,12 +468,17 @@ MaybeError ComputePipeline::Initialize() {
                     RunTransforms(&transformManager, computeStage.module->GetTintProgram(),
                                   transformInputs, nullptr, nullptr));
 
-    // Do the workgroup size validation as it is actually backend agnostic.
+    // Do the workgroup size validation, although different backend will have different
+    // fullSubgroups parameter.
     const CombinedLimits& limits = GetDevice()->GetLimits();
     Extent3D _;
     DAWN_TRY_ASSIGN(
-        _, ValidateComputeStageWorkgroupSize(transformedProgram, computeStage.entryPoint.c_str(),
-                                             LimitsForCompilationRequest::Create(limits.v1)));
+        _, ValidateComputeStageWorkgroupSize(
+               transformedProgram, computeStage.entryPoint.c_str(),
+               LimitsForCompilationRequest::Create(limits.v1), /* maxSubgroupSizeForFullSubgroups */
+               IsFullSubgroupsRequired()
+                   ? std::make_optional(limits.experimentalSubgroupLimits.maxSubgroupSize)
+                   : std::nullopt));
 
     return {};
 }

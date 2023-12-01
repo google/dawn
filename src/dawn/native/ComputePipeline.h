@@ -56,11 +56,15 @@ class ComputePipelineBase : public PipelineBase,
         bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
     };
 
+    bool IsFullSubgroupsRequired() const;
+
   protected:
     void DestroyImpl() override;
 
   private:
     ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+
+    bool mRequiresFullSubgroups;
 };
 
 }  // namespace dawn::native

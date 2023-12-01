@@ -50,6 +50,7 @@ struct TransformedShaderModuleCacheKey {
     const PipelineLayoutBase* layout;
     std::string entryPoint;
     PipelineConstantEntries constants;
+    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups;
 
     bool operator==(const TransformedShaderModuleCacheKey& other) const;
 };
@@ -75,10 +76,12 @@ class ShaderModule final : public ShaderModuleBase {
                                                    ShaderModuleParseResult* parseResult,
                                                    OwnedCompilationMessages* compilationMessages);
 
-    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(SingleShaderStage stage,
-                                                    const ProgrammableStage& programmableStage,
-                                                    const PipelineLayout* layout,
-                                                    bool clampFragDepth);
+    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(
+        SingleShaderStage stage,
+        const ProgrammableStage& programmableStage,
+        const PipelineLayout* layout,
+        bool clampFragDepth,
+        std::optional<uint32_t> maxSubgroupSizeForFullSubgroups);
 
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

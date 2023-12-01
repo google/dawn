@@ -218,11 +218,12 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
         return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
     }
 
+    // Validate workgroup size after program runs transforms.
     if (r.stage == SingleShaderStage::Compute) {
-        // Validate workgroup size after program runs transforms.
         Extent3D _;
-        DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                               transformedProgram, remappedEntryPointName->data(), r.limits));
+        DAWN_TRY_ASSIGN(
+            _, ValidateComputeStageWorkgroupSize(transformedProgram, remappedEntryPointName->data(),
+                                                 r.limits, r.maxSubgroupSizeForFullSubgroups));
     }
 
     bool usesVertexIndex = false;

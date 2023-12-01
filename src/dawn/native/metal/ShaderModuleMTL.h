@@ -62,12 +62,14 @@ class ShaderModule final : public ShaderModuleBase {
         MTLSize localWorkgroupSize;
     };
 
-    MaybeError CreateFunction(SingleShaderStage stage,
-                              const ProgrammableStage& programmableStage,
-                              const PipelineLayout* layout,
-                              MetalFunctionData* out,
-                              uint32_t sampleMask = 0xFFFFFFFF,
-                              const RenderPipeline* renderPipeline = nullptr);
+    MaybeError CreateFunction(
+        SingleShaderStage stage,
+        const ProgrammableStage& programmableStage,
+        const PipelineLayout* layout,
+        MetalFunctionData* out,
+        uint32_t sampleMask = 0xFFFFFFFF,
+        const RenderPipeline* renderPipeline = nullptr,
+        std::optional<uint32_t> maxSubgroupSizeForFullSubgroups = std::nullopt);
 
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

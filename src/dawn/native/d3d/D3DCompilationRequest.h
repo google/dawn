@@ -80,7 +80,8 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(bool, disableSymbolRenaming)                                                               \
-    X(bool, dumpShaders)
+    X(bool, dumpShaders)                                                                         \
+    X(std::optional<uint32_t>, maxSubgroupSizeForFullSubgroups)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
     X(bool, hasShaderF16Feature)                    \

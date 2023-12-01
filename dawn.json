@@ -999,6 +999,14 @@
             {"name": "compute", "type": "programmable stage descriptor"}
         ]
     },
+    "dawn compute pipeline full subgroups": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["compute pipeline descriptor"],
+        "members": [
+            {"name": "requires full subgroups", "type": "bool", "default": "false"}
+        ]
+    },
     "alpha mode": {
         "category": "enum",
         "tags": ["dawn"],
@@ -3302,6 +3310,7 @@
             {"value": 1017, "name": "buffer host mapped pointer", "tags": ["dawn"]},
             {"value": 1018, "name": "dawn experimental subgroup limits", "tags": ["dawn"]},
             {"value": 1019, "name": "adapter properties memory heaps", "tags": ["dawn"]},
+            {"value": 1020, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

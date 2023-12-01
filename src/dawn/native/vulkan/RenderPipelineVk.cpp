@@ -373,7 +373,8 @@ MaybeError RenderPipeline::Initialize() {
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv,
                         ToBackend(programmableStage.module)
-                            ->GetHandleAndSpirv(stage, programmableStage, layout, clampFragDepth));
+                            ->GetHandleAndSpirv(stage, programmableStage, layout, clampFragDepth,
+                                                /* fullSubgroups */ {}));
         // Record cache key for each shader since it will become inaccessible later on.
         StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
 
