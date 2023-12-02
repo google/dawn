@@ -307,8 +307,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // D3D11 can only clear RTV with float values.
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
-    // D3D11 doesn't support shader model 6+ features
-    deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

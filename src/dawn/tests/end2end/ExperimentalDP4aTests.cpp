@@ -134,6 +134,8 @@ DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
                             D3D12Backend({}, {"use_dxc"}),
                             D3D12Backend({"polyfill_packed_4x8_dot_product"}),
                             MetalBackend(),
+                            OpenGLBackend(),
+                            OpenGLESBackend(),
                             VulkanBackend(),
                         },
                         {true, false});

@@ -1,89 +1,100 @@
-SKIP: FAILED
+#version 310 es
 
-
-enable chromium_experimental_dp4a;
-
-fn dot4I8Packed_881e62() {
-  var arg_0 = 1u;
-  var arg_1 = 1u;
-  var res : i32 = dot4I8Packed(arg_0, arg_1);
-  prevent_dce = res;
+int tint_int_dot(ivec4 a, ivec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+int tint_dot4_i8_packed(uint a, uint b) {
+  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  return tint_int_dot(a_i8, b_i8);
+}
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
+void dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  int res = tint_dot4_i8_packed(arg_0, arg_1);
+  prevent_dce.inner = res;
+}
+
+vec4 vertex_main() {
   dot4I8Packed_881e62();
-  return vec4<f32>();
+  return vec4(0.0f);
 }
 
-@fragment
-fn fragment_main() {
-  dot4I8Packed_881e62();
+void main() {
+  gl_PointSize = 1.0;
+  vec4 inner_result = vertex_main();
+  gl_Position = inner_result;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
+}
+#version 310 es
+precision highp float;
+
+int tint_int_dot(ivec4 a, ivec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  dot4I8Packed_881e62();
+int tint_dot4_i8_packed(uint a, uint b) {
+  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  return tint_int_dot(a_i8, b_i8);
 }
 
-Failed to generate: error: Unknown builtin method: dot4I8Packed
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
 
-enable chromium_experimental_dp4a;
-
-fn dot4I8Packed_881e62() {
-  var arg_0 = 1u;
-  var arg_1 = 1u;
-  var res : i32 = dot4I8Packed(arg_0, arg_1);
-  prevent_dce = res;
+void dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  int res = tint_dot4_i8_packed(arg_0, arg_1);
+  prevent_dce.inner = res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  dot4I8Packed_881e62();
-  return vec4<f32>();
-}
-
-@fragment
-fn fragment_main() {
-  dot4I8Packed_881e62();
-}
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  dot4I8Packed_881e62();
-}
-
-Failed to generate: error: Unknown builtin method: dot4I8Packed
-
-enable chromium_experimental_dp4a;
-
-fn dot4I8Packed_881e62() {
-  var arg_0 = 1u;
-  var arg_1 = 1u;
-  var res : i32 = dot4I8Packed(arg_0, arg_1);
-  prevent_dce = res;
-}
-
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  dot4I8Packed_881e62();
-  return vec4<f32>();
-}
-
-@fragment
-fn fragment_main() {
+void fragment_main() {
   dot4I8Packed_881e62();
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
+void main() {
+  fragment_main();
+  return;
+}
+#version 310 es
+
+int tint_int_dot(ivec4 a, ivec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
+int tint_dot4_i8_packed(uint a, uint b) {
+  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
+  return tint_int_dot(a_i8, b_i8);
+}
+
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
+void dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  int res = tint_dot4_i8_packed(arg_0, arg_1);
+  prevent_dce.inner = res;
+}
+
+void compute_main() {
   dot4I8Packed_881e62();
 }
 
-Failed to generate: error: Unknown builtin method: dot4I8Packed
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main();
+  return;
+}

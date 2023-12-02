@@ -236,6 +236,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mFunctions.IsGLExtensionSupported("GL_EXT_texture_norm16")) {
         EnableFeature(Feature::Norm16TextureFormats);
     }
+
+    EnableFeature(Feature::ChromiumExperimentalDp4a);
 }
 
 namespace {
