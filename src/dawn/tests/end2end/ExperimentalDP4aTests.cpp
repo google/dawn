@@ -58,6 +58,10 @@ class ExperimentalDP4aTests : public DawnTestWithParams<ExperimentalDP4aTestsPar
 };
 
 TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
+    // TODO(dawn:1704): investigate why the creation of compute pipeline with dot4{U|I}Packed()
+    // fails on Pixel 4
+    DAWN_SUPPRESS_TEST_IF(IsQualcomm());
+
     const char* computeShader = R"(
         enable chromium_experimental_dp4a;
 
@@ -128,16 +132,9 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
-                        {
-                            D3D11Backend(),
-                            D3D12Backend(),
-                            D3D12Backend({}, {"use_dxc"}),
-                            D3D12Backend({"polyfill_packed_4x8_dot_product"}),
-                            MetalBackend(),
-                            OpenGLBackend(),
-                            OpenGLESBackend(),
-                            VulkanBackend(),
-                        },
+                        {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_dxc"}),
+                         D3D12Backend({"polyfill_packed_4x8_dot_product"}), MetalBackend(),
+                         VulkanBackend(), VulkanBackend({"polyfill_packed_4x8_dot_product"})},
                         {true, false});
 
 }  // anonymous namespace

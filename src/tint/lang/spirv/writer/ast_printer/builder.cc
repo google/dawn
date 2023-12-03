@@ -263,12 +263,14 @@ Builder::AccessorInfo::~AccessorInfo() {}
 
 Builder::Builder(const Program& program,
                  bool zero_initialize_workgroup_memory,
-                 bool experimental_require_subgroup_uniform_control_flow)
+                 bool experimental_require_subgroup_uniform_control_flow,
+                 bool polyfill_dot_4x8_packed)
     : builder_(ProgramBuilder::Wrap(program)),
       scope_stack_{Scope{}},
       zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory),
       experimental_require_subgroup_uniform_control_flow_(
-          experimental_require_subgroup_uniform_control_flow) {}
+          experimental_require_subgroup_uniform_control_flow),
+      polyfill_dot_4x8_packed_(polyfill_dot_4x8_packed) {}
 
 Builder::~Builder() = default;
 
@@ -349,9 +351,11 @@ Operand Builder::result_op() {
 bool Builder::GenerateExtension(wgsl::Extension extension) {
     switch (extension) {
         case wgsl::Extension::kChromiumExperimentalDp4A:
-            module_.PushExtension("SPV_KHR_integer_dot_product");
-            module_.PushCapability(SpvCapabilityDotProductKHR);
-            module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            if (!polyfill_dot_4x8_packed_) {
+                module_.PushExtension("SPV_KHR_integer_dot_product");
+                module_.PushCapability(SpvCapabilityDotProductKHR);
+                module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            }
             break;
         case wgsl::Extension::kF16:
             module_.PushCapability(SpvCapabilityFloat16);

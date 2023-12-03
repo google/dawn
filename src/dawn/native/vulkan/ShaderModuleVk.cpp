@@ -332,6 +332,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // transform as unsized arrays can only be declared on storage address space.
     req.tintOptions.disable_runtime_sized_array_index_clamping =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
+    req.tintOptions.polyfill_dot_4x8_packed =
+        GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
     req.use_tint_ir = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
 
     // Set subgroup uniform control flow flag for subgroup experiment, if device has

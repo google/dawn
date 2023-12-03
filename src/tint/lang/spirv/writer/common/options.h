@@ -143,6 +143,9 @@ struct Options {
     /// SPIRV module. Issue: dawn:464
     bool experimental_require_subgroup_uniform_control_flow = false;
 
+    /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
+    bool polyfill_dot_4x8_packed = false;
+
     /// The bindings
     Bindings bindings;
 
@@ -155,6 +158,7 @@ struct Options {
                  emit_vertex_point_size,
                  clamp_frag_depth,
                  experimental_require_subgroup_uniform_control_flow,
+                 polyfill_dot_4x8_packed,
                  bindings);
 };
 

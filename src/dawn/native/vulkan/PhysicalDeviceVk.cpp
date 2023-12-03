@@ -204,6 +204,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
+    EnableFeature(Feature::ChromiumExperimentalDp4a);
 
     // Initialize supported extensions
     if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
@@ -242,15 +243,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         mDeviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
         mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE) {
         EnableFeature(Feature::ShaderF16);
-    }
-
-    if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct) &&
-        mDeviceInfo.shaderIntegerDotProductFeatures.shaderIntegerDotProduct == VK_TRUE &&
-        mDeviceInfo.shaderIntegerDotProductProperties
-                .integerDotProduct4x8BitPackedSignedAccelerated == VK_TRUE &&
-        mDeviceInfo.shaderIntegerDotProductProperties
-                .integerDotProduct4x8BitPackedUnsignedAccelerated == VK_TRUE) {
-        EnableFeature(Feature::ChromiumExperimentalDp4a);
     }
 
     // unclippedDepth=true translates to depthClamp=true, which implicitly disables clipping.
@@ -710,6 +702,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // By default try to disable index clamping on the runtime-sized arrays on storage buffers in
     // Tint robustness transform according to the Vulkan extension VK_EXT_robustness2.
     deviceToggles->Default(Toggle::VulkanUseBufferRobustAccess2, true);
+
+    // Enable the polyfill versions of dot4I8Packed() and dot4U8Packed() when the SPIR-V capability
+    // `DotProductInput4x8BitPackedKHR` is not supported.
+    if (!GetDeviceInfo().HasExt(DeviceExt::ShaderIntegerDotProduct) ||
+        GetDeviceInfo().shaderIntegerDotProductFeatures.shaderIntegerDotProduct == VK_FALSE) {
+        deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
+    }
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

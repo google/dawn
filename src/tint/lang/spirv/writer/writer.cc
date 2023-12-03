@@ -94,7 +94,8 @@ Result<Output> Generate(const Program& program, const Options& options) {
     // Generate the SPIR-V code.
     auto impl =
         std::make_unique<ASTPrinter>(sanitized_result.program, zero_initialize_workgroup_memory,
-                                     options.experimental_require_subgroup_uniform_control_flow);
+                                     options.experimental_require_subgroup_uniform_control_flow,
+                                     options.polyfill_dot_4x8_packed);
     if (!impl->Generate()) {
         return Failure{impl->Diagnostics()};
     }
