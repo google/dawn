@@ -42,6 +42,7 @@ tint_add_target(tint_utils_bytes lib
   utils/bytes/bytes.cc
   utils/bytes/decoder.h
   utils/bytes/endianness.h
+  utils/bytes/reader.cc
   utils/bytes/reader.h
   utils/bytes/swap.h
 )

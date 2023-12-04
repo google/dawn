@@ -44,7 +44,7 @@ auto Data(ARGS&&... args) {
 
 TEST(BytesDecoderTest, Uint8) {
     auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80);
-    auto reader = Reader{Slice{data}, 0, Endianness::kLittle};
+    auto reader = BufferReader{Slice{data}};
     EXPECT_EQ(Decode<uint8_t>(reader).Get(), 0x10u);
     EXPECT_EQ(Decode<uint8_t>(reader).Get(), 0x20u);
     EXPECT_EQ(Decode<uint8_t>(reader).Get(), 0x30u);
@@ -58,7 +58,7 @@ TEST(BytesDecoderTest, Uint8) {
 
 TEST(BytesDecoderTest, Uint16) {
     auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80);
-    auto reader = Reader{Slice{data}, 0, Endianness::kLittle};
+    auto reader = BufferReader{Slice{data}};
     EXPECT_EQ(Decode<uint16_t>(reader).Get(), 0x2010u);
     EXPECT_EQ(Decode<uint16_t>(reader).Get(), 0x4030u);
     EXPECT_EQ(Decode<uint16_t>(reader).Get(), 0x6050u);
@@ -68,22 +68,22 @@ TEST(BytesDecoderTest, Uint16) {
 
 TEST(BytesDecoderTest, Uint32) {
     auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80);
-    auto reader = Reader{Slice{data}, 0, Endianness::kBig};
-    EXPECT_EQ(Decode<uint32_t>(reader).Get(), 0x10203040u);
-    EXPECT_EQ(Decode<uint32_t>(reader).Get(), 0x50607080u);
+    auto reader = BufferReader{Slice{data}};
+    EXPECT_EQ(Decode<uint32_t>(reader, Endianness::kBig).Get(), 0x10203040u);
+    EXPECT_EQ(Decode<uint32_t>(reader, Endianness::kBig).Get(), 0x50607080u);
     EXPECT_FALSE(Decode<uint32_t>(reader));
 }
 
 TEST(BytesDecoderTest, Float) {
     auto data = Data(0x00, 0x00, 0x08, 0x41);
-    auto reader = Reader{Slice{data}};
+    auto reader = BufferReader{Slice{data}};
     EXPECT_EQ(Decode<float>(reader).Get(), 8.5f);
     EXPECT_FALSE(Decode<float>(reader));
 }
 
 TEST(BytesDecoderTest, Bool) {
     auto data = Data(0x0, 0x1, 0x2, 0x1, 0x0);
-    auto reader = Reader{Slice{data}};
+    auto reader = BufferReader{Slice{data}};
     EXPECT_EQ(Decode<bool>(reader).Get(), false);
     EXPECT_EQ(Decode<bool>(reader).Get(), true);
     EXPECT_EQ(Decode<bool>(reader).Get(), true);
@@ -93,8 +93,8 @@ TEST(BytesDecoderTest, Bool) {
 }
 
 TEST(BytesDecoderTest, String) {
-    auto data = Data(0x0, 0x5, 'h', 'e', 'l', 'l', 'o', 0x0, 0x5, 'w', 'o', 'r', 'l', 'd');
-    auto reader = Reader{Slice{data}, 0, Endianness::kBig};
+    auto data = Data(0x5, 0x0, 'h', 'e', 'l', 'l', 'o', 0x5, 0x0, 'w', 'o', 'r', 'l', 'd');
+    auto reader = BufferReader{Slice{data}};
     EXPECT_EQ(Decode<std::string>(reader).Get(), "hello");
     EXPECT_EQ(Decode<std::string>(reader).Get(), "world");
     EXPECT_FALSE(Decode<std::string>(reader));
@@ -109,11 +109,11 @@ struct S {
 
 TEST(BytesDecoderTest, ReflectedObject) {
     auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80);
-    auto reader = Reader{Slice{data}, 0, Endianness::kBig};
+    auto reader = BufferReader{Slice{data}};
     auto got = Decode<S>(reader);
     EXPECT_EQ(got->a, 0x10u);
-    EXPECT_EQ(got->b, 0x2030u);
-    EXPECT_EQ(got->c, 0x40506070u);
+    EXPECT_EQ(got->b, 0x3020u);
+    EXPECT_EQ(got->c, 0x70605040u);
     EXPECT_FALSE(Decode<S>(reader));
 }
 
@@ -124,13 +124,13 @@ TEST(BytesDecoderTest, UnorderedMap) {
                      0x00, 0x50, 0x06, 0x60,  //
                      0x00, 0x70, 0x08, 0x80,  //
                      0x01);
-    auto reader = Reader{Slice{data}, 0, Endianness::kBig};
+    auto reader = BufferReader{Slice{data}};
     auto got = Decode<M>(reader);
     EXPECT_THAT(got.Get(), testing::ContainerEq(M{
-                               std::pair<uint8_t, uint32_t>(0x10u, 0x0220u),
-                               std::pair<uint8_t, uint32_t>(0x30u, 0x0440u),
-                               std::pair<uint8_t, uint32_t>(0x50u, 0x0660u),
-                               std::pair<uint8_t, uint32_t>(0x70u, 0x0880u),
+                               std::pair<uint8_t, uint32_t>(0x10u, 0x2002u),
+                               std::pair<uint8_t, uint32_t>(0x30u, 0x4004u),
+                               std::pair<uint8_t, uint32_t>(0x50u, 0x6006u),
+                               std::pair<uint8_t, uint32_t>(0x70u, 0x8008u),
                            }));
     EXPECT_FALSE(Decode<M>(reader));
 }
@@ -141,8 +141,8 @@ TEST(BytesDecoderTest, Tuple) {
                      0x20, 0x30,              //
                      0x40, 0x50, 0x60, 0x70,  //
                      0x80);
-    auto reader = Reader{Slice{data}, 0, Endianness::kBig};
-    EXPECT_THAT(Decode<T>(reader).Get(), (T{0x10u, 0x2030u, 0x40506070u}));
+    auto reader = BufferReader{Slice{data}};
+    EXPECT_THAT(Decode<T>(reader).Get(), (T{0x10u, 0x3020u, 0x70605040u}));
     EXPECT_FALSE(Decode<T>(reader));
 }
 

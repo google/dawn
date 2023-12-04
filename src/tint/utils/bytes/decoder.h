@@ -34,7 +34,6 @@
 #include <utility>
 
 #include "src/tint/utils/bytes/reader.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::bytes {
 
@@ -43,10 +42,11 @@ struct Decoder;
 
 /// Decodes T from @p reader.
 /// @param reader the byte reader
+/// @param args additional arguments used by Decoder<T>::Decode()
 /// @returns the decoded object
-template <typename T>
-Result<T> Decode(Reader& reader) {
-    return Decoder<T>::Decode(reader);
+template <typename T, typename... ARGS>
+Result<T> Decode(Reader& reader, ARGS&&... args) {
+    return Decoder<T>::Decode(reader, std::forward<ARGS>(args)...);
 }
 
 /// Decoder specialization for integer types
@@ -54,12 +54,10 @@ template <typename T>
 struct Decoder<T, std::enable_if_t<std::is_integral_v<T>>> {
     /// Decode decodes the integer type from @p reader.
     /// @param reader the reader to decode from
+    /// @param endianness the endianness of the integer
     /// @returns the decoded integer type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader) {
-        if (reader.BytesRemaining() < sizeof(T)) {
-            return Failure{"EOF"};
-        }
-        return reader.Int<T>();
+    static Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
+        return reader.Int<T>(endianness);
     }
 };
 
@@ -69,44 +67,31 @@ struct Decoder<T, std::enable_if_t<std::is_floating_point_v<T>>> {
     /// Decode decodes the floating point type from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded floating point type, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader) {
-        if (reader.BytesRemaining() < sizeof(T)) {
-            return Failure{"EOF"};
-        }
-        return reader.Float<T>();
-    }
+    static Result<T> Decode(Reader& reader) { return reader.Float<T>(); }
 };
 
 /// Decoder specialization for a uint16_t length prefixed string.
-template <typename T>
-struct Decoder<T, std::enable_if_t<std::is_same_v<T, std::string>>> {
+template <>
+struct Decoder<std::string, void> {
     /// Decode decodes the string from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded string, or an error if the stream is too short.
-    static Result<T> Decode(Reader& reader) {
-        if (reader.BytesRemaining() < sizeof(uint16_t)) {
-            return Failure{"EOF"};
-        }
+    static Result<std::string> Decode(Reader& reader) {
         auto len = reader.Int<uint16_t>();
-        if (reader.BytesRemaining() < len) {
-            return Failure{"EOF"};
+        if (!len) {
+            return len.Failure();
         }
-        return reader.String(len);
+        return reader.String(len.Get());
     }
 };
 
 /// Decoder specialization for bool types
 template <>
 struct Decoder<bool, void> {
-    static Result<bool> Decode(Reader& reader) {
-        /// Decode decodes the boolean from @p reader.
-        /// @param reader the reader to decode from
-        /// @returns the decoded boolean, or an error if the stream is too short.
-        if (reader.IsEOF()) {
-            return Failure{"EOF"};
-        }
-        return reader.Bool();
-    }
+    /// Decode decodes the boolean from @p reader.
+    /// @param reader the reader to decode from
+    /// @returns the decoded boolean, or an error if the stream is too short.
+    static Result<bool> Decode(Reader& reader) { return reader.Bool(); }
 };
 
 /// Decoder specialization for types that use TINT_REFLECT
@@ -143,10 +128,11 @@ struct Decoder<std::unordered_map<K, V>, void> {
         std::unordered_map<K, V> out;
 
         while (true) {
-            if (reader.IsEOF()) {
-                return Failure{"EOF"};
+            auto stop = bytes::Decode<bool>(reader);
+            if (!stop) {
+                return stop.Failure();
             }
-            if (reader.Bool()) {
+            if (stop.Get()) {
                 break;
             }
             auto key = bytes::Decode<K>(reader);

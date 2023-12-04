@@ -37,70 +37,49 @@ auto Data(ARGS&&... args) {
     return std::array{std::byte{static_cast<uint8_t>(args)}...};
 }
 
-TEST(BytesReaderTest, IntegerBigEndian) {
+TEST(BufferReaderTest, IntegerBigEndian) {
     auto data = Data(0x10, 0x20, 0x30, 0x40);
-    auto u32 = Reader{Slice{data}, 0, Endianness::kBig}.Int<uint32_t>();
+    auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kBig);
     EXPECT_EQ(u32, 0x10203040u);
-    auto i32 = Reader{Slice{data}, 0, Endianness::kBig}.Int<int32_t>();
+    auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kBig);
     EXPECT_EQ(i32, 0x10203040);
 }
 
-TEST(BytesReaderTest, IntegerBigEndian_Offset) {
-    auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60);
-    auto u32 = Reader{Slice{data}, 2, Endianness::kBig}.Int<uint32_t>();
-    EXPECT_EQ(u32, 0x30405060u);
-    auto i32 = Reader{Slice{data}, 2, Endianness::kBig}.Int<int32_t>();
-    EXPECT_EQ(i32, 0x30405060);
+TEST(BufferReaderTest, IntegerBigEndian_TooShort) {
+    auto data = Data(0x10, 0x20);
+    auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kBig);
+    EXPECT_FALSE(u32);
+    auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kBig);
+    EXPECT_FALSE(i32);
 }
 
-TEST(BytesReaderTest, IntegerBigEndian_Clipped) {
+TEST(BufferReaderTest, IntegerLittleEndian) {
     auto data = Data(0x10, 0x20, 0x30, 0x40);
-    auto u32 = Reader{Slice{data}, 2, Endianness::kBig}.Int<uint32_t>();
-    EXPECT_EQ(u32, 0x30400000u);
-    auto i32 = Reader{Slice{data}, 2, Endianness::kBig}.Int<int32_t>();
-    EXPECT_EQ(i32, 0x30400000);
-}
-
-TEST(BytesReaderTest, IntegerLittleEndian) {
-    auto data = Data(0x10, 0x20, 0x30, 0x40);
-    auto u32 = Reader{Slice{data}, 0, Endianness::kLittle}.Int<uint32_t>();
+    auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kLittle);
     EXPECT_EQ(u32, 0x40302010u);
-    auto i32 = Reader{Slice{data}, 0, Endianness::kLittle}.Int<int32_t>();
+    auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kLittle);
     EXPECT_EQ(i32, 0x40302010);
 }
 
-TEST(BytesReaderTest, IntegerLittleEndian_Offset) {
-    auto data = Data(0x10, 0x20, 0x30, 0x40, 0x50, 0x60);
-    auto u32 = Reader{Slice{data}, 2, Endianness::kLittle}.Int<uint32_t>();
-    EXPECT_EQ(u32, 0x60504030u);
-    auto i32 = Reader{Slice{data}, 2, Endianness::kLittle}.Int<int32_t>();
-    EXPECT_EQ(i32, 0x60504030);
+TEST(BufferReaderTest, IntegerLittleEndian_TooShort) {
+    auto data = Data(0x30, 0x40);
+    auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kLittle);
+    EXPECT_FALSE(u32);
+    auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kLittle);
+    EXPECT_FALSE(i32);
 }
 
-TEST(BytesReaderTest, IntegerLittleEndian_Clipped) {
-    auto data = Data(0x10, 0x20, 0x30, 0x40);
-    auto u32 = Reader{Slice{data}, 2, Endianness::kLittle}.Int<uint32_t>();
-    EXPECT_EQ(u32, 0x00004030u);
-    auto i32 = Reader{Slice{data}, 2, Endianness::kLittle}.Int<int32_t>();
-    EXPECT_EQ(i32, 0x00004030);
-}
-
-TEST(BytesReaderTest, Float) {
+TEST(BufferReaderTest, Float) {
     auto data = Data(0x00, 0x00, 0x08, 0x41);
-    float f32 = Reader{Slice{data}}.Float<float>();
-    EXPECT_EQ(f32, 8.5f);
+    auto f32 = BufferReader{Slice{data}}.Float<float>();
+    ASSERT_TRUE(f32);
+    EXPECT_EQ(f32.Get(), 8.5f);
 }
 
-TEST(BytesReaderTest, Float_Offset) {
-    auto data = Data(0x00, 0x00, 0x08, 0x41, 0x80, 0x3e);
-    float f32 = Reader{Slice{data}, 2}.Float<float>();
-    EXPECT_EQ(f32, 0.25049614f);
-}
-
-TEST(BytesReaderTest, Float_Clipped) {
-    auto data = Data(0x00, 0x00, 0x08, 0x41);
-    float f32 = Reader{Slice{data}, 2}.Float<float>();
-    EXPECT_EQ(f32, 2.3329e-41f);
+TEST(BufferReaderTest, Float_TooShort) {
+    auto data = Data(0x08, 0x41);
+    auto f32 = BufferReader{Slice{data}}.Float<float>();
+    EXPECT_FALSE(f32);
 }
 
 }  // namespace

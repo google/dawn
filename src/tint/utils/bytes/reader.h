@@ -36,104 +36,114 @@
 #include "src/tint/utils/bytes/swap.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::bytes {
 
-/// A binary stream reader.
-struct Reader {
-    /// @returns true if there are no more bytes remaining
-    bool IsEOF() const { return offset >= bytes.len; }
+/// A binary stream reader interface
+class Reader {
+  public:
+    /// Read reads bytes from the stream, blocking until there are @p count bytes available, or the
+    /// end of the stream has been reached.
+    /// @param out a pointer to the byte buffer that will be filled with the read data. Must be at
+    /// least @p count size.
+    /// @param count the number of bytes to read. Must be greater than 0.
+    /// @returns the number of bytes read from the stream. If Read() returns less than @p count,
+    /// then the end of the stream has been reached.
+    virtual size_t Read(std::byte* out, size_t count) = 0;
 
-    /// @returns the number of bytes remaining in the stream
-    size_t BytesRemaining() const { return IsEOF() ? 0 : bytes.len - offset; }
+    // Destructor
+    virtual ~Reader();
 
     /// Reads an integer from the stream, performing byte swapping if the stream's endianness
-    /// differs from the native endianness. If there are too few bytes remaining in the stream, then
-    /// the missing data will be substituted with zeros.
+    /// differs from the native endianness.
+    /// If there are too few bytes remaining in the stream, then a failure is returned.
+    /// @param endianness the encoded endianness of the integer
     /// @return the deserialized integer
     template <typename T>
-    T Int() {
+    Result<T> Int(Endianness endianness = Endianness::kLittle) {
         static_assert(std::is_integral_v<T>);
         T out = 0;
-        if (!IsEOF()) {
-            size_t n = std::min(sizeof(T), BytesRemaining());
-            memcpy(&out, &bytes[offset], n);
-            offset += n;
-            if (NativeEndianness() != endianness) {
-                out = Swap(out);
-            }
+        if (size_t n = Read(reinterpret_cast<std::byte*>(&out), sizeof(T)); n != sizeof(T)) {
+            return Failure{"EOF"};
+        }
+        if (NativeEndianness() != endianness) {
+            out = Swap(out);
         }
         return out;
     }
 
-    /// Reads a float from the stream. If there are too few bytes remaining in the stream, then
-    /// the missing data will be substituted with zeros.
+    /// Reads a float from the stream.
+    /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @return the deserialized floating point number
     template <typename T>
-    T Float() {
+    Result<T> Float() {
         static_assert(std::is_floating_point_v<T>);
         T out = 0;
-        if (!IsEOF()) {
-            size_t n = std::min(sizeof(T), BytesRemaining());
-            memcpy(&out, &bytes[offset], n);
-            offset += n;
+        if (size_t n = Read(reinterpret_cast<std::byte*>(&out), sizeof(T)); n != sizeof(T)) {
+            return Failure{"EOF"};
         }
         return out;
     }
 
     /// Reads a boolean from the stream
+    /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @returns true if the next byte is non-zero
-    bool Bool() {
-        if (IsEOF()) {
-            return false;
+    Result<bool> Bool() {
+        std::byte b{0};
+        if (size_t n = Read(&b, 1); n != 1) {
+            return Failure{"EOF"};
         }
-        return bytes[offset++] != std::byte{0};
+        return b != std::byte{0};
     }
 
-    /// Reads a string of @p len bytes from the stream. If there are too few bytes remaining in the
-    /// stream, then the returned string will be truncated.
+    /// Reads a string of @p len bytes from the stream.
+    /// If there are too few bytes remaining in the stream, then a failure is returned.
     /// @param len the length of the returned string in bytes
     /// @return the deserialized string
-    std::string String(size_t len) {
-        if (IsEOF()) {
-            return "";
+    Result<std::string> String(size_t len) {
+        std::string out;
+        out.resize(len);
+        if (size_t n = Read(reinterpret_cast<std::byte*>(out.data()), sizeof(char) * len);
+            n != len) {
+            return Failure{"EOF"};
         }
-        size_t n = std::min(len, BytesRemaining());
-        std::string out(reinterpret_cast<const char*>(&bytes[offset]), n);
-        offset += n;
         return out;
     }
-
-    /// The data to read from
-    Slice<const std::byte> bytes;
-
-    /// The current byte offset
-    size_t offset = 0;
-
-    /// The endianness of integers serialized in the stream
-    Endianness endianness = Endianness::kLittle;
 };
 
-/// Reads the templated type from the reader and assigns it to @p out
-/// @note This function does not
-template <typename T>
-Reader& operator>>(Reader& reader, T& out) {
-    constexpr bool is_numeric = std::is_integral_v<T> || std::is_floating_point_v<T>;
-    static_assert(is_numeric);
+/// BufferReader is an implementation of the Reader interface backed by a buffer.
+class BufferReader final : public Reader {
+  public:
+    // Destructor
+    ~BufferReader() override;
 
-    if constexpr (std::is_integral_v<T>) {
-        out = reader.Int<T>();
-        return reader;
+    /// Constructor
+    /// @param data the data to read from
+    /// @param size the number of bytes in the buffer
+    BufferReader(const std::byte* data, size_t size) : data_(data), bytes_remaining_(size) {}
+
+    /// Constructor
+    /// @param slice the byte slice to read from
+    explicit BufferReader(Slice<const std::byte> slice)
+        : data_(slice.data), bytes_remaining_(slice.len) {}
+
+    /// @copydoc Reader::Read
+    size_t Read(std::byte* out, size_t count) override {
+        size_t n = std::min(count, bytes_remaining_);
+        memcpy(out, data_, n);
+        data_ += n;
+        bytes_remaining_ -= n;
+        return n;
     }
 
-    if constexpr (std::is_floating_point_v<T>) {
-        out = reader.Float<T>();
-        return reader;
-    }
+  private:
+    /// The data to read from
+    const std::byte* data_ = nullptr;
 
-    // Unreachable
-    return reader;
-}
+    /// The number of bytes remaining
+    size_t bytes_remaining_ = 0;
+};
 
 }  // namespace tint::bytes
 

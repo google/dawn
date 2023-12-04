@@ -47,6 +47,7 @@ libtint_source_set("bytes") {
     "bytes.cc",
     "decoder.h",
     "endianness.h",
+    "reader.cc",
     "reader.h",
     "swap.h",
   ]
