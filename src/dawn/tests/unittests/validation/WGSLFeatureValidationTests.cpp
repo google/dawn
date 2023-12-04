@@ -30,16 +30,14 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "dawn/utils/WireHelper.h"
 
 namespace dawn {
 namespace {
 
 class WGSLFeatureValidationTest : public ValidationTest {
   protected:
-    void SetUp() override {
-        ValidationTest::SetUp();
-        DAWN_SKIP_TEST_IF(UsesWire());
-    }
+    void SetUp() override { ValidationTest::SetUp(); }
 
     struct InstanceSpec {
         bool useTestingFeatures = true;
@@ -47,8 +45,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
     };
 
     wgpu::Instance CreateInstance(InstanceSpec spec) {
-        wgpu::InstanceDescriptor desc;
-
+        // Build the native instance descriptor.
         std::vector<const char*> enabledToggles;
         if (spec.useTestingFeatures) {
             enabledToggles.push_back("expose_wgsl_testing_features");
@@ -58,12 +55,22 @@ class WGSLFeatureValidationTest : public ValidationTest {
         }
 
         wgpu::DawnTogglesDescriptor togglesDesc;
-        togglesDesc.nextInChain = desc.nextInChain;
-        desc.nextInChain = &togglesDesc;
         togglesDesc.enabledToggleCount = enabledToggles.size();
         togglesDesc.enabledToggles = enabledToggles.data();
 
-        return wgpu::CreateInstance(&desc);
+        wgpu::InstanceDescriptor nativeDesc;
+        nativeDesc.nextInChain = &togglesDesc;
+
+        // Build the wire instance descriptor.
+        wgpu::DawnWireWGSLControl wgslControl;
+        wgslControl.enableExperimental = spec.allowUnsafeAPIs;
+        wgslControl.enableUnsafe = spec.allowUnsafeAPIs;
+        wgslControl.enableTesting = spec.useTestingFeatures;
+
+        wgpu::InstanceDescriptor wireDesc;
+        wireDesc.nextInChain = &wgslControl;
+
+        return GetWireHelper()->CreateInstances(&nativeDesc, &wireDesc).first;
     }
 
     wgpu::Device CreateDeviceOnInstance(wgpu::Instance instance) {

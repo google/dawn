@@ -2126,6 +2126,17 @@
             {"name": "features", "type": "instance features", "annotation": "*"}
         ]
     },
+    "dawn wire WGSL control": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["instance descriptor"],
+        "members": [
+            {"name": "enable experimental", "type": "bool", "default": "false"},
+            {"name": "enable unsafe", "type": "bool", "default": "false"},
+            {"name": "enable testing", "type": "bool", "default": "false"}
+        ]
+    },
     "vertex attribute": {
         "category": "structure",
         "extensible": false,
@@ -3325,6 +3336,7 @@
             {"value": 1018, "name": "dawn experimental subgroup limits", "tags": ["dawn"]},
             {"value": 1019, "name": "adapter properties memory heaps", "tags": ["dawn"]},
             {"value": 1020, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
+            {"value": 1021, "name": "dawn wire WGSL control", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

@@ -43,9 +43,7 @@ class WireDeviceLifetimeTests : public testing::Test {
     WireDeviceLifetimeTests()
         : nativeProcs(BuildProcs()),
           wireHelper(utils::CreateWireHelper(nativeProcs, /* useWire */ true)) {
-        WGPUInstanceDescriptor instanceDesc = {};
-        nativeInstance = std::make_unique<native::Instance>(&instanceDesc);
-        instance = wireHelper->RegisterInstance(nativeInstance->Get());
+        instance = wireHelper->CreateInstances().first;
     }
 
   protected:
@@ -68,7 +66,6 @@ class WireDeviceLifetimeTests : public testing::Test {
     const DawnProcTable nativeProcs;
     std::unique_ptr<utils::WireHelper> wireHelper;
 
-    std::unique_ptr<native::Instance> nativeInstance;
     wgpu::Instance instance;
     wgpu::Adapter adapter;
 

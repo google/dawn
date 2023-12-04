@@ -55,8 +55,8 @@ ReservedDevice WireClient::ReserveDevice() {
     return mImpl->ReserveDevice();
 }
 
-ReservedInstance WireClient::ReserveInstance() {
-    return mImpl->ReserveInstance();
+ReservedInstance WireClient::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
+    return mImpl->ReserveInstance(descriptor);
 }
 
 void WireClient::ReclaimTextureReservation(const ReservedTexture& reservation) {

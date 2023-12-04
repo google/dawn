@@ -36,6 +36,10 @@
 
 struct DawnProcTable;
 
+namespace dawn::native {
+class Instance;
+}  // namespace dawn::native
+
 namespace dawn::utils {
 
 class WireHelper {
@@ -43,10 +47,17 @@ class WireHelper {
     virtual ~WireHelper();
 
     // Registers the instance on the wire, if present.
-    // Returns the wgpu::Instance which is the client instance on the wire, and
-    // the backend instance without the wire.
+    // Returns the wgpu::Instance which is the client instance on the wire (created with wireDesc),
+    // and the backend instance without the wire.
     // The function should not take ownership of |backendInstance|.
-    virtual wgpu::Instance RegisterInstance(WGPUInstance backendInstance) = 0;
+    virtual wgpu::Instance RegisterInstance(WGPUInstance backendInstance,
+                                            const WGPUInstanceDescriptor* wireDesc = nullptr) = 0;
+
+    // Helper to created a native instance and automatically register it with the wire if needed.
+    // Return the native instance and the same result as RegisterInstance.
+    virtual std::pair<wgpu::Instance, std::unique_ptr<dawn::native::Instance>> CreateInstances(
+        const wgpu::InstanceDescriptor* nativeDesc = nullptr,
+        const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
     virtual void BeginWireTrace(const char* name) = 0;
 

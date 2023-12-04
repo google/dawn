@@ -32,8 +32,11 @@
 #include <utility>
 
 #include "dawn/common/Log.h"
+#include "dawn/common/WGSLFeatureMapping.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
+#include "tint/lang/wgsl/features/language_feature.h"
+#include "tint/lang/wgsl/features/status.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -100,6 +103,16 @@ class RequestAdapterEvent : public TrackedEvent {
     Adapter* mAdapter = nullptr;
 };
 
+WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
+    switch (f) {
+#define CASE(WgslName, WgpuName)                \
+    case tint::wgsl::LanguageFeature::WgslName: \
+        return WGPUWGSLFeatureName_##WgpuName;
+        DAWN_FOREACH_WGSL_FEATURE(CASE)
+#undef CASE
+    }
+}
+
 }  // anonymous namespace
 
 // Free-standing API functions
@@ -120,6 +133,40 @@ WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
 }
 
 // Instance
+
+WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
+    if (descriptor == nullptr) {
+        return WireResult::Success;
+    }
+
+    if (descriptor->features.timedWaitAnyEnable) {
+        dawn::ErrorLog() << "Wire client instance doesn't support timedWaitAnyEnable = true";
+        return WireResult::FatalError;
+    }
+    if (descriptor->features.timedWaitAnyMaxCount > 0) {
+        dawn::ErrorLog() << "Wire client instance doesn't support non-zero timedWaitAnyMaxCount";
+        return WireResult::FatalError;
+    }
+
+    const WGPUDawnWireWGSLControl* wgslControl = nullptr;
+    for (const WGPUChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
+         chain = chain->next) {
+        switch (chain->sType) {
+            case WGPUSType_DawnWireWGSLControl:
+                wgslControl = reinterpret_cast<const WGPUDawnWireWGSLControl*>(chain);
+                break;
+            default:
+                dawn::ErrorLog() << "Wire client instance doesn't support InstanceDescriptor "
+                                    "extension structure with sType ("
+                                 << chain->sType << ")";
+                return WireResult::FatalError;
+        }
+    }
+
+    GatherWGSLFeatures(wgslControl);
+
+    return WireResult::Success;
+}
 
 void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
                               WGPURequestAdapterCallback callback,
@@ -210,14 +257,66 @@ WGPUWaitStatus Instance::WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64
     return GetClient()->GetEventManager()->WaitAny(count, infos, timeoutNS);
 }
 
+void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl) {
+    WGPUDawnWireWGSLControl defaultWgslControl{};
+    if (wgslControl == nullptr) {
+        wgslControl = &defaultWgslControl;
+    }
+
+    for (auto wgslFeature : tint::wgsl::kAllLanguageFeatures) {
+        // Skip over testing features if we don't have the toggle to expose them.
+        if (!wgslControl->enableTesting) {
+            switch (wgslFeature) {
+                case tint::wgsl::LanguageFeature::kChromiumTestingUnimplemented:
+                case tint::wgsl::LanguageFeature::kChromiumTestingUnsafeExperimental:
+                case tint::wgsl::LanguageFeature::kChromiumTestingExperimental:
+                case tint::wgsl::LanguageFeature::kChromiumTestingShippedWithKillswitch:
+                case tint::wgsl::LanguageFeature::kChromiumTestingShipped:
+                    continue;
+                default:
+                    break;
+            }
+        }
+
+        // Expose the feature depending on its status and wgslControl.
+        bool enable = false;
+        switch (tint::wgsl::GetLanguageFeatureStatus(wgslFeature)) {
+            case tint::wgsl::FeatureStatus::kUnknown:
+            case tint::wgsl::FeatureStatus::kUnimplemented:
+                enable = false;
+                break;
+
+            case tint::wgsl::FeatureStatus::kUnsafeExperimental:
+                enable = wgslControl->enableUnsafe;
+                break;
+            case tint::wgsl::FeatureStatus::kExperimental:
+                enable = wgslControl->enableExperimental;
+                break;
+
+            case tint::wgsl::FeatureStatus::kShippedWithKillswitch:
+            case tint::wgsl::FeatureStatus::kShipped:
+                enable = true;
+                break;
+        }
+
+        if (enable) {
+            mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
+        }
+    }
+}
+
 bool Instance::HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const {
-    // TODO(dawn:2260): Implemented wgslLanguageFeatures on the wire.
-    return false;
+    return mWGSLFeatures.count(feature) != 0;
 }
 
 size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const {
-    // TODO(dawn:2260): Implemented wgslLanguageFeatures on the wire.
-    return 0;
+    if (features != nullptr) {
+        for (WGPUWGSLFeatureName f : mWGSLFeatures) {
+            *features = f;
+            ++features;
+        }
+    }
+    return mWGSLFeatures.size();
 }
 
 }  // namespace dawn::wire::client

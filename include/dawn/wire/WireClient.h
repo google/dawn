@@ -87,7 +87,7 @@ class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
     ReservedSwapChain ReserveSwapChain(WGPUDevice device,
                                        const WGPUSwapChainDescriptor* descriptor);
     ReservedDevice ReserveDevice();
-    ReservedInstance ReserveInstance();
+    ReservedInstance ReserveInstance(const WGPUInstanceDescriptor* descriptor = nullptr);
 
     void ReclaimTextureReservation(const ReservedTexture& reservation);
     void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);

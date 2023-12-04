@@ -160,6 +160,7 @@ class ValidationTest : public testing::Test {
     const dawn::native::ToggleInfo* GetToggleInfo(const char* name) const;
     bool HasToggleEnabled(const char* toggle) const;
     wgpu::SupportedLimits GetSupportedLimits() const;
+    dawn::utils::WireHelper* GetWireHelper() const;
 
   protected:
     dawn::native::Adapter& GetBackendAdapter();

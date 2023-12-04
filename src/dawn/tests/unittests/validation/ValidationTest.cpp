@@ -143,16 +143,13 @@ void ValidationTest::SetUp() {
     // features). To test device with AllowUnsafeAPIs disabled, require it in device toggles
     // descriptor to override the inheritance.
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
-    WGPUDawnTogglesDescriptor instanceToggles = {};
-    instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
+    wgpu::DawnTogglesDescriptor instanceToggles = {};
     instanceToggles.enabledToggleCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
-    WGPUInstanceDescriptor instanceDesc = {};
-    instanceDesc.nextInChain = &instanceToggles.chain;
-
-    mDawnInstance = std::make_unique<dawn::native::Instance>(&instanceDesc);
-    mInstance = mWireHelper->RegisterInstance(mDawnInstance->Get());
+    wgpu::InstanceDescriptor instanceDesc = {};
+    instanceDesc.nextInChain = &instanceToggles;
+    std::tie(mInstance, mDawnInstance) = mWireHelper->CreateInstances(&instanceDesc);
 
     std::string traceName =
         std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
@@ -272,6 +269,10 @@ wgpu::SupportedLimits ValidationTest::GetSupportedLimits() const {
     wgpu::SupportedLimits supportedLimits = {};
     device.GetLimits(&supportedLimits);
     return supportedLimits;
+}
+
+dawn::utils::WireHelper* ValidationTest::GetWireHelper() const {
+    return mWireHelper.get();
 }
 
 wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc) {

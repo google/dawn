@@ -131,8 +131,13 @@ ReservedDevice Client::ReserveDevice() {
     return result;
 }
 
-ReservedInstance Client::ReserveInstance() {
+ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
     Instance* instance = Make<Instance>();
+
+    if (instance->Initialize(descriptor) != WireResult::Success) {
+        Free(instance);
+        return {nullptr, 0, 0};
+    }
 
     ReservedInstance result;
     result.instance = ToAPI(instance);

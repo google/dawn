@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 #define SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 
+#include <unordered_set>
+
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
@@ -42,6 +44,8 @@ WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor);
 class Instance final : public ObjectBase {
   public:
     using ObjectBase::ObjectBase;
+
+    WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
     void RequestAdapter(const WGPURequestAdapterOptions* options,
                         WGPURequestAdapterCallback callback,
@@ -63,6 +67,11 @@ class Instance final : public ObjectBase {
     // Always writes the full list when features is not nullptr.
     // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
     size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
+
+  private:
+    void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl);
+
+    std::unordered_set<WGPUWGSLFeatureName> mWGSLFeatures;
 };
 
 }  // namespace dawn::wire::client
