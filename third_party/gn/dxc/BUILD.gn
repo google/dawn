@@ -548,9 +548,17 @@ config("common_config") {
     "$dawn_dxc_dir/include",
     "$dawn_dxc_dir/tools/clang/include",
     "$dawn_dxc_dir/tools/clang/tools",
-    "$dawn_dxc_dir/include/llvm/llvm_assert",
     "${target_gen_dir}/include",  # Generated files
   ]
+
+  if (is_win) {
+    include_dirs += [
+      # $dawn_dxc_dir/lib/Support/assert.cpp depends on a "assert.h" include for the windows path,
+      # but the other architectures include <assert.h>. The system include would be shadowed if this
+      # include directory is added.
+      "$dawn_dxc_dir/include/llvm/llvm_assert",
+    ]
+  }
 
   defines = []
   if (is_debug && dawn_dxc_disable_asserts_debug) {
