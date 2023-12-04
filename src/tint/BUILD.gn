@@ -42,13 +42,13 @@ import("tint.gni")
 # Common - Configs, etc. shared across targets
 ###############################################################################
 
+# tint_gen_dir is the relative path of tint_root_dir to '//', under root_gen_dir
+tint_gen_dir = "${root_gen_dir}/" + rebase_path("${tint_root_dir}", "//")
+
 config("tint_common_config") {
   include_dirs = [
-    "${target_gen_dir}",
-    "${tint_root_dir}/",
-    "${tint_spirv_headers_dir}/include",
-    "${tint_spirv_tools_dir}/",
-    "${tint_spirv_tools_dir}/include",
+    "${tint_root_dir}",
+    "${tint_gen_dir}",
   ]
 }
 
@@ -129,7 +129,6 @@ config("tint_public_config") {
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
-    "${tint_spirv_headers_dir}/include",
   ]
 }
 
