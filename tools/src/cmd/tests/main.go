@@ -310,7 +310,6 @@ func run() error {
 
 	// Spawn numCPU job runners...
 	runCfg := runConfig{
-		rootPath:         rootPath,
 		tintPath:         tintPath,
 		dxcPath:          dxcPath,
 		fxcPath:          fxcPath,
@@ -621,7 +620,6 @@ type job struct {
 }
 
 type runConfig struct {
-	rootPath         string
 	tintPath         string
 	dxcPath          string
 	fxcPath          string
@@ -715,7 +713,7 @@ func (j job) run(cfg runConfig) {
 		args = append(args, j.flags...)
 
 		start := time.Now()
-		ok, out = invoke(cfg.rootPath, cfg.tintPath, args...)
+		ok, out = invoke(cfg.tintPath, args...)
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
@@ -889,12 +887,11 @@ func percentage(n, total int) string {
 }
 
 // invoke runs the executable 'exe' with the provided arguments.
-func invoke(wd, exe string, args ...string) (ok bool, output string) {
+func invoke(exe string, args ...string) (ok bool, output string) {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, exe, args...)
-	cmd.Dir = wd
 	out, err := cmd.CombinedOutput()
 	str := string(out)
 	if err != nil {
@@ -963,12 +960,14 @@ type validationCache struct {
 // A map of fileAndFormat to known-good (validated) output hashes.
 type knownGoodHashes map[fileAndFormat][]string
 
-// The serialized form of a known-good validation.cache file
+// ValidationCacheFile is the serialized form of a known-good validation.cache file
 type ValidationCacheFile struct {
 	ToolchainHash string
 	KnownGood     []ValidationCacheFileKnownGood
 }
 
+// ValidationCacheFileKnownGood holds a single record for a known-to-pass test output, given the
+// target format and tool hashes.
 type ValidationCacheFileKnownGood struct {
 	File   string
 	Format outputFormat
