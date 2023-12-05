@@ -1,3 +1,5 @@
+RWByteAddressBuffer s : register(u0);
+
 float f1(float a[4]) {
   return a[3];
 }
@@ -18,5 +20,6 @@ void main() {
   const float v1 = f1(a1);
   const float v2 = f2(a2);
   const float v3 = f3(a3);
+  s.Store(0u, asuint(((v1 + v2) + v3)));
   return;
 }

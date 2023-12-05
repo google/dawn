@@ -1,41 +1,72 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 20
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
+               OpName %s "s"
                OpName %main "main"
                OpName %signed_literal "signed_literal"
                OpName %unsigned_literal "unsigned_literal"
                OpName %signed_constant "signed_constant"
                OpName %unsigned_constant "unsigned_constant"
                OpName %shr_const_expr "shr_const_expr"
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 0
                OpDecorate %_arr_float_uint_4 ArrayStride 4
-       %void = OpTypeVoid
-          %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
+    %s_block = OpTypeStruct %float
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
 %_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4
-         %11 = OpConstantNull %_arr_float_uint_4
-       %main = OpFunction %void None %1
-          %4 = OpLabel
-%signed_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %11
-%unsigned_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %11
-%signed_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %11
-%unsigned_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %11
-%shr_const_expr = OpVariable %_ptr_Function__arr_float_uint_4 Function %11
-         %16 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %unsigned_literal %16
-         %17 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %signed_constant %17
-         %18 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %unsigned_constant %18
+         %14 = OpConstantNull %_arr_float_uint_4
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+        %int = OpTypeInt 32 1
+         %27 = OpConstantNull %int
+%_ptr_Function_float = OpTypePointer Function %float
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+%signed_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
+%unsigned_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
+%signed_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
+%unsigned_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
+%shr_const_expr = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
          %19 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %shr_const_expr %19
+               OpStore %unsigned_literal %19
+         %20 = OpLoad %_arr_float_uint_4 %signed_literal
+               OpStore %signed_constant %20
+         %21 = OpLoad %_arr_float_uint_4 %signed_literal
+               OpStore %unsigned_constant %21
+         %22 = OpLoad %_arr_float_uint_4 %signed_literal
+               OpStore %shr_const_expr %22
+         %25 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0
+         %29 = OpAccessChain %_ptr_Function_float %signed_literal %27
+         %30 = OpLoad %float %29
+         %31 = OpAccessChain %_ptr_Function_float %unsigned_literal %27
+         %32 = OpLoad %float %31
+         %33 = OpFAdd %float %30 %32
+         %34 = OpAccessChain %_ptr_Function_float %signed_constant %27
+         %35 = OpLoad %float %34
+         %36 = OpFAdd %float %33 %35
+         %37 = OpAccessChain %_ptr_Function_float %unsigned_constant %27
+         %38 = OpLoad %float %37
+         %39 = OpFAdd %float %36 %38
+         %40 = OpAccessChain %_ptr_Function_float %shr_const_expr %27
+         %41 = OpLoad %float %40
+         %42 = OpFAdd %float %39 %41
+               OpStore %25 %42
                OpReturn
                OpFunctionEnd

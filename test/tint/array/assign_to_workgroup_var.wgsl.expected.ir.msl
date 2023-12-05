@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: S = struct @align(16) {
   arr:array<vec4<i32>, 4> @offset(0)
 }
 
@@ -50,6 +50,60 @@ SKIP: FAILED
     %src_nested:ptr<function, array<array<array<i32, 2>, 3>, 4>, read_write> = var
     %24:array<array<array<i32, 2>, 3>, 4> = load %src_nested
     store %dst_nested, %24
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b5 {
+  %b5 = block {
+    loop [i: %b6, b: %b7, c: %b8] {  # loop_1
+      %b6 = block {  # initializer
+        next_iteration %b7 %tint_local_index
+      }
+      %b7 = block (%idx:u32) {  # body
+        %28:bool = gte %idx:u32, 4u
+        if %28 [t: %b9] {  # if_1
+          %b9 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %29:ptr<workgroup, vec4<i32>, read_write> = access %src_workgroup, %idx:u32
+        store %29, vec4<i32>(0i)
+        %30:ptr<workgroup, vec4<i32>, read_write> = access %dst, %idx:u32
+        store %30, vec4<i32>(0i)
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %31:u32 = add %idx:u32, 1u
+        next_iteration %b7 %31
+      }
+    }
+    loop [i: %b10, b: %b11, c: %b12] {  # loop_2
+      %b10 = block {  # initializer
+        next_iteration %b11 %tint_local_index
+      }
+      %b11 = block (%idx_1:u32) {  # body
+        %33:bool = gte %idx_1:u32, 24u
+        if %33 [t: %b13] {  # if_2
+          %b13 = block {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %34:u32 = mod %idx_1:u32, 2u
+        %35:u32 = div %idx_1:u32, 2u
+        %36:u32 = mod %35, 3u
+        %37:u32 = div %idx_1:u32, 6u
+        %38:ptr<workgroup, i32, read_write> = access %dst_nested, %37, %36, %34
+        store %38, 0i
+        continue %b12
+      }
+      %b12 = block {  # continuing
+        %39:u32 = add %idx_1:u32, 1u
+        next_iteration %b11 %39
+      }
+    }
+    %40:void = msl.threadgroup_barrier 4u
+    %val:array<vec4<i32>, 4> = let array<vec4<i32>, 4>(vec4<i32>(0i))
+    %42:void = call %foo, %val
     ret
   }
 }

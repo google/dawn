@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(16) {
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: S = struct @align(16) {
   arr:array<vec4<i32>, 4> @offset(0)
 }
 
@@ -50,6 +50,34 @@ SKIP: FAILED
     %src_nested:ptr<function, array<array<array<i32, 2>, 3>, 4>, read_write> = var
     %24:array<array<array<i32, 2>, 3>, 4> = load %src_nested
     store %dst_nested, %24
+    ret
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b5 {
+  %b5 = block {
+    loop [i: %b6, b: %b7, c: %b8] {  # loop_1
+      %b6 = block {  # initializer
+        next_iteration %b7 %tint_local_index
+      }
+      %b7 = block (%idx:u32) {  # body
+        %28:bool = gte %idx:u32, 4u
+        if %28 [t: %b9] {  # if_1
+          %b9 = block {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %29:ptr<workgroup, vec4<i32>, read_write> = access %src_workgroup, %idx:u32
+        store %29, vec4<i32>(0i)
+        continue %b8
+      }
+      %b8 = block {  # continuing
+        %30:u32 = add %idx:u32, 1u
+        next_iteration %b7 %30
+      }
+    }
+    %31:void = msl.threadgroup_barrier 4u
+    %a:array<vec4<i32>, 4> = let array<vec4<i32>, 4>(vec4<i32>(0i))
+    %33:void = call %foo, %a
     ret
   }
 }

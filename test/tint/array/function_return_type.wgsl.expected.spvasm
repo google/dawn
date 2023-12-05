@@ -1,56 +1,80 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 49
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
+               OpName %s "s"
                OpName %f1 "f1"
                OpName %f2 "f2"
                OpName %f3 "f3"
                OpName %main "main"
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 0
                OpDecorate %_arr_float_uint_4 ArrayStride 4
                OpDecorate %_arr__arr_float_uint_4_uint_3 ArrayStride 16
                OpDecorate %_arr__arr__arr_float_uint_4_uint_3_uint_2 ArrayStride 48
       %float = OpTypeFloat 32
+    %s_block = OpTypeStruct %float
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
-          %1 = OpTypeFunction %_arr_float_uint_4
-          %8 = OpConstantNull %_arr_float_uint_4
+          %5 = OpTypeFunction %_arr_float_uint_4
+         %11 = OpConstantNull %_arr_float_uint_4
      %uint_3 = OpConstant %uint 3
 %_arr__arr_float_uint_4_uint_3 = OpTypeArray %_arr_float_uint_4 %uint_3
-          %9 = OpTypeFunction %_arr__arr_float_uint_4_uint_3
+         %12 = OpTypeFunction %_arr__arr_float_uint_4_uint_3
      %uint_2 = OpConstant %uint 2
 %_arr__arr__arr_float_uint_4_uint_3_uint_2 = OpTypeArray %_arr__arr_float_uint_4_uint_3 %uint_2
-         %18 = OpTypeFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2
+         %21 = OpTypeFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2
        %void = OpTypeVoid
-         %26 = OpTypeFunction %void
-         %f1 = OpFunction %_arr_float_uint_4 None %1
-          %7 = OpLabel
-               OpReturnValue %8
+         %29 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+        %int = OpTypeInt 32 1
+         %40 = OpConstantNull %int
+         %f1 = OpFunction %_arr_float_uint_4 None %5
+         %10 = OpLabel
+               OpReturnValue %11
                OpFunctionEnd
-         %f2 = OpFunction %_arr__arr_float_uint_4_uint_3 None %9
-         %13 = OpLabel
-         %14 = OpFunctionCall %_arr_float_uint_4 %f1
-         %15 = OpFunctionCall %_arr_float_uint_4 %f1
-         %16 = OpFunctionCall %_arr_float_uint_4 %f1
-         %17 = OpCompositeConstruct %_arr__arr_float_uint_4_uint_3 %14 %15 %16
-               OpReturnValue %17
+         %f2 = OpFunction %_arr__arr_float_uint_4_uint_3 None %12
+         %16 = OpLabel
+         %17 = OpFunctionCall %_arr_float_uint_4 %f1
+         %18 = OpFunctionCall %_arr_float_uint_4 %f1
+         %19 = OpFunctionCall %_arr_float_uint_4 %f1
+         %20 = OpCompositeConstruct %_arr__arr_float_uint_4_uint_3 %17 %18 %19
+               OpReturnValue %20
                OpFunctionEnd
-         %f3 = OpFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2 None %18
-         %22 = OpLabel
-         %23 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
-         %24 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
-         %25 = OpCompositeConstruct %_arr__arr__arr_float_uint_4_uint_3_uint_2 %23 %24
-               OpReturnValue %25
+         %f3 = OpFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2 None %21
+         %25 = OpLabel
+         %26 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %27 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %28 = OpCompositeConstruct %_arr__arr__arr_float_uint_4_uint_3_uint_2 %26 %27
+               OpReturnValue %28
                OpFunctionEnd
-       %main = OpFunction %void None %26
-         %29 = OpLabel
-         %30 = OpFunctionCall %_arr_float_uint_4 %f1
-         %31 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
-         %32 = OpFunctionCall %_arr__arr__arr_float_uint_4_uint_3_uint_2 %f3
+       %main = OpFunction %void None %29
+         %32 = OpLabel
+         %33 = OpFunctionCall %_arr_float_uint_4 %f1
+         %34 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %35 = OpFunctionCall %_arr__arr__arr_float_uint_4_uint_3_uint_2 %f3
+         %38 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0
+         %41 = OpCompositeExtract %float %33 0
+         %42 = OpCompositeExtract %_arr_float_uint_4 %34 0
+         %43 = OpCompositeExtract %float %42 0
+         %44 = OpFAdd %float %41 %43
+         %45 = OpCompositeExtract %_arr__arr_float_uint_4_uint_3 %35 0
+         %46 = OpCompositeExtract %_arr_float_uint_4 %45 0
+         %47 = OpCompositeExtract %float %46 0
+         %48 = OpFAdd %float %44 %47
+               OpStore %38 %48
                OpReturn
                OpFunctionEnd

@@ -18,7 +18,7 @@ struct S {
   tint_array<int, 4> arr;
 };
 
-void foo() {
+int foo() {
   tint_array<int, 4> const src = tint_array<int, 4>{};
   tint_array<int, 4> dst = {};
   S dst_struct = {};
@@ -28,5 +28,11 @@ void foo() {
   dst = src;
   dst_struct.arr = src;
   dst_array[0] = src;
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(dst[0]) + as_type<uint>(dst_struct.arr[0])))) + as_type<uint>(dst_array[0][0])));
+}
+
+kernel void tint_symbol(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = foo();
+  return;
 }
 

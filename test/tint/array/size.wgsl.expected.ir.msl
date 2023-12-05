@@ -1,26 +1,47 @@
-#include <metal_stdlib>
-using namespace metal;
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
+SKIP: FAILED
 
-
-fragment void tint_symbol() {
-  tint_array<float, 4> signed_literal = {};
-  tint_array<float, 4> unsigned_literal = {};
-  tint_array<float, 4> signed_constant = {};
-  tint_array<float, 4> unsigned_constant = {};
-  tint_array<float, 4> shr_const_expr = {};
-  unsigned_literal = signed_literal;
-  signed_constant = signed_literal;
-  unsigned_constant = signed_literal;
-  shr_const_expr = signed_literal;
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: %b1 = block {  # root
+  %s:ptr<storage, f32, read_write> = var @binding_point(0, 0)
 }
+
+%tint_symbol = @fragment func():void -> %b2 {
+  %b2 = block {
+    %signed_literal:ptr<function, array<f32, 4>, read_write> = var
+    %unsigned_literal:ptr<function, array<f32, 4>, read_write> = var
+    %signed_constant:ptr<function, array<f32, 4>, read_write> = var
+    %unsigned_constant:ptr<function, array<f32, 4>, read_write> = var
+    %shr_const_expr:ptr<function, array<f32, 4>, read_write> = var
+    %8:array<f32, 4> = load %signed_literal
+    store %unsigned_literal, %8
+    %9:array<f32, 4> = load %signed_literal
+    store %signed_constant, %9
+    %10:array<f32, 4> = load %signed_literal
+    store %unsigned_constant, %10
+    %11:array<f32, 4> = load %signed_literal
+    store %shr_const_expr, %11
+    %12:ptr<function, f32, read_write> = access %signed_literal, 0i
+    %13:f32 = load %12
+    %14:ptr<function, f32, read_write> = access %unsigned_literal, 0i
+    %15:f32 = load %14
+    %16:f32 = add %13, %15
+    %17:ptr<function, f32, read_write> = access %signed_constant, 0i
+    %18:f32 = load %17
+    %19:f32 = add %16, %18
+    %20:ptr<function, f32, read_write> = access %unsigned_constant, 0i
+    %21:f32 = load %20
+    %22:f32 = add %19, %21
+    %23:ptr<function, f32, read_write> = access %shr_const_expr, 0i
+    %24:f32 = load %23
+    %25:f32 = add %22, %24
+    store %s, %25
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

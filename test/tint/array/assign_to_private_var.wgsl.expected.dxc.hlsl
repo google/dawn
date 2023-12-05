@@ -1,8 +1,3 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-
 struct S {
   int4 arr[4];
 };
@@ -18,22 +13,22 @@ static int dst_nested[4][3][2] = (int[4][3][2])0;
 
 typedef int4 ret_arr_ret[4];
 ret_arr_ret ret_arr() {
-  const int4 tint_symbol_2[4] = (int4[4])0;
-  return tint_symbol_2;
+  const int4 tint_symbol_4[4] = (int4[4])0;
+  return tint_symbol_4;
 }
 
 S ret_struct_arr() {
-  const S tint_symbol_3 = (S)0;
-  return tint_symbol_3;
+  const S tint_symbol_5 = (S)0;
+  return tint_symbol_5;
 }
 
 typedef int4 src_uniform_load_ret[4];
 src_uniform_load_ret src_uniform_load(uint offset) {
   int4 arr_1[4] = (int4[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      const uint scalar_offset = ((offset + (i * 16u))) / 4;
-      arr_1[i] = asint(src_uniform[scalar_offset / 4]);
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+      const uint scalar_offset = ((offset + (i_1 * 16u))) / 4;
+      arr_1[i_1] = asint(src_uniform[scalar_offset / 4]);
     }
   }
   return arr_1;
@@ -43,8 +38,8 @@ typedef int4 src_storage_load_ret[4];
 src_storage_load_ret src_storage_load(uint offset) {
   int4 arr_2[4] = (int4[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr_2[i_1] = asint(src_storage.Load4((offset + (i_1 * 16u))));
+    for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
+      arr_2[i_2] = asint(src_storage.Load4((offset + (i_2 * 16u))));
     }
   }
   return arr_2;
@@ -52,8 +47,8 @@ src_storage_load_ret src_storage_load(uint offset) {
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  const int4 tint_symbol_4[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
-  tint_symbol = tint_symbol_4;
+  const int4 tint_symbol_6[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
+  tint_symbol = tint_symbol_6;
   tint_symbol = src_param;
   tint_symbol = ret_arr();
   const int4 src_let[4] = (int4[4])0;
@@ -67,4 +62,26 @@ void foo(int4 src_param[4]) {
   tint_symbol = src_storage_load(0u);
   int src_nested[4][3][2] = (int[4][3][2])0;
   dst_nested = src_nested;
+}
+
+struct tint_symbol_3 {
+  uint local_invocation_index : SV_GroupIndex;
+};
+
+void main_inner(uint local_invocation_index) {
+  {
+    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+      const uint i = idx;
+      src_workgroup[i] = (0).xxxx;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+  const int4 a[4] = (int4[4])0;
+  foo(a);
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_3 tint_symbol_2) {
+  main_inner(tint_symbol_2.local_invocation_index);
+  return;
 }

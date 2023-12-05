@@ -1,3 +1,5 @@
+RWByteAddressBuffer s : register(u0);
+
 typedef float f1_ret[4];
 f1_ret f1() {
   const float tint_symbol_5[4] = (float[4])0;
@@ -26,5 +28,6 @@ void main() {
   const float a1[4] = f1();
   const float a2[3][4] = f2();
   const float a3[2][3][4] = f3();
+  s.Store(0u, asuint(((a1[0] + a2[0][0]) + a3[0][0][0])));
   return;
 }

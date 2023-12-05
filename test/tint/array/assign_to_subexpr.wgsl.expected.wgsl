@@ -1,10 +1,12 @@
+@group(0) @binding(0) var<storage, read_write> s : i32;
+
 alias ArrayType = array<i32, 4>;
 
 struct S {
   arr : array<i32, 4>,
 }
 
-fn foo() {
+fn foo() -> i32 {
   let src : ArrayType = ArrayType();
   var dst : ArrayType;
   var dst_struct : S;
@@ -17,4 +19,10 @@ fn foo() {
   *(dst_ptr) = src;
   (*(dst_struct_ptr)).arr = src;
   (*(dst_array_ptr))[0] = src;
+  return (((*(dst_ptr))[0] + (*(dst_struct_ptr)).arr[0]) + (*(dst_array_ptr))[0][0]);
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  s = foo();
 }

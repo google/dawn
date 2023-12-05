@@ -40,3 +40,9 @@ fn foo(src_param : ArrayType) {
   var src_nested : array<array<array<i32, 2>, 3>, 4>;
   dst_nested = src_nested;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  let a = ArrayType();
+  foo(a);
+}

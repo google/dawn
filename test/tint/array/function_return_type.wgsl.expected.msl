@@ -34,10 +34,11 @@ tint_array<tint_array<tint_array<float, 4>, 3>, 2> f3() {
   return tint_symbol_8;
 }
 
-kernel void tint_symbol() {
+kernel void tint_symbol(device float* tint_symbol_9 [[buffer(0)]]) {
   tint_array<float, 4> const a1 = f1();
   tint_array<tint_array<float, 4>, 3> const a2 = f2();
   tint_array<tint_array<tint_array<float, 4>, 3>, 2> const a3 = f3();
+  *(tint_symbol_9) = ((a1[0] + a2[0][0]) + a3[0][0][0]);
   return;
 }
 

@@ -26,13 +26,14 @@ float f3(tint_array<tint_array<tint_array<float, 4>, 3>, 2> a) {
   return a[1][2][3];
 }
 
-kernel void tint_symbol() {
+kernel void tint_symbol(device float* tint_symbol_1 [[buffer(0)]]) {
   tint_array<float, 4> const a1 = tint_array<float, 4>{};
   tint_array<tint_array<float, 4>, 3> const a2 = tint_array<tint_array<float, 4>, 3>{};
   tint_array<tint_array<tint_array<float, 4>, 3>, 2> const a3 = tint_array<tint_array<tint_array<float, 4>, 3>, 2>{};
   float const v1 = f1(a1);
   float const v2 = f2(a2);
   float const v3 = f3(a3);
+  *(tint_symbol_1) = ((v1 + v2) + v3);
   return;
 }
 

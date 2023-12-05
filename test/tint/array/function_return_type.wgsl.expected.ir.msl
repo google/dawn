@@ -1,32 +1,56 @@
-#include <metal_stdlib>
-using namespace metal;
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
+SKIP: FAILED
 
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: %b1 = block {  # root
+  %s:ptr<storage, f32, read_write> = var @binding_point(0, 0)
+}
 
-tint_array<float, 4> f1() {
-  return tint_array<float, 4>{};
+%f1 = func():array<f32, 4> -> %b2 {
+  %b2 = block {
+    ret array<f32, 4>(0.0f)
+  }
 }
-tint_array<tint_array<float, 4>, 3> f2() {
-  tint_array<float, 4> const v = f1();
-  tint_array<float, 4> const v_1 = f1();
-  return tint_array<tint_array<float, 4>, 3>{v, v_1, f1()};
+%f2 = func():array<array<f32, 4>, 3> -> %b3 {
+  %b3 = block {
+    %4:array<f32, 4> = call %f1
+    %5:array<f32, 4> = let %4
+    %6:array<f32, 4> = call %f1
+    %7:array<f32, 4> = let %6
+    %8:array<f32, 4> = call %f1
+    %9:array<array<f32, 4>, 3> = construct %5, %7, %8
+    ret %9
+  }
 }
-tint_array<tint_array<tint_array<float, 4>, 3>, 2> f3() {
-  tint_array<tint_array<float, 4>, 3> const v_2 = f2();
-  return tint_array<tint_array<tint_array<float, 4>, 3>, 2>{v_2, f2()};
+%f3 = func():array<array<array<f32, 4>, 3>, 2> -> %b4 {
+  %b4 = block {
+    %11:array<array<f32, 4>, 3> = call %f2
+    %12:array<array<f32, 4>, 3> = let %11
+    %13:array<array<f32, 4>, 3> = call %f2
+    %14:array<array<array<f32, 4>, 3>, 2> = construct %12, %13
+    ret %14
+  }
 }
-kernel void tint_symbol() {
-  tint_array<float, 4> const a1 = f1();
-  tint_array<tint_array<float, 4>, 3> const a2 = f2();
-  tint_array<tint_array<tint_array<float, 4>, 3>, 2> const a3 = f3();
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+  %b5 = block {
+    %16:array<f32, 4> = call %f1
+    %a1:array<f32, 4> = let %16
+    %18:array<array<f32, 4>, 3> = call %f2
+    %a2:array<array<f32, 4>, 3> = let %18
+    %20:array<array<array<f32, 4>, 3>, 2> = call %f3
+    %a3:array<array<array<f32, 4>, 3>, 2> = let %20
+    %22:f32 = access %a1, 0i
+    %23:f32 = access %a2, 0i, 0i
+    %24:f32 = add %22, %23
+    %25:f32 = access %a3, 0i, 0i, 0i
+    %26:f32 = add %24, %25
+    store %s, %26
+    ret
+  }
 }
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

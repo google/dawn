@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> s: i32;
+
 @compute @workgroup_size(1)
 fn main() {
   let x : i32 = 42;
@@ -45,4 +47,10 @@ fn main() {
       array<i32, 4>(1, x, x + 1, nonempty[3]),
       nested_nonempty[1][2],
     )[1];
+
+
+  s = empty[0] + nonempty[0] + nonempty_with_expr[0] + nested_empty[0][0][0] +
+    nested_nonempty[0][0][0] + nested_nonempty_with_expr[0][0][0] +
+    subexpr_empty + subexpr_nonempty + subexpr_nonempty_with_expr + subexpr_nested_empty[0] +
+    subexpr_nested_nonempty[0] + subexpr_nested_nonempty_with_expr[0];
 }

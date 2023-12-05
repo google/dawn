@@ -1,31 +1,76 @@
-#include <metal_stdlib>
-using namespace metal;
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
+SKIP: FAILED
 
-
-kernel void tint_symbol() {
-  int const x = 42;
-  tint_array<int, 4> const empty = tint_array<int, 4>{};
-  tint_array<int, 4> const nonempty = tint_array<int, 4>{1, 2, 3, 4};
-  tint_array<int, 4> const nonempty_with_expr = tint_array<int, 4>{1, x, (x + 1), nonempty[3]};
-  tint_array<tint_array<tint_array<int, 4>, 3>, 2> const nested_empty = tint_array<tint_array<tint_array<int, 4>, 3>, 2>{};
-  tint_array<tint_array<tint_array<int, 4>, 3>, 2> const nested_nonempty = tint_array<tint_array<tint_array<int, 4>, 3>, 2>{tint_array<tint_array<int, 4>, 3>{tint_array<int, 4>{1, 2, 3, 4}, tint_array<int, 4>{5, 6, 7, 8}, tint_array<int, 4>{9, 10, 11, 12}}, tint_array<tint_array<int, 4>, 3>{tint_array<int, 4>{13, 14, 15, 16}, tint_array<int, 4>{17, 18, 19, 20}, tint_array<int, 4>{21, 22, 23, 24}}};
-  tint_array<int, 4> const v = tint_array<int, 4>{1, 2, x, (x + 1)};
-  tint_array<tint_array<tint_array<int, 4>, 3>, 2> const nested_nonempty_with_expr = tint_array<tint_array<tint_array<int, 4>, 3>, 2>{tint_array<tint_array<int, 4>, 3>{v, tint_array<int, 4>{5, 6, nonempty[2], (nonempty[3] + 1)}, nonempty}, nested_nonempty[1]};
-  int const subexpr_empty = 0;
-  int const subexpr_nonempty = 3;
-  int const subexpr_nonempty_with_expr = tint_array<int, 4>{1, x, (x + 1), nonempty[3]}[2];
-  tint_array<int, 4> const subexpr_nested_empty = tint_array<int, 4>{};
-  tint_array<int, 4> const subexpr_nested_nonempty = tint_array<int, 4>{5, 6, 7, 8};
-  tint_array<int, 4> const subexpr_nested_nonempty_with_expr = tint_array<tint_array<int, 4>, 2>{tint_array<int, 4>{1, x, (x + 1), nonempty[3]}, nested_nonempty[1][2]}[1];
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: %b1 = block {  # root
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %x:i32 = let 42i
+    %empty:array<i32, 4> = let array<i32, 4>(0i)
+    %nonempty:array<i32, 4> = let array<i32, 4>(1i, 2i, 3i, 4i)
+    %6:i32 = add %x, 1i
+    %7:i32 = access %nonempty, 3i
+    %8:array<i32, 4> = construct 1i, %x, %6, %7
+    %nonempty_with_expr:array<i32, 4> = let %8
+    %nested_empty:array<array<array<i32, 4>, 3>, 2> = let array<array<array<i32, 4>, 3>, 2>(array<array<i32, 4>, 3>(array<i32, 4>(0i)))
+    %nested_nonempty:array<array<array<i32, 4>, 3>, 2> = let array<array<array<i32, 4>, 3>, 2>(array<array<i32, 4>, 3>(array<i32, 4>(1i, 2i, 3i, 4i), array<i32, 4>(5i, 6i, 7i, 8i), array<i32, 4>(9i, 10i, 11i, 12i)), array<array<i32, 4>, 3>(array<i32, 4>(13i, 14i, 15i, 16i), array<i32, 4>(17i, 18i, 19i, 20i), array<i32, 4>(21i, 22i, 23i, 24i)))
+    %12:i32 = add %x, 1i
+    %13:array<i32, 4> = construct 1i, 2i, %x, %12
+    %14:array<i32, 4> = let %13
+    %15:i32 = access %nonempty, 2i
+    %16:i32 = access %nonempty, 3i
+    %17:i32 = add %16, 1i
+    %18:array<i32, 4> = construct 5i, 6i, %15, %17
+    %19:array<array<i32, 4>, 3> = construct %14, %18, %nonempty
+    %20:array<array<i32, 4>, 3> = access %nested_nonempty, 1i
+    %21:array<array<array<i32, 4>, 3>, 2> = construct %19, %20
+    %nested_nonempty_with_expr:array<array<array<i32, 4>, 3>, 2> = let %21
+    %subexpr_empty:i32 = let 0i
+    %subexpr_nonempty:i32 = let 3i
+    %25:i32 = add %x, 1i
+    %26:i32 = access %nonempty, 3i
+    %27:array<i32, 4> = construct 1i, %x, %25, %26
+    %28:i32 = access %27, 2i
+    %subexpr_nonempty_with_expr:i32 = let %28
+    %subexpr_nested_empty:array<i32, 4> = let array<i32, 4>(0i)
+    %subexpr_nested_nonempty:array<i32, 4> = let array<i32, 4>(5i, 6i, 7i, 8i)
+    %32:i32 = add %x, 1i
+    %33:i32 = access %nonempty, 3i
+    %34:array<i32, 4> = construct 1i, %x, %32, %33
+    %35:array<i32, 4> = access %nested_nonempty, 1i, 2i
+    %36:array<array<i32, 4>, 2> = construct %34, %35
+    %37:array<i32, 4> = access %36, 1i
+    %subexpr_nested_nonempty_with_expr:array<i32, 4> = let %37
+    %39:i32 = access %empty, 0i
+    %40:i32 = access %nonempty, 0i
+    %41:i32 = add %39, %40
+    %42:i32 = access %nonempty_with_expr, 0i
+    %43:i32 = add %41, %42
+    %44:i32 = access %nested_empty, 0i, 0i, 0i
+    %45:i32 = add %43, %44
+    %46:i32 = access %nested_nonempty, 0i, 0i, 0i
+    %47:i32 = add %45, %46
+    %48:i32 = access %nested_nonempty_with_expr, 0i, 0i, 0i
+    %49:i32 = add %47, %48
+    %50:i32 = add %49, %subexpr_empty
+    %51:i32 = add %50, %subexpr_nonempty
+    %52:i32 = add %51, %subexpr_nonempty_with_expr
+    %53:i32 = access %subexpr_nested_empty, 0i
+    %54:i32 = add %52, %53
+    %55:i32 = access %subexpr_nested_nonempty, 0i
+    %56:i32 = add %54, %55
+    %57:i32 = access %subexpr_nested_nonempty_with_expr, 0i
+    %58:i32 = add %56, %57
+    store %s, %58
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
