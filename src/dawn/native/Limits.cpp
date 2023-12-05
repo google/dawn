@@ -94,7 +94,7 @@
 //                                                             compat      tier0       tier1
 #define LIMITS_INTER_STAGE_SHADER_VARIABLES(X) \
     X(Maximum,               maxInterStageShaderComponents,       60,        60,        112) \
-    X(Maximum,               maxInterStageShaderVariables,        16,        16,         28) \
+    X(Maximum,               maxInterStageShaderVariables,        15,        16,         28) \
 
 // Tiered limits for texture dimensions.
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where some dimensions
