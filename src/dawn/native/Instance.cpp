@@ -607,8 +607,11 @@ void InstanceBase::GatherWGSLFeatures() {
                 break;
 
             case tint::wgsl::FeatureStatus::kUnsafeExperimental:
-            case tint::wgsl::FeatureStatus::kExperimental:
                 enable = mToggles.IsEnabled(Toggle::AllowUnsafeAPIs);
+                break;
+            case tint::wgsl::FeatureStatus::kExperimental:
+                enable = mToggles.IsEnabled(Toggle::AllowUnsafeAPIs) ||
+                         mToggles.IsEnabled(Toggle::ExposeWGSLExperimentalFeatures);
                 break;
 
             case tint::wgsl::FeatureStatus::kShippedWithKillswitch:

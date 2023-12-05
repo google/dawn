@@ -492,8 +492,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/tint/1497", ToggleStage::Device}},
     {Toggle::ExposeWGSLTestingFeatures,
      {"expose_wgsl_testing_features",
-      "Make the Instance expose the ChromiumExperimental* features for testing of "
+      "Make the Instance expose the ChromiumTesting* features for testing of "
       "wgslLanguageFeatures functionality.",
+      "https://crbug.com/dawn/2260", ToggleStage::Instance}},
+    {Toggle::ExposeWGSLExperimentalFeatures,
+     {"expose_wgsl_experimental_features",
+      "Make the Instance expose the experimental features but not the unsage ones, so that safe "
+      "experimental features can be used without the need for allow_unsafe_apis",
       "https://crbug.com/dawn/2260", ToggleStage::Instance}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",

@@ -42,6 +42,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
     struct InstanceSpec {
         bool useTestingFeatures = true;
         bool allowUnsafeAPIs = false;
+        bool exposeExperimental = false;
     };
 
     wgpu::Instance CreateInstance(InstanceSpec spec) {
@@ -53,6 +54,9 @@ class WGSLFeatureValidationTest : public ValidationTest {
         if (spec.allowUnsafeAPIs) {
             enabledToggles.push_back("allow_unsafe_apis");
         }
+        if (spec.exposeExperimental) {
+            enabledToggles.push_back("expose_wgsl_experimental_features");
+        }
 
         wgpu::DawnTogglesDescriptor togglesDesc;
         togglesDesc.enabledToggleCount = enabledToggles.size();
@@ -63,7 +67,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
 
         // Build the wire instance descriptor.
         wgpu::DawnWireWGSLControl wgslControl;
-        wgslControl.enableExperimental = spec.allowUnsafeAPIs;
+        wgslControl.enableExperimental = spec.allowUnsafeAPIs || spec.exposeExperimental;
         wgslControl.enableUnsafe = spec.allowUnsafeAPIs;
         wgslControl.enableTesting = spec.useTestingFeatures;
 
@@ -136,6 +140,27 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureDefaultInstance) {
 }
 
 // Check HasFeature for an Instance that has unsafe APIs.
+TEST_F(WGSLFeatureValidationTest, HasFeatureExposeExperimental) {
+    wgpu::Instance instance = CreateInstance({.exposeExperimental = true});
+
+    // Shipped and experimental features are present.
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
+
+    // Unsafe and unimplemented features are not present.
+    ASSERT_FALSE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+    ASSERT_FALSE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
+
+    // Non-existent features are not present.
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(kNonExistentFeature));
+}
+
+// Check HasFeature for an Instance that has unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureAllowUnsafeInstance) {
     wgpu::Instance instance = CreateInstance({.allowUnsafeAPIs = true});
 
@@ -148,7 +173,7 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureAllowUnsafeInstance) {
     ASSERT_TRUE(
         instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
 
-    // Experimental and unimplemented features are not present.
+    // Unimplemented features are not present.
     ASSERT_FALSE(
         instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnimplemented));
 

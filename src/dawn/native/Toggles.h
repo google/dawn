@@ -124,6 +124,7 @@ enum class Toggle {
     D3DDisableIEEEStrictness,
     PolyFillPacked4x8DotProduct,
     ExposeWGSLTestingFeatures,
+    ExposeWGSLExperimentalFeatures,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
