@@ -1,4 +1,9 @@
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
+}
+
 ByteAddressBuffer sb : register(t0);
+RWByteAddressBuffer s : register(u1);
 
 struct tint_symbol_1 {
   uint idx : SV_GroupIndex;
@@ -74,6 +79,7 @@ void main_inner(uint idx) {
   const float4x3 mat4x3_f32 = sb_load_19(((544u * idx) + 384u));
   const float4x4 mat4x4_f32 = sb_load_20(((544u * idx) + 448u));
   const float3 arr2_vec3_f32[2] = sb_load_21(((544u * idx) + 512u));
+  s.Store(0u, asuint((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + tint_ftoi(arr2_vec3_f32[0].x))));
 }
 
 [numthreads(1, 1, 1)]

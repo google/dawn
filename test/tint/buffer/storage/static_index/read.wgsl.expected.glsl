@@ -1,5 +1,9 @@
 #version 310 es
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 struct Inner {
   int scalar_i32;
   float scalar_f32;
@@ -46,6 +50,10 @@ layout(binding = 0, std430) buffer sb_block_ssbo {
   S inner;
 } sb;
 
+layout(binding = 1, std430) buffer s_block_ssbo {
+  int inner;
+} s;
+
 void tint_symbol() {
   float scalar_f32 = sb.inner.scalar_f32;
   int scalar_i32 = sb.inner.scalar_i32;
@@ -71,6 +79,7 @@ void tint_symbol() {
   vec3 arr2_vec3_f32[2] = sb.inner.arr2_vec3_f32;
   Inner struct_inner = sb.inner.struct_inner;
   Inner array_struct_inner[4] = sb.inner.array_struct_inner;
+  s.inner = (((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + tint_ftoi(arr2_vec3_f32[0].x)) + struct_inner.scalar_i32) + array_struct_inner[0].scalar_i32);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

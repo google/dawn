@@ -48,6 +48,7 @@ struct S {
 };
 
 @binding(0) @group(0) var<storage, read> sb : S;
+@group(0) @binding(1) var<storage, read_write> s: i32;
 
 @compute @workgroup_size(1)
 fn main() {
@@ -89,4 +90,21 @@ fn main() {
     let arr2_mat4x2_f16 = sb.arr2_mat4x2_f16;
     let struct_inner = sb.struct_inner;
     let array_struct_inner = sb.array_struct_inner;
+
+    s = i32(scalar_f32) + scalar_i32 + i32(scalar_u32) + i32(scalar_f16) +
+        i32(vec2_f32.x) + vec2_i32.x + i32(vec2_u32.x) + i32(vec2_f16.x) +
+        i32(vec3_f32.y) + vec3_i32.y + i32(vec3_u32.y) + i32(vec3_f16.y) +
+        i32(vec4_f32.z) + vec4_i32.z + i32(vec4_u32.z) + i32(vec4_f16.z) +
+        i32(mat2x2_f32[0].x) + i32(mat2x3_f32[0].x) +
+        i32(mat2x4_f32[0].x) + i32(mat3x2_f32[0].x) +
+        i32(mat3x3_f32[0].x) + i32(mat3x4_f32[0].x) +
+        i32(mat4x2_f32[0].x) + i32(mat4x3_f32[0].x) +
+        i32(mat4x4_f32[0].x) +
+        i32(mat2x2_f16[0].x) + i32(mat2x3_f16[0].x) +
+        i32(mat2x4_f16[0].x) + i32(mat3x2_f16[0].x) +
+        i32(mat3x3_f16[0].x) + i32(mat3x4_f16[0].x) +
+        i32(mat4x2_f16[0].x) + i32(mat4x3_f16[0].x) +
+        i32(mat4x4_f16[0].x) +
+        i32(arr2_vec3_f32[0].x) + i32(arr2_mat4x2_f16[0][0].x) +
+        struct_inner.scalar_i32 + array_struct_inner[0].scalar_i32;
 }
