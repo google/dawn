@@ -646,6 +646,146 @@ TEST_P(PixelLocalStorageTests, CopyToRenderAttachmentWithStorageAttachments) {
     }
 }
 
+// Test using PLS in multiple render passes with different sizes in one command buffer, fully
+// implicit version.
+TEST_P(PixelLocalStorageTests, ImplicitPLSAndLargerRenderAttachmentsInOneCommandBuffer) {
+    // Prepare the shader modules with one fragment shader entry point that increases the pixel
+    // local storage variables and another fragment shader entry point that computes the output to
+    // the color attachment.
+    wgpu::ShaderModule wgslModule = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_pixel_local;
+            @vertex
+            fn vsMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, -1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0));
+                return vec4f(pos[VertexIndex % 6], 0.5, 1.0);
+            }
+
+            struct PLS {
+                a : u32,
+                b : u32,
+            };
+            var<pixel_local> pls : PLS;
+            @fragment fn accumulate() -> @location(0) vec4u {
+                pls.a = pls.a + 1;
+                pls.b = pls.b + 2;
+                return vec4u(0, 0, 0, 1u);
+            }
+
+            @fragment fn copyToColorAttachment() -> @location(0) vec4u {
+                return vec4u(pls.a + pls.b, 0, 0, 1u);
+            })");
+    constexpr uint32_t kPixelLocalStorageSize = kPLSSlotByteSize * 2;
+
+    // Create render pipelines in the test
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    {
+        pipelineDescriptor.vertex.module = wgslModule;
+        pipelineDescriptor.vertex.entryPoint = "vsMain";
+        pipelineDescriptor.cFragment.module = wgslModule;
+        pipelineDescriptor.cFragment.entryPoint = "accumulate";
+        pipelineDescriptor.cFragment.targetCount = 1;
+        pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::R32Uint;
+        pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+
+        // Create pipeline layout with pixel local storage
+        wgpu::PipelineLayoutPixelLocalStorage pixelLocalStoragePipelineLayout;
+        pixelLocalStoragePipelineLayout.totalPixelLocalStorageSize = kPixelLocalStorageSize;
+        pixelLocalStoragePipelineLayout.storageAttachmentCount = 0;
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDesciptor;
+        pipelineLayoutDesciptor.nextInChain = &pixelLocalStoragePipelineLayout;
+        pipelineLayoutDesciptor.bindGroupLayoutCount = 0;
+        pipelineDescriptor.layout = device.CreatePipelineLayout(&pipelineLayoutDesciptor);
+    }
+    // Create the render pipeline to update pixel local storage values
+    wgpu::RenderPipeline accumulatePipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    // Create the render pipeline to compute the final output with the current pixel local storage
+    // values
+    pipelineDescriptor.cFragment.entryPoint = "copyToColorAttachment";
+    wgpu::RenderPipeline copyToColorAttachmentPipeline =
+        device.CreateRenderPipeline(&pipelineDescriptor);
+
+    // Create two color attachments with different sizes
+    wgpu::Texture color1;
+    wgpu::Texture color2;
+    constexpr wgpu::Extent3D kColorSize1 = {1, 1, 1};
+    constexpr wgpu::Extent3D kColorSize2 = {2, 2, 1};
+    {
+        wgpu::TextureDescriptor colorDescriptor;
+        colorDescriptor.size = kColorSize1;
+        colorDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+        colorDescriptor.format = wgpu::TextureFormat::R32Uint;
+        color1 = device.CreateTexture(&colorDescriptor);
+        colorDescriptor.size = kColorSize2;
+        color2 = device.CreateTexture(&colorDescriptor);
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Use first color attachment with smaller size
+    wgpu::RenderPassDescriptor renderPassDescriptor;
+    wgpu::RenderPassPixelLocalStorage renderPassPixelLocalStorageDescriptor;
+    wgpu::RenderPassColorAttachment renderPassColor;
+    {
+        renderPassPixelLocalStorageDescriptor.totalPixelLocalStorageSize = kPixelLocalStorageSize;
+        renderPassPixelLocalStorageDescriptor.storageAttachmentCount = 0;
+        renderPassDescriptor.nextInChain = &renderPassPixelLocalStorageDescriptor;
+        renderPassColor.view = color1.CreateView();
+        renderPassColor.loadOp = wgpu::LoadOp::Clear;
+        renderPassColor.clearValue = {0, 0, 0, 0};
+        renderPassColor.storeOp = wgpu::StoreOp::Store;
+        renderPassDescriptor.colorAttachmentCount = 1;
+        renderPassDescriptor.colorAttachments = &renderPassColor;
+    }
+    wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPassDescriptor);
+    pass1.SetPipeline(accumulatePipeline);
+    if (supportsCoherent) {
+        pass1.Draw(kIterations * 6);
+    } else {
+        for (uint32_t i = 0; i < kIterations; i++) {
+            pass1.Draw(6);
+            pass1.PixelLocalStorageBarrier();
+        }
+    }
+    pass1.SetPipeline(copyToColorAttachmentPipeline);
+    pass1.Draw(6);
+    pass1.End();
+
+    // Use second color attachment with larger size
+    renderPassColor.view = color2.CreateView();
+    wgpu::RenderPassEncoder pass2 = encoder.BeginRenderPass(&renderPassDescriptor);
+    pass2.SetPipeline(accumulatePipeline);
+    if (supportsCoherent) {
+        pass2.Draw(kIterations * 6 * 2);
+    } else {
+        for (uint32_t i = 0; i < kIterations * 2; i++) {
+            pass2.Draw(6);
+            pass2.PixelLocalStorageBarrier();
+        }
+    }
+
+    pass2.SetPipeline(copyToColorAttachmentPipeline);
+    pass2.Draw(6);
+    pass2.End();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // Check the data in color1 and color2
+    constexpr uint32_t kExpectedResult1 = kIterations * 3;
+    EXPECT_TEXTURE_EQ(&kExpectedResult1, color1, {0, 0, 0}, {1, 1, 1});
+
+    constexpr std::array<uint32_t, 2> kExpectedResult2 = {{kIterations * 6, kIterations * 6}};
+    EXPECT_TEXTURE_EQ(kExpectedResult2.data(), color2, {0, 0, 0}, {2, 1, 1});
+    EXPECT_TEXTURE_EQ(kExpectedResult2.data(), color2, {0, 1, 0}, {2, 1, 1});
+}
+
 DAWN_INSTANTIATE_TEST(PixelLocalStorageTests, D3D11Backend(), MetalBackend());
 
 }  // anonymous namespace

@@ -106,6 +106,11 @@ class Device final : public d3d::Device {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
     MaybeError WaitForIdleForDestruction();
 
+    ResultOrError<TextureViewBase*> GetOrCreateCachedImplicitPixelLocalStorageAttachment(
+        uint32_t width,
+        uint32_t height,
+        uint32_t implicitAttachmentIndex);
+
   private:
     using Base = d3d::Device;
     using Base::Base;
@@ -161,6 +166,9 @@ class Device final : public d3d::Device {
     ComPtr<ID3D11Device5> mD3d11Device5;
     CommandRecordingContext mPendingCommands;
     SerialQueue<ExecutionSerial, ComPtr<IUnknown>> mUsedComObjectRefs;
+
+    // TODO(dawn:1704): decide when to clear the cached implicit pixel local storage attachments.
+    std::array<Ref<TextureViewBase>, kMaxPLSSlots> mImplicitPixelLocalStorageAttachmentTextureViews;
 };
 
 }  // namespace dawn::native::d3d11

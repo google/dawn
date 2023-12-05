@@ -604,4 +604,35 @@ uint32_t Device::GetUAVSlotCount() const {
     return ToBackend(GetPhysicalDevice())->GetUAVSlotCount();
 }
 
+ResultOrError<TextureViewBase*> Device::GetOrCreateCachedImplicitPixelLocalStorageAttachment(
+    uint32_t width,
+    uint32_t height,
+    uint32_t implicitAttachmentIndex) {
+    DAWN_ASSERT(implicitAttachmentIndex <= kMaxPLSSlots);
+
+    TextureViewBase* currentAttachmentView =
+        mImplicitPixelLocalStorageAttachmentTextureViews[implicitAttachmentIndex].Get();
+    if (currentAttachmentView == nullptr ||
+        currentAttachmentView->GetTexture()->GetWidth(Aspect::Color) < width ||
+        currentAttachmentView->GetTexture()->GetHeight(Aspect::Color) < height) {
+        // Create one 2D texture for each attachment. Note that currently on D3D11 backend we cannot
+        // create a Texture2D UAV on a 2D array texture with baseArrayLayer > 0 because D3D11
+        // requires the Unordered Access View dimension declared in the shader code must match the
+        // view type bound to the Pixel Shader unit, while TEXTURE2D doesn't match TEXTURE2DARRAY.
+        // TODO(dawn:1703): support 2D array storage textures as implicit pixel local storage
+        // attachments in WGSL.
+        TextureDescriptor desc;
+        desc.dimension = wgpu::TextureDimension::e2D;
+        desc.format = RenderPipelineBase::kImplicitPLSSlotFormat;
+        desc.usage = wgpu::TextureUsage::StorageAttachment;
+        desc.size = {width, height, 1};
+
+        Ref<TextureBase> newAttachment;
+        DAWN_TRY_ASSIGN(newAttachment, CreateTexture(&desc));
+        DAWN_TRY_ASSIGN(mImplicitPixelLocalStorageAttachmentTextureViews[implicitAttachmentIndex],
+                        newAttachment->CreateView());
+    }
+    return mImplicitPixelLocalStorageAttachmentTextureViews[implicitAttachmentIndex].Get();
+}
+
 }  // namespace dawn::native::d3d11

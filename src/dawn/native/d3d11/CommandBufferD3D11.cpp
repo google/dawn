@@ -129,24 +129,6 @@ MaybeError SynchronizeTextureBeforeUse(
     return {};
 }
 
-// Create a texture as an implicit pixel local attachment of the render pass.
-ResultOrError<Ref<TextureViewBase>> CreateImplicitPixelLocalAttachment(
-    DeviceBase* device,
-    const BeginRenderPassCmd* renderPass) {
-    TextureDescriptor desc;
-    desc.dimension = wgpu::TextureDimension::e2D;
-    desc.format = RenderPipelineBase::kImplicitPLSSlotFormat;
-    desc.usage = wgpu::TextureUsage::StorageAttachment;
-    desc.size = {renderPass->width, renderPass->height, 1};
-    Ref<TextureBase> texture;
-    DAWN_TRY_ASSIGN(texture, device->CreateTexture(&desc));
-
-    Ref<TextureViewBase> textureView;
-    DAWN_TRY_ASSIGN(textureView, texture->CreateView());
-
-    return textureView;
-}
-
 // Handle pixel local storage attachments and return a vector of all pixel local storage UAVs.
 // - For implicit attachments, create the texture and clear it to 0.
 // - For explicit attachments, clear them to the specified clear color if their load operation is
@@ -161,21 +143,23 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
 
     const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
         renderPass->attachmentState->GetStorageAttachmentSlots();
+    uint32_t nextImplicitAttachmentIndex = 0;
     for (size_t attachment = 0; attachment < storageAttachmentSlots.size(); attachment++) {
         ComPtr<ID3D11UnorderedAccessView> pixelLocalStorageUAV;
         if (storageAttachmentSlots[attachment] == wgpu::TextureFormat::Undefined) {
-            // Create the texture as implicit pixel local storage attachment
-            // TODO(dawn:1704): Optimize this by creating a single 2D array texture and reusing it
-            // across different render passes.
-            Ref<TextureViewBase> implicitPixelLocalStorageTextureView;
-            DAWN_TRY_ASSIGN(implicitPixelLocalStorageTextureView,
-                            CreateImplicitPixelLocalAttachment(device, renderPass));
+            // Get implicit pixel local storage attachment
+            TextureViewBase* implicitPixelLocalStorageTextureView = nullptr;
+            DAWN_TRY_ASSIGN(
+                implicitPixelLocalStorageTextureView,
+                ToBackend(device)->GetOrCreateCachedImplicitPixelLocalStorageAttachment(
+                    renderPass->width, renderPass->height, nextImplicitAttachmentIndex));
+            ++nextImplicitAttachmentIndex;
 
             // Get and clear the UAV of the implicit pixel local storage attachment
-            DAWN_TRY_ASSIGN(pixelLocalStorageUAV,
-                            ToBackend(implicitPixelLocalStorageTextureView.Get())
-                                ->GetOrCreateD3D11UnorderedAccessView());
+            DAWN_TRY_ASSIGN(pixelLocalStorageUAV, ToBackend(implicitPixelLocalStorageTextureView)
+                                                      ->GetOrCreateD3D11UnorderedAccessView());
 
+            // TODO(dawn:1704): investigate if we can only clear it when necessary.
             uint32_t clearValue[4] = {0, 0, 0, 0};
             d3d11DeviceContext->ClearUnorderedAccessViewUint(pixelLocalStorageUAV.Get(),
                                                              clearValue);
