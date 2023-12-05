@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 27
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -15,6 +15,11 @@
                OpMemberName %u_block_std140 0 "inner_0"
                OpMemberName %u_block_std140 1 "inner_1"
                OpName %u "u"
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
+               OpName %s "s"
+               OpName %assign_and_preserve_padding_s "assign_and_preserve_padding_s"
+               OpName %value "value"
                OpName %load_u_inner "load_u_inner"
                OpName %main "main"
                OpDecorate %u_block_std140 Block
@@ -23,30 +28,57 @@
                OpDecorate %u NonWritable
                OpDecorate %u DescriptorSet 0
                OpDecorate %u Binding 0
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 8
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 1
        %half = OpTypeFloat 16
      %v3half = OpTypeVector %half 3
 %u_block_std140 = OpTypeStruct %v3half %v3half
 %_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
           %u = OpVariable %_ptr_Uniform_u_block_std140 Uniform
  %mat2v3half = OpTypeMatrix %v3half 2
-          %6 = OpTypeFunction %mat2v3half
+    %u_block = OpTypeStruct %mat2v3half
+%_ptr_StorageBuffer_u_block = OpTypePointer StorageBuffer %u_block
+          %s = OpVariable %_ptr_StorageBuffer_u_block StorageBuffer
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %mat2v3half
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
+        %int = OpTypeInt 32 1
+         %18 = OpConstantNull %int
+%_ptr_StorageBuffer_v3half = OpTypePointer StorageBuffer %v3half
+         %21 = OpConstantNull %uint
+      %int_1 = OpConstant %int 1
      %uint_1 = OpConstant %uint 1
-       %void = OpTypeVoid
-         %22 = OpTypeFunction %void
-%load_u_inner = OpFunction %mat2v3half None %6
-          %9 = OpLabel
-         %15 = OpAccessChain %_ptr_Uniform_v3half %u %uint_0
-         %16 = OpLoad %v3half %15
-         %19 = OpAccessChain %_ptr_Uniform_v3half %u %uint_1
-         %20 = OpLoad %v3half %19
-         %21 = OpCompositeConstruct %mat2v3half %16 %20
-               OpReturnValue %21
+         %27 = OpTypeFunction %mat2v3half
+%_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
+         %39 = OpTypeFunction %void
+%assign_and_preserve_padding_s = OpFunction %void None %10
+      %value = OpFunctionParameter %mat2v3half
+         %14 = OpLabel
+         %20 = OpAccessChain %_ptr_StorageBuffer_v3half %s %uint_0 %18
+         %22 = OpCompositeExtract %v3half %value 0
+               OpStore %20 %22
+         %24 = OpAccessChain %_ptr_StorageBuffer_v3half %s %uint_0 %int_1
+         %26 = OpCompositeExtract %v3half %value 1
+               OpStore %24 %26
+               OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %22
-         %25 = OpLabel
-         %26 = OpFunctionCall %mat2v3half %load_u_inner
+%load_u_inner = OpFunction %mat2v3half None %27
+         %29 = OpLabel
+         %33 = OpAccessChain %_ptr_Uniform_v3half %u %uint_0
+         %34 = OpLoad %v3half %33
+         %36 = OpAccessChain %_ptr_Uniform_v3half %u %uint_1
+         %37 = OpLoad %v3half %36
+         %38 = OpCompositeConstruct %mat2v3half %34 %37
+               OpReturnValue %38
+               OpFunctionEnd
+       %main = OpFunction %void None %39
+         %41 = OpLabel
+         %42 = OpFunctionCall %mat2v3half %load_u_inner
+         %43 = OpFunctionCall %void %assign_and_preserve_padding_s %42
                OpReturn
                OpFunctionEnd

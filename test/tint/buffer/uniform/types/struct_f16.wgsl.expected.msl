@@ -50,8 +50,19 @@ S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
   return result;
 }
 
-kernel void tint_symbol(const constant S_tint_packed_vec3* tint_symbol_1 [[buffer(0)]]) {
+void assign_and_preserve_padding_1(device Inner_tint_packed_vec3* const dest, Inner value) {
+  (*(dest)).scalar_f16 = value.scalar_f16;
+  (*(dest)).vec3_f16 = packed_half3(value.vec3_f16);
+  (*(dest)).mat2x4_f16 = value.mat2x4_f16;
+}
+
+void assign_and_preserve_padding(device S_tint_packed_vec3* const dest, S value) {
+  assign_and_preserve_padding_1(&((*(dest)).inner), value.inner);
+}
+
+kernel void tint_symbol(const constant S_tint_packed_vec3* tint_symbol_1 [[buffer(0)]], device S_tint_packed_vec3* tint_symbol_2 [[buffer(1)]]) {
   S const x = tint_unpack_vec3_in_composite_1(*(tint_symbol_1));
+  assign_and_preserve_padding(tint_symbol_2, x);
   return;
 }
 

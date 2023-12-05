@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 15
+; Bound: 19
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -14,25 +14,33 @@
                OpName %u_block "u_block"
                OpMemberName %u_block 0 "inner"
                OpName %u "u"
+               OpName %s "s"
                OpName %main "main"
                OpDecorate %u_block Block
                OpMemberDecorate %u_block 0 Offset 0
                OpDecorate %u NonWritable
                OpDecorate %u DescriptorSet 0
                OpDecorate %u Binding 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 1
        %half = OpTypeFloat 16
      %v2half = OpTypeVector %half 2
     %u_block = OpTypeStruct %v2half
 %_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
           %u = OpVariable %_ptr_Uniform_u_block Uniform
+%_ptr_StorageBuffer_u_block = OpTypePointer StorageBuffer %u_block
+          %s = OpVariable %_ptr_StorageBuffer_u_block StorageBuffer
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
+          %8 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
-       %main = OpFunction %void None %6
-          %9 = OpLabel
-         %13 = OpAccessChain %_ptr_Uniform_v2half %u %uint_0
-         %14 = OpLoad %v2half %13
+%_ptr_StorageBuffer_v2half = OpTypePointer StorageBuffer %v2half
+       %main = OpFunction %void None %8
+         %11 = OpLabel
+         %15 = OpAccessChain %_ptr_Uniform_v2half %u %uint_0
+         %16 = OpLoad %v2half %15
+         %18 = OpAccessChain %_ptr_StorageBuffer_v2half %s %uint_0
+               OpStore %18 %16
                OpReturn
                OpFunctionEnd

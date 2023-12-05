@@ -10,6 +10,7 @@ struct S {
 cbuffer cbuffer_u : register(b0) {
   uint4 u[2];
 };
+RWByteAddressBuffer s : register(u1);
 
 matrix<float16_t, 2, 4> u_load_4(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
@@ -42,8 +43,24 @@ S u_load(uint offset) {
   return tint_symbol_1;
 }
 
+void s_store_4(uint offset, matrix<float16_t, 2, 4> value) {
+  s.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);
+  s.Store<vector<float16_t, 4> >((offset + 8u), value[1u]);
+}
+
+void s_store_1(uint offset, Inner value) {
+  s.Store<float16_t>((offset + 0u), value.scalar_f16);
+  s.Store<vector<float16_t, 3> >((offset + 8u), value.vec3_f16);
+  s_store_4((offset + 16u), value.mat2x4_f16);
+}
+
+void s_store(uint offset, S value) {
+  s_store_1((offset + 0u), value.inner);
+}
+
 [numthreads(1, 1, 1)]
 void main() {
   S x = u_load(0u);
+  s_store(0u, x);
   return;
 }

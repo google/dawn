@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 13
+; Bound: 17
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -10,23 +10,31 @@
                OpName %u_block "u_block"
                OpMemberName %u_block 0 "inner"
                OpName %u "u"
+               OpName %s "s"
                OpName %main "main"
                OpDecorate %u_block Block
                OpMemberDecorate %u_block 0 Offset 0
                OpDecorate %u NonWritable
                OpDecorate %u DescriptorSet 0
                OpDecorate %u Binding 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 1
        %uint = OpTypeInt 32 0
     %u_block = OpTypeStruct %uint
 %_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
           %u = OpVariable %_ptr_Uniform_u_block Uniform
+%_ptr_StorageBuffer_u_block = OpTypePointer StorageBuffer %u_block
+          %s = OpVariable %_ptr_StorageBuffer_u_block StorageBuffer
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+          %7 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
-       %main = OpFunction %void None %5
-          %8 = OpLabel
-         %11 = OpAccessChain %_ptr_Uniform_uint %u %uint_0
-         %12 = OpLoad %uint %11
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+       %main = OpFunction %void None %7
+         %10 = OpLabel
+         %13 = OpAccessChain %_ptr_Uniform_uint %u %uint_0
+         %14 = OpLoad %uint %13
+         %16 = OpAccessChain %_ptr_StorageBuffer_uint %s %uint_0
+               OpStore %16 %14
                OpReturn
                OpFunctionEnd

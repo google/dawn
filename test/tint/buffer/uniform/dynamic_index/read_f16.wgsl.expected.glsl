@@ -8,6 +8,10 @@ struct mat4x2_f16_4 {
   f16vec2 col3;
 };
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 struct Inner {
   float scalar_f32;
   int scalar_i32;
@@ -148,6 +152,10 @@ layout(binding = 0, std140) uniform ub_block_std140_ubo {
   S_std140 inner;
 } ub;
 
+layout(binding = 1, std430) buffer s_block_ssbo {
+  int inner;
+} s;
+
 mat2 load_ub_inner_arr_p0_mat2x2_f32(uint p0) {
   uint s_save = p0;
   return mat2(ub.inner.arr[s_save].mat2x2_f32_0, ub.inner.arr[s_save].mat2x2_f32_1);
@@ -259,6 +267,7 @@ void tint_symbol(uint idx) {
   f16mat4 mat4x4_f16 = load_ub_inner_arr_p0_mat4x4_f16(uint(idx));
   vec3 arr2_vec3_f32[2] = ub.inner.arr[idx].arr2_vec3_f32;
   f16mat4x2 arr2_mat4x2_f16[2] = conv_arr2_mat4x2_f16(ub.inner.arr[idx].arr2_mat4x2_f16);
+  s.inner = (((((((((((((((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + int(scalar_f16)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + int(vec2_f16.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + int(vec3_f16.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + int(vec4_f16.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + int(mat2x2_f16[0].x)) + int(mat2x3_f16[0].x)) + int(mat2x4_f16[0].x)) + int(mat3x2_f16[0].x)) + int(mat3x3_f16[0].x)) + int(mat3x4_f16[0].x)) + int(mat4x2_f16[0].x)) + int(mat4x3_f16[0].x)) + int(mat4x4_f16[0].x)) + tint_ftoi(arr2_vec3_f32[0].x)) + int(arr2_mat4x2_f16[0][0].x));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

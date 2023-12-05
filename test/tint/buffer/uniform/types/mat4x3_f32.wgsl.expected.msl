@@ -27,8 +27,16 @@ float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
   return result;
 }
 
-kernel void tint_symbol(const constant tint_array<tint_packed_vec3_f32_array_element, 4>* tint_symbol_1 [[buffer(0)]]) {
+void assign_and_preserve_padding(device tint_array<tint_packed_vec3_f32_array_element, 4>* const dest, float4x3 value) {
+  (*(dest))[0u].elements = packed_float3(value[0u]);
+  (*(dest))[1u].elements = packed_float3(value[1u]);
+  (*(dest))[2u].elements = packed_float3(value[2u]);
+  (*(dest))[3u].elements = packed_float3(value[3u]);
+}
+
+kernel void tint_symbol(const constant tint_array<tint_packed_vec3_f32_array_element, 4>* tint_symbol_1 [[buffer(0)]], device tint_array<tint_packed_vec3_f32_array_element, 4>* tint_symbol_2 [[buffer(1)]]) {
   float4x3 const x = tint_unpack_vec3_in_composite(*(tint_symbol_1));
+  assign_and_preserve_padding(tint_symbol_2, x);
   return;
 }
 
