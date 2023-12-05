@@ -1,8 +1,3 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-
 void A() {
 }
 
@@ -15,4 +10,11 @@ void B() {
 
 void _B() {
   _A();
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  B();
+  _B();
+  return;
 }

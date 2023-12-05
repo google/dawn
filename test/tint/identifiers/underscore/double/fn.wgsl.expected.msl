@@ -15,3 +15,9 @@ void b__() {
   a__();
 }
 
+kernel void tint_symbol() {
+  b();
+  b__();
+  return;
+}
+

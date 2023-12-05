@@ -1,9 +1,5 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 void A() {
 }
 
@@ -18,3 +14,13 @@ void _B() {
   _A();
 }
 
+void tint_symbol() {
+  B();
+  _B();
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol();
+  return;
+}

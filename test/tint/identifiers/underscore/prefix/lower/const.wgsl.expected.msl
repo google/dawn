@@ -1,6 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void f() {
+kernel void f(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = 3;
+  return;
 }
 

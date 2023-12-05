@@ -9,8 +9,10 @@ struct a__ {
   int b__;
 };
 
-void f() {
+kernel void f(device int* tint_symbol [[buffer(0)]]) {
   a__ const c = a__{};
   int const d = c.b__;
+  *(tint_symbol) = as_type<int>((as_type<uint>(c.b__) + as_type<uint>(d)));
+  return;
 }
 

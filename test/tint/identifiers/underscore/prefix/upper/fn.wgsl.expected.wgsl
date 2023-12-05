@@ -11,3 +11,9 @@ fn B() {
 fn _B() {
   _A();
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  B();
+  _B();
+}

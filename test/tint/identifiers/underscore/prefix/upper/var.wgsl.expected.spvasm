@@ -1,39 +1,52 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 19
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
+               OpName %s "s"
                OpName %A "A"
                OpName %_A "_A"
-               OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
                OpName %B "B"
                OpName %_B "_B"
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 0
         %int = OpTypeInt 32 1
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
       %int_1 = OpConstant %int 1
 %_ptr_Private_int = OpTypePointer Private %int
           %A = OpVariable %_ptr_Private_int Private %int_1
       %int_2 = OpConstant %int 2
          %_A = OpVariable %_ptr_Private_int Private %int_2
        %void = OpTypeVoid
-          %7 = OpTypeFunction %void
+         %10 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
-         %16 = OpConstantNull %int
-%unused_entry_point = OpFunction %void None %7
-         %10 = OpLabel
-               OpReturn
-               OpFunctionEnd
-          %f = OpFunction %void None %7
-         %12 = OpLabel
-          %B = OpVariable %_ptr_Function_int Function %16
-         %_B = OpVariable %_ptr_Function_int Function %16
-         %13 = OpLoad %int %A
-               OpStore %B %13
-         %17 = OpLoad %int %_A
-               OpStore %_B %17
+         %17 = OpConstantNull %int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+          %f = OpFunction %void None %10
+         %13 = OpLabel
+          %B = OpVariable %_ptr_Function_int Function %17
+         %_B = OpVariable %_ptr_Function_int Function %17
+         %14 = OpLoad %int %A
+               OpStore %B %14
+         %18 = OpLoad %int %_A
+               OpStore %_B %18
+         %23 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_0
+         %24 = OpLoad %int %B
+         %25 = OpLoad %int %_B
+         %26 = OpIAdd %int %24 %25
+               OpStore %23 %26
                OpReturn
                OpFunctionEnd
