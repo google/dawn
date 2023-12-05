@@ -14,7 +14,12 @@ vec4 v4f32_var = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 mat2x3 m2x3_var = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 float arr_var[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
 S struct_var = S(0.0f);
-void tint_symbol() {
+shared float wg_var;
+void tint_symbol(uint local_invocation_index) {
+  {
+    wg_var = 0.0f;
+  }
+  barrier();
   bool_var = false;
   i32_var = 0;
   u32_var = 0u;
@@ -27,10 +32,11 @@ void tint_symbol() {
   arr_var = tint_symbol_1;
   S tint_symbol_2 = S(0.0f);
   struct_var = tint_symbol_2;
+  wg_var = 42.0f;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
+  tint_symbol(gl_LocalInvocationIndex);
   return;
 }

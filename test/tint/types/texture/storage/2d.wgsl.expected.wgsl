@@ -32,20 +32,20 @@
 
 @compute @workgroup_size(1)
 fn main() {
-  _ = t_rgba8unorm;
-  _ = t_rgba8snorm;
-  _ = t_rgba8uint;
-  _ = t_rgba8sint;
-  _ = t_rgba16uint;
-  _ = t_rgba16sint;
-  _ = t_rgba16float;
-  _ = t_r32uint;
-  _ = t_r32sint;
-  _ = t_r32float;
-  _ = t_rg32uint;
-  _ = t_rg32sint;
-  _ = t_rg32float;
-  _ = t_rgba32uint;
-  _ = t_rgba32sint;
-  _ = t_rgba32float;
+  var dim1 = textureDimensions(t_rgba8unorm);
+  var dim2 = textureDimensions(t_rgba8snorm);
+  var dim3 = textureDimensions(t_rgba8uint);
+  var dim4 = textureDimensions(t_rgba8sint);
+  var dim5 = textureDimensions(t_rgba16uint);
+  var dim6 = textureDimensions(t_rgba16sint);
+  var dim7 = textureDimensions(t_rgba16float);
+  var dim8 = textureDimensions(t_r32uint);
+  var dim9 = textureDimensions(t_r32sint);
+  var dim10 = textureDimensions(t_r32float);
+  var dim11 = textureDimensions(t_rg32uint);
+  var dim12 = textureDimensions(t_rg32sint);
+  var dim13 = textureDimensions(t_rg32float);
+  var dim14 = textureDimensions(t_rgba32uint);
+  var dim15 = textureDimensions(t_rgba32sint);
+  var dim16 = textureDimensions(t_rgba32float);
 }

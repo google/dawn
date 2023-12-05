@@ -1,7 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol() {
+kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_1 [[texture(0)]]) {
+  uint2 dims = uint2(tint_symbol_1.get_width(0), tint_symbol_1.get_height(0));
   return;
 }
 

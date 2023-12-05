@@ -1,7 +1,10 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol() {
+kernel void tint_symbol(texture3d<float, access::sample> tint_symbol_1 [[texture(0)]], texture3d<int, access::sample> tint_symbol_2 [[texture(1)]], texture3d<uint, access::sample> tint_symbol_3 [[texture(2)]]) {
+  uint3 fdims = uint3(tint_symbol_1.get_width(1), tint_symbol_1.get_height(1), tint_symbol_1.get_depth(1));
+  uint3 idims = uint3(tint_symbol_2.get_width(1), tint_symbol_2.get_height(1), tint_symbol_2.get_depth(1));
+  uint3 udims = uint3(tint_symbol_3.get_width(1), tint_symbol_3.get_height(1), tint_symbol_3.get_depth(1));
   return;
 }
 

@@ -1,0 +1,42 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 20
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %weights_block "weights_block"
+               OpMemberName %weights_block 0 "inner"
+               OpName %weights "weights"
+               OpName %main "main"
+               OpName %a "a"
+               OpDecorate %weights_block Block
+               OpMemberDecorate %weights_block 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %weights NonWritable
+               OpDecorate %weights DescriptorSet 0
+               OpDecorate %weights Binding 0
+      %float = OpTypeFloat 32
+%_runtimearr_float = OpTypeRuntimeArray %float
+%weights_block = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_weights_block = OpTypePointer StorageBuffer %weights_block
+    %weights = OpVariable %_ptr_StorageBuffer_weights_block StorageBuffer
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %13 = OpConstantNull %int
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%_ptr_Function_float = OpTypePointer Function %float
+         %19 = OpConstantNull %float
+       %main = OpFunction %void None %6
+          %9 = OpLabel
+          %a = OpVariable %_ptr_Function_float Function %19
+         %15 = OpAccessChain %_ptr_StorageBuffer_float %weights %uint_0 %13
+         %16 = OpLoad %float %15
+               OpStore %a %16
+               OpReturn
+               OpFunctionEnd

@@ -1,10 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Bound: 29
 ; Schema: 0
                OpCapability Shader
                OpCapability Sampled1D
+               OpCapability ImageQuery
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -12,6 +13,9 @@
                OpName %t_i "t_i"
                OpName %t_u "t_u"
                OpName %main "main"
+               OpName %fdims "fdims"
+               OpName %idims "idims"
+               OpName %udims "udims"
                OpDecorate %t_f DescriptorSet 0
                OpDecorate %t_f Binding 0
                OpDecorate %t_i DescriptorSet 0
@@ -32,7 +36,22 @@
         %t_u = OpVariable %_ptr_UniformConstant_11 UniformConstant
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
+      %int_1 = OpConstant %int 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %22 = OpConstantNull %uint
        %main = OpFunction %void None %13
          %16 = OpLabel
+      %fdims = OpVariable %_ptr_Function_uint Function %22
+      %idims = OpVariable %_ptr_Function_uint Function %22
+      %udims = OpVariable %_ptr_Function_uint Function %22
+         %18 = OpLoad %3 %t_f
+         %17 = OpImageQuerySizeLod %uint %18 %int_1
+               OpStore %fdims %17
+         %24 = OpLoad %7 %t_i
+         %23 = OpImageQuerySizeLod %uint %24 %int_1
+               OpStore %idims %23
+         %27 = OpLoad %11 %t_u
+         %26 = OpImageQuerySizeLod %uint %27 %int_1
+               OpStore %udims %26
                OpReturn
                OpFunctionEnd

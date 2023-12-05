@@ -4,7 +4,7 @@
 
 @compute @workgroup_size(1)
 fn main() {
-  _ = t_f;
-  _ = t_i;
-  _ = t_u;
+  var fdims = textureDimensions(t_f, 1);
+  var idims = textureDimensions(t_i, 1);
+  var udims = textureDimensions(t_u, 1);
 }

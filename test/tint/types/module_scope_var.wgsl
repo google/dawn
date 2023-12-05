@@ -13,6 +13,8 @@ var<private> m2x3_var : mat2x3<f32>;
 var<private> arr_var : array<f32, 4>;
 var<private> struct_var : S;
 
+var<workgroup> wg_var : f32;
+
 @compute @workgroup_size(1)
 fn main() {
   // Reference the module-scope variables to stop them from being removed.
@@ -26,4 +28,6 @@ fn main() {
   m2x3_var = mat2x3<f32>();
   arr_var = array<f32, 4>();
   struct_var = S();
+
+  wg_var = 42;
 }

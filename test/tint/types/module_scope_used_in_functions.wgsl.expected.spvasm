@@ -1,0 +1,114 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 59
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %local_invocation_index_1
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %local_invocation_index_1 "local_invocation_index_1"
+               OpName %p "p"
+               OpName %w "w"
+               OpName %uniforms_block "uniforms_block"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms "uniforms"
+               OpName %storages_block "storages_block"
+               OpMemberName %storages_block 0 "inner"
+               OpName %storages "storages"
+               OpName %no_uses "no_uses"
+               OpName %zoo "zoo"
+               OpName %bar "bar"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %foo "foo"
+               OpName %a_0 "a"
+               OpName %main_inner "main_inner"
+               OpName %local_invocation_index "local_invocation_index"
+               OpName %main "main"
+               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
+               OpDecorate %uniforms_block Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms NonWritable
+               OpDecorate %uniforms DescriptorSet 0
+               OpDecorate %uniforms Binding 1
+               OpDecorate %storages_block Block
+               OpMemberDecorate %storages_block 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %storages DescriptorSet 0
+               OpDecorate %storages Binding 0
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+%_ptr_Private_float = OpTypePointer Private %float
+          %7 = OpConstantNull %float
+          %p = OpVariable %_ptr_Private_float Private %7
+%_ptr_Workgroup_float = OpTypePointer Workgroup %float
+          %w = OpVariable %_ptr_Workgroup_float Workgroup
+    %v2float = OpTypeVector %float 2
+%uniforms_block = OpTypeStruct %v2float
+%_ptr_StorageBuffer_uniforms_block = OpTypePointer StorageBuffer %uniforms_block
+   %uniforms = OpVariable %_ptr_StorageBuffer_uniforms_block StorageBuffer
+%_runtimearr_float = OpTypeRuntimeArray %float
+%storages_block = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_storages_block = OpTypePointer StorageBuffer %storages_block
+   %storages = OpVariable %_ptr_StorageBuffer_storages_block StorageBuffer
+       %void = OpTypeVoid
+         %18 = OpTypeFunction %void
+    %float_2 = OpConstant %float 2
+         %27 = OpTypeFunction %void %float %float
+     %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %34 = OpConstantNull %int
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+         %40 = OpTypeFunction %void %float
+         %46 = OpTypeFunction %void %uint
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+    %float_1 = OpConstant %float 1
+    %no_uses = OpFunction %void None %18
+         %21 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %zoo = OpFunction %void None %18
+         %23 = OpLabel
+         %24 = OpLoad %float %p
+         %26 = OpFMul %float %24 %float_2
+               OpStore %p %26
+               OpReturn
+               OpFunctionEnd
+        %bar = OpFunction %void None %27
+          %a = OpFunctionParameter %float
+          %b = OpFunctionParameter %float
+         %31 = OpLabel
+               OpStore %p %a
+               OpStore %w %b
+         %36 = OpAccessChain %_ptr_StorageBuffer_float %storages %uint_0 %34
+         %37 = OpAccessChain %_ptr_StorageBuffer_float %uniforms %uint_0 %uint_0
+         %38 = OpLoad %float %37
+               OpStore %36 %38
+         %39 = OpFunctionCall %void %zoo
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %void None %40
+        %a_0 = OpFunctionParameter %float
+         %43 = OpLabel
+         %44 = OpFunctionCall %void %bar %a_0 %float_2
+         %45 = OpFunctionCall %void %no_uses
+               OpReturn
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %46
+%local_invocation_index = OpFunctionParameter %uint
+         %49 = OpLabel
+               OpStore %w %7
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %53 = OpFunctionCall %void %foo %float_1
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %18
+         %56 = OpLabel
+         %58 = OpLoad %uint %local_invocation_index_1
+         %57 = OpFunctionCall %void %main_inner %58
+               OpReturn
+               OpFunctionEnd

@@ -2,5 +2,5 @@
 
 @compute @workgroup_size(1)
 fn main() {
-  _ = t_f;
+  var dims = textureDimensions(t_f, 0);
 }

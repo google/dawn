@@ -1,10 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 56
+; Bound: 107
 ; Schema: 0
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
+               OpCapability ImageQuery
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -25,6 +26,22 @@
                OpName %t_rgba32sint "t_rgba32sint"
                OpName %t_rgba32float "t_rgba32float"
                OpName %main "main"
+               OpName %dim1 "dim1"
+               OpName %dim2 "dim2"
+               OpName %dim3 "dim3"
+               OpName %dim4 "dim4"
+               OpName %dim5 "dim5"
+               OpName %dim6 "dim6"
+               OpName %dim7 "dim7"
+               OpName %dim8 "dim8"
+               OpName %dim9 "dim9"
+               OpName %dim10 "dim10"
+               OpName %dim11 "dim11"
+               OpName %dim12 "dim12"
+               OpName %dim13 "dim13"
+               OpName %dim14 "dim14"
+               OpName %dim15 "dim15"
+               OpName %dim16 "dim16"
                OpDecorate %t_rgba8unorm NonReadable
                OpDecorate %t_rgba8unorm DescriptorSet 0
                OpDecorate %t_rgba8unorm Binding 0
@@ -126,7 +143,74 @@
 %t_rgba32float = OpVariable %_ptr_UniformConstant_51 UniformConstant
        %void = OpTypeVoid
          %52 = OpTypeFunction %void
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+         %61 = OpConstantNull %v2uint
        %main = OpFunction %void None %52
          %55 = OpLabel
+       %dim1 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim2 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim3 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim4 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim5 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim6 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim7 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim8 = OpVariable %_ptr_Function_v2uint Function %61
+       %dim9 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim10 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim11 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim12 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim13 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim14 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim15 = OpVariable %_ptr_Function_v2uint Function %61
+      %dim16 = OpVariable %_ptr_Function_v2uint Function %61
+         %58 = OpLoad %3 %t_rgba8unorm
+         %56 = OpImageQuerySize %v2uint %58
+               OpStore %dim1 %56
+         %63 = OpLoad %7 %t_rgba8snorm
+         %62 = OpImageQuerySize %v2uint %63
+               OpStore %dim2 %62
+         %66 = OpLoad %10 %t_rgba8uint
+         %65 = OpImageQuerySize %v2uint %66
+               OpStore %dim3 %65
+         %69 = OpLoad %14 %t_rgba8sint
+         %68 = OpImageQuerySize %v2uint %69
+               OpStore %dim4 %68
+         %72 = OpLoad %18 %t_rgba16uint
+         %71 = OpImageQuerySize %v2uint %72
+               OpStore %dim5 %71
+         %75 = OpLoad %21 %t_rgba16sint
+         %74 = OpImageQuerySize %v2uint %75
+               OpStore %dim6 %74
+         %78 = OpLoad %24 %t_rgba16float
+         %77 = OpImageQuerySize %v2uint %78
+               OpStore %dim7 %77
+         %81 = OpLoad %27 %t_r32uint
+         %80 = OpImageQuerySize %v2uint %81
+               OpStore %dim8 %80
+         %84 = OpLoad %30 %t_r32sint
+         %83 = OpImageQuerySize %v2uint %84
+               OpStore %dim9 %83
+         %87 = OpLoad %33 %t_r32float
+         %86 = OpImageQuerySize %v2uint %87
+               OpStore %dim10 %86
+         %90 = OpLoad %36 %t_rg32uint
+         %89 = OpImageQuerySize %v2uint %90
+               OpStore %dim11 %89
+         %93 = OpLoad %39 %t_rg32sint
+         %92 = OpImageQuerySize %v2uint %93
+               OpStore %dim12 %92
+         %96 = OpLoad %42 %t_rg32float
+         %95 = OpImageQuerySize %v2uint %96
+               OpStore %dim13 %95
+         %99 = OpLoad %45 %t_rgba32uint
+         %98 = OpImageQuerySize %v2uint %99
+               OpStore %dim14 %98
+        %102 = OpLoad %48 %t_rgba32sint
+        %101 = OpImageQuerySize %v2uint %102
+               OpStore %dim15 %101
+        %105 = OpLoad %51 %t_rgba32float
+        %104 = OpImageQuerySize %v2uint %105
+               OpStore %dim16 %104
                OpReturn
                OpFunctionEnd
