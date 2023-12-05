@@ -407,6 +407,9 @@ TEST_P(DynamicBufferOffsetTests, BasicInheritRenderPipeline) {
 
 // Test inherit dynamic offsets on render pipeline
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
+    // TODO(crbug.com/1497726): Remove when test is no longer flaky on M2
+    // devices.
+    DAWN_SUPPRESS_TEST_IF(IsApple());
     // Using default pipeline and setting dynamic offsets
     wgpu::RenderPipeline pipeline = CreateRenderPipeline();
     wgpu::RenderPipeline testPipeline = CreateRenderPipeline(true);
