@@ -1,0 +1,116 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: S = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+}
+
+%b1 = block {  # root
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+  %g1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%d = func(%val:i32):i32 -> %b2 {
+  %b2 = block {
+    ret %val
+  }
+}
+%c = func(%val_1:ptr<function, i32, read_write>):i32 -> %b3 {  # %val_1: 'val'
+  %b3 = block {
+    %7:i32 = load %val_1
+    %8:i32 = let %7
+    %9:i32 = load %val_1
+    %10:i32 = call %d, %9
+    %11:i32 = add %8, %10
+    ret %11
+  }
+}
+%a = func(%val_2:ptr<function, i32, read_write>):i32 -> %b4 {  # %val_2: 'val'
+  %b4 = block {
+    %14:i32 = load %val_2
+    %15:i32 = let %14
+    %16:i32 = call %c, %val_2
+    %17:i32 = add %15, %16
+    ret %17
+  }
+}
+%z = func():i32 -> %b5 {
+  %b5 = block {
+    %19:i32 = atomicLoad %g1
+    ret %19
+  }
+}
+%y = func(%v1:ptr<function, vec3<f32>, read_write>):i32 -> %b6 {
+  %b6 = block {
+    %22:vec3<f32> = load %v1
+    %23:vec3<f32> = load %v1
+    %24:vec3<f32> = cross %22, %23
+    %25:f32 = access %24, 0u
+    store_vector_element %v1, 0u, %25
+    %26:f32 = load_vector_element %v1, 0u
+    %27:i32 = call %tint_f32_to_i32, %26
+    ret %27
+  }
+}
+%b = func(%val_3:ptr<function, S, read_write>):i32 -> %b7 {  # %val_3: 'val'
+  %b7 = block {
+    %31:ptr<function, i32, read_write> = access %val_3, 0u
+    %32:i32 = load %31
+    %33:ptr<function, i32, read_write> = access %val_3, 1u
+    %34:i32 = load %33
+    %35:i32 = add %32, %34
+    ret %35
+  }
+}
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b8 {
+  %b8 = block {
+    %38:bool = eq %tint_local_index, 0u
+    if %38 [t: %b9] {  # if_1
+      %b9 = block {  # true
+        %39:void = atomicStore %g1, 0i
+        exit_if  # if_1
+      }
+    }
+    %40:void = msl.threadgroup_barrier 4u
+    %v1_1:ptr<function, i32, read_write> = var, 0i  # %v1_1: 'v1'
+    %v2:ptr<function, S, read_write> = var, S(0i)
+    %v3:ptr<function, S, read_write> = let %v2
+    %v4:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
+    %45:i32 = atomicLoad %g1
+    %t1:i32 = let %45
+    %47:i32 = call %a, %v1_1
+    %48:i32 = let %47
+    %49:i32 = call %b, %v2
+    %50:i32 = add %48, %49
+    %51:i32 = let %50
+    %52:i32 = call %b, %v3
+    %53:i32 = add %51, %52
+    %54:i32 = let %53
+    %55:i32 = call %z
+    %56:i32 = add %54, %55
+    %57:i32 = add %56, %t1
+    %58:i32 = let %57
+    %59:i32 = call %y, %v4
+    %60:i32 = add %58, %59
+    store %s, %60
+    ret
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 -> %b10 {
+  %b10 = block {
+    %62:i32 = convert %value
+    %63:bool = gte %value, -2147483648.0f
+    %64:i32 = select -2147483648i, %62, %63
+    %65:bool = lte %value, 2147483520.0f
+    %66:i32 = select 2147483647i, %64, %65
+    ret %66
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
