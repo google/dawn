@@ -1,26 +1,47 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 15
+; Bound: 28
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
+               OpName %s "s"
                OpName %main "main"
-       %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 0
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
+    %s_block = OpTypeStruct %v3float
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
-         %10 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+         %13 = OpConstantComposite %v3float %float_1 %float_2 %float_3
     %v2float = OpTypeVector %float 2
-       %main = OpFunction %void None %1
-          %4 = OpLabel
-         %11 = OpCompositeExtract %float %10 1
-         %13 = OpVectorShuffle %v2float %10 %10 0 2
-         %14 = OpVectorShuffle %v3float %10 %10 0 2 1
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+       %main = OpFunction %void None %6
+          %9 = OpLabel
+         %14 = OpCompositeExtract %float %13 1
+         %16 = OpVectorShuffle %v2float %13 %13 0 2
+         %17 = OpVectorShuffle %v3float %13 %13 0 2 1
+         %21 = OpAccessChain %_ptr_StorageBuffer_v3float %s %uint_0
+         %22 = OpCompositeConstruct %v3float %14 %14 %14
+         %23 = OpCompositeExtract %float %16 0
+         %24 = OpCompositeExtract %float %16 1
+         %25 = OpCompositeConstruct %v3float %23 %24 %float_1
+         %26 = OpFAdd %v3float %22 %25
+         %27 = OpFAdd %v3float %26 %17
+               OpStore %21 %27
                OpReturn
                OpFunctionEnd
