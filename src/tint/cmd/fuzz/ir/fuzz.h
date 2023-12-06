@@ -53,6 +53,9 @@ struct IRFuzzer {
     static IRFuzzer Create(std::string_view name, void (*fn)(core::ir::Module&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](core::ir::Module& module, Slice<const std::byte> data) {
+                if (!data.data) {
+                    return;
+                }
                 bytes::BufferReader reader{data};
                 if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader)) {
                     auto all_args =

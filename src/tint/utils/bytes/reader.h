@@ -121,12 +121,16 @@ class BufferReader final : public Reader {
     /// Constructor
     /// @param data the data to read from
     /// @param size the number of bytes in the buffer
-    BufferReader(const std::byte* data, size_t size) : data_(data), bytes_remaining_(size) {}
+    BufferReader(const std::byte* data, size_t size) : data_(data), bytes_remaining_(size) {
+        TINT_ASSERT(data);
+    }
 
     /// Constructor
     /// @param slice the byte slice to read from
     explicit BufferReader(Slice<const std::byte> slice)
-        : data_(slice.data), bytes_remaining_(slice.len) {}
+        : data_(slice.data), bytes_remaining_(slice.len) {
+        TINT_ASSERT(slice.data);
+    }
 
     /// @copydoc Reader::Read
     size_t Read(std::byte* out, size_t count) override {

@@ -50,6 +50,9 @@ struct ProgramFuzzer {
     static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](const Program& program, Slice<const std::byte> data) {
+                if (!data.data) {
+                    return;
+                }
                 bytes::BufferReader reader{data};
                 if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader)) {
                     auto all_args =
