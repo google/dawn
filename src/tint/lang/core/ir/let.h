@@ -40,10 +40,14 @@ class Let final : public Castable<Let, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
+    /// Constructor (no operands)
+    Let();
+
     /// Constructor
     /// @param result the result value
     /// @param value the let's value
     Let(InstructionResult* result, Value* value);
+
     ~Let() override;
 
     /// @copydoc Instruction::Clone()

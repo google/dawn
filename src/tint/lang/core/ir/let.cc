@@ -35,6 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Let);
 
 namespace tint::core::ir {
 
+Let::Let() = default;
+
 Let::Let(InstructionResult* result, ir::Value* value) {
     AddOperand(Let::kValueOperandOffset, value);
     AddResult(result);

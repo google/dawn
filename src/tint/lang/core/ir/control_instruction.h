@@ -54,31 +54,6 @@ class ControlInstruction : public Castable<ControlInstruction, OperandInstructio
     /// @param cb the function to call once for each block
     virtual void ForeachBlock(const std::function<void(ir::Block*)>& cb) = 0;
 
-    /// Sets the results of the control instruction
-    /// @param values the new result values
-    void SetResults(VectorRef<InstructionResult*> values) {
-        for (auto* value : results_) {
-            if (value) {
-                value->SetInstruction(nullptr);
-            }
-        }
-        results_ = std::move(values);
-        for (auto* value : results_) {
-            if (value) {
-                value->SetInstruction(this);
-            }
-        }
-    }
-
-    /// Sets the results of the control instruction
-    /// @param values the new result values
-    template <typename... ARGS,
-              typename = std::enable_if_t<!tint::IsVectorLike<
-                  tint::traits::Decay<tint::traits::NthTypeOf<0, ARGS..., void>>>>>
-    void SetResults(ARGS&&... values) {
-        SetResults(Vector{std::forward<ARGS>(values)...});
-    }
-
     /// @return All the exits for the flow control instruction
     const Hashset<Exit*, 2>& Exits() const { return exits_; }
 

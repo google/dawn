@@ -27,11 +27,14 @@
 
 #include "src/tint/lang/core/ir/binary/encode.h"
 
+#include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/function_param.h"
+#include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -52,6 +55,7 @@ struct Encoder {
     Hashmap<const core::ir::Block*, uint32_t, 32> blocks_{};
     Hashmap<const core::type::Type*, uint32_t, 32> types_{};
     Hashmap<const core::ir::Value*, uint32_t, 32> values_{};
+    Hashmap<const core::constant::Value*, uint32_t, 32> constant_values_{};
 
     void Encode() {
         Vector<pb::Function*, 8> fns_out;
@@ -61,14 +65,14 @@ struct Encoder {
             functions_.Add(fn_in, id);
         }
         for (size_t i = 0, n = mod_in_.functions.Length(); i < n; i++) {
-            Function(fns_out[i], mod_in_.functions[i]);
+            PopulateFunction(fns_out[i], mod_in_.functions[i]);
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////
     // Functions
     ////////////////////////////////////////////////////////////////////////////
-    void Function(pb::Function* fn_out, const ir::Function* fn_in) {
+    void PopulateFunction(pb::Function* fn_out, const ir::Function* fn_in) {
         if (auto name = mod_in_.NameOf(fn_in)) {
             fn_out->set_name(name.Name());
         }
@@ -83,10 +87,12 @@ struct Encoder {
             wg_size_out.set_z((*wg_size_in)[2]);
         }
         for (auto* param_in : fn_in->Params()) {
-            fn_out->add_parameters(FunctionParam(param_in));
+            fn_out->add_parameters(Value(param_in));
         }
         fn_out->set_block(Block(fn_in->Block()));
     }
+
+    uint32_t Function(const ir::Function* fn_in) { return fn_in ? *functions_.Get(fn_in) : 0; }
 
     pb::PipelineStage PipelineStage(Function::PipelineStage stage) {
         switch (stage) {
@@ -126,8 +132,15 @@ struct Encoder {
             inst_in,                                                           //
             [&](const ir::Discard*) { return pb::InstructionKind::Discard; },  //
             [&](const ir::Return*) { return pb::InstructionKind::Return; },    //
+            [&](const ir::Let*) { return pb::InstructionKind::Let; },          //
             TINT_ICE_ON_NO_MATCH);
         inst_out->set_kind(kind);
+        for (auto* operand : inst_in->Operands()) {
+            inst_out->add_operands(Value(operand));
+        }
+        for (auto* result : inst_in->Results()) {
+            inst_out->add_results(Value(result));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -144,9 +157,12 @@ struct Encoder {
                 [&](const core::type::Bool*) { return pb::BasicType::bool_; },
                 [&](const core::type::I32*) { return pb::BasicType::i32; },
                 [&](const core::type::U32*) { return pb::BasicType::u32; },
-                [&](const core::type::F32*) { return pb::BasicType::f32; },  //
+                [&](const core::type::F32*) { return pb::BasicType::f32; },
+                [&](const core::type::F16*) { return pb::BasicType::f16; },  //
                 TINT_ICE_ON_NO_MATCH);
             mod_out_.add_types()->set_basic(basic);
+
+            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
             return static_cast<uint32_t>(types_.Count());
         });
     }
@@ -154,20 +170,72 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     // Values
     ////////////////////////////////////////////////////////////////////////////
-    // uint32_t Value(const ir::Value* value) {
-    //     return Switch(value,  //
-    //                   [&](const ir::FunctionParam* p) { return FunctionParam(p); });
-    // }
+    uint32_t Value(const ir::Value* value_in) {
+        if (!value_in) {
+            return 0;
+        }
+        return values_.GetOrCreate(value_in, [&] {
+            auto& value_out = *mod_out_.add_values();
+            Switch(
+                value_in,
+                [&](const ir::InstructionResult* v) {
+                    InstructionResult(*value_out.mutable_instruction_result(), v);
+                },
+                [&](const ir::FunctionParam* v) {
+                    FunctionParameter(*value_out.mutable_function_parameter(), v);
+                },
+                [&](const ir::Function* v) { value_out.set_function(Function(v)); },
+                [&](const ir::Constant* v) { value_out.set_constant(ConstantValue(v->Value())); },
+                TINT_ICE_ON_NO_MATCH);
 
-    uint32_t FunctionParam(const ir::FunctionParam* param) {
-        return values_.GetOrCreate(param, [&] {
-            auto& val_out = *mod_out_.add_values();
-            val_out.set_kind(pb::ValueKind::function_parameter);
-            val_out.set_type(Type(param->Type()));
-            if (auto name = mod_in_.NameOf(param); name.IsValid()) {
-                val_out.set_name(name.Name());
-            }
+            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
             return static_cast<uint32_t>(values_.Count());
+        });
+    }
+
+    void InstructionResult(pb::InstructionResult& res_out, const ir::InstructionResult* res_in) {
+        res_out.set_type(Type(res_in->Type()));
+        if (auto name = mod_in_.NameOf(res_in); name.IsValid()) {
+            res_out.set_name(name.Name());
+        }
+    }
+
+    void FunctionParameter(pb::FunctionParameter& param_out, const ir::FunctionParam* param_in) {
+        param_out.set_type(Type(param_in->Type()));
+        if (auto name = mod_in_.NameOf(param_in); name.IsValid()) {
+            param_out.set_name(name.Name());
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // ConstantValues
+    ////////////////////////////////////////////////////////////////////////////
+    uint32_t ConstantValue(const core::constant::Value* constant_in) {
+        if (!constant_in) {
+            return 0;
+        }
+        return constant_values_.GetOrCreate(constant_in, [&] {
+            auto& constant_out = *mod_out_.add_constant_values();
+            Switch(
+                constant_in,  //
+                [&](const core::constant::Scalar<bool>* b) {
+                    constant_out.mutable_scalar()->set_bool_(b->value);
+                },
+                [&](const core::constant::Scalar<core::i32>* i32) {
+                    constant_out.mutable_scalar()->set_i32(i32->value);
+                },
+                [&](const core::constant::Scalar<core::u32>* u32) {
+                    constant_out.mutable_scalar()->set_u32(u32->value);
+                },
+                [&](const core::constant::Scalar<core::f32>* f32) {
+                    constant_out.mutable_scalar()->set_f32(f32->value);
+                },
+                [&](const core::constant::Scalar<core::f16>* f16) {
+                    constant_out.mutable_scalar()->set_f16(f16->value);
+                },
+                TINT_ICE_ON_NO_MATCH);
+            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
+            return static_cast<uint32_t>(constant_values_.Count());
         });
     }
 };

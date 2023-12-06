@@ -32,9 +32,10 @@ package tint.core.ir.binary.pb;
 message Module {
     repeated TypeDecl types = 1;
     repeated Value values = 2;
-    Block root_block = 3;
-    repeated Function functions = 4;
-    repeated Block blocks = 5;
+    repeated ConstantValue constant_values = 3;
+    Block root_block = 4;
+    repeated Function functions = 5;
+    repeated Block blocks = 6;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,26 +82,66 @@ message ArrayType {
 // Values
 ////////////////////////////////////////////////////////////////////////////////
 message Value {
-    ValueKind kind = 1;
-    uint32 type = 2;  // Module.types
-    optional string name = 3;
+    oneof kind {
+        uint32 function = 1;  // Module.functions
+        InstructionResult instruction_result = 2;
+        FunctionParameter function_parameter = 3;
+        uint32 constant = 4;  // Module.constant_values
+    }
 }
 
-enum ValueKind {
-    instruction_result = 0;
-    function_parameter = 1;
+message InstructionResult {
+    uint32 type = 1;  // Module.types
+    optional string name = 2;
+}
+
+message FunctionParameter {
+    uint32 type = 1;  // Module.types
+    optional string name = 2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// ConstantValues
+////////////////////////////////////////////////////////////////////////////////
+message ConstantValue {
+    oneof kind {
+        ConstantValueScalar scalar = 1;
+        ConstantValueComposite composite = 2;
+        ConstantValueSplat splat = 3;
+    }
+}
+
+message ConstantValueScalar {
+    oneof kind {
+        bool bool = 1;
+        int32 i32 = 2;
+        uint32 u32 = 3;
+        float f32 = 4;
+        float f16 = 5;
+    }
+}
+
+message ConstantValueComposite {
+    uint32 type = 1;               // Module.types
+    repeated uint32 elements = 2;  // Module.constant_values
+}
+
+message ConstantValueSplat {
+    uint32 type = 1;      // Module.types
+    uint32 elements = 2;  // Module.constant_values
+    uint32 count = 3;     // splat count
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions
 ////////////////////////////////////////////////////////////////////////////////
 message Function {
-    optional string name = 1;
-    uint32 return_type = 2;
-    optional PipelineStage pipeline_stage = 3;
-    optional WorkgroupSize workgroup_size = 4;
-    repeated uint32 parameters = 5;  // Module.values
-    uint32 block = 6;                // Module.blocks
+    uint32 return_type = 1;  // Module.types
+    uint32 block = 2;        // Module.blocks
+    optional string name = 3;
+    optional PipelineStage pipeline_stage = 4;
+    optional WorkgroupSize workgroup_size = 5;
+    repeated uint32 parameters = 6;  // Module.values
 }
 
 enum PipelineStage {
@@ -128,8 +169,8 @@ message Block {
 ////////////////////////////////////////////////////////////////////////////////
 message Instruction {
     InstructionKind kind = 1;
-    repeated uint32 operands = 2;
-    repeated uint32 results = 3;
+    repeated uint32 operands = 2;  // Module.values
+    repeated uint32 results = 3;   // Module.values
 }
 
 enum InstructionKind {
@@ -139,4 +180,5 @@ enum InstructionKind {
     Builtin = 3;
     Constructor = 4;
     Discard = 5;
+    Let = 6;
 }

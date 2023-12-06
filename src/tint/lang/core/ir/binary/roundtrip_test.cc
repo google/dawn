@@ -110,5 +110,53 @@ TEST_F(IRBinaryRoundtripTest, Return) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Return_bool) {
+    auto* fn = b.Function("Function", ty.bool_());
+    b.Append(fn->Block(), [&] { b.Return(fn, true); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_i32) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] { b.Return(fn, 42_i); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_u32) {
+    auto* fn = b.Function("Function", ty.u32());
+    b.Append(fn->Block(), [&] { b.Return(fn, 42_u); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_f32) {
+    auto* fn = b.Function("Function", ty.f32());
+    b.Append(fn->Block(), [&] { b.Return(fn, 42_f); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_f16) {
+    auto* fn = b.Function("Function", ty.f16());
+    b.Append(fn->Block(), [&] { b.Return(fn, 42_h); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Discard) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Discard();
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Let) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Let("Let", b.Constant(42_i));
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary
