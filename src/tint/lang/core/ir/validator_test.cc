@@ -833,7 +833,7 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: if: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: if: result is undefined
     undef = if true [t: %b2, f: %b3] {  # if_1
     ^^^^^
 
@@ -905,7 +905,7 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:2:3 error: var: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:2:3 error: var: result is undefined
   undef = var
   ^^^^^
 
@@ -932,7 +932,7 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: var: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: var: result is undefined
     undef = var
     ^^^^^
 
@@ -991,7 +991,7 @@ TEST_F(IR_ValidatorTest, Let_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: let: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: let: result is undefined
     undef = let 1i
     ^^^^^
 
@@ -1105,7 +1105,7 @@ note: # Disassembly
     EXPECT_EQ(res.Failure().reason.str(), expected);
 }
 
-TEST_F(IR_ValidatorTest, Instruction_NullSource) {
+TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
@@ -1116,7 +1116,8 @@ TEST_F(IR_ValidatorTest, Instruction_NullSource) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: var: instruction result source is undefined
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:3:5 error: var: instruction of result is undefined
     %2:ptr<function, f32, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1147,7 +1148,7 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: instruction operand 0 is not alive
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: operand is not alive
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 
@@ -1178,7 +1179,7 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: instruction operand 0 missing usage
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: operand missing usage
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 
@@ -1285,7 +1286,7 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: binary: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: binary: result is undefined
     undef = add 3i, 2i
     ^^^^^
 
@@ -1342,7 +1343,7 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: unary: instruction result is undefined
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: unary: result is undefined
     undef = negation 2i
     ^^^^^
 
@@ -2985,7 +2986,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().reason.str(),
-              R"(:4:5 error: load_vector_element: instruction result is undefined
+              R"(:4:5 error: load_vector_element: result is undefined
     undef = load_vector_element %2, 1i
     ^^^^^
 
