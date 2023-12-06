@@ -30,8 +30,10 @@
 
 #include <bitset>
 #include <unordered_map>
-#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/IntegerTypes.h"
 
 namespace dawn::native {
 class BufferBase;
@@ -40,8 +42,8 @@ struct RenderPassDescriptor;
 
 struct KeyOfApplyClearColorValueWithDrawPipelines {
     uint8_t colorAttachmentCount;
-    std::array<wgpu::TextureFormat, kMaxColorAttachments> colorTargetFormats;
-    std::bitset<kMaxColorAttachments> colorTargetsToApplyClearColorValue;
+    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
+    ColorAttachmentMask colorTargetsToApplyClearColorValue;
 };
 
 struct KeyOfApplyClearColorValueWithDrawPipelinesHashFunc {

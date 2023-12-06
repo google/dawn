@@ -61,12 +61,18 @@ using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
 constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
+// Color attachment indices represent the index in the wgpu::FragmentState::targets array, the
+// wgpu::RenderPassDescriptor::colorAttachments arry and other similar arrays.
 using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>;
 constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
     ColorAttachmentIndex(kMaxColorAttachments);
 
+using ColorAttachmentMask = ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>;
+template <typename Value>
+using PerColorAttachment = ityp::array<ColorAttachmentIndex, Value, kMaxColorAttachments>;
+
 // Vertex buffer slots represent the `slot` passed in calls to SetVertexBuffer or the index in the
-// wgpu::VertexState::vertexBuffers
+// wgpu::VertexState::vertexBuffers array.
 using VertexBufferSlot = TypedInteger<struct VertexBufferSlotT, uint8_t>;
 constexpr VertexBufferSlot kMaxVertexBuffersTyped = VertexBufferSlot(kMaxVertexBuffers);
 

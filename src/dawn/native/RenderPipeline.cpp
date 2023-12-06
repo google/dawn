@@ -586,7 +586,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
     auto targets =
         ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);
 
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> targetMask;
+    ColorAttachmentMask targetMask;
     for (auto [i, target] : Enumerate(targets)) {
         if (target.format == wgpu::TextureFormat::Undefined) {
             DAWN_INVALID_IF(target.blend,
@@ -1100,8 +1100,7 @@ bool RenderPipelineBase::HasUnclippedDepth() const {
     return mUnclippedDepth;
 }
 
-ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
-RenderPipelineBase::GetColorAttachmentsMask() const {
+ColorAttachmentMask RenderPipelineBase::GetColorAttachmentsMask() const {
     DAWN_ASSERT(!IsError());
     return mAttachmentState->GetColorAttachmentsMask();
 }

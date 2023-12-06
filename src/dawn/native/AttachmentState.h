@@ -60,7 +60,7 @@ class AttachmentState final : public ObjectBase,
     // Constructor used to avoid re-parsing descriptors when we already parsed them for cache keys.
     AttachmentState(const AttachmentState& blueprint);
 
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
+    ColorAttachmentMask GetColorAttachmentsMask() const;
     wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex index) const;
     bool HasDepthStencilAttachment() const;
     wgpu::TextureFormat GetDepthStencilFormat() const;
@@ -79,8 +79,8 @@ class AttachmentState final : public ObjectBase,
     void DeleteThis() override;
 
   private:
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;
-    ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
+    ColorAttachmentMask mColorAttachmentsSet;
+    PerColorAttachment<wgpu::TextureFormat> mColorFormats;
     // Default (texture format Undefined) indicates there is no depth stencil attachment.
     wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
     uint32_t mSampleCount = 0;

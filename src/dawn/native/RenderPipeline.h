@@ -119,7 +119,7 @@ class RenderPipelineBase : public PipelineBase,
     float GetDepthBiasClamp() const;
     bool HasUnclippedDepth() const;
 
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
+    ColorAttachmentMask GetColorAttachmentsMask() const;
     bool HasDepthStencilAttachment() const;
     wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
     wgpu::TextureFormat GetDepthStencilFormat() const;
@@ -158,8 +158,8 @@ class RenderPipelineBase : public PipelineBase,
 
     // Attachments
     Ref<AttachmentState> mAttachmentState;
-    ityp::array<ColorAttachmentIndex, ColorTargetState, kMaxColorAttachments> mTargets;
-    ityp::array<ColorAttachmentIndex, BlendState, kMaxColorAttachments> mTargetBlend;
+    PerColorAttachment<ColorTargetState> mTargets;
+    PerColorAttachment<BlendState> mTargetBlend;
 
     // Other state
     PrimitiveState mPrimitive;

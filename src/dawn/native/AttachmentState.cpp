@@ -247,8 +247,7 @@ size_t AttachmentState::ComputeContentHash() {
     return hash;
 }
 
-ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> AttachmentState::GetColorAttachmentsMask()
-    const {
+ColorAttachmentMask AttachmentState::GetColorAttachmentsMask() const {
     return mColorAttachmentsSet;
 }
 
@@ -287,8 +286,8 @@ AttachmentState::ComputeStorageAttachmentPackingInColorAttachments() const {
     // TODO(dawn:1704): Consider caching this on AttachmentState creation, but does it become part
     // of the hashing and comparison operators? Fill with garbage data to more easily detect cases
     // where an incorrect slot is accessed.
-    std::vector<ColorAttachmentIndex> result(
-        mStorageAttachmentSlots.size(), ColorAttachmentIndex(uint8_t(kMaxColorAttachments + 1)));
+    std::vector<ColorAttachmentIndex> result(mStorageAttachmentSlots.size(),
+                                             ityp::PlusOne(kMaxColorAttachmentsTyped));
 
     // Iterate over the empty bits of mColorAttachmentsSet to pack storage attachment in them.
     auto availableSlots = ~mColorAttachmentsSet;

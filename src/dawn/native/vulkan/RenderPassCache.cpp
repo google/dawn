@@ -134,10 +134,8 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
     // Precompute them as they must be pointer-chained in VkSubpassDescription.
     // Note that both colorAttachmentRefs and resolveAttachmentRefs can be sparse with holes
     // filled with VK_ATTACHMENT_UNUSED.
-    ityp::array<ColorAttachmentIndex, VkAttachmentReference, kMaxColorAttachments>
-        colorAttachmentRefs;
-    ityp::array<ColorAttachmentIndex, VkAttachmentReference, kMaxColorAttachments>
-        resolveAttachmentRefs;
+    PerColorAttachment<VkAttachmentReference> colorAttachmentRefs;
+    PerColorAttachment<VkAttachmentReference> resolveAttachmentRefs;
     VkAttachmentReference depthStencilAttachmentRef;
 
     for (auto i : Range(kMaxColorAttachmentsTyped)) {

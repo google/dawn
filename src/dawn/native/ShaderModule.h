@@ -224,13 +224,11 @@ struct EntryPointMetadata {
         TextureComponentType baseType;
         uint8_t componentCount;
     };
-    ityp::array<ColorAttachmentIndex, FragmentRenderAttachmentInfo, kMaxColorAttachments>
-        fragmentOutputVariables;
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputMask;
+    PerColorAttachment<FragmentRenderAttachmentInfo> fragmentOutputVariables;
+    ColorAttachmentMask fragmentOutputMask;
 
-    ityp::array<ColorAttachmentIndex, FragmentRenderAttachmentInfo, kMaxColorAttachments>
-        fragmentInputVariables;
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentInputMask;
+    PerColorAttachment<FragmentRenderAttachmentInfo> fragmentInputVariables;
+    ColorAttachmentMask fragmentInputMask;
 
     struct InterStageVariableInfo {
         std::string name;

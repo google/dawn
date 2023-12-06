@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/common/MutexProtected.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"
@@ -1322,7 +1323,7 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
     D3D12_CPU_DESCRIPTOR_HANDLE nullRTV;
 
     const auto& colorAttachmentsMaskBitSet = renderPass->attachmentState->GetColorAttachmentsMask();
-    for (ColorAttachmentIndex i(uint8_t(0)); i < ColorAttachmentIndex(kMaxColorAttachments); i++) {
+    for (auto i : Range(kMaxColorAttachmentsTyped)) {
         if (colorAttachmentsMaskBitSet.test(i)) {
             RenderPassColorAttachmentInfo& attachmentInfo = renderPass->colorAttachments[i];
             TextureView* view = ToBackend(attachmentInfo.view.Get());

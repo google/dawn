@@ -986,7 +986,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 
         // Mapping from attachmentSlot to GL framebuffer attachment points. Defaults to zero
         // (GL_NONE).
-        ityp::array<ColorAttachmentIndex, GLenum, kMaxColorAttachments> drawBuffers = {};
+        PerColorAttachment<GLenum> drawBuffers = {};
 
         // Construct GL framebuffer
 

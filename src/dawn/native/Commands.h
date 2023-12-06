@@ -152,8 +152,7 @@ struct BeginRenderPassCmd {
     ~BeginRenderPassCmd();
 
     Ref<AttachmentState> attachmentState;
-    ityp::array<ColorAttachmentIndex, RenderPassColorAttachmentInfo, kMaxColorAttachments>
-        colorAttachments;
+    PerColorAttachment<RenderPassColorAttachmentInfo> colorAttachments;
     RenderPassDepthStencilAttachmentInfo depthStencilAttachment;
 
     std::array<RenderPassStorageAttachmentInfo, kMaxPLSSlots> storageAttachments;

@@ -473,8 +473,7 @@ MaybeError RenderPipeline::Initialize() {
     VkPipelineColorBlendStateCreateInfo colorBlend;
     // colorBlend may hold pointers to elements in colorBlendAttachments, so it must have a
     // definition scope as same as colorBlend
-    ityp::array<ColorAttachmentIndex, VkPipelineColorBlendAttachmentState, kMaxColorAttachments>
-        colorBlendAttachments;
+    PerColorAttachment<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {
         // Initialize the "blend state info" that will be chained in the "create info" from the
         // data pre-computed in the ColorState

@@ -32,6 +32,8 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/Enumerator.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
@@ -40,6 +42,7 @@
 #include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+#include "dawn/native/webgpu_absl_format.h"
 
 namespace dawn::native {
 
@@ -86,18 +89,18 @@ std::string ConstructFragmentShader(DeviceBase* device,
     clearValueUniformBufferDeclarationStream << "struct ClearColors {" << std::endl;
 
     // Only generate the assignments we need.
-    for (uint32_t i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
+    for (auto i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
         wgpu::TextureFormat currentFormat = key.colorTargetFormats[i];
         DAWN_ASSERT(currentFormat != wgpu::TextureFormat::Undefined);
 
         const char* type = GetTextureComponentTypeString(device, currentFormat);
 
-        outputColorDeclarationStream << "@location(" << i << ") output" << i << " : vec4<" << type
-                                     << ">," << std::endl;
-        clearValueUniformBufferDeclarationStream << "color" << i << " : vec4<" << type << ">,"
-                                                 << std::endl;
-        assignOutputColorStream << "outputColor.output" << i << " = clearColors.color" << i << ";"
-                                << std::endl;
+        outputColorDeclarationStream
+            << absl::StrFormat("@location(%u) output%u : vec4<%s>,\n", i, i, type);
+        clearValueUniformBufferDeclarationStream
+            << absl::StrFormat("color%u : vec4<%s>,\n", i, type);
+        assignOutputColorStream << absl::StrFormat("outputColor.output%u = clearColors.color%u;\n",
+                                                   i, i);
     }
     outputColorDeclarationStream << "}" << std::endl;
     clearValueUniformBufferDeclarationStream << "}" << std::endl;
@@ -152,12 +155,12 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
     fragment.entryPoint = "main";
 
     // Prepare the color states
-    std::array<ColorTargetState, kMaxColorAttachments> colorTargets = {};
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-        colorTargets[i].format = key.colorTargetFormats[i];
+    PerColorAttachment<ColorTargetState> colorTargets = {};
+    for (auto [i, target] : Enumerate(colorTargets)) {
+        target.format = key.colorTargetFormats[i];
         // We shouldn't change the color targets that are not involved in.
         if (!key.colorTargetsToApplyClearColorValue[i]) {
-            colorTargets[i].writeMask = wgpu::ColorWriteMask::None;
+            target.writeMask = wgpu::ColorWriteMask::None;
         }
     }
 
@@ -185,13 +188,16 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     DeviceBase* device,
     const RenderPassDescriptor* renderPassDescriptor,
     const KeyOfApplyClearColorValueWithDrawPipelines& key) {
+    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+        renderPassDescriptor->colorAttachments, renderPassDescriptor->colorAttachmentCount);
+
     std::array<uint8_t, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
     uint32_t offset = 0;
-    for (uint32_t i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
-        const Format& format = renderPassDescriptor->colorAttachments[i].view->GetFormat();
+    for (auto i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
+        const Format& format = colorAttachments[i].view->GetFormat();
         TextureComponentType baseType = format.GetAspectInfo(Aspect::Color).baseType;
 
-        Color initialClearValue = GetClearColorValue(renderPassDescriptor->colorAttachments[i]);
+        Color initialClearValue = GetClearColorValue(colorAttachments[i]);
         Color clearValue = ClampClearColorValueToLegalRange(initialClearValue, format);
         switch (baseType) {
             case TextureComponentType::Uint: {
@@ -299,15 +305,16 @@ KeyOfApplyClearColorValueWithDrawPipelines GetKeyOfApplyClearColorValueWithDrawP
     KeyOfApplyClearColorValueWithDrawPipelines key;
     key.colorAttachmentCount = renderPassDescriptor->colorAttachmentCount;
 
+    auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
+        renderPassDescriptor->colorAttachments, renderPassDescriptor->colorAttachmentCount);
+
     key.colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
-    for (uint32_t i = 0; i < renderPassDescriptor->colorAttachmentCount; ++i) {
-        if (renderPassDescriptor->colorAttachments[i].view != nullptr) {
-            key.colorTargetFormats[i] =
-                renderPassDescriptor->colorAttachments[i].view->GetFormat().format;
+    for (auto [i, attachment] : Enumerate(colorAttachments)) {
+        if (attachment.view != nullptr) {
+            key.colorTargetFormats[i] = attachment.view->GetFormat().format;
         }
 
-        if (ShouldApplyClearBigIntegerColorValueWithDraw(
-                renderPassDescriptor->colorAttachments[i])) {
+        if (ShouldApplyClearBigIntegerColorValueWithDraw(attachment)) {
             key.colorTargetsToApplyClearColorValue.set(i);
         }
     }
@@ -342,7 +349,7 @@ bool KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc::operator()(
         return false;
     }
 
-    for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+    for (auto i : Range(key1.colorTargetFormats.size())) {
         if (key1.colorTargetFormats[i] != key2.colorTargetFormats[i]) {
             return false;
         }
