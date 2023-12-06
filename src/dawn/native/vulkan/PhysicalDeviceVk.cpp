@@ -664,14 +664,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // The environment can only request to use VK_KHR_zero_initialize_workgroup_memory when the
     // extension is available. Override the decision if it is not applicable or
     // zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory == VK_FALSE.
+    // Never use the extension on Mali devices due to a known bug (see crbug.com/tint/2101).
     if (!GetDeviceInfo().HasExt(DeviceExt::ZeroInitializeWorkgroupMemory) ||
         GetDeviceInfo().zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory ==
-            VK_FALSE) {
-        deviceToggles->ForceSet(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, false);
-    }
-    // Never use VK_KHR_zero_initialize_workgroup_memory on Mali devices due to a known bug.
-    // See crbug.com/tint/2101.
-    if (IsAndroidARM()) {
+            VK_FALSE ||
+        IsAndroidARM()) {
         deviceToggles->ForceSet(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, false);
     }
     // By default try to initialize workgroup memory with OpConstantNull according to the Vulkan
