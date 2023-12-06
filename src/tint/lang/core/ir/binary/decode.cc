@@ -62,9 +62,9 @@ struct Decoder {
         }
         {
             const size_t n = static_cast<size_t>(mod_in_.functions().size());
-            b.ir.functions.Reserve(n);
+            mod_out_.functions.Reserve(n);
             for (auto& fn_in : mod_in_.functions()) {
-                b.ir.functions.Push(CreateFunction(fn_in));
+                mod_out_.functions.Push(CreateFunction(fn_in));
             }
         }
         {
@@ -89,7 +89,7 @@ struct Decoder {
             }
         }
         for (size_t i = 0, n = static_cast<size_t>(mod_in_.functions().size()); i < n; i++) {
-            PopulateFunction(b.ir.functions[i], mod_in_.functions()[static_cast<int>(i)]);
+            PopulateFunction(mod_out_.functions[i], mod_in_.functions()[static_cast<int>(i)]);
         }
         for (size_t i = 0, n = static_cast<size_t>(mod_in_.blocks().size()); i < n; i++) {
             PopulateBlock(blocks_[i], mod_in_.blocks()[static_cast<int>(i)]);
@@ -99,11 +99,13 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     // Functions
     ////////////////////////////////////////////////////////////////////////////
-    ir::Function* CreateFunction(const pb::Function&) { return b.ir.values.Create<ir::Function>(); }
+    ir::Function* CreateFunction(const pb::Function&) {
+        return mod_out_.values.Create<ir::Function>();
+    }
 
     void PopulateFunction(ir::Function* fn_out, const pb::Function& fn_in) {
         if (!fn_in.name().empty()) {
-            b.ir.SetName(fn_out, fn_in.name());
+            mod_out_.SetName(fn_out, fn_in.name());
         }
         fn_out->SetReturnType(Type(fn_in.return_type()));
         if (fn_in.has_pipeline_stage()) {
@@ -122,7 +124,7 @@ struct Decoder {
         fn_out->SetBlock(Block(fn_in.block()));
     }
 
-    ir::Function* Function(uint32_t id) { return id > 0 ? b.ir.functions[id - 1] : nullptr; }
+    ir::Function* Function(uint32_t id) { return id > 0 ? mod_out_.functions[id - 1] : nullptr; }
 
     Function::PipelineStage PipelineStage(pb::PipelineStage stage) {
         switch (stage) {
@@ -159,13 +161,16 @@ struct Decoder {
         ir::Instruction* inst_out = nullptr;
         switch (inst_in.kind()) {
             case pb::InstructionKind::Discard:
-                inst_out = b.ir.instructions.Create<ir::Discard>();
+                inst_out = mod_out_.instructions.Create<ir::Discard>();
                 break;
             case pb::InstructionKind::Return:
-                inst_out = b.ir.instructions.Create<ir::Return>();
+                inst_out = mod_out_.instructions.Create<ir::Return>();
                 break;
             case pb::InstructionKind::Let:
-                inst_out = b.ir.instructions.Create<ir::Let>();
+                inst_out = mod_out_.instructions.Create<ir::Let>();
+                break;
+            case pb::InstructionKind::Construct:
+                inst_out = mod_out_.instructions.Create<ir::Construct>();
                 break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind();
@@ -191,9 +196,9 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////////////////////
-    const type::Type* CreateType(const pb::TypeDecl type_in) {
+    const type::Type* CreateType(const pb::Type type_in) {
         switch (type_in.kind_case()) {
-            case pb::TypeDecl::KindCase::kBasic:
+            case pb::Type::KindCase::kBasic:
                 switch (type_in.basic()) {
                     case pb::BasicType::void_:
                         return mod_out_.Types().Get<void>();
@@ -211,14 +216,23 @@ struct Decoder {
                         TINT_ICE() << "invalid BasicType: " << type_in.basic();
                         return nullptr;
                 }
-            case pb::TypeDecl::KindCase::kVector:
-            case pb::TypeDecl::KindCase::kMatrix:
-            case pb::TypeDecl::KindCase::kArray:
-            case pb::TypeDecl::KindCase::kAtomic:
+            case pb::Type::KindCase::kVector: {
+                auto& vector_in = type_in.vector();
+                auto* el_ty = Type(vector_in.element_type());
+                return mod_out_.Types().vec(el_ty, vector_in.width());
+            }
+            case pb::Type::KindCase::kMatrix: {
+                auto& matrix_in = type_in.matrix();
+                auto* el_ty = Type(matrix_in.element_type());
+                auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
+                return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
+            }
+            case pb::Type::KindCase::kArray:
+            case pb::Type::KindCase::kAtomic:
                 TINT_UNIMPLEMENTED() << type_in.kind_case();
                 return nullptr;
 
-            case pb::TypeDecl::KindCase::KIND_NOT_SET:
+            case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
         TINT_ICE() << "invalid TypeDecl.kind";
@@ -242,7 +256,7 @@ struct Decoder {
                 auto* type = Type(res_in.type());
                 value_out = b.InstructionResult(type);
                 if (res_in.has_name()) {
-                    b.ir.SetName(value_out, res_in.name());
+                    mod_out_.SetName(value_out, res_in.name());
                 }
                 break;
             }
@@ -251,7 +265,7 @@ struct Decoder {
                 auto* type = Type(param_in.type());
                 value_out = b.FunctionParam(type);
                 if (param_in.has_name()) {
-                    b.ir.SetName(value_out, param_in.name());
+                    mod_out_.SetName(value_out, param_in.name());
                 }
                 break;
             }
@@ -284,22 +298,19 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     const core::constant::Value* CreateConstantValue(const pb::ConstantValue& value_in) {
         switch (value_in.kind_case()) {
-            case pb::ConstantValue::KindCase::kScalar: {
-                return CreateScalarValue(value_in.scalar());
-            }
-            case pb::ConstantValue::KindCase::kSplat: {
-                auto& splat_in = value_in.splat();
-                auto* type = Type(splat_in.type());
-                auto* elem = ConstantValue(splat_in.elements());
-                return b.ir.constant_values.Splat(type, elem, splat_in.count());
-            }
+            case pb::ConstantValue::KindCase::kScalar:
+                return CreateConstantScalar(value_in.scalar());
+            case pb::ConstantValue::KindCase::kComposite:
+                return CreateConstantComposite(value_in.composite());
+            case pb::ConstantValue::KindCase::kSplat:
+                return CreateConstantSplat(value_in.splat());
             default:
                 TINT_ICE() << "invalid ConstantValue.kind: " << value_in.kind_case();
                 return nullptr;
         }
     }
 
-    const core::constant::Value* CreateScalarValue(const pb::ConstantValueScalar& value_in) {
+    const core::constant::Value* CreateConstantScalar(const pb::ConstantValueScalar& value_in) {
         switch (value_in.kind_case()) {
             case pb::ConstantValueScalar::KindCase::kBool:
                 return b.ConstantValue(value_in.bool_());
@@ -315,6 +326,22 @@ struct Decoder {
                 TINT_ICE() << "invalid ConstantValueScalar.kind: " << value_in.kind_case();
                 return nullptr;
         }
+    }
+
+    const core::constant::Value* CreateConstantComposite(
+        const pb::ConstantValueComposite& composite_in) {
+        auto* type = Type(composite_in.type());
+        Vector<const core::constant::Value*, 8> elements_out;
+        for (auto element_id : composite_in.elements()) {
+            elements_out.Push(ConstantValue(element_id));
+        }
+        return mod_out_.constant_values.Composite(type, std::move(elements_out));
+    }
+
+    const core::constant::Value* CreateConstantSplat(const pb::ConstantValueSplat& splat_in) {
+        auto* type = Type(splat_in.type());
+        auto* elem = ConstantValue(splat_in.elements());
+        return mod_out_.constant_values.Splat(type, elem, splat_in.count());
     }
 
     const core::constant::Value* ConstantValue(uint32_t id) {

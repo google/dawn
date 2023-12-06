@@ -30,7 +30,7 @@ syntax = "proto3";
 package tint.core.ir.binary.pb;
 
 message Module {
-    repeated TypeDecl types = 1;
+    repeated Type types = 1;
     repeated Value values = 2;
     repeated ConstantValue constant_values = 3;
     Block root_block = 4;
@@ -41,7 +41,7 @@ message Module {
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 ////////////////////////////////////////////////////////////////////////////////
-message TypeDecl {
+message Type {
     oneof kind {
         BasicType basic = 1;
         VectorType vector = 2;
@@ -69,7 +69,7 @@ message VectorType {
 
 message MatrixType {
     uint32 num_columns = 1;
-    uint32 num_width = 2;
+    uint32 num_rows = 2;
     uint32 element_type = 3;  // Module.types
 }
 
@@ -181,4 +181,5 @@ enum InstructionKind {
     Constructor = 4;
     Discard = 5;
     Let = 6;
+    Construct = 7;
 }

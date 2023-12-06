@@ -35,6 +35,7 @@ namespace tint::core::ir::binary {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 template <typename T = testing::Test>
 class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
@@ -137,6 +138,40 @@ TEST_F(IRBinaryRoundtripTest, Return_f32) {
 TEST_F(IRBinaryRoundtripTest, Return_f16) {
     auto* fn = b.Function("Function", ty.f16());
     b.Append(fn->Block(), [&] { b.Return(fn, 42_h); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_vec3f_Composite) {
+    auto* fn = b.Function("Function", ty.vec3<f32>());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Composite<vec3<f32>>(1_f, 2_f, 3_f)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_vec3f_Splat) {
+    auto* fn = b.Function("Function", ty.vec3<f32>());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Splat<vec3<f32>>(1_f, 3)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_mat2x3f_Composite) {
+    auto* fn = b.Function("Function", ty.mat2x3<f32>());
+    b.Append(fn->Block(),
+             [&] { b.Return(fn, b.Composite<mat2x3<f32>>(1_f, 2_f, 3_f, 4_f, 5_f, 6_f)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_mat2x3f_Splat) {
+    auto* fn = b.Function("Function", ty.mat2x3<f32>());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Splat<mat2x3<f32>>(1_f, 6)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Construct) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Construct<vec3<f32>>(1_f, 2_f, 3_f);
+        b.Return(fn);
+    });
     RUN_TEST();
 }
 

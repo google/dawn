@@ -27,7 +27,12 @@
 
 #include "src/tint/lang/core/ir/binary/encode.h"
 
+#include <utility>
+
+#include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -37,6 +42,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -129,10 +135,11 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     void Instruction(pb::Instruction* inst_out, const ir::Instruction* inst_in) {
         auto kind = Switch(
-            inst_in,                                                           //
-            [&](const ir::Discard*) { return pb::InstructionKind::Discard; },  //
-            [&](const ir::Return*) { return pb::InstructionKind::Return; },    //
-            [&](const ir::Let*) { return pb::InstructionKind::Let; },          //
+            inst_in,                                                               //
+            [&](const ir::Construct*) { return pb::InstructionKind::Construct; },  //
+            [&](const ir::Discard*) { return pb::InstructionKind::Discard; },      //
+            [&](const ir::Let*) { return pb::InstructionKind::Let; },              //
+            [&](const ir::Return*) { return pb::InstructionKind::Return; },        //
             TINT_ICE_ON_NO_MATCH);
         inst_out->set_kind(kind);
         for (auto* operand : inst_in->Operands()) {
@@ -146,25 +153,38 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////////////////////
-    uint32_t Type(const core::type::Type* type) {
-        if (type == nullptr) {
+    uint32_t Type(const core::type::Type* type_in) {
+        if (type_in == nullptr) {
             return 0;
         }
-        return types_.GetOrCreate(type, [&]() -> uint32_t {
-            auto basic = tint::Switch<pb::BasicType>(
-                type,  //
-                [&](const core::type::Void*) { return pb::BasicType::void_; },
-                [&](const core::type::Bool*) { return pb::BasicType::bool_; },
-                [&](const core::type::I32*) { return pb::BasicType::i32; },
-                [&](const core::type::U32*) { return pb::BasicType::u32; },
-                [&](const core::type::F32*) { return pb::BasicType::f32; },
-                [&](const core::type::F16*) { return pb::BasicType::f16; },  //
+        return types_.GetOrCreate(type_in, [&]() -> uint32_t {
+            pb::Type type_out;
+            Switch(
+                type_in,  //
+                [&](const core::type::Void*) { type_out.set_basic(pb::BasicType::void_); },
+                [&](const core::type::Bool*) { type_out.set_basic(pb::BasicType::bool_); },
+                [&](const core::type::I32*) { type_out.set_basic(pb::BasicType::i32); },
+                [&](const core::type::U32*) { type_out.set_basic(pb::BasicType::u32); },
+                [&](const core::type::F32*) { type_out.set_basic(pb::BasicType::f32); },
+                [&](const core::type::F16*) { type_out.set_basic(pb::BasicType::f16); },
+                [&](const core::type::Vector* v) { VectorType(*type_out.mutable_vector(), v); },
+                [&](const core::type::Matrix* m) { MatrixType(*type_out.mutable_matrix(), m); },
                 TINT_ICE_ON_NO_MATCH);
-            mod_out_.add_types()->set_basic(basic);
 
-            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
-            return static_cast<uint32_t>(types_.Count());
+            mod_out_.mutable_types()->Add(std::move(type_out));
+            return static_cast<uint32_t>(mod_out_.types().size());
         });
+    }
+
+    void VectorType(pb::VectorType& vector_out, const core::type::Vector* vector_in) {
+        vector_out.set_width(vector_in->Width());
+        vector_out.set_element_type(Type(vector_in->type()));
+    }
+
+    void MatrixType(pb::MatrixType& matrix_out, const core::type::Matrix* matrix_in) {
+        matrix_out.set_num_columns(matrix_in->columns());
+        matrix_out.set_num_rows(matrix_in->rows());
+        matrix_out.set_element_type(Type(matrix_in->type()));
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -188,8 +208,7 @@ struct Encoder {
                 [&](const ir::Constant* v) { value_out.set_constant(ConstantValue(v->Value())); },
                 TINT_ICE_ON_NO_MATCH);
 
-            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
-            return static_cast<uint32_t>(values_.Count());
+            return static_cast<uint32_t>(mod_out_.values().size());
         });
     }
 
@@ -215,7 +234,7 @@ struct Encoder {
             return 0;
         }
         return constant_values_.GetOrCreate(constant_in, [&] {
-            auto& constant_out = *mod_out_.add_constant_values();
+            pb::ConstantValue constant_out;
             Switch(
                 constant_in,  //
                 [&](const core::constant::Scalar<bool>* b) {
@@ -233,10 +252,32 @@ struct Encoder {
                 [&](const core::constant::Scalar<core::f16>* f16) {
                     constant_out.mutable_scalar()->set_f16(f16->value);
                 },
+                [&](const core::constant::Composite* composite) {
+                    ConstantValueComposite(*constant_out.mutable_composite(), composite);
+                },
+                [&](const core::constant::Splat* splat) {
+                    ConstantValueSplat(*constant_out.mutable_splat(), splat);
+                },
                 TINT_ICE_ON_NO_MATCH);
-            // Note: GetOrCreate() already creates the map slot, so Count() includes this Value.
-            return static_cast<uint32_t>(constant_values_.Count());
+
+            mod_out_.mutable_constant_values()->Add(std::move(constant_out));
+            return static_cast<uint32_t>(mod_out_.constant_values().size());
         });
+    }
+
+    void ConstantValueComposite(pb::ConstantValueComposite& composite_out,
+                                const core::constant::Composite* composite_in) {
+        composite_out.set_type(Type(composite_in->type));
+        for (auto* el : composite_in->elements) {
+            composite_out.add_elements(ConstantValue(el));
+        }
+    }
+
+    void ConstantValueSplat(pb::ConstantValueSplat& splat_out,
+                            const core::constant::Splat* splat_in) {
+        splat_out.set_type(Type(splat_in->type));
+        splat_out.set_elements(ConstantValue(splat_in->el));
+        splat_out.set_count(static_cast<uint32_t>(splat_in->count));
     }
 };
 

@@ -365,6 +365,17 @@ class Builder {
     }
 
     /// Creates a new ir::Constant
+    /// @tparam TYPE the splat type
+    /// @param value the splat value
+    /// @param size the number of items
+    /// @returns the new constant
+    template <typename TYPE, typename ARG>
+    ir::Constant* Splat(ARG&& value, size_t size) {
+        auto* type = ir.Types().Get<TYPE>();
+        return Splat(type, std::forward<ARG>(value), size);
+    }
+
+    /// Creates a new ir::Constant
     /// @param ty the constant type
     /// @param values the composite values
     /// @returns the new constant
@@ -372,6 +383,16 @@ class Builder {
     ir::Constant* Composite(const core::type::Type* ty, ARGS&&... values) {
         return Constant(
             ir.constant_values.Composite(ty, Vector{ConstantValue(std::forward<ARGS>(values))...}));
+    }
+
+    /// Creates a new ir::Constant
+    /// @tparam TYPE the constant type
+    /// @param values the composite values
+    /// @returns the new constant
+    template <typename TYPE, typename... ARGS, typename = DisableIfVectorLike<ARGS...>>
+    ir::Constant* Composite(ARGS&&... values) {
+        auto* type = ir.Types().Get<TYPE>();
+        return Composite(type, std::forward<ARGS>(values)...);
     }
 
     /// Creates a new zero-value ir::Constant

@@ -41,6 +41,9 @@ class Construct final : public Castable<Construct, Call> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no result, no operands)
+    Construct();
+
     /// Constructor
     /// @param result the result value
     /// @param args the constructor arguments
