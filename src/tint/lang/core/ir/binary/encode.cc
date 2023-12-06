@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/binary/encode.h"
 
+#include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
@@ -122,8 +123,9 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     void Instruction(pb::Instruction* inst_out, const ir::Instruction* inst_in) {
         auto kind = Switch(
-            inst_in,                                                         //
-            [&](const ir::Return*) { return pb::InstructionKind::Return; },  //
+            inst_in,                                                           //
+            [&](const ir::Discard*) { return pb::InstructionKind::Discard; },  //
+            [&](const ir::Return*) { return pb::InstructionKind::Return; },    //
             TINT_ICE_ON_NO_MATCH);
         inst_out->set_kind(kind);
     }

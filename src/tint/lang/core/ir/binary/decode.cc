@@ -122,6 +122,9 @@ struct Decoder {
     ir::Instruction* Instruction(const pb::Instruction& inst_in) {
         ir::Instruction* inst_out = nullptr;
         switch (inst_in.kind()) {
+            case pb::InstructionKind::Discard:
+                inst_out = b.ir.instructions.Create<ir::Discard>();
+                break;
             case pb::InstructionKind::Return:
                 inst_out = b.ir.instructions.Create<ir::Return>();
                 break;
