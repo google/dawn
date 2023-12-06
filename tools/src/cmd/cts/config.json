@@ -57,7 +57,7 @@
     "Mac-Arm64": {
       "Project": "chromium",
       "Bucket": "try",
-      "Builder": "dawn-try-mac-arm64-rel"
+      "Builder": "mac-arm64-dawn-rel"
     },
     "Linux": {
       "Project": "chromium",
