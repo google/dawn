@@ -192,6 +192,8 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
 
 // Test different array layers
 TEST_P(TextureSubresourceTest, ArrayLayersTest) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // Create a texture with 1 mipmap level and 2 layers
     wgpu::Texture texture =
         CreateTexture(1, 2,

@@ -1083,6 +1083,8 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 // sampled and attachment (with LoadOp::Clear so the lazy clear can be skipped) then the sampled
 // subresource is correctly cleared.
 TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
     wgpu::TextureDescriptor texDesc;
     texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment |
@@ -1095,7 +1097,7 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
     if (IsCompatibilityMode()) {
         textureBindingViewDimensionDesc.textureBindingViewDimension =
-            wgpu::TextureViewDimension::e2D;
+            wgpu::TextureViewDimension::e2DArray;
         texDesc.nextInChain = &textureBindingViewDimensionDesc;
     }
 
@@ -1530,6 +1532,8 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     wgpu::TextureDescriptor sampleTextureDescriptor =
         CreateTextureDescriptor(1, 2,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |

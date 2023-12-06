@@ -415,6 +415,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
 
 // Test sampling from a 2D texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     Texture2DViewTest(6, 1, 4, 0);
 }
 
@@ -457,6 +458,7 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DTexture) {
 
 // Test sampling from a 2D texture view created on a mipmap level of a 2D array texture layer.
 TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     Texture2DViewTest(6, 6, 3, 4);
 }
 
@@ -565,6 +567,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapOnWholeTexture) {
 
 // Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     // TODO(dawn:1935): Total layers have to be at least 12 on Intel D3D11 Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -573,6 +576,8 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
 
 // Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewCoveringLastLayer) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
 
@@ -621,8 +626,10 @@ class TextureViewRenderingTest : public TextureViewTestBase {
 
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-        wgpu::Texture texture = Create2DTexture(textureWidthLevel0, textureHeightLevel0, layerCount,
-                                                levelCount, kUsage, dimension);
+        wgpu::Texture texture =
+            Create2DTexture(textureWidthLevel0, textureHeightLevel0, layerCount, levelCount, kUsage,
+                            layerCount > 1 ? wgpu::TextureViewDimension::e2DArray
+                                           : wgpu::TextureViewDimension::e2D);
 
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = kDefaultFormat;

@@ -631,12 +631,14 @@ class DawnTestBase {
                                                   uint32_t dataSize,
                                                   uint32_t bytesPerRow);
 
-    std::ostringstream& ExpectSampledFloatDataImpl(wgpu::TextureView textureView,
-                                                   const char* wgslTextureType,
+    std::ostringstream& ExpectSampledFloatDataImpl(wgpu::Texture texture,
                                                    uint32_t width,
                                                    uint32_t height,
                                                    uint32_t componentCount,
+                                                   uint32_t arrayLayer,
+                                                   uint32_t mipLevel,
                                                    uint32_t sampleCount,
+                                                   wgpu::TextureAspect aspect,
                                                    detail::Expectation* expectation);
 
     // MapRead buffers used to get data for the expectations

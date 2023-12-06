@@ -134,9 +134,12 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
 
     constexpr uint32_t kMipLevelsView = 1;
     wgpu::Texture tex3 =
-        CreateTexture("tex3", kLayers, kMipLevels, 1, wgpu::TextureViewDimension::e2D);
+        CreateTexture("tex3", kLayers, kMipLevels, 1, wgpu::TextureViewDimension::e2DArray);
     wgpu::TextureView texView3 =
-        CreateTextureView(tex3, "texView3", wgpu::TextureViewDimension::e2D, 1, kMipLevelsView);
+        CreateTextureView(tex3, "texView3",
+                          IsCompatibilityMode() ? wgpu::TextureViewDimension::e2DArray
+                                                : wgpu::TextureViewDimension::e2D,
+                          1, kMipLevelsView);
 
     const uint32_t expected[] = {
         kLayers,
@@ -150,21 +153,28 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    wgpu::ComputePipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
-@group(0) @binding(0) var<storage, read_write> dstBuf : array<u32>;
-@group(0) @binding(1) var tex1 : texture_2d_array<f32>;
-// Use sparse binding to test impact of binding remapping
-@group(0) @binding(4) var tex2 : texture_multisampled_2d<f32>;
-@group(1) @binding(3) var tex3 : texture_2d<f32>;
+    const char* tex3Type = IsCompatibilityMode() ? "texture_2d_array<f32>" : "texture_2d<f32>";
 
-@compute @workgroup_size(1, 1, 1) fn main() {
-    dstBuf[0] = textureNumLayers(tex1); // control case
-    dstBuf[1] = textureNumLevels(tex1);
-    dstBuf[2] = textureNumSamples(tex2);
-    dstBuf[3] = textureNumLevels(tex3);
-    }
-    )");
+    std::ostringstream shaderSource;
+    // clang-format off
+    shaderSource << R"(
+    @group(0) @binding(0) var<storage, read_write> dstBuf : array<u32>;
+    @group(0) @binding(1) var tex1 : texture_2d_array<f32>;
+    // Use sparse binding to test impact of binding remapping
+    @group(0) @binding(4) var tex2 : texture_multisampled_2d<f32>;
+    @group(1) @binding(3) var tex3 : )" << tex3Type << R"(;
+
+    @compute @workgroup_size(1, 1, 1) fn main() {
+        dstBuf[0] = textureNumLayers(tex1); // control case
+        dstBuf[1] = textureNumLevels(tex1);
+        dstBuf[2] = textureNumSamples(tex2);
+        dstBuf[3] = textureNumLevels(tex3);
+        }
+        )";
+    // clang-format on
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.compute.module = utils::CreateShaderModule(device, shaderSource.str());
     pipelineDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
@@ -396,12 +406,16 @@ TEST_P(TextureShaderBuiltinTests, OnePipelineMultipleDispatches) {
 // Test textureNumLevels & textureNumSamples results correctness used in multiple pipelines sharing
 // same shader module.
 TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
-    const char* shader = R"(
+    std::ostringstream shaderSource;
+
+    const char* tex3Type = IsCompatibilityMode() ? "texture_2d_array<f32>" : "texture_2d<f32>";
+    // clang-format off
+    shaderSource << R"(
 @group(0) @binding(0) var<storage, read_write> dstBuf : array<u32>;
 @group(0) @binding(1) var tex1 : texture_2d_array<f32>;
 // Use sparse binding to test impact of binding remapping
 @group(0) @binding(4) var tex2 : texture_multisampled_2d<f32>;
-@group(1) @binding(3) var tex3 : texture_2d<f32>;
+@group(1) @binding(3) var tex3 : )" << tex3Type << R"(;
 
 @compute @workgroup_size(1, 1, 1) fn main1() {
     dstBuf[0] = textureNumLayers(tex1); // control case
@@ -418,6 +432,7 @@ TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
     dstBuf[3] = 99;
 }
     )";
+    // clang-format on
 
     constexpr uint32_t kLayers_1 = 3;
     constexpr uint32_t kMipLevels_1 = 2;
@@ -440,14 +455,20 @@ TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
 
     constexpr uint32_t kMipLevelsView_1 = 1;
     wgpu::Texture tex3_1 =
-        CreateTexture("tex3_1", kLayers_1, kMipLevels_1, 1, wgpu::TextureViewDimension::e2D);
+        CreateTexture("tex3_1", kLayers_1, kMipLevels_1, 1, wgpu::TextureViewDimension::e2DArray);
     wgpu::TextureView texView3_1 =
-        CreateTextureView(tex3_1, "tex3_1", wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_1);
+        CreateTextureView(tex3_1, "tex3_1",
+                          IsCompatibilityMode() ? wgpu::TextureViewDimension::e2DArray
+                                                : wgpu::TextureViewDimension::e2D,
+                          0, kMipLevelsView_1);
     constexpr uint32_t kMipLevelsView_2 = 1;
     wgpu::Texture tex3_2 =
-        CreateTexture("tex3_2", kLayers_2, kMipLevels_2, 1, wgpu::TextureViewDimension::e2D);
+        CreateTexture("tex3_2", kLayers_2, kMipLevels_2, 1, wgpu::TextureViewDimension::e2DArray);
     wgpu::TextureView texView3_2 =
-        CreateTextureView(tex3_2, "tex3_2", wgpu::TextureViewDimension::e2D, 0, kMipLevelsView_2);
+        CreateTextureView(tex3_2, "tex3_2",
+                          IsCompatibilityMode() ? wgpu::TextureViewDimension::e2DArray
+                                                : wgpu::TextureViewDimension::e2D,
+                          0, kMipLevelsView_2);
 
     constexpr uint32_t expected_1[] = {
         // Output from first dispatch
@@ -471,7 +492,7 @@ TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
     wgpu::Buffer buffer_1 = device.CreateBuffer(&bufferDesc);
     wgpu::Buffer buffer_2 = device.CreateBuffer(&bufferDesc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModule(device, shader);
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, shaderSource.str());
     wgpu::ComputePipeline pipeline_1;
     {
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
