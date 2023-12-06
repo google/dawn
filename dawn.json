@@ -213,6 +213,16 @@
             {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""}
         ]
     },
+    "dawn WGSL blocklist": {
+        "tags": ["dawn", "native"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["instance descriptor"],
+        "members": [
+            {"name": "blocklisted feature count", "type": "size_t", "default": 0},
+            {"name": "blocklisted features", "type": "char", "annotation": "const*const*", "length": "blocklisted feature count"}
+        ]
+    },
     "address mode": {
         "category": "enum",
         "values": [
@@ -3337,6 +3347,7 @@
             {"value": 1019, "name": "adapter properties memory heaps", "tags": ["dawn"]},
             {"value": 1020, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
             {"value": 1021, "name": "dawn wire WGSL control", "tags": ["dawn"]},
+            {"value": 1022, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

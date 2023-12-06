@@ -69,7 +69,8 @@ class Instance final : public ObjectBase {
     size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
 
   private:
-    void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl);
+    void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
+                            const WGPUDawnWGSLBlocklist* wgslBlocklist);
 
     std::unordered_set<WGPUWGSLFeatureName> mWGSLFeatures;
 };

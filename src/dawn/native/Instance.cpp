@@ -118,21 +118,6 @@ wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
     }
 }
 
-tint::wgsl::LanguageFeature ToWGSLFeature(wgpu::WGSLFeatureName f) {
-    switch (f) {
-#define CASE(WgslName, WgpuName)          \
-    case wgpu::WGSLFeatureName::WgpuName: \
-        return tint::wgsl::LanguageFeature::WgslName;
-        DAWN_FOREACH_WGSL_FEATURE(CASE)
-#undef CASE
-        case wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct:
-        case wgpu::WGSLFeatureName::UnrestrictedPointerParameters:
-        case wgpu::WGSLFeatureName::PointerCompositeAccess:
-            return tint::wgsl::LanguageFeature::kUndefined;
-    }
-}
-DAWN_UNUSED_FUNC(ToWGSLFeature);
-
 }  // anonymous namespace
 
 wgpu::Bool APIGetInstanceFeatures(InstanceFeatures* features) {
@@ -221,16 +206,21 @@ void InstanceBase::WillDropLastExternalRef() {
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
-    DAWN_TRY(ValidateSTypes(descriptor->nextInChain, {{wgpu::SType::DawnInstanceDescriptor},
-                                                      {wgpu::SType::DawnTogglesDescriptor}}));
+    UnpackedInstanceDescriptorChain unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
 
-    const DawnInstanceDescriptor* dawnDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &dawnDesc);
-    if (dawnDesc != nullptr) {
+    // Initialize the platform to the default for now.
+    mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
+    SetPlatform(mDefaultPlatform.get());
+
+    // Process DawnInstanceDescriptor
+    if (const auto* dawnDesc = std::get<const DawnInstanceDescriptor*>(unpacked)) {
         for (uint32_t i = 0; i < dawnDesc->additionalRuntimeSearchPathsCount; ++i) {
             mRuntimeSearchPaths.push_back(dawnDesc->additionalRuntimeSearchPaths[i]);
         }
+        SetPlatform(dawnDesc->platform);
     }
+
     // Default paths to search are next to the shared library, next to the executable, and
     // no path (just libvulkan.so).
     if (auto p = GetModuleDirectory()) {
@@ -242,14 +232,8 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
     mRuntimeSearchPaths.push_back("");
 
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
-
-    // Initialize the platform to the default for now.
-    mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
-    SetPlatform(dawnDesc != nullptr ? dawnDesc->platform : mDefaultPlatform.get());
-
     DAWN_TRY(mEventManager.Initialize(descriptor));
-
-    GatherWGSLFeatures();
+    GatherWGSLFeatures(std::get<const DawnWGSLBlocklist*>(unpacked));
 
     return {};
 }
@@ -582,7 +566,7 @@ InstanceBase::GetAllowedWGSLLanguageFeatures() const {
     return mTintLanguageFeatures;
 }
 
-void InstanceBase::GatherWGSLFeatures() {
+void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
     for (auto wgslFeature : tint::wgsl::kAllLanguageFeatures) {
         // Skip over testing features if we don't have the toggle to expose them.
         if (!mToggles.IsEnabled(Toggle::ExposeWGSLTestingFeatures)) {
@@ -623,6 +607,23 @@ void InstanceBase::GatherWGSLFeatures() {
         if (enable) {
             mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
             mTintLanguageFeatures.emplace(wgslFeature);
+        }
+    }
+
+    // Remove blocklisted features.
+    if (wgslBlocklist != nullptr) {
+        for (size_t i = 0; i < wgslBlocklist->blocklistedFeatureCount; i++) {
+            const char* name = wgslBlocklist->blocklistedFeatures[i];
+            tint::wgsl::LanguageFeature tintFeature = tint::wgsl::ParseLanguageFeature(name);
+            wgpu::WGSLFeatureName feature = ToWGPUFeature(tintFeature);
+
+            // Ignore unknown features in the blocklist.
+            if (feature == wgpu::WGSLFeatureName::Undefined) {
+                continue;
+            }
+
+            mTintLanguageFeatures.erase(tintFeature);
+            mWGSLFeatures.erase(feature);
         }
     }
 }

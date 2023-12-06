@@ -43,9 +43,15 @@ class WGSLFeatureValidationTest : public ValidationTest {
         bool useTestingFeatures = true;
         bool allowUnsafeAPIs = false;
         bool exposeExperimental = false;
+        std::vector<const char*> blocklist = {};
     };
 
     wgpu::Instance CreateInstance(InstanceSpec spec) {
+        // The blocklist that will be shared between both the native and wire descriptors.
+        wgpu::DawnWGSLBlocklist blocklist;
+        blocklist.blocklistedFeatureCount = spec.blocklist.size();
+        blocklist.blocklistedFeatures = spec.blocklist.data();
+
         // Build the native instance descriptor.
         std::vector<const char*> enabledToggles;
         if (spec.useTestingFeatures) {
@@ -59,6 +65,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
         }
 
         wgpu::DawnTogglesDescriptor togglesDesc;
+        togglesDesc.nextInChain = &blocklist;
         togglesDesc.enabledToggleCount = enabledToggles.size();
         togglesDesc.enabledToggles = enabledToggles.data();
 
@@ -67,6 +74,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
 
         // Build the wire instance descriptor.
         wgpu::DawnWireWGSLControl wgslControl;
+        wgslControl.nextInChain = &blocklist;
         wgslControl.enableExperimental = spec.allowUnsafeAPIs || spec.exposeExperimental;
         wgslControl.enableUnsafe = spec.allowUnsafeAPIs;
         wgslControl.enableTesting = spec.useTestingFeatures;
@@ -254,6 +262,50 @@ TEST_F(WGSLFeatureValidationTest, UsingFeatureInShaderModule) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         requires chromium_testing_experimental;
     )"));
+}
+
+// Test using DawnWGSLBlocklist to block features with a killswitch by name.
+TEST_F(WGSLFeatureValidationTest, BlockListOfKillswitchedFeatures) {
+    wgpu::Instance instance = CreateInstance(
+        {.allowUnsafeAPIs = true, .blocklist = {"chromium_testing_shipped_with_killswitch"}});
+
+    // The blocklisted feature is not present.
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(
+        wgpu::WGSLFeatureName::ChromiumTestingShippedWithKillswitch));
+
+    // The others are.
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
+    ASSERT_TRUE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+
+    // Using the blocklisted extension fails.
+    wgpu::Device device = CreateDeviceOnInstance(instance);
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        requires chromium_testing_shipped_with_killswitch;
+    )"));
+}
+
+// Test that DawnWGSLBlocklist can block any feature name (even without a killswitch).
+TEST_F(WGSLFeatureValidationTest, BlockListOfAnyFeature) {
+    wgpu::Instance instance =
+        CreateInstance({.allowUnsafeAPIs = true,
+                        .blocklist = {"chromium_testing_shipped", "chromium_testing_experimental",
+                                      "chromium_testing_unsafe_experimental"}});
+
+    // All blocklisted features aren't present.
+    ASSERT_FALSE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
+    ASSERT_FALSE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingExperimental));
+    ASSERT_FALSE(
+        instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
+}
+
+// Test that DawnWGSLBlocklist can contain garbage names without causing problems.
+TEST_F(WGSLFeatureValidationTest, BlockListGarbageName) {
+    wgpu::Instance instance = CreateInstance({.blocklist = {"LE_GARBAGE"}});
+    ASSERT_NE(instance, nullptr);
 }
 
 }  // anonymous namespace
