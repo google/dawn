@@ -33,7 +33,6 @@
 #include <vector>
 
 #include "dawn/common/ContentLessObjectCacheable.h"
-#include "dawn/common/TypedInteger.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
@@ -102,11 +101,9 @@ class RenderPipelineBase : public PipelineBase,
     const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>& GetAttributeLocationsUsed()
         const;
     const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
-    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
-    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-    GetVertexBufferSlotsUsedAsVertexBuffer() const;
-    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-    GetVertexBufferSlotsUsedAsInstanceBuffer() const;
+    const VertexBufferMask& GetVertexBuffersUsed() const;
+    const VertexBufferMask& GetVertexBuffersUsedAsVertexBuffer() const;
+    const VertexBufferMask& GetVertexBuffersUsedAsInstanceBuffer() const;
     const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
     uint32_t GetVertexBufferCount() const;
 
@@ -154,10 +151,10 @@ class RenderPipelineBase : public PipelineBase,
     uint32_t mVertexBufferCount;
     ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> mAttributeLocationsUsed;
     ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsVertexBuffer;
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsInstanceBuffer;
-    ityp::array<VertexBufferSlot, VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
+    VertexBufferMask mVertexBuffersUsed;
+    VertexBufferMask mVertexBuffersUsedAsVertexBuffer;
+    VertexBufferMask mVertexBuffersUsedAsInstanceBuffer;
+    PerVertexBuffer<VertexBufferInfo> mVertexBufferInfos;
 
     // Attachments
     Ref<AttachmentState> mAttachmentState;

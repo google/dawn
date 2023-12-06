@@ -664,7 +664,7 @@ class VertexBufferTracker {
   public:
     void OnSetVertexBuffer(VertexBufferSlot slot, Buffer* buffer, uint64_t offset, uint64_t size) {
         mStartSlot = std::min(mStartSlot, slot);
-        mEndSlot = std::max(mEndSlot, ityp::Add(slot, VertexBufferSlot(uint8_t(1))));
+        mEndSlot = std::max(mEndSlot, ityp::PlusOne(slot));
 
         auto* d3d12BufferView = &mD3D12BufferViews[slot];
         d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
@@ -684,10 +684,9 @@ class VertexBufferTracker {
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
 
-            for (VertexBufferSlot slot :
-                 IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
+            for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
                 startSlot = std::min(startSlot, slot);
-                endSlot = std::max(endSlot, ityp::Add(slot, VertexBufferSlot(uint8_t(1))));
+                endSlot = std::max(endSlot, ityp::PlusOne(slot));
                 mD3D12BufferViews[slot].StrideInBytes =
                     renderPipeline->GetVertexBuffer(slot).arrayStride;
             }
@@ -705,8 +704,8 @@ class VertexBufferTracker {
                                         static_cast<uint8_t>(ityp::Sub(endSlot, startSlot)),
                                         &mD3D12BufferViews[startSlot]);
 
-        mStartSlot = VertexBufferSlot(kMaxVertexBuffers);
-        mEndSlot = VertexBufferSlot(uint8_t(0));
+        mStartSlot = kMaxVertexBuffersTyped;
+        mEndSlot = {};
     }
 
   private:
@@ -716,9 +715,8 @@ class VertexBufferTracker {
     // data in the middle of the range).
     const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
     VertexBufferSlot mStartSlot{kMaxVertexBuffers};
-    VertexBufferSlot mEndSlot{uint8_t(0)};
-    ityp::array<VertexBufferSlot, D3D12_VERTEX_BUFFER_VIEW, kMaxVertexBuffers> mD3D12BufferViews =
-        {};
+    VertexBufferSlot mEndSlot{};
+    PerVertexBuffer<D3D12_VERTEX_BUFFER_VIEW> mD3D12BufferViews = {};
 };
 
 void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,

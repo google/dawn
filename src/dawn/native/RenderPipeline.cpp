@@ -835,53 +835,53 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
                    GetRenderStagesAndSetPlaceholderShader(device, descriptor)),
       mAttachmentState(device->GetOrCreateAttachmentState(descriptor, GetLayout())) {
     mVertexBufferCount = descriptor->vertex.bufferCount;
-    const VertexBufferLayout* buffers = descriptor->vertex.buffers;
-    for (uint8_t slot = 0; slot < mVertexBufferCount; ++slot) {
+
+    auto buffers =
+        ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
+    for (auto [slot, buffer] : Enumerate(buffers)) {
         // Skip unused slots
-        if (buffers[slot].stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
+        if (buffer.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
             continue;
         }
 
-        VertexBufferSlot typedSlot(slot);
-
-        mVertexBufferSlotsUsed.set(typedSlot);
-        mVertexBufferInfos[typedSlot].arrayStride = buffers[slot].arrayStride;
-        mVertexBufferInfos[typedSlot].stepMode = buffers[slot].stepMode;
-        mVertexBufferInfos[typedSlot].usedBytesInStride = 0;
-        mVertexBufferInfos[typedSlot].lastStride = 0;
-        switch (buffers[slot].stepMode) {
+        mVertexBuffersUsed.set(slot);
+        mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
+        mVertexBufferInfos[slot].stepMode = buffer.stepMode;
+        mVertexBufferInfos[slot].usedBytesInStride = 0;
+        mVertexBufferInfos[slot].lastStride = 0;
+        switch (buffer.stepMode) {
             case wgpu::VertexStepMode::Vertex:
-                mVertexBufferSlotsUsedAsVertexBuffer.set(typedSlot);
+                mVertexBuffersUsedAsVertexBuffer.set(slot);
                 break;
             case wgpu::VertexStepMode::Instance:
-                mVertexBufferSlotsUsedAsInstanceBuffer.set(typedSlot);
+                mVertexBuffersUsedAsInstanceBuffer.set(slot);
                 break;
             default:
                 DAWN_UNREACHABLE();
         }
 
-        for (uint32_t i = 0; i < buffers[slot].attributeCount; ++i) {
-            VertexAttributeLocation location = VertexAttributeLocation(
-                static_cast<uint8_t>(buffers[slot].attributes[i].shaderLocation));
+        auto attributes = ityp::SpanFromUntyped<size_t>(buffer.attributes, buffer.attributeCount);
+        for (auto [i, attribute] : Enumerate(attributes)) {
+            VertexAttributeLocation location =
+                VertexAttributeLocation(static_cast<uint8_t>(attribute.shaderLocation));
+
             mAttributeLocationsUsed.set(location);
             mAttributeInfos[location].shaderLocation = location;
-            mAttributeInfos[location].vertexBufferSlot = typedSlot;
-            mAttributeInfos[location].offset = buffers[slot].attributes[i].offset;
-            mAttributeInfos[location].format = buffers[slot].attributes[i].format;
+            mAttributeInfos[location].vertexBufferSlot = slot;
+            mAttributeInfos[location].offset = attribute.offset;
+            mAttributeInfos[location].format = attribute.format;
             // Compute the access boundary of this attribute by adding attribute format size to
             // attribute offset. Although offset is in uint64_t, such sum must be no larger than
             // maxVertexBufferArrayStride (2048), which is promised by the GPUVertexBufferLayout
             // validation of creating render pipeline. Therefore, calculating in uint16_t will
             // cause no overflow.
-            uint32_t formatByteSize =
-                GetVertexFormatInfo(buffers[slot].attributes[i].format).byteSize;
-            DAWN_ASSERT(buffers[slot].attributes[i].offset <= 2048);
-            uint16_t accessBoundary =
-                uint16_t(buffers[slot].attributes[i].offset) + uint16_t(formatByteSize);
-            mVertexBufferInfos[typedSlot].usedBytesInStride =
-                std::max(mVertexBufferInfos[typedSlot].usedBytesInStride, accessBoundary);
-            mVertexBufferInfos[typedSlot].lastStride =
-                std::max(mVertexBufferInfos[typedSlot].lastStride,
+            uint32_t formatByteSize = GetVertexFormatInfo(attribute.format).byteSize;
+            DAWN_ASSERT(attribute.offset <= 2048);
+            uint16_t accessBoundary = uint16_t(attribute.offset) + uint16_t(formatByteSize);
+            mVertexBufferInfos[slot].usedBytesInStride =
+                std::max(mVertexBufferInfos[slot].usedBytesInStride, accessBoundary);
+            mVertexBufferInfos[slot].lastStride =
+                std::max(mVertexBufferInfos[slot].lastStride,
                          mAttributeInfos[location].offset + formatByteSize);
         }
     }
@@ -1017,27 +1017,24 @@ const VertexAttributeInfo& RenderPipelineBase::GetAttribute(
     return mAttributeInfos[location];
 }
 
-const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-RenderPipelineBase::GetVertexBufferSlotsUsed() const {
+const VertexBufferMask& RenderPipelineBase::GetVertexBuffersUsed() const {
     DAWN_ASSERT(!IsError());
-    return mVertexBufferSlotsUsed;
+    return mVertexBuffersUsed;
 }
 
-const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-RenderPipelineBase::GetVertexBufferSlotsUsedAsVertexBuffer() const {
+const VertexBufferMask& RenderPipelineBase::GetVertexBuffersUsedAsVertexBuffer() const {
     DAWN_ASSERT(!IsError());
-    return mVertexBufferSlotsUsedAsVertexBuffer;
+    return mVertexBuffersUsedAsVertexBuffer;
 }
 
-const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-RenderPipelineBase::GetVertexBufferSlotsUsedAsInstanceBuffer() const {
+const VertexBufferMask& RenderPipelineBase::GetVertexBuffersUsedAsInstanceBuffer() const {
     DAWN_ASSERT(!IsError());
-    return mVertexBufferSlotsUsedAsInstanceBuffer;
+    return mVertexBuffersUsedAsInstanceBuffer;
 }
 
 const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(VertexBufferSlot slot) const {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mVertexBufferSlotsUsed[slot]);
+    DAWN_ASSERT(mVertexBuffersUsed[slot]);
     return mVertexBufferInfos[slot];
 }
 
@@ -1201,8 +1198,8 @@ size_t RenderPipelineBase::ComputeContentHash() {
         recorder.Record(desc.shaderLocation, desc.vertexBufferSlot, desc.offset, desc.format);
     }
 
-    recorder.Record(mVertexBufferSlotsUsed);
-    for (VertexBufferSlot slot : IterateBitSet(mVertexBufferSlotsUsed)) {
+    recorder.Record(mVertexBuffersUsed);
+    for (VertexBufferSlot slot : IterateBitSet(mVertexBuffersUsed)) {
         const VertexBufferInfo& desc = GetVertexBuffer(slot);
         recorder.Record(desc.arrayStride, desc.stepMode);
     }
@@ -1306,11 +1303,11 @@ bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
         }
     }
 
-    if (a->mVertexBufferSlotsUsed != b->mVertexBufferSlotsUsed) {
+    if (a->mVertexBuffersUsed != b->mVertexBuffersUsed) {
         return false;
     }
 
-    for (VertexBufferSlot slot : IterateBitSet(a->mVertexBufferSlotsUsed)) {
+    for (VertexBufferSlot slot : IterateBitSet(a->mVertexBuffersUsed)) {
         const VertexBufferInfo& descA = a->GetVertexBuffer(slot);
         const VertexBufferInfo& descB = b->GetVertexBuffer(slot);
         if (descA.arrayStride != descB.arrayStride || descA.stepMode != descB.stepMode) {

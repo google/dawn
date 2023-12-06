@@ -64,9 +64,7 @@ class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
     GLuint mVertexArrayObject;
     GLenum mGlPrimitiveTopology;
 
-    ityp::array<VertexBufferSlot,
-                ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>,
-                kMaxVertexBuffers>
+    PerVertexBuffer<ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>>
         mAttributesUsingVertexBuffer;
 };
 

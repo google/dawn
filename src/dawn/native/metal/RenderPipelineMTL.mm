@@ -353,7 +353,7 @@ MaybeError RenderPipeline::Initialize() {
         uint32_t mtlVertexBufferIndex =
             ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
-        for (VertexBufferSlot slot : IterateBitSet(GetVertexBufferSlotsUsed())) {
+        for (VertexBufferSlot slot : IterateBitSet(GetVertexBuffersUsed())) {
             mMtlVertexBufferIndices[slot] = mtlVertexBufferIndex;
             mtlVertexBufferIndex++;
         }
@@ -511,7 +511,7 @@ wgpu::ShaderStage RenderPipeline::GetStagesRequiringStorageBufferLength() const 
 NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
     MTLVertexDescriptor* mtlVertexDescriptor = [MTLVertexDescriptor new];
 
-    for (VertexBufferSlot slot : IterateBitSet(GetVertexBufferSlotsUsed())) {
+    for (VertexBufferSlot slot : IterateBitSet(GetVertexBuffersUsed())) {
         const VertexBufferInfo& info = GetVertexBuffer(slot);
 
         MTLVertexBufferLayoutDescriptor* layoutDesc = [MTLVertexBufferLayoutDescriptor new];

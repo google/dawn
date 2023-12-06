@@ -91,8 +91,7 @@ class VertexBufferTracker {
         // If the vertex state has changed, we need to update the strides.
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
-            for (VertexBufferSlot slot :
-                 IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
+            for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
                 mStrides[slot] = renderPipeline->GetVertexBuffer(slot).arrayStride;
             }
         }
@@ -104,9 +103,9 @@ class VertexBufferTracker {
   private:
     const ScopedSwapStateCommandRecordingContext* mCommandContext;
     const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
-    ityp::array<VertexBufferSlot, ID3D11Buffer*, kMaxVertexBuffers> mD3D11Buffers = {};
-    ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mStrides = {};
-    ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mOffsets = {};
+    PerVertexBuffer<ID3D11Buffer*> mD3D11Buffers = {};
+    PerVertexBuffer<UINT> mStrides = {};
+    PerVertexBuffer<UINT> mOffsets = {};
 };
 
 MaybeError SynchronizeTextureBeforeUse(

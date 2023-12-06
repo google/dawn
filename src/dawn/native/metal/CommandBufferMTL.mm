@@ -683,14 +683,13 @@ class VertexBufferTracker {
         // When a new pipeline is bound we must set all the vertex buffers again because
         // they might have been offset by the pipeline layout, and they might be packed
         // differently from the previous pipeline.
-        mDirtyVertexBuffers |= pipeline->GetVertexBufferSlotsUsed();
+        mDirtyVertexBuffers |= pipeline->GetVertexBuffersUsed();
     }
 
     void Apply(id<MTLRenderCommandEncoder> encoder,
                RenderPipeline* pipeline,
                bool enableVertexPulling) {
-        const auto& vertexBuffersToApply =
-            mDirtyVertexBuffers & pipeline->GetVertexBufferSlotsUsed();
+        const auto& vertexBuffersToApply = mDirtyVertexBuffers & pipeline->GetVertexBuffersUsed();
 
         for (VertexBufferSlot slot : IterateBitSet(vertexBuffersToApply)) {
             uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(slot);
@@ -712,10 +711,10 @@ class VertexBufferTracker {
 
   private:
     // All the indices in these arrays are Dawn vertex buffer indices
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mDirtyVertexBuffers;
-    ityp::array<VertexBufferSlot, id<MTLBuffer>, kMaxVertexBuffers> mVertexBuffers;
-    ityp::array<VertexBufferSlot, NSUInteger, kMaxVertexBuffers> mVertexBufferOffsets;
-    ityp::array<VertexBufferSlot, uint32_t, kMaxVertexBuffers> mVertexBufferBindingSizes;
+    VertexBufferMask mDirtyVertexBuffers;
+    PerVertexBuffer<id<MTLBuffer>> mVertexBuffers;
+    PerVertexBuffer<NSUInteger> mVertexBufferOffsets;
+    PerVertexBuffer<uint32_t> mVertexBufferBindingSizes;
 
     StorageBufferLengthTracker* mLengthTracker;
 };

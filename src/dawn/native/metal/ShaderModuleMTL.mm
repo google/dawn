@@ -213,7 +213,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         vertexPullingTransformConfig =
             BuildVertexPullingTransformConfig(*renderPipeline, kPullingBufferBindingSet);
 
-        for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
+        for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
 
             // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.

@@ -94,12 +94,13 @@ class CommandBufferStateTracker {
 
     ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
     ityp::array<BindGroupIndex, std::vector<uint32_t>, kMaxBindGroups> mDynamicOffsets = {};
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
+
+    VertexBufferMask mVertexBuffersUsed;
+    PerVertexBuffer<uint64_t> mVertexBufferSizes = {};
+
     bool mIndexBufferSet = false;
     wgpu::IndexFormat mIndexFormat;
     uint64_t mIndexBufferSize = 0;
-
-    ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferSizes = {};
 
     PipelineLayoutBase* mLastPipelineLayout = nullptr;
     PipelineBase* mLastPipeline = nullptr;

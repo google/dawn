@@ -33,6 +33,22 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/TypedInteger.h"
 
+namespace dawn::ityp {
+template <typename Index, typename Value, size_t Size>
+class array;
+
+template <typename Index, size_t N>
+class bitset;
+}  // namespace dawn::ityp
+
+// This files creates a number of integer types using ityp to represent the zoo of indices used all
+// over the codebase, so that the semantic of numbers is clear from the types, but also so it is
+// harder to use the wrong type to index into array, bitsets and other containers.
+//
+// In addition various container type aliases are declared so that they have a consistent name
+// everywhere and don't need explicit sizing with the kMaxStuff constants. Respective ityp::
+// headers still need to be #included in the files using them though.
+
 namespace dawn::native {
 
 // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
@@ -49,10 +65,16 @@ using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>
 constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
     ColorAttachmentIndex(kMaxColorAttachments);
 
+// Vertex buffer slots represent the `slot` passed in calls to SetVertexBuffer or the index in the
+// wgpu::VertexState::vertexBuffers
 using VertexBufferSlot = TypedInteger<struct VertexBufferSlotT, uint8_t>;
-using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
-
 constexpr VertexBufferSlot kMaxVertexBuffersTyped = VertexBufferSlot(kMaxVertexBuffers);
+
+using VertexBufferMask = ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>;
+template <typename Value>
+using PerVertexBuffer = ityp::array<VertexBufferSlot, Value, kMaxVertexBuffers>;
+
+using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
 constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
     VertexAttributeLocation(kMaxVertexAttributes);
 

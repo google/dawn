@@ -180,7 +180,7 @@ class VertexStateBufferBindingTracker {
         }
 
         mIndexBufferDirty = true;
-        mDirtyVertexBuffers |= pipeline->GetVertexBufferSlotsUsed();
+        mDirtyVertexBuffers |= pipeline->GetVertexBuffersUsed();
 
         mLastPipeline = pipeline;
     }
@@ -192,7 +192,7 @@ class VertexStateBufferBindingTracker {
         }
 
         for (VertexBufferSlot slot :
-             IterateBitSet(mDirtyVertexBuffers & mLastPipeline->GetVertexBufferSlotsUsed())) {
+             IterateBitSet(mDirtyVertexBuffers & mLastPipeline->GetVertexBuffersUsed())) {
             for (VertexAttributeLocation location :
                  IterateBitSet(ToBackend(mLastPipeline)->GetAttributesUsingVertexBuffer(slot))) {
                 const VertexAttributeInfo& attribute = mLastPipeline->GetAttribute(location);
@@ -226,9 +226,9 @@ class VertexStateBufferBindingTracker {
     bool mIndexBufferDirty = false;
     Buffer* mIndexBuffer = nullptr;
 
-    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mDirtyVertexBuffers;
-    ityp::array<VertexBufferSlot, Buffer*, kMaxVertexBuffers> mVertexBuffers;
-    ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferOffsets;
+    VertexBufferMask mDirtyVertexBuffers;
+    PerVertexBuffer<Buffer*> mVertexBuffers;
+    PerVertexBuffer<uint64_t> mVertexBufferOffsets;
 
     RenderPipelineBase* mLastPipeline = nullptr;
 };
