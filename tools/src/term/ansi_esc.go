@@ -55,9 +55,9 @@ const (
 // CanUseAnsiEscapeSequences looks at the process's environment to determine
 // whether its sensible to emit ansi-escape sequences.
 func CanUseAnsiEscapeSequences() bool {
-	if os.Getenv("TERM") != "dumb" ||
-		(isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd())) ||
-		(isatty.IsCygwinTerminal(os.Stdout.Fd()) && isatty.IsCygwinTerminal(os.Stderr.Fd())) {
+	if os.Getenv("TERM") != "dumb" &&
+		((isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stderr.Fd())) ||
+			(isatty.IsCygwinTerminal(os.Stdout.Fd()) && isatty.IsCygwinTerminal(os.Stderr.Fd()))) {
 		if _, disable := os.LookupEnv("NO_COLOR"); !disable {
 			return true
 		}
