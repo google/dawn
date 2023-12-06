@@ -188,20 +188,10 @@ void GPUCommandEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
 void GPUCommandEncoder::writeTimestamp(Napi::Env env,
                                        interop::Interface<interop::GPUQuerySet> querySet,
                                        interop::GPUSize32 queryIndex) {
-    if (!device_.HasFeature(wgpu::FeatureName::TimestampQuery)) {
-        Napi::TypeError::New(env, "timestamp-query feature is not enabled.")
-            .ThrowAsJavaScriptException();
-        return;
-    }
-
-    Converter conv(env);
-
-    wgpu::QuerySet q{};
-    if (!conv(q, querySet)) {
-        return;
-    }
-
-    enc_.WriteTimestamp(q, queryIndex);
+    Napi::TypeError::New(
+        env, "writeTimestamp is no longer supported with the 'timestamp-query' feature.")
+        .ThrowAsJavaScriptException();
+    return;
 }
 
 void GPUCommandEncoder::resolveQuerySet(Napi::Env env,
