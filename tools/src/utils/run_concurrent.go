@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2022 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -27,24 +27,29 @@
 
 package utils
 
-import (
-	"context"
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-)
+import "sync"
 
-// CancelOnInterruptContext returns a context that's cancelled if the process receives a SIGINT or
-// SIGTERM interrupt.
-func CancelOnInterruptContext(ctx context.Context) context.Context {
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+// RunConcurrent calls fn on numRoutines separate go routines.
+// RunConcurrent will return on the first error returned, leaving the other go
+// routines to complete.
+func RunConcurrent(numRoutines int, fn func() error) error {
+	errs := make(chan error, numRoutines)
+	wg := sync.WaitGroup{}
+	wg.Add(numRoutines)
+	for i := 0; i < numRoutines; i++ {
+		go func() {
+			defer wg.Done()
+			errs <- fn()
+		}()
+	}
 	go func() {
-		sig := <-sigs
-		fmt.Printf("Signal received: %v\n", sig)
-		cancel()
+		wg.Wait()
+		close(errs)
 	}()
-	return ctx
+	for err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -117,3 +117,15 @@ E(8)`); e != nil {
 		t.Error(e)
 	}
 }
+
+func TestSliceToChan(t *testing.T) {
+	in := []int{5, 8, 2, 4}
+	c := transform.SliceToChan(in)
+	out := []int{}
+	for i := range c {
+		out = append(out, i)
+	}
+	if e := check(in, out); e != nil {
+		t.Error(e)
+	}
+}

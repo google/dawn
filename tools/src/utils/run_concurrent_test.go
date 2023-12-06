@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2022 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,26 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package utils
+package utils_test
 
 import (
-	"context"
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
+	"sync/atomic"
+	"testing"
+
+	"dawn.googlesource.com/dawn/tools/src/utils"
 )
 
-// CancelOnInterruptContext returns a context that's cancelled if the process receives a SIGINT or
-// SIGTERM interrupt.
-func CancelOnInterruptContext(ctx context.Context) context.Context {
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		fmt.Printf("Signal received: %v\n", sig)
-		cancel()
-	}()
-	return ctx
+func TestRunConcurrent(t *testing.T) {
+	var i uint32
+	err := utils.RunConcurrent(8, func() error {
+		atomic.AddUint32(&i, 1)
+		return nil
+	})
+	if err != nil {
+		t.Errorf("utils.RunConcurrent() returned %v", err)
+	}
+	if n := atomic.LoadUint32(&i); n != 8 {
+		t.Errorf("i is %v", n)
+	}
+}
+
+func TestRunConcurrentError(t *testing.T) {
+	err := utils.RunConcurrent(8, func() error {
+		return fmt.Errorf("error")
+	})
+	if err == nil {
+		t.Errorf("utils.RunConcurrent() returned no error")
+	}
 }

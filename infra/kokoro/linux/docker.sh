@@ -197,6 +197,13 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         ./tint_unittests
     hide_cmds
 
+    if [ -f ./tint_wgsl_fuzzer ]; then
+        status "Checking fuzzers"
+        show_cmds
+            ${SRC_DIR}/tools/run fuzz --check --build ${BUILD_DIR}
+        hide_cmds
+    fi
+
     if [ -f ./tint_ast_fuzzer_unittests ]; then
         status "Running tint_ast_fuzzer_unittests"
         show_cmds

@@ -115,7 +115,6 @@ func GoSlice[IN any, OUT any](in []IN, fn func(in IN) (OUT, error)) ([]OUT, erro
 // GoSliceNoErr returns a new slice by transforming each element with the function
 // fn, called by multiple go-routines.
 func GoSliceNoErr[IN any, OUT any](in []IN, fn func(in IN) OUT) []OUT {
-
 	// Create a channel of indices
 	indices := make(chan int, 256)
 	go func() {
@@ -142,4 +141,17 @@ func GoSliceNoErr[IN any, OUT any](in []IN, fn func(in IN) OUT) []OUT {
 	wg.Wait()
 
 	return out
+}
+
+// SliceToChan returns a new chan populated with all the items in slice.
+// The chan is closed after being populated.
+func SliceToChan[T any](slice []T) <-chan T {
+	c := make(chan T, 256)
+	go func() {
+		for _, el := range slice {
+			c <- el
+		}
+		close(c)
+	}()
+	return c
 }
