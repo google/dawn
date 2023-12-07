@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/function_param.h"
@@ -136,6 +137,7 @@ struct Encoder {
     void Instruction(pb::Instruction* inst_out, const ir::Instruction* inst_in) {
         auto kind = Switch(
             inst_in,                                                               //
+            [&](const ir::Access*) { return pb::InstructionKind::Access; },        //
             [&](const ir::Construct*) { return pb::InstructionKind::Construct; },  //
             [&](const ir::Discard*) { return pb::InstructionKind::Discard; },      //
             [&](const ir::Let*) { return pb::InstructionKind::Let; },              //

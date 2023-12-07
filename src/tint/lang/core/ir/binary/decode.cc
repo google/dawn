@@ -172,6 +172,9 @@ struct Decoder {
             case pb::InstructionKind::Construct:
                 inst_out = mod_out_.instructions.Create<ir::Construct>();
                 break;
+            case pb::InstructionKind::Access:
+                inst_out = mod_out_.instructions.Create<ir::Access>();
+                break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind();
                 break;

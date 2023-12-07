@@ -37,6 +37,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Access);
 namespace tint::core::ir {
 
 //! @cond Doxygen_Suppress
+Access::Access() = default;
+
 Access::Access(InstructionResult* result, Value* object, VectorRef<Value*> indices) {
     AddOperand(Access::kObjectOperandOffset, object);
     AddOperands(Access::kIndicesOperandOffset, std::move(indices));

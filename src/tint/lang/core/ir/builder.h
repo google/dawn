@@ -1291,6 +1291,17 @@ class Builder {
                                                          Values(std::forward<ARGS>(indices)...)));
     }
 
+    /// Creates a new `Access`
+    /// @tparam TYPE the return type
+    /// @param object the object being accessed
+    /// @param indices the access indices
+    /// @returns the instruction
+    template <typename TYPE, typename OBJ, typename... ARGS>
+    ir::Access* Access(OBJ&& object, ARGS&&... indices) {
+        auto* type = ir.Types().Get<TYPE>();
+        return Access(type, std::forward<OBJ>(object), std::forward<ARGS>(indices)...);
+    }
+
     /// Creates a new `Swizzle`
     /// @param type the return type
     /// @param object the object being swizzled

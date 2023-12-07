@@ -44,6 +44,9 @@ class Access final : public Castable<Access, OperandInstruction<3, 1>> {
     /// The base offset in Operands() for the access indices
     static constexpr size_t kIndicesOperandOffset = 1;
 
+    /// Constructor (no results, no operands)
+    Access();
+
     /// Constructor
     /// @param result the result value
     /// @param object the accessor object

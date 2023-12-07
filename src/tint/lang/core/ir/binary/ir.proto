@@ -182,4 +182,5 @@ enum InstructionKind {
     Discard = 5;
     Let = 6;
     Construct = 7;
+    Access = 8;
 }
