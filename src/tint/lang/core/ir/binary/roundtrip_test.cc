@@ -166,6 +166,18 @@ TEST_F(IRBinaryRoundtripTest, Return_mat2x3f_Splat) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Return_array_f32_Composite) {
+    auto* fn = b.Function("Function", ty.array<f32, 3>());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Composite<array<f32, 3>>(1_i, 2_i, 3_i)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Return_array_f32_Splat) {
+    auto* fn = b.Function("Function", ty.array<f32, 3>());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Splat<array<f32, 3>>(1_i, 3)); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Construct) {
     auto* fn = b.Function("Function", ty.void_());
     b.Append(fn->Block(), [&] {

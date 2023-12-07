@@ -75,8 +75,9 @@ message MatrixType {
 }
 
 message ArrayType {
-    uint32 count = 1;
-    uint32 element_type = 2;  // Module.types
+    uint32 element = 1;  // Module.types
+    uint32 stride = 2;
+    uint32 count = 3;
 }
 
 message PointerType {

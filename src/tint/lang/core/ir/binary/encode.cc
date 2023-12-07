@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -175,6 +176,7 @@ struct Encoder {
                 [&](const core::type::Vector* v) { VectorType(*type_out.mutable_vector(), v); },
                 [&](const core::type::Matrix* m) { MatrixType(*type_out.mutable_matrix(), m); },
                 [&](const core::type::Pointer* m) { PointerType(*type_out.mutable_pointer(), m); },
+                [&](const core::type::Array* m) { ArrayType(*type_out.mutable_array(), m); },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -197,6 +199,15 @@ struct Encoder {
         pointer_out.set_address_space(AddressSpace(pointer_in->AddressSpace()));
         pointer_out.set_store_type(Type(pointer_in->StoreType()));
         pointer_out.set_access(Access(pointer_in->Access()));
+    }
+
+    void ArrayType(pb::ArrayType& array_out, const core::type::Array* array_in) {
+        array_out.set_element(Type(array_in->ElemType()));
+        array_out.set_stride(array_in->Stride());
+        Switch(
+            array_in->Count(),  //
+            [&](const core::type::ConstantArrayCount* c) { array_out.set_count(c->value); },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     ////////////////////////////////////////////////////////////////////////////

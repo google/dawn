@@ -205,42 +205,15 @@ struct Decoder {
     const type::Type* CreateType(const pb::Type type_in) {
         switch (type_in.kind_case()) {
             case pb::Type::KindCase::kBasic:
-                switch (type_in.basic()) {
-                    case pb::BasicType::void_:
-                        return mod_out_.Types().Get<void>();
-                    case pb::BasicType::bool_:
-                        return mod_out_.Types().Get<bool>();
-                    case pb::BasicType::i32:
-                        return mod_out_.Types().Get<i32>();
-                    case pb::BasicType::u32:
-                        return mod_out_.Types().Get<u32>();
-                    case pb::BasicType::f32:
-                        return mod_out_.Types().Get<f32>();
-                    case pb::BasicType::f16:
-                        return mod_out_.Types().Get<f16>();
-                    default:
-                        TINT_ICE() << "invalid BasicType: " << type_in.basic();
-                        return nullptr;
-                }
-            case pb::Type::KindCase::kVector: {
-                auto& vector_in = type_in.vector();
-                auto* el_ty = Type(vector_in.element_type());
-                return mod_out_.Types().vec(el_ty, vector_in.width());
-            }
-            case pb::Type::KindCase::kMatrix: {
-                auto& matrix_in = type_in.matrix();
-                auto* el_ty = Type(matrix_in.element_type());
-                auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
-                return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
-            }
-            case pb::Type::KindCase::kPointer: {
-                auto& pointer_in = type_in.pointer();
-                auto address_space = AddressSpace(pointer_in.address_space());
-                auto* store_ty = Type(pointer_in.store_type());
-                auto access = Access(pointer_in.access());
-                return mod_out_.Types().ptr(address_space, store_ty, access);
-            }
+                return CreateTypeBasic(type_in.basic());
+            case pb::Type::KindCase::kVector:
+                return CreateTypeVector(type_in.vector());
+            case pb::Type::KindCase::kMatrix:
+                return CreateTypeMatrix(type_in.matrix());
+            case pb::Type::KindCase::kPointer:
+                return CreateTypePointer(type_in.pointer());
             case pb::Type::KindCase::kArray:
+                return CreateTypeArray(type_in.array());
             case pb::Type::KindCase::kAtomic:
                 TINT_UNIMPLEMENTED() << type_in.kind_case();
                 return nullptr;
@@ -250,6 +223,51 @@ struct Decoder {
         }
         TINT_ICE() << "invalid TypeDecl.kind";
         return nullptr;
+    }
+
+    const type::Type* CreateTypeBasic(pb::BasicType basic_in) {
+        switch (basic_in) {
+            case pb::BasicType::void_:
+                return mod_out_.Types().Get<void>();
+            case pb::BasicType::bool_:
+                return mod_out_.Types().Get<bool>();
+            case pb::BasicType::i32:
+                return mod_out_.Types().Get<i32>();
+            case pb::BasicType::u32:
+                return mod_out_.Types().Get<u32>();
+            case pb::BasicType::f32:
+                return mod_out_.Types().Get<f32>();
+            case pb::BasicType::f16:
+                return mod_out_.Types().Get<f16>();
+            default:
+                TINT_ICE() << "invalid BasicType: " << basic_in;
+                return nullptr;
+        }
+    }
+
+    const type::Vector* CreateTypeVector(const pb::VectorType& vector_in) {
+        auto* el_ty = Type(vector_in.element_type());
+        return mod_out_.Types().vec(el_ty, vector_in.width());
+    }
+
+    const type::Matrix* CreateTypeMatrix(const pb::MatrixType& matrix_in) {
+        auto* el_ty = Type(matrix_in.element_type());
+        auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
+        return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
+    }
+
+    const type::Pointer* CreateTypePointer(const pb::PointerType& pointer_in) {
+        auto address_space = AddressSpace(pointer_in.address_space());
+        auto* store_ty = Type(pointer_in.store_type());
+        auto access = Access(pointer_in.access());
+        return mod_out_.Types().ptr(address_space, store_ty, access);
+    }
+
+    const type::Array* CreateTypeArray(const pb::ArrayType& array_in) {
+        auto* element = Type(array_in.element());
+        uint32_t stride = static_cast<uint32_t>(array_in.stride());
+        uint32_t count = static_cast<uint32_t>(array_in.count());
+        return mod_out_.Types().array(element, count, stride);
     }
 
     const type::Type* Type(size_t id) { return id > 0 ? types_[id - 1] : nullptr; }
