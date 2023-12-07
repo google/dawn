@@ -37,8 +37,6 @@
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 {% set prefix = metadata.proc_table_prefix.lower() %}
 #include <tuple>
-#include <type_traits>
-#include <unordered_set>
 
 #include "absl/strings/str_format.h"
 #include "{{native_dir}}/{{prefix}}_platform.h"
@@ -46,20 +44,20 @@
 #include "{{native_dir}}/{{namespace}}_structs_autogen.h"
 
 namespace {{native_namespace}} {
-
 namespace detail {
 
 // SType for implementation details. Kept inside the detail namespace for extensibility.
 template <typename T>
 inline {{namespace}}::SType STypeForImpl;
 
- // Specialize STypeFor to map from native struct types to their SType.
- {% for value in types["s type"].values %}
-     {% if value.valid and value.name.get() in types %}
-         template <>
-         constexpr inline {{namespace}}::SType STypeForImpl<{{as_cppEnum(value.name)}}> = {{namespace}}::SType::{{as_cppEnum(value.name)}};
-     {% endif %}
- {% endfor %}
+// Specialize STypeFor to map from native struct types to their SType.
+{% for value in types["s type"].values %}
+    {% if value.valid and value.name.get() in types %}
+        template <>
+        constexpr inline {{namespace}}::SType STypeForImpl<{{as_cppEnum(value.name)}}> =
+            {{namespace}}::SType::{{as_cppEnum(value.name)}};
+    {% endif %}
+{% endfor %}
 
 template <typename Arg, typename... Rest>
 std::string STypesToString() {
@@ -69,12 +67,6 @@ std::string STypesToString() {
         return absl::StrFormat("%s", STypeForImpl<Arg>);
     }
 }
-
-//
-// Unpacked chain types structs and helpers.
-//   Note that unpacked types are tuples to enable further templating extensions based on
-//   typing via something like std::get<const Extension*> in templated functions.
-//
 
 // Typelist type used to further add extensions to chain roots when they are not in the json.
 template <typename... Exts>
@@ -93,25 +85,6 @@ template <typename... Additionals, typename... Ts>
 struct UnpackedChain<AdditionalExtensionsList<Additionals...>, Ts...> {
     using Type = std::tuple<Ts..., Additionals...>;
 };
-
-// Template function that returns a string of the non-nullptr STypes from an unpacked chain.
-template <typename Unpacked>
-std::string UnpackedChainToString(const Unpacked& unpacked) {
-    std::string result = "( ";
-    std::apply(
-        [&](const auto*... args) {
-            (([&](const auto* arg) {
-                if (arg != nullptr) {
-                    // reinterpret_cast because this chained struct might be forward-declared
-                    // without a definition. The definition may only be available on a
-                    // particular backend.
-                    const auto* chainedStruct = reinterpret_cast<const wgpu::ChainedStruct*>(arg);
-                    result += absl::StrFormat("%s, ", chainedStruct->sType);
-                }
-            }(args)), ...);}, unpacked);
-    result += " )";
-    return result;
-}
 
 }  // namespace detail
 
@@ -220,35 +193,55 @@ MaybeError ValidateSingleSType(const ChainedStructOut* chain, T sType, Args... s
     return ValidateSingleSTypeInner(chain, sType, sTypes...);
 }
 
-// Template type to get root type from the unpacked chain and vice-versa.
-template <typename Unpacked>
-struct RootTypeFor;
-template <typename Root>
-struct UnpackedTypeFor;
-
 }  // namespace {{native_namespace}}
 
 // Include specializations before declaring types for ordering purposes.
 #include "{{native_dir}}/ChainUtilsImpl.inl"
 
 namespace {{native_namespace}} {
+namespace detail {
+
+// Template type to get the unpacked chain type from the root type.
+template <typename Root>
+struct UnpackedTypeFor;
+
+// Template for extensible structures typing.
+enum class Extensibility { In, Out };
+template <typename T>
+inline Extensibility ExtensibilityFor;
 
 {% for type in by_category["structure"] %}
+    {% set T = as_cppType(type.name) %}
     {% if type.extensible == "in" %}
-        {% set unpackedChain = "Unpacked" + as_cppType(type.name) + "Chain" %}
-        using {{unpackedChain}} = detail::UnpackedChain<
-            detail::AdditionalExtensions<{{as_cppType(type.name)}}>::List{{ "," if len(type.extensions) != 0 else ""}}
-            {% for extension in type.extensions %}
-                const {{as_cppType(extension.name)}}*{{ "," if not loop.last else "" }}
-            {% endfor %}
-        >::Type;
         template <>
-        struct UnpackedTypeFor<{{as_cppType(type.name)}}> {
-            using Type = {{unpackedChain}};
+        struct UnpackedTypeFor<{{T}}> {
+            using Type = UnpackedChain<
+                AdditionalExtensions<{{T}}>::List
+                {% for extension in type.extensions %}
+                    , const {{as_cppType(extension.name)}}*
+                {% endfor %}
+            >::Type;
         };
-        ResultOrError<{{unpackedChain}}> ValidateAndUnpackChain(const {{as_cppType(type.name)}}* chain);
+        template <>
+        constexpr inline Extensibility ExtensibilityFor<{{T}}> = Extensibility::In;
+
+    {% elif type.extensible == "out" %}
+        template <>
+        struct UnpackedTypeFor<{{T}}> {
+            using Type = UnpackedChain<
+                AdditionalExtensions<{{T}}>::List
+                {% for extension in type.extensions %}
+                    , {{as_cppType(extension.name)}}*
+                {% endfor %}
+            >::Type;
+        };
+        template <>
+        constexpr inline Extensibility ExtensibilityFor<{{T}}> = Extensibility::Out;
+
     {% endif %}
 {% endfor %}
+
+}  // namespace detail
 
 }  // namespace {{native_namespace}}
 

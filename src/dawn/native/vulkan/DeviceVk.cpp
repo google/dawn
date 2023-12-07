@@ -226,20 +226,18 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedSharedTextureMemoryDescriptorChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+    Unpacked<SharedTextureMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
-    DAWN_TRY_ASSIGN(
-        type, ValidateBranches<BranchList<Branch<SharedTextureMemoryDmaBufDescriptor>>>(unpacked));
+    DAWN_TRY_ASSIGN(type, unpacked.ValidateBranches<Branch<SharedTextureMemoryDmaBufDescriptor>>());
 
     switch (type) {
         case wgpu::SType::SharedTextureMemoryDmaBufDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryDmaBuf), "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryDmaBuf);
-            return SharedTextureMemory::Create(
-                this, descriptor->label,
-                std::get<const SharedTextureMemoryDmaBufDescriptor*>(unpacked));
+            return SharedTextureMemory::Create(this, descriptor->label,
+                                               unpacked.Get<SharedTextureMemoryDmaBufDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
@@ -247,15 +245,14 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     const SharedFenceDescriptor* descriptor) {
-    UnpackedSharedFenceDescriptorChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+    Unpacked<SharedFenceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
-        type,
-        (ValidateBranches<BranchList<Branch<SharedFenceVkSemaphoreZirconHandleDescriptor>,
-                                     Branch<SharedFenceVkSemaphoreSyncFDDescriptor>,
-                                     Branch<SharedFenceVkSemaphoreOpaqueFDDescriptor>>>(unpacked)));
+        type, (unpacked.ValidateBranches<Branch<SharedFenceVkSemaphoreZirconHandleDescriptor>,
+                                         Branch<SharedFenceVkSemaphoreSyncFDDescriptor>,
+                                         Branch<SharedFenceVkSemaphoreOpaqueFDDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedFenceVkSemaphoreZirconHandleDescriptor:
@@ -264,20 +261,18 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
                             wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
             return SharedFence::Create(
                 this, descriptor->label,
-                std::get<const SharedFenceVkSemaphoreZirconHandleDescriptor*>(unpacked));
+                unpacked.Get<SharedFenceVkSemaphoreZirconHandleDescriptor>());
         case wgpu::SType::SharedFenceVkSemaphoreSyncFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceVkSemaphoreSyncFD),
                             "%s is not enabled.", wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD);
-            return SharedFence::Create(
-                this, descriptor->label,
-                std::get<const SharedFenceVkSemaphoreSyncFDDescriptor*>(unpacked));
+            return SharedFence::Create(this, descriptor->label,
+                                       unpacked.Get<SharedFenceVkSemaphoreSyncFDDescriptor>());
         case wgpu::SType::SharedFenceVkSemaphoreOpaqueFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD),
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD);
-            return SharedFence::Create(
-                this, descriptor->label,
-                std::get<const SharedFenceVkSemaphoreOpaqueFDDescriptor*>(unpacked));
+            return SharedFence::Create(this, descriptor->label,
+                                       unpacked.Get<SharedFenceVkSemaphoreOpaqueFDDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }

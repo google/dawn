@@ -215,12 +215,12 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
 };
 
 MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor) {
-    UnpackedBufferDescriptorChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+    Unpacked<BufferDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     DAWN_TRY(ValidateBufferUsage(descriptor->usage));
 
-    if (const auto* hostMappedDesc = std::get<const BufferHostMappedPointer*>(unpacked)) {
+    if (const auto* hostMappedDesc = unpacked.Get<BufferHostMappedPointer>()) {
         // TODO(crbug.com/dawn/2018): Properly expose this limit.
         uint32_t requiredAlignment = 4096;
         if (device->GetAdapter()->GetPhysicalDevice()->GetBackendType() ==

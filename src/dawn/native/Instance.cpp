@@ -206,15 +206,15 @@ void InstanceBase::WillDropLastExternalRef() {
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
-    UnpackedInstanceDescriptorChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+    Unpacked<InstanceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());
 
     // Process DawnInstanceDescriptor
-    if (const auto* dawnDesc = std::get<const DawnInstanceDescriptor*>(unpacked)) {
+    if (const auto* dawnDesc = unpacked.Get<DawnInstanceDescriptor>()) {
         for (uint32_t i = 0; i < dawnDesc->additionalRuntimeSearchPathsCount; ++i) {
             mRuntimeSearchPaths.push_back(dawnDesc->additionalRuntimeSearchPaths[i]);
         }
@@ -233,7 +233,7 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
 
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     DAWN_TRY(mEventManager.Initialize(descriptor));
-    GatherWGSLFeatures(std::get<const DawnWGSLBlocklist*>(unpacked));
+    GatherWGSLFeatures(unpacked.Get<DawnWGSLBlocklist>());
 
     return {};
 }

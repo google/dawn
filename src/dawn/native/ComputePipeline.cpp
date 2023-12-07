@@ -36,10 +36,9 @@ namespace dawn::native {
 
 MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor) {
-    UnpackedComputePipelineDescriptorChain unpackedChain;
-    DAWN_TRY_ASSIGN(unpackedChain, ValidateAndUnpackChain(descriptor));
-    const auto* fullSubgroupsOption =
-        std::get<const DawnComputePipelineFullSubgroups*>(unpackedChain);
+    Unpacked<ComputePipelineDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    const auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
     DAWN_INVALID_IF(
         (fullSubgroupsOption && !device->HasFeature(Feature::ChromiumExperimentalSubgroups)),
         "DawnComputePipelineFullSubgroups is used without %s enabled.",

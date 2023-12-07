@@ -1004,26 +1004,26 @@ class TintSource {
     tint::Source::File file;
 };
 
-// A WGSL (or SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V options
-// descriptor is allowed when using SPIR-V.
-#if TINT_BUILD_SPV_READER
-using ShaderModuleDescriptorBranches =
-    BranchList<Branch<ShaderModuleWGSLDescriptor>,
-               Branch<ShaderModuleSPIRVDescriptor, DawnShaderModuleSPIRVOptionsDescriptor>>;
-#else
-using ShaderModuleDescriptorBranches = BranchList<Branch<ShaderModuleWGSLDescriptor>>;
-#endif
-
 MaybeError ValidateAndParseShaderModule(DeviceBase* device,
                                         const ShaderModuleDescriptor* descriptor,
                                         ShaderModuleParseResult* parseResult,
                                         OwnedCompilationMessages* outMessages) {
     DAWN_ASSERT(parseResult != nullptr);
 
-    UnpackedShaderModuleDescriptorChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+    Unpacked<ShaderModuleDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     wgpu::SType moduleType;
-    DAWN_TRY_ASSIGN(moduleType, (ValidateBranches<ShaderModuleDescriptorBranches>(unpacked)));
+    // A WGSL (or SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V options
+// descriptor is allowed when using SPIR-V.
+#if TINT_BUILD_SPV_READER
+    DAWN_TRY_ASSIGN(
+        moduleType,
+        (unpacked.ValidateBranches<
+            Branch<ShaderModuleWGSLDescriptor>,
+            Branch<ShaderModuleSPIRVDescriptor, DawnShaderModuleSPIRVOptionsDescriptor>>()));
+#else
+    DAWN_TRY_ASSIGN(moduleType, (unpacked.ValidateBranches<Branch<ShaderModuleWGSLDescriptor>>()));
+#endif
     DAWN_ASSERT(moduleType != wgpu::SType::Invalid);
 
     ScopedTintICEHandler scopedICEHandler(device);
@@ -1040,9 +1040,8 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         case wgpu::SType::ShaderModuleSPIRVDescriptor: {
             DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowSpirv),
                             "SPIR-V is disallowed.");
-            const auto* spirvDesc = std::get<const ShaderModuleSPIRVDescriptor*>(unpacked);
-            const auto* spirvOptions =
-                std::get<const DawnShaderModuleSPIRVOptionsDescriptor*>(unpacked);
+            const auto* spirvDesc = unpacked.Get<ShaderModuleSPIRVDescriptor>();
+            const auto* spirvOptions = unpacked.Get<DawnShaderModuleSPIRVOptionsDescriptor>();
 
             // TODO(dawn:2033): Avoid unnecessary copies of the SPIR-V code.
             std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
@@ -1060,7 +1059,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         }
 #endif  // TINT_BUILD_SPV_READER
         case wgpu::SType::ShaderModuleWGSLDescriptor: {
-            wgslDesc = std::get<const ShaderModuleWGSLDescriptor*>(unpacked);
+            wgslDesc = unpacked.Get<ShaderModuleWGSLDescriptor>();
             break;
         }
         default:

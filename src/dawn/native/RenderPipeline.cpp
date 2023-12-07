@@ -317,10 +317,9 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
         descriptor->format, wgpu::CompareFunction::Undefined, descriptor->depthWriteEnabled,
         descriptor->stencilFront.depthFailOp, descriptor->stencilBack.depthFailOp);
 
-    UnpackedDepthStencilStateChain unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
-    if (const auto* depthWriteDefined =
-            std::get<const DepthStencilStateDepthWriteDefinedDawn*>(unpacked)) {
+    Unpacked<DepthStencilState> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (const auto* depthWriteDefined = unpacked.Get<DepthStencilStateDepthWriteDefinedDawn>()) {
         DAWN_INVALID_IF(
             format->HasDepth() && !depthWriteDefined->depthWriteDefined,
             "Depth stencil format (%s) has a depth aspect and depthWriteEnabled is undefined.",
