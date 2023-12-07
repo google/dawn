@@ -268,8 +268,7 @@ GLenum RenderPipeline::GetGLPrimitiveTopology() const {
     return mGlPrimitiveTopology;
 }
 
-ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>
-RenderPipeline::GetAttributesUsingVertexBuffer(VertexBufferSlot slot) const {
+VertexAttributeMask RenderPipeline::GetAttributesUsingVertexBuffer(VertexBufferSlot slot) const {
     DAWN_ASSERT(!IsError());
     return mAttributesUsingVertexBuffer[slot];
 }

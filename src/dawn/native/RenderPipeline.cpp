@@ -93,12 +93,11 @@ const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
 
 // Helper functions
 namespace {
-MaybeError ValidateVertexAttribute(
-    DeviceBase* device,
-    const VertexAttribute* attribute,
-    const EntryPointMetadata& metadata,
-    uint64_t vertexBufferStride,
-    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
+MaybeError ValidateVertexAttribute(DeviceBase* device,
+                                   const VertexAttribute* attribute,
+                                   const EntryPointMetadata& metadata,
+                                   uint64_t vertexBufferStride,
+                                   VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexFormat(attribute->format));
     const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
 
@@ -147,11 +146,10 @@ MaybeError ValidateVertexAttribute(
     return {};
 }
 
-MaybeError ValidateVertexBufferLayout(
-    DeviceBase* device,
-    const VertexBufferLayout* buffer,
-    const EntryPointMetadata& metadata,
-    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
+MaybeError ValidateVertexBufferLayout(DeviceBase* device,
+                                      const VertexBufferLayout* buffer,
+                                      const EntryPointMetadata& metadata,
+                                      VertexAttributeMask* attributesSetMask) {
     DAWN_TRY(ValidateVertexStepMode(buffer->stepMode));
     DAWN_INVALID_IF(buffer->arrayStride > kMaxVertexBufferArrayStride,
                     "Vertex buffer arrayStride (%u) is larger than the maximum array stride (%u).",
@@ -206,7 +204,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
             limits.v1.maxInterStageShaderComponents - 1, primitiveTopology);
     }
 
-    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> attributesSetMask;
+    VertexAttributeMask attributesSetMask;
     uint32_t totalAttributesNum = 0;
     for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
         DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i], vertexMetadata,
@@ -236,7 +234,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     // Validate that attributes used by the VertexState are in the shader using bitmask operations
     // but try to be helpful by finding one missing attribute to surface in the error message
     if (!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask)) {
-        const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> missingAttributes =
+        const VertexAttributeMask missingAttributes =
             vertexMetadata.usedVertexInputs & ~attributesSetMask;
         DAWN_ASSERT(missingAttributes.any());
 
@@ -1004,8 +1002,7 @@ ObjectType RenderPipelineBase::GetType() const {
     return ObjectType::RenderPipeline;
 }
 
-const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
-RenderPipelineBase::GetAttributeLocationsUsed() const {
+const VertexAttributeMask& RenderPipelineBase::GetAttributeLocationsUsed() const {
     DAWN_ASSERT(!IsError());
     return mAttributeLocationsUsed;
 }

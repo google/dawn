@@ -98,8 +98,7 @@ class RenderPipelineBase : public PipelineBase,
 
     ObjectType GetType() const override;
 
-    const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>& GetAttributeLocationsUsed()
-        const;
+    const VertexAttributeMask& GetAttributeLocationsUsed() const;
     const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
     const VertexBufferMask& GetVertexBuffersUsed() const;
     const VertexBufferMask& GetVertexBuffersUsedAsVertexBuffer() const;
@@ -149,8 +148,8 @@ class RenderPipelineBase : public PipelineBase,
 
     // Vertex state
     uint32_t mVertexBufferCount;
-    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> mAttributeLocationsUsed;
-    ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+    VertexAttributeMask mAttributeLocationsUsed;
+    PerVertexAttribute<VertexAttributeInfo> mAttributeInfos;
     VertexBufferMask mVertexBuffersUsed;
     VertexBufferMask mVertexBuffersUsedAsVertexBuffer;
     VertexBufferMask mVertexBuffersUsedAsInstanceBuffer;

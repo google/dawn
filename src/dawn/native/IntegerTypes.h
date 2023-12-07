@@ -80,9 +80,14 @@ using VertexBufferMask = ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>;
 template <typename Value>
 using PerVertexBuffer = ityp::array<VertexBufferSlot, Value, kMaxVertexBuffers>;
 
+// Vertex attribute locations represent the "shaderLocation" in wgpu::VertexAttribute.
 using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
 constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
     VertexAttributeLocation(kMaxVertexAttributes);
+
+using VertexAttributeMask = ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>;
+template <typename Value>
+using PerVertexAttribute = ityp::array<VertexAttributeLocation, Value, kMaxVertexAttributes>;
 
 // Serials are 64bit integers that are incremented by one each time to produce unique values.
 // Some serials (like queue serials) are compared numerically to know which one is before

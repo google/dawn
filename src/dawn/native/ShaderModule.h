@@ -214,9 +214,8 @@ struct EntryPointMetadata {
     std::vector<SamplerTexturePair> samplerTexturePairs;
 
     // The set of vertex attributes this entryPoint uses.
-    ityp::array<VertexAttributeLocation, VertexFormatBaseType, kMaxVertexAttributes>
-        vertexInputBaseTypes;
-    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> usedVertexInputs;
+    PerVertexAttribute<VertexFormatBaseType> vertexInputBaseTypes;
+    VertexAttributeMask usedVertexInputs;
 
     // An array to record the basic types (float, int and uint) of the fragment shader framebuffer
     // input/outputs (inputs being "framebuffer fetch").
