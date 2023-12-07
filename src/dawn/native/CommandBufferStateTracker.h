@@ -92,8 +92,8 @@ class CommandBufferStateTracker {
 
     ValidationAspects mAspects;
 
-    ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
-    ityp::array<BindGroupIndex, std::vector<uint32_t>, kMaxBindGroups> mDynamicOffsets = {};
+    PerBindGroup<BindGroupBase*> mBindgroups = {};
+    PerBindGroup<std::vector<uint32_t>> mDynamicOffsets = {};
 
     VertexBufferMask mVertexBuffersUsed;
     PerVertexBuffer<uint64_t> mVertexBufferSizes = {};

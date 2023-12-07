@@ -100,7 +100,7 @@ void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& 
 MaybeError ValidateBindingCounts(const CombinedLimits& limits, const BindingCounts& bindingCounts);
 
 // For buffer size validation
-using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;
+using RequiredBufferSizes = PerBindGroup<std::vector<uint64_t>>;
 
 }  // namespace dawn::native
 

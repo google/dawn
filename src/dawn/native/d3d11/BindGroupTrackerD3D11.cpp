@@ -161,7 +161,7 @@ MaybeError BindGroupTracker::Apply() {
     if (mIsRenderPass) {
         // As D3d11 requires to bind all UAVs slots at the same time for pixel shaders, we record
         // all UAV slot assignments in the bind groups, and then bind them all together.
-        const BindGroupLayoutMask uavBindGroups =
+        const BindGroupMask uavBindGroups =
             ToBackend(mPipelineLayout)->GetUAVBindGroupLayoutsMask();
         std::vector<ComPtr<ID3D11UnorderedAccessView>> uavsInBindGroup;
         for (BindGroupIndex index : IterateBitSet(uavBindGroups)) {
@@ -249,9 +249,9 @@ MaybeError BindGroupTracker::Apply() {
             D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
             uavSlotCount - views.size(), views.size(), views.data(), nullptr);
     } else {
-        BindGroupLayoutMask inheritedGroups =
+        BindGroupMask inheritedGroups =
             mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
-        BindGroupLayoutMask previousGroups = mLastAppliedPipelineLayout->GetBindGroupLayoutsMask();
+        BindGroupMask previousGroups = mLastAppliedPipelineLayout->GetBindGroupLayoutsMask();
 
         // To avoid UAV / SRV conflicts with bindings in previously bind groups, we unset the bind
         // groups that aren't reused by the current pipeline.
@@ -261,7 +261,7 @@ MaybeError BindGroupTracker::Apply() {
         //
         // Note: WebGPU API guarantees that resources are not used both as UAV and SRV in the same
         // render pass. So we don't need to do this inside render passes.
-        BindGroupLayoutMask groupsToUnset = previousGroups & (~inheritedGroups | mDirtyBindGroups);
+        BindGroupMask groupsToUnset = previousGroups & (~inheritedGroups | mDirtyBindGroups);
         for (BindGroupIndex index : IterateBitSet(groupsToUnset)) {
             UnApplyBindGroup(index);
         }

@@ -31,6 +31,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"
@@ -230,12 +231,11 @@ PipelineBase::PipelineBase(DeviceBase* device,
         if (isFirstStage) {
             mMinBufferSizes = std::move(stageMinBufferSizes);
         } else {
-            for (BindGroupIndex group(0); group < mMinBufferSizes.size(); ++group) {
-                DAWN_ASSERT(stageMinBufferSizes[group].size() == mMinBufferSizes[group].size());
+            for (auto [group, minBufferSize] : Enumerate(mMinBufferSizes)) {
+                DAWN_ASSERT(stageMinBufferSizes[group].size() == minBufferSize.size());
 
                 for (size_t i = 0; i < stageMinBufferSizes[group].size(); ++i) {
-                    mMinBufferSizes[group][i] =
-                        std::max(mMinBufferSizes[group][i], stageMinBufferSizes[group][i]);
+                    minBufferSize[i] = std::max(minBufferSize[i], stageMinBufferSizes[group][i]);
                 }
             }
         }

@@ -33,7 +33,9 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Enumerator.h"
 #include "dawn/common/Numeric.h"
+#include "dawn/common/Range.h"
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/ChainUtils.h"
@@ -110,10 +112,11 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label) {
     DAWN_ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
-    for (BindGroupIndex group(0);
-         group < BindGroupIndex(checked_cast<uint32_t>(descriptor->bindGroupLayoutCount));
-         ++group) {
-        mBindGroupLayouts[group] = descriptor->bindGroupLayouts[static_cast<uint32_t>(group)];
+
+    auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
+                                                      descriptor->bindGroupLayoutCount);
+    for (auto [group, bgl] : Enumerate(bgls)) {
+        mBindGroupLayouts[group] = bgl;
         mMask.set(group);
     }
 
@@ -310,8 +313,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         device->GetNextPipelineCompatibilityToken();
 
     // Data which BindGroupLayoutDescriptor will point to for creation
-    ityp::array<BindGroupIndex, std::map<BindingNumber, BindGroupLayoutEntry>, kMaxBindGroups>
-        entryData = {};
+    PerBindGroup<std::map<BindingNumber, BindGroupLayoutEntry>> entryData = {};
 
     // External texture binding layouts are chained structs that are set as a pointer within
     // the bind group layout entry. We declare an entry here so that it can be used when needed
@@ -329,8 +331,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             metadata.usesPixelLocal,
             "Implicit layouts are not supported for entry-points using `pixel_local` blocks.");
 
-        for (BindGroupIndex group(0); group < metadata.bindings.size(); ++group) {
-            for (const auto& [bindingNumber, shaderBinding] : metadata.bindings[group]) {
+        for (auto [group, groupBindings] : Enumerate(metadata.bindings)) {
+            for (const auto& [bindingNumber, shaderBinding] : groupBindings) {
                 // Create the BindGroupLayoutEntry
                 BindGroupLayoutEntry entry =
                     ConvertMetadataToEntry(shaderBinding, &externalTextureBindingLayout);
@@ -363,18 +365,18 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     // TODO(cwallez@chromium.org): remove this when Dawn knows that empty and null BGL are the
     // same.
     BindGroupIndex pipelineBGLCount = BindGroupIndex(0);
-    ityp::array<BindGroupIndex, Ref<BindGroupLayoutBase>, kMaxBindGroups> bindGroupLayouts = {};
-    for (BindGroupIndex group(0); group < kMaxBindGroupsTyped; ++group) {
+    PerBindGroup<Ref<BindGroupLayoutBase>> bindGroupLayouts = {};
+    for (auto group : Range(kMaxBindGroupsTyped)) {
         DAWN_TRY_ASSIGN(bindGroupLayouts[group],
                         CreateBGL(device, entryData[group], pipelineCompatibilityToken));
         if (entryData[group].size() != 0) {
-            pipelineBGLCount = group + BindGroupIndex(1);
+            pipelineBGLCount = ityp::PlusOne(group);
         }
     }
 
     // Create the deduced pipeline layout, validating if it is valid.
-    ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bgls = {};
-    for (BindGroupIndex group(0); group < pipelineBGLCount; ++group) {
+    PerBindGroup<BindGroupLayoutBase*> bgls = {};
+    for (auto group : Range(pipelineBGLCount)) {
         bgls[group] = bindGroupLayouts[group].Get();
     }
 
@@ -430,7 +432,7 @@ BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupInd
     return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
 }
 
-const BindGroupLayoutMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {
+const BindGroupMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {
     DAWN_ASSERT(!IsError());
     return mMask;
 }
@@ -452,7 +454,7 @@ bool PipelineLayoutBase::HasAnyStorageAttachments() const {
     return false;
 }
 
-BindGroupLayoutMask PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
+BindGroupMask PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
     DAWN_ASSERT(!IsError());
     return {(1 << static_cast<uint32_t>(GroupsInheritUpTo(other))) - 1u};
 }

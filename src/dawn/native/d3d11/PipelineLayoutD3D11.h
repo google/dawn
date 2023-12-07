@@ -62,15 +62,14 @@ class PipelineLayout final : public PipelineLayoutBase {
     static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
                                                      const PipelineLayoutDescriptor* descriptor);
 
-    using BindingIndexInfo =
-        ityp::array<BindGroupIndex, ityp::vector<BindingIndex, uint32_t>, kMaxBindGroups>;
+    using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, uint32_t>>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
 
     uint32_t GetUnusedUAVBindingCount() const { return mUnusedUAVBindingCount; }
     uint32_t GetTotalUAVBindingCount() const { return mTotalUAVBindingCount; }
 
     // Get the bind groups that use one or more UAV slots.
-    const BindGroupLayoutMask& GetUAVBindGroupLayoutsMask() const;
+    const BindGroupMask& GetUAVBindGroupLayoutsMask() const;
 
   private:
     using PipelineLayoutBase::PipelineLayoutBase;
@@ -83,7 +82,7 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     uint32_t mUnusedUAVBindingCount = 0u;
     uint32_t mTotalUAVBindingCount = 0u;
-    BindGroupLayoutMask mUAVBindGroups = 0;
+    BindGroupMask mUAVBindGroups = 0;
 };
 
 }  // namespace dawn::native::d3d11

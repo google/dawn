@@ -46,8 +46,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     // GL backend does not support separate bind group index
     // BindingIndexInfo is a map from BindingPoint(group, binding) to a flattened GLuint binding
     // number.
-    using BindingIndexInfo =
-        ityp::array<BindGroupIndex, ityp::vector<BindingIndex, GLuint>, kMaxBindGroups>;
+    using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, GLuint>>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
 
     GLuint GetTextureUnitsUsed() const;

@@ -54,9 +54,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDescriptor* descriptor);
 
     using BindingIndexInfo =
-        ityp::array<BindGroupIndex,
-                    ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>,
-                    kMaxBindGroups>;
+        PerBindGroup<ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>>;
     const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
     // The number of Metal vertex stage buffers used for the whole pipeline layout.

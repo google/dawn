@@ -89,7 +89,7 @@ class BindGroupTrackerBase {
         // the first |k| matching bind groups may be inherited.
         if (CanInheritBindGroups && mLastAppliedPipelineLayout != nullptr) {
             // Dirty bind groups that cannot be inherited.
-            BindGroupLayoutMask dirtiedGroups =
+            BindGroupMask dirtiedGroups =
                 ~mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
 
             mDirtyBindGroups |= dirtiedGroups;
@@ -116,12 +116,11 @@ class BindGroupTrackerBase {
         mLastAppliedPipelineLayout = mPipelineLayout;
     }
 
-    BindGroupLayoutMask mDirtyBindGroups = 0;
-    BindGroupLayoutMask mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
-    BindGroupLayoutMask mBindGroupLayoutsMask = 0;
-    ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindGroups = {};
-    ityp::array<BindGroupIndex, ityp::vector<BindingIndex, DynamicOffset>, kMaxBindGroups>
-        mDynamicOffsets = {};
+    BindGroupMask mDirtyBindGroups = 0;
+    BindGroupMask mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
+    BindGroupMask mBindGroupLayoutsMask = 0;
+    PerBindGroup<BindGroupBase*> mBindGroups = {};
+    PerBindGroup<ityp::vector<BindingIndex, DynamicOffset>> mDynamicOffsets = {};
 
     // |mPipelineLayout| is the current pipeline layout set on the command buffer.
     // |mLastAppliedPipelineLayout| is the last pipeline layout for which we applied changes

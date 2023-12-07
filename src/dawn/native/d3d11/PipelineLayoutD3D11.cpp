@@ -116,7 +116,7 @@ const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() co
     return mIndexInfo;
 }
 
-const BindGroupLayoutMask& PipelineLayout::GetUAVBindGroupLayoutsMask() const {
+const BindGroupMask& PipelineLayout::GetUAVBindGroupLayoutsMask() const {
     return mUAVBindGroups;
 }
 

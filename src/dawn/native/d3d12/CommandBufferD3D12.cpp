@@ -616,8 +616,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
 
     bool mInCompute = false;
 
-    ityp::array<BindGroupIndex, D3D12_GPU_DESCRIPTOR_HANDLE, kMaxBindGroups>
-        mBoundRootSamplerTables = {};
+    PerBindGroup<D3D12_GPU_DESCRIPTOR_HANDLE> mBoundRootSamplerTables = {};
 
     MutexProtected<ShaderVisibleDescriptorAllocator>& mViewAllocator;
     MutexProtected<ShaderVisibleDescriptorAllocator>& mSamplerAllocator;

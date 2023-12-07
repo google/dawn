@@ -58,8 +58,14 @@ constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindin
 // Binding numbers get mapped to a packed range of indices
 using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
+// Bind group indinces represent the index in the SetBindGroup, the index in
+// wgpu::PipelineLayoutDescriptor::bindGroupLayouts and friends.
 using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
 constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
+
+using BindGroupMask = ityp::bitset<BindGroupIndex, kMaxBindGroups>;
+template <typename Value>
+using PerBindGroup = ityp::array<BindGroupIndex, Value, kMaxBindGroups>;
 
 // Color attachment indices represent the index in the wgpu::FragmentState::targets array, the
 // wgpu::RenderPassDescriptor::colorAttachments arry and other similar arrays.

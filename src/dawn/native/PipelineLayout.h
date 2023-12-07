@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 
-#include "dawn/common/Constants.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -41,8 +40,8 @@
 #include "dawn/native/CachedObject.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
@@ -51,9 +50,6 @@ MaybeError ValidatePipelineLayoutDescriptor(
     DeviceBase*,
     const PipelineLayoutDescriptor* descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken = PipelineCompatibilityToken(0));
-
-using BindGroupLayoutArray = ityp::array<BindGroupIndex, Ref<BindGroupLayoutBase>, kMaxBindGroups>;
-using BindGroupLayoutMask = ityp::bitset<BindGroupIndex, kMaxBindGroups>;
 
 struct StageAndDescriptor {
     StageAndDescriptor(SingleShaderStage shaderStage,
@@ -90,14 +86,14 @@ class PipelineLayoutBase : public ApiObjectBase,
     BindGroupLayoutBase* GetFrontendBindGroupLayout(BindGroupIndex group);
     const BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group) const;
     BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group);
-    const BindGroupLayoutMask& GetBindGroupLayoutsMask() const;
+    const BindGroupMask& GetBindGroupLayoutsMask() const;
     bool HasPixelLocalStorage() const;
     const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
     bool HasAnyStorageAttachments() const;
 
     // Utility functions to compute inherited bind groups.
     // Returns the inherited bind groups as a mask.
-    BindGroupLayoutMask InheritedGroupsMask(const PipelineLayoutBase* other) const;
+    BindGroupMask InheritedGroupsMask(const PipelineLayoutBase* other) const;
 
     // Returns the index of the first incompatible bind group in the range
     // [0, kMaxBindGroups]
@@ -114,8 +110,8 @@ class PipelineLayoutBase : public ApiObjectBase,
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
     void DestroyImpl() override;
 
-    BindGroupLayoutArray mBindGroupLayouts;
-    BindGroupLayoutMask mMask;
+    PerBindGroup<Ref<BindGroupLayoutBase>> mBindGroupLayouts;
+    BindGroupMask mMask;
     bool mHasPLS = false;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
 };

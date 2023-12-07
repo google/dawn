@@ -27,6 +27,7 @@
 
 #include "dawn/native/ComputePassEncoder.h"
 
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
@@ -491,7 +492,7 @@ void ComputePassEncoder::RestoreCommandBufferState(CommandBufferStateTracker sta
     if (state.HasPipeline()) {
         APISetPipeline(state.GetComputePipeline());
     }
-    for (BindGroupIndex i(0); i < kMaxBindGroupsTyped; ++i) {
+    for (auto i : Range(kMaxBindGroupsTyped)) {
         BindGroupBase* bg = state.GetBindGroup(i);
         if (bg != nullptr) {
             const std::vector<uint32_t>& offsets = state.GetDynamicOffsets(i);
