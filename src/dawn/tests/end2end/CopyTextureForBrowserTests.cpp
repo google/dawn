@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -245,9 +246,9 @@ class CopyTextureForBrowserTests : public Parent {
             0,
             0,  // uvec2, subrect copy dst origin
             0,
-            0,  // uvec2, subrect copy size
-            0,  // srcAlphaMode, wgpu::AlphaMode::Premultiplied
-            0   // dstAlphaMode, wgpu::AlphaMode::Premultiplied
+            0,                                                      // uvec2, subrect copy size
+            static_cast<uint32_t>(wgpu::AlphaMode::Premultiplied),  // srcAlphaMode
+            static_cast<uint32_t>(wgpu::AlphaMode::Premultiplied),  // dstAlphaMode
         };
 
         wgpu::BufferDescriptor uniformBufferDesc = {};
@@ -260,7 +261,8 @@ class CopyTextureForBrowserTests : public Parent {
     // shader) instead of CPU after executing CopyTextureForBrowser() to avoid the errors caused by
     // comparing a value generated on CPU to the one generated on GPU.
     wgpu::ComputePipeline MakeTestPipeline() {
-        wgpu::ShaderModule csModule = utils::CreateShaderModule(this->device, R"(
+        std::string shader =
+            R"(
             struct Uniforms {
                 dstTextureFlipY : u32,
                 channelCount    : u32,
@@ -311,9 +313,12 @@ class CopyTextureForBrowserTests : public Parent {
 
                     // Expect the dst texture channels should be all equal to alpha value
                     // after premultiply.
-                    let premultiplied = 0u;
-                    let unpremultiplied = 1u;
-                    let opaque = 2u;
+                    let premultiplied = )" +
+            std::to_string(static_cast<uint32_t>(wgpu::AlphaMode::Premultiplied)) + R"(u;
+                    let unpremultiplied = )" +
+            std::to_string(static_cast<uint32_t>(wgpu::AlphaMode::Unpremultiplied)) + R"(u;
+                    let opaque = )" +
+            std::to_string(static_cast<uint32_t>(wgpu::AlphaMode::Opaque)) + R"(u;
                     if (uniforms.srcAlphaMode == opaque) {
                         srcColor.a = 1.0;
                     }
@@ -361,7 +366,8 @@ class CopyTextureForBrowserTests : public Parent {
                     output.result[outputIndex] = 0u;
                 }
             }
-         )");
+         )";
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(this->device, shader.c_str());
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = csModule;
