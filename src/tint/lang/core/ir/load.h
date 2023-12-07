@@ -41,6 +41,9 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the from value
     static constexpr size_t kFromOperandOffset = 0;
 
+    /// Constructor (no results, no operands)
+    Load();
+
     /// Constructor (infers type)
     /// @param result the result value
     /// @param from the value being loaded from

@@ -229,5 +229,24 @@ TEST_F(IRBinaryRoundtripTest, UserCall) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Load) {
+    auto p = b.FunctionParam<ptr<function, f32, read_write>>("p");
+    auto* fn = b.Function("Function", ty.f32());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Load(p)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Store) {
+    auto p = b.FunctionParam<ptr<function, f32, read_write>>("p");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] {
+        b.Store(p, 42_f);
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

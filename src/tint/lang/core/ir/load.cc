@@ -36,6 +36,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Load);
 
 namespace tint::core::ir {
 
+Load::Load() {
+    flags_.Add(Flag::kSequenced);
+}
+
 Load::Load(InstructionResult* result, Value* from) {
     flags_.Add(Flag::kSequenced);
 

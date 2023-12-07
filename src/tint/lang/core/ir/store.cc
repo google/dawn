@@ -34,6 +34,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Store);
 
 namespace tint::core::ir {
 
+Store::Store() {
+    flags_.Add(Flag::kSequenced);
+}
+
 Store::Store(Value* to, Value* from) {
     flags_.Add(Flag::kSequenced);
 

@@ -44,6 +44,9 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 1;
 
+    /// Constructor (no results, no operands)
+    Store();
+
     /// Constructor
     /// @param to the value to store too
     /// @param from the value being stored from
