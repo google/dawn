@@ -39,11 +39,13 @@
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -142,6 +144,7 @@ struct Encoder {
             [&](const ir::Discard*) { return pb::InstructionKind::Discard; },      //
             [&](const ir::Let*) { return pb::InstructionKind::Let; },              //
             [&](const ir::Return*) { return pb::InstructionKind::Return; },        //
+            [&](const ir::Var*) { return pb::InstructionKind::Var; },              //
             TINT_ICE_ON_NO_MATCH);
         inst_out->set_kind(kind);
         for (auto* operand : inst_in->Operands()) {
@@ -171,6 +174,7 @@ struct Encoder {
                 [&](const core::type::F16*) { type_out.set_basic(pb::BasicType::f16); },
                 [&](const core::type::Vector* v) { VectorType(*type_out.mutable_vector(), v); },
                 [&](const core::type::Matrix* m) { MatrixType(*type_out.mutable_matrix(), m); },
+                [&](const core::type::Pointer* m) { PointerType(*type_out.mutable_pointer(), m); },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -187,6 +191,12 @@ struct Encoder {
         matrix_out.set_num_columns(matrix_in->columns());
         matrix_out.set_num_rows(matrix_in->rows());
         matrix_out.set_element_type(Type(matrix_in->type()));
+    }
+
+    void PointerType(pb::PointerType& pointer_out, const core::type::Pointer* pointer_in) {
+        pointer_out.set_address_space(AddressSpace(pointer_in->AddressSpace()));
+        pointer_out.set_store_type(Type(pointer_in->StoreType()));
+        pointer_out.set_access(Access(pointer_in->Access()));
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -280,6 +290,47 @@ struct Encoder {
         splat_out.set_type(Type(splat_in->type));
         splat_out.set_elements(ConstantValue(splat_in->el));
         splat_out.set_count(static_cast<uint32_t>(splat_in->count));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Enums
+    ////////////////////////////////////////////////////////////////////////////
+    pb::AddressSpace AddressSpace(core::AddressSpace in) {
+        switch (in) {
+            case core::AddressSpace::kFunction:
+                return pb::AddressSpace::function;
+            case core::AddressSpace::kHandle:
+                return pb::AddressSpace::handle;
+            case core::AddressSpace::kPixelLocal:
+                return pb::AddressSpace::pixel_local;
+            case core::AddressSpace::kPrivate:
+                return pb::AddressSpace::private_;
+            case core::AddressSpace::kPushConstant:
+                return pb::AddressSpace::push_constant;
+            case core::AddressSpace::kStorage:
+                return pb::AddressSpace::storage;
+            case core::AddressSpace::kUniform:
+                return pb::AddressSpace::uniform;
+            case core::AddressSpace::kWorkgroup:
+                return pb::AddressSpace::workgroup;
+            default:
+                TINT_ICE() << "invalid AddressSpace: " << in;
+                return pb::AddressSpace::function;
+        }
+    }
+
+    pb::AccessControl Access(core::Access in) {
+        switch (in) {
+            case core::Access::kRead:
+                return pb::AccessControl::read;
+            case core::Access::kWrite:
+                return pb::AccessControl::write;
+            case core::Access::kReadWrite:
+                return pb::AccessControl::read_write;
+            default:
+                TINT_ICE() << "invalid Access: " << in;
+                return pb::AccessControl::read;
+        }
     }
 };
 

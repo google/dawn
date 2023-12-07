@@ -47,7 +47,8 @@ message Type {
         VectorType vector = 2;
         MatrixType matrix = 3;
         ArrayType array = 4;
-        uint32 atomic = 5;  // Module.types
+        PointerType pointer = 5;
+        uint32 atomic = 6;  // Module.types
         // TODO: textures, samplers
     }
 }
@@ -76,6 +77,12 @@ message MatrixType {
 message ArrayType {
     uint32 count = 1;
     uint32 element_type = 2;  // Module.types
+}
+
+message PointerType {
+    AddressSpace address_space = 1;
+    uint32 store_type = 2;  // Module.types
+    AccessControl access = 3;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,6 +188,27 @@ enum InstructionKind {
     Constructor = 4;
     Discard = 5;
     Let = 6;
-    Construct = 7;
-    Access = 8;
+    Var = 7;
+    Construct = 8;
+    Access = 9;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Enums
+////////////////////////////////////////////////////////////////////////////////
+enum AddressSpace {
+    function = 0;
+    handle = 1;
+    pixel_local = 2;
+    private = 3;
+    push_constant = 4;
+    storage = 5;
+    uniform = 6;
+    workgroup = 7;
+}
+
+enum AccessControl {
+    read = 0;
+    write = 1;
+    read_write = 2;
 }

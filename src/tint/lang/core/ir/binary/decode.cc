@@ -175,6 +175,9 @@ struct Decoder {
             case pb::InstructionKind::Access:
                 inst_out = mod_out_.instructions.Create<ir::Access>();
                 break;
+            case pb::InstructionKind::Var:
+                inst_out = mod_out_.instructions.Create<ir::Var>();
+                break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind();
                 break;
@@ -229,6 +232,13 @@ struct Decoder {
                 auto* el_ty = Type(matrix_in.element_type());
                 auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
                 return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
+            }
+            case pb::Type::KindCase::kPointer: {
+                auto& pointer_in = type_in.pointer();
+                auto address_space = AddressSpace(pointer_in.address_space());
+                auto* store_ty = Type(pointer_in.store_type());
+                auto access = Access(pointer_in.access());
+                return mod_out_.Types().ptr(address_space, store_ty, access);
             }
             case pb::Type::KindCase::kArray:
             case pb::Type::KindCase::kAtomic:
@@ -349,6 +359,47 @@ struct Decoder {
 
     const core::constant::Value* ConstantValue(uint32_t id) {
         return id > 0 ? constant_values_[id - 1] : nullptr;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Enums
+    ////////////////////////////////////////////////////////////////////////////
+    core::AddressSpace AddressSpace(pb::AddressSpace in) {
+        switch (in) {
+            case pb::AddressSpace::function:
+                return core::AddressSpace::kFunction;
+            case pb::AddressSpace::handle:
+                return core::AddressSpace::kHandle;
+            case pb::AddressSpace::pixel_local:
+                return core::AddressSpace::kPixelLocal;
+            case pb::AddressSpace::private_:
+                return core::AddressSpace::kPrivate;
+            case pb::AddressSpace::push_constant:
+                return core::AddressSpace::kPushConstant;
+            case pb::AddressSpace::storage:
+                return core::AddressSpace::kStorage;
+            case pb::AddressSpace::uniform:
+                return core::AddressSpace::kUniform;
+            case pb::AddressSpace::workgroup:
+                return core::AddressSpace::kWorkgroup;
+            default:
+                TINT_ICE() << "invalid AddressSpace: " << in;
+                return core::AddressSpace::kUndefined;
+        }
+    }
+
+    core::Access Access(pb::AccessControl in) {
+        switch (in) {
+            case pb::AccessControl::read:
+                return core::Access::kRead;
+            case pb::AccessControl::write:
+                return core::Access::kWrite;
+            case pb::AccessControl::read_write:
+                return core::Access::kReadWrite;
+            default:
+                TINT_ICE() << "invalid Access: " << in;
+                return core::Access::kUndefined;
+        }
     }
 };
 

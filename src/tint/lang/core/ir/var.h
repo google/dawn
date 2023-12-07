@@ -58,6 +58,9 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the initializer
     static constexpr size_t kInitializerOperandOffset = 0;
 
+    /// Constructor (no results, no operands)
+    Var();
+
     /// Constructor
     /// @param result the result value
     explicit Var(InstructionResult* result);

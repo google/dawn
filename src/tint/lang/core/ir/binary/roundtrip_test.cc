@@ -193,6 +193,15 @@ TEST_F(IRBinaryRoundtripTest, Let) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Var) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var<function>("Var", b.Constant(42_i));
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Access) {
     auto* fn = b.Function("Function", ty.f32());
     b.Append(fn->Block(),
