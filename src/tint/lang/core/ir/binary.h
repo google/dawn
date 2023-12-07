@@ -67,6 +67,9 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
     /// The offset in Operands() for the RHS
     static constexpr size_t kRhsOperandOffset = 1;
 
+    /// Constructor (no results, no operands)
+    Binary();
+
     /// Constructor
     /// @param result the result value
     /// @param op the binary operator
@@ -80,6 +83,9 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
 
     /// @returns the binary operator
     BinaryOp Op() const { return op_; }
+
+    /// @param op the new binary operator
+    void SetOp(BinaryOp op) { op_ = op; }
 
     /// @returns the left-hand-side value for the instruction
     Value* LHS() { return operands_[kLhsOperandOffset]; }
@@ -97,7 +103,7 @@ class Binary final : public Castable<Binary, OperandInstruction<2, 1>> {
     std::string FriendlyName() const override { return "binary"; }
 
   private:
-    BinaryOp op_;
+    BinaryOp op_ = BinaryOp::kAdd;
 };
 
 /// @param kind the enum value

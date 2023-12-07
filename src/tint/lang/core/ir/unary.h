@@ -47,6 +47,9 @@ class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
+    /// Constructor (no results, no operands)
+    Unary();
+
     /// Constructor
     /// @param result the result value
     /// @param op the unary operator
@@ -66,12 +69,25 @@ class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
     /// @returns the unary operator
     UnaryOp Op() const { return op_; }
 
+    /// @param op the new unary operator
+    void SetOp(UnaryOp op) { op_ = op; }
+
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "unary"; }
 
   private:
-    UnaryOp op_;
+    UnaryOp op_ = UnaryOp::kComplement;
 };
+
+/// @param kind the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(UnaryOp kind);
+
+/// Emits the name of the intrinsic type.
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, UnaryOp kind) {
+    return out << ToString(kind);
+}
 
 }  // namespace tint::core::ir
 

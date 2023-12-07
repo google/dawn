@@ -34,6 +34,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Binary);
 
 namespace tint::core::ir {
 
+Binary::Binary() = default;
+
 Binary::Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs) : op_(op) {
     AddOperand(Binary::kLhsOperandOffset, lhs);
     AddOperand(Binary::kRhsOperandOffset, rhs);

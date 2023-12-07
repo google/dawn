@@ -268,5 +268,22 @@ TEST_F(IRBinaryRoundtripTest, Store) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, UnaryOp) {
+    auto x = b.FunctionParam<bool>("x");
+    auto* fn = b.Function("Function", ty.bool_());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Not<bool>(x)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, BinaryOp) {
+    auto x = b.FunctionParam<f32>("x");
+    auto y = b.FunctionParam<f32>("y");
+    auto* fn = b.Function("Function", ty.f32());
+    fn->SetParams({x, y});
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Add<f32>(x, y)); });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

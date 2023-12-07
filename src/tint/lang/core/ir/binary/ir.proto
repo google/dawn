@@ -179,49 +179,53 @@ message Instruction {
     repeated uint32 operands = 1;  // Module.values
     repeated uint32 results = 2;   // Module.values
     oneof kind {
-        ReturnInstruction return = 3;
-        UnaryOpInstruction unary_op = 4;
-        BinaryOpInstruction binary_op = 5;
-        BuiltinInstruction builtin = 6;
-        ConstructorInstruction constructor = 7;
-        DiscardInstruction discard = 8;
-        LetInstruction let = 9;
-        VarInstruction var = 10;
-        ConstructInstruction construct = 11;
-        AccessInstruction access = 12;
-        UserCallInstruction user_call = 13;
-        LoadInstruction load = 14;
-        StoreInstruction store = 15;
+        InstructionReturn return = 3;
+        InstructionUnary unary = 4;
+        InstructionBinary binary = 5;
+        InstructionBuiltin builtin = 6;
+        InstructionConstructor constructor = 7;
+        InstructionDiscard discard = 8;
+        InstructionLet let = 9;
+        InstructionVar var = 10;
+        InstructionConstruct construct = 11;
+        InstructionAccess access = 12;
+        InstructionUserCall user_call = 13;
+        InstructionLoad load = 14;
+        InstructionStore store = 15;
     }
 }
 
-message ReturnInstruction {}
+message InstructionReturn {}
 
-message UnaryOpInstruction {}
+message InstructionUnary {
+    UnaryOp op = 1;
+}
 
-message BinaryOpInstruction {}
+message InstructionBinary {
+    BinaryOp op = 1;
+}
 
-message BuiltinInstruction {}
+message InstructionBuiltin {}
 
-message ConstructorInstruction {}
+message InstructionConstructor {}
 
-message DiscardInstruction {}
+message InstructionDiscard {}
 
-message LetInstruction {}
+message InstructionLet {}
 
-message VarInstruction {
+message InstructionVar {
     optional BindingPoint binding_point = 1;
 }
 
-message ConstructInstruction {}
+message InstructionConstruct {}
 
-message AccessInstruction {}
+message InstructionAccess {}
 
-message UserCallInstruction {}
+message InstructionUserCall {}
 
-message LoadInstruction {}
+message InstructionLoad {}
 
-message StoreInstruction {}
+message InstructionStore {}
 
 message BindingPoint {
     uint32 group = 1;
@@ -246,4 +250,28 @@ enum AccessControl {
     read = 0;
     write = 1;
     read_write = 2;
+}
+
+enum UnaryOp {
+    complement = 0;
+    negation = 1;
+}
+
+enum BinaryOp {
+    add_ = 0;
+    subtract = 1;
+    multiply = 2;
+    divide = 3;
+    modulo = 4;
+    and = 5;
+    or_ = 6;
+    xor_ = 7;
+    equal = 8;
+    not_equal = 9;
+    less_than = 10;
+    greater_than = 11;
+    less_than_equal = 12;
+    greater_than_equal = 13;
+    shift_left = 14;
+    shift_right = 15;
 }

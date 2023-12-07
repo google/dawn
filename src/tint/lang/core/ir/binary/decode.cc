@@ -166,32 +166,38 @@ struct Decoder {
     ir::Instruction* Instruction(const pb::Instruction& inst_in) {
         ir::Instruction* inst_out = nullptr;
         switch (inst_in.kind_case()) {
-            case pb::Instruction::KindCase::kDiscard:
-                inst_out = CreateInstructionDiscard(inst_in.discard());
+            case pb::Instruction::KindCase::kAccess:
+                inst_out = CreateInstructionAccess(inst_in.access());
                 break;
-            case pb::Instruction::KindCase::kReturn:
-                inst_out = CreateInstructionReturn(inst_in.return_());
-                break;
-            case pb::Instruction::KindCase::kLet:
-                inst_out = CreateInstructionLet(inst_in.let());
+            case pb::Instruction::KindCase::kBinary:
+                inst_out = CreateInstructionBinary(inst_in.binary());
                 break;
             case pb::Instruction::KindCase::kConstruct:
                 inst_out = CreateInstructionConstruct(inst_in.construct());
                 break;
-            case pb::Instruction::KindCase::kAccess:
-                inst_out = CreateInstructionAccess(inst_in.access());
+            case pb::Instruction::KindCase::kDiscard:
+                inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
-            case pb::Instruction::KindCase::kVar:
-                inst_out = CreateInstructionVar(inst_in.var());
-                break;
-            case pb::Instruction::KindCase::kUserCall:
-                inst_out = CreateInstructionUserCall(inst_in.user_call());
+            case pb::Instruction::KindCase::kLet:
+                inst_out = CreateInstructionLet(inst_in.let());
                 break;
             case pb::Instruction::KindCase::kLoad:
                 inst_out = CreateInstructionLoad(inst_in.load());
                 break;
+            case pb::Instruction::KindCase::kReturn:
+                inst_out = CreateInstructionReturn(inst_in.return_());
+                break;
             case pb::Instruction::KindCase::kStore:
                 inst_out = CreateInstructionStore(inst_in.store());
+                break;
+            case pb::Instruction::KindCase::kUnary:
+                inst_out = CreateInstructionUnary(inst_in.unary());
+                break;
+            case pb::Instruction::KindCase::kUserCall:
+                inst_out = CreateInstructionUserCall(inst_in.user_call());
+                break;
+            case pb::Instruction::KindCase::kVar:
+                inst_out = CreateInstructionVar(inst_in.var());
                 break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind_case();
@@ -214,45 +220,57 @@ struct Decoder {
         return inst_out;
     }
 
-    ir::Discard* CreateInstructionDiscard(const pb::DiscardInstruction&) {
-        return mod_out_.instructions.Create<ir::Discard>();
-    }
-
-    ir::Return* CreateInstructionReturn(const pb::ReturnInstruction&) {
-        return mod_out_.instructions.Create<ir::Return>();
-    }
-
-    ir::Let* CreateInstructionLet(const pb::LetInstruction&) {
-        return mod_out_.instructions.Create<ir::Let>();
-    }
-
-    ir::Construct* CreateInstructionConstruct(const pb::ConstructInstruction&) {
-        return mod_out_.instructions.Create<ir::Construct>();
-    }
-
-    ir::Access* CreateInstructionAccess(const pb::AccessInstruction&) {
+    ir::Access* CreateInstructionAccess(const pb::InstructionAccess&) {
         return mod_out_.instructions.Create<ir::Access>();
     }
 
-    ir::Var* CreateInstructionVar(const pb::VarInstruction& var_in) {
+    ir::Binary* CreateInstructionBinary(const pb::InstructionBinary& binary_in) {
+        auto* binary_out = mod_out_.instructions.Create<ir::Binary>();
+        binary_out->SetOp(BinaryOp(binary_in.op()));
+        return binary_out;
+    }
+
+    ir::Construct* CreateInstructionConstruct(const pb::InstructionConstruct&) {
+        return mod_out_.instructions.Create<ir::Construct>();
+    }
+
+    ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
+        return mod_out_.instructions.Create<ir::Discard>();
+    }
+
+    ir::Let* CreateInstructionLet(const pb::InstructionLet&) {
+        return mod_out_.instructions.Create<ir::Let>();
+    }
+
+    ir::Load* CreateInstructionLoad(const pb::InstructionLoad&) {
+        return mod_out_.instructions.Create<ir::Load>();
+    }
+
+    ir::Return* CreateInstructionReturn(const pb::InstructionReturn&) {
+        return mod_out_.instructions.Create<ir::Return>();
+    }
+
+    ir::Store* CreateInstructionStore(const pb::InstructionStore&) {
+        return mod_out_.instructions.Create<ir::Store>();
+    }
+
+    ir::Unary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
+        auto* unary_out = mod_out_.instructions.Create<ir::Unary>();
+        unary_out->SetOp(UnaryOp(unary_in.op()));
+        return unary_out;
+    }
+
+    ir::UserCall* CreateInstructionUserCall(const pb::InstructionUserCall&) {
+        return mod_out_.instructions.Create<ir::UserCall>();
+    }
+
+    ir::Var* CreateInstructionVar(const pb::InstructionVar& var_in) {
         auto* var_out = mod_out_.instructions.Create<ir::Var>();
         if (var_in.has_binding_point()) {
             auto& bp_in = var_in.binding_point();
             var_out->SetBindingPoint(bp_in.group(), bp_in.binding());
         }
         return var_out;
-    }
-
-    ir::UserCall* CreateInstructionUserCall(const pb::UserCallInstruction&) {
-        return mod_out_.instructions.Create<ir::UserCall>();
-    }
-
-    ir::Load* CreateInstructionLoad(const pb::LoadInstruction&) {
-        return mod_out_.instructions.Create<ir::Load>();
-    }
-
-    ir::Store* CreateInstructionStore(const pb::StoreInstruction&) {
-        return mod_out_.instructions.Create<ir::Store>();
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -473,6 +491,60 @@ struct Decoder {
             default:
                 TINT_ICE() << "invalid Access: " << in;
                 return core::Access::kUndefined;
+        }
+    }
+
+    core::ir::UnaryOp UnaryOp(pb::UnaryOp in) {
+        switch (in) {
+            case pb::UnaryOp::complement:
+                return core::ir::UnaryOp::kComplement;
+            case pb::UnaryOp::negation:
+                return core::ir::UnaryOp::kNegation;
+
+            default:
+                TINT_ICE() << "invalid UnaryOp: " << in;
+                return core::ir::UnaryOp::kComplement;
+        }
+    }
+
+    core::ir::BinaryOp BinaryOp(pb::BinaryOp in) {
+        switch (in) {
+            case pb::BinaryOp::add_:
+                return core::ir::BinaryOp::kAdd;
+            case pb::BinaryOp::subtract:
+                return core::ir::BinaryOp::kSubtract;
+            case pb::BinaryOp::multiply:
+                return core::ir::BinaryOp::kMultiply;
+            case pb::BinaryOp::divide:
+                return core::ir::BinaryOp::kDivide;
+            case pb::BinaryOp::modulo:
+                return core::ir::BinaryOp::kModulo;
+            case pb::BinaryOp::and_:
+                return core::ir::BinaryOp::kAnd;
+            case pb::BinaryOp::or_:
+                return core::ir::BinaryOp::kOr;
+            case pb::BinaryOp::xor_:
+                return core::ir::BinaryOp::kXor;
+            case pb::BinaryOp::equal:
+                return core::ir::BinaryOp::kEqual;
+            case pb::BinaryOp::not_equal:
+                return core::ir::BinaryOp::kNotEqual;
+            case pb::BinaryOp::less_than:
+                return core::ir::BinaryOp::kLessThan;
+            case pb::BinaryOp::greater_than:
+                return core::ir::BinaryOp::kGreaterThan;
+            case pb::BinaryOp::less_than_equal:
+                return core::ir::BinaryOp::kLessThanEqual;
+            case pb::BinaryOp::greater_than_equal:
+                return core::ir::BinaryOp::kGreaterThanEqual;
+            case pb::BinaryOp::shift_left:
+                return core::ir::BinaryOp::kShiftLeft;
+            case pb::BinaryOp::shift_right:
+                return core::ir::BinaryOp::kShiftRight;
+
+            default:
+                TINT_ICE() << "invalid BinaryOp: " << in;
+                return core::ir::BinaryOp::kAdd;
         }
     }
 };
