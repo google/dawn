@@ -1690,8 +1690,11 @@
         "chain roots": ["shared texture memory descriptor"],
         "tags": ["dawn", "native"],
         "members": [
+            {"name": "vk image create info", "type": "void const *"},
             {"name": "memory FD", "type": "int"},
-            {"name": "allocation size", "type": "uint64_t"}
+            {"name": "memory type index", "type": "uint32_t"},
+            {"name": "allocation size", "type": "uint64_t"},
+            {"name": "dedicated allocation", "type": "bool"}
         ]
     },
     "shared texture memory zircon handle descriptor": {

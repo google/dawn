@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/end2end/SharedTextureMemoryTests.h"
+#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
+
+#include <memory>
+#include <vector>
+#include <utility>
 
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -33,6 +37,51 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
+
+namespace {
+
+struct BackendBeginStateVk : public SharedTextureMemoryTestBackend::BackendBeginState {
+    wgpu::SharedTextureMemoryVkImageLayoutBeginState imageLayouts{};
+};
+
+struct BackendEndStateVk : public SharedTextureMemoryTestBackend::BackendEndState {
+    wgpu::SharedTextureMemoryVkImageLayoutEndState imageLayouts{};
+};
+
+}  // anonymous namespace
+
+std::unique_ptr<SharedTextureMemoryTestBackend::BackendBeginState>
+SharedTextureMemoryTestVulkanBackend::ChainInitialBeginState(
+    wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc) {
+    auto state = std::make_unique<BackendBeginStateVk>();
+    beginDesc->nextInChain = &state->imageLayouts;
+    return state;
+}
+
+std::unique_ptr<SharedTextureMemoryTestBackend::BackendEndState>
+SharedTextureMemoryTestVulkanBackend::ChainEndState(
+    wgpu::SharedTextureMemoryEndAccessState* endState) {
+    auto state = std::make_unique<BackendEndStateVk>();
+    endState->nextInChain = &state->imageLayouts;
+    return state;
+}
+
+std::unique_ptr<SharedTextureMemoryTestBackend::BackendBeginState>
+SharedTextureMemoryTestVulkanBackend::ChainBeginState(
+    wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc,
+    const wgpu::SharedTextureMemoryEndAccessState& endState) {
+    DAWN_ASSERT(endState.nextInChain != nullptr);
+    DAWN_ASSERT(endState.nextInChain->sType ==
+                wgpu::SType::SharedTextureMemoryVkImageLayoutEndState);
+    auto* vkEndState =
+        static_cast<wgpu::SharedTextureMemoryVkImageLayoutEndState*>(endState.nextInChain);
+
+    auto state = std::make_unique<BackendBeginStateVk>();
+    state->imageLayouts.oldLayout = vkEndState->oldLayout;
+    state->imageLayouts.newLayout = vkEndState->newLayout;
+    beginDesc->nextInChain = &state->imageLayouts;
+    return state;
+}
 
 void SharedTextureMemoryNoFeatureTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -79,6 +128,79 @@ void SharedTextureMemoryTests::TearDown() {
     GetParam().mBackend->TearDown();
 }
 
+wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(
+    const wgpu::Device& importingDevice, const wgpu::SharedFence& fence) {
+
+    wgpu::SharedFenceExportInfo exportInfo;
+    fence.ExportInfo(&exportInfo);
+
+    switch (exportInfo.type) {
+        case wgpu::SharedFenceType::VkSemaphoreOpaqueFD: {
+            wgpu::SharedFenceVkSemaphoreOpaqueFDExportInfo vkExportInfo;
+            exportInfo.nextInChain = &vkExportInfo;
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor vkDesc;
+            vkDesc.handle = vkExportInfo.handle;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &vkDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        case wgpu::SharedFenceType::VkSemaphoreSyncFD: {
+            wgpu::SharedFenceVkSemaphoreSyncFDExportInfo vkExportInfo;
+            exportInfo.nextInChain = &vkExportInfo;
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceVkSemaphoreSyncFDDescriptor vkDesc;
+            vkDesc.handle = vkExportInfo.handle;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &vkDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        case wgpu::SharedFenceType::VkSemaphoreZirconHandle: {
+            wgpu::SharedFenceVkSemaphoreZirconHandleExportInfo vkExportInfo;
+            exportInfo.nextInChain = &vkExportInfo;
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceVkSemaphoreZirconHandleDescriptor vkDesc;
+            vkDesc.handle = vkExportInfo.handle;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &vkDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        case wgpu::SharedFenceType::DXGISharedHandle: {
+            wgpu::SharedFenceDXGISharedHandleExportInfo dxgiExportInfo;
+            exportInfo.nextInChain = &dxgiExportInfo;
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceDXGISharedHandleDescriptor dxgiDesc;
+            dxgiDesc.handle = dxgiExportInfo.handle;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &dxgiDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        case wgpu::SharedFenceType::MTLSharedEvent: {
+            wgpu::SharedFenceMTLSharedEventExportInfo sharedEventInfo;
+            exportInfo.nextInChain = &sharedEventInfo;
+
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+            sharedEventDesc.sharedEvent = sharedEventInfo.sharedEvent;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &sharedEventDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSharedTextureMemories(
     wgpu::Device& device) {
     std::vector<wgpu::SharedTextureMemory> memories;
@@ -86,6 +208,8 @@ std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSha
         DAWN_ASSERT(memory.size() == 1u);
         memories.push_back(std::move(memory[0]));
     }
+    // There should be at least one memory to test.
+    DAWN_ASSERT(!memories.empty());
     return memories;
 }
 
@@ -148,10 +272,12 @@ SharedTextureMemoryTestBackend::CreatePerDeviceSharedTextureMemoriesFilterByUsag
             // create valid backing textures for some multiplanar formats (e.g.,
             // on Apple), which results in a crash when accessing plane 0.
             // TODO(crbug.com/dawn/2263): Fix this and remove this short-circuit.
-            if (!utils::IsMultiPlanarFormat(properties.format) &&
-                (requiredUsage & wgpu::TextureUsage::RenderAttachment)) {
-                out.push_back(std::move(memories));
+            if (utils::IsMultiPlanarFormat(properties.format) &&
+                (requiredUsage &
+                 (wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding))) {
+                continue;
             }
+            out.push_back(std::move(memories));
         }
     }
     return out;
@@ -523,10 +649,10 @@ TEST_P(SharedTextureMemoryTests, TextureUsages) {
         memory.GetProperties(&properties);
 
         // CopySrc and TextureBinding should always be supported.
-        // TODO(crbug.com/dawn/2262): TextureBinding support on D3D11/D3D12 is actually
+        // TODO(crbug.com/dawn/2262): TextureBinding support on D3D11/D3D12/Vulkan is actually
         // dependent on the flags passed to the underlying texture (the relevant
         // flag is currently always passed in the test context). Add tests where
-        // the D3D texture is not created with the relevant flag.
+        // the D3D/Vulkan texture is not created with the relevant flag.
         wgpu::TextureUsage expectedUsage =
             wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding;
 
@@ -537,20 +663,20 @@ TEST_P(SharedTextureMemoryTests, TextureUsages) {
             expectedUsage |= wgpu::TextureUsage::CopyDst;
         }
 
-        // TODO(crbug.com/dawn/2262): RenderAttachment support on D3D11/D3D12 is
+        // TODO(crbug.com/dawn/2262): RenderAttachment support on D3D11/D3D12/Vulkan is
         // additionally dependent on the flags passed to the underlying
         // texture (the relevant flag is currently always passed in the test
-        // context). Add tests where the D3D texture is not created with the
+        // context). Add tests where the D3D/Vulkan texture is not created with the
         // relevant flag.
         if ((isSinglePlanar || device.HasFeature(wgpu::FeatureName::MultiPlanarRenderTargets)) &&
             utils::IsRenderableFormat(device, properties.format)) {
             expectedUsage |= wgpu::TextureUsage::RenderAttachment;
         }
 
-        // TODO(crbug.com/dawn/2262): StorageBinding support on D3D11/D3D12 is
+        // TODO(crbug.com/dawn/2262): StorageBinding support on D3D11/D3D12/Vulkan is
         // additionally dependent on the flags passed to the underlying
         // texture (the relevant flag is currently always passed in the test
-        // context). Add tests where the D3D texture is not created with the
+        // context). Add tests where the D3D/Vulkan texture is not created with the
         // relevant flag.
         if (isSinglePlanar &&
             utils::TextureFormatSupportsStorageTexture(properties.format, IsCompatibilityMode())) {
@@ -765,6 +891,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadWrite) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     EXPECT_TRUE(memory.BeginAccess(readTexture, &beginDesc));
     ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.BeginAccess(writeTexture, &beginDesc)),
@@ -781,6 +908,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesWriteWrite) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     EXPECT_TRUE(memory.BeginAccess(writeTexture1, &beginDesc));
     ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.BeginAccess(writeTexture2, &beginDesc)),
@@ -799,6 +927,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadRead) {
 
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
+    auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
     EXPECT_TRUE(memory.BeginAccess(readTexture1, &beginDesc));
     ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.BeginAccess(readTexture2, &beginDesc)),
@@ -919,6 +1048,9 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
 
 // Test that if the texture is uninitialized, it is cleared on first use.
 TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
+    // TODO(dawn:1745): Diagnose and fix on Android Qualcomm.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1067,6 +1199,72 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
             memory.EndAccess(texture, &endState);
             EXPECT_FALSE(endState.initialized);
         }
+    }
+}
+
+// Test copying to texture memory on one device, then sampling it using another device.
+TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::TextureBinding)) {
+        wgpu::Texture texture = memories[0].CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memories[0].BeginAccess(texture, &beginDesc);
+
+        // Create a texture of the same size to use as the source content.
+        wgpu::TextureDescriptor texDesc;
+        texDesc.format = texture.GetFormat();
+        texDesc.size = {texture.GetWidth(), texture.GetHeight()};
+        texDesc.usage =
+            texture.GetUsage() | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+        wgpu::Texture srcTex = devices[0].CreateTexture(&texDesc);
+
+        // Populate the source texture.
+        wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(devices[0], srcTex);
+        devices[0].GetQueue().Submit(1, &commandBuffer);
+
+        // Copy from the source texture into `texture`.
+        {
+            wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
+            auto src = utils::CreateImageCopyTexture(srcTex);
+            auto dst = utils::CreateImageCopyTexture(texture);
+            encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
+            commandBuffer = encoder.Finish();
+        }
+        devices[0].GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memories[0].EndAccess(texture, &endState);
+
+        // Sample from the texture
+
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        texture = memories[1].CreateTexture();
+
+        memories[1].BeginAccess(texture, &beginDesc);
+
+        wgpu::Texture colorTarget;
+        std::tie(commandBuffer, colorTarget) =
+            MakeCheckBySamplingCommandBuffer(devices[1], texture);
+        devices[1].GetQueue().Submit(1, &commandBuffer);
+        memories[1].EndAccess(texture, &endState);
+
+        CheckFourColors(devices[1], texture.GetFormat(), colorTarget);
     }
 }
 

@@ -607,8 +607,6 @@ source_set("end2end_tests_sources") {
     "end2end/ShaderF16Tests.cpp",
     "end2end/ShaderTests.cpp",
     "end2end/ShaderValidationTests.cpp",
-    "end2end/SharedTextureMemoryTests.cpp",
-    "end2end/SharedTextureMemoryTests.h",
     "end2end/StorageTextureTests.cpp",
     "end2end/SubresourceRenderAttachmentTests.cpp",
     "end2end/Texture3DTests.cpp",
@@ -643,10 +641,6 @@ source_set("end2end_tests_sources") {
     sources += [ "end2end/D3D12CachingTests.cpp" ]
   }
 
-  if (is_win) {
-    sources += [ "end2end/SharedTextureMemoryTests_win.cpp" ]
-  }
-
   if (is_mac || is_ios) {
     if (dawn_enable_metal) {
       sources += [
@@ -654,10 +648,7 @@ source_set("end2end_tests_sources") {
         "end2end/VideoViewsTests_mac.cpp",
       ]
     }
-    sources += [
-      "end2end/BufferHostMappedPointerTests_apple.mm",
-      "end2end/SharedTextureMemoryTests_apple.mm",
-    ]
+    sources += [ "end2end/BufferHostMappedPointerTests_apple.mm" ]
 
     frameworks = [ "IOSurface.framework" ]
 
@@ -693,10 +684,6 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_vulkan && is_chromeos) {
     sources += [ "end2end/VideoViewsTests_gbm.cpp" ]
   }
-
-  if (is_linux || is_chromeos) {
-    sources += [ "end2end/SharedTextureMemoryTests_linux.cpp" ]
-  }
 }
 
 source_set("white_box_tests_sources") {
@@ -716,8 +703,19 @@ source_set("white_box_tests_sources") {
     "${dawn_root}/src/dawn/wire",
   ]
 
-  sources = []
+  sources = [
+    "white_box/SharedTextureMemoryTests.cpp",
+    "white_box/SharedTextureMemoryTests.h",
+  ]
   libs = []
+
+  if (is_mac || is_ios) {
+    sources += [ "white_box/SharedTextureMemoryTests_apple.mm" ]
+  }
+
+  if (is_win) {
+    sources += [ "white_box/SharedTextureMemoryTests_win.cpp" ]
+  }
 
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
@@ -731,6 +729,15 @@ source_set("white_box_tests_sources") {
         "white_box/VulkanImageWrappingTests_OpaqueFD.cpp",
         "white_box/VulkanImageWrappingTests_OpaqueFD.h",
       ]
+
+      sources += [
+        "white_box/SharedTextureMemoryTests_dmabuf.cpp",
+        "white_box/SharedTextureMemoryTests_opaquefd.cpp",
+      ]
+    }
+
+    if (is_android) {
+      sources += [ "white_box/SharedTextureMemoryTests_android.cpp" ]
     }
 
     if (dawn_enable_error_injection) {

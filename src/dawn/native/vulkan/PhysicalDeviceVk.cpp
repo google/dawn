@@ -368,6 +368,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
+        EnableFeature(Feature::SharedTextureMemoryAHardwareBuffer);
+    }
+
     if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreZirconHandle,
                               VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA)) {
         EnableFeature(Feature::SharedFenceVkSemaphoreZirconHandle);

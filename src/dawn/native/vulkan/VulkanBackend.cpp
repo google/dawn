@@ -44,6 +44,11 @@ VkInstance GetInstance(WGPUDevice device) {
     return backendDevice->GetVkInstance();
 }
 
+VkDevice GetVkDevice(WGPUDevice device) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    return backendDevice->GetVkDevice();
+}
+
 DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName) {
     Device* backendDevice = ToBackend(FromAPI(device));
     return (*backendDevice->fn.GetInstanceProcAddr)(backendDevice->GetVkInstance(), pName);
