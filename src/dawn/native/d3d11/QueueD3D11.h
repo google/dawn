@@ -33,18 +33,36 @@
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/d3d/QueueD3D.h"
 
+#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
+#include "dawn/native/d3d11/Forward.h"
+
 namespace dawn::native::d3d11 {
 
 class Device;
 
 class Queue final : public d3d::Queue {
   public:
-    static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
+    static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
+
+    ScopedCommandRecordingContext GetScopedPendingCommandContext(SubmitMode submitMode);
+    ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
+        SubmitMode submitMode);
+    MaybeError SubmitPendingCommands();
+    ID3D11Fence* GetFence() const;
+    void Destroy();
+    MaybeError NextSerial();
+    MaybeError WaitForSerial(ExecutionSerial serial);
+
+    // Separated from creation because it creates resources, which is not valid before the
+    // DeviceBase is fully created.
+    MaybeError InitializePendingContext();
 
   private:
     using d3d::Queue::Queue;
 
     ~Queue() override = default;
+
+    MaybeError Initialize();
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,
@@ -62,6 +80,10 @@ class Queue final : public d3d::Queue {
     MaybeError WaitForIdleForDestruction() override;
 
     void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
+
+    ComPtr<ID3D11Fence> mFence;
+    HANDLE mFenceEvent = nullptr;
+    CommandRecordingContext mPendingCommands;
 };
 
 }  // namespace dawn::native::d3d11

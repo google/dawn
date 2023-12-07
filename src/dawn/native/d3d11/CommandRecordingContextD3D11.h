@@ -40,9 +40,9 @@ class Device;
 
 class CommandRecordingContext {
   public:
-    MaybeError Intialize(Device* device);
+    MaybeError Initialize(Device* device);
     void Release();
-    MaybeError ExecuteCommandList(Device* device);
+    MaybeError ExecuteCommandList();
 
     bool IsOpen() const { return mIsOpen; }
     bool NeedsSubmit() const { return mNeedsSubmit; }

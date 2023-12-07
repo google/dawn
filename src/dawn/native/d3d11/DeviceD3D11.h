@@ -53,19 +53,15 @@ class Device final : public d3d::Device {
 
     ID3D11Device* GetD3D11Device() const;
     ID3D11Device5* GetD3D11Device5() const;
-    ID3D11Fence* GetD3D11Fence() const;
 
+    // TODO(dawn:1413): Remove these proxy method in favor of using the Queue directly.
     ScopedCommandRecordingContext GetScopedPendingCommandContext(SubmitMode submitMode);
     ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
         SubmitMode submitMode);
 
     const DeviceInfo& GetDeviceInfo() const;
 
-    MaybeError NextSerial();
-    MaybeError WaitForSerial(ExecutionSerial serial);
-
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
-    MaybeError ExecutePendingCommandContext();
     Ref<TextureBase> CreateD3DExternalTexture(const TextureDescriptor* descriptor,
                                               ComPtr<IUnknown> d3dTexture,
                                               std::vector<Ref<d3d::Fence>> waitFences,
@@ -99,12 +95,6 @@ class Device final : public d3d::Device {
         const ExternalImageDescriptor* descriptor) override;
 
     uint32_t GetUAVSlotCount() const;
-
-    // TODO(dawn:1413) move these methods to the d3d11::Queue.
-    void ForceEventualFlushOfCommands();
-    bool HasPendingCommands() const;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
-    MaybeError WaitForIdleForDestruction();
 
     ResultOrError<TextureViewBase*> GetOrCreateCachedImplicitPixelLocalStorageAttachment(
         uint32_t width,
@@ -158,13 +148,9 @@ class Device final : public d3d::Device {
     void AppendDebugLayerMessages(ErrorData* error) override;
     void AppendDeviceLostMessage(ErrorData* error) override;
 
-    ComPtr<ID3D11Fence> mFence;
-    HANDLE mFenceEvent = nullptr;
-
     ComPtr<ID3D11Device> mD3d11Device;
     bool mIsDebugLayerEnabled = false;
     ComPtr<ID3D11Device5> mD3d11Device5;
-    CommandRecordingContext mPendingCommands;
     SerialQueue<ExecutionSerial, ComPtr<IUnknown>> mUsedComObjectRefs;
 
     // TODO(dawn:1704): decide when to clear the cached implicit pixel local storage attachments.

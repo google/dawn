@@ -199,7 +199,7 @@ void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
 
     ExecutionSerial fenceValue;
     if (mBackendDevice->ConsumedError(backendTexture->EndAccess(), &fenceValue)) {
-        dawn::ErrorLog() << "D3D11 fence end access failed";
+        dawn::ErrorLog() << "D3D fence end access failed";
         return;
     }
     signalFence->fenceHandle = ToBackend(mBackendDevice.Get())->GetFenceHandle();

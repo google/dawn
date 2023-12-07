@@ -179,7 +179,7 @@ Buffer* ScopedSwapStateCommandRecordingContext::GetUniformBuffer() const {
     return mCommandContext->mUniformBuffer.Get();
 }
 
-MaybeError CommandRecordingContext::Intialize(Device* device) {
+MaybeError CommandRecordingContext::Initialize(Device* device) {
     DAWN_ASSERT(!IsOpen());
     DAWN_ASSERT(device);
     mDevice = device;
@@ -243,7 +243,7 @@ MaybeError CommandRecordingContext::Intialize(Device* device) {
     return {};
 }
 
-MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
+MaybeError CommandRecordingContext::ExecuteCommandList() {
     // Consider using deferred DeviceContext.
     mNeedsSubmit = false;
     return {};
