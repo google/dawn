@@ -429,15 +429,26 @@ def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_onl
 _os_arch_to_branch_builder = {
     "linux": "dawn-linux-x64-deps-rel",
     "mac": "dawn-mac-x64-deps-rel",
+    "mac-arm64": "dawn-mac-arm64-deps-rel",
     "win": "dawn-win10-x64-deps-rel",
     "android-arm": "dawn-android-arm-deps-rel",
     "android-arm64": "dawn-android-arm64-deps-rel",
+}
+
+_os_arch_to_dawn_cq_builder = {
+    "linux": "linux-dawn-rel",
+    "mac": "mac-dawn-rel",
+    "mac-arm64": "mac-arm64-dawn-rel",
+    "win": "win-dawn-rel",
+    "android-arm": "android-dawn-arm-rel",
+    "android-arm64": "android-dawn-arm64-rel",
 }
 
 # The earliest milestone that the builder is relevant for
 _os_arch_to_min_milestone = {
     "linux": 112,
     "mac": 112,
+    "mac-arm64": 122,
     "win": 112,
     "android-arm": None,
     "android-arm64": None,
@@ -454,7 +465,8 @@ def chromium_dawn_tryjob(os, arch = None):
     if arch:
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ",
-            builder = "chromium:try/{os}-dawn-{arch}-rel".format(os = os, arch = arch),
+            builder = "chromium:try/{builder}".format(builder =
+                _os_arch_to_dawn_cq_builder["{os}-{arch}".format(os = os, arch = arch)]),
             location_filters = [
                 cq.location_filter(path_regexp = ".*"),
                 cq.location_filter(
@@ -569,6 +581,7 @@ dawn_standalone_builder("cron-linux-clang-rel-x64", True, False, "x64", True)
 
 chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
+chromium_dawn_tryjob("mac", "arm64")
 chromium_dawn_tryjob("win")
 chromium_dawn_tryjob("android", "arm")
 chromium_dawn_tryjob("android", "arm64")
