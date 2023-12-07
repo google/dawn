@@ -221,5 +221,13 @@ TEST_F(IRBinaryRoundtripTest, Access) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, UserCall) {
+    auto* fn_a = b.Function("A", ty.f32());
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 42_f); });
+    auto* fn_b = b.Function("B", ty.f32());
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, b.Call(fn_a)); });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

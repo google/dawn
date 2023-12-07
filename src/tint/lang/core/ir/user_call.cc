@@ -36,6 +36,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::UserCall);
 
 namespace tint::core::ir {
 
+UserCall::UserCall() {
+    flags_.Add(Flag::kSequenced);
+}
+
 UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> arguments) {
     flags_.Add(Flag::kSequenced);
     AddOperand(UserCall::kFunctionOperandOffset, func);

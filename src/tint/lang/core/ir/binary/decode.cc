@@ -178,6 +178,9 @@ struct Decoder {
             case pb::InstructionKind::Var:
                 inst_out = mod_out_.instructions.Create<ir::Var>();
                 break;
+            case pb::InstructionKind::UserCall:
+                inst_out = mod_out_.instructions.Create<ir::UserCall>();
+                break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind();
                 break;

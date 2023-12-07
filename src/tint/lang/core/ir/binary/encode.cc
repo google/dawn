@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -146,6 +147,7 @@ struct Encoder {
             [&](const ir::Let*) { return pb::InstructionKind::Let; },              //
             [&](const ir::Return*) { return pb::InstructionKind::Return; },        //
             [&](const ir::Var*) { return pb::InstructionKind::Var; },              //
+            [&](const ir::UserCall*) { return pb::InstructionKind::UserCall; },    //
             TINT_ICE_ON_NO_MATCH);
         inst_out->set_kind(kind);
         for (auto* operand : inst_in->Operands()) {

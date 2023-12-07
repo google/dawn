@@ -45,6 +45,9 @@ class UserCall final : public Castable<UserCall, Call> {
     /// The base offset in Operands() for the call arguments
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// Constructor (no results, no operands)
+    UserCall();
+
     /// Constructor
     /// @param result the result value
     /// @param func the function being called
