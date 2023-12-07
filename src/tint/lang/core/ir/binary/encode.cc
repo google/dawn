@@ -80,6 +80,7 @@ struct Encoder {
         for (size_t i = 0, n = mod_in_.functions.Length(); i < n; i++) {
             PopulateFunction(fns_out[i], mod_in_.functions[i]);
         }
+        mod_out_.set_root_block(Block(mod_in_.root_block));
     }
 
     ////////////////////////////////////////////////////////////////////////////

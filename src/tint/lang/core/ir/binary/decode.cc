@@ -70,8 +70,14 @@ struct Decoder {
         {
             const size_t n = static_cast<size_t>(mod_in_.blocks().size());
             blocks_.Reserve(n);
-            for (auto& block_in : mod_in_.blocks()) {
-                blocks_.Push(CreateBlock(block_in));
+            for (size_t i = 0; i < n; i++) {
+                auto id = static_cast<uint32_t>(i + 1);
+                if (id == mod_in_.root_block()) {
+                    blocks_.Push(mod_out_.root_block);
+                } else {
+                    auto& block_in = mod_in_.blocks()[static_cast<int>(i)];
+                    blocks_.Push(CreateBlock(block_in));
+                }
             }
         }
         {

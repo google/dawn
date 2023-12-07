@@ -33,9 +33,9 @@ message Module {
     repeated Type types = 1;
     repeated Value values = 2;
     repeated ConstantValue constant_values = 3;
-    Block root_block = 4;
-    repeated Function functions = 5;
-    repeated Block blocks = 6;
+    repeated Function functions = 4;
+    repeated Block blocks = 5;
+    uint32 root_block = 6;  // Module.blocks
 }
 
 ////////////////////////////////////////////////////////////////////////////////
