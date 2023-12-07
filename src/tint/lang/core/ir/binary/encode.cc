@@ -132,7 +132,7 @@ struct Encoder {
         return blocks_.GetOrCreate(block_in, [&]() -> uint32_t {
             auto& block_out = *mod_out_.add_blocks();
             for (auto* inst : *block_in) {
-                Instruction(block_out.add_instructions(), inst);
+                Instruction(*block_out.add_instructions(), inst);
             }
             return static_cast<uint32_t>(blocks_.Count());
         });
@@ -141,27 +141,50 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     // Instructions
     ////////////////////////////////////////////////////////////////////////////
-    void Instruction(pb::Instruction* inst_out, const ir::Instruction* inst_in) {
-        auto kind = Switch(
-            inst_in,                                                               //
-            [&](const ir::Access*) { return pb::InstructionKind::Access; },        //
-            [&](const ir::Construct*) { return pb::InstructionKind::Construct; },  //
-            [&](const ir::Discard*) { return pb::InstructionKind::Discard; },      //
-            [&](const ir::Let*) { return pb::InstructionKind::Let; },              //
-            [&](const ir::Return*) { return pb::InstructionKind::Return; },        //
-            [&](const ir::Var*) { return pb::InstructionKind::Var; },              //
-            [&](const ir::UserCall*) { return pb::InstructionKind::UserCall; },    //
-            [&](const ir::Load*) { return pb::InstructionKind::Load; },            //
-            [&](const ir::Store*) { return pb::InstructionKind::Store; },          //
+    void Instruction(pb::Instruction& inst_out, const ir::Instruction* inst_in) {
+        Switch(
+            inst_in,  //
+            [&](const ir::Access* i) { InstructionAccess(*inst_out.mutable_access(), i); },
+            [&](const ir::Construct* i) { InstructionConstruct(*inst_out.mutable_construct(), i); },
+            [&](const ir::Discard* i) { InstructionDiscard(*inst_out.mutable_discard(), i); },
+            [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
+            [&](const ir::Return* i) { InstructionReturn(*inst_out.mutable_return_(), i); },
+            [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
+            [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
+            [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
+            [&](const ir::Store* i) { InstructionStore(*inst_out.mutable_store(), i); },
             TINT_ICE_ON_NO_MATCH);
-        inst_out->set_kind(kind);
         for (auto* operand : inst_in->Operands()) {
-            inst_out->add_operands(Value(operand));
+            inst_out.add_operands(Value(operand));
         }
         for (auto* result : inst_in->Results()) {
-            inst_out->add_results(Value(result));
+            inst_out.add_results(Value(result));
         }
     }
+
+    void InstructionAccess(pb::AccessInstruction&, const ir::Access*) {}
+
+    void InstructionConstruct(pb::ConstructInstruction&, const ir::Construct*) {}
+
+    void InstructionDiscard(pb::DiscardInstruction&, const ir::Discard*) {}
+
+    void InstructionLet(pb::LetInstruction&, const ir::Let*) {}
+
+    void InstructionReturn(pb::ReturnInstruction&, const ir::Return*) {}
+
+    void InstructionVar(pb::VarInstruction& var_out, const ir::Var* var_in) {
+        if (auto bp_in = var_in->BindingPoint()) {
+            auto& bp_out = *var_out.mutable_binding_point();
+            bp_out.set_group(bp_in->group);
+            bp_out.set_binding(bp_in->binding);
+        }
+    }
+
+    void InstructionUserCall(pb::UserCallInstruction&, const ir::UserCall*) {}
+
+    void InstructionLoad(pb::LoadInstruction&, const ir::Load*) {}
+
+    void InstructionStore(pb::StoreInstruction&, const ir::Store*) {}
 
     ////////////////////////////////////////////////////////////////////////////
     // Types

@@ -176,25 +176,56 @@ message Block {
 // Instructions
 ////////////////////////////////////////////////////////////////////////////////
 message Instruction {
-    InstructionKind kind = 1;
-    repeated uint32 operands = 2;  // Module.values
-    repeated uint32 results = 3;   // Module.values
+    repeated uint32 operands = 1;  // Module.values
+    repeated uint32 results = 2;   // Module.values
+    oneof kind {
+        ReturnInstruction return = 3;
+        UnaryOpInstruction unary_op = 4;
+        BinaryOpInstruction binary_op = 5;
+        BuiltinInstruction builtin = 6;
+        ConstructorInstruction constructor = 7;
+        DiscardInstruction discard = 8;
+        LetInstruction let = 9;
+        VarInstruction var = 10;
+        ConstructInstruction construct = 11;
+        AccessInstruction access = 12;
+        UserCallInstruction user_call = 13;
+        LoadInstruction load = 14;
+        StoreInstruction store = 15;
+    }
 }
 
-enum InstructionKind {
-    Return = 0;
-    UnaryOp = 1;
-    BinaryOp = 2;
-    Builtin = 3;
-    Constructor = 4;
-    Discard = 5;
-    Let = 6;
-    Var = 7;
-    Construct = 8;
-    Access = 9;
-    UserCall = 10;
-    Load = 11;
-    Store = 12;
+message ReturnInstruction {}
+
+message UnaryOpInstruction {}
+
+message BinaryOpInstruction {}
+
+message BuiltinInstruction {}
+
+message ConstructorInstruction {}
+
+message DiscardInstruction {}
+
+message LetInstruction {}
+
+message VarInstruction {
+    optional BindingPoint binding_point = 1;
+}
+
+message ConstructInstruction {}
+
+message AccessInstruction {}
+
+message UserCallInstruction {}
+
+message LoadInstruction {}
+
+message StoreInstruction {}
+
+message BindingPoint {
+    uint32 group = 1;
+    uint32 binding = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -165,36 +165,36 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     ir::Instruction* Instruction(const pb::Instruction& inst_in) {
         ir::Instruction* inst_out = nullptr;
-        switch (inst_in.kind()) {
-            case pb::InstructionKind::Discard:
-                inst_out = mod_out_.instructions.Create<ir::Discard>();
+        switch (inst_in.kind_case()) {
+            case pb::Instruction::KindCase::kDiscard:
+                inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
-            case pb::InstructionKind::Return:
-                inst_out = mod_out_.instructions.Create<ir::Return>();
+            case pb::Instruction::KindCase::kReturn:
+                inst_out = CreateInstructionReturn(inst_in.return_());
                 break;
-            case pb::InstructionKind::Let:
-                inst_out = mod_out_.instructions.Create<ir::Let>();
+            case pb::Instruction::KindCase::kLet:
+                inst_out = CreateInstructionLet(inst_in.let());
                 break;
-            case pb::InstructionKind::Construct:
-                inst_out = mod_out_.instructions.Create<ir::Construct>();
+            case pb::Instruction::KindCase::kConstruct:
+                inst_out = CreateInstructionConstruct(inst_in.construct());
                 break;
-            case pb::InstructionKind::Access:
-                inst_out = mod_out_.instructions.Create<ir::Access>();
+            case pb::Instruction::KindCase::kAccess:
+                inst_out = CreateInstructionAccess(inst_in.access());
                 break;
-            case pb::InstructionKind::Var:
-                inst_out = mod_out_.instructions.Create<ir::Var>();
+            case pb::Instruction::KindCase::kVar:
+                inst_out = CreateInstructionVar(inst_in.var());
                 break;
-            case pb::InstructionKind::UserCall:
-                inst_out = mod_out_.instructions.Create<ir::UserCall>();
+            case pb::Instruction::KindCase::kUserCall:
+                inst_out = CreateInstructionUserCall(inst_in.user_call());
                 break;
-            case pb::InstructionKind::Load:
-                inst_out = mod_out_.instructions.Create<ir::Load>();
+            case pb::Instruction::KindCase::kLoad:
+                inst_out = CreateInstructionLoad(inst_in.load());
                 break;
-            case pb::InstructionKind::Store:
-                inst_out = mod_out_.instructions.Create<ir::Store>();
+            case pb::Instruction::KindCase::kStore:
+                inst_out = CreateInstructionStore(inst_in.store());
                 break;
             default:
-                TINT_UNIMPLEMENTED() << inst_in.kind();
+                TINT_UNIMPLEMENTED() << inst_in.kind_case();
                 break;
         }
         TINT_ASSERT_OR_RETURN_VALUE(inst_out, nullptr);
@@ -212,6 +212,47 @@ struct Decoder {
         inst_out->SetResults(std::move(results));
 
         return inst_out;
+    }
+
+    ir::Discard* CreateInstructionDiscard(const pb::DiscardInstruction&) {
+        return mod_out_.instructions.Create<ir::Discard>();
+    }
+
+    ir::Return* CreateInstructionReturn(const pb::ReturnInstruction&) {
+        return mod_out_.instructions.Create<ir::Return>();
+    }
+
+    ir::Let* CreateInstructionLet(const pb::LetInstruction&) {
+        return mod_out_.instructions.Create<ir::Let>();
+    }
+
+    ir::Construct* CreateInstructionConstruct(const pb::ConstructInstruction&) {
+        return mod_out_.instructions.Create<ir::Construct>();
+    }
+
+    ir::Access* CreateInstructionAccess(const pb::AccessInstruction&) {
+        return mod_out_.instructions.Create<ir::Access>();
+    }
+
+    ir::Var* CreateInstructionVar(const pb::VarInstruction& var_in) {
+        auto* var_out = mod_out_.instructions.Create<ir::Var>();
+        if (var_in.has_binding_point()) {
+            auto& bp_in = var_in.binding_point();
+            var_out->SetBindingPoint(bp_in.group(), bp_in.binding());
+        }
+        return var_out;
+    }
+
+    ir::UserCall* CreateInstructionUserCall(const pb::UserCallInstruction&) {
+        return mod_out_.instructions.Create<ir::UserCall>();
+    }
+
+    ir::Load* CreateInstructionLoad(const pb::LoadInstruction&) {
+        return mod_out_.instructions.Create<ir::Load>();
+    }
+
+    ir::Store* CreateInstructionStore(const pb::StoreInstruction&) {
+        return mod_out_.instructions.Create<ir::Store>();
     }
 
     ////////////////////////////////////////////////////////////////////////////

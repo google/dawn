@@ -80,6 +80,13 @@ TEST_F(IRBinaryRoundtripTest, RootBlock_Var_workgroup_f32_Named) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, RootBlock_Var_storage_binding) {
+    b.Append(b.ir.root_block, [&] {
+        auto* v = b.Var<storage, f32>();
+        v->SetBindingPoint(10, 20);
+    });
+    RUN_TEST();
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Functions
 ////////////////////////////////////////////////////////////////////////////////
