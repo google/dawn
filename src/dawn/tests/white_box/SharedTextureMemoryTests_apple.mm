@@ -33,7 +33,7 @@
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
-#include "dawn/tests/end2end/SharedTextureMemoryTests.h"
+#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 #include "dawn/webgpu_cpp.h"
 
 namespace dawn {
@@ -150,23 +150,6 @@ class Backend : public SharedTextureMemoryTestBackend {
         }
 
         return memories;
-    }
-
-    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
-                                    const wgpu::SharedFence& fence) override {
-        wgpu::SharedFenceMTLSharedEventExportInfo sharedEventInfo;
-        wgpu::SharedFenceExportInfo exportInfo;
-        exportInfo.nextInChain = &sharedEventInfo;
-
-        fence.ExportInfo(&exportInfo);
-
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = sharedEventInfo.sharedEvent;
-
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
-
-        return importingDevice.ImportSharedFence(&fenceDesc);
     }
 };
 

@@ -59,6 +59,9 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     static SharedTextureMemoryBase* MakeError(DeviceBase* device,
                                               const SharedTextureMemoryDescriptor* descriptor);
 
+    // Strip out properties based on what the Dawn device actually supports.
+    static void ReifyProperties(DeviceBase* device, SharedTextureMemoryProperties* properties);
+
     void Initialize();
 
     void APIGetProperties(SharedTextureMemoryProperties* properties) const;

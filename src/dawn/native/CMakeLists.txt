@@ -266,6 +266,13 @@ if (DAWN_USE_X11)
     )
 endif()
 
+if (ANDROID)
+    target_sources(dawn_native PRIVATE
+        "AHBFunctions.cpp"
+        "AHBFunctions.h"
+    )
+endif()
+
 # Only win32 app needs to link with user32.lib
 # In UWP, all availiable APIs are defined in WindowsApp.lib
 # and is automatically linked when WINDOWS_STORE set

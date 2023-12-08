@@ -47,6 +47,7 @@ class Device;
 class Texture;
 
 VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format);
+ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat);
 VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& format);
 VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage);
 VkImageLayout VulkanImageLayoutForDepthStencilAttachment(const Format& format,

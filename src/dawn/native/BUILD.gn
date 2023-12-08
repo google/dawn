@@ -399,6 +399,13 @@ source_set("sources") {
     ]
   }
 
+  if (is_android) {
+    sources += [
+      "AHBFunctions.cpp",
+      "AHBFunctions.h",
+    ]
+  }
+
   # Only win32 app needs to link with user32.lib
   # In UWP, all availiable APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {

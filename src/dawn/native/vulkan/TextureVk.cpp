@@ -323,106 +323,126 @@ Aspect ComputeCombinedAspect(Device* device, const Format& format) {
 
 }  // namespace
 
+#define SIMPLE_FORMAT_MAPPING(X)                                                      \
+    X(wgpu::TextureFormat::R8Unorm, VK_FORMAT_R8_UNORM)                               \
+    X(wgpu::TextureFormat::R8Snorm, VK_FORMAT_R8_SNORM)                               \
+    X(wgpu::TextureFormat::R8Uint, VK_FORMAT_R8_UINT)                                 \
+    X(wgpu::TextureFormat::R8Sint, VK_FORMAT_R8_SINT)                                 \
+                                                                                      \
+    X(wgpu::TextureFormat::R16Unorm, VK_FORMAT_R16_UNORM)                             \
+    X(wgpu::TextureFormat::R16Snorm, VK_FORMAT_R16_SNORM)                             \
+    X(wgpu::TextureFormat::R16Uint, VK_FORMAT_R16_UINT)                               \
+    X(wgpu::TextureFormat::R16Sint, VK_FORMAT_R16_SINT)                               \
+    X(wgpu::TextureFormat::R16Float, VK_FORMAT_R16_SFLOAT)                            \
+    X(wgpu::TextureFormat::RG8Unorm, VK_FORMAT_R8G8_UNORM)                            \
+    X(wgpu::TextureFormat::RG8Snorm, VK_FORMAT_R8G8_SNORM)                            \
+    X(wgpu::TextureFormat::RG8Uint, VK_FORMAT_R8G8_UINT)                              \
+    X(wgpu::TextureFormat::RG8Sint, VK_FORMAT_R8G8_SINT)                              \
+                                                                                      \
+    X(wgpu::TextureFormat::R32Uint, VK_FORMAT_R32_UINT)                               \
+    X(wgpu::TextureFormat::R32Sint, VK_FORMAT_R32_SINT)                               \
+    X(wgpu::TextureFormat::R32Float, VK_FORMAT_R32_SFLOAT)                            \
+    X(wgpu::TextureFormat::RG16Unorm, VK_FORMAT_R16G16_UNORM)                         \
+    X(wgpu::TextureFormat::RG16Snorm, VK_FORMAT_R16G16_SNORM)                         \
+    X(wgpu::TextureFormat::RG16Uint, VK_FORMAT_R16G16_UINT)                           \
+    X(wgpu::TextureFormat::RG16Sint, VK_FORMAT_R16G16_SINT)                           \
+    X(wgpu::TextureFormat::RG16Float, VK_FORMAT_R16G16_SFLOAT)                        \
+    X(wgpu::TextureFormat::RGBA8Unorm, VK_FORMAT_R8G8B8A8_UNORM)                      \
+    X(wgpu::TextureFormat::RGBA8UnormSrgb, VK_FORMAT_R8G8B8A8_SRGB)                   \
+    X(wgpu::TextureFormat::RGBA8Snorm, VK_FORMAT_R8G8B8A8_SNORM)                      \
+    X(wgpu::TextureFormat::RGBA8Uint, VK_FORMAT_R8G8B8A8_UINT)                        \
+    X(wgpu::TextureFormat::RGBA8Sint, VK_FORMAT_R8G8B8A8_SINT)                        \
+    X(wgpu::TextureFormat::BGRA8Unorm, VK_FORMAT_B8G8R8A8_UNORM)                      \
+    X(wgpu::TextureFormat::BGRA8UnormSrgb, VK_FORMAT_B8G8R8A8_SRGB)                   \
+    X(wgpu::TextureFormat::RGB10A2Uint, VK_FORMAT_A2B10G10R10_UINT_PACK32)            \
+    X(wgpu::TextureFormat::RGB10A2Unorm, VK_FORMAT_A2B10G10R10_UNORM_PACK32)          \
+    X(wgpu::TextureFormat::RG11B10Ufloat, VK_FORMAT_B10G11R11_UFLOAT_PACK32)          \
+    X(wgpu::TextureFormat::RGB9E5Ufloat, VK_FORMAT_E5B9G9R9_UFLOAT_PACK32)            \
+                                                                                      \
+    X(wgpu::TextureFormat::RG32Uint, VK_FORMAT_R32G32_UINT)                           \
+    X(wgpu::TextureFormat::RG32Sint, VK_FORMAT_R32G32_SINT)                           \
+    X(wgpu::TextureFormat::RG32Float, VK_FORMAT_R32G32_SFLOAT)                        \
+    X(wgpu::TextureFormat::RGBA16Unorm, VK_FORMAT_R16G16B16A16_UNORM)                 \
+    X(wgpu::TextureFormat::RGBA16Snorm, VK_FORMAT_R16G16B16A16_SNORM)                 \
+    X(wgpu::TextureFormat::RGBA16Uint, VK_FORMAT_R16G16B16A16_UINT)                   \
+    X(wgpu::TextureFormat::RGBA16Sint, VK_FORMAT_R16G16B16A16_SINT)                   \
+    X(wgpu::TextureFormat::RGBA16Float, VK_FORMAT_R16G16B16A16_SFLOAT)                \
+                                                                                      \
+    X(wgpu::TextureFormat::RGBA32Uint, VK_FORMAT_R32G32B32A32_UINT)                   \
+    X(wgpu::TextureFormat::RGBA32Sint, VK_FORMAT_R32G32B32A32_SINT)                   \
+    X(wgpu::TextureFormat::RGBA32Float, VK_FORMAT_R32G32B32A32_SFLOAT)                \
+                                                                                      \
+    X(wgpu::TextureFormat::Depth16Unorm, VK_FORMAT_D16_UNORM)                         \
+    X(wgpu::TextureFormat::Depth32Float, VK_FORMAT_D32_SFLOAT)                        \
+    X(wgpu::TextureFormat::Depth32FloatStencil8, VK_FORMAT_D32_SFLOAT_S8_UINT)        \
+                                                                                      \
+    X(wgpu::TextureFormat::BC1RGBAUnorm, VK_FORMAT_BC1_RGBA_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::BC1RGBAUnormSrgb, VK_FORMAT_BC1_RGBA_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::BC2RGBAUnorm, VK_FORMAT_BC2_UNORM_BLOCK)                   \
+    X(wgpu::TextureFormat::BC2RGBAUnormSrgb, VK_FORMAT_BC2_SRGB_BLOCK)                \
+    X(wgpu::TextureFormat::BC3RGBAUnorm, VK_FORMAT_BC3_UNORM_BLOCK)                   \
+    X(wgpu::TextureFormat::BC3RGBAUnormSrgb, VK_FORMAT_BC3_SRGB_BLOCK)                \
+    X(wgpu::TextureFormat::BC4RSnorm, VK_FORMAT_BC4_SNORM_BLOCK)                      \
+    X(wgpu::TextureFormat::BC4RUnorm, VK_FORMAT_BC4_UNORM_BLOCK)                      \
+    X(wgpu::TextureFormat::BC5RGSnorm, VK_FORMAT_BC5_SNORM_BLOCK)                     \
+    X(wgpu::TextureFormat::BC5RGUnorm, VK_FORMAT_BC5_UNORM_BLOCK)                     \
+    X(wgpu::TextureFormat::BC6HRGBFloat, VK_FORMAT_BC6H_SFLOAT_BLOCK)                 \
+    X(wgpu::TextureFormat::BC6HRGBUfloat, VK_FORMAT_BC6H_UFLOAT_BLOCK)                \
+    X(wgpu::TextureFormat::BC7RGBAUnorm, VK_FORMAT_BC7_UNORM_BLOCK)                   \
+    X(wgpu::TextureFormat::BC7RGBAUnormSrgb, VK_FORMAT_BC7_SRGB_BLOCK)                \
+                                                                                      \
+    X(wgpu::TextureFormat::ETC2RGB8Unorm, VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK)          \
+    X(wgpu::TextureFormat::ETC2RGB8UnormSrgb, VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK)       \
+    X(wgpu::TextureFormat::ETC2RGB8A1Unorm, VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK)      \
+    X(wgpu::TextureFormat::ETC2RGB8A1UnormSrgb, VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK)   \
+    X(wgpu::TextureFormat::ETC2RGBA8Unorm, VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK)       \
+    X(wgpu::TextureFormat::ETC2RGBA8UnormSrgb, VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK)    \
+    X(wgpu::TextureFormat::EACR11Unorm, VK_FORMAT_EAC_R11_UNORM_BLOCK)                \
+    X(wgpu::TextureFormat::EACR11Snorm, VK_FORMAT_EAC_R11_SNORM_BLOCK)                \
+    X(wgpu::TextureFormat::EACRG11Unorm, VK_FORMAT_EAC_R11G11_UNORM_BLOCK)            \
+    X(wgpu::TextureFormat::EACRG11Snorm, VK_FORMAT_EAC_R11G11_SNORM_BLOCK)            \
+                                                                                      \
+    X(wgpu::TextureFormat::ASTC4x4Unorm, VK_FORMAT_ASTC_4x4_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC4x4UnormSrgb, VK_FORMAT_ASTC_4x4_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC5x4Unorm, VK_FORMAT_ASTC_5x4_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC5x4UnormSrgb, VK_FORMAT_ASTC_5x4_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC5x5Unorm, VK_FORMAT_ASTC_5x5_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC5x5UnormSrgb, VK_FORMAT_ASTC_5x5_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC6x5Unorm, VK_FORMAT_ASTC_6x5_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC6x5UnormSrgb, VK_FORMAT_ASTC_6x5_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC6x6Unorm, VK_FORMAT_ASTC_6x6_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC6x6UnormSrgb, VK_FORMAT_ASTC_6x6_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC8x5Unorm, VK_FORMAT_ASTC_8x5_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC8x5UnormSrgb, VK_FORMAT_ASTC_8x5_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC8x6Unorm, VK_FORMAT_ASTC_8x6_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC8x6UnormSrgb, VK_FORMAT_ASTC_8x6_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC8x8Unorm, VK_FORMAT_ASTC_8x8_UNORM_BLOCK)              \
+    X(wgpu::TextureFormat::ASTC8x8UnormSrgb, VK_FORMAT_ASTC_8x8_SRGB_BLOCK)           \
+    X(wgpu::TextureFormat::ASTC10x5Unorm, VK_FORMAT_ASTC_10x5_UNORM_BLOCK)            \
+    X(wgpu::TextureFormat::ASTC10x5UnormSrgb, VK_FORMAT_ASTC_10x5_SRGB_BLOCK)         \
+    X(wgpu::TextureFormat::ASTC10x6Unorm, VK_FORMAT_ASTC_10x6_UNORM_BLOCK)            \
+    X(wgpu::TextureFormat::ASTC10x6UnormSrgb, VK_FORMAT_ASTC_10x6_SRGB_BLOCK)         \
+    X(wgpu::TextureFormat::ASTC10x8Unorm, VK_FORMAT_ASTC_10x8_UNORM_BLOCK)            \
+    X(wgpu::TextureFormat::ASTC10x8UnormSrgb, VK_FORMAT_ASTC_10x8_SRGB_BLOCK)         \
+    X(wgpu::TextureFormat::ASTC10x10Unorm, VK_FORMAT_ASTC_10x10_UNORM_BLOCK)          \
+    X(wgpu::TextureFormat::ASTC10x10UnormSrgb, VK_FORMAT_ASTC_10x10_SRGB_BLOCK)       \
+    X(wgpu::TextureFormat::ASTC12x10Unorm, VK_FORMAT_ASTC_12x10_UNORM_BLOCK)          \
+    X(wgpu::TextureFormat::ASTC12x10UnormSrgb, VK_FORMAT_ASTC_12x10_SRGB_BLOCK)       \
+    X(wgpu::TextureFormat::ASTC12x12Unorm, VK_FORMAT_ASTC_12x12_UNORM_BLOCK)          \
+    X(wgpu::TextureFormat::ASTC12x12UnormSrgb, VK_FORMAT_ASTC_12x12_SRGB_BLOCK)       \
+                                                                                      \
+    X(wgpu::TextureFormat::R8BG8Biplanar420Unorm, VK_FORMAT_G8_B8R8_2PLANE_420_UNORM) \
+    X(wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm,                               \
+      VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16)
+
 // Converts Dawn texture format to Vulkan formats.
 VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
     switch (format) {
-        case wgpu::TextureFormat::R8Unorm:
-            return VK_FORMAT_R8_UNORM;
-        case wgpu::TextureFormat::R8Snorm:
-            return VK_FORMAT_R8_SNORM;
-        case wgpu::TextureFormat::R8Uint:
-            return VK_FORMAT_R8_UINT;
-        case wgpu::TextureFormat::R8Sint:
-            return VK_FORMAT_R8_SINT;
-
-        case wgpu::TextureFormat::R16Unorm:
-            return VK_FORMAT_R16_UNORM;
-        case wgpu::TextureFormat::R16Snorm:
-            return VK_FORMAT_R16_SNORM;
-        case wgpu::TextureFormat::R16Uint:
-            return VK_FORMAT_R16_UINT;
-        case wgpu::TextureFormat::R16Sint:
-            return VK_FORMAT_R16_SINT;
-        case wgpu::TextureFormat::R16Float:
-            return VK_FORMAT_R16_SFLOAT;
-        case wgpu::TextureFormat::RG8Unorm:
-            return VK_FORMAT_R8G8_UNORM;
-        case wgpu::TextureFormat::RG8Snorm:
-            return VK_FORMAT_R8G8_SNORM;
-        case wgpu::TextureFormat::RG8Uint:
-            return VK_FORMAT_R8G8_UINT;
-        case wgpu::TextureFormat::RG8Sint:
-            return VK_FORMAT_R8G8_SINT;
-
-        case wgpu::TextureFormat::R32Uint:
-            return VK_FORMAT_R32_UINT;
-        case wgpu::TextureFormat::R32Sint:
-            return VK_FORMAT_R32_SINT;
-        case wgpu::TextureFormat::R32Float:
-            return VK_FORMAT_R32_SFLOAT;
-        case wgpu::TextureFormat::RG16Unorm:
-            return VK_FORMAT_R16G16_UNORM;
-        case wgpu::TextureFormat::RG16Snorm:
-            return VK_FORMAT_R16G16_SNORM;
-        case wgpu::TextureFormat::RG16Uint:
-            return VK_FORMAT_R16G16_UINT;
-        case wgpu::TextureFormat::RG16Sint:
-            return VK_FORMAT_R16G16_SINT;
-        case wgpu::TextureFormat::RG16Float:
-            return VK_FORMAT_R16G16_SFLOAT;
-        case wgpu::TextureFormat::RGBA8Unorm:
-            return VK_FORMAT_R8G8B8A8_UNORM;
-        case wgpu::TextureFormat::RGBA8UnormSrgb:
-            return VK_FORMAT_R8G8B8A8_SRGB;
-        case wgpu::TextureFormat::RGBA8Snorm:
-            return VK_FORMAT_R8G8B8A8_SNORM;
-        case wgpu::TextureFormat::RGBA8Uint:
-            return VK_FORMAT_R8G8B8A8_UINT;
-        case wgpu::TextureFormat::RGBA8Sint:
-            return VK_FORMAT_R8G8B8A8_SINT;
-        case wgpu::TextureFormat::BGRA8Unorm:
-            return VK_FORMAT_B8G8R8A8_UNORM;
-        case wgpu::TextureFormat::BGRA8UnormSrgb:
-            return VK_FORMAT_B8G8R8A8_SRGB;
-        case wgpu::TextureFormat::RGB10A2Uint:
-            return VK_FORMAT_A2B10G10R10_UINT_PACK32;
-        case wgpu::TextureFormat::RGB10A2Unorm:
-            return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
-        case wgpu::TextureFormat::RG11B10Ufloat:
-            return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
-        case wgpu::TextureFormat::RGB9E5Ufloat:
-            return VK_FORMAT_E5B9G9R9_UFLOAT_PACK32;
-
-        case wgpu::TextureFormat::RG32Uint:
-            return VK_FORMAT_R32G32_UINT;
-        case wgpu::TextureFormat::RG32Sint:
-            return VK_FORMAT_R32G32_SINT;
-        case wgpu::TextureFormat::RG32Float:
-            return VK_FORMAT_R32G32_SFLOAT;
-        case wgpu::TextureFormat::RGBA16Unorm:
-            return VK_FORMAT_R16G16B16A16_UNORM;
-        case wgpu::TextureFormat::RGBA16Snorm:
-            return VK_FORMAT_R16G16B16A16_SNORM;
-        case wgpu::TextureFormat::RGBA16Uint:
-            return VK_FORMAT_R16G16B16A16_UINT;
-        case wgpu::TextureFormat::RGBA16Sint:
-            return VK_FORMAT_R16G16B16A16_SINT;
-        case wgpu::TextureFormat::RGBA16Float:
-            return VK_FORMAT_R16G16B16A16_SFLOAT;
-
-        case wgpu::TextureFormat::RGBA32Uint:
-            return VK_FORMAT_R32G32B32A32_UINT;
-        case wgpu::TextureFormat::RGBA32Sint:
-            return VK_FORMAT_R32G32B32A32_SINT;
-        case wgpu::TextureFormat::RGBA32Float:
-            return VK_FORMAT_R32G32B32A32_SFLOAT;
-
-        case wgpu::TextureFormat::Depth16Unorm:
-            return VK_FORMAT_D16_UNORM;
-        case wgpu::TextureFormat::Depth32Float:
-            return VK_FORMAT_D32_SFLOAT;
-        case wgpu::TextureFormat::Depth24Plus:
-            return VK_FORMAT_D32_SFLOAT;
+#define X(wgpuFormat, vkFormat) \
+    case wgpuFormat:            \
+        return vkFormat;
+        SIMPLE_FORMAT_MAPPING(X)
+#undef X
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 maps to either of these two formats because only requires
             // that one of the two be present. The VulkanUseD32S8 toggle combines the wish of
@@ -433,8 +453,10 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
             } else {
                 return VK_FORMAT_D24_UNORM_S8_UINT;
             }
-        case wgpu::TextureFormat::Depth32FloatStencil8:
-            return VK_FORMAT_D32_SFLOAT_S8_UINT;
+
+        case wgpu::TextureFormat::Depth24Plus:
+            return VK_FORMAT_D32_SFLOAT;
+
         case wgpu::TextureFormat::Stencil8:
             // Try to use the stencil8 format if possible, otherwise use whatever format we can
             // use that contains a stencil8 component.
@@ -444,117 +466,6 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
                 return VulkanImageFormat(device, wgpu::TextureFormat::Depth24PlusStencil8);
             }
 
-        case wgpu::TextureFormat::BC1RGBAUnorm:
-            return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC1RGBAUnormSrgb:
-            return VK_FORMAT_BC1_RGBA_SRGB_BLOCK;
-        case wgpu::TextureFormat::BC2RGBAUnorm:
-            return VK_FORMAT_BC2_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC2RGBAUnormSrgb:
-            return VK_FORMAT_BC2_SRGB_BLOCK;
-        case wgpu::TextureFormat::BC3RGBAUnorm:
-            return VK_FORMAT_BC3_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC3RGBAUnormSrgb:
-            return VK_FORMAT_BC3_SRGB_BLOCK;
-        case wgpu::TextureFormat::BC4RSnorm:
-            return VK_FORMAT_BC4_SNORM_BLOCK;
-        case wgpu::TextureFormat::BC4RUnorm:
-            return VK_FORMAT_BC4_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC5RGSnorm:
-            return VK_FORMAT_BC5_SNORM_BLOCK;
-        case wgpu::TextureFormat::BC5RGUnorm:
-            return VK_FORMAT_BC5_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC6HRGBFloat:
-            return VK_FORMAT_BC6H_SFLOAT_BLOCK;
-        case wgpu::TextureFormat::BC6HRGBUfloat:
-            return VK_FORMAT_BC6H_UFLOAT_BLOCK;
-        case wgpu::TextureFormat::BC7RGBAUnorm:
-            return VK_FORMAT_BC7_UNORM_BLOCK;
-        case wgpu::TextureFormat::BC7RGBAUnormSrgb:
-            return VK_FORMAT_BC7_SRGB_BLOCK;
-
-        case wgpu::TextureFormat::ETC2RGB8Unorm:
-            return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
-        case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
-            return VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK;
-        case wgpu::TextureFormat::ETC2RGB8A1Unorm:
-            return VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK;
-        case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
-            return VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK;
-        case wgpu::TextureFormat::ETC2RGBA8Unorm:
-            return VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
-        case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
-            return VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK;
-        case wgpu::TextureFormat::EACR11Unorm:
-            return VK_FORMAT_EAC_R11_UNORM_BLOCK;
-        case wgpu::TextureFormat::EACR11Snorm:
-            return VK_FORMAT_EAC_R11_SNORM_BLOCK;
-        case wgpu::TextureFormat::EACRG11Unorm:
-            return VK_FORMAT_EAC_R11G11_UNORM_BLOCK;
-        case wgpu::TextureFormat::EACRG11Snorm:
-            return VK_FORMAT_EAC_R11G11_SNORM_BLOCK;
-
-        case wgpu::TextureFormat::ASTC4x4Unorm:
-            return VK_FORMAT_ASTC_4x4_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC4x4UnormSrgb:
-            return VK_FORMAT_ASTC_4x4_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC5x4Unorm:
-            return VK_FORMAT_ASTC_5x4_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC5x4UnormSrgb:
-            return VK_FORMAT_ASTC_5x4_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC5x5Unorm:
-            return VK_FORMAT_ASTC_5x5_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC5x5UnormSrgb:
-            return VK_FORMAT_ASTC_5x5_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC6x5Unorm:
-            return VK_FORMAT_ASTC_6x5_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC6x5UnormSrgb:
-            return VK_FORMAT_ASTC_6x5_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC6x6Unorm:
-            return VK_FORMAT_ASTC_6x6_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC6x6UnormSrgb:
-            return VK_FORMAT_ASTC_6x6_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC8x5Unorm:
-            return VK_FORMAT_ASTC_8x5_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC8x5UnormSrgb:
-            return VK_FORMAT_ASTC_8x5_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC8x6Unorm:
-            return VK_FORMAT_ASTC_8x6_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC8x6UnormSrgb:
-            return VK_FORMAT_ASTC_8x6_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC8x8Unorm:
-            return VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC8x8UnormSrgb:
-            return VK_FORMAT_ASTC_8x8_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC10x5Unorm:
-            return VK_FORMAT_ASTC_10x5_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC10x5UnormSrgb:
-            return VK_FORMAT_ASTC_10x5_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC10x6Unorm:
-            return VK_FORMAT_ASTC_10x6_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC10x6UnormSrgb:
-            return VK_FORMAT_ASTC_10x6_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC10x8Unorm:
-            return VK_FORMAT_ASTC_10x8_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC10x8UnormSrgb:
-            return VK_FORMAT_ASTC_10x8_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC10x10Unorm:
-            return VK_FORMAT_ASTC_10x10_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC10x10UnormSrgb:
-            return VK_FORMAT_ASTC_10x10_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC12x10Unorm:
-            return VK_FORMAT_ASTC_12x10_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC12x10UnormSrgb:
-            return VK_FORMAT_ASTC_12x10_SRGB_BLOCK;
-        case wgpu::TextureFormat::ASTC12x12Unorm:
-            return VK_FORMAT_ASTC_12x12_UNORM_BLOCK;
-        case wgpu::TextureFormat::ASTC12x12UnormSrgb:
-            return VK_FORMAT_ASTC_12x12_SRGB_BLOCK;
-
-        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-            return VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-            return VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16;
         // R8BG8A8Triplanar420Unorm format is only supported on macOS.
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::Undefined:
@@ -562,6 +473,32 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
     }
     DAWN_UNREACHABLE();
 }
+
+ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
+    switch (vkFormat) {
+#define X(wgpuFormat, vkFormat) \
+    case vkFormat:              \
+        return wgpuFormat;
+        SIMPLE_FORMAT_MAPPING(X)
+#undef X
+        case VK_FORMAT_S8_UINT:
+            if (device->IsToggleEnabled(Toggle::VulkanUseS8)) {
+                return wgpu::TextureFormat::Stencil8;
+            }
+            break;
+
+        case VK_FORMAT_D24_UNORM_S8_UINT:
+            if (!device->IsToggleEnabled(Toggle::VulkanUseD32S8)) {
+                return wgpu::TextureFormat::Depth24PlusStencil8;
+            }
+            break;
+        default:
+            break;
+    }
+    return DAWN_VALIDATION_ERROR("Unsupported VkFormat %x", vkFormat);
+}
+
+#undef SIMPLE_FORMAT_MAPPING
 
 // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
 // between color and depth attachment usages.

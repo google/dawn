@@ -60,8 +60,8 @@ class SharedTextureMemoryTestBackend {
     CreatePerDeviceSharedTextureMemories(const std::vector<wgpu::Device>& devices) = 0;
 
     // Import `fence` which may have been created on some other device, onto `importingDevice`.
-    virtual wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
-                                            const wgpu::SharedFence& fence) = 0;
+    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
+                                    const wgpu::SharedFence& fence);
 
     // Shorthand version of `CreatePerDeviceSharedTextureMemories` that creates memories on a single
     // device.
@@ -127,6 +127,19 @@ class SharedTextureMemoryTestBackend {
         beginDesc->nextInChain = nullptr;
         return std::make_unique<BackendBeginState>();
     }
+};
+
+class SharedTextureMemoryTestVulkanBackend : public SharedTextureMemoryTestBackend {
+  public:
+    std::unique_ptr<BackendBeginState> ChainInitialBeginState(
+        wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc) override;
+
+    std::unique_ptr<BackendEndState> ChainEndState(
+        wgpu::SharedTextureMemoryEndAccessState* endState) override;
+
+    std::unique_ptr<BackendBeginState> ChainBeginState(
+        wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc,
+        const wgpu::SharedTextureMemoryEndAccessState& endState) override;
 };
 
 inline std::ostream& operator<<(std::ostream& o, SharedTextureMemoryTestBackend* backend) {

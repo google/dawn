@@ -34,14 +34,14 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/tests/end2end/SharedTextureMemoryTests.h"
+#include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 #include "dawn/webgpu_cpp.h"
 
 namespace dawn {
 namespace {
 
 template <wgpu::FeatureName FenceFeature>
-class Backend : public SharedTextureMemoryTestBackend {
+class Backend : public SharedTextureMemoryTestVulkanBackend {
   public:
     static SharedTextureMemoryTestBackend* GetInstance() {
         static Backend b;
@@ -167,93 +167,6 @@ class Backend : public SharedTextureMemoryTestBackend {
             }
         }
         return memories;
-    }
-
-    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
-                                    const wgpu::SharedFence& fence) override {
-        wgpu::SharedFenceExportInfo exportInfo;
-        fence.ExportInfo(&exportInfo);
-
-        switch (exportInfo.type) {
-            case wgpu::SharedFenceType::VkSemaphoreOpaqueFD: {
-                wgpu::SharedFenceVkSemaphoreOpaqueFDExportInfo vkExportInfo;
-                exportInfo.nextInChain = &vkExportInfo;
-                fence.ExportInfo(&exportInfo);
-
-                wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor vkDesc;
-                vkDesc.handle = vkExportInfo.handle;
-
-                wgpu::SharedFenceDescriptor fenceDesc;
-                fenceDesc.nextInChain = &vkDesc;
-                return importingDevice.ImportSharedFence(&fenceDesc);
-            }
-            case wgpu::SharedFenceType::VkSemaphoreSyncFD: {
-                wgpu::SharedFenceVkSemaphoreSyncFDExportInfo vkExportInfo;
-                exportInfo.nextInChain = &vkExportInfo;
-                fence.ExportInfo(&exportInfo);
-
-                wgpu::SharedFenceVkSemaphoreSyncFDDescriptor vkDesc;
-                vkDesc.handle = vkExportInfo.handle;
-
-                wgpu::SharedFenceDescriptor fenceDesc;
-                fenceDesc.nextInChain = &vkDesc;
-                return importingDevice.ImportSharedFence(&fenceDesc);
-            }
-            case wgpu::SharedFenceType::VkSemaphoreZirconHandle: {
-                wgpu::SharedFenceVkSemaphoreZirconHandleExportInfo vkExportInfo;
-                exportInfo.nextInChain = &vkExportInfo;
-                fence.ExportInfo(&exportInfo);
-
-                wgpu::SharedFenceVkSemaphoreZirconHandleDescriptor vkDesc;
-                vkDesc.handle = vkExportInfo.handle;
-
-                wgpu::SharedFenceDescriptor fenceDesc;
-                fenceDesc.nextInChain = &vkDesc;
-                return importingDevice.ImportSharedFence(&fenceDesc);
-            }
-            default:
-                DAWN_UNREACHABLE();
-        }
-    }
-
-    struct BackendBeginStateVk : public BackendBeginState {
-        wgpu::SharedTextureMemoryVkImageLayoutBeginState imageLayouts{};
-    };
-
-    struct BackendEndStateVk : public BackendEndState {
-        wgpu::SharedTextureMemoryVkImageLayoutEndState imageLayouts{};
-    };
-
-    std::unique_ptr<BackendBeginState> ChainInitialBeginState(
-        wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc) override {
-        auto state = std::make_unique<BackendBeginStateVk>();
-        state->imageLayouts.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        state->imageLayouts.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        beginDesc->nextInChain = &state->imageLayouts;
-        return state;
-    }
-
-    std::unique_ptr<BackendEndState> ChainEndState(
-        wgpu::SharedTextureMemoryEndAccessState* endState) override {
-        auto state = std::make_unique<BackendEndStateVk>();
-        endState->nextInChain = &state->imageLayouts;
-        return state;
-    }
-
-    std::unique_ptr<BackendBeginState> ChainBeginState(
-        wgpu::SharedTextureMemoryBeginAccessDescriptor* beginDesc,
-        const wgpu::SharedTextureMemoryEndAccessState& endState) override {
-        DAWN_ASSERT(endState.nextInChain != nullptr);
-        DAWN_ASSERT(endState.nextInChain->sType ==
-                    wgpu::SType::SharedTextureMemoryVkImageLayoutEndState);
-        auto* vkEndState =
-            static_cast<wgpu::SharedTextureMemoryVkImageLayoutEndState*>(endState.nextInChain);
-
-        auto state = std::make_unique<BackendBeginStateVk>();
-        state->imageLayouts.oldLayout = vkEndState->oldLayout;
-        state->imageLayouts.newLayout = vkEndState->newLayout;
-        beginDesc->nextInChain = &state->imageLayouts;
-        return state;
     }
 
   private:

@@ -37,6 +37,10 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/platform/DawnPlatform.h"
 
+#if DAWN_PLATFORM_IS(ANDROID)
+#include "dawn/native/AHBFunctions.h"
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
 namespace dawn::native::vulkan {
 
 namespace {
@@ -366,6 +370,14 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
     }
+
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
+        if (GetInstance()->GetOrLoadAHBFunctions()->IsValid()) {
+            EnableFeature(Feature::SharedTextureMemoryAHardwareBuffer);
+        }
+    }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
     if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreZirconHandle,
                               VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA)) {

@@ -56,6 +56,7 @@ class Platform;
 
 namespace dawn::native {
 
+class AHBFunctions;
 class CallbackTaskManager;
 class DeviceBase;
 class Surface;
@@ -157,6 +158,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     // Get backend-independent libraries that need to be loaded dynamically.
     const X11Functions* GetOrLoadX11Functions();
+    const AHBFunctions* GetOrLoadAHBFunctions();
 
     // Dawn API
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
@@ -225,6 +227,9 @@ class InstanceBase final : public RefCountedWithExternalCount {
 #if defined(DAWN_USE_X11)
     std::unique_ptr<X11Functions> mX11Functions;
 #endif  // defined(DAWN_USE_X11)
+#if DAWN_PLATFORM_IS(ANDROID)
+    std::unique_ptr<AHBFunctions> mAHBFunctions;
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
     Ref<CallbackTaskManager> mCallbackTaskManager;
     EventManager mEventManager;

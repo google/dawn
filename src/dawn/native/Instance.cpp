@@ -64,6 +64,10 @@
 #include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
+#if DAWN_PLATFORM_IS(ANDROID)
+#include "dawn/native/AHBFunctions.h"
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
 namespace dawn::native {
 
 // Forward definitions of each backend's "Connect" function that creates new BackendConnection.
@@ -551,6 +555,17 @@ const X11Functions* InstanceBase::GetOrLoadX11Functions() {
 #else
     DAWN_UNREACHABLE();
 #endif  // defined(DAWN_USE_X11)
+}
+
+const AHBFunctions* InstanceBase::GetOrLoadAHBFunctions() {
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (mAHBFunctions == nullptr) {
+        mAHBFunctions = std::make_unique<AHBFunctions>();
+    }
+    return mAHBFunctions.get();
+#else
+    DAWN_UNREACHABLE();
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
 Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {

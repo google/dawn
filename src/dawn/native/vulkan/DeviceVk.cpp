@@ -230,7 +230,10 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
-    DAWN_TRY_ASSIGN(type, unpacked.ValidateBranches<Branch<SharedTextureMemoryDmaBufDescriptor>>());
+    DAWN_TRY_ASSIGN(type,
+                    (unpacked.ValidateBranches<Branch<SharedTextureMemoryDmaBufDescriptor>,
+                                               Branch<SharedTextureMemoryAHardwareBufferDescriptor>,
+                                               Branch<SharedTextureMemoryOpaqueFDDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedTextureMemoryDmaBufDescriptor:
@@ -238,6 +241,18 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             wgpu::FeatureName::SharedTextureMemoryDmaBuf);
             return SharedTextureMemory::Create(this, descriptor->label,
                                                unpacked.Get<SharedTextureMemoryDmaBufDescriptor>());
+        case wgpu::SType::SharedTextureMemoryAHardwareBufferDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
+                            "%s is not enabled.",
+                            wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
+            return SharedTextureMemory::Create(
+                this, descriptor->label,
+                unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
+        case wgpu::SType::SharedTextureMemoryOpaqueFDDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryOpaqueFD), "%s is not enabled.",
+                            wgpu::FeatureName::SharedTextureMemoryOpaqueFD);
+            return SharedTextureMemory::Create(
+                this, descriptor->label, unpacked.Get<SharedTextureMemoryOpaqueFDDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
