@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
@@ -170,6 +171,97 @@ TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
+}
+
+// Test 3d texture slices used as render attachments.
+TEST_P(Texture3DTests, Rendering) {
+    // TODO(crbug.com/dawn/1217): D3D12 debug layer reports the same subresource of 3d texture
+    // cannot be written at the same time, which is a bug of D3D12 debug layer.
+    // Remove this suppression once the issue is fixed.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // Set up pipeline. Bottom-left triangle will be drawn via the pipeline.
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f(-1.0,  1.0),
+                vec2f( 1.0, -1.0),
+                vec2f(-1.0, -1.0));
+
+            return vec4f(pos[VertexIndex], 0.0, 1.0);
+        })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        struct Output {
+            @location(0) color0 : vec4f,
+            @location(1) color1 : vec4f,
+        }
+
+        @fragment
+        fn main() -> Output {
+            var output : Output;
+            output.color0 = vec4f(0.0, 1.0, 0.0, 1.0);
+            output.color1 = vec4f(0.0, 1.0, 0.0, 1.0);
+            return output;
+        })");
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].format = kFormat;
+    pipelineDescriptor.cTargets[1].format = kFormat;
+    pipelineDescriptor.cFragment.targetCount = 2;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    // Create a 3D texture and 3D texture view which will be used as a render attachment.
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.dimension = wgpu::TextureDimension::e3D;
+    textureDescriptor.size = {kRTSize, kRTSize, kRTSize};
+    textureDescriptor.mipLevelCount = 2;
+    textureDescriptor.format = kFormat;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture renderTarget = device.CreateTexture(&textureDescriptor);
+
+    wgpu::TextureViewDescriptor viewDescriptor;
+    viewDescriptor.dimension = wgpu::TextureViewDimension::e3D;
+    viewDescriptor.baseMipLevel = 1;
+    viewDescriptor.mipLevelCount = 1;
+    viewDescriptor.baseArrayLayer = 0;
+    viewDescriptor.arrayLayerCount = 1;
+    wgpu::TextureView view = renderTarget.CreateView(&viewDescriptor);
+
+    // Clear and render to the depth slice index 0 and 1 of 3D texture at mip level 1
+    utils::ComboRenderPassDescriptor renderPass({view, view});
+    renderPass.cColorAttachments[0].depthSlice = 0;
+    renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+    renderPass.cColorAttachments[1].depthSlice = 1;
+    renderPass.cColorAttachments[1].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    uint32_t mipSize = std::max(kRTSize >> viewDescriptor.baseMipLevel, 1u);
+    std::vector<utils::RGBA8> expected(mipSize * mipSize);
+    // Only bottom-left triangle should be drawn with green color (0, 255, 0, 255), other pixels
+    // stay red color (255, 0, 0, 255).
+    for (uint32_t i = 0; i < mipSize; ++i) {
+        for (uint32_t j = 0; j < mipSize; ++j) {
+            expected[i * mipSize + j] =
+                j < i ? utils::RGBA8(0, 255, 0, 255) : utils::RGBA8(255, 0, 0, 255);
+        }
+    }
+
+    EXPECT_TEXTURE_EQ(expected.data(), renderTarget, {0, 0, 0}, {mipSize, mipSize, 1},
+                      viewDescriptor.baseMipLevel);
+    EXPECT_TEXTURE_EQ(expected.data(), renderTarget, {0, 0, 1}, {mipSize, mipSize, 1},
+                      viewDescriptor.baseMipLevel);
 }
 
 DAWN_INSTANTIATE_TEST(Texture3DTests,

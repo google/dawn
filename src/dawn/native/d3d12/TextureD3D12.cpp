@@ -822,14 +822,15 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                     device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
                 const D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetBaseDescriptor();
 
-                uint32_t baseSlice = layer;
-                uint32_t sliceCount = 1;
-                if (GetDimension() == wgpu::TextureDimension::e3D) {
-                    baseSlice = 0;
-                    sliceCount = std::max(GetDepth(Aspect::Color) >> level, 1u);
-                }
+                // For the subresources of 3d textures, range.baseArrayLayer must be 0 and
+                // range.layerCount must be 1, the sliceCount is the depthOrArrayLayers of the
+                // subresource virtual size, which must be 1 for 2d textures. When clearing RTV, we
+                // can use the 'layer' as baseSlice and the 'depthOrArrayLayers' as sliceCount to
+                // create RTV without checking the dimension.
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
-                    GetRTVDescriptor(GetFormat(), level, baseSlice, sliceCount);
+                    GetRTVDescriptor(GetFormat(), level, layer,
+                                     GetMipLevelSingleSubresourceVirtualSize(level, Aspect::Color)
+                                         .depthOrArrayLayers);
                 device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
                                                                  rtvHandle);
                 commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
@@ -1097,9 +1098,15 @@ const D3D12_SHADER_RESOURCE_VIEW_DESC& TextureView::GetSRVDescriptor() const {
     return mSrvDesc;
 }
 
-D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() const {
+D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor(uint32_t depthSlice) const {
+    DAWN_ASSERT(depthSlice < GetSingleSubresourceVirtualSize().depthOrArrayLayers);
+    // We have validated that the depthSlice in render pass's colorAttachments must be undefined for
+    // 2d RTVs, which value is set to 0. For 3d RTVs, the baseArrayLayer must be 0. So here we can
+    // simply use baseArrayLayer + depthSlice to specify the slice in RTVs without checking the
+    // view's dimension.
     return ToBackend(GetTexture())
-        ->GetRTVDescriptor(GetFormat(), GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount());
+        ->GetRTVDescriptor(GetFormat(), GetBaseMipLevel(), GetBaseArrayLayer() + depthSlice,
+                           GetLayerCount());
 }
 
 D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor(bool depthReadOnly,

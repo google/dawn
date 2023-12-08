@@ -807,6 +807,11 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
         createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     }
 
+    if (createInfo.imageType == VK_IMAGE_TYPE_3D &&
+        createInfo.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+        createInfo.flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+    }
+
     // We always set VK_IMAGE_USAGE_TRANSFER_DST_BIT unconditionally beause the Vulkan images
     // that are used in vkCmdClearColorImage() must have been created with this flag, which is
     // also required for the implementation of robust resource initialization.
@@ -1634,36 +1639,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     }
 
     Device* device = ToBackend(GetTexture()->GetDevice());
-
-    VkImageViewCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-    createInfo.image = ToBackend(GetTexture())->GetHandle();
-    createInfo.viewType = VulkanImageViewType(descriptor->dimension);
-
-    const Format& textureFormat = GetTexture()->GetFormat();
-    if (textureFormat.HasStencil() &&
-        (textureFormat.HasDepth() || !device->IsToggleEnabled(Toggle::VulkanUseS8))) {
-        // Unlike multi-planar formats, depth-stencil formats have multiple aspects but are not
-        // created with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT.
-        // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageViewCreateInfo.html#VUID-VkImageViewCreateInfo-image-01762
-        // Without, VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, the view format must match the texture
-        // format.
-        createInfo.format = VulkanImageFormat(device, textureFormat.format);
-    } else {
-        createInfo.format = VulkanImageFormat(device, descriptor->format);
-    }
-
-    createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
-                                               VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-
-    const SubresourceRange& subresources = GetSubresourceRange();
-    createInfo.subresourceRange.baseMipLevel = subresources.baseMipLevel;
-    createInfo.subresourceRange.levelCount = subresources.levelCount;
-    createInfo.subresourceRange.baseArrayLayer = subresources.baseArrayLayer;
-    createInfo.subresourceRange.layerCount = subresources.layerCount;
-    createInfo.subresourceRange.aspectMask = VulkanAspectMask(subresources.aspects);
+    VkImageViewCreateInfo createInfo = GetCreateInfo(descriptor->format, descriptor->dimension);
 
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
@@ -1698,6 +1674,13 @@ void TextureView::DestroyImpl() {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
         mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
     }
+
+    for (auto& handle : mHandlesFor2DViewOn3D) {
+        if (handle != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(handle);
+            handle = VK_NULL_HANDLE;
+        }
+    }
 }
 
 VkImageView TextureView::GetHandle() const {
@@ -1706,6 +1689,70 @@ VkImageView TextureView::GetHandle() const {
 
 VkImageView TextureView::GetHandleForBGRA8UnormStorage() const {
     return mHandleForBGRA8UnormStorage;
+}
+
+VkImageViewCreateInfo TextureView::GetCreateInfo(wgpu::TextureFormat format,
+                                                 wgpu::TextureViewDimension dimension,
+                                                 uint32_t depthSlice) const {
+    Device* device = ToBackend(GetTexture()->GetDevice());
+
+    VkImageViewCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.image = ToBackend(GetTexture())->GetHandle();
+    createInfo.viewType = VulkanImageViewType(dimension);
+
+    const Format& textureFormat = GetTexture()->GetFormat();
+    if (textureFormat.HasStencil() &&
+        (textureFormat.HasDepth() || !device->IsToggleEnabled(Toggle::VulkanUseS8))) {
+        // Unlike multi-planar formats, depth-stencil formats have multiple aspects but are not
+        // created with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT.
+        // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageViewCreateInfo.html#VUID-VkImageViewCreateInfo-image-01762
+        // Without, VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, the view format must match the texture
+        // format.
+        createInfo.format = VulkanImageFormat(device, textureFormat.format);
+    } else {
+        createInfo.format = VulkanImageFormat(device, format);
+    }
+
+    createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
+                                               VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+
+    const SubresourceRange& subresources = GetSubresourceRange();
+    createInfo.subresourceRange.baseMipLevel = subresources.baseMipLevel;
+    createInfo.subresourceRange.levelCount = subresources.levelCount;
+    createInfo.subresourceRange.baseArrayLayer = subresources.baseArrayLayer + depthSlice;
+    createInfo.subresourceRange.layerCount = subresources.layerCount;
+    createInfo.subresourceRange.aspectMask = VulkanAspectMask(subresources.aspects);
+
+    return createInfo;
+}
+
+ResultOrError<VkImageView> TextureView::GetOrCreate2DViewOn3D(uint32_t depthSlice) {
+    DAWN_ASSERT(GetTexture()->GetDimension() == wgpu::TextureDimension::e3D);
+    DAWN_ASSERT(depthSlice < GetSingleSubresourceVirtualSize().depthOrArrayLayers);
+
+    if (mHandlesFor2DViewOn3D.empty()) {
+        mHandlesFor2DViewOn3D.resize(GetSingleSubresourceVirtualSize().depthOrArrayLayers);
+    }
+
+    if (mHandlesFor2DViewOn3D[depthSlice] != VK_NULL_HANDLE) {
+        return static_cast<VkImageView>(mHandlesFor2DViewOn3D[depthSlice]);
+    }
+
+    Device* device = ToBackend(GetTexture()->GetDevice());
+    VkImageViewCreateInfo createInfo =
+        GetCreateInfo(GetFormat().format, wgpu::TextureViewDimension::e2D, depthSlice);
+
+    VkImageView view;
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*view),
+        "CreateImageView for 2D view on 3D image"));
+
+    mHandlesFor2DViewOn3D[depthSlice] = view;
+
+    return view;
 }
 
 void TextureView::SetLabelImpl() {

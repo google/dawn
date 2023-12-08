@@ -1109,7 +1109,13 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     resolveTarget = descColorAttachment.resolveTarget;
 
                     cmdColorAttachment.view = colorTarget;
-                    cmdColorAttachment.depthSlice = descColorAttachment.depthSlice;
+                    // Explicitly set depthSlice to 0 if it's undefined. The
+                    // WGPU_DEPTH_SLICE_UNDEFINED is defined to differentiate between `undefined`
+                    // and 0 for depthSlice, but we use it as 0 for 2d attachments in backends.
+                    cmdColorAttachment.depthSlice =
+                        descColorAttachment.depthSlice == WGPU_DEPTH_SLICE_UNDEFINED
+                            ? 0
+                            : descColorAttachment.depthSlice;
                     cmdColorAttachment.loadOp = descColorAttachment.loadOp;
                     cmdColorAttachment.storeOp = descColorAttachment.storeOp;
                 } else {

@@ -173,7 +173,7 @@ class TextureView final : public TextureViewBase {
     DXGI_FORMAT GetD3D12Format() const;
 
     const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
-    D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor() const;
+    D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t depthSlice = 0u) const;
     D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(bool depthReadOnly, bool stencilReadOnly) const;
     D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDescriptor() const;
 

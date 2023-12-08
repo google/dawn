@@ -236,17 +236,24 @@ class TextureView final : public TextureViewBase {
     VkImageView GetHandle() const;
     VkImageView GetHandleForBGRA8UnormStorage() const;
 
+    ResultOrError<VkImageView> GetOrCreate2DViewOn3D(uint32_t depthSlice = 0u);
+
   private:
     ~TextureView() override;
     void DestroyImpl() override;
     using TextureViewBase::TextureViewBase;
     MaybeError Initialize(const TextureViewDescriptor* descriptor);
 
+    VkImageViewCreateInfo GetCreateInfo(wgpu::TextureFormat format,
+                                        wgpu::TextureViewDimension dimension,
+                                        uint32_t depthSlice = 0u) const;
+
     // Dawn API
     void SetLabelImpl() override;
 
     VkImageView mHandle = VK_NULL_HANDLE;
     VkImageView mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
+    std::vector<VkImageView> mHandlesFor2DViewOn3D;
 };
 
 }  // namespace dawn::native::vulkan
