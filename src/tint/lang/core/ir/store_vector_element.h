@@ -47,6 +47,9 @@ class StoreVectorElement final : public Castable<StoreVectorElement, OperandInst
     /// The offset in Operands() for the `value` value
     static constexpr size_t kValueOperandOffset = 2;
 
+    /// Constructor (no operands)
+    StoreVectorElement();
+
     /// Constructor
     /// @param to the vector pointer
     /// @param index the new vector element index

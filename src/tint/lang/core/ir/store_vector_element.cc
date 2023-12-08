@@ -34,6 +34,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::StoreVectorElement);
 
 namespace tint::core::ir {
 
+StoreVectorElement::StoreVectorElement() {
+    flags_.Add(Flag::kSequenced);
+}
+
 StoreVectorElement::StoreVectorElement(ir::Value* to, ir::Value* index, ir::Value* value) {
     flags_.Add(Flag::kSequenced);
 

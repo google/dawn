@@ -192,6 +192,8 @@ message Instruction {
         InstructionUserCall user_call = 13;
         InstructionLoad load = 14;
         InstructionStore store = 15;
+        InstructionLoadVectorElement load_vector_element = 16;
+        InstructionStoreVectorElement store_vector_element = 17;
     }
 }
 
@@ -226,6 +228,10 @@ message InstructionUserCall {}
 message InstructionLoad {}
 
 message InstructionStore {}
+
+message InstructionLoadVectorElement {}
+
+message InstructionStoreVectorElement {}
 
 message BindingPoint {
     uint32 group = 1;

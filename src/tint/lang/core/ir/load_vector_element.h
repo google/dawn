@@ -44,6 +44,9 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
     /// The offset in Operands() for the `index` value
     static constexpr size_t kIndexOperandOffset = 1;
 
+    /// Constructor (no results, no operands)
+    LoadVectorElement();
+
     /// Constructor
     /// @param result the result value
     /// @param from the vector pointer

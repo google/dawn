@@ -34,6 +34,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::LoadVectorElement);
 
 namespace tint::core::ir {
 
+LoadVectorElement::LoadVectorElement() {
+    flags_.Add(Flag::kSequenced);
+}
+
 LoadVectorElement::LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index) {
     flags_.Add(Flag::kSequenced);
 

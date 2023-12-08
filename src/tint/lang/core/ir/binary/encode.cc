@@ -39,9 +39,11 @@
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
+#include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -152,8 +154,14 @@ struct Encoder {
             [&](const ir::Discard* i) { InstructionDiscard(*inst_out.mutable_discard(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
             [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
+            [&](const ir::LoadVectorElement* i) {
+                InstructionLoadVectorElement(*inst_out.mutable_load_vector_element(), i);
+            },
             [&](const ir::Return* i) { InstructionReturn(*inst_out.mutable_return_(), i); },
             [&](const ir::Store* i) { InstructionStore(*inst_out.mutable_store(), i); },
+            [&](const ir::StoreVectorElement* i) {
+                InstructionStoreVectorElement(*inst_out.mutable_store_vector_element(), i);
+            },
             [&](const ir::Unary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
             [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
@@ -180,9 +188,15 @@ struct Encoder {
 
     void InstructionLoad(pb::InstructionLoad&, const ir::Load*) {}
 
+    void InstructionLoadVectorElement(pb::InstructionLoadVectorElement&,
+                                      const ir::LoadVectorElement*) {}
+
     void InstructionReturn(pb::InstructionReturn&, const ir::Return*) {}
 
     void InstructionStore(pb::InstructionStore&, const ir::Store*) {}
+
+    void InstructionStoreVectorElement(pb::InstructionStoreVectorElement&,
+                                       const ir::StoreVectorElement*) {}
 
     void InstructionUnary(pb::InstructionUnary& unary_out, const ir::Unary* unary_in) {
         unary_out.set_op(UnaryOp(unary_in->Op()));

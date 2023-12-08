@@ -268,6 +268,25 @@ TEST_F(IRBinaryRoundtripTest, Store) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, LoadVectorElement) {
+    auto p = b.FunctionParam<ptr<function, vec3<f32>, read_write>>("p");
+    auto* fn = b.Function("Function", ty.f32());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn, b.LoadVectorElement(p, 1_i)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, StoreVectorElement) {
+    auto p = b.FunctionParam<ptr<function, vec3<f32>, read_write>>("p");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] {
+        b.StoreVectorElement(p, 1_u, 42_f);
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, UnaryOp) {
     auto x = b.FunctionParam<bool>("x");
     auto* fn = b.Function("Function", ty.bool_());

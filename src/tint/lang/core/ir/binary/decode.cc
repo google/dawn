@@ -184,11 +184,17 @@ struct Decoder {
             case pb::Instruction::KindCase::kLoad:
                 inst_out = CreateInstructionLoad(inst_in.load());
                 break;
+            case pb::Instruction::KindCase::kLoadVectorElement:
+                inst_out = CreateInstructionLoadVectorElement(inst_in.load_vector_element());
+                break;
             case pb::Instruction::KindCase::kReturn:
                 inst_out = CreateInstructionReturn(inst_in.return_());
                 break;
             case pb::Instruction::KindCase::kStore:
                 inst_out = CreateInstructionStore(inst_in.store());
+                break;
+            case pb::Instruction::KindCase::kStoreVectorElement:
+                inst_out = CreateInstructionStoreVectorElement(inst_in.store_vector_element());
                 break;
             case pb::Instruction::KindCase::kUnary:
                 inst_out = CreateInstructionUnary(inst_in.unary());
@@ -246,12 +252,22 @@ struct Decoder {
         return mod_out_.instructions.Create<ir::Load>();
     }
 
+    ir::LoadVectorElement* CreateInstructionLoadVectorElement(
+        const pb::InstructionLoadVectorElement&) {
+        return mod_out_.instructions.Create<ir::LoadVectorElement>();
+    }
+
     ir::Return* CreateInstructionReturn(const pb::InstructionReturn&) {
         return mod_out_.instructions.Create<ir::Return>();
     }
 
     ir::Store* CreateInstructionStore(const pb::InstructionStore&) {
         return mod_out_.instructions.Create<ir::Store>();
+    }
+
+    ir::StoreVectorElement* CreateInstructionStoreVectorElement(
+        const pb::InstructionStoreVectorElement&) {
+        return mod_out_.instructions.Create<ir::StoreVectorElement>();
     }
 
     ir::Unary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
