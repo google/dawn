@@ -292,7 +292,7 @@ func run() error {
 	}
 	fmt.Println()
 
-	validationCache := loadValidationCache(fmt.Sprintf("%x", toolchainHash.Sum(nil)))
+	validationCache := loadValidationCache(fmt.Sprintf("%x", toolchainHash.Sum(nil)), verbose)
 	defer saveValidationCache(validationCache)
 
 	// Build the list of results.
@@ -419,6 +419,7 @@ func run() error {
 	newKnownGood := knownGoodHashes{}
 
 	for i, file := range relFiles {
+		absFile := absFiles[i]
 		results := results[i]
 
 		row := &strings.Builder{}
@@ -437,7 +438,7 @@ func run() error {
 			result := <-results[format]
 
 			// Update the known-good hashes
-			newKnownGood[fileAndFormat{file, format}] = result.passHashes
+			newKnownGood[fileAndFormat{absFile, format}] = result.passHashes
 
 			// Update stats
 			stats := statsByFmt[format]
@@ -590,7 +591,7 @@ func run() error {
 	fmt.Println()
 
 	if allStats.numFail > 0 {
-		os.Exit(1)
+		return fmt.Errorf("%v tests failed", allStats.numFail)
 	}
 
 	return nil
@@ -980,7 +981,7 @@ func validationCachePath() string {
 
 // loadValidationCache attempts to load the validation cache.
 // Returns an empty cache if the file could not be loaded, or if toolchains have changed.
-func loadValidationCache(toolchainHash string) validationCache {
+func loadValidationCache(toolchainHash string, verbose bool) validationCache {
 	out := validationCache{
 		toolchainHash: toolchainHash,
 		knownGood:     knownGoodHashes{},
@@ -988,12 +989,18 @@ func loadValidationCache(toolchainHash string) validationCache {
 
 	file, err := os.Open(validationCachePath())
 	if err != nil {
+		if verbose {
+			fmt.Println(err)
+		}
 		return out
 	}
 	defer file.Close()
 
 	content := ValidationCacheFile{}
 	if err := json.NewDecoder(file).Decode(&content); err != nil {
+		if verbose {
+			fmt.Println(err)
+		}
 		return out
 	}
 
@@ -1012,7 +1019,7 @@ func loadValidationCache(toolchainHash string) validationCache {
 }
 
 // saveValidationCache saves the validation cache file.
-func saveValidationCache(vc validationCache) error {
+func saveValidationCache(vc validationCache) {
 	out := ValidationCacheFile{
 		ToolchainHash: vc.toolchainHash,
 		KnownGood:     make([]ValidationCacheFileKnownGood, 0, len(vc.knownGood)),
@@ -1042,13 +1049,15 @@ func saveValidationCache(vc validationCache) error {
 
 	file, err := os.Create(validationCachePath())
 	if err != nil {
-		return fmt.Errorf("failed to save the validation cache file: %w", err)
+		fmt.Printf("WARNING: failed to save the validation cache file: %v\n", err)
 	}
 	defer file.Close()
 
 	enc := json.NewEncoder(file)
 	enc.SetIndent("", "  ")
-	return enc.Encode(&out)
+	if err := enc.Encode(&out); err != nil {
+		fmt.Printf("WARNING: failed to encode the validation cache file: %v\n", err)
+	}
 }
 
 // defaultRootPath returns the default path to the root of the test tree
