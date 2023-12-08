@@ -47,7 +47,7 @@ struct D3D12DeviceInfo {
     uint32_t shaderModel;
     PerStage<std::wstring> shaderProfiles;
     bool supportsSharedResourceCapabilityTier1;
-    bool supportsDP4a;
+    bool supportsPacked4x8IntegerDotProduct;
     bool supportsCastingFullyTypedFormat;
     uint32_t programmableSamplePositionsTier;
     bool supportsRootSignatureVersion1_1;

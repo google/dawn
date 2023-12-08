@@ -93,8 +93,8 @@ bool BuiltinFn::IsAtomic() const {
     return wgsl::IsAtomic(fn_);
 }
 
-bool BuiltinFn::IsDP4a() const {
-    return wgsl::IsDP4a(fn_);
+bool BuiltinFn::IsPacked4x8IntegerDotProductBuiltin() const {
+    return wgsl::IsPacked4x8IntegerDotProductBuiltin(fn_);
 }
 
 bool BuiltinFn::IsSubgroup() const {
@@ -106,9 +106,6 @@ bool BuiltinFn::HasSideEffects() const {
 }
 
 wgsl::Extension BuiltinFn::RequiredExtension() const {
-    if (IsDP4a()) {
-        return wgsl::Extension::kChromiumExperimentalDp4A;
-    }
     if (IsSubgroup()) {
         return wgsl::Extension::kChromiumExperimentalSubgroups;
     }
@@ -118,6 +115,9 @@ wgsl::Extension BuiltinFn::RequiredExtension() const {
 wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
     if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;
+    }
+    if (IsPacked4x8IntegerDotProductBuiltin()) {
+        return wgsl::LanguageFeature::kPacked4X8IntegerDotProduct;
     }
     return wgsl::LanguageFeature::kUndefined;
 }

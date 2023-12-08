@@ -1150,7 +1150,17 @@ void DawnTestBase::SetUp() {
     mTestPlatform = CreateTestPlatform();
     native::FromAPI(gTestEnv->GetInstance()->Get())->SetPlatformForTesting(mTestPlatform.get());
 
-    instance = mWireHelper->RegisterInstance(gTestEnv->GetInstance()->Get());
+    // By default we enable all the WGSL language features (including experimental, testing and
+    // unsafe ones) in the tests.
+    WGPUInstanceDescriptor instanceDesc = {};
+    WGPUDawnWireWGSLControl wgslControl;
+    wgslControl.chain.sType = WGPUSType_DawnWireWGSLControl;
+    wgslControl.enableExperimental = true;
+    wgslControl.enableTesting = true;
+    wgslControl.enableUnsafe = true;
+    instanceDesc.nextInChain = &wgslControl.chain;
+    wgslControl.chain.next = nullptr;
+    instance = mWireHelper->RegisterInstance(gTestEnv->GetInstance()->Get(), &instanceDesc);
 
     std::string traceName =
         std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +

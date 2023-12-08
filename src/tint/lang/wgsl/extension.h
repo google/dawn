@@ -47,7 +47,6 @@ namespace tint::wgsl {
 enum class Extension : uint8_t {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
-    kChromiumExperimentalDp4A,
     kChromiumExperimentalFramebufferFetch,
     kChromiumExperimentalFullPtrParameters,
     kChromiumExperimentalPixelLocal,
@@ -76,17 +75,20 @@ auto& operator<<(STREAM& out, Extension value) {
 Extension ParseExtension(std::string_view str);
 
 constexpr std::string_view kExtensionStrings[] = {
-    "chromium_disable_uniformity_analysis",     "chromium_experimental_dp4a",
-    "chromium_experimental_framebuffer_fetch",  "chromium_experimental_full_ptr_parameters",
-    "chromium_experimental_pixel_local",        "chromium_experimental_push_constant",
-    "chromium_experimental_subgroups",          "chromium_internal_dual_source_blending",
-    "chromium_internal_relaxed_uniform_layout", "f16",
+    "chromium_disable_uniformity_analysis",
+    "chromium_experimental_framebuffer_fetch",
+    "chromium_experimental_full_ptr_parameters",
+    "chromium_experimental_pixel_local",
+    "chromium_experimental_push_constant",
+    "chromium_experimental_subgroups",
+    "chromium_internal_dual_source_blending",
+    "chromium_internal_relaxed_uniform_layout",
+    "f16",
 };
 
 /// All extensions
 static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumDisableUniformityAnalysis,
-    Extension::kChromiumExperimentalDp4A,
     Extension::kChromiumExperimentalFramebufferFetch,
     Extension::kChromiumExperimentalFullPtrParameters,
     Extension::kChromiumExperimentalPixelLocal,

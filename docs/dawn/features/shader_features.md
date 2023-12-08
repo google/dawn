@@ -3,10 +3,6 @@
 New shader features require the extensions to be enabled at device creation in addition to adding a `enable` directive in the WGSL.
 This file regroups the documentation for all the Dawn-specific shader-only features.
 
-## ChromiumExperimentalDp4a
-
-This adds support for the [`chromium_experimental_dp4a`](Link to do) WGSL `enable`.
-
 ## ChromiumExperimentalSubgroups
 
 This adds support for the [`chromium_experimental_subgroups`](Link to do) WGSL `enable`.

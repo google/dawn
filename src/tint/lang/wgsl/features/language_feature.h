@@ -51,6 +51,7 @@ enum class LanguageFeature : uint8_t {
     kChromiumTestingShippedWithKillswitch,
     kChromiumTestingUnimplemented,
     kChromiumTestingUnsafeExperimental,
+    kPacked4X8IntegerDotProduct,
     kReadonlyAndReadwriteStorageTextures,
 };
 
@@ -69,6 +70,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "chromium_testing_shipped_with_killswitch",
     "chromium_testing_unimplemented",
     "chromium_testing_unsafe_experimental",
+    "packed_4x8_integer_dot_product",
     "readonly_and_readwrite_storage_textures",
 };
 
@@ -79,6 +81,7 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kChromiumTestingShippedWithKillswitch,
     LanguageFeature::kChromiumTestingUnimplemented,
     LanguageFeature::kChromiumTestingUnsafeExperimental,
+    LanguageFeature::kPacked4X8IntegerDotProduct,
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,
 };
 

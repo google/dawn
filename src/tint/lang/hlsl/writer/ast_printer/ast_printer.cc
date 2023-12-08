@@ -380,7 +380,6 @@ bool ASTPrinter::Generate() {
             "HLSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
-                wgsl::Extension::kChromiumExperimentalDp4A,
                 wgsl::Extension::kChromiumExperimentalFullPtrParameters,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
@@ -1246,8 +1245,8 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     if (builtin->IsAtomic()) {
         return EmitWorkgroupAtomicCall(out, expr, builtin);
     }
-    if (builtin->IsDP4a()) {
-        return EmitDP4aCall(out, expr, builtin);
+    if (builtin->IsPacked4x8IntegerDotProductBuiltin()) {
+        return EmitPacked4x8IntegerDotProductBuiltinCall(out, expr, builtin);
     }
     if (builtin->IsSubgroup()) {
         if (builtin->Fn() == wgsl::BuiltinFn::kSubgroupBroadcast) {
@@ -2521,10 +2520,9 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDP4aCall(StringStream& out,
-                              const ast::CallExpression* expr,
-                              const sem::BuiltinFn* builtin) {
-    // TODO(crbug.com/tint/1497): support the polyfill version of DP4a functions.
+bool ASTPrinter::EmitPacked4x8IntegerDotProductBuiltinCall(StringStream& out,
+                                                           const ast::CallExpression* expr,
+                                                           const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             std::string functionName;

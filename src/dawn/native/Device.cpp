@@ -1452,9 +1452,6 @@ bool DeviceBase::HasFeature(Feature feature) const {
 void DeviceBase::SetWGSLExtensionAllowList() {
     // Set the WGSL extensions and language features allow list based on device's enabled features
     // and other properties.
-    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalDp4a)) {
-        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kChromiumExperimentalDp4A);
-    }
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kF16);
     }

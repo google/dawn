@@ -180,7 +180,6 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 using SideEffectsBuiltinTest = resolver::ResolverTestWithParam<Case>;
 
 TEST_P(SideEffectsBuiltinTest, Test) {
-    Enable(tint::wgsl::Extension::kChromiumExperimentalDp4A);
     auto& c = GetParam();
 
     uint32_t next_binding = 0;

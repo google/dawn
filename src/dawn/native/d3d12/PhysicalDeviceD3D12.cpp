@@ -143,7 +143,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Norm16TextureFormats);
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
-    EnableFeature(Feature::ChromiumExperimentalDp4a);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
@@ -564,7 +563,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::D3D12CreateNotZeroedHeap,
                            GetDeviceInfo().supportsHeapFlagCreateNotZeroed);
 
-    if (!GetDeviceInfo().supportsDP4a || !deviceToggles->IsEnabled(Toggle::UseDXC) ||
+    if (!GetDeviceInfo().supportsPacked4x8IntegerDotProduct ||
+        !deviceToggles->IsEnabled(Toggle::UseDXC) ||
         !GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4)) {
         deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
     }

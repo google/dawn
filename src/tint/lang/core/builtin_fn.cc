@@ -689,7 +689,7 @@ bool IsAtomic(BuiltinFn f) {
            f == BuiltinFn::kAtomicCompareExchangeWeak;
 }
 
-bool IsDP4a(BuiltinFn f) {
+bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
     return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed;
 }
 

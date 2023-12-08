@@ -68,9 +68,6 @@ enum diagnostic_severity {
 enum extension {
   // WGSL Extension "f16"
   f16
-  // An extension for the experimental feature "chromium_experimental_dp4a".
-  // See crbug.com/tint/1497 for more details
-  chromium_experimental_dp4a
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
   // A Chromium-specific extension for push constants
@@ -95,6 +92,7 @@ enum extension {
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
 enum language_feature {
   readonly_and_readwrite_storage_textures
+  packed_4x8_integer_dot_product
 
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented

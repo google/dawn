@@ -795,7 +795,6 @@ struct WGSLExtensionInfo {
 
 constexpr struct WGSLExtensionInfo kExtensions[] = {
     {"f16", false, "shader-f16"},
-    {"chromium_experimental_dp4a", true, "chromium-experimental-dp4a"},
     {"chromium_experimental_subgroups", true, "chromium-experimental-subgroups"},
     {"chromium_experimental_pixel_local", true, "pixel-local-storage-coherent"},
     {"chromium_disable_uniformity_analysis", true, nullptr},

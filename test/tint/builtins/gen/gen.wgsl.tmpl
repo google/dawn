@@ -197,11 +197,6 @@ fn compute_main() {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Check and emit chromium_experimental_dp4a */ -}}
-{{-   if or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
-enable chromium_experimental_dp4a;
-{{    end -}}
-
 {{- /* Check and emit chromium_experimental_subgroups */ -}}
 {{-   if or (eq "subgroupBallot" $builtin_name) (eq "subgroupBroadcast" $builtin_name)}}
 enable chromium_experimental_subgroups;

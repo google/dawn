@@ -63,6 +63,7 @@ static constexpr Case kValidCases[] = {
      LanguageFeature::kChromiumTestingShippedWithKillswitch},
     {"chromium_testing_unimplemented", LanguageFeature::kChromiumTestingUnimplemented},
     {"chromium_testing_unsafe_experimental", LanguageFeature::kChromiumTestingUnsafeExperimental},
+    {"packed_4x8_integer_dot_product", LanguageFeature::kPacked4X8IntegerDotProduct},
     {"readonly_and_readwrite_storage_textures",
      LanguageFeature::kReadonlyAndReadwriteStorageTextures},
 };
@@ -83,9 +84,12 @@ static constexpr Case kInvalidCases[] = {
     {"chXggmium_testing_unsafe_expermental", LanguageFeature::kUndefined},
     {"Xhomiuu_testng_unsafe_experimental", LanguageFeature::kUndefined},
     {"chromium_3esting_unsafe_experimental", LanguageFeature::kUndefined},
-    {"readonly_and_readwrite_stErage_textures", LanguageFeature::kUndefined},
-    {"readoTTly_and_readwrite_strage_tPPxtures", LanguageFeature::kUndefined},
-    {"readoly_and_redddwrite_storaxxe_textures", LanguageFeature::kUndefined},
+    {"packed_4x8_integer_Eot_product", LanguageFeature::kUndefined},
+    {"paked_4x8_integePP_dTTt_product", LanguageFeature::kUndefined},
+    {"packed_4x8_integxxrdot_pddoduct", LanguageFeature::kUndefined},
+    {"readon44y_and_readwrite_storage_textures", LanguageFeature::kUndefined},
+    {"readonly_and_readwrite_storageVVSSextures", LanguageFeature::kUndefined},
+    {"rRadonly_an_rea22write_storRge_textures", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<Case>;

@@ -33,38 +33,14 @@
 namespace dawn {
 namespace {
 
-using RequestDP4aExtension = bool;
-DAWN_TEST_PARAM_STRUCT(ExperimentalDP4aTestsParams, RequestDP4aExtension);
+class Packed4x8IntegerDotProductTests : public DawnTest {};
 
-class ExperimentalDP4aTests : public DawnTestWithParams<ExperimentalDP4aTestsParams> {
-  protected:
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        mIsDP4aSupportedOnAdapter = SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalDp4a});
-        if (!mIsDP4aSupportedOnAdapter) {
-            return {};
-        }
-
-        if (GetParam().mRequestDP4aExtension) {
-            return {wgpu::FeatureName::ChromiumExperimentalDp4a};
-        }
-
-        return {};
-    }
-
-    bool IsDP4aSupportedOnAdapter() const { return mIsDP4aSupportedOnAdapter; }
-
-  private:
-    bool mIsDP4aSupportedOnAdapter = false;
-};
-
-TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
+TEST_P(Packed4x8IntegerDotProductTests, BasicPacked4x8IntegerDotProductTest) {
     // TODO(dawn:1704): investigate why the creation of compute pipeline with dot4{U|I}Packed()
     // fails on Pixel 4
     DAWN_SUPPRESS_TEST_IF(IsQualcomm());
 
     const char* computeShader = R"(
-        enable chromium_experimental_dp4a;
-
         struct Buf {
             data1 : i32,
             data2 : u32,
@@ -84,23 +60,8 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
             buf.data4 = dot4U8Packed(a, c);
         }
 )";
-    const bool shouldDP4AFeatureSupportedByDevice =
-        // Required when creating device
-        GetParam().mRequestDP4aExtension &&
-        // Adapter support the feature
-        IsDP4aSupportedOnAdapter() &&
-        // Proper toggle (allow_unsafe_apis)
-        // Note that "allow_unsafe_apis" is always enabled in
-        // DawnTestEnvironment::CreateInstance.
-        HasToggleEnabled("allow_unsafe_apis");
-    const bool deviceSupportDP4AFeature =
-        device.HasFeature(wgpu::FeatureName::ChromiumExperimentalDp4a);
-    EXPECT_EQ(deviceSupportDP4AFeature, shouldDP4AFeatureSupportedByDevice);
 
-    if (!deviceSupportDP4AFeature) {
-        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader));
-        return;
-    }
+    ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::Packed4x8IntegerDotProduct));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = 4 * sizeof(uint32_t);
@@ -131,11 +92,14 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
-                        {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_dxc"}),
-                         D3D12Backend({"polyfill_packed_4x8_dot_product"}), MetalBackend(),
-                         VulkanBackend(), VulkanBackend({"polyfill_packed_4x8_dot_product"})},
-                        {true, false});
+DAWN_INSTANTIATE_TEST(Packed4x8IntegerDotProductTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      D3D12Backend({}, {"use_dxc"}),
+                      D3D12Backend({"polyfill_packed_4x8_dot_product"}),
+                      MetalBackend(),
+                      VulkanBackend(),
+                      VulkanBackend({"polyfill_packed_4x8_dot_product"}));
 
 }  // anonymous namespace
 }  // namespace dawn

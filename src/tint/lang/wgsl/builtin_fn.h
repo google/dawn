@@ -471,10 +471,12 @@ bool IsBarrier(BuiltinFn f);
 /// @returns true if the given `f` is an atomic builtin
 bool IsAtomic(BuiltinFn f);
 
-/// Determines if the given `f` is a DP4a builtin.
+/// Determines if the given `f` is a builtin defined in the language extension
+/// `packed_4x8_integer_dot_product`.
 /// @param f the builtin type
-/// @returns true if the given `f` is a DP4a builtin
-bool IsDP4a(BuiltinFn f);
+/// @returns true if the given `f` is a builtin defined in the language extension
+/// `packed_4x8_integer_dot_product`.
+bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f);
 
 /// Determines if the given `f` is a subgroup builtin.
 /// @param f the builtin type

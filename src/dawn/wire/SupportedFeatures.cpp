@@ -78,7 +78,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_MultiPlanarFormatP010:
         case WGPUFeatureName_MultiPlanarFormatNv12a:
         case WGPUFeatureName_MultiPlanarRenderTargets:
-        case WGPUFeatureName_ChromiumExperimentalDp4a:
         case WGPUFeatureName_ShaderF16:
         case WGPUFeatureName_RG11B10UfloatRenderable:
         case WGPUFeatureName_BGRA8UnormStorage:

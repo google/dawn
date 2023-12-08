@@ -1,5 +1,3 @@
-enable chromium_experimental_dp4a;
-
 fn dot4I8Packed_881e62() {
   var arg_0 = 1u;
   var arg_1 = 1u;

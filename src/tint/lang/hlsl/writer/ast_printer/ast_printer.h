@@ -286,14 +286,15 @@ class ASTPrinter : public tint::TextGenerator {
     bool EmitTruncCall(StringStream& out,
                        const ast::CallExpression* expr,
                        const sem::BuiltinFn* builtin);
-    /// Handles generating a call to DP4a builtins (dot4I8Packed and dot4U8Packed)
+    /// Handles generating a call to the builtins defined in the language extension
+    /// `packed_4x8_integer_dot_product`.
     /// @param out the output stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitDP4aCall(StringStream& out,
-                      const ast::CallExpression* expr,
-                      const sem::BuiltinFn* builtin);
+    bool EmitPacked4x8IntegerDotProductBuiltinCall(StringStream& out,
+                                                   const ast::CallExpression* expr,
+                                                   const sem::BuiltinFn* builtin);
     /// Handles generating a call to subgroup builtins.
     /// @param out the output stream
     /// @param expr the call expression

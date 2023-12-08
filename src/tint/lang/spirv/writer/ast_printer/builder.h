@@ -98,13 +98,9 @@ class Builder {
     /// @param experimental_require_subgroup_uniform_control_flow `true` to require
     /// `SPV_KHR_subgroup_uniform_control_flow` extension and `SubgroupUniformControlFlowKHR`
     /// execution mode for compute stage entry points.
-    /// @param polyfill_dot_4x8_packed `true` to require `SPV_KHR_integer_dot_product` extension
-    /// and `SpvCapabilityDotProductKHR` and `SpvCapabilityDotProductInput4x8BitPackedKHR`
-    /// capabilities.
     explicit Builder(const Program& program,
                      bool zero_initialize_workgroup_memory = false,
-                     bool experimental_require_subgroup_uniform_control_flow = false,
-                     bool polyfill_dot_4x8_packed = false);
+                     bool experimental_require_subgroup_uniform_control_flow = false);
     ~Builder();
 
     /// Generates the SPIR-V instructions for the given program
@@ -532,6 +528,10 @@ class Builder {
     /// Pops the top-most scope
     void PopScope();
 
+    /// Declare all the extensions and capabilities required by `OpSDot` and `OpUDot` using 4x8
+    // packed integer vectors as input.
+    void DeclarePacked4x8IntegerDotProductCapabilitiesAndExtensions();
+
     ProgramBuilder builder_;
     writer::Module module_;
     Function current_function_;
@@ -560,7 +560,6 @@ class Builder {
     std::vector<uint32_t> continue_stack_;
     bool zero_initialize_workgroup_memory_ = false;
     bool experimental_require_subgroup_uniform_control_flow_ = false;
-    bool polyfill_dot_4x8_packed_ = false;
 
     struct ContinuingInfo {
         ContinuingInfo(const ast::Statement* last_statement,

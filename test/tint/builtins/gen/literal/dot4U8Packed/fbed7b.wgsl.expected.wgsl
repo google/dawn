@@ -1,5 +1,3 @@
-enable chromium_experimental_dp4a;
-
 fn dot4U8Packed_fbed7b() {
   var res : u32 = dot4U8Packed(1u, 1u);
   prevent_dce = res;

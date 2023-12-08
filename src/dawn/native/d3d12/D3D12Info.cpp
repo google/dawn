@@ -169,7 +169,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     info.supportsShaderF16 =
         driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureOptions4.Native16BitShaderOpsSupported;
 
-    info.supportsDP4a = driverShaderModel >= D3D_SHADER_MODEL_6_4;
+    info.supportsPacked4x8IntegerDotProduct = driverShaderModel >= D3D_SHADER_MODEL_6_4;
 
     // Device support wave intrinsics if shader model >= SM6.0 and capabilities flag WaveOps is set.
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics

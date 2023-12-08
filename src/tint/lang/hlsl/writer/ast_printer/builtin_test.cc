@@ -1449,7 +1449,7 @@ void main() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Dot4I8Packed) {
-    Enable(wgsl::Extension::kChromiumExperimentalDp4A);
+    Require(wgsl::LanguageFeature::kPacked4X8IntegerDotProduct);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -1475,7 +1475,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Dot4U8Packed) {
-    Enable(wgsl::Extension::kChromiumExperimentalDp4A);
+    Require(wgsl::LanguageFeature::kPacked4X8IntegerDotProduct);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());

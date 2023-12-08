@@ -263,14 +263,12 @@ Builder::AccessorInfo::~AccessorInfo() {}
 
 Builder::Builder(const Program& program,
                  bool zero_initialize_workgroup_memory,
-                 bool experimental_require_subgroup_uniform_control_flow,
-                 bool polyfill_dot_4x8_packed)
+                 bool experimental_require_subgroup_uniform_control_flow)
     : builder_(ProgramBuilder::Wrap(program)),
       scope_stack_{Scope{}},
       zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory),
       experimental_require_subgroup_uniform_control_flow_(
-          experimental_require_subgroup_uniform_control_flow),
-      polyfill_dot_4x8_packed_(polyfill_dot_4x8_packed) {}
+          experimental_require_subgroup_uniform_control_flow) {}
 
 Builder::~Builder() = default;
 
@@ -279,7 +277,6 @@ bool Builder::Build() {
             "SPIR-V", builder_.AST(), builder_.Diagnostics(),
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
-                wgsl::Extension::kChromiumExperimentalDp4A,
                 wgsl::Extension::kChromiumExperimentalFullPtrParameters,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
@@ -350,13 +347,6 @@ Operand Builder::result_op() {
 
 bool Builder::GenerateExtension(wgsl::Extension extension) {
     switch (extension) {
-        case wgsl::Extension::kChromiumExperimentalDp4A:
-            if (!polyfill_dot_4x8_packed_) {
-                module_.PushExtension("SPV_KHR_integer_dot_product");
-                module_.PushCapability(SpvCapabilityDotProductKHR);
-                module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
-            }
-            break;
         case wgsl::Extension::kF16:
             module_.PushCapability(SpvCapabilityFloat16);
             module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
@@ -2538,6 +2528,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             break;
         case wgsl::BuiltinFn::kDot4I8Packed: {
+            DeclarePacked4x8IntegerDotProductCapabilitiesAndExtensions();
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpSDotKHR,
@@ -2550,6 +2541,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             return result_id;
         }
         case wgsl::BuiltinFn::kDot4U8Packed: {
+            DeclarePacked4x8IntegerDotProductCapabilitiesAndExtensions();
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpUDotKHR,
@@ -4182,6 +4174,12 @@ bool Builder::InsideBasicBlock() const {
             break;
     }
     return true;
+}
+
+void Builder::DeclarePacked4x8IntegerDotProductCapabilitiesAndExtensions() {
+    module_.PushExtension("SPV_KHR_integer_dot_product");
+    module_.PushCapability(SpvCapabilityDotProductKHR);
+    module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
 }
 
 Builder::ContinuingInfo::ContinuingInfo(const ast::Statement* the_last_statement,

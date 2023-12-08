@@ -4168,11 +4168,11 @@ OpReturn
 
 }  // namespace synchronization_builtin_tests
 
-// Tests for DP4A builtins, tint:1497
-namespace DP4A_builtin_tests {
+// Tests for `packed_4x8_integer_dot_product` builtins, tint:1497
+namespace Packed_4x8_integer_dot_product_builtin_tests {
 
 TEST_F(BuiltinSpirvASTPrinterTest, Call_Dot4I8Packed) {
-    Enable(wgsl::Extension::kChromiumExperimentalDp4A);
+    Require(wgsl::LanguageFeature::kPacked4X8IntegerDotProduct);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -4184,7 +4184,10 @@ TEST_F(BuiltinSpirvASTPrinterTest, Call_Dot4I8Packed) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpModule(b.Module());
-    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
+    auto expect = R"(OpCapability DotProduct
+OpCapability DotProductInput4x8BitPacked
+OpExtension "SPV_KHR_integer_dot_product"
+OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "val1"
@@ -4209,7 +4212,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinSpirvASTPrinterTest, Call_Dot4U8Packed) {
-    Enable(wgsl::Extension::kChromiumExperimentalDp4A);
+    Require(wgsl::LanguageFeature::kPacked4X8IntegerDotProduct);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -4221,7 +4224,10 @@ TEST_F(BuiltinSpirvASTPrinterTest, Call_Dot4U8Packed) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpModule(b.Module());
-    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
+    auto expect = R"(OpCapability DotProduct
+OpCapability DotProductInput4x8BitPacked
+OpExtension "SPV_KHR_integer_dot_product"
+OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "val1"
@@ -4244,7 +4250,7 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
-}  // namespace DP4A_builtin_tests
+}  // namespace Packed_4x8_integer_dot_product_builtin_tests
 
 }  // namespace
 }  // namespace tint::spirv::writer

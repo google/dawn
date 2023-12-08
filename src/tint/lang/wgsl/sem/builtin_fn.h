@@ -102,9 +102,9 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// @returns true if builtin is a atomic builtin
     bool IsAtomic() const;
 
-    /// @returns true if builtin is a DP4a builtin (defined in the extension
-    /// chromium_experimental_DP4a)
-    bool IsDP4a() const;
+    /// @returns true if builtin is a builtin defined in the language extension
+    /// `packed_4x8_integer_dot_product`.
+    bool IsPacked4x8IntegerDotProductBuiltin() const;
 
     /// @returns true if builtin is a subgroup builtin (defined in the extension
     /// chromium_experimental_subgroups)

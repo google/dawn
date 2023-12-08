@@ -46,7 +46,6 @@ namespace {
 bool IsUnsupported(const ast::Enable* enable) {
     for (auto ext : enable->extensions) {
         switch (ext->name) {
-            case tint::wgsl::Extension::kChromiumExperimentalDp4A:
             case tint::wgsl::Extension::kChromiumExperimentalFullPtrParameters:
             case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
             case tint::wgsl::Extension::kChromiumExperimentalPushConstant:

@@ -59,13 +59,9 @@ class ASTPrinter {
     /// @param experimental_require_subgroup_uniform_control_flow `true` to require
     /// `SPV_KHR_subgroup_uniform_control_flow` extension and `SubgroupUniformControlFlowKHR`
     /// execution mode for compute stage entry points.
-    /// @param polyfill_dot_4x8_packed `true` to require `SPV_KHR_integer_dot_product` extension
-    /// and `SpvCapabilityDotProductKHR` and `SpvCapabilityDotProductInput4x8BitPackedKHR`
-    /// capabilities.
     ASTPrinter(const Program& program,
                bool zero_initialize_workgroup_memory,
-               bool experimental_require_subgroup_uniform_control_flow,
-               bool polyfill_dot_4x8_packed);
+               bool experimental_require_subgroup_uniform_control_flow);
 
     /// @returns true on successful generation; false otherwise
     bool Generate();
