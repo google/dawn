@@ -37,6 +37,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Swizzle);
 
 namespace tint::core::ir {
 
+Swizzle::Swizzle() = default;
+
 Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
     : indices_(std::move(indices)) {
     TINT_ASSERT(!indices.IsEmpty());

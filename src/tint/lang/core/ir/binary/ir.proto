@@ -194,6 +194,7 @@ message Instruction {
         InstructionStore store = 15;
         InstructionLoadVectorElement load_vector_element = 16;
         InstructionStoreVectorElement store_vector_element = 17;
+        InstructionSwizzle swizzle = 18;
     }
 }
 
@@ -232,6 +233,10 @@ message InstructionStore {}
 message InstructionLoadVectorElement {}
 
 message InstructionStoreVectorElement {}
+
+message InstructionSwizzle {
+    repeated uint32 indices = 1;
+}
 
 message BindingPoint {
     uint32 group = 1;

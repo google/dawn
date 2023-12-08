@@ -196,6 +196,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kStoreVectorElement:
                 inst_out = CreateInstructionStoreVectorElement(inst_in.store_vector_element());
                 break;
+            case pb::Instruction::KindCase::kSwizzle:
+                inst_out = CreateInstructionSwizzle(inst_in.swizzle());
+                break;
             case pb::Instruction::KindCase::kUnary:
                 inst_out = CreateInstructionUnary(inst_in.unary());
                 break;
@@ -268,6 +271,16 @@ struct Decoder {
     ir::StoreVectorElement* CreateInstructionStoreVectorElement(
         const pb::InstructionStoreVectorElement&) {
         return mod_out_.instructions.Create<ir::StoreVectorElement>();
+    }
+
+    ir::Swizzle* CreateInstructionSwizzle(const pb::InstructionSwizzle& swizzle_in) {
+        auto* swizzle_out = mod_out_.instructions.Create<ir::Swizzle>();
+        Vector<uint32_t, 4> indices;
+        for (auto idx : swizzle_in.indices()) {
+            indices.Push(idx);
+        }
+        swizzle_out->SetIndices(indices);
+        return swizzle_out;
     }
 
     ir::Unary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {

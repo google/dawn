@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
+#include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -162,6 +163,7 @@ struct Encoder {
             [&](const ir::StoreVectorElement* i) {
                 InstructionStoreVectorElement(*inst_out.mutable_store_vector_element(), i);
             },
+            [&](const ir::Swizzle* i) { InstructionSwizzle(*inst_out.mutable_swizzle(), i); },
             [&](const ir::Unary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
             [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
@@ -197,6 +199,12 @@ struct Encoder {
 
     void InstructionStoreVectorElement(pb::InstructionStoreVectorElement&,
                                        const ir::StoreVectorElement*) {}
+
+    void InstructionSwizzle(pb::InstructionSwizzle& swizzle_out, const ir::Swizzle* swizzle_in) {
+        for (auto idx : swizzle_in->Indices()) {
+            swizzle_out.add_indices(idx);
+        }
+    }
 
     void InstructionUnary(pb::InstructionUnary& unary_out, const ir::Unary* unary_in) {
         unary_out.set_op(UnaryOp(unary_in->Op()));

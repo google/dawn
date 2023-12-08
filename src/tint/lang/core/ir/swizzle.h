@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_SWIZZLE_H_
 
 #include <string>
+#include <utility>
 
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -40,6 +41,9 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the object being swizzled
     static constexpr size_t kObjectOperandOffset = 0;
+
+    /// Constructor (no results, no operands)
+    Swizzle();
 
     /// Constructor
     /// @param result the result value
@@ -59,6 +63,9 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
 
     /// @returns the swizzle indices
     VectorRef<uint32_t> Indices() const { return indices_; }
+
+    /// @param indices the new swizzle indices
+    void SetIndices(VectorRef<uint32_t> indices) { indices_ = std::move(indices); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "swizzle"; }

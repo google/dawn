@@ -1315,6 +1315,17 @@ class Builder {
     }
 
     /// Creates a new `Swizzle`
+    /// @tparam TYPE the return type
+    /// @param object the object being swizzled
+    /// @param indices the swizzle indices
+    /// @returns the instruction
+    template <typename TYPE, typename OBJ>
+    ir::Swizzle* Swizzle(OBJ&& object, VectorRef<uint32_t> indices) {
+        auto* type = ir.Types().Get<TYPE>();
+        return Swizzle(type, std::forward<OBJ>(object), std::move(indices));
+    }
+
+    /// Creates a new `Swizzle`
     /// @param type the return type
     /// @param object the object being swizzled
     /// @param indices the swizzle indices

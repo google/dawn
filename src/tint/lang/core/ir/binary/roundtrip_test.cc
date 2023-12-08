@@ -304,5 +304,15 @@ TEST_F(IRBinaryRoundtripTest, BinaryOp) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Swizzle) {
+    auto x = b.FunctionParam<vec4<f32>>("x");
+    auto* fn = b.Function("Function", ty.vec3<f32>());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        b.Return(fn, b.Swizzle<vec3<f32>>(x, Vector<uint32_t, 3>{1, 0, 2}));
+    });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary
