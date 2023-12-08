@@ -44,30 +44,14 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
         const char* label,
         const SharedTextureMemoryDmaBufDescriptor* descriptor);
 
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedTextureMemoryAHardwareBufferDescriptor* descriptor);
-
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedTextureMemoryOpaqueFDDescriptor* descriptor);
-
     RefCountedVkHandle<VkDeviceMemory>* GetVkDeviceMemory() const;
     RefCountedVkHandle<VkImage>* GetVkImage() const;
     uint32_t GetQueueFamilyIndex() const;
 
   private:
-    static Ref<SharedTextureMemory> Create(Device* device,
-                                           const char* label,
-                                           const SharedTextureMemoryProperties& properties,
-                                           uint32_t queueFamilyIndex);
-
     SharedTextureMemory(Device* device,
                         const char* label,
-                        const SharedTextureMemoryProperties& properties,
-                        uint32_t queueFamilyIndex);
+                        const SharedTextureMemoryProperties& properties);
     void DestroyImpl() override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
@@ -77,7 +61,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
 
     Ref<RefCountedVkHandle<VkImage>> mVkImage;
     Ref<RefCountedVkHandle<VkDeviceMemory>> mVkDeviceMemory;
-    const uint32_t mQueueFamilyIndex;
+    uint32_t mQueueFamilyIndex;
 };
 
 }  // namespace dawn::native::vulkan
