@@ -231,16 +231,16 @@ struct Encoder {
             pb::Type type_out;
             Switch(
                 type_in,  //
-                [&](const core::type::Void*) { type_out.set_basic(pb::BasicType::void_); },
-                [&](const core::type::Bool*) { type_out.set_basic(pb::BasicType::bool_); },
-                [&](const core::type::I32*) { type_out.set_basic(pb::BasicType::i32); },
-                [&](const core::type::U32*) { type_out.set_basic(pb::BasicType::u32); },
-                [&](const core::type::F32*) { type_out.set_basic(pb::BasicType::f32); },
-                [&](const core::type::F16*) { type_out.set_basic(pb::BasicType::f16); },
-                [&](const core::type::Vector* v) { VectorType(*type_out.mutable_vector(), v); },
-                [&](const core::type::Matrix* m) { MatrixType(*type_out.mutable_matrix(), m); },
-                [&](const core::type::Pointer* m) { PointerType(*type_out.mutable_pointer(), m); },
-                [&](const core::type::Array* m) { ArrayType(*type_out.mutable_array(), m); },
+                [&](const core::type::Void*) { type_out.set_basic(pb::TypeBasic::void_); },
+                [&](const core::type::Bool*) { type_out.set_basic(pb::TypeBasic::bool_); },
+                [&](const core::type::I32*) { type_out.set_basic(pb::TypeBasic::i32); },
+                [&](const core::type::U32*) { type_out.set_basic(pb::TypeBasic::u32); },
+                [&](const core::type::F32*) { type_out.set_basic(pb::TypeBasic::f32); },
+                [&](const core::type::F16*) { type_out.set_basic(pb::TypeBasic::f16); },
+                [&](const core::type::Vector* v) { TypeVector(*type_out.mutable_vector(), v); },
+                [&](const core::type::Matrix* m) { TypeMatrix(*type_out.mutable_matrix(), m); },
+                [&](const core::type::Pointer* m) { TypePointer(*type_out.mutable_pointer(), m); },
+                [&](const core::type::Array* m) { TypeArray(*type_out.mutable_array(), m); },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -248,24 +248,24 @@ struct Encoder {
         });
     }
 
-    void VectorType(pb::VectorType& vector_out, const core::type::Vector* vector_in) {
+    void TypeVector(pb::TypeVector& vector_out, const core::type::Vector* vector_in) {
         vector_out.set_width(vector_in->Width());
         vector_out.set_element_type(Type(vector_in->type()));
     }
 
-    void MatrixType(pb::MatrixType& matrix_out, const core::type::Matrix* matrix_in) {
+    void TypeMatrix(pb::TypeMatrix& matrix_out, const core::type::Matrix* matrix_in) {
         matrix_out.set_num_columns(matrix_in->columns());
         matrix_out.set_num_rows(matrix_in->rows());
         matrix_out.set_element_type(Type(matrix_in->type()));
     }
 
-    void PointerType(pb::PointerType& pointer_out, const core::type::Pointer* pointer_in) {
+    void TypePointer(pb::TypePointer& pointer_out, const core::type::Pointer* pointer_in) {
         pointer_out.set_address_space(AddressSpace(pointer_in->AddressSpace()));
         pointer_out.set_store_type(Type(pointer_in->StoreType()));
         pointer_out.set_access(Access(pointer_in->Access()));
     }
 
-    void ArrayType(pb::ArrayType& array_out, const core::type::Array* array_in) {
+    void TypeArray(pb::TypeArray& array_out, const core::type::Array* array_in) {
         array_out.set_element(Type(array_in->ElemType()));
         array_out.set_stride(array_in->Stride());
         Switch(

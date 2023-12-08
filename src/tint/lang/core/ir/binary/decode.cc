@@ -328,45 +328,45 @@ struct Decoder {
         return nullptr;
     }
 
-    const type::Type* CreateTypeBasic(pb::BasicType basic_in) {
+    const type::Type* CreateTypeBasic(pb::TypeBasic basic_in) {
         switch (basic_in) {
-            case pb::BasicType::void_:
+            case pb::TypeBasic::void_:
                 return mod_out_.Types().Get<void>();
-            case pb::BasicType::bool_:
+            case pb::TypeBasic::bool_:
                 return mod_out_.Types().Get<bool>();
-            case pb::BasicType::i32:
+            case pb::TypeBasic::i32:
                 return mod_out_.Types().Get<i32>();
-            case pb::BasicType::u32:
+            case pb::TypeBasic::u32:
                 return mod_out_.Types().Get<u32>();
-            case pb::BasicType::f32:
+            case pb::TypeBasic::f32:
                 return mod_out_.Types().Get<f32>();
-            case pb::BasicType::f16:
+            case pb::TypeBasic::f16:
                 return mod_out_.Types().Get<f16>();
             default:
-                TINT_ICE() << "invalid BasicType: " << basic_in;
+                TINT_ICE() << "invalid TypeBasic: " << basic_in;
                 return nullptr;
         }
     }
 
-    const type::Vector* CreateTypeVector(const pb::VectorType& vector_in) {
+    const type::Vector* CreateTypeVector(const pb::TypeVector& vector_in) {
         auto* el_ty = Type(vector_in.element_type());
         return mod_out_.Types().vec(el_ty, vector_in.width());
     }
 
-    const type::Matrix* CreateTypeMatrix(const pb::MatrixType& matrix_in) {
+    const type::Matrix* CreateTypeMatrix(const pb::TypeMatrix& matrix_in) {
         auto* el_ty = Type(matrix_in.element_type());
         auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
         return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
     }
 
-    const type::Pointer* CreateTypePointer(const pb::PointerType& pointer_in) {
+    const type::Pointer* CreateTypePointer(const pb::TypePointer& pointer_in) {
         auto address_space = AddressSpace(pointer_in.address_space());
         auto* store_ty = Type(pointer_in.store_type());
         auto access = Access(pointer_in.access());
         return mod_out_.Types().ptr(address_space, store_ty, access);
     }
 
-    const type::Array* CreateTypeArray(const pb::ArrayType& array_in) {
+    const type::Array* CreateTypeArray(const pb::TypeArray& array_in) {
         auto* element = Type(array_in.element());
         uint32_t stride = static_cast<uint32_t>(array_in.stride());
         uint32_t count = static_cast<uint32_t>(array_in.count());

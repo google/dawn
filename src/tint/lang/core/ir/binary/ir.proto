@@ -43,18 +43,18 @@ message Module {
 ////////////////////////////////////////////////////////////////////////////////
 message Type {
     oneof kind {
-        BasicType basic = 1;
-        VectorType vector = 2;
-        MatrixType matrix = 3;
-        ArrayType array = 4;
-        PointerType pointer = 5;
+        TypeBasic basic = 1;
+        TypeVector vector = 2;
+        TypeMatrix matrix = 3;
+        TypeArray array = 4;
+        TypePointer pointer = 5;
         uint32 atomic = 6;  // Module.types
         // TODO: textures, samplers
     }
 }
 
 // Non-compound types
-enum BasicType {
+enum TypeBasic {
     void = 0;
     bool = 1;
     i32 = 2;
@@ -63,24 +63,24 @@ enum BasicType {
     f16 = 5;
 }
 
-message VectorType {
+message TypeVector {
     uint32 width = 1;
     uint32 element_type = 2;  // Module.types
 }
 
-message MatrixType {
+message TypeMatrix {
     uint32 num_columns = 1;
     uint32 num_rows = 2;
     uint32 element_type = 3;  // Module.types
 }
 
-message ArrayType {
+message TypeArray {
     uint32 element = 1;  // Module.types
     uint32 stride = 2;
     uint32 count = 3;
 }
 
-message PointerType {
+message TypePointer {
     AddressSpace address_space = 1;
     uint32 store_type = 2;  // Module.types
     AccessControl access = 3;
