@@ -91,6 +91,43 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_True) {
     EXPECT_EQ(program.Diagnostics().count(), 0u) << errs;
 }
 
+TEST_F(ParserTest, WorkgroupIdGuardingBarrier) {
+    auto spv = test::Assemble(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %foo "foo" %wgid
+               OpExecutionMode %foo LocalSize 1 1 1
+               OpDecorate %wgid BuiltIn WorkgroupId
+       %uint = OpTypeInt 32 0
+      %vec3u = OpTypeVector %uint 3
+%_ptr_Input_vec3u = OpTypePointer Input %vec3u
+     %uint_0 = OpConstant %uint 0
+     %uint_2 = OpConstant %uint 2
+     %uint_8 = OpConstant %uint 8
+       %wgid = OpVariable %_ptr_Input_vec3u Input
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+  %func_type = OpTypeFunction %void
+        %foo = OpFunction %void None %func_type
+  %foo_start = OpLabel
+ %wgid_value = OpLoad %vec3u %wgid
+     %wgid_x = OpCompositeExtract %uint %wgid_value 0
+  %condition = OpIEqual %bool %wgid_x %uint_0
+               OpSelectionMerge %merge None
+               OpBranchConditional %condition %true_branch %merge
+%true_branch = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_8
+               OpBranch %merge
+      %merge = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    auto program = Parse(spv, {});
+    auto errs = program.Diagnostics().str();
+    EXPECT_TRUE(program.IsValid()) << errs;
+    EXPECT_EQ(program.Diagnostics().count(), 0u) << errs;
+}
+
 // TODO(dneto): uint32 vec, valid SPIR-V
 // TODO(dneto): uint32 vec, invalid SPIR-V
 

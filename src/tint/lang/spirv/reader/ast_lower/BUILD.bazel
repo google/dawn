@@ -43,12 +43,14 @@ cc_library(
     "decompose_strided_array.cc",
     "decompose_strided_matrix.cc",
     "fold_trivial_lets.cc",
+    "pass_workgroup_id_as_argument.cc",
   ],
   hdrs = [
     "atomics.h",
     "decompose_strided_array.h",
     "decompose_strided_matrix.h",
     "fold_trivial_lets.h",
+    "pass_workgroup_id_as_argument.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -88,6 +90,7 @@ cc_library(
     "decompose_strided_array_test.cc",
     "decompose_strided_matrix_test.cc",
     "fold_trivial_lets_test.cc",
+    "pass_workgroup_id_as_argument_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

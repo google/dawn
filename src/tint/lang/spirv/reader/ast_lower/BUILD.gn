@@ -52,6 +52,8 @@ if (tint_build_spv_reader) {
       "decompose_strided_matrix.h",
       "fold_trivial_lets.cc",
       "fold_trivial_lets.h",
+      "pass_workgroup_id_as_argument.cc",
+      "pass_workgroup_id_as_argument.h",
     ]
     deps = [
       "${tint_src_dir}/api/common",
@@ -91,6 +93,7 @@ if (tint_build_unittests) {
         "decompose_strided_array_test.cc",
         "decompose_strided_matrix_test.cc",
         "fold_trivial_lets_test.cc",
+        "pass_workgroup_id_as_argument_test.cc",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",
