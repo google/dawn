@@ -3756,7 +3756,7 @@
     "depth slice undefined" : {
         "category": "constant",
         "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
+        "value":  "UINT32_MAX"
     },
     "query set index undefined" : {
         "category": "constant",
