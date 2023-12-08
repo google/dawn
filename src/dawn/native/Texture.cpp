@@ -58,6 +58,10 @@ MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
                     "The texture view format (%s) is not texture view format compatible "
                     "with the texture format (%s).",
                     viewFormatEnum, format.format);
+
+    DAWN_INVALID_IF(device->IsCompatibilityMode() && viewFormat->format != format.format,
+                    "viewFormat (%s) must match format (%s) in compatibility mode.",
+                    viewFormat->format, format.format);
     return {};
 }
 
