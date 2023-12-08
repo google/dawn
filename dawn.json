@@ -1013,6 +1013,7 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["compute pipeline descriptor"],
+        "tags": ["dawn"],
         "members": [
             {"name": "requires full subgroups", "type": "bool", "default": "false"}
         ]
@@ -1435,6 +1436,7 @@
         "category": "structure",
         "chained": "out",
         "chain roots": ["supported limits"],
+        "tags": ["dawn"],
         "members": [
             {"name": "min subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
@@ -2083,6 +2085,7 @@
     },
     "callback mode": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"name": "wait any only", "value": 0},
             {"name": "allow process events", "value": 1},
