@@ -291,6 +291,7 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {
     }
 };
 
+#undef CHECK
 #define CHECK()                                      \
     if (GetParam().error.empty()) {                  \
         EXPECT_TRUE(r()->Resolve()) << r()->error(); \
