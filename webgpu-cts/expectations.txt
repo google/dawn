@@ -152,12 +152,6 @@ crbug.com/dawn/1903 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mas
 crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
 crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
 
-################################################################################
-# Temporary failures while implementing separate depth-stencil readonlyness.
-# KEEP
-################################################################################
-crbug.com/dawn/2146 webgpu:api,validation,encoding,createRenderBundleEncoder:depth_stencil_readonly:* [ Failure ]
-crbug.com/dawn/2146 webgpu:api,validation,render_pass,render_pass_descriptor:depth_stencil_attachment,loadOp_storeOp_match_depthReadOnly_stencilReadOnly:* [ Failure ]
 
 ################################################################################
 # Android failures
@@ -661,7 +655,6 @@ crbug.com/dawn/1960 [ android-r ] webgpu:api,validation,error_scope:parent_scope
 # Shader corr failing flakily on Android ARM (Pixel 6)
 ################################################################################
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
 
 ################################################################################
 # Tint unimplemented feature
@@ -718,9 +711,7 @@ crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapt
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,gpu_external_texture_expiration:use_import_to_refresh: [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="r16sint";usageType="render";usageCopy="dst";awaitLost=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="r32uint";usageType="texture";usageCopy="none";awaitLost=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="write";containerType="vector";shadowingMode="module-scope";isAtomic=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,access,vector:vector:case="var_3u";vector_decl="var";vector_width=4;element_type="f32" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,access,vector:vector:case="xyx";vector_decl="param";vector_width=2;element_type="i32" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,abs:values:stage="constant";type="vec2%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="vec3%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="vec3%3Cf32%3E" [ RetryOnFailure ]
