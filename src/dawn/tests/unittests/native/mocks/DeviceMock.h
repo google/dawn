@@ -125,7 +125,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<TextureBase>>,
                 CreateTextureImpl,
-                (const TextureDescriptor*),
+                (const Unpacked<TextureDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<TextureViewBase>>,
                 CreateTextureViewImpl,

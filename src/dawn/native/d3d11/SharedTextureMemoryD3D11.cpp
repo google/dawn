@@ -158,7 +158,7 @@ ID3D11Resource* SharedTextureMemory::GetD3DResource() const {
 }
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
-    const TextureDescriptor* descriptor) {
+    const Unpacked<TextureDescriptor>& descriptor) {
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 

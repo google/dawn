@@ -143,7 +143,7 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
 }  // namespace
 
 MaybeError ValidateTextureCanBeWrapped(ID3D11Resource* d3d11Resource,
-                                       const TextureDescriptor* dawnDescriptor) {
+                                       const Unpacked<TextureDescriptor>& dawnDescriptor) {
     ComPtr<ID3D11Texture2D> d3d11Texture;
     DAWN_TRY(
         CheckHRESULT(d3d11Resource->QueryInterface(IID_PPV_ARGS(&d3d11Texture)), "QueryInterface"));
@@ -196,7 +196,8 @@ MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFo
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
+ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                            const Unpacked<TextureDescriptor>& descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(texture->InitializeAsInternalTexture());
     return std::move(texture);
@@ -204,7 +205,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescrip
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const TextureDescriptor* descriptor,
+                                            const Unpacked<TextureDescriptor>& descriptor,
                                             ComPtr<ID3D11Resource> d3d11Texture) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d11Texture)));
@@ -212,7 +213,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 }
 
 ResultOrError<Ref<Texture>> Texture::CreateInternal(Device* device,
-                                                    const TextureDescriptor* descriptor,
+                                                    const Unpacked<TextureDescriptor>& descriptor,
                                                     Kind kind) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, kind));
     DAWN_TRY(texture->InitializeAsInternalTexture());
@@ -220,12 +221,13 @@ ResultOrError<Ref<Texture>> Texture::CreateInternal(Device* device,
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
-                                                         const TextureDescriptor* descriptor,
-                                                         ComPtr<IUnknown> d3dTexture,
-                                                         std::vector<Ref<d3d::Fence>> waitFences,
-                                                         bool isSwapChainTexture,
-                                                         bool isInitialized) {
+ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
+    Device* device,
+    const Unpacked<TextureDescriptor>& descriptor,
+    ComPtr<IUnknown> d3dTexture,
+    std::vector<Ref<d3d::Fence>> waitFences,
+    bool isSwapChainTexture,
+    bool isInitialized) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(waitFences),
                                                       isSwapChainTexture));
@@ -245,7 +247,7 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const TextureDescriptor* descriptor) {
+    const Unpacked<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
@@ -375,7 +377,7 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     return {};
 }
 
-Texture::Texture(Device* device, const TextureDescriptor* descriptor, Kind kind)
+Texture::Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor, Kind kind)
     : Base(device, descriptor), mKind(kind) {}
 
 Texture::~Texture() = default;
@@ -622,7 +624,8 @@ MaybeError Texture::ClearCompressed(const ScopedCommandRecordingContext* command
     desc.sampleCount = 1;
 
     Ref<Texture> interimTexture;
-    DAWN_TRY_ASSIGN(interimTexture, CreateInternal(ToBackend(GetDevice()), &desc, Kind::Interim));
+    DAWN_TRY_ASSIGN(interimTexture,
+                    CreateInternal(ToBackend(GetDevice()), Unpack(&desc), Kind::Interim));
 
     float color = 0.0f;
     if (clearValue == ClearValue::NonZero) {
@@ -793,7 +796,8 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
     desc.sampleCount = GetSampleCount();
 
     Ref<Texture> stagingTexture;
-    DAWN_TRY_ASSIGN(stagingTexture, CreateInternal(ToBackend(GetDevice()), &desc, Kind::Staging));
+    DAWN_TRY_ASSIGN(stagingTexture,
+                    CreateInternal(ToBackend(GetDevice()), Unpack(&desc), Kind::Staging));
 
     // Depth-stencil subresources can only be written to completely and not partially.
     DAWN_ASSERT(
@@ -987,7 +991,8 @@ MaybeError Texture::Read(const ScopedCommandRecordingContext* commandContext,
     desc.sampleCount = GetSampleCount();
 
     Ref<Texture> stagingTexture;
-    DAWN_TRY_ASSIGN(stagingTexture, CreateInternal(ToBackend(GetDevice()), &desc, Kind::Staging));
+    DAWN_TRY_ASSIGN(stagingTexture,
+                    CreateInternal(ToBackend(GetDevice()), Unpack(&desc), Kind::Staging));
 
     CopyTextureToTextureCmd copyCmd;
     copyCmd.source.texture = this;
@@ -1117,7 +1122,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
         desc.usage = wgpu::TextureUsage::TextureBinding;
 
         DAWN_TRY_ASSIGN(mTextureForStencilSampling,
-                        CreateInternal(ToBackend(GetDevice()), &desc, Kind::Interim));
+                        CreateInternal(ToBackend(GetDevice()), Unpack(&desc), Kind::Interim));
     }
 
     // Sync the stencil data of this texture to the interim stencil-view texture.

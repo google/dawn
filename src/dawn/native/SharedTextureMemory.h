@@ -34,6 +34,7 @@
 #include "dawn/common/StackContainer.h"
 #include "dawn/common/WeakRef.h"
 #include "dawn/common/WeakRefSupport.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
@@ -101,14 +102,14 @@ class SharedTextureMemoryBase : public ApiObjectBase,
   private:
     virtual Ref<SharedTextureMemoryContents> CreateContents();
 
-    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* descriptor);
+    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
     MaybeError BeginAccess(TextureBase* texture, const BeginAccessDescriptor* descriptor);
     MaybeError EndAccess(TextureBase* texture, EndAccessState* state);
     ResultOrError<FenceAndSignalValue> EndAccessInternal(TextureBase* texture,
                                                          EndAccessState* state);
 
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const TextureDescriptor* descriptor) = 0;
+        const Unpacked<TextureDescriptor>& descriptor) = 0;
 
     // BeginAccessImpl validates the operation is valid on the backend, and performs any
     // backend specific operations. It does NOT need to acquire begin fences; that is done in the

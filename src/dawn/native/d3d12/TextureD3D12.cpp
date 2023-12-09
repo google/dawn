@@ -128,7 +128,7 @@ D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension)
 }  // namespace
 
 MaybeError ValidateTextureCanBeWrapped(ID3D12Resource* d3d12Resource,
-                                       const TextureDescriptor* dawnDescriptor) {
+                                       const Unpacked<TextureDescriptor>& dawnDescriptor) {
     const D3D12_RESOURCE_DESC d3dDescriptor = d3d12Resource->GetDesc();
     DAWN_INVALID_IF(
         (dawnDescriptor->size.width != d3dDescriptor.Width) ||
@@ -176,7 +176,8 @@ MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFo
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
+ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                            const Unpacked<TextureDescriptor>& descriptor) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
 
     DAWN_INVALID_IF(dawnTexture->GetFormat().IsMultiPlanar(),
@@ -187,12 +188,13 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescrip
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
-                                                         const TextureDescriptor* descriptor,
-                                                         ComPtr<IUnknown> d3dTexture,
-                                                         std::vector<Ref<d3d::Fence>> waitFences,
-                                                         bool isSwapChainTexture,
-                                                         bool isInitialized) {
+ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
+    Device* device,
+    const Unpacked<TextureDescriptor>& descriptor,
+    ComPtr<IUnknown> d3dTexture,
+    std::vector<Ref<d3d::Fence>> waitFences,
+    bool isSwapChainTexture,
+    bool isInitialized) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(waitFences),
                                                       isSwapChainTexture));
@@ -211,7 +213,7 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const TextureDescriptor* descriptor,
+                                            const Unpacked<TextureDescriptor>& descriptor,
                                             ComPtr<ID3D12Resource> d3d12Texture) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d12Texture)));
@@ -221,7 +223,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const TextureDescriptor* descriptor) {
+    const Unpacked<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
@@ -346,7 +348,7 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Tex
     return {};
 }
 
-Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+Texture::Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor)
     : Base(device, descriptor), mSubresourceStateAndDecay(InitialSubresourceStateAndDecay()) {}
 
 Texture::~Texture() = default;

@@ -197,7 +197,8 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     const SwapChainDescriptor* descriptor) {
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
-ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
+    const Unpacked<TextureDescriptor>& descriptor) {
     return Texture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
@@ -713,10 +714,13 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     const ExternalImageDescriptorVk* descriptor,
     ExternalMemoryHandle memoryHandle,
     const std::vector<ExternalSemaphoreHandle>& waitHandles) {
-    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
-
     // Initial validation
     if (ConsumedError(ValidateIsAlive())) {
+        return nullptr;
+    }
+    Unpacked<TextureDescriptor> textureDescriptor;
+    if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
+                      &textureDescriptor)) {
         return nullptr;
     }
     if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor,
@@ -725,7 +729,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     }
     if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
                       "validating that a Vulkan image can be wrapped with %s.",
-                      textureDescriptor)) {
+                      *textureDescriptor)) {
         return nullptr;
     }
     if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&

@@ -49,24 +49,26 @@ class CommandRecordingContext;
 class Device;
 
 MaybeError ValidateTextureCanBeWrapped(ID3D12Resource* d3d12Resource,
-                                       const TextureDescriptor* descriptor);
+                                       const Unpacked<TextureDescriptor>& descriptor);
 MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat);
 
 class Texture final : public d3d::Texture {
   public:
-    static ResultOrError<Ref<Texture>> Create(Device* device, const TextureDescriptor* descriptor);
-    static ResultOrError<Ref<Texture>> CreateExternalImage(Device* device,
-                                                           const TextureDescriptor* descriptor,
-                                                           ComPtr<IUnknown> d3dTexture,
-                                                           std::vector<Ref<d3d::Fence>> waitFences,
-                                                           bool isSwapChainTexture,
-                                                           bool isInitialized);
     static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const TextureDescriptor* descriptor,
+                                              const Unpacked<TextureDescriptor>& descriptor);
+    static ResultOrError<Ref<Texture>> CreateExternalImage(
+        Device* device,
+        const Unpacked<TextureDescriptor>& descriptor,
+        ComPtr<IUnknown> d3dTexture,
+        std::vector<Ref<d3d::Fence>> waitFences,
+        bool isSwapChainTexture,
+        bool isInitialized);
+    static ResultOrError<Ref<Texture>> Create(Device* device,
+                                              const Unpacked<TextureDescriptor>& descriptor,
                                               ComPtr<ID3D12Resource> d3d12Texture);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
-        const TextureDescriptor* descriptor);
+        const Unpacked<TextureDescriptor>& descriptor);
 
     // For external textures, returns the Device internal fence's value associated with the last
     // ExecuteCommandLists that used this texture. If nullopt is returned, the texture wasn't used.
@@ -114,7 +116,7 @@ class Texture final : public d3d::Texture {
   private:
     using Base = d3d::Texture;
 
-    Texture(Device* device, const TextureDescriptor* descriptor);
+    Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor);
     ~Texture() override;
 
     MaybeError InitializeAsInternalTexture();

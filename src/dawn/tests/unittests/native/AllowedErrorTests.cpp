@@ -124,7 +124,7 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
     desc.size.height = 1;
     desc.usage = wgpu::TextureUsage::CopyDst;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
-    TextureMock* textureMock = new NiceMock<TextureMock>(mDeviceMock, &desc);
+    TextureMock* textureMock = new NiceMock<TextureMock>(mDeviceMock, Unpack(&desc));
     wgpu::Texture texture = wgpu::Texture::Acquire(ToAPI(textureMock));
 
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteTextureImpl)

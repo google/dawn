@@ -109,7 +109,7 @@ ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
 
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
 
-        mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc,
+        mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), Unpack(&textureDesc),
                                            NSPRef<id<MTLTexture>>([*mCurrentDrawable texture]));
         return mTexture;
     }

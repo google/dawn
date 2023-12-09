@@ -70,7 +70,8 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                         uint32_t queueFamilyIndex);
     void DestroyImpl() override;
 
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureBase>> CreateTextureImpl(
+        const Unpacked<TextureDescriptor>& descriptor) override;
     MaybeError BeginAccessImpl(TextureBase* texture, const BeginAccessDescriptor*) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
                                                      EndAccessState* state) override;

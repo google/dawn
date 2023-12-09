@@ -274,9 +274,6 @@ MaybeError ValidateExternalTextureBinding(
                     "External texture binding entry %u is not present in the bind group layout.",
                     entry.binding);
 
-    DAWN_TRY(ValidateSingleSType(externalTextureBindingEntry->nextInChain,
-                                 wgpu::SType::ExternalTextureBindingEntry));
-
     DAWN_TRY(device->ValidateObject(externalTextureBindingEntry->externalTexture));
 
     return {};
@@ -338,9 +335,9 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         // TODO(dawn:1293): Store external textures in
         // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
         // be moved in the switch below.
-        const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
-        FindInChain(entry.nextInChain, &externalTextureBindingEntry);
-        if (externalTextureBindingEntry != nullptr) {
+        Unpacked<BindGroupEntry> unpacked;
+        DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&entry));
+        if (auto* externalTextureBindingEntry = unpacked.Get<ExternalTextureBindingEntry>()) {
             DAWN_TRY(
                 ValidateExternalTextureBinding(device, entry, externalTextureBindingEntry,
                                                layout->GetExternalTextureBindingExpansionMap()));

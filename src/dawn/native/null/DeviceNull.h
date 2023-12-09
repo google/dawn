@@ -163,7 +163,8 @@ class Device final : public DeviceBase {
         Surface* surface,
         SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) override;
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureBase>> CreateTextureImpl(
+        const Unpacked<TextureDescriptor>& descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) override;
@@ -333,7 +334,7 @@ class SwapChain final : public SwapChainBase {
 
 class Texture : public TextureBase {
   public:
-    Texture(DeviceBase* device, const TextureDescriptor* descriptor);
+    Texture(DeviceBase* device, const Unpacked<TextureDescriptor>& descriptor);
 };
 
 }  // namespace dawn::native::null

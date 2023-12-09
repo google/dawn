@@ -230,7 +230,8 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
+    const Unpacked<TextureDescriptor>& descriptor) {
     return Texture::Create(this, descriptor);
 }
 
@@ -446,13 +447,14 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
         }
     }
 
-    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
+    Unpacked<TextureDescriptor> textureDescriptor;
+    DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)));
     DAWN_TRY(
         ValidateTextureDescriptor(this, textureDescriptor, AllowMultiPlanarTextureFormat::Yes));
 
     DAWN_TRY_CONTEXT(d3d::ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
                      "validating that a D3D11 external image can be wrapped with %s",
-                     textureDescriptor);
+                     *textureDescriptor);
 
     DAWN_TRY(ValidateTextureCanBeWrapped(d3d11Resource.Get(), textureDescriptor));
 
@@ -480,7 +482,7 @@ bool Device::IsResolveTextureBlitWithDrawSupported() const {
     return true;
 }
 
-Ref<TextureBase> Device::CreateD3DExternalTexture(const TextureDescriptor* descriptor,
+Ref<TextureBase> Device::CreateD3DExternalTexture(const Unpacked<TextureDescriptor>& descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
                                                   std::vector<Ref<d3d::Fence>> waitFences,
                                                   bool isSwapChainTexture,

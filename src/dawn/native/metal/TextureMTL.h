@@ -49,25 +49,27 @@ class SharedTextureMemory;
 
 MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
 MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
-                                         const TextureDescriptor* descriptor,
+                                         const Unpacked<TextureDescriptor>& descriptor,
                                          IOSurfaceRef ioSurface);
 
 class Texture final : public TextureBase {
   public:
-    static ResultOrError<Ref<Texture>> Create(Device* device, const TextureDescriptor* descriptor);
+    static ResultOrError<Ref<Texture>> Create(Device* device,
+                                              const Unpacked<TextureDescriptor>& descriptor);
     static ResultOrError<Ref<Texture>> CreateFromIOSurface(
         Device* device,
         const ExternalImageDescriptor* descriptor,
+        const Unpacked<TextureDescriptor>& textureDescriptor,
         IOSurfaceRef ioSurface,
         std::vector<MTLSharedEventAndSignalValue> waitEvents);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
-        const TextureDescriptor* descriptor);
+        const Unpacked<TextureDescriptor>& descriptor);
     static Ref<Texture> CreateWrapping(Device* device,
-                                       const TextureDescriptor* descriptor,
+                                       const Unpacked<TextureDescriptor>& descriptor,
                                        NSPRef<id<MTLTexture>> wrapped);
 
-    Texture(DeviceBase* device, const TextureDescriptor* descriptor);
+    Texture(DeviceBase* device, const Unpacked<TextureDescriptor>& descriptor);
 
     id<MTLTexture> GetMTLTexture(Aspect aspect) const;
     IOSurfaceRef GetIOSurface();
@@ -88,12 +90,13 @@ class Texture final : public TextureBase {
 
     NSRef<MTLTextureDescriptor> CreateMetalTextureDescriptor() const;
 
-    MaybeError InitializeAsInternalTexture(const TextureDescriptor* descriptor);
+    MaybeError InitializeAsInternalTexture(const Unpacked<TextureDescriptor>& descriptor);
     MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
-                                       const TextureDescriptor* textureDescriptor,
+                                       const Unpacked<TextureDescriptor>& textureDescriptor,
                                        IOSurfaceRef ioSurface,
                                        std::vector<MTLSharedEventAndSignalValue> waitEvents);
-    void InitializeAsWrapping(const TextureDescriptor* descriptor, NSPRef<id<MTLTexture>> wrapped);
+    void InitializeAsWrapping(const Unpacked<TextureDescriptor>& descriptor,
+                              NSPRef<id<MTLTexture>> wrapped);
 
     void DestroyImpl() override;
     void SetLabelImpl() override;

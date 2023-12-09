@@ -702,7 +702,7 @@ ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureInternal(bool isReen
     textureDesc.usage = mConfig.wgpuUsage;
 
     VkImage currentImage = mSwapChainImages[mLastImageIndex];
-    mTexture = Texture::CreateForSwapChain(device, &textureDesc, currentImage);
+    mTexture = Texture::CreateForSwapChain(device, Unpack(&textureDesc), currentImage);
 
     // In the happy path we can use the swapchain image directly.
     if (!mConfig.needsBlit) {
@@ -712,7 +712,8 @@ ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureInternal(bool isReen
     // The blit texture always perfectly matches what the user requested for the swapchain.
     // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
-    DAWN_TRY_ASSIGN(mBlitTexture, Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+    DAWN_TRY_ASSIGN(mBlitTexture,
+                    Texture::Create(device, Unpack(&desc), VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     return mBlitTexture;
 }
 

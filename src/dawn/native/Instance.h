@@ -43,6 +43,7 @@
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/BlobCache.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/RefCountedWithExternalCount.h"
@@ -73,7 +74,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 // specialize this class.
 class InstanceBase final : public RefCountedWithExternalCount {
   public:
-    static Ref<InstanceBase> Create(const InstanceDescriptor* descriptor = nullptr);
+    static ResultOrError<Ref<InstanceBase>> Create(const InstanceDescriptor* descriptor = nullptr);
 
     void APIRequestAdapter(const RequestAdapterOptions* options,
                            WGPURequestAdapterCallback callback,
@@ -181,7 +182,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     InstanceBase(const InstanceBase& other) = delete;
     InstanceBase& operator=(const InstanceBase& other) = delete;
 
-    MaybeError Initialize(const InstanceDescriptor* descriptor);
+    MaybeError Initialize(const Unpacked<InstanceDescriptor> descriptor);
     void SetPlatform(dawn::platform::Platform* platform);
 
     // Lazily creates connections to all backends that have been compiled, may return null even for

@@ -135,20 +135,27 @@ wgpu::Bool APIGetInstanceFeatures(InstanceFeatures* features) {
 }
 
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
-    return InstanceBase::Create(descriptor).Detach();
+    auto result = InstanceBase::Create(descriptor);
+    if (result.IsError()) {
+        dawn::ErrorLog() << result.AcquireError()->GetFormattedMessage();
+        return nullptr;
+    }
+    return result.AcquireSuccess().Detach();
 }
 
 // InstanceBase
 
 // static
-Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
+ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* descriptor) {
     static constexpr InstanceDescriptor kDefaultDesc = {};
     if (descriptor == nullptr) {
         descriptor = &kDefaultDesc;
     }
 
-    const DawnTogglesDescriptor* instanceTogglesDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &instanceTogglesDesc);
+    Unpacked<InstanceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    const DawnTogglesDescriptor* instanceTogglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
     // Set up the instance toggle state from toggles descriptor
     TogglesState instanceToggles =
@@ -158,9 +165,7 @@ Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
     instanceToggles.Default(Toggle::AllowUnsafeAPIs, false);
 
     Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));
-    if (instance->ConsumedError(instance->Initialize(descriptor))) {
-        return nullptr;
-    }
+    DAWN_TRY(instance->Initialize(unpacked));
     return instance;
 }
 
@@ -209,16 +214,13 @@ void InstanceBase::WillDropLastExternalRef() {
 }
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
-MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
-    Unpacked<InstanceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+MaybeError InstanceBase::Initialize(const Unpacked<InstanceDescriptor> descriptor) {
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());
 
     // Process DawnInstanceDescriptor
-    if (const auto* dawnDesc = unpacked.Get<DawnInstanceDescriptor>()) {
+    if (const auto* dawnDesc = descriptor.Get<DawnInstanceDescriptor>()) {
         for (uint32_t i = 0; i < dawnDesc->additionalRuntimeSearchPathsCount; ++i) {
             mRuntimeSearchPaths.push_back(dawnDesc->additionalRuntimeSearchPaths[i]);
         }
@@ -237,7 +239,7 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
 
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     DAWN_TRY(mEventManager.Initialize(descriptor));
-    GatherWGSLFeatures(unpacked.Get<DawnWGSLBlocklist>());
+    GatherWGSLFeatures(descriptor.Get<DawnWGSLBlocklist>());
 
     return {};
 }

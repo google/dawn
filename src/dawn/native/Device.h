@@ -37,6 +37,7 @@
 #include "dawn/common/ContentLessObjectCache.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/native/CacheKey.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Error.h"
@@ -103,20 +104,6 @@ class DeviceBase : public RefCountedWithExternalCount {
         }
         return false;
     }
-
-    template <typename T>
-    [[nodiscard]] bool ConsumedError(
-        ResultOrError<T> resultOrError,
-        T* result,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
-            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-
     template <typename... Args>
     [[nodiscard]] bool ConsumedError(MaybeError maybeError,
                                      InternalErrorType additionalAllowedErrors,
@@ -132,7 +119,6 @@ class DeviceBase : public RefCountedWithExternalCount {
         }
         return false;
     }
-
     template <typename... Args>
     [[nodiscard]] bool ConsumedError(MaybeError maybeError,
                                      const char* formatStr,
@@ -140,6 +126,18 @@ class DeviceBase : public RefCountedWithExternalCount {
         return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
     }
 
+    template <typename T>
+    [[nodiscard]] bool ConsumedError(
+        ResultOrError<T> resultOrError,
+        T* result,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
+        if (DAWN_UNLIKELY(resultOrError.IsError())) {
+            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
+            return true;
+        }
+        *result = resultOrError.AcquireSuccess();
+        return false;
+    }
     template <typename T, typename... Args>
     [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
                                      T* result,
@@ -157,7 +155,6 @@ class DeviceBase : public RefCountedWithExternalCount {
         *result = resultOrError.AcquireSuccess();
         return false;
     }
-
     template <typename T, typename... Args>
     [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
                                      T* result,
@@ -264,7 +261,7 @@ class DeviceBase : public RefCountedWithExternalCount {
         OwnedCompilationMessages* compilationMessages = nullptr);
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                       const SwapChainDescriptor* descriptor);
-    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* descriptor);
+    ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
     ResultOrError<Ref<TextureViewBase>> CreateTextureView(TextureBase* texture,
                                                           const TextureViewDescriptor* descriptor);
 
@@ -501,7 +498,7 @@ class DeviceBase : public RefCountedWithExternalCount {
         SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const TextureDescriptor* descriptor) = 0;
+        const Unpacked<TextureDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) = 0;

@@ -38,6 +38,7 @@
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/common/NonCopyable.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
@@ -51,13 +52,13 @@ struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDXGIFenceDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
 
-MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);
+MaybeError ValidateTextureDescriptorCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor);
 
 class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
     ExternalImageDXGIImpl(Device* backendDevice,
                           ComPtr<IUnknown> d3dResource,
-                          const TextureDescriptor* textureDescriptor);
+                          const Unpacked<TextureDescriptor>& textureDescriptor);
     ~ExternalImageDXGIImpl();
 
     ExternalImageDXGIImpl(const ExternalImageDXGIImpl&) = delete;

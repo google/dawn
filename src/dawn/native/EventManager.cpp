@@ -271,7 +271,7 @@ EventManager::~EventManager() {
     DAWN_ASSERT(!mEvents.has_value());
 }
 
-MaybeError EventManager::Initialize(const InstanceDescriptor* descriptor) {
+MaybeError EventManager::Initialize(const Unpacked<InstanceDescriptor>& descriptor) {
     if (descriptor) {
         if (descriptor->features.timedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
             // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated

@@ -39,6 +39,7 @@
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/SystemEvent.h"
@@ -63,7 +64,7 @@ class EventManager final : NonMovable {
     EventManager();
     ~EventManager();
 
-    MaybeError Initialize(const InstanceDescriptor*);
+    MaybeError Initialize(const Unpacked<InstanceDescriptor>& descriptor);
     // Called by WillDropLastExternalRef. Once shut down, the EventManager stops tracking anything.
     // It drops any refs to TrackedEvents, to break reference cycles. If doing so frees the last ref
     // of any uncompleted TrackedEvents, they'll get completed with EventCompletionType::Shutdown.

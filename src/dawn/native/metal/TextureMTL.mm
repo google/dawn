@@ -658,7 +658,7 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
 }
 
 MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase*,
-                                         const TextureDescriptor* descriptor,
+                                         const Unpacked<TextureDescriptor>& descriptor,
                                          IOSurfaceRef ioSurface) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
@@ -758,7 +758,8 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
+ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                            const Unpacked<TextureDescriptor>& descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
 
     if (texture->GetFormat().IsMultiPlanar()) {
@@ -798,10 +799,9 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescrip
 ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
     Device* device,
     const ExternalImageDescriptor* descriptor,
+    const Unpacked<TextureDescriptor>& textureDescriptor,
     IOSurfaceRef ioSurface,
     std::vector<MTLSharedEventAndSignalValue> waitEvents) {
-    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
-
     Ref<Texture> texture = AcquireRef(new Texture(device, textureDescriptor));
     DAWN_TRY(texture->InitializeFromIOSurface(descriptor, textureDescriptor, ioSurface,
                                               std::move(waitEvents)));
@@ -811,7 +811,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const TextureDescriptor* descriptor) {
+    const Unpacked<TextureDescriptor>& descriptor) {
     ExternalImageDescriptorIOSurface ioSurfaceImageDesc;
     ioSurfaceImageDesc.isInitialized = false;  // Initialized state is set on memory.BeginAccess.
 
@@ -825,14 +825,14 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
 
 // static
 Ref<Texture> Texture::CreateWrapping(Device* device,
-                                     const TextureDescriptor* descriptor,
+                                     const Unpacked<TextureDescriptor>& descriptor,
                                      NSPRef<id<MTLTexture>> wrapped) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     texture->InitializeAsWrapping(descriptor, std::move(wrapped));
     return texture;
 }
 
-MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descriptor) {
+MaybeError Texture::InitializeAsInternalTexture(const Unpacked<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(GetDevice());
 
     NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
@@ -850,7 +850,7 @@ MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descrip
     return {};
 }
 
-void Texture::InitializeAsWrapping(const TextureDescriptor* descriptor,
+void Texture::InitializeAsWrapping(const Unpacked<TextureDescriptor>& descriptor,
                                    NSPRef<id<MTLTexture>> wrapped) {
     NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
     mMtlUsage = [*mtlDesc usage];
@@ -861,7 +861,7 @@ void Texture::InitializeAsWrapping(const TextureDescriptor* descriptor,
 }
 
 MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
-                                            const TextureDescriptor* textureDescriptor,
+                                            const Unpacked<TextureDescriptor>& textureDescriptor,
                                             IOSurfaceRef ioSurface,
                                             std::vector<MTLSharedEventAndSignalValue> waitEvents) {
     DAWN_INVALID_IF(
@@ -969,7 +969,8 @@ void Texture::IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* desc
     Destroy();
 }
 
-Texture::Texture(DeviceBase* dev, const TextureDescriptor* desc) : TextureBase(dev, desc) {}
+Texture::Texture(DeviceBase* dev, const Unpacked<TextureDescriptor>& desc)
+    : TextureBase(dev, desc) {}
 
 Texture::~Texture() {}
 

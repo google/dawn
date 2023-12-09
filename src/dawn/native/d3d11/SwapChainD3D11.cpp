@@ -86,7 +86,8 @@ MaybeError SwapChain::PresentImpl() {
 ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     // Create the API side objects for this use of the swapchain's buffer.
     TextureDescriptor descriptor = GetSwapChainBaseTextureDescriptor(this);
-    DAWN_TRY_ASSIGN(mApiTexture, Texture::Create(ToBackend(GetDevice()), &descriptor, mBuffer));
+    DAWN_TRY_ASSIGN(mApiTexture,
+                    Texture::Create(ToBackend(GetDevice()), Unpack(&descriptor), mBuffer));
     return mApiTexture;
 }
 

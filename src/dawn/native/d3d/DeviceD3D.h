@@ -62,7 +62,7 @@ class Device : public DeviceBase {
 
     virtual ResultOrError<Ref<Fence>> CreateFence(
         const ExternalImageDXGIFenceDescriptor* descriptor) = 0;
-    virtual Ref<TextureBase> CreateD3DExternalTexture(const TextureDescriptor* descriptor,
+    virtual Ref<TextureBase> CreateD3DExternalTexture(const Unpacked<TextureDescriptor>& descriptor,
                                                       ComPtr<IUnknown> d3dTexture,
                                                       std::vector<Ref<Fence>> waitFences,
                                                       bool isSwapChainTexture,

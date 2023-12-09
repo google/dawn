@@ -30,6 +30,7 @@
 
 #include <vector>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/RenderEncoderBase.h"
@@ -41,7 +42,7 @@ class RenderBundleBase;
 class RenderPassEncoder final : public RenderEncoderBase {
   public:
     static Ref<RenderPassEncoder> Create(DeviceBase* device,
-                                         const RenderPassDescriptor* descriptor,
+                                         const Unpacked<RenderPassDescriptor>& descriptor,
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
                                          RenderPassResourceUsageTracker usageTracker,
@@ -86,7 +87,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
 
   protected:
     RenderPassEncoder(DeviceBase* device,
-                      const RenderPassDescriptor* descriptor,
+                      const Unpacked<RenderPassDescriptor>& descriptor,
                       CommandEncoder* commandEncoder,
                       EncodingContext* encodingContext,
                       RenderPassResourceUsageTracker usageTracker,

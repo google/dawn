@@ -62,7 +62,7 @@ class Device final : public d3d::Device {
     const DeviceInfo& GetDeviceInfo() const;
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
-    Ref<TextureBase> CreateD3DExternalTexture(const TextureDescriptor* descriptor,
+    Ref<TextureBase> CreateD3DExternalTexture(const Unpacked<TextureDescriptor>& descriptor,
                                               ComPtr<IUnknown> d3dTexture,
                                               std::vector<Ref<d3d::Fence>> waitFences,
                                               bool isSwapChainTexture,
@@ -123,7 +123,8 @@ class Device final : public d3d::Device {
         Surface* surface,
         SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) override;
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureBase>> CreateTextureImpl(
+        const Unpacked<TextureDescriptor>& descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) override;

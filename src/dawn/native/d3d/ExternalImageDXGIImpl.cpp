@@ -40,7 +40,7 @@
 
 namespace dawn::native::d3d {
 
-MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor) {
+MaybeError ValidateTextureDescriptorCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -59,7 +59,7 @@ MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descri
 
 ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
                                              ComPtr<IUnknown> d3dResource,
-                                             const TextureDescriptor* textureDescriptor)
+                                             const Unpacked<TextureDescriptor>& textureDescriptor)
     : mBackendDevice(backendDevice),
       mD3DResource(std::move(d3dResource)),
       mUsage(textureDescriptor->usage),
@@ -166,8 +166,9 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 
     Ref<TextureBase> texture =
         ToBackend(mBackendDevice.Get())
-            ->CreateD3DExternalTexture(&textureDescriptor, mD3DResource, std::move(waitFences),
-                                       descriptor->isSwapChainTexture, descriptor->isInitialized);
+            ->CreateD3DExternalTexture(Unpack(&textureDescriptor), mD3DResource,
+                                       std::move(waitFences), descriptor->isSwapChainTexture,
+                                       descriptor->isInitialized);
 
     if (mDXGIKeyedMutex && mAccessCount == 0) {
         HRESULT hr = mDXGIKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireKey, INFINITE);
