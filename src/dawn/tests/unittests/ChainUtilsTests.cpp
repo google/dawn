@@ -610,6 +610,7 @@ TEST(ChainUtilsTests, ValidateSubset) {
     // With none set, subset for anything should work.
     {
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateSubset<>().IsSuccess());
         EXPECT_TRUE(unpacked.ValidateSubset<DawnTogglesDescriptor>().IsSuccess());
         EXPECT_TRUE(unpacked.ValidateSubset<DawnCacheDeviceDescriptor>().IsSuccess());
         EXPECT_TRUE((unpacked.ValidateSubset<DawnTogglesDescriptor, DawnCacheDeviceDescriptor>()
@@ -619,6 +620,7 @@ TEST(ChainUtilsTests, ValidateSubset) {
     {
         desc.nextInChain = &chain1;
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateSubset<>().AcquireError(), nullptr);
         EXPECT_TRUE(unpacked.ValidateSubset<DawnTogglesDescriptor>().IsSuccess());
         EXPECT_NE(unpacked.ValidateSubset<DawnCacheDeviceDescriptor>().AcquireError(), nullptr);
         EXPECT_TRUE((unpacked.ValidateSubset<DawnTogglesDescriptor, DawnCacheDeviceDescriptor>()
@@ -628,6 +630,7 @@ TEST(ChainUtilsTests, ValidateSubset) {
     {
         chain1.nextInChain = &chain2;
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateSubset<>().AcquireError(), nullptr);
         EXPECT_NE(unpacked.ValidateSubset<DawnTogglesDescriptor>().AcquireError(), nullptr);
         EXPECT_NE(unpacked.ValidateSubset<DawnCacheDeviceDescriptor>().AcquireError(), nullptr);
         EXPECT_TRUE((unpacked.ValidateSubset<DawnTogglesDescriptor, DawnCacheDeviceDescriptor>()
@@ -644,6 +647,7 @@ TEST(ChainUtilsTests, ValidateSubsetOut) {
     // With none set, subset for anything should work.
     {
         auto unpacked = ValidateAndUnpack(&info).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateSubset<>().IsSuccess());
         EXPECT_TRUE(
             unpacked.ValidateSubset<SharedFenceVkSemaphoreOpaqueFDExportInfo>().IsSuccess());
         EXPECT_TRUE(
@@ -657,6 +661,7 @@ TEST(ChainUtilsTests, ValidateSubsetOut) {
     {
         info.nextInChain = &chain1;
         auto unpacked = ValidateAndUnpack(&info).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateSubset<>().AcquireError(), nullptr);
         EXPECT_TRUE(
             unpacked.ValidateSubset<SharedFenceVkSemaphoreOpaqueFDExportInfo>().IsSuccess());
         EXPECT_NE(
@@ -671,6 +676,7 @@ TEST(ChainUtilsTests, ValidateSubsetOut) {
     {
         chain1.nextInChain = &chain2;
         auto unpacked = ValidateAndUnpack(&info).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateSubset<>().AcquireError(), nullptr);
         EXPECT_NE(
             unpacked.ValidateSubset<SharedFenceVkSemaphoreOpaqueFDExportInfo>().AcquireError(),
             nullptr);

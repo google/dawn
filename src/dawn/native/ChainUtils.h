@@ -158,6 +158,8 @@ constexpr inline size_t UnpackedIndexOf<Unpacked<T>, Ext> =
 template <typename UnpackedT, typename... Exts>
 constexpr inline auto UnpackedBitsetForExts =
     typename UnpackedT::BitsetType(((uint64_t(1) << UnpackedIndexOf<UnpackedT, Exts>) | ...));
+template <typename UnpackedT>
+constexpr inline auto UnpackedBitsetForExts<UnpackedT> = typename UnpackedT::BitsetType(0);
 
 template <typename UnpackedT, typename...>
 struct OneBranchValidator;
@@ -211,19 +213,20 @@ template <typename UnpackedT, typename... Allowed>
 struct SubsetValidator {
     using BitsetType = typename UnpackedT::BitsetType;
 
-    static std::string ToString() {
-        return absl::StrFormat("[ %s ]", STypesToString<Allowed...>());
-    }
-
     static MaybeError Validate(const UnpackedT& unpacked, const BitsetType& bitset) {
         // Allowed set of extensions includes the branch root as well.
         constexpr auto allowed =
             detail::UnpackedBitsetForExts<UnpackedT,
                                           typename detail::PtrTypeFor<UnpackedT, Allowed>::Type...>;
         if (!IsSubset(bitset, allowed)) {
-            return DAWN_VALIDATION_ERROR(
-                "Expected extension set to be a subset of: %s\nInstead found: %s", ToString(),
-                unpacked.ToString());
+            if constexpr (sizeof...(Allowed)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Expected extension set to be a subset of: %s\nInstead found: %s",
+                    absl::StrFormat("[ %s ]", STypesToString<Allowed...>()), unpacked.ToString());
+            } else {
+                return DAWN_VALIDATION_ERROR(
+                    "Expected there to be no extensions. Instead found: %s", unpacked.ToString());
+            }
         }
         return {};
     }
