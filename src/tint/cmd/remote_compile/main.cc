@@ -45,12 +45,6 @@
 
 namespace {
 
-#if 0
-#define DEBUG(msg, ...) printf(msg "\n", ##__VA_ARGS__)
-#else
-#define DEBUG(...)
-#endif
-
 /// The return structure of a compile function
 struct CompileResult {
     /// True if shader compiled
@@ -280,7 +274,7 @@ std::enable_if_t<std::is_base_of<Message, MESSAGE>::value, Stream>& operator>>(S
             m.Serialize([&s](auto& value) { s >> value; });
         } else {
             std::stringstream ss;
-            ss << "expected message type " << static_cast<int>(m.type) << ", got "
+            ss << "Expected message type " << static_cast<int>(m.type) << ", got "
                << static_cast<int>(ty);
             s.error = ss.str();
         }
@@ -305,15 +299,17 @@ RESPONSE Send(Stream& s, const REQUEST& req) {
 
 }  // namespace
 
-bool RunServer(std::string port);
+bool RunServer(std::string port, bool verbose);
 bool RunClient(std::string address,
                std::string port,
                std::string file,
                int version_major,
-               int version_minor);
+               int version_minor,
+               bool verbose);
 
 int main(int argc, char* argv[]) {
     bool run_server = false;
+    bool verbose = false;
     int version_major = 0;
     int version_minor = 0;
     std::string port = "19000";
@@ -335,6 +331,10 @@ int main(int argc, char* argv[]) {
                 printf("expected port number");
                 exit(1);
             }
+            continue;
+        }
+        if (arg == "-v" || arg == "--verbose") {
+            verbose = true;
             continue;
         }
 
@@ -366,7 +366,7 @@ int main(int argc, char* argv[]) {
     bool success = false;
 
     if (run_server) {
-        success = RunServer(port);
+        success = RunServer(port, verbose);
     } else {
         std::string address;
         std::string file;
@@ -384,13 +384,13 @@ int main(int argc, char* argv[]) {
                 file = args[1];
                 break;
             default:
-                std::cerr << "expected 1 or 2 arguments, got " << args.size() << "\n\n";
+                std::cerr << "Expected 1 or 2 arguments, got " << args.size() << "\n\n";
                 ShowUsage();
         }
         if (address.empty() || file.empty()) {
             ShowUsage();
         }
-        success = RunClient(address, port, file, version_major, version_minor);
+        success = RunClient(address, port, file, version_major, version_minor, verbose);
     }
 
     if (!success) {
@@ -400,7 +400,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-bool RunServer(std::string port) {
+bool RunServer(std::string port, bool verbose) {
     auto server_socket = tint::socket::Socket::Listen("", port.c_str());
     if (!server_socket) {
         std::cout << "Failed to listen on port " << port << "\n";
@@ -409,31 +409,43 @@ bool RunServer(std::string port) {
     std::cout << "Listening on port " << port.c_str() << "...\n";
     while (auto conn = server_socket->Accept()) {
         std::thread([=] {
-            DEBUG("Client connected...");
+            auto tid = std::this_thread::get_id();
+            if (verbose) {
+                std::cout << tid << " Client connected...\n";
+            }
             Stream stream{conn.get(), ""};
 
             {
                 ConnectionRequest req;
                 stream >> req;
                 if (!stream.error.empty()) {
-                    DEBUG("%s", stream.error.c_str());
+                    if (verbose) {
+                        std::cout << tid << " Error: " << stream.error << "\n";
+                    }
                     return;
                 }
                 ConnectionResponse resp;
                 if (req.protocol_version != kProtocolVersion) {
-                    DEBUG("Protocol version mismatch");
+                    if (verbose) {
+                        std::cout << tid << " Protocol version mismatch. requested: "
+                                  << req.protocol_version << "\n";
+                    }
                     resp.error = "Protocol version mismatch";
                     stream << resp;
                     return;
                 }
                 stream << resp;
             }
-            DEBUG("Connection established");
+            if (verbose) {
+                std::cout << tid << " Connection established\n";
+            }
             {
                 CompileRequest req;
                 stream >> req;
                 if (!stream.error.empty()) {
-                    DEBUG("%s\n", stream.error.c_str());
+                    if (verbose) {
+                        std::cout << tid << " Error: " << stream.error << "\n";
+                    }
                     return;
                 }
 #if TINT_BUILD_MSL_WRITER && defined(__APPLE__)
@@ -451,6 +463,11 @@ bool RunServer(std::string port) {
                         resp.error = result.output;
                     }
                     stream << resp;
+
+                    if (verbose) {
+                        std::cout << tid << " Shader compilation "
+                                  << (result.failed ? "failed" : "passed") << "\n";
+                    }
                     return;
                 }
 #endif
@@ -467,7 +484,8 @@ bool RunClient(std::string address,
                std::string port,
                std::string file,
                int version_major,
-               int version_minor) {
+               int version_minor,
+               bool verbose) {
     // Read the file
     std::ifstream input(file, std::ios::binary);
     if (!input) {
@@ -476,8 +494,10 @@ bool RunClient(std::string address,
     }
     std::string source((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 
-    constexpr const int timeout_ms = 10000;
-    DEBUG("Connecting to %s:%s...", address.c_str(), port.c_str());
+    constexpr const int timeout_ms = 100'000;
+    if (verbose) {
+        std::cout << "Connecting to " << address << ":" << port << "\n";
+    }
     auto conn = tint::socket::Socket::Connect(address.c_str(), port.c_str(), timeout_ms);
     if (!conn) {
         std::cerr << "Connection failed\n";
@@ -486,7 +506,9 @@ bool RunClient(std::string address,
 
     Stream stream{conn.get(), ""};
 
-    DEBUG("Sending connection request...");
+    if (verbose) {
+        std::cout << "Sending connection request...\n";
+    }
     auto conn_resp = Send(stream, ConnectionRequest{kProtocolVersion});
     if (!stream.error.empty()) {
         std::cerr << stream.error << "\n";
@@ -496,7 +518,9 @@ bool RunClient(std::string address,
         std::cerr << conn_resp.error << "\n";
         return false;
     }
-    DEBUG("Connection established. Requesting compile...");
+    if (verbose) {
+        std::cout << "Connection established. Requesting compile...\n";
+    }
     auto comp_resp =
         Send(stream, CompileRequest{SourceLanguage::MSL, version_major, version_minor, source});
     if (!stream.error.empty()) {
@@ -507,6 +531,8 @@ bool RunClient(std::string address,
         std::cerr << comp_resp.error << "\n";
         return false;
     }
-    DEBUG("Compilation successful");
+    if (verbose) {
+        std::cout << "Compilation successful\n";
+    }
     return true;
 }
