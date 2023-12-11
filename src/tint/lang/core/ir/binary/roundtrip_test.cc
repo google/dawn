@@ -359,6 +359,12 @@ TEST_F(IRBinaryRoundtripTest, UserCall) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, BuiltinCall) {
+    auto* fn = b.Function("Function", ty.f32());
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Call<i32>(core::BuiltinFn::kMax, 1_i, 2_i)); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Load) {
     auto p = b.FunctionParam<ptr<function, f32, read_write>>("p");
     auto* fn = b.Function("Function", ty.f32());

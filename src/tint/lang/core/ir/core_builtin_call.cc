@@ -37,6 +37,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::CoreBuiltinCall);
 
 namespace tint::core::ir {
 
+CoreBuiltinCall::CoreBuiltinCall() = default;
+
 CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
                                  core::BuiltinFn func,
                                  VectorRef<Value*> arguments)

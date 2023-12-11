@@ -204,11 +204,12 @@ message Instruction {
         InstructionConstruct construct = 11;
         InstructionAccess access = 12;
         InstructionUserCall user_call = 13;
-        InstructionLoad load = 14;
-        InstructionStore store = 15;
-        InstructionLoadVectorElement load_vector_element = 16;
-        InstructionStoreVectorElement store_vector_element = 17;
-        InstructionSwizzle swizzle = 18;
+        InstructionBuiltinCall builtin_call = 14;
+        InstructionLoad load = 15;
+        InstructionStore store = 16;
+        InstructionLoadVectorElement load_vector_element = 17;
+        InstructionStoreVectorElement store_vector_element = 18;
+        InstructionSwizzle swizzle = 19;
     }
 }
 
@@ -239,6 +240,10 @@ message InstructionConstruct {}
 message InstructionAccess {}
 
 message InstructionUserCall {}
+
+message InstructionBuiltinCall {
+    BuiltinFn builtin = 1;
+}
 
 message InstructionLoad {}
 

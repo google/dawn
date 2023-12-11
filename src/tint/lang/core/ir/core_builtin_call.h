@@ -41,6 +41,9 @@ namespace tint::core::ir {
 /// A core builtin call instruction in the IR.
 class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
   public:
+    /// Constructor (no results, no operands)
+    CoreBuiltinCall();
+
     /// Constructor
     /// @param result the result value
     /// @param func the builtin function
@@ -55,6 +58,9 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
 
     /// @returns the builtin function
     core::BuiltinFn Func() const { return func_; }
+
+    /// @param func the new builtin function
+    void SetFunc(core::BuiltinFn func) { func_ = func; }
 
     /// @returns the identifier for the function
     size_t FuncId() const override { return static_cast<size_t>(func_); }

@@ -40,6 +40,9 @@ class BuiltinCall : public Castable<BuiltinCall, Call> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no results, no operands)
+    BuiltinCall();
+
     /// Constructor
     /// @param result the result value
     /// @param args the conversion arguments
