@@ -1889,7 +1889,7 @@ ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescripto
         DAWN_TRY_ASSIGN_CONTEXT(descriptor, ValidateAndUnpack(rawDescriptor), "validating %s.",
                                 rawDescriptor);
         DAWN_TRY_CONTEXT(ValidateTextureDescriptor(this, descriptor, allowMultiPlanar),
-                         "validating %s.", rawDescriptor);
+                         "validating %s.", descriptor);
     } else {
         descriptor = Unpack(rawDescriptor);
     }

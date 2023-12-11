@@ -35,6 +35,7 @@
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 {% set prefix = metadata.proc_table_prefix.lower() %}
 #include "{{native_dir}}/{{prefix}}_platform.h"
+#include "{{native_dir}}/Forward.h"
 
 #include "absl/strings/str_format.h"
 
@@ -50,6 +51,10 @@ namespace {{native_namespace}} {
             {% if member.name.canonical_case() == "label" %}
                 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
                     AbslFormatConvert(const {{as_cppType(type.name)}}* value,
+                                      const absl::FormatConversionSpec& spec,
+                                      absl::FormatSink* s);
+                absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+                    AbslFormatConvert(const Unpacked<{{as_cppType(type.name)}}>& value,
                                       const absl::FormatConversionSpec& spec,
                                       absl::FormatSink* s);
             {% endif %}

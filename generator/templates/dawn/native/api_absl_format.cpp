@@ -32,6 +32,7 @@
 {% set api = metadata.api.lower() %}
 #include "{{native_dir}}/{{api}}_absl_format_autogen.h"
 
+#include "{{native_dir}}/ChainUtils.h"
 #include "{{native_dir}}/ObjectType_autogen.h"
 
 namespace {{native_namespace}} {
@@ -45,8 +46,8 @@ namespace {{native_namespace}} {
             {% if member.name.canonical_case() == "label" %}
                 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
                 AbslFormatConvert(const {{as_cppType(type.name)}}* value,
-                                    const absl::FormatConversionSpec& spec,
-                                    absl::FormatSink* s) {
+                                  const absl::FormatConversionSpec& spec,
+                                  absl::FormatSink* s) {
                     if (value == nullptr) {
                         s->Append("[null]");
                         return {true};
@@ -57,6 +58,12 @@ namespace {{native_namespace}} {
                     }
                     s->Append("]");
                     return {true};
+                }
+                absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+                AbslFormatConvert(const Unpacked<{{as_cppType(type.name)}}>& value,
+                                  const absl::FormatConversionSpec& spec,
+                                  absl::FormatSink* s) {
+                    return AbslFormatConvert(*value, spec, s);
                 }
             {% endif %}
         {% endfor %}

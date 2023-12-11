@@ -729,7 +729,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     }
     if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
                       "validating that a Vulkan image can be wrapped with %s.",
-                      *textureDescriptor)) {
+                      textureDescriptor)) {
         return nullptr;
     }
     if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&

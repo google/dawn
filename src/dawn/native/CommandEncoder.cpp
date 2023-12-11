@@ -1287,7 +1287,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             return {};
         },
-        "encoding %s.BeginRenderPass(%s).", this, *descriptor);
+        "encoding %s.BeginRenderPass(%s).", this, descriptor);
 
     if (success) {
         Ref<RenderPassEncoder> passEncoder = RenderPassEncoder::Create(
