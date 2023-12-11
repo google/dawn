@@ -30,6 +30,7 @@
 #include <string_view>
 #include <utility>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/webgpu_cpp.h"
 #include "mocks/BufferMock.h"

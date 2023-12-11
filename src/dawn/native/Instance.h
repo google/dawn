@@ -43,9 +43,9 @@
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/BlobCache.h"
-#include "dawn/native/ChainUtils.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Features.h"
+#include "dawn/native/Forward.h"
 #include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
@@ -182,7 +182,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     InstanceBase(const InstanceBase& other) = delete;
     InstanceBase& operator=(const InstanceBase& other) = delete;
 
-    MaybeError Initialize(const Unpacked<InstanceDescriptor> descriptor);
+    MaybeError Initialize(const Unpacked<InstanceDescriptor>& descriptor);
     void SetPlatform(dawn::platform::Platform* platform);
 
     // Lazily creates connections to all backends that have been compiled, may return null even for

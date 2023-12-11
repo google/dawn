@@ -35,7 +35,6 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/Error.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
 

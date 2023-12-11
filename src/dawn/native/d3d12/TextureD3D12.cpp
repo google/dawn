@@ -33,6 +33,7 @@
 #include "absl/numeric/bits.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Error.h"

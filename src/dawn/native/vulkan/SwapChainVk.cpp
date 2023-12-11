@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Compiler.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/vulkan/BackendVk.h"

@@ -30,6 +30,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/tests/DawnNativeTest.h"

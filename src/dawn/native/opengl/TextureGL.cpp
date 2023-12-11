@@ -33,6 +33,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/CommandBufferGL.h"

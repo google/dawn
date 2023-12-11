@@ -31,6 +31,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/opengl/BindGroupGL.h"

@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"

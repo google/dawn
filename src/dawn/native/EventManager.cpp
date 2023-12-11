@@ -34,6 +34,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/FutureUtils.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Queue.h"

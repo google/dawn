@@ -38,7 +38,6 @@
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/common/NonCopyable.h"
-#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"

@@ -39,8 +39,8 @@
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
-#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/SystemEvent.h"
 

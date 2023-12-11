@@ -27,6 +27,7 @@
 
 #include "dawn/native/metal/SwapChainMTL.h"
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/TextureMTL.h"

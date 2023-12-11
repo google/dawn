@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "dawn/common/Log.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/d3d/DeviceD3D.h"

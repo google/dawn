@@ -33,6 +33,7 @@
 
 #include <utility>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"

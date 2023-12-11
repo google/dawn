@@ -77,6 +77,9 @@ class PerStage;
 
 struct Format;
 
+template <typename T>
+class Unpacked;
+
 // Aliases for frontend-only types.
 using CommandEncoderBase = CommandEncoder;
 using ComputePassEncoderBase = ComputePassEncoder;
