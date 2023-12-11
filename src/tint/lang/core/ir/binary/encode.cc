@@ -29,6 +29,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
@@ -240,6 +242,7 @@ struct Encoder {
                 [&](const core::type::Vector* v) { TypeVector(*type_out.mutable_vector(), v); },
                 [&](const core::type::Matrix* m) { TypeMatrix(*type_out.mutable_matrix(), m); },
                 [&](const core::type::Pointer* m) { TypePointer(*type_out.mutable_pointer(), m); },
+                [&](const core::type::Struct* s) { TypeStruct(*type_out.mutable_struct_(), s); },
                 [&](const core::type::Array* m) { TypeArray(*type_out.mutable_array(), m); },
                 TINT_ICE_ON_NO_MATCH);
 
@@ -263,6 +266,42 @@ struct Encoder {
         pointer_out.set_address_space(AddressSpace(pointer_in->AddressSpace()));
         pointer_out.set_store_type(Type(pointer_in->StoreType()));
         pointer_out.set_access(Access(pointer_in->Access()));
+    }
+
+    void TypeStruct(pb::TypeStruct& struct_out, const core::type::Struct* struct_in) {
+        struct_out.set_name(struct_in->Name().Name());
+        for (auto* member_in : struct_in->Members()) {
+            auto& member_out = *struct_out.add_member();
+            member_out.set_name(member_in->Name().Name());
+            member_out.set_type(Type(member_in->Type()));
+            member_out.set_size(member_in->Size());
+            member_out.set_align(member_in->Align());
+
+            auto& attrs_in = member_in->Attributes();
+            if (attrs_in.location) {
+                member_out.mutable_attributes()->set_location(*attrs_in.location);
+            }
+            if (attrs_in.index) {
+                member_out.mutable_attributes()->set_index(*attrs_in.index);
+            }
+            if (attrs_in.color) {
+                member_out.mutable_attributes()->set_color(*attrs_in.color);
+            }
+            if (attrs_in.builtin) {
+                member_out.mutable_attributes()->set_builtin(BuiltinValue(*attrs_in.builtin));
+            }
+            if (auto& interpolation_in = attrs_in.interpolation) {
+                auto& interpolation_out = *member_out.mutable_attributes()->mutable_interpolation();
+                interpolation_out.set_type(InterpolationType(interpolation_in->type));
+                if (interpolation_in->sampling != InterpolationSampling::kUndefined) {
+                    interpolation_out.set_sampling(
+                        InterpolationSampling(interpolation_in->sampling));
+                }
+            }
+            if (attrs_in.invariant) {
+                member_out.mutable_attributes()->set_invariant(true);
+            }
+        }
     }
 
     void TypeArray(pb::TypeArray& array_out, const core::type::Array* array_in) {
@@ -457,6 +496,75 @@ struct Encoder {
 
         TINT_ICE() << "invalid BinaryOp: " << in;
         return pb::BinaryOp::add_;
+    }
+
+    pb::InterpolationType InterpolationType(core::InterpolationType in) {
+        switch (in) {
+            case core::InterpolationType::kFlat:
+                return pb::InterpolationType::flat;
+            case core::InterpolationType::kLinear:
+                return pb::InterpolationType::linear;
+            case core::InterpolationType::kPerspective:
+                return pb::InterpolationType::perspective;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid InterpolationType: " << in;
+        return pb::InterpolationType::flat;
+    }
+
+    pb::InterpolationSampling InterpolationSampling(core::InterpolationSampling in) {
+        switch (in) {
+            case core::InterpolationSampling::kCenter:
+                return pb::InterpolationSampling::center;
+            case core::InterpolationSampling::kCentroid:
+                return pb::InterpolationSampling::centroid;
+            case core::InterpolationSampling::kSample:
+                return pb::InterpolationSampling::sample;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid InterpolationSampling: " << in;
+        return pb::InterpolationSampling::center;
+    }
+
+    pb::BuiltinValue BuiltinValue(core::BuiltinValue in) {
+        switch (in) {
+            case core::BuiltinValue::kPointSize:
+                return pb::BuiltinValue::point_size;
+            case core::BuiltinValue::kFragDepth:
+                return pb::BuiltinValue::frag_depth;
+            case core::BuiltinValue::kFrontFacing:
+                return pb::BuiltinValue::front_facing;
+            case core::BuiltinValue::kGlobalInvocationId:
+                return pb::BuiltinValue::global_invocation_id;
+            case core::BuiltinValue::kInstanceIndex:
+                return pb::BuiltinValue::instance_index;
+            case core::BuiltinValue::kLocalInvocationId:
+                return pb::BuiltinValue::local_invocation_id;
+            case core::BuiltinValue::kLocalInvocationIndex:
+                return pb::BuiltinValue::local_invocation_index;
+            case core::BuiltinValue::kNumWorkgroups:
+                return pb::BuiltinValue::num_workgroups;
+            case core::BuiltinValue::kPosition:
+                return pb::BuiltinValue::position;
+            case core::BuiltinValue::kSampleIndex:
+                return pb::BuiltinValue::sample_index;
+            case core::BuiltinValue::kSampleMask:
+                return pb::BuiltinValue::sample_mask;
+            case core::BuiltinValue::kSubgroupInvocationId:
+                return pb::BuiltinValue::subgroup_invocation_id;
+            case core::BuiltinValue::kSubgroupSize:
+                return pb::BuiltinValue::subgroup_size;
+            case core::BuiltinValue::kVertexIndex:
+                return pb::BuiltinValue::vertex_index;
+            case core::BuiltinValue::kWorkgroupId:
+                return pb::BuiltinValue::workgroup_id;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid BuiltinValue: " << in;
+        return pb::BuiltinValue::point_size;
     }
 };
 

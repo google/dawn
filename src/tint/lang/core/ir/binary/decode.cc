@@ -315,6 +315,8 @@ struct Decoder {
                 return CreateTypeMatrix(type_in.matrix());
             case pb::Type::KindCase::kPointer:
                 return CreateTypePointer(type_in.pointer());
+            case pb::Type::KindCase::kStruct:
+                return CreateTypeStruct(type_in.struct_());
             case pb::Type::KindCase::kArray:
                 return CreateTypeArray(type_in.array());
             case pb::Type::KindCase::kAtomic:
@@ -364,6 +366,55 @@ struct Decoder {
         auto* store_ty = Type(pointer_in.store_type());
         auto access = Access(pointer_in.access());
         return mod_out_.Types().ptr(address_space, store_ty, access);
+    }
+
+    const type::Struct* CreateTypeStruct(const pb::TypeStruct& struct_in) {
+        Vector<const core::type::StructMember*, 8> members_out;
+        uint32_t offset = 0;
+        for (auto& member_in : struct_in.member()) {
+            auto symbol = mod_out_.symbols.Register(member_in.name());
+            auto* type = Type(member_in.type());
+            auto index = static_cast<uint32_t>(members_out.Length());
+            auto align = member_in.align();
+            auto size = member_in.size();
+            core::type::StructMemberAttributes attributes_out{};
+            if (member_in.has_attributes()) {
+                auto& attributes_in = member_in.attributes();
+                if (attributes_in.has_location()) {
+                    attributes_out.location = attributes_in.location();
+                }
+                if (attributes_in.has_index()) {
+                    attributes_out.index = attributes_in.index();
+                }
+                if (attributes_in.has_color()) {
+                    attributes_out.color = attributes_in.color();
+                }
+                if (attributes_in.has_builtin()) {
+                    attributes_out.builtin = BuiltinValue(attributes_in.builtin());
+                }
+                if (attributes_in.has_interpolation()) {
+                    auto& interpolation_in = attributes_in.interpolation();
+                    attributes_out.interpolation = core::Interpolation{
+                        InterpolationType(interpolation_in.type()),
+                        InterpolationSampling::kUndefined,
+                    };
+                    if (interpolation_in.has_sampling()) {
+                        attributes_out.interpolation->sampling =
+                            InterpolationSampling(interpolation_in.sampling());
+                    }
+                }
+                if (attributes_in.has_invariant()) {
+                    attributes_out.invariant = attributes_in.invariant();
+                }
+            }
+            offset = RoundUp(align, offset);
+            auto* member_out = mod_out_.Types().Get<core::type::StructMember>(
+                symbol, type, index, offset, align, size, std::move(attributes_out));
+            offset += size;
+            members_out.Push(member_out);
+        }
+        auto name = mod_out_.symbols.Register(struct_in.name());
+        return mod_out_.Types().Struct(name, std::move(members_out));
     }
 
     const type::Array* CreateTypeArray(const pb::TypeArray& array_in) {
@@ -575,6 +626,75 @@ struct Decoder {
                 TINT_ICE() << "invalid BinaryOp: " << in;
                 return core::ir::BinaryOp::kAdd;
         }
+    }
+
+    core::InterpolationType InterpolationType(pb::InterpolationType in) {
+        switch (in) {
+            case pb::InterpolationType::flat:
+                return core::InterpolationType::kFlat;
+            case pb::InterpolationType::linear:
+                return core::InterpolationType::kLinear;
+            case pb::InterpolationType::perspective:
+                return core::InterpolationType::kPerspective;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid InterpolationType: " << in;
+        return core::InterpolationType::kFlat;
+    }
+
+    core::InterpolationSampling InterpolationSampling(pb::InterpolationSampling in) {
+        switch (in) {
+            case pb::InterpolationSampling::center:
+                return core::InterpolationSampling::kCenter;
+            case pb::InterpolationSampling::centroid:
+                return core::InterpolationSampling::kCentroid;
+            case pb::InterpolationSampling::sample:
+                return core::InterpolationSampling::kSample;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid InterpolationSampling: " << in;
+        return core::InterpolationSampling::kCenter;
+    }
+
+    core::BuiltinValue BuiltinValue(pb::BuiltinValue in) {
+        switch (in) {
+            case pb::BuiltinValue::point_size:
+                return core::BuiltinValue::kPointSize;
+            case pb::BuiltinValue::frag_depth:
+                return core::BuiltinValue::kFragDepth;
+            case pb::BuiltinValue::front_facing:
+                return core::BuiltinValue::kFrontFacing;
+            case pb::BuiltinValue::global_invocation_id:
+                return core::BuiltinValue::kGlobalInvocationId;
+            case pb::BuiltinValue::instance_index:
+                return core::BuiltinValue::kInstanceIndex;
+            case pb::BuiltinValue::local_invocation_id:
+                return core::BuiltinValue::kLocalInvocationId;
+            case pb::BuiltinValue::local_invocation_index:
+                return core::BuiltinValue::kLocalInvocationIndex;
+            case pb::BuiltinValue::num_workgroups:
+                return core::BuiltinValue::kNumWorkgroups;
+            case pb::BuiltinValue::position:
+                return core::BuiltinValue::kPosition;
+            case pb::BuiltinValue::sample_index:
+                return core::BuiltinValue::kSampleIndex;
+            case pb::BuiltinValue::sample_mask:
+                return core::BuiltinValue::kSampleMask;
+            case pb::BuiltinValue::subgroup_invocation_id:
+                return core::BuiltinValue::kSubgroupInvocationId;
+            case pb::BuiltinValue::subgroup_size:
+                return core::BuiltinValue::kSubgroupSize;
+            case pb::BuiltinValue::vertex_index:
+                return core::BuiltinValue::kVertexIndex;
+            case pb::BuiltinValue::workgroup_id:
+                return core::BuiltinValue::kWorkgroupId;
+            default:
+                break;
+        }
+        TINT_ICE() << "invalid BuiltinValue: " << in;
+        return core::BuiltinValue::kPointSize;
     }
 };
 

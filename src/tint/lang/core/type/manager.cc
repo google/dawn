@@ -192,8 +192,18 @@ const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
     return Get<core::type::Pointer>(address_space, subtype, access);
 }
 
+core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {
+    uint32_t max_align = 0u;
+    for (const auto& m : members) {
+        max_align = std::max(max_align, m->Align());
+    }
+    uint32_t size = members.Back()->Offset() + members.Back()->Size();
+    return Get<core::type::Struct>(name, std::move(members), max_align,
+                                   tint::RoundUp(max_align, size), size);
+}
+
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md) {
-    tint::Vector<const core::type::StructMember*, 4> members;
+    tint::Vector<const StructMember*, 4> members;
     uint32_t current_size = 0u;
     uint32_t max_align = 0u;
     for (const auto& m : md) {
@@ -205,8 +215,8 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md)
         current_size = offset + m.type->Size();
         max_align = std::max(max_align, align);
     }
-    return Get<core::type::Struct>(name, members, max_align, tint::RoundUp(max_align, current_size),
-                                   current_size);
+    return Get<core::type::Struct>(name, std::move(members), max_align,
+                                   tint::RoundUp(max_align, current_size), current_size);
 }
 
 }  // namespace tint::core::type

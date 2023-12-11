@@ -87,6 +87,7 @@ TEST_F(IRBinaryRoundtripTest, RootBlock_Var_storage_binding) {
     });
     RUN_TEST();
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Functions
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +120,115 @@ TEST_F(IRBinaryRoundtripTest, Fn_Parameters) {
     auto* p2 = b.FunctionParam(ty.f32());
     b.ir.SetName(p1, "p1");
     fn->SetParams({p0, p1, p2});
+    RUN_TEST();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRBinaryRoundtripTest, bool) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, bool>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, i32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, i32>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, u32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, u32>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, f32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, f32>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, f16) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, f16>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, vec2_f32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, vec2<f32>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, vec3_i32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, vec3<i32>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, vec4_bool) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, vec4<bool>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, mat4x2_f32) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, vec4<mat4x2<f32>>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, mat2x4_f16) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, vec4<mat2x4<f16>>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, ptr_function_f32_read_write) {
+    auto p = b.FunctionParam<ptr<function, f32, read_write>>("p");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, ptr_workgroup_i32_read) {
+    auto p = b.FunctionParam<ptr<workgroup, i32, read>>("p");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, struct) {
+    Vector members{
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), /* index */ 0u,
+                                         /* offset */ 0u, /* align */ 4u, /* size */ 4u,
+                                         type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), /* index */ 1u,
+                                         /* offset */ 4u, /* align */ 4u, /* size */ 32u,
+                                         type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.u32(), /* index */ 2u,
+                                         /* offset */ 36u, /* align */ 4u, /* size */ 4u,
+                                         type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.u32(), /* index */ 3u,
+                                         /* offset */ 64u, /* align */ 32u, /* size */ 4u,
+                                         type::StructMemberAttributes{}),
+    };
+    auto* S = ty.Struct(b.ir.symbols.New("S"), std::move(members));
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr<function, read_write>(S)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, StructMemberAttributes) {
+    type::StructMemberAttributes attrs{};
+    attrs.location = 1;
+    attrs.index = 2;
+    attrs.color = 3;
+    attrs.builtin = core::BuiltinValue::kFragDepth;
+    attrs.interpolation = core::Interpolation{
+        core::InterpolationType::kLinear,
+        core::InterpolationSampling::kCentroid,
+    };
+    attrs.invariant = true;
+    Vector members{
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), /* index */ 0u,
+                                         /* offset */ 0u, /* align */ 4u, /* size */ 4u, attrs),
+    };
+    auto* S = ty.Struct(b.ir.symbols.New("S"), std::move(members));
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr<function, read_write>(S)); });
     RUN_TEST();
 }
 

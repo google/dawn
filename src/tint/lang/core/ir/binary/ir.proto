@@ -48,7 +48,8 @@ message Type {
         TypeMatrix matrix = 3;
         TypeArray array = 4;
         TypePointer pointer = 5;
-        uint32 atomic = 6;  // Module.types
+        TypeStruct struct = 6;
+        uint32 atomic = 7;  // Module.types
         // TODO: textures, samplers
     }
 }
@@ -84,6 +85,19 @@ message TypePointer {
     AddressSpace address_space = 1;
     uint32 store_type = 2;  // Module.types
     AccessControl access = 3;
+}
+
+message TypeStruct {
+    string name = 1;
+    repeated TypeStructMember member = 2;
+}
+
+message TypeStructMember {
+    string name = 1;
+    uint32 type = 2;
+    uint32 size = 3;
+    uint32 align = 4;
+    optional AttributesStructMember attributes = 5;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -244,6 +258,23 @@ message BindingPoint {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Attributes
+////////////////////////////////////////////////////////////////////////////////
+message AttributesStructMember {
+    optional uint32 location = 1;
+    optional uint32 index = 2;
+    optional uint32 color = 3;
+    optional BuiltinValue builtin = 4;
+    optional AttributesInterpolation interpolation = 5;
+    optional bool invariant = 6;
+}
+
+message AttributesInterpolation {
+    InterpolationType type = 1;
+    optional InterpolationSampling sampling = 2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Enums
 ////////////////////////////////////////////////////////////////////////////////
 enum AddressSpace {
@@ -285,4 +316,152 @@ enum BinaryOp {
     greater_than_equal = 13;
     shift_left = 14;
     shift_right = 15;
+}
+
+enum InterpolationType {
+    flat = 0;
+    linear = 1;
+    perspective = 2;
+}
+
+enum InterpolationSampling {
+    center = 0;
+    centroid = 1;
+    sample = 2;
+}
+
+enum BuiltinValue {
+    point_size = 0;
+    frag_depth = 1;
+    front_facing = 2;
+    global_invocation_id = 3;
+    instance_index = 4;
+    local_invocation_id = 5;
+    local_invocation_index = 6;
+    num_workgroups = 7;
+    position = 8;
+    sample_index = 9;
+    sample_mask = 10;
+    subgroup_invocation_id = 11;
+    subgroup_size = 12;
+    vertex_index = 13;
+    workgroup_id = 14;
+}
+
+enum BuiltinFn {
+    abs = 0;
+    acos = 1;
+    acosh = 2;
+    all = 3;
+    any = 4;
+    array_length = 5;
+    asin = 6;
+    asinh = 7;
+    atan = 8;
+    atan2 = 9;
+    atanh = 10;
+    ceil = 11;
+    clamp = 12;
+    cos = 13;
+    cosh = 14;
+    count_leading_zeros = 15;
+    count_one_bits = 16;
+    count_trailing_zeros = 17;
+    cross = 18;
+    degrees = 19;
+    determinant = 20;
+    distance = 21;
+    dot = 22;
+    dot4i8_packed = 23;
+    dot4u8_packed = 24;
+    dpdx = 25;
+    dpdx_coarse = 26;
+    dpdx_fine = 27;
+    dpdy = 28;
+    dpdy_coarse = 29;
+    dpdy_fine = 30;
+    exp = 31;
+    exp2 = 32;
+    extract_bits = 33;
+    face_forward = 34;
+    first_leading_bit = 35;
+    first_trailing_bit = 36;
+    floor = 37;
+    fma = 38;
+    fract = 39;
+    frexp = 40;
+    fwidth = 41;
+    fwidth_coarse = 42;
+    fwidth_fine = 43;
+    insert_bits = 44;
+    inverse_sqrt = 45;
+    ldexp = 46;
+    length = 47;
+    log = 48;
+    log2 = 49;
+    max = 50;
+    min = 51;
+    mix = 52;
+    modf = 53;
+    normalize = 54;
+    pack2x16_float = 55;
+    pack2x16_snorm = 56;
+    pack2x16_unorm = 57;
+    pack4x8_snorm = 58;
+    pack4x8_unorm = 59;
+    pow = 60;
+    quantize_to_f16 = 61;
+    radians = 62;
+    reflect = 63;
+    refract = 64;
+    reverse_bits = 65;
+    round = 66;
+    saturate = 67;
+    select = 68;
+    sign = 69;
+    sin = 70;
+    sinh = 71;
+    smoothstep = 72;
+    sqrt = 73;
+    step = 74;
+    storage_barrier = 75;
+    tan = 76;
+    tanh = 77;
+    transpose = 78;
+    trunc = 79;
+    unpack2x16_float = 80;
+    unpack2x16_snorm = 81;
+    unpack2x16_unorm = 82;
+    unpack4x8_snorm = 83;
+    unpack4x8_unorm = 84;
+    workgroup_barrier = 85;
+    texture_barrier = 86;
+    texture_dimensions = 87;
+    texture_gather = 88;
+    texture_gather_compare = 89;
+    texture_num_layers = 90;
+    texture_num_levels = 91;
+    texture_num_samples = 92;
+    texture_sample = 93;
+    texture_sample_bias = 94;
+    texture_sample_compare = 95;
+    texture_sample_compare_level = 96;
+    texture_sample_grad = 97;
+    texture_sample_level = 98;
+    texture_sample_base_clamp_to_edge = 99;
+    texture_store = 100;
+    texture_load = 101;
+    atomic_load = 102;
+    atomic_store = 103;
+    atomic_add = 104;
+    atomic_sub = 105;
+    atomic_max = 106;
+    atomic_min = 107;
+    atomic_and = 108;
+    atomic_or = 109;
+    atomic_xor = 110;
+    atomic_exchange = 111;
+    atomic_compare_exchange_weak = 112;
+    subgroup_ballot = 113;
+    subgroup_broadcast = 114;
 }
