@@ -29,6 +29,7 @@
 # Dawn projects
 ###############################################################################
 
+add_subdirectory(partition_alloc)
 add_subdirectory(common)
 add_subdirectory(platform)
 add_subdirectory(native)

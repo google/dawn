@@ -1,0 +1,2 @@
+add_library(partition_alloc INTERFACE)
+target_include_directories(partition_alloc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

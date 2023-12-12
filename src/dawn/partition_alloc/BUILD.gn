@@ -1,0 +1,25 @@
+import("//build_overrides/dawn.gni")
+
+# This file provides Dawn, the MiraclePtr "raw_ptr" definition.
+# Depending on the configuration, this is either:
+# - Delegated to the `partition_alloc` library.
+# - Provided by Dawn itself as "no-op" implementation.
+
+# This define the same targets as in partition_alloc. See Chrome's file:
+# - base/allocator/partition_allocator/BUILD.gn
+# - base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
+
+if (defined(dawn_partition_alloc_dir)) {
+  group("raw_ptr") {
+    public_deps = [ "${dawn_partition_alloc_dir}:raw_ptr" ]
+  }
+} else {
+  config("public_includes") {
+    include_dirs = [ "." ]
+  }
+
+  source_set("raw_ptr") {
+    public_configs = [ ":public_includes" ]
+    public = [ "partition_alloc/pointers/raw_ptr.h" ]
+  }
+}
