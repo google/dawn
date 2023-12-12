@@ -2934,5 +2934,45 @@ INSTANTIATE_TEST_SUITE_P(  //
     testing::Combine(testing::Values(core::BuiltinFn::kQuantizeToF16),
                      testing::ValuesIn(QuantizeToF16Cases())));
 
+std::vector<Case> Dot4I8PackedCases() {
+    return {
+        // {-1, -2, -3, -4} . {-5, -6, -7, -8}
+        C({Val(u32(0xFFFEFDFC)), Val(u32(0xFBFAF9F8))}, Val(i32(70))),
+        // {1, 2, 3, 4} . {-1, -2, -3, -4}
+        C({Val(u32(0x01020304)), Val(u32(0xFFFEFDFC))}, Val(i32(-30))),
+        // {-9, -10, -11, -12} . {5, 6, 7, 8}
+        C({Val(u32(0xF7F6F5F4)), Val(u32(0x05060708))}, Val(i32(-278))),
+        // {0, 0, 0, 0} . {0, 0, 0, 0}
+        C({Val(u32(0)), Val(u32(0))}, Val(i32(0))),
+        // {127, 127, 127, 127} . {127, 127, 127, 127}
+        C({Val(u32(0x7F7F7F7F)), Val(u32(0x7F7F7F7F))}, Val(i32(64516))),
+        // {-128, -128, -128, -128} . {-128, -128, -128, -128}
+        C({Val(u32(0x80808080)), Val(u32(0x80808080))}, Val(i32(65536))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Dot4I8Packed,
+    ConstEvalBuiltinTest,
+    testing::Combine(testing::Values(core::BuiltinFn::kDot4I8Packed),
+                     testing::ValuesIn(Dot4I8PackedCases())));
+
+std::vector<Case> Dot4U8PackedCases() {
+    return {
+        // {255, 254, 253, 252} . {251, 250, 249, 248}
+        C({Val(u32(0xFFFEFDFC)), Val(u32(0xFBFAF9F8))}, Val(u32(252998))),
+        // {1, 2, 3, 4} . {255, 254, 253, 252}
+        C({Val(u32(0x01020304)), Val(u32(0xFFFEFDFC))}, Val(u32(2530))),
+        // {0, 0, 0, 0} . {0, 0, 0, 0}
+        C({Val(u32(0)), Val(u32(0))}, Val(u32(0))),
+        // {255, 255, 255, 255} . {255, 255, 255, 255}
+        C({Val(u32(0xFFFFFFFF)), Val(u32(0xFFFFFFFF))}, Val(u32(260100))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Dot4U8Packed,
+    ConstEvalBuiltinTest,
+    testing::Combine(testing::Values(core::BuiltinFn::kDot4U8Packed),
+                     testing::ValuesIn(Dot4U8PackedCases())));
+
 }  // namespace
 }  // namespace tint::core::constant::test

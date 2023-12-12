@@ -550,6 +550,24 @@ class Eval {
     /// @return the result value, or null if the value cannot be calculated
     Result dot(const core::type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
+    /// dot4I8Packed builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result dot4I8Packed(const core::type::Type* ty,
+                        VectorRef<const Value*> args,
+                        const Source& source);
+
+    /// dot4U8Packed builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result dot4U8Packed(const core::type::Type* ty,
+                        VectorRef<const Value*> args,
+                        const Source& source);
+
     /// exp builtin
     /// @param ty the expression type
     /// @param args the input arguments

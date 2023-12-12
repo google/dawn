@@ -451,8 +451,8 @@ match workgroup
 @must_use @const fn distance<T: fa_f32_f16>(T, T) -> T
 @must_use @const fn distance<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> T
 @must_use @const fn dot<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> T
-@must_use fn dot4I8Packed(u32, u32) -> i32
-@must_use fn dot4U8Packed(u32, u32) -> u32
+@must_use @const fn dot4I8Packed(u32, u32) -> i32
+@must_use @const fn dot4U8Packed(u32, u32) -> u32
 @must_use @stage("fragment") fn dpdx(f32) -> f32
 @must_use @stage("fragment") fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
 @must_use @stage("fragment") fn dpdxCoarse(f32) -> f32

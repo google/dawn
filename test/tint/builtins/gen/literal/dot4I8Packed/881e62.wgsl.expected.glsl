@@ -1,21 +1,11 @@
 #version 310 es
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
-int tint_dot4_i8_packed(uint a, uint b) {
-  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  return tint_int_dot(a_i8, b_i8);
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   int inner;
 } prevent_dce;
 
 void dot4I8Packed_881e62() {
-  int res = tint_dot4_i8_packed(1u, 1u);
+  int res = 1;
   prevent_dce.inner = res;
 }
 
@@ -35,22 +25,12 @@ void main() {
 #version 310 es
 precision highp float;
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
-int tint_dot4_i8_packed(uint a, uint b) {
-  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  return tint_int_dot(a_i8, b_i8);
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   int inner;
 } prevent_dce;
 
 void dot4I8Packed_881e62() {
-  int res = tint_dot4_i8_packed(1u, 1u);
+  int res = 1;
   prevent_dce.inner = res;
 }
 
@@ -64,22 +44,12 @@ void main() {
 }
 #version 310 es
 
-int tint_int_dot(ivec4 a, ivec4 b) {
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
-}
-
-int tint_dot4_i8_packed(uint a, uint b) {
-  ivec4 a_i8 = (ivec4((uvec4(a) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  ivec4 b_i8 = (ivec4((uvec4(b) << uvec4(24u, 16u, 8u, 0u))) >> uvec4(24u));
-  return tint_int_dot(a_i8, b_i8);
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   int inner;
 } prevent_dce;
 
 void dot4I8Packed_881e62() {
-  int res = tint_dot4_i8_packed(1u, 1u);
+  int res = 1;
   prevent_dce.inner = res;
 }
 

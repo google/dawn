@@ -1,14 +1,7 @@
-SKIP: FAILED
-
-int tint_dot4I8Packed(uint param_0, uint param_1) {
-  int accumulator = 0;
-  return dot4add_i8packed(param_0, param_1, accumulator);
-}
-
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void dot4I8Packed_881e62() {
-  int res = tint_dot4I8Packed(1u, 1u);
+  int res = 1;
   prevent_dce.Store(0u, asuint(res));
 }
 

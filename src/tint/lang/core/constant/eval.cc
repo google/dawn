@@ -2510,6 +2510,36 @@ Eval::Result Eval::dot(const core::type::Type*,
     return r;
 }
 
+Eval::Result Eval::dot4I8Packed(const core::type::Type* ty,
+                                VectorRef<const Value*> args,
+                                const Source& source) {
+    uint32_t packed_int8_vec4_1 = args[0]->ValueAs<u32>();
+    uint32_t packed_int8_vec4_2 = args[1]->ValueAs<u32>();
+
+    int8_t* int8_vec4_1 = reinterpret_cast<int8_t*>(&packed_int8_vec4_1);
+    int8_t* int8_vec4_2 = reinterpret_cast<int8_t*>(&packed_int8_vec4_2);
+    int32_t result = 0;
+    for (uint8_t i = 0; i < 4; ++i) {
+        result += int8_vec4_1[i] * int8_vec4_2[i];
+    }
+    return CreateScalar(source, ty, i32(result));
+}
+
+Eval::Result Eval::dot4U8Packed(const core::type::Type* ty,
+                                VectorRef<const Value*> args,
+                                const Source& source) {
+    uint32_t packed_uint8_vec4_1 = args[0]->ValueAs<u32>();
+    uint32_t packed_uint8_vec4_2 = args[1]->ValueAs<u32>();
+
+    uint8_t* uint8_vec4_1 = reinterpret_cast<uint8_t*>(&packed_uint8_vec4_1);
+    uint8_t* uint8_vec4_2 = reinterpret_cast<uint8_t*>(&packed_uint8_vec4_2);
+    uint32_t result = 0;
+    for (uint8_t i = 0; i < 4; ++i) {
+        result += uint8_vec4_1[i] * uint8_vec4_2[i];
+    }
+    return CreateScalar(source, ty, u32(result));
+}
+
 Eval::Result Eval::exp(const core::type::Type* ty,
                        VectorRef<const Value*> args,
                        const Source& source) {

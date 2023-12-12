@@ -1,15 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-int tint_dot4I8Packed(uint param_0, uint param_1) {
-  char4 vec1 = as_type<char4>(param_0);
-  char4 vec2 = as_type<char4>(param_1);
-  return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
-}
-
 void dot4I8Packed_881e62(device int* const tint_symbol_1) {
-  int res = tint_dot4I8Packed(1u, 1u);
+  int res = 1;
   *(tint_symbol_1) = res;
 }
 
