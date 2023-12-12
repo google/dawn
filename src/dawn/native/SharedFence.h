@@ -54,7 +54,7 @@ class SharedFenceBase : public ApiObjectBase {
 
   private:
     void DestroyImpl() override;
-    virtual MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const = 0;
+    virtual MaybeError ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const = 0;
 };
 
 struct FenceAndSignalValue {

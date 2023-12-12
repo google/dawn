@@ -60,7 +60,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
         const SharedFenceDXGISharedHandleDescriptor* desc) override;
 
     MaybeError BeginAccessImpl(TextureBase* texture,
-                               const BeginAccessDescriptor* descriptor) override;
+                               const Unpacked<BeginAccessDescriptor>& descriptor) override;
 
     ComPtr<ID3D12Resource> mResource;
 };

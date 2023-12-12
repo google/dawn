@@ -27,7 +27,7 @@
 
 #include "dawn/native/metal/SharedFenceMTL.h"
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/metal/DeviceMTL.h"
 
 namespace dawn::native::metal {
@@ -49,15 +49,11 @@ id<MTLSharedEvent> SharedFence::GetMTLSharedEvent() const {
     return mSharedEvent.Get();
 }
 
-MaybeError SharedFence::ExportInfoImpl(SharedFenceExportInfo* info) const {
+MaybeError SharedFence::ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const {
     info->type = wgpu::SharedFenceType::MTLSharedEvent;
 
-    DAWN_TRY(
-        ValidateSingleSType(info->nextInChain, wgpu::SType::SharedFenceMTLSharedEventExportInfo));
-
-    SharedFenceMTLSharedEventExportInfo* exportInfo = nullptr;
-    FindInChain(info->nextInChain, &exportInfo);
-
+    DAWN_TRY(info.ValidateSubset<SharedFenceMTLSharedEventExportInfo>());
+    auto* exportInfo = info.Get<SharedFenceMTLSharedEventExportInfo>();
     if (exportInfo != nullptr) {
         exportInfo->sharedEvent = mSharedEvent.Get();
     }

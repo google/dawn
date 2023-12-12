@@ -49,11 +49,11 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
         DAWN_UNREACHABLE();
     }
     MaybeError BeginAccessImpl(TextureBase* texture,
-                               const BeginAccessDescriptor* descriptor) override {
+                               const Unpacked<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     EndAccessState* state) override {
+                                                     Unpacked<EndAccessState>& state) override {
         DAWN_UNREACHABLE();
     }
 };
@@ -239,7 +239,10 @@ bool SharedTextureMemoryBase::APIIsDeviceLost() {
 }
 
 MaybeError SharedTextureMemoryBase::BeginAccess(TextureBase* texture,
-                                                const BeginAccessDescriptor* descriptor) {
+                                                const BeginAccessDescriptor* rawDescriptor) {
+    Unpacked<BeginAccessDescriptor> descriptor;
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+
     // Append begin fences first. Fences should be tracked regardless of whether later errors occur.
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         mContents->mPendingFences->push_back(
@@ -328,9 +331,11 @@ MaybeError SharedTextureMemoryBase::EndAccess(TextureBase* texture, EndAccessSta
 
 ResultOrError<FenceAndSignalValue> SharedTextureMemoryBase::EndAccessInternal(
     TextureBase* texture,
-    EndAccessState* state) {
+    EndAccessState* rawState) {
     DAWN_TRY(GetDevice()->ValidateObject(texture));
     DAWN_TRY(ValidateTextureCreatedFromSelf(texture));
+    Unpacked<EndAccessState> state;
+    DAWN_TRY_ASSIGN(state, ValidateAndUnpack(rawState));
     return EndAccessImpl(texture, state);
 }
 

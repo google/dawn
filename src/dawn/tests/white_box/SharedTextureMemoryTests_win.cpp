@@ -486,7 +486,6 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStruct) {
     exportInfo.nextInChain = &otherStruct;
 
     ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
-    EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::DXGISharedHandle);
 }
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,

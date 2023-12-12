@@ -47,8 +47,8 @@ SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
 }
 
 MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const BeginAccessDescriptor* descriptor) {
-    DAWN_TRY(ValidateSTypes(descriptor->nextInChain, {}));
+                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
+    DAWN_TRY(descriptor.ValidateSubset<>());
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         SharedFenceBase* fence = descriptor->fences[i];
 
@@ -73,9 +73,10 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBase* texture,
-                                                                      EndAccessState* state) {
-    DAWN_TRY(ValidateSTypes(state->nextInChain, {}));
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+    TextureBase* texture,
+    Unpacked<EndAccessState>& state) {
+    DAWN_TRY(state.ValidateSubset<>());
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceDXGISharedHandle),
                     "Required feature (%s) is missing.",
                     wgpu::FeatureName::SharedFenceDXGISharedHandle);

@@ -249,10 +249,10 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     return entryPoint;
 }
 
-MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* descriptor) {
-    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClipControl));
-    const PrimitiveDepthClipControl* depthClipControl = nullptr;
-    FindInChain(descriptor->nextInChain, &depthClipControl);
+MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* rawDescriptor) {
+    Unpacked<PrimitiveState> descriptor;
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+    const auto* depthClipControl = descriptor.Get<PrimitiveDepthClipControl>();
     DAWN_INVALID_IF(depthClipControl && !device->HasFeature(Feature::DepthClipControl),
                     "%s is not supported", wgpu::FeatureName::DepthClipControl);
     DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));

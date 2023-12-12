@@ -72,9 +72,10 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const Unpacked<TextureDescriptor>& descriptor) override;
-    MaybeError BeginAccessImpl(TextureBase* texture, const BeginAccessDescriptor*) override;
+    MaybeError BeginAccessImpl(TextureBase* texture,
+                               const Unpacked<BeginAccessDescriptor>& descriptor) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     EndAccessState* state) override;
+                                                     Unpacked<EndAccessState>& state) override;
 
     Ref<RefCountedVkHandle<VkImage>> mVkImage;
     Ref<RefCountedVkHandle<VkDeviceMemory>> mVkDeviceMemory;

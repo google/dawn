@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 
 namespace dawn::native::vulkan {
@@ -87,40 +87,30 @@ const SystemHandle& SharedFence::GetHandle() const {
     return mHandle;
 }
 
-MaybeError SharedFence::ExportInfoImpl(SharedFenceExportInfo* info) const {
+MaybeError SharedFence::ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const {
     info->type = mType;
 
 #if DAWN_PLATFORM_IS(FUCHSIA)
-    DAWN_TRY(ValidateSingleSType(info->nextInChain,
-                                 wgpu::SType::SharedFenceVkSemaphoreZirconHandleExportInfo));
-
-    SharedFenceVkSemaphoreZirconHandleExportInfo* exportInfo = nullptr;
-    FindInChain(info->nextInChain, &exportInfo);
-
+    DAWN_TRY(info.ValidateSubset<SharedFenceVkSemaphoreZirconHandleExportInfo>());
+    auto* exportInfo = info.Get<SharedFenceVkSemaphoreZirconHandleExportInfo>();
     if (exportInfo != nullptr) {
         exportInfo->handle = mHandle;
     }
 #elif DAWN_PLATFORM_IS(LINUX)
     switch (mType) {
         case wgpu::SharedFenceType::VkSemaphoreSyncFD:
-            DAWN_TRY(ValidateSingleSType(info->nextInChain,
-                                         wgpu::SType::SharedFenceVkSemaphoreSyncFDExportInfo));
+            DAWN_TRY(info.ValidateSubset<SharedFenceVkSemaphoreSyncFDExportInfo>());
             {
-                SharedFenceVkSemaphoreSyncFDExportInfo* exportInfo = nullptr;
-                FindInChain(info->nextInChain, &exportInfo);
-
+                auto* exportInfo = info.Get<SharedFenceVkSemaphoreSyncFDExportInfo>();
                 if (exportInfo != nullptr) {
                     exportInfo->handle = mHandle.Get();
                 }
             }
             break;
         case wgpu::SharedFenceType::VkSemaphoreOpaqueFD:
-            DAWN_TRY(ValidateSingleSType(info->nextInChain,
-                                         wgpu::SType::SharedFenceVkSemaphoreOpaqueFDExportInfo));
+            DAWN_TRY(info.ValidateSubset<SharedFenceVkSemaphoreOpaqueFDExportInfo>());
             {
-                SharedFenceVkSemaphoreOpaqueFDExportInfo* exportInfo = nullptr;
-                FindInChain(info->nextInChain, &exportInfo);
-
+                auto* exportInfo = info.Get<SharedFenceVkSemaphoreOpaqueFDExportInfo>();
                 if (exportInfo != nullptr) {
                     exportInfo->handle = mHandle.Get();
                 }

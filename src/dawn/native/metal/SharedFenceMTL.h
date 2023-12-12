@@ -53,7 +53,7 @@ class API_AVAILABLE(macos(10.14), ios(12.0)) SharedFence final : public SharedFe
   private:
     SharedFence(Device* device, const char* label, id<MTLSharedEvent> sharedEvent);
 
-    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override;
+    MaybeError ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const override;
 
     NSPRef<id<MTLSharedEvent>> mSharedEvent;
 };

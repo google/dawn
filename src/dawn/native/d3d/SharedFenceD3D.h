@@ -41,7 +41,7 @@ class SharedFence : public SharedFenceBase {
     SharedFence(Device* device, const char* label, SystemHandle ownedHandle);
 
   private:
-    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override;
+    MaybeError ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const override;
 
     SystemHandle mHandle;
 };

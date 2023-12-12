@@ -423,12 +423,11 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         return {};
     }
 
-    DAWN_TRY(ValidateSingleSType(colorAttachment.nextInChain,
-                                 wgpu::SType::DawnRenderPassColorAttachmentRenderToSingleSampled));
+    Unpacked<RenderPassColorAttachment> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&colorAttachment));
 
-    const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc =
-        nullptr;
-    FindInChain(colorAttachment.nextInChain, &msaaRenderToSingleSampledDesc);
+    const auto* msaaRenderToSingleSampledDesc =
+        unpacked.Get<DawnRenderPassColorAttachmentRenderToSingleSampled>();
     if (msaaRenderToSingleSampledDesc) {
         DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, colorAttachment,
                                                               msaaRenderToSingleSampledDesc));
@@ -918,12 +917,10 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
 
 MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
                                             const CommandEncoderDescriptor* descriptor) {
-    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
-                                 wgpu::SType::DawnEncoderInternalUsageDescriptor));
+    Unpacked<CommandEncoderDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
-    const DawnEncoderInternalUsageDescriptor* internalUsageDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &internalUsageDesc);
-
+    const auto* internalUsageDesc = unpacked.Get<DawnEncoderInternalUsageDescriptor>();
     DAWN_INVALID_IF(internalUsageDesc != nullptr &&
                         !device->APIHasFeature(wgpu::FeatureName::DawnInternalUsages),
                     "%s is not available.", wgpu::FeatureName::DawnInternalUsages);

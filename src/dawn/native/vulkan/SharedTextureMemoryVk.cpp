@@ -905,14 +905,14 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
 }
 
 MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const BeginAccessDescriptor* descriptor) {
-    DAWN_TRY(ValidateSTypes(descriptor->nextInChain,
-                            {{wgpu::SType::SharedTextureMemoryVkImageLayoutBeginState}}));
+                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(
+        type, (descriptor.ValidateBranches<Branch<SharedTextureMemoryVkImageLayoutBeginState>>()));
+    DAWN_ASSERT(type == wgpu::SType::SharedTextureMemoryVkImageLayoutBeginState);
 
-    const SharedTextureMemoryVkImageLayoutBeginState* vkLayoutBeginState = nullptr;
-    FindInChain(descriptor->nextInChain, &vkLayoutBeginState);
-    DAWN_INVALID_IF(vkLayoutBeginState == nullptr,
-                    "SharedTextureMemoryVkImageLayoutBeginState was not provided.");
+    auto vkLayoutBeginState = descriptor.Get<SharedTextureMemoryVkImageLayoutBeginState>();
+    DAWN_ASSERT(vkLayoutBeginState != nullptr);
 
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         // All fences are backed by binary semaphores.
@@ -926,15 +926,16 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
 }
 
 #if DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBase* texture,
-                                                                      EndAccessState* state) {
-    DAWN_TRY(ValidateSTypes(state->nextInChain,
-                            {{wgpu::SType::SharedTextureMemoryVkImageLayoutEndState}}));
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+    TextureBase* texture,
+    Unpacked<EndAccessState>& state) {
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(type,
+                    (state.ValidateBranches<Branch<SharedTextureMemoryVkImageLayoutEndState>>()));
+    DAWN_ASSERT(type == wgpu::SType::SharedTextureMemoryVkImageLayoutEndState);
 
-    SharedTextureMemoryVkImageLayoutEndState* vkLayoutEndState = nullptr;
-    FindInChain(state->nextInChain, &vkLayoutEndState);
-    DAWN_INVALID_IF(vkLayoutEndState == nullptr,
-                    "SharedTextureMemoryVkImageLayoutEndState was not provided.");
+    auto vkLayoutEndState = state.Get<SharedTextureMemoryVkImageLayoutEndState>();
+    DAWN_ASSERT(vkLayoutEndState != nullptr);
 
 #if DAWN_PLATFORM_IS(FUCHSIA)
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle),
@@ -996,8 +997,9 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBas
 
 #else  // DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBase* texture,
-                                                                      EndAccessState* state) {
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+    TextureBase* texture,
+    Unpacked<EndAccessState>& state) {
     return DAWN_VALIDATION_ERROR("No shared fence features supported.");
 }
 

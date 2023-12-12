@@ -259,14 +259,15 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     const SharedTextureMemoryDescriptor* baseDescriptor) {
-    DAWN_TRY(ValidateSingleSType(baseDescriptor->nextInChain,
-                                 wgpu::SType::SharedTextureMemoryIOSurfaceDescriptor));
+    Unpacked<SharedTextureMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
 
-    const SharedTextureMemoryIOSurfaceDescriptor* descriptor = nullptr;
-    FindInChain(baseDescriptor->nextInChain, &descriptor);
-
-    DAWN_INVALID_IF(descriptor == nullptr,
-                    "SharedTextureMemoryIOSurfaceDescriptor must be chained.");
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(type,
+                    (unpacked.ValidateBranches<Branch<SharedTextureMemoryIOSurfaceDescriptor>>()));
+    DAWN_ASSERT(type == wgpu::SType::SharedTextureMemoryIOSurfaceDescriptor);
+    const auto* descriptor = unpacked.Get<SharedTextureMemoryIOSurfaceDescriptor>();
+    DAWN_ASSERT(descriptor != nullptr);
 
     DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryIOSurface), "%s is not enabled.",
                     wgpu::FeatureName::SharedTextureMemoryIOSurface);
@@ -276,13 +277,15 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     const SharedFenceDescriptor* baseDescriptor) {
-    DAWN_TRY(ValidateSingleSType(baseDescriptor->nextInChain,
-                                 wgpu::SType::SharedFenceMTLSharedEventDescriptor));
+    Unpacked<SharedFenceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
 
-    const SharedFenceMTLSharedEventDescriptor* descriptor = nullptr;
-    FindInChain(baseDescriptor->nextInChain, &descriptor);
-
-    DAWN_INVALID_IF(descriptor == nullptr, "SharedFenceMTLSharedEventDescriptor must be chained.");
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(type,
+                    (unpacked.ValidateBranches<Branch<SharedFenceMTLSharedEventDescriptor>>()));
+    DAWN_ASSERT(type == wgpu::SType::SharedFenceMTLSharedEventDescriptor);
+    const auto* descriptor = unpacked.Get<SharedFenceMTLSharedEventDescriptor>();
+    DAWN_ASSERT(descriptor != nullptr);
 
     DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceMTLSharedEvent), "%s is not enabled.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);

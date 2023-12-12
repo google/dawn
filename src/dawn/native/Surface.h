@@ -47,7 +47,9 @@ struct IUnknown;
 
 namespace dawn::native {
 
-MaybeError ValidateSurfaceDescriptor(InstanceBase* instance, const SurfaceDescriptor* descriptor);
+ResultOrError<Unpacked<SurfaceDescriptor>> ValidateSurfaceDescriptor(
+    InstanceBase* instance,
+    const SurfaceDescriptor* rawDescriptor);
 
 // A surface is a sum types of all the kind of windows Dawn supports. The OS-specific types
 // aren't used because they would cause compilation errors on other OSes (or require
@@ -58,7 +60,7 @@ class Surface final : public ErrorMonad {
   public:
     static Surface* MakeError(InstanceBase* instance);
 
-    Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
+    Surface(InstanceBase* instance, const Unpacked<SurfaceDescriptor>& descriptor);
 
     void SetAttachedSwapChain(SwapChainBase* swapChain);
     SwapChainBase* GetAttachedSwapChain();

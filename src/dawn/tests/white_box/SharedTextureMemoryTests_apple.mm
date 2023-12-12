@@ -257,7 +257,6 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStruct) {
         exportInfo.nextInChain = &otherStruct;
 
         ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
-        EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::MTLSharedEvent);
     }
 }
 

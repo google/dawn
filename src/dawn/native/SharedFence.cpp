@@ -27,6 +27,7 @@
 
 #include "dawn/native/SharedFence.h"
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -39,7 +40,9 @@ class ErrorSharedFence : public SharedFenceBase {
     ErrorSharedFence(DeviceBase* device, const SharedFenceDescriptor* descriptor)
         : SharedFenceBase(device, descriptor, ObjectBase::kError) {}
 
-    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override { DAWN_UNREACHABLE(); }
+    MaybeError ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const override {
+        DAWN_UNREACHABLE();
+    }
 };
 
 }  // namespace
@@ -74,7 +77,10 @@ MaybeError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
     info->type = wgpu::SharedFenceType::Undefined;
 
     DAWN_TRY(GetDevice()->ValidateObject(this));
-    return ExportInfoImpl(info);
+
+    Unpacked<SharedFenceExportInfo> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(info));
+    return ExportInfoImpl(unpacked);
 }
 
 }  // namespace dawn::native

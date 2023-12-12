@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -124,7 +125,7 @@ ResultOrError<Ref<SharedFenceBase>> SharedTextureMemory::CreateFenceImpl(
 }
 
 MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const BeginAccessDescriptor* descriptor) {
+                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));
     // Reset state to COMMON. BeginAccess contains a list of fences to wait on after
     // which the texture's usage will complete on the GPU.
