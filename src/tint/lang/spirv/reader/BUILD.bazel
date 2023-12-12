@@ -45,8 +45,10 @@ cc_library(
     "reader.h",
   ],
   deps = [
+    "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/spirv/reader/common",
     "//src/tint/lang/wgsl",

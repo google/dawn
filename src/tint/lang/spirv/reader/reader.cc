@@ -29,9 +29,15 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/reader/ast_parser/parse.h"
 
 namespace tint::spirv::reader {
+
+Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
+    (void)input;
+    return Failure("SPIR-V to IR reader is unimplemented");
+}
 
 Program Read(const std::vector<uint32_t>& input, const Options& options) {
     return ast_parser::Parse(input, options);
