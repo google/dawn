@@ -179,6 +179,7 @@ struct Options {
 
     bool dump_ir = false;
     bool use_ir = false;
+    bool use_ir_reader = false;
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     bool dump_ast = false;
@@ -291,6 +292,10 @@ When specified, automatically enables MSL validation)",
     auto& use_ir = options.Add<BoolOption>(
         "use-ir", "Use the IR for writers and transforms when possible", Default{false});
     TINT_DEFER(opts->use_ir = *use_ir.value);
+
+    auto& use_ir_reader = options.Add<BoolOption>(
+        "use-ir-reader", "Use the IR for the SPIR-V reader", Default{false});
+    TINT_DEFER(opts->use_ir_reader = *use_ir_reader.value);
 
     auto& verbose =
         options.Add<BoolOption>("verbose", "Verbose output", ShortName{"v"}, Default{false});
@@ -1149,6 +1154,7 @@ int main(int argc, const char** argv) {
     tint::cmd::LoadProgramOptions opts;
     opts.filename = options.input_filename;
 #if TINT_BUILD_SPV_READER
+    opts.use_ir = options.use_ir_reader;
     opts.spirv_reader_options = options.spirv_reader_options;
 #endif
 

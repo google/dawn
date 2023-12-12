@@ -79,6 +79,7 @@ struct LoadProgramOptions {
     std::string filename;
 #if TINT_BUILD_SPV_READER
     /// Spirv-reader options
+    bool use_ir = false;
     tint::spirv::reader::Options spirv_reader_options;
 #endif
 };

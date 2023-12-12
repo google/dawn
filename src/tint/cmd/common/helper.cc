@@ -37,6 +37,7 @@
 #endif
 
 #if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #endif
 
@@ -109,6 +110,38 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
     }
 }
 
+#if TINT_BUILD_SPV_READER
+tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOptions& opts) {
+    if (opts.use_ir) {
+#if TINT_BUILD_WGSL_WRITER
+        // Parse the SPIR-V binary to a core Tint IR module.
+        auto result = tint::spirv::reader::ReadIR(data);
+        if (!result) {
+            std::cerr << "Failed to parse SPIR-V: " << result.Failure() << "\n";
+            exit(1);
+        }
+
+        // Convert the IR module to a WGSL AST program.
+        tint::wgsl::writer::ProgramOptions options;
+        options.allow_non_uniform_derivatives =
+            opts.spirv_reader_options.allow_non_uniform_derivatives;
+        options.allowed_features = opts.spirv_reader_options.allowed_features;
+        auto ast = tint::wgsl::writer::IRToProgram(result.Get(), options);
+        if (!ast.IsValid() || ast.Diagnostics().contains_errors()) {
+            std::cerr << "Failed to convert IR to AST:\n\n" << ast.Diagnostics() << "\n";
+            exit(1);
+        }
+        return ast;
+#else
+        std::cerr << "Tint not built with the WGSL writer enabled" << std::endl;
+        exit(1);
+#endif  // TINT_BUILD_WGSL_READER
+    } else {
+        return tint::spirv::reader::Read(data, opts.spirv_reader_options);
+    }
+}
+#endif  // TINT_BUILD_SPV_READER
+
 }  // namespace
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
@@ -180,7 +213,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
                 }
 
                 return ProgramInfo{
-                    /* program */ tint::spirv::reader::Read(data, opts.spirv_reader_options),
+                    /* program */ ReadSpirv(data, opts),
                     /* source_file */ nullptr,
                 };
 #else
@@ -211,7 +244,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
                     opts.filename, std::string(text.begin(), text.end()));
 
                 return ProgramInfo{
-                    /* program */ tint::spirv::reader::Read(data, opts.spirv_reader_options),
+                    /* program */ ReadSpirv(data, opts),
                     /* source_file */ std::move(file),
                 };
 #else
