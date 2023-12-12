@@ -1383,8 +1383,8 @@ bool ASTPrinter::EmitDot4I8PackedCall(StringStream& out,
                                       const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            Line(b) << "packed_char4 vec1 = as_type<packed_char4>(" << params[0] << ");";
-            Line(b) << "packed_char4 vec2 = as_type<packed_char4>(" << params[1] << ");";
+            Line(b) << "char4 vec1 = as_type<char4>(" << params[0] << ");";
+            Line(b) << "char4 vec2 = as_type<char4>(" << params[1] << ");";
             Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
                        "* vec2[3];";
             return true;
@@ -1396,8 +1396,8 @@ bool ASTPrinter::EmitDot4U8PackedCall(StringStream& out,
                                       const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            Line(b) << "packed_uchar4 vec1 = as_type<packed_uchar4>(" << params[0] << ");";
-            Line(b) << "packed_uchar4 vec2 = as_type<packed_uchar4>(" << params[1] << ");";
+            Line(b) << "uchar4 vec1 = as_type<uchar4>(" << params[0] << ");";
+            Line(b) << "uchar4 vec2 = as_type<uchar4>(" << params[1] << ");";
             Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
                        "* vec2[3];";
             return true;
