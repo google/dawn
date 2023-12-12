@@ -61,6 +61,9 @@ class If final : public Castable<If, ControlInstruction> {
     /// The index of the condition operand
     static constexpr size_t kConditionOperandOffset = 0;
 
+    /// Constructor (no results, no operands, no blocks)
+    If();
+
     /// Constructor
     /// @param cond the if condition
     /// @param t the true block
@@ -86,11 +89,17 @@ class If final : public Castable<If, ControlInstruction> {
     /// @returns the true block
     const ir::Block* True() const { return true_; }
 
+    /// @param block the new true block
+    void SetTrue(ir::Block* block);
+
     /// @returns the false block
     ir::Block* False() { return false_; }
 
     /// @returns the false block
     const ir::Block* False() const { return false_; }
+
+    /// @param block the new false block
+    void SetFalse(ir::Block* block);
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "if"; }

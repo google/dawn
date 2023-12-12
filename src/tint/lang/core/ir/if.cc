@@ -36,6 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::If);
 
 namespace tint::core::ir {
 
+If::If() = default;
+
 If::If(Value* cond, ir::Block* t, ir::Block* f) : true_(t), false_(f) {
     TINT_ASSERT(true_);
     TINT_ASSERT(false_);
@@ -75,6 +77,26 @@ If* If::Clone(CloneContext& ctx) {
     new_if->SetResults(ctx.Clone(results_));
 
     return new_if;
+}
+
+void If::SetTrue(ir::Block* block) {
+    if (true_ && true_->Parent() == this) {
+        true_->SetParent(nullptr);
+    }
+    true_ = block;
+    if (block) {
+        block->SetParent(this);
+    }
+}
+
+void If::SetFalse(ir::Block* block) {
+    if (false_ && false_->Parent() == this) {
+        false_->SetParent(nullptr);
+    }
+    false_ = block;
+    if (block) {
+        block->SetParent(this);
+    }
 }
 
 }  // namespace tint::core::ir

@@ -46,6 +46,9 @@ class ExitIf final : public Castable<ExitIf, Exit> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no operands, no if)
+    ExitIf();
+
     /// Constructor
     /// @param i the if being exited
     /// @param args the target MultiInBlock arguments

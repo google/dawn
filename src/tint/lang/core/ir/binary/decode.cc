@@ -52,6 +52,8 @@ struct Decoder {
     Vector<ir::Value*, 32> values_{};
     Builder b{mod_out_};
 
+    Vector<ir::ExitIf*, 32> exit_ifs_{};
+
     void Decode() {
         {
             const size_t n = static_cast<size_t>(mod_in_.types().size());
@@ -99,6 +101,25 @@ struct Decoder {
         }
         for (size_t i = 0, n = static_cast<size_t>(mod_in_.blocks().size()); i < n; i++) {
             PopulateBlock(blocks_[i], mod_in_.blocks()[static_cast<int>(i)]);
+        }
+
+        for (auto* exit : exit_ifs_) {
+            InferControlInstruction(exit, &ExitIf::SetIf);
+        }
+    }
+
+    template <typename EXIT, typename CTRL_INST>
+    void InferControlInstruction(EXIT* exit, void (EXIT::*set)(CTRL_INST*)) {
+        for (auto* block = exit->Block(); block;) {
+            auto* parent = block->Parent();
+            if (!parent) {
+                break;
+            }
+            if (auto* ctrl_inst = parent->template As<CTRL_INST>()) {
+                (exit->*set)(ctrl_inst);
+                break;
+            }
+            block = parent->Block();
         }
     }
 
@@ -151,11 +172,10 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     ir::Block* CreateBlock(const pb::Block&) { return b.Block(); }
 
-    ir::Block* PopulateBlock(ir::Block* block_out, const pb::Block& block_in) {
+    void PopulateBlock(ir::Block* block_out, const pb::Block& block_in) {
         for (auto& inst : block_in.instructions()) {
             block_out->Append(Instruction(inst));
         }
-        return block_out;
     }
 
     ir::Block* Block(uint32_t id) { return id > 0 ? blocks_[id - 1] : nullptr; }
@@ -181,8 +201,14 @@ struct Decoder {
             case pb::Instruction::KindCase::kConvert:
                 inst_out = CreateInstructionConvert(inst_in.convert());
                 break;
+            case pb::Instruction::KindCase::kExitIf:
+                inst_out = CreateInstructionExitIf(inst_in.exit_if());
+                break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
+                break;
+            case pb::Instruction::KindCase::kIf:
+                inst_out = CreateInstructionIf(inst_in.if_());
                 break;
             case pb::Instruction::KindCase::kLet:
                 inst_out = CreateInstructionLet(inst_in.let());
@@ -259,8 +285,25 @@ struct Decoder {
         return mod_out_.instructions.Create<ir::Convert>();
     }
 
+    ir::ExitIf* CreateInstructionExitIf(const pb::InstructionExitIf&) {
+        auto* exit_out = mod_out_.instructions.Create<ir::ExitIf>();
+        exit_ifs_.Push(exit_out);
+        return exit_out;
+    }
+
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
         return mod_out_.instructions.Create<ir::Discard>();
+    }
+
+    ir::If* CreateInstructionIf(const pb::InstructionIf& if_in) {
+        auto* if_out = mod_out_.instructions.Create<ir::If>();
+        if (if_in.has_true_()) {
+            if_out->SetTrue(Block(if_in.true_()));
+        }
+        if (if_in.has_false_()) {
+            if_out->SetFalse(Block(if_in.false_()));
+        }
+        return if_out;
     }
 
     ir::Let* CreateInstructionLet(const pb::InstructionLet&) {

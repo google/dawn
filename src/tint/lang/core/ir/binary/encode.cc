@@ -40,7 +40,9 @@
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/discard.h"
+#include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/function_param.h"
+#include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -140,10 +142,11 @@ struct Encoder {
         }
         return blocks_.GetOrCreate(block_in, [&]() -> uint32_t {
             auto& block_out = *mod_out_.add_blocks();
+            auto id = static_cast<uint32_t>(blocks_.Count());
             for (auto* inst : *block_in) {
                 Instruction(*block_out.add_instructions(), inst);
             }
-            return static_cast<uint32_t>(blocks_.Count());
+            return id;
         });
     }
 
@@ -161,6 +164,8 @@ struct Encoder {
             [&](const ir::Construct* i) { InstructionConstruct(*inst_out.mutable_construct(), i); },
             [&](const ir::Convert* i) { InstructionConvert(*inst_out.mutable_convert(), i); },
             [&](const ir::Discard* i) { InstructionDiscard(*inst_out.mutable_discard(), i); },
+            [&](const ir::ExitIf* i) { InstructionExitIf(*inst_out.mutable_exit_if(), i); },
+            [&](const ir::If* i) { InstructionIf(*inst_out.mutable_if_(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
             [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
             [&](const ir::LoadVectorElement* i) {
@@ -199,7 +204,18 @@ struct Encoder {
 
     void InstructionConvert(pb::InstructionConvert&, const ir::Convert*) {}
 
+    void InstructionIf(pb::InstructionIf& if_out, const ir::If* if_in) {
+        if (auto* block = if_in->True()) {
+            if_out.set_true_(Block(block));
+        }
+        if (auto* block = if_in->False()) {
+            if_out.set_false_(Block(block));
+        }
+    }
+
     void InstructionDiscard(pb::InstructionDiscard&, const ir::Discard*) {}
+
+    void InstructionExitIf(pb::InstructionExitIf&, const ir::ExitIf*) {}
 
     void InstructionLet(pb::InstructionLet&, const ir::Let*) {}
 

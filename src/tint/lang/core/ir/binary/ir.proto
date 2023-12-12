@@ -214,6 +214,8 @@ message Instruction {
         InstructionLoadVectorElement load_vector_element = 17;
         InstructionStoreVectorElement store_vector_element = 18;
         InstructionSwizzle swizzle = 19;
+        InstructionIf if = 20;
+        InstructionExitIf exit_if = 21;
     }
 }
 
@@ -262,6 +264,13 @@ message InstructionStoreVectorElement {}
 message InstructionSwizzle {
     repeated uint32 indices = 1;
 }
+
+message InstructionIf {
+    optional uint32 true = 1;   // Module.blocks
+    optional uint32 false = 2;  // Module.blocks
+}
+
+message InstructionExitIf {}
 
 message BindingPoint {
     uint32 group = 1;

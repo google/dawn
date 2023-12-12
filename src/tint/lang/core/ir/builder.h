@@ -1364,6 +1364,15 @@ class Builder {
         return ir.values.Create<ir::InstructionResult>(type);
     }
 
+    /// Creates a new runtime value
+    /// @tparam TYPE the return type
+    /// @returns the value
+    template <typename TYPE>
+    ir::InstructionResult* InstructionResult() {
+        auto* type = ir.Types().Get<TYPE>();
+        return InstructionResult(type);
+    }
+
     /// Create a ranged loop with a callback to build the loop body.
     /// @param ty the type manager to use for new types
     /// @param start the first loop index
