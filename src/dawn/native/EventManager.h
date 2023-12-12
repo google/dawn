@@ -64,7 +64,7 @@ class EventManager final : NonMovable {
     EventManager();
     ~EventManager();
 
-    MaybeError Initialize(const Unpacked<InstanceDescriptor>& descriptor);
+    MaybeError Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor);
     // Called by WillDropLastExternalRef. Once shut down, the EventManager stops tracking anything.
     // It drops any refs to TrackedEvents, to break reference cycles. If doing so frees the last ref
     // of any uncompleted TrackedEvents, they'll get completed with EventCompletionType::Shutdown.

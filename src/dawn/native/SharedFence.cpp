@@ -40,7 +40,7 @@ class ErrorSharedFence : public SharedFenceBase {
     ErrorSharedFence(DeviceBase* device, const SharedFenceDescriptor* descriptor)
         : SharedFenceBase(device, descriptor, ObjectBase::kError) {}
 
-    MaybeError ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const override {
+    MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override {
         DAWN_UNREACHABLE();
     }
 };
@@ -78,7 +78,7 @@ MaybeError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
 
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
-    Unpacked<SharedFenceExportInfo> unpacked;
+    UnpackedPtr<SharedFenceExportInfo> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(info));
     return ExportInfoImpl(unpacked);
 }

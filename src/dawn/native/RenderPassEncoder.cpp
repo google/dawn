@@ -64,7 +64,7 @@ MaybeError ValidateQueryIndexOverwrite(QuerySetBase* querySet,
 // BeginRenderPassCmd. If we had RenderPassEncoder responsible for recording the
 // command, then this wouldn't be necessary.
 RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
-                                     const Unpacked<RenderPassDescriptor>& descriptor,
+                                     const UnpackedPtr<RenderPassDescriptor>& descriptor,
                                      CommandEncoder* commandEncoder,
                                      EncodingContext* encodingContext,
                                      RenderPassResourceUsageTracker usageTracker,
@@ -93,17 +93,18 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
 }
 
 // static
-Ref<RenderPassEncoder> RenderPassEncoder::Create(DeviceBase* device,
-                                                 const Unpacked<RenderPassDescriptor>& descriptor,
-                                                 CommandEncoder* commandEncoder,
-                                                 EncodingContext* encodingContext,
-                                                 RenderPassResourceUsageTracker usageTracker,
-                                                 Ref<AttachmentState> attachmentState,
-                                                 uint32_t renderTargetWidth,
-                                                 uint32_t renderTargetHeight,
-                                                 bool depthReadOnly,
-                                                 bool stencilReadOnly,
-                                                 std::function<void()> endCallback) {
+Ref<RenderPassEncoder> RenderPassEncoder::Create(
+    DeviceBase* device,
+    const UnpackedPtr<RenderPassDescriptor>& descriptor,
+    CommandEncoder* commandEncoder,
+    EncodingContext* encodingContext,
+    RenderPassResourceUsageTracker usageTracker,
+    Ref<AttachmentState> attachmentState,
+    uint32_t renderTargetWidth,
+    uint32_t renderTargetHeight,
+    bool depthReadOnly,
+    bool stencilReadOnly,
+    std::function<void()> endCallback) {
     return AcquireRef(new RenderPassEncoder(device, descriptor, commandEncoder, encodingContext,
                                             std::move(usageTracker), std::move(attachmentState),
                                             renderTargetWidth, renderTargetHeight, depthReadOnly,

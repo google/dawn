@@ -29,7 +29,7 @@
 
 namespace dawn::native {
 
-TextureMock::TextureMock(DeviceMock* device, const Unpacked<TextureDescriptor>& descriptor)
+TextureMock::TextureMock(DeviceMock* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->TextureBase::DestroyImpl(); });
 }

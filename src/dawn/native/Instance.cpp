@@ -152,7 +152,7 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
         descriptor = &kDefaultDesc;
     }
 
-    Unpacked<InstanceDescriptor> unpacked;
+    UnpackedPtr<InstanceDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     const DawnTogglesDescriptor* instanceTogglesDesc = unpacked.Get<DawnTogglesDescriptor>();
@@ -214,7 +214,7 @@ void InstanceBase::WillDropLastExternalRef() {
 }
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
-MaybeError InstanceBase::Initialize(const Unpacked<InstanceDescriptor>& descriptor) {
+MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());
@@ -571,7 +571,7 @@ const AHBFunctions* InstanceBase::GetOrLoadAHBFunctions() {
 }
 
 Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {
-    Unpacked<SurfaceDescriptor> unpacked;
+    UnpackedPtr<SurfaceDescriptor> unpacked;
     if (ConsumedError(ValidateSurfaceDescriptor(this, descriptor), &unpacked)) {
         return Surface::MakeError(this);
     }

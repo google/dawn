@@ -497,7 +497,7 @@ class DeviceBase : public RefCountedWithExternalCount {
         SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const Unpacked<TextureDescriptor>& descriptor) = 0;
+        const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) = 0;

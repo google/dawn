@@ -98,7 +98,7 @@ DeviceMock::DeviceMock() {
             return ShaderModuleMock::Create(this, descriptor);
         }));
     ON_CALL(*this, CreateTextureImpl)
-        .WillByDefault(WithArgs<0>([this](const Unpacked<TextureDescriptor>& descriptor)
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<TextureDescriptor>& descriptor)
                                        -> ResultOrError<Ref<TextureBase>> {
             return AcquireRef(new NiceMock<TextureMock>(this, descriptor));
         }));

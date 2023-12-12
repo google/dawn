@@ -49,7 +49,7 @@ id<MTLSharedEvent> SharedFence::GetMTLSharedEvent() const {
     return mSharedEvent.Get();
 }
 
-MaybeError SharedFence::ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const {
+MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     info->type = wgpu::SharedFenceType::MTLSharedEvent;
 
     DAWN_TRY(info.ValidateSubset<SharedFenceMTLSharedEventExportInfo>());

@@ -87,7 +87,7 @@ const SystemHandle& SharedFence::GetHandle() const {
     return mHandle;
 }
 
-MaybeError SharedFence::ExportInfoImpl(Unpacked<SharedFenceExportInfo>& info) const {
+MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     info->type = mType;
 
 #if DAWN_PLATFORM_IS(FUCHSIA)

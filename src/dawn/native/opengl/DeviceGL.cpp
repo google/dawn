@@ -261,7 +261,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     return DAWN_VALIDATION_ERROR("New swapchains not implemented.");
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
@@ -278,7 +278,7 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
     return usages;
 }
 
-MaybeError Device::ValidateTextureCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor) {
+MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -303,7 +303,7 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
                                                    ::EGLImage image) {
     const OpenGLFunctions& gl = GetGL();
 
-    Unpacked<TextureDescriptor> textureDescriptor;
+    UnpackedPtr<TextureDescriptor> textureDescriptor;
     if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
                       &textureDescriptor)) {
         return nullptr;
@@ -347,7 +347,7 @@ TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescripto
                                                     GLuint texture) {
     const OpenGLFunctions& gl = GetGL();
 
-    Unpacked<TextureDescriptor> textureDescriptor;
+    UnpackedPtr<TextureDescriptor> textureDescriptor;
     if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
                       &textureDescriptor)) {
         return nullptr;

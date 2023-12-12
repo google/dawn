@@ -66,7 +66,7 @@ class Device final : public DeviceBase {
 
     const GLFormat& GetGLFormat(const Format& format);
 
-    MaybeError ValidateTextureCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor);
+    MaybeError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
     TextureBase* CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                ::EGLImage image);
     TextureBase* CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
@@ -126,7 +126,7 @@ class Device final : public DeviceBase {
         SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) override;
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const Unpacked<TextureDescriptor>& descriptor) override;
+        const UnpackedPtr<TextureDescriptor>& descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) override;

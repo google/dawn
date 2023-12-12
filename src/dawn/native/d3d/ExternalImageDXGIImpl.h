@@ -51,13 +51,13 @@ struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDXGIFenceDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
 
-MaybeError ValidateTextureDescriptorCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor);
+MaybeError ValidateTextureDescriptorCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
 
 class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
     ExternalImageDXGIImpl(Device* backendDevice,
                           ComPtr<IUnknown> d3dResource,
-                          const Unpacked<TextureDescriptor>& textureDescriptor);
+                          const UnpackedPtr<TextureDescriptor>& textureDescriptor);
     ~ExternalImageDXGIImpl();
 
     ExternalImageDXGIImpl(const ExternalImageDXGIImpl&) = delete;

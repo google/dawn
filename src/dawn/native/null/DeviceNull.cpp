@@ -223,7 +223,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return AcquireRef(new Texture(this, descriptor));
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
@@ -558,7 +558,7 @@ bool Device::IsResolveTextureBlitWithDrawSupported() const {
     return true;
 }
 
-Texture::Texture(DeviceBase* device, const Unpacked<TextureDescriptor>& descriptor)
+Texture::Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {}
 
 }  // namespace dawn::native::null

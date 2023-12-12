@@ -230,7 +230,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
@@ -259,7 +259,7 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     const SharedTextureMemoryDescriptor* baseDescriptor) {
-    Unpacked<SharedTextureMemoryDescriptor> unpacked;
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
 
     wgpu::SType type;
@@ -277,7 +277,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     const SharedFenceDescriptor* baseDescriptor) {
-    Unpacked<SharedFenceDescriptor> unpacked;
+    UnpackedPtr<SharedFenceDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
 
     wgpu::SType type;
@@ -366,7 +366,7 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(
     const ExternalImageDescriptor* descriptor,
     IOSurfaceRef ioSurface,
     std::vector<MTLSharedEventAndSignalValue> waitEvents) {
-    Unpacked<TextureDescriptor> textureDescriptor;
+    UnpackedPtr<TextureDescriptor> textureDescriptor;
     if (ConsumedError(ValidateIsAlive())) {
         return nullptr;
     }

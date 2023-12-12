@@ -41,7 +41,7 @@
 
 namespace dawn::native::d3d {
 
-MaybeError ValidateTextureDescriptorCanBeWrapped(const Unpacked<TextureDescriptor>& descriptor) {
+MaybeError ValidateTextureDescriptorCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -58,9 +58,10 @@ MaybeError ValidateTextureDescriptorCanBeWrapped(const Unpacked<TextureDescripto
     return {};
 }
 
-ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
-                                             ComPtr<IUnknown> d3dResource,
-                                             const Unpacked<TextureDescriptor>& textureDescriptor)
+ExternalImageDXGIImpl::ExternalImageDXGIImpl(
+    Device* backendDevice,
+    ComPtr<IUnknown> d3dResource,
+    const UnpackedPtr<TextureDescriptor>& textureDescriptor)
     : mBackendDevice(backendDevice),
       mD3DResource(std::move(d3dResource)),
       mUsage(textureDescriptor->usage),

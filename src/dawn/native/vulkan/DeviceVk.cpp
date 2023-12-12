@@ -198,7 +198,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
@@ -227,7 +227,7 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
     const SharedTextureMemoryDescriptor* descriptor) {
-    Unpacked<SharedTextureMemoryDescriptor> unpacked;
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
@@ -261,7 +261,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
 
 ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     const SharedFenceDescriptor* descriptor) {
-    Unpacked<SharedFenceDescriptor> unpacked;
+    UnpackedPtr<SharedFenceDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     wgpu::SType type;
@@ -718,7 +718,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     if (ConsumedError(ValidateIsAlive())) {
         return nullptr;
     }
-    Unpacked<TextureDescriptor> textureDescriptor;
+    UnpackedPtr<TextureDescriptor> textureDescriptor;
     if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
                       &textureDescriptor)) {
         return nullptr;

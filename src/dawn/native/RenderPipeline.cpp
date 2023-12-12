@@ -250,7 +250,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 }
 
 MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* rawDescriptor) {
-    Unpacked<PrimitiveState> descriptor;
+    UnpackedPtr<PrimitiveState> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
     const auto* depthClipControl = descriptor.Get<PrimitiveDepthClipControl>();
     DAWN_INVALID_IF(depthClipControl && !device->HasFeature(Feature::DepthClipControl),
@@ -317,7 +317,7 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
         descriptor->format, wgpu::CompareFunction::Undefined, descriptor->depthWriteEnabled,
         descriptor->stencilFront.depthFailOp, descriptor->stencilBack.depthFailOp);
 
-    Unpacked<DepthStencilState> unpacked;
+    UnpackedPtr<DepthStencilState> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     if (const auto* depthWriteDefined = unpacked.Get<DepthStencilStateDepthWriteDefinedDawn>()) {
         DAWN_INVALID_IF(

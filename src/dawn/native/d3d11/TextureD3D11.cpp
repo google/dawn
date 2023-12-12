@@ -144,7 +144,7 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
 }  // namespace
 
 MaybeError ValidateTextureCanBeWrapped(ID3D11Resource* d3d11Resource,
-                                       const Unpacked<TextureDescriptor>& dawnDescriptor) {
+                                       const UnpackedPtr<TextureDescriptor>& dawnDescriptor) {
     ComPtr<ID3D11Texture2D> d3d11Texture;
     DAWN_TRY(
         CheckHRESULT(d3d11Resource->QueryInterface(IID_PPV_ARGS(&d3d11Texture)), "QueryInterface"));
@@ -198,7 +198,7 @@ MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFo
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const Unpacked<TextureDescriptor>& descriptor) {
+                                            const UnpackedPtr<TextureDescriptor>& descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(texture->InitializeAsInternalTexture());
     return std::move(texture);
@@ -206,16 +206,17 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const Unpacked<TextureDescriptor>& descriptor,
+                                            const UnpackedPtr<TextureDescriptor>& descriptor,
                                             ComPtr<ID3D11Resource> d3d11Texture) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d11Texture)));
     return std::move(dawnTexture);
 }
 
-ResultOrError<Ref<Texture>> Texture::CreateInternal(Device* device,
-                                                    const Unpacked<TextureDescriptor>& descriptor,
-                                                    Kind kind) {
+ResultOrError<Ref<Texture>> Texture::CreateInternal(
+    Device* device,
+    const UnpackedPtr<TextureDescriptor>& descriptor,
+    Kind kind) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, kind));
     DAWN_TRY(texture->InitializeAsInternalTexture());
     return std::move(texture);
@@ -224,7 +225,7 @@ ResultOrError<Ref<Texture>> Texture::CreateInternal(Device* device,
 // static
 ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
     Device* device,
-    const Unpacked<TextureDescriptor>& descriptor,
+    const UnpackedPtr<TextureDescriptor>& descriptor,
     ComPtr<IUnknown> d3dTexture,
     std::vector<Ref<d3d::Fence>> waitFences,
     bool isSwapChainTexture,
@@ -248,7 +249,7 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
 // static
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
@@ -378,7 +379,7 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     return {};
 }
 
-Texture::Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor, Kind kind)
+Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind)
     : Base(device, descriptor), mKind(kind) {}
 
 Texture::~Texture() = default;

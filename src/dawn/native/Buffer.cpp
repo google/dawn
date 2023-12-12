@@ -215,7 +215,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
 };
 
 MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor) {
-    Unpacked<BufferDescriptor> unpacked;
+    UnpackedPtr<BufferDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     DAWN_TRY(ValidateBufferUsage(descriptor->usage));

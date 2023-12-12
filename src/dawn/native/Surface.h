@@ -47,7 +47,7 @@ struct IUnknown;
 
 namespace dawn::native {
 
-ResultOrError<Unpacked<SurfaceDescriptor>> ValidateSurfaceDescriptor(
+ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
     InstanceBase* instance,
     const SurfaceDescriptor* rawDescriptor);
 
@@ -60,7 +60,7 @@ class Surface final : public ErrorMonad {
   public:
     static Surface* MakeError(InstanceBase* instance);
 
-    Surface(InstanceBase* instance, const Unpacked<SurfaceDescriptor>& descriptor);
+    Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& descriptor);
 
     void SetAttachedSwapChain(SwapChainBase* swapChain);
     SwapChainBase* GetAttachedSwapChain();

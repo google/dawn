@@ -78,13 +78,13 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 bool InheritsFromCAMetalLayer(void* obj);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-ResultOrError<Unpacked<SurfaceDescriptor>> ValidateSurfaceDescriptor(
+ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
     InstanceBase* instance,
     const SurfaceDescriptor* rawDescriptor) {
     DAWN_INVALID_IF(rawDescriptor->nextInChain == nullptr,
                     "Surface cannot be created with %s. nextInChain is not specified.",
                     rawDescriptor);
-    Unpacked<SurfaceDescriptor> descriptor;
+    UnpackedPtr<SurfaceDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
     wgpu::SType type;
@@ -193,7 +193,7 @@ Surface* Surface::MakeError(InstanceBase* instance) {
 
 Surface::Surface(InstanceBase* instance, ErrorTag tag) : ErrorMonad(tag), mInstance(instance) {}
 
-Surface::Surface(InstanceBase* instance, const Unpacked<SurfaceDescriptor>& descriptor)
+Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& descriptor)
     : ErrorMonad(), mInstance(instance) {
     // Type is validated in validation, otherwise this may crash with an assert failure.
     wgpu::SType type = descriptor

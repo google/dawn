@@ -481,7 +481,7 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
 
 wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension(
     const DeviceBase* device,
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     // In non-compatibility mode this value is not used so return undefined so that it is not
     // used by mistake.
     if (!device->IsCompatibilityMode()) {
@@ -511,7 +511,7 @@ wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension
 
 MaybeError ValidateTextureDescriptor(
     const DeviceBase* device,
-    const Unpacked<TextureDescriptor>& descriptor,
+    const UnpackedPtr<TextureDescriptor>& descriptor,
     AllowMultiPlanarTextureFormat allowMultiPlanar,
     std::optional<wgpu::TextureUsage> allowedSharedTextureMemoryUsage) {
     wgpu::TextureUsage usage = descriptor->usage;
@@ -722,7 +722,7 @@ bool IsValidSampleCount(uint32_t sampleCount) {
 
 TextureBase::TextureState::TextureState() : hasAccess(true), destroyed(false) {}
 
-TextureBase::TextureBase(DeviceBase* device, const Unpacked<TextureDescriptor>& descriptor)
+TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : ApiObjectBase(device, descriptor->label),
       mDimension(descriptor->dimension),
       mCompatibilityTextureBindingViewDimension(

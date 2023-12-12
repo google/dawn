@@ -40,8 +40,8 @@ struct GLFormat;
 class Texture final : public TextureBase {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const Unpacked<TextureDescriptor>& descriptor);
-    Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor, GLuint handle);
+                                              const UnpackedPtr<TextureDescriptor>& descriptor);
+    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, GLuint handle);
 
     GLuint GetHandle() const;
     GLenum GetGLTarget() const;
@@ -52,7 +52,7 @@ class Texture final : public TextureBase {
     MaybeError EnsureSubresourceContentInitialized(const SubresourceRange& range);
 
   private:
-    Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor);
+    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     ~Texture() override;
 
     void DestroyImpl() override;

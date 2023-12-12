@@ -182,7 +182,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     InstanceBase(const InstanceBase& other) = delete;
     InstanceBase& operator=(const InstanceBase& other) = delete;
 
-    MaybeError Initialize(const Unpacked<InstanceDescriptor>& descriptor);
+    MaybeError Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor);
     void SetPlatform(dawn::platform::Platform* platform);
 
     // Lazily creates connections to all backends that have been compiled, may return null even for

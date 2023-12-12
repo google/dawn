@@ -51,7 +51,7 @@ enum class AllowMultiPlanarTextureFormat {
 
 MaybeError ValidateTextureDescriptor(
     const DeviceBase* device,
-    const Unpacked<TextureDescriptor>& descriptor,
+    const UnpackedPtr<TextureDescriptor>& descriptor,
     AllowMultiPlanarTextureFormat allowMultiPlanar = AllowMultiPlanarTextureFormat::No,
     std::optional<wgpu::TextureUsage> allowedSharedTextureMemoryUsage = std::nullopt);
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
@@ -158,7 +158,7 @@ class TextureBase : public ApiObjectBase {
     wgpu::TextureUsage APIGetUsage() const;
 
   protected:
-    TextureBase(DeviceBase* device, const Unpacked<TextureDescriptor>& descriptor);
+    TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     ~TextureBase() override;
 
     void DestroyImpl() override;

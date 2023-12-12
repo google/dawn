@@ -53,26 +53,26 @@ class ScopedCommandRecordingContext;
 class SharedTextureMemory;
 
 MaybeError ValidateTextureCanBeWrapped(ID3D11Resource* d3d11Resource,
-                                       const Unpacked<TextureDescriptor>& descriptor);
+                                       const UnpackedPtr<TextureDescriptor>& descriptor);
 MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat);
 
 class Texture final : public d3d::Texture {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const Unpacked<TextureDescriptor>& descriptor);
+                                              const UnpackedPtr<TextureDescriptor>& descriptor);
     static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const Unpacked<TextureDescriptor>& descriptor,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor,
                                               ComPtr<ID3D11Resource> d3d11Texture);
     static ResultOrError<Ref<Texture>> CreateExternalImage(
         Device* device,
-        const Unpacked<TextureDescriptor>& descriptor,
+        const UnpackedPtr<TextureDescriptor>& descriptor,
         ComPtr<IUnknown> d3dTexture,
         std::vector<Ref<d3d::Fence>> waitFences,
         bool isSwapChainTexture,
         bool isInitialized);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
-        const Unpacked<TextureDescriptor>& descriptor);
+        const UnpackedPtr<TextureDescriptor>& descriptor);
     ID3D11Resource* GetD3D11Resource() const;
 
     ResultOrError<ComPtr<ID3D11RenderTargetView>> CreateD3D11RenderTargetView(
@@ -126,11 +126,10 @@ class Texture final : public d3d::Texture {
         uint8_t stencil;
     };
 
-    static ResultOrError<Ref<Texture>> CreateInternal(Device* device,
-                                                      const Unpacked<TextureDescriptor>& descriptor,
-                                                      Kind kind);
+    static ResultOrError<Ref<Texture>>
+    CreateInternal(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind);
 
-    Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor, Kind kind);
+    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, Kind kind);
     ~Texture() override;
 
     template <typename T>

@@ -46,8 +46,9 @@ SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
     resource->QueryInterface(IID_PPV_ARGS(&mDXGIKeyedMutex));
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
+MaybeError SharedTextureMemory::BeginAccessImpl(
+    TextureBase* texture,
+    const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         SharedFenceBase* fence = descriptor->fences[i];
@@ -75,7 +76,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
 
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
-    Unpacked<EndAccessState>& state) {
+    UnpackedPtr<EndAccessState>& state) {
     DAWN_TRY(state.ValidateSubset<>());
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceDXGISharedHandle),
                     "Required feature (%s) is missing.",

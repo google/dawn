@@ -80,7 +80,7 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     InstanceBase* instance = mPhysicalDevice->GetInstance();
 
-    Unpacked<SupportedLimits> unpacked;
+    UnpackedPtr<SupportedLimits> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
         return false;
     }
@@ -109,7 +109,7 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     DAWN_ASSERT(properties != nullptr);
     InstanceBase* instance = mPhysicalDevice->GetInstance();
 
-    Unpacked<AdapterProperties> unpacked;
+    UnpackedPtr<AdapterProperties> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(properties), &unpacked)) {
         return;
     }

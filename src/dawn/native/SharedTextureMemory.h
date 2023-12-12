@@ -109,17 +109,18 @@ class SharedTextureMemoryBase : public ApiObjectBase,
                                                          EndAccessState* rawState);
 
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const Unpacked<TextureDescriptor>& descriptor) = 0;
+        const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
 
     // BeginAccessImpl validates the operation is valid on the backend, and performs any
     // backend specific operations. It does NOT need to acquire begin fences; that is done in the
     // frontend in BeginAccess.
     virtual MaybeError BeginAccessImpl(TextureBase* texture,
-                                       const Unpacked<BeginAccessDescriptor>& descriptor) = 0;
+                                       const UnpackedPtr<BeginAccessDescriptor>& descriptor) = 0;
     // EndAccessImpl validates the operation is valid on the backend, and returns the end fence.
     // It should also write out any backend specific state in chained out structs of EndAccessState.
-    virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                             Unpacked<EndAccessState>& state) = 0;
+    virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(
+        TextureBase* texture,
+        UnpackedPtr<EndAccessState>& state) = 0;
 
     Ref<SharedTextureMemoryContents> mContents;
 };

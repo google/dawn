@@ -1010,7 +1010,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
                                         OwnedCompilationMessages* outMessages) {
     DAWN_ASSERT(parseResult != nullptr);
 
-    Unpacked<ShaderModuleDescriptor> unpacked;
+    UnpackedPtr<ShaderModuleDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     wgpu::SType moduleType;
     // A WGSL (or SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V options

@@ -115,7 +115,7 @@ ID3D12Resource* SharedTextureMemory::GetD3DResource() const {
 }
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
@@ -124,8 +124,9 @@ ResultOrError<Ref<SharedFenceBase>> SharedTextureMemory::CreateFenceImpl(
     return SharedFence::Create(ToBackend(GetDevice()), "Internal shared DXGI fence", desc);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
+MaybeError SharedTextureMemory::BeginAccessImpl(
+    TextureBase* texture,
+    const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));
     // Reset state to COMMON. BeginAccess contains a list of fences to wait on after
     // which the texture's usage will complete on the GPU.

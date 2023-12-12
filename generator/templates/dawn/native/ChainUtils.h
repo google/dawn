@@ -80,9 +80,9 @@ struct AdditionalExtensions {
 
 // Template structs to get the typing for the unpacked chains.
 template <typename...>
-struct UnpackedChain;
+struct UnpackedPtrChain;
 template <typename... Additionals, typename... Ts>
-struct UnpackedChain<AdditionalExtensionsList<Additionals...>, Ts...> {
+struct UnpackedPtrChain<AdditionalExtensionsList<Additionals...>, Ts...> {
     using Type = std::tuple<Ts..., Additionals...>;
 };
 
@@ -122,7 +122,7 @@ namespace detail {
 
 // Template type to get the unpacked chain type from the root type.
 template <typename Root>
-struct UnpackedTypeFor;
+struct UnpackedPtrTypeFor;
 
 // Template for extensible structures typing.
 enum class Extensibility { In, Out };
@@ -133,8 +133,8 @@ inline Extensibility ExtensibilityFor;
     {% set T = as_cppType(type.name) %}
     {% if type.extensible == "in" %}
         template <>
-        struct UnpackedTypeFor<{{T}}> {
-            using Type = UnpackedChain<
+        struct UnpackedPtrTypeFor<{{T}}> {
+            using Type = UnpackedPtrChain<
                 AdditionalExtensions<{{T}}>::List
                 {% for extension in type.extensions %}
                     , const {{as_cppType(extension.name)}}*
@@ -146,8 +146,8 @@ inline Extensibility ExtensibilityFor;
 
     {% elif type.extensible == "out" %}
         template <>
-        struct UnpackedTypeFor<{{T}}> {
-            using Type = UnpackedChain<
+        struct UnpackedPtrTypeFor<{{T}}> {
+            using Type = UnpackedPtrChain<
                 AdditionalExtensions<{{T}}>::List
                 {% for extension in type.extensions %}
                     , {{as_cppType(extension.name)}}*

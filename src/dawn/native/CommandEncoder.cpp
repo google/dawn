@@ -423,7 +423,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         return {};
     }
 
-    Unpacked<RenderPassColorAttachment> unpacked;
+    UnpackedPtr<RenderPassColorAttachment> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&colorAttachment));
 
     const auto* msaaRenderToSingleSampledDesc =
@@ -633,12 +633,12 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
                            {attachments->data(), attachments->size()});
 }
 
-ResultOrError<Unpacked<RenderPassDescriptor>> ValidateRenderPassDescriptor(
+ResultOrError<UnpackedPtr<RenderPassDescriptor>> ValidateRenderPassDescriptor(
     DeviceBase* device,
     const RenderPassDescriptor* rawDescriptor,
     UsageValidationMode usageValidationMode,
     RenderPassValidationState* validationState) {
-    Unpacked<RenderPassDescriptor> descriptor;
+    UnpackedPtr<RenderPassDescriptor> descriptor;
     DAWN_TRY_ASSIGN_CONTEXT(descriptor, ValidateAndUnpack(rawDescriptor),
                             "validating chained structs.");
 
@@ -917,7 +917,7 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
 
 MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
                                             const CommandEncoderDescriptor* descriptor) {
-    Unpacked<CommandEncoderDescriptor> unpacked;
+    UnpackedPtr<CommandEncoderDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     const auto* internalUsageDesc = unpacked.Get<DawnEncoderInternalUsageDescriptor>();
@@ -1082,7 +1082,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                                             rawDescriptor ? rawDescriptor->label : nullptr);
     };
 
-    Unpacked<RenderPassDescriptor> descriptor;
+    UnpackedPtr<RenderPassDescriptor> descriptor;
     bool success = mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {

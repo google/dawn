@@ -54,7 +54,7 @@ namespace {{native_namespace}} {
                                       const absl::FormatConversionSpec& spec,
                                       absl::FormatSink* s);
                 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-                    AbslFormatConvert(const Unpacked<{{as_cppType(type.name)}}>& value,
+                    AbslFormatConvert(const UnpackedPtr<{{as_cppType(type.name)}}>& value,
                                       const absl::FormatConversionSpec& spec,
                                       absl::FormatSink* s);
             {% endif %}

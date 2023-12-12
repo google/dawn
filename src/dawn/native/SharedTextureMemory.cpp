@@ -45,15 +45,15 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
 
     Ref<SharedTextureMemoryContents> CreateContents() override { DAWN_UNREACHABLE(); }
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const Unpacked<TextureDescriptor>& descriptor) override {
+        const UnpackedPtr<TextureDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     MaybeError BeginAccessImpl(TextureBase* texture,
-                               const Unpacked<BeginAccessDescriptor>& descriptor) override {
+                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     Unpacked<EndAccessState>& state) override {
+                                                     UnpackedPtr<EndAccessState>& state) override {
         DAWN_UNREACHABLE();
     }
 };
@@ -123,7 +123,7 @@ void SharedTextureMemoryBase::APIGetProperties(SharedTextureMemoryProperties* pr
     properties->size = mProperties.size;
     properties->format = mProperties.format;
 
-    Unpacked<SharedTextureMemoryProperties> unpacked;
+    UnpackedPtr<SharedTextureMemoryProperties> unpacked;
     if (GetDevice()->ConsumedError(ValidateAndUnpack(properties), &unpacked,
                                    "calling %s.GetProperties", this)) {
         return;
@@ -160,7 +160,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
-    Unpacked<TextureDescriptor> descriptor;
+    UnpackedPtr<TextureDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
     // Validate that there is one 2D, single-sampled subresource
@@ -240,7 +240,7 @@ bool SharedTextureMemoryBase::APIIsDeviceLost() {
 
 MaybeError SharedTextureMemoryBase::BeginAccess(TextureBase* texture,
                                                 const BeginAccessDescriptor* rawDescriptor) {
-    Unpacked<BeginAccessDescriptor> descriptor;
+    UnpackedPtr<BeginAccessDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
     // Append begin fences first. Fences should be tracked regardless of whether later errors occur.
@@ -334,7 +334,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemoryBase::EndAccessInternal(
     EndAccessState* rawState) {
     DAWN_TRY(GetDevice()->ValidateObject(texture));
     DAWN_TRY(ValidateTextureCreatedFromSelf(texture));
-    Unpacked<EndAccessState> state;
+    UnpackedPtr<EndAccessState> state;
     DAWN_TRY_ASSIGN(state, ValidateAndUnpack(rawState));
     return EndAccessImpl(texture, state);
 }

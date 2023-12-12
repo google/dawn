@@ -44,7 +44,7 @@ namespace dawn::native::opengl {
 
 namespace {
 
-GLenum TargetForTexture(const Unpacked<TextureDescriptor>& descriptor) {
+GLenum TargetForTexture(const UnpackedPtr<TextureDescriptor>& descriptor) {
     switch (descriptor->dimension) {
         case wgpu::TextureDimension::e1D:
         case wgpu::TextureDimension::e2D:
@@ -189,7 +189,7 @@ void AllocateTexture(const OpenGLFunctions& gl,
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const Unpacked<TextureDescriptor>& descriptor) {
+                                            const UnpackedPtr<TextureDescriptor>& descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         DAWN_TRY(
@@ -198,7 +198,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
     return std::move(texture);
 }
 
-Texture::Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor)
+Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : Texture(device, descriptor, 0) {
     const OpenGLFunctions& gl = device->GetGL();
 
@@ -225,7 +225,7 @@ uint32_t Texture::GetGenID() const {
     return mGenID;
 }
 
-Texture::Texture(Device* device, const Unpacked<TextureDescriptor>& descriptor, GLuint handle)
+Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, GLuint handle)
     : TextureBase(device, descriptor), mHandle(handle) {
     mTarget = TargetForTexture(descriptor);
 }

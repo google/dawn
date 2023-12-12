@@ -36,7 +36,7 @@ namespace dawn::native {
 
 MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor) {
-    Unpacked<ComputePipelineDescriptor> unpacked;
+    UnpackedPtr<ComputePipelineDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     const auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
     DAWN_INVALID_IF(

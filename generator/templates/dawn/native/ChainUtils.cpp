@@ -93,10 +93,10 @@ MaybeError ValidateSTypes(const ChainedStructOut* chain,
 // Returns true iff the chain's SType matches the extension, false otherwise. If the SType was
 // not already matched, sets the unpacked result accordingly. Otherwise, stores the duplicated
 // SType in 'duplicate'.
-template <typename Root, typename UnpackedT, typename Ext>
-bool UnpackExtension(typename UnpackedT::TupleType& unpacked,
-                     typename UnpackedT::BitsetType& bitset,
-                     typename UnpackedT::ChainType chain, bool* duplicate) {
+template <typename Root, typename UnpackedPtrT, typename Ext>
+bool UnpackExtension(typename UnpackedPtrT::TupleType& unpacked,
+                     typename UnpackedPtrT::BitsetType& bitset,
+                     typename UnpackedPtrT::ChainType chain, bool* duplicate) {
     DAWN_ASSERT(chain != nullptr);
     if (chain->sType == STypeFor<Ext>) {
         auto& member = std::get<Ext>(unpacked);
@@ -104,7 +104,7 @@ bool UnpackExtension(typename UnpackedT::TupleType& unpacked,
             *duplicate = true;
         } else {
             member = reinterpret_cast<Ext>(chain);
-            bitset.set(detail::UnpackedIndexOf<UnpackedT, Ext>);
+            bitset.set(detail::UnpackedPtrIndexOf<UnpackedPtrT, Ext>);
         }
         return true;
     }
@@ -114,32 +114,32 @@ bool UnpackExtension(typename UnpackedT::TupleType& unpacked,
 // Tries to match all possible extensions, returning true iff one of the allowed extensions were
 // matched, false otherwise. If the SType was not already matched, sets the unpacked result
 // accordingly. Otherwise, stores the duplicated SType in 'duplicate'.
-template <typename Root, typename UnpackedT, typename AdditionalExts>
+template <typename Root, typename UnpackedPtrT, typename AdditionalExts>
 struct AdditionalExtensionUnpacker;
-template <typename Root, typename UnpackedT, typename... Exts>
-struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensionsList<Exts...>> {
-    static bool Unpack(typename UnpackedT::TupleType& unpacked,
-                       typename UnpackedT::BitsetType& bitset,
-                       typename UnpackedT::ChainType chain,
+template <typename Root, typename UnpackedPtrT, typename... Exts>
+struct AdditionalExtensionUnpacker<Root, UnpackedPtrT, detail::AdditionalExtensionsList<Exts...>> {
+    static bool Unpack(typename UnpackedPtrT::TupleType& unpacked,
+                       typename UnpackedPtrT::BitsetType& bitset,
+                       typename UnpackedPtrT::ChainType chain,
                        bool* duplicate) {
-        return ((UnpackExtension<Root, UnpackedT, Exts>(unpacked, bitset, chain, duplicate)) ||
+        return ((UnpackExtension<Root, UnpackedPtrT, Exts>(unpacked, bitset, chain, duplicate)) ||
                 ...);
     }
 };
 
 //
-// Unpacked chain helpers.
+// UnpackedPtr chain helpers.
 //
 {% for type in by_category["structure"] %}
     {% if not type.extensible %}
         {% continue %}
     {% endif %}
     {% set T = as_cppType(type.name) %}
-    {% set UnpackedT = "Unpacked<" + T + ">" %}
+    {% set UnpackedPtrT = "UnpackedPtr<" + T + ">" %}
     template <>
-    {{UnpackedT}} Unpack<{{T}}>(typename {{UnpackedT}}::PtrType chain) {
-        {{UnpackedT}} result(chain);
-        for (typename {{UnpackedT}}::ChainType next = chain->nextInChain;
+    {{UnpackedPtrT}} Unpack<{{T}}>(typename {{UnpackedPtrT}}::PtrType chain) {
+        {{UnpackedPtrT}} result(chain);
+        for (typename {{UnpackedPtrT}}::ChainType next = chain->nextInChain;
              next != nullptr;
              next = next->nextInChain) {
             switch (next->sType) {
@@ -147,11 +147,11 @@ struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensions
                     {% set Ext = as_cppType(extension.name) %}
                     case STypeFor<{{Ext}}>: {
                         using ExtPtrType =
-                            typename detail::PtrTypeFor<{{UnpackedT}}, {{Ext}}>::Type;
+                            typename detail::PtrTypeFor<{{UnpackedPtrT}}, {{Ext}}>::Type;
                         std::get<ExtPtrType>(result.mUnpacked) =
                             static_cast<ExtPtrType>(next);
                         result.mBitset.set(
-                            detail::UnpackedIndexOf<{{UnpackedT}}, ExtPtrType>
+                            detail::UnpackedPtrIndexOf<{{UnpackedPtrT}}, ExtPtrType>
                         );
                         break;
                     }
@@ -160,7 +160,7 @@ struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensions
                     using Unpacker =
                         AdditionalExtensionUnpacker<
                             {{T}},
-                            {{UnpackedT}},
+                            {{UnpackedPtrT}},
                             detail::AdditionalExtensions<{{T}}>::List>;
                     Unpacker::Unpack(result.mUnpacked, result.mBitset, next, nullptr);
                     break;
@@ -170,9 +170,10 @@ struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensions
         return result;
     }
     template <>
-    ResultOrError<{{UnpackedT}}> ValidateAndUnpack<{{T}}>(typename {{UnpackedT}}::PtrType chain) {
-        {{UnpackedT}} result(chain);
-        for (typename {{UnpackedT}}::ChainType next = chain->nextInChain;
+    ResultOrError<{{UnpackedPtrT}}> ValidateAndUnpack<{{T}}>(
+        typename {{UnpackedPtrT}}::PtrType chain) {
+        {{UnpackedPtrT}} result(chain);
+        for (typename {{UnpackedPtrT}}::ChainType next = chain->nextInChain;
              next != nullptr;
              next = next->nextInChain) {
             bool duplicate = false;
@@ -181,14 +182,14 @@ struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensions
                     {% set Ext = as_cppType(extension.name) %}
                     case STypeFor<{{Ext}}>: {
                         using ExtPtrType =
-                            typename detail::PtrTypeFor<{{UnpackedT}}, {{Ext}}>::Type;
+                            typename detail::PtrTypeFor<{{UnpackedPtrT}}, {{Ext}}>::Type;
                         auto& member = std::get<ExtPtrType>(result.mUnpacked);
                         if (member != nullptr) {
                             duplicate = true;
                         } else {
                             member = static_cast<ExtPtrType>(next);
                             result.mBitset.set(
-                                detail::UnpackedIndexOf<{{UnpackedT}}, ExtPtrType>
+                                detail::UnpackedPtrIndexOf<{{UnpackedPtrT}}, ExtPtrType>
                             );
                         }
                         break;
@@ -198,7 +199,7 @@ struct AdditionalExtensionUnpacker<Root, UnpackedT, detail::AdditionalExtensions
                     using Unpacker =
                         AdditionalExtensionUnpacker<
                             {{T}},
-                            {{UnpackedT}},
+                            {{UnpackedPtrT}},
                             detail::AdditionalExtensions<{{T}}>::List>;
                     if (!Unpacker::Unpack(result.mUnpacked,
                                           result.mBitset,

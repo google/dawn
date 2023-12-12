@@ -900,12 +900,13 @@ void SharedTextureMemory::DestroyImpl() {
 }
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
-    const Unpacked<TextureDescriptor>& descriptor) {
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
-                                                const Unpacked<BeginAccessDescriptor>& descriptor) {
+MaybeError SharedTextureMemory::BeginAccessImpl(
+    TextureBase* texture,
+    const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (descriptor.ValidateBranches<Branch<SharedTextureMemoryVkImageLayoutBeginState>>()));
@@ -928,7 +929,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
 #if DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
-    Unpacked<EndAccessState>& state) {
+    UnpackedPtr<EndAccessState>& state) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (state.ValidateBranches<Branch<SharedTextureMemoryVkImageLayoutEndState>>()));
@@ -999,7 +1000,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
-    Unpacked<EndAccessState>& state) {
+    UnpackedPtr<EndAccessState>& state) {
     return DAWN_VALIDATION_ERROR("No shared fence features supported.");
 }
 
