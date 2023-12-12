@@ -197,11 +197,11 @@ message Instruction {
         InstructionUnary unary = 4;
         InstructionBinary binary = 5;
         InstructionBuiltin builtin = 6;
-        InstructionConstructor constructor = 7;
-        InstructionDiscard discard = 8;
-        InstructionLet let = 9;
-        InstructionVar var = 10;
-        InstructionConstruct construct = 11;
+        InstructionDiscard discard = 7;
+        InstructionLet let = 8;
+        InstructionVar var = 9;
+        InstructionConstruct construct = 10;
+        InstructionConvert convert = 11;
         InstructionAccess access = 12;
         InstructionUserCall user_call = 13;
         InstructionBuiltinCall builtin_call = 14;
@@ -236,6 +236,8 @@ message InstructionVar {
 }
 
 message InstructionConstruct {}
+
+message InstructionConvert {}
 
 message InstructionAccess {}
 

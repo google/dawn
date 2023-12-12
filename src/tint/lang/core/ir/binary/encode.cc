@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/construct.h"
+#include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/function_param.h"
@@ -158,6 +159,7 @@ struct Encoder {
                 InstructionBuiltinCall(*inst_out.mutable_builtin_call(), i);
             },
             [&](const ir::Construct* i) { InstructionConstruct(*inst_out.mutable_construct(), i); },
+            [&](const ir::Convert* i) { InstructionConvert(*inst_out.mutable_convert(), i); },
             [&](const ir::Discard* i) { InstructionDiscard(*inst_out.mutable_discard(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
             [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
@@ -194,6 +196,8 @@ struct Encoder {
     }
 
     void InstructionConstruct(pb::InstructionConstruct&, const ir::Construct*) {}
+
+    void InstructionConvert(pb::InstructionConvert&, const ir::Convert*) {}
 
     void InstructionDiscard(pb::InstructionDiscard&, const ir::Discard*) {}
 

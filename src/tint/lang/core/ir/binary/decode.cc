@@ -178,6 +178,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kConstruct:
                 inst_out = CreateInstructionConstruct(inst_in.construct());
                 break;
+            case pb::Instruction::KindCase::kConvert:
+                inst_out = CreateInstructionConvert(inst_in.convert());
+                break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
@@ -250,6 +253,10 @@ struct Decoder {
 
     ir::Construct* CreateInstructionConstruct(const pb::InstructionConstruct&) {
         return mod_out_.instructions.Create<ir::Construct>();
+    }
+
+    ir::Convert* CreateInstructionConvert(const pb::InstructionConvert&) {
+        return mod_out_.instructions.Create<ir::Convert>();
     }
 
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {

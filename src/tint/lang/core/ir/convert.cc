@@ -36,6 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Convert);
 
 namespace tint::core::ir {
 
+Convert::Convert() = default;
+
 Convert::Convert(InstructionResult* result, Value* value) {
     AddOperand(Convert::kValueOperandOffset, value);
     AddResult(result);
