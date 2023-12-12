@@ -333,16 +333,14 @@ struct Decoder {
                 return CreateTypePointer(type_in.pointer());
             case pb::Type::KindCase::kStruct:
                 return CreateTypeStruct(type_in.struct_());
+            case pb::Type::KindCase::kAtomic:
+                return CreateTypeAtomic(type_in.atomic());
             case pb::Type::KindCase::kArray:
                 return CreateTypeArray(type_in.array());
-            case pb::Type::KindCase::kAtomic:
-                TINT_UNIMPLEMENTED() << type_in.kind_case();
-                return nullptr;
-
-            case pb::Type::KindCase::KIND_NOT_SET:
+            default:
                 break;
         }
-        TINT_ICE() << "invalid TypeDecl.kind";
+        TINT_ICE() << type_in.kind_case();
         return nullptr;
     }
 
@@ -431,6 +429,10 @@ struct Decoder {
         }
         auto name = mod_out_.symbols.Register(struct_in.name());
         return mod_out_.Types().Struct(name, std::move(members_out));
+    }
+
+    const type::Atomic* CreateTypeAtomic(const pb::TypeAtomic& atomic_in) {
+        return mod_out_.Types().atomic(Type(atomic_in.type()));
     }
 
     const type::Array* CreateTypeArray(const pb::TypeArray& array_in) {

@@ -49,7 +49,7 @@ message Type {
         TypeArray array = 4;
         TypePointer pointer = 5;
         TypeStruct struct = 6;
-        uint32 atomic = 7;  // Module.types
+        TypeAtomic atomic = 7;
         // TODO: textures, samplers
     }
 }
@@ -98,6 +98,10 @@ message TypeStructMember {
     uint32 size = 3;
     uint32 align = 4;
     optional AttributesStructMember attributes = 5;
+}
+
+message TypeAtomic {
+    uint32 type = 1;  // Module.types
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -232,6 +232,11 @@ TEST_F(IRBinaryRoundtripTest, StructMemberAttributes) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, atomic_i32) {
+    b.Append(b.ir.root_block, [&] { b.Var<storage, atomic<i32>>(); });
+    RUN_TEST();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Instructions
 ////////////////////////////////////////////////////////////////////////////////

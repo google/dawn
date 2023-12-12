@@ -256,6 +256,7 @@ struct Encoder {
                 [&](const core::type::Matrix* m) { TypeMatrix(*type_out.mutable_matrix(), m); },
                 [&](const core::type::Pointer* m) { TypePointer(*type_out.mutable_pointer(), m); },
                 [&](const core::type::Struct* s) { TypeStruct(*type_out.mutable_struct_(), s); },
+                [&](const core::type::Atomic* a) { TypeAtomic(*type_out.mutable_atomic(), a); },
                 [&](const core::type::Array* m) { TypeArray(*type_out.mutable_array(), m); },
                 TINT_ICE_ON_NO_MATCH);
 
@@ -315,6 +316,10 @@ struct Encoder {
                 member_out.mutable_attributes()->set_invariant(true);
             }
         }
+    }
+
+    void TypeAtomic(pb::TypeAtomic& atomic_out, const core::type::Atomic* atomic_in) {
+        atomic_out.set_type(Type(atomic_in->Type()));
     }
 
     void TypeArray(pb::TypeArray& array_out, const core::type::Array* array_in) {
