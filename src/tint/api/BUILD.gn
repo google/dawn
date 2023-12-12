@@ -58,6 +58,7 @@ libtint_source_set("api") {
     "${tint_src_dir}/lang/wgsl/features",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
+    "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",

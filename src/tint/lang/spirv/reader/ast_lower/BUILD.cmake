@@ -110,6 +110,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower_test test
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
+  tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

@@ -41,6 +41,7 @@
 tint_add_target(tint_lang_wgsl_writer_ir_to_program lib
   lang/wgsl/writer/ir_to_program/ir_to_program.cc
   lang/wgsl/writer/ir_to_program/ir_to_program.h
+  lang/wgsl/writer/ir_to_program/program_options.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
@@ -92,6 +93,8 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
+  tint_lang_wgsl_features
   tint_lang_wgsl_intrinsic
   tint_lang_wgsl_ir
   tint_lang_wgsl_program

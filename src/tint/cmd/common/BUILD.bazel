@@ -61,6 +61,7 @@ cc_library(
     "//src/tint/lang/wgsl/inspector",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
+    "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",

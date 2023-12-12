@@ -77,7 +77,10 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
             return "DirectVariableAccess failed:\n" + res.Failure().reason.str();
         }
 
-        auto transformed = wgsl::writer::IRToProgram(module.Get());
+        wgsl::writer::ProgramOptions program_options;
+        program_options.allowed_features.extensions.insert(
+            wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+        auto transformed = wgsl::writer::IRToProgram(module.Get(), program_options);
         if (!transformed.IsValid()) {
             return "wgsl::writer::IRToProgram() failed: \n" + transformed.Diagnostics().str() +
                    "\n\nIR:\n" + ir::Disassemble(module.Get()) +  //

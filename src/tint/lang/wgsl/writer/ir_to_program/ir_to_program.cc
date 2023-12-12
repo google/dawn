@@ -103,7 +103,7 @@ class State {
   public:
     explicit State(const core::ir::Module& m) : mod(m) {}
 
-    Program Run() {
+    Program Run(const ProgramOptions& options) {
         if (auto res = core::ir::Validate(mod); !res) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;
@@ -116,7 +116,14 @@ class State {
         for (auto& fn : mod.functions) {
             Fn(fn);
         }
-        return Program{resolver::Resolve(b)};
+
+        if (options.allow_non_uniform_derivatives) {
+            // Suppress errors regarding non-uniform derivative operations if requested, by adding a
+            // diagnostic directive to the module.
+            b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "derivative_uniformity");
+        }
+
+        return Program{resolver::Resolve(b, options.allowed_features)};
     }
 
   private:
@@ -1230,8 +1237,8 @@ class State {
 
 }  // namespace
 
-Program IRToProgram(const core::ir::Module& i) {
-    return State{i}.Run();
+Program IRToProgram(const core::ir::Module& i, const ProgramOptions& options) {
+    return State{i}.Run(options);
 }
 
 }  // namespace tint::wgsl::writer

@@ -51,7 +51,9 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
 
         auto disassembly = tint::core::ir::Disassemble(ir_module.Get());
 
-        auto output = wgsl::writer::WgslFromIR(ir_module.Get());
+        writer::ProgramOptions program_options;
+        program_options.allowed_features = AllowedFeatures::Everything();
+        auto output = wgsl::writer::WgslFromIR(ir_module.Get(), program_options);
         if (!output) {
             FAIL() << output.Failure() << std::endl  //
                    << "IR:" << std::endl             //

@@ -48,7 +48,9 @@ IRToProgramTest::Result IRToProgramTest::Run() {
 
     result.ir = tint::core::ir::Disassemble(mod);
 
-    auto output_program = IRToProgram(mod);
+    ProgramOptions options;
+    options.allowed_features = AllowedFeatures::Everything();
+    auto output_program = IRToProgram(mod, options);
     if (!output_program.IsValid()) {
         result.err = output_program.Diagnostics().str();
         result.ast = Program::printer(output_program);
