@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-12-08 08:01:39AM
+# Last rolled: 2023-12-12 01:55:38AM
 
 # Flaky on all platforms
 # KEEP
@@ -746,13 +746,6 @@ crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuf
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="sameGroup" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:viewFormats:formatFeature="_undef_";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:viewFormats:formatFeature="texture-compression-bc";viewFormatFeature="texture-compression-bc" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,texture,createTexture:format_reinterpretation:format="bc1-rgba-unorm-srgb" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,texture,createTexture:format_reinterpretation:format="bc2-rgba-unorm-srgb" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,texture,createTexture:format_reinterpretation:format="bc3-rgba-unorm-srgb" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,texture,createTexture:format_reinterpretation:format="bc7-rgba-unorm-srgb" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,texture,createTexture:format_reinterpretation:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
