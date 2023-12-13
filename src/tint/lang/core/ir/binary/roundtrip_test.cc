@@ -193,6 +193,16 @@ TEST_F(IRBinaryRoundtripTest, ptr_workgroup_i32_read) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, array_i32_4) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_, array<i32, 4>>(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, array_i32_runtime_sized) {
+    b.Append(b.ir.root_block, [&] { b.Var<storage, array<i32>>(); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, struct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), /* index */ 0u,

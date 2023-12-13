@@ -610,7 +610,8 @@ struct Decoder {
         auto* element = Type(array_in.element());
         uint32_t stride = static_cast<uint32_t>(array_in.stride());
         uint32_t count = static_cast<uint32_t>(array_in.count());
-        return mod_out_.Types().array(element, count, stride);
+        return count > 0 ? mod_out_.Types().array(element, count, stride)
+                         : mod_out_.Types().runtime_array(element, stride);
     }
 
     const type::DepthTexture* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {

@@ -407,6 +407,7 @@ struct Encoder {
         tint::Switch(
             array_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) { array_out.set_count(c->value); },
+            [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
             TINT_ICE_ON_NO_MATCH);
     }
 
