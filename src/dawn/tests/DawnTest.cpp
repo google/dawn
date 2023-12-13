@@ -1470,7 +1470,6 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     std::vector<float> expectedDepth,
     uint8_t* expectedStencil) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    std::cerr << "here1\n";
 
     // Make the color attachment that we'll use to read back.
     wgpu::TextureDescriptor colorTexDesc = {};
