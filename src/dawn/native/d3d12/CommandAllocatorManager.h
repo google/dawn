@@ -38,11 +38,11 @@
 
 namespace dawn::native::d3d12 {
 
-class Device;
+class Queue;
 
 class CommandAllocatorManager {
   public:
-    explicit CommandAllocatorManager(Device* device);
+    explicit CommandAllocatorManager(Queue* queue);
 
     // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
     // otherwise its commands may be reset before execution has completed on the GPU
@@ -50,7 +50,8 @@ class CommandAllocatorManager {
     MaybeError Tick(ExecutionSerial lastCompletedSerial);
 
   private:
-    Device* device;
+    // The allocator manager is owned by the queue so the queue outlives it.
+    Queue* mQueue;
 
     // This must be at least 2 because the Device and Queue use separate command allocators
     static constexpr unsigned int kMaxCommandAllocators = 32;
