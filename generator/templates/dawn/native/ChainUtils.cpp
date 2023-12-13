@@ -32,64 +32,11 @@
 #include "{{native_dir}}/ChainUtils.h"
 
 #include <tuple>
-#include <unordered_set>
 #include <utility>
 
 namespace {{native_namespace}} {
 
 {% set namespace = metadata.namespace %}
-MaybeError ValidateSTypes(const ChainedStruct* chain,
-                          std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints) {
-    std::unordered_set<{{namespace}}::SType> allSTypes;
-    for (; chain; chain = chain->nextInChain) {
-        DAWN_INVALID_IF(allSTypes.find(chain->sType) != allSTypes.end(),
-            "Extension chain has duplicate sType %s.", chain->sType);
-        allSTypes.insert(chain->sType);
-    }
-
-    for (const auto& oneOfConstraint : oneOfConstraints) {
-        bool satisfied = false;
-        for ({{namespace}}::SType oneOfSType : oneOfConstraint) {
-            if (allSTypes.find(oneOfSType) != allSTypes.end()) {
-                DAWN_INVALID_IF(satisfied,
-                    "sType %s is part of a group of exclusive sTypes that is already present.",
-                    oneOfSType);
-                satisfied = true;
-                allSTypes.erase(oneOfSType);
-            }
-        }
-    }
-
-    DAWN_INVALID_IF(!allSTypes.empty(), "Unsupported sType %s.", *allSTypes.begin());
-    return {};
-}
-
-MaybeError ValidateSTypes(const ChainedStructOut* chain,
-                          std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints) {
-    std::unordered_set<{{namespace}}::SType> allSTypes;
-    for (; chain; chain = chain->nextInChain) {
-        DAWN_INVALID_IF(allSTypes.find(chain->sType) != allSTypes.end(),
-            "Extension chain has duplicate sType %s.", chain->sType);
-        allSTypes.insert(chain->sType);
-    }
-
-    for (const auto& oneOfConstraint : oneOfConstraints) {
-        bool satisfied = false;
-        for ({{namespace}}::SType oneOfSType : oneOfConstraint) {
-            if (allSTypes.find(oneOfSType) != allSTypes.end()) {
-                DAWN_INVALID_IF(satisfied,
-                    "sType %s is part of a group of exclusive sTypes that is already present.",
-                    oneOfSType);
-                satisfied = true;
-                allSTypes.erase(oneOfSType);
-            }
-        }
-    }
-
-    DAWN_INVALID_IF(!allSTypes.empty(), "Unsupported sType %s.", *allSTypes.begin());
-    return {};
-}
-
 // Returns true iff the chain's SType matches the extension, false otherwise. If the SType was
 // not already matched, sets the unpacked result accordingly. Otherwise, stores the duplicated
 // SType in 'duplicate'.
