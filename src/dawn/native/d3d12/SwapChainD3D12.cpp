@@ -38,7 +38,6 @@
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
-#include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
 namespace dawn::native::d3d12 {
@@ -55,7 +54,7 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
 SwapChain::~SwapChain() = default;
 
 IUnknown* SwapChain::GetD3DDeviceForCreatingSwapChain() {
-    return ToBackend(GetDevice()->GetQueue())->GetCommandQueue();
+    return ToBackend(GetDevice())->GetCommandQueue().Get();
 }
 
 void SwapChain::ReuseBuffers(SwapChainBase* previousSwapChain) {
@@ -83,22 +82,22 @@ MaybeError SwapChain::CollectSwapChainBuffers() {
 }
 
 MaybeError SwapChain::PresentImpl() {
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    Device* device = ToBackend(GetDevice());
 
     // Transition the texture to the present state as required by IDXGISwapChain1::Present()
     // TODO(crbug.com/dawn/269): Remove the need for this by eagerly transitioning the
     // presentable texture to present at the end of submits that use them.
     CommandRecordingContext* commandContext;
-    DAWN_TRY_ASSIGN(commandContext, queue->GetPendingCommandContext());
+    DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
     mApiTexture->TrackUsageAndTransitionNow(commandContext, kPresentTextureUsage,
                                             mApiTexture->GetAllSubresources());
-    DAWN_TRY(queue->SubmitPendingCommands());
+    DAWN_TRY(device->ExecutePendingCommandContext());
 
     DAWN_TRY(PresentDXGISwapChain());
 
     // Record that "new" is the last time the buffer has been used.
-    DAWN_TRY(queue->NextSerial());
-    mBufferLastUsedSerials[mCurrentBuffer] = queue->GetPendingCommandSerial();
+    DAWN_TRY(device->NextSerial());
+    mBufferLastUsedSerials[mCurrentBuffer] = device->GetPendingCommandSerial();
 
     mApiTexture->APIDestroy();
     mApiTexture = nullptr;
@@ -107,14 +106,14 @@ MaybeError SwapChain::PresentImpl() {
 }
 
 ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    Device* device = ToBackend(GetDevice());
 
     // Synchronously wait until previous operations on the next swapchain buffer are finished.
     // This is the logic that performs frame pacing.
     // TODO(crbug.com/dawn/269): Consider whether this should  be lifted for Mailbox so that
     // there is not frame pacing.
     mCurrentBuffer = GetDXGISwapChain()->GetCurrentBackBufferIndex();
-    DAWN_TRY(queue->WaitForSerial(mBufferLastUsedSerials[mCurrentBuffer]));
+    DAWN_TRY(device->WaitForSerial(mBufferLastUsedSerials[mCurrentBuffer]));
 
     // Create the API side objects for this use of the swapchain's buffer.
     TextureDescriptor descriptor = GetSwapChainBaseTextureDescriptor(this);
@@ -130,10 +129,10 @@ MaybeError SwapChain::DetachAndWaitForDeallocation() {
     // SerialQueue with the current "pending serial" so that we don't destroy the texture
     // before it is finished being used. Flush the commands and wait for that serial to be
     // passed, then Tick the device to make sure the reference to the D3D12 texture is removed.
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
-    DAWN_TRY(queue->NextSerial());
-    DAWN_TRY(queue->WaitForSerial(queue->GetLastSubmittedCommandSerial()));
-    return ToBackend(GetDevice())->TickImpl();
+    Device* device = ToBackend(GetDevice());
+    DAWN_TRY(device->NextSerial());
+    DAWN_TRY(device->WaitForSerial(device->GetLastSubmittedCommandSerial()));
+    return device->TickImpl();
 }
 
 void SwapChain::DetachFromSurfaceImpl() {
