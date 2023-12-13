@@ -200,17 +200,74 @@ class State {
     const ast::Function* Fn(const core::ir::Function* fn) {
         SCOPED_NESTING();
 
-        // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
+        // Emit parameters.
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
         auto params = tint::Transform<N>(fn->Params(), [&](const core::ir::FunctionParam* param) {
             auto ty = Type(param->Type());
             auto name = NameFor(param);
+            Vector<const ast::Attribute*, 1> attrs{};
             Bind(param, name, PtrKind::kPtr);
+
+            // Emit parameter attributes.
+            if (auto builtin = param->Builtin()) {
+                switch (builtin.value()) {
+                    case core::ir::FunctionParam::Builtin::kVertexIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kVertexIndex));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kInstanceIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kInstanceIndex));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kPosition:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kPosition));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kFrontFacing:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kFrontFacing));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kLocalInvocationId:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kLocalInvocationId));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kLocalInvocationIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kLocalInvocationIndex));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kGlobalInvocationId:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kGlobalInvocationId));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kWorkgroupId:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kWorkgroupId));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kNumWorkgroups:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kNumWorkgroups));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kSampleIndex:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kSampleIndex));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kSampleMask:
+                        attrs.Push(b.Builtin(core::BuiltinValue::kSampleMask));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kSubgroupInvocationId:
+                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        attrs.Push(b.Builtin(core::BuiltinValue::kSubgroupInvocationId));
+                        break;
+                    case core::ir::FunctionParam::Builtin::kSubgroupSize:
+                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        attrs.Push(b.Builtin(core::BuiltinValue::kSubgroupSize));
+                        break;
+                }
+            }
+            if (auto loc = param->Location()) {
+                attrs.Push(b.Location(AInt(loc->value)));
+                if (auto interp = loc->interpolation) {
+                    attrs.Push(b.Interpolate(interp->type, interp->sampling));
+                }
+            }
+            if (param->Invariant()) {
+                attrs.Push(b.Invariant());
+            }
 
             if (ParamRequiresFullPtrParameters(param->Type())) {
                 Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
             }
-            return b.Param(name, ty);
+            return b.Param(name, ty, std::move(attrs));
         });
 
         auto name = NameFor(fn);
@@ -218,6 +275,49 @@ class State {
         auto* body = Block(fn->Block());
         Vector<const ast::Attribute*, 1> attrs{};
         Vector<const ast::Attribute*, 1> ret_attrs{};
+
+        // Emit entry point attributes.
+        switch (fn->Stage()) {
+            case core::ir::Function::PipelineStage::kUndefined:
+                break;
+            case core::ir::Function::PipelineStage::kCompute: {
+                auto wgsize = fn->WorkgroupSize().value();
+                attrs.Push(b.Stage(ast::PipelineStage::kCompute));
+                attrs.Push(b.WorkgroupSize(AInt(wgsize[0]), AInt(wgsize[1]), AInt(wgsize[2])));
+                break;
+            }
+            case core::ir::Function::PipelineStage::kFragment:
+                attrs.Push(b.Stage(ast::PipelineStage::kFragment));
+                break;
+            case core::ir::Function::PipelineStage::kVertex:
+                attrs.Push(b.Stage(ast::PipelineStage::kVertex));
+                break;
+        }
+
+        // Emit return type attributes.
+        if (auto builtin = fn->ReturnBuiltin()) {
+            switch (builtin.value()) {
+                case core::ir::Function::ReturnBuiltin::kPosition:
+                    ret_attrs.Push(b.Builtin(core::BuiltinValue::kPosition));
+                    break;
+                case core::ir::Function::ReturnBuiltin::kFragDepth:
+                    ret_attrs.Push(b.Builtin(core::BuiltinValue::kFragDepth));
+                    break;
+                case core::ir::Function::ReturnBuiltin::kSampleMask:
+                    ret_attrs.Push(b.Builtin(core::BuiltinValue::kSampleMask));
+                    break;
+            }
+        }
+        if (auto loc = fn->ReturnLocation()) {
+            ret_attrs.Push(b.Location(AInt(loc->value)));
+            if (auto interp = loc->interpolation) {
+                ret_attrs.Push(b.Interpolate(interp->type, interp->sampling));
+            }
+        }
+        if (fn->ReturnInvariant()) {
+            ret_attrs.Push(b.Invariant());
+        }
+
         return b.Func(name, std::move(params), ret_ty, body, std::move(attrs),
                       std::move(ret_attrs));
     }
