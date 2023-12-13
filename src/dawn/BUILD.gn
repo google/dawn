@@ -61,7 +61,10 @@ dawn_component("proc") {
   DEFINE_PREFIX = "WGPU"
 
   public_deps = [ "${dawn_root}/include/dawn:headers" ]
-  deps = [ ":proc_gen" ]
+  deps = [
+    ":proc_gen",
+    "${dawn_root}/src/dawn/common",
+  ]
   sources = get_target_outputs(":proc_gen")
   sources += [
     "${dawn_root}/include/dawn/dawn_proc.h",

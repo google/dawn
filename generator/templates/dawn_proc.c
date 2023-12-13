@@ -29,6 +29,10 @@
 {% set prefix = Prefix.lower() %}
 #include "dawn/{{prefix}}_proc.h"
 
+// The sanitizer is disabled for calls to procs.* since those functions may be
+// dynamically loaded.
+#include "dawn/common/Compiler.h"
+
 static {{Prefix}}ProcTable procs;
 
 static {{Prefix}}ProcTable nullProcs;
@@ -42,6 +46,7 @@ void {{prefix}}ProcSetProcs(const {{Prefix}}ProcTable* procs_) {
 }
 
 {% for function in by_category["function"] %}
+    DAWN_NO_SANITIZE("cfi-icall")
     {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
         {%- for arg in function.arguments -%}
             {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
@@ -58,6 +63,7 @@ void {{prefix}}ProcSetProcs(const {{Prefix}}ProcTable* procs_) {
 
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}
+        DAWN_NO_SANITIZE("cfi-icall")
         {{as_cReturnType(method.return_type)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}

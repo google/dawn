@@ -159,7 +159,13 @@ target_sources(dawn_proc
   PRIVATE
     ${DAWNPROC_GEN_SOURCES}
 )
-target_link_libraries(dawn_proc PUBLIC dawn_headers)
+target_link_libraries(dawn_proc
+  PUBLIC
+  dawn_headers
+  PRIVATE
+  dawn_common
+  dawn_internal_config
+)
 
 install_if_enabled(dawn_proc)
 
