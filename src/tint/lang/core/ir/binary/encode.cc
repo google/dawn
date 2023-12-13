@@ -70,6 +70,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -337,6 +338,7 @@ struct Encoder {
                 [&](const core::type::DepthTexture* t) {
                     TypeDepthTexture(*type_out.mutable_depth_texture(), t);
                 },
+                [&](const core::type::Sampler* s) { TypeSampler(*type_out.mutable_sampler(), s); },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -414,6 +416,10 @@ struct Encoder {
     void TypeDepthTexture(pb::TypeDepthTexture& texture_out,
                           const core::type::DepthTexture* texture_in) {
         texture_out.set_dimension(TextureDimension(texture_in->dim()));
+    }
+
+    void TypeSampler(pb::TypeSampler& sampler_out, const core::type::Sampler* sampler_in) {
+        sampler_out.set_kind(SamplerKind(sampler_in->kind()));
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -633,6 +639,18 @@ struct Encoder {
 
         TINT_ICE() << "invalid TextureDimension: " << in;
         return pb::TextureDimension::_1d;
+    }
+
+    pb::SamplerKind SamplerKind(core::type::SamplerKind in) {
+        switch (in) {
+            case core::type::SamplerKind::kSampler:
+                return pb::SamplerKind::sampler;
+            case core::type::SamplerKind::kComparisonSampler:
+                return pb::SamplerKind::comparison;
+        }
+
+        TINT_ICE() << "invalid SamplerKind: " << in;
+        return pb::SamplerKind::sampler;
     }
 
     pb::InterpolationType InterpolationType(core::InterpolationType in) {

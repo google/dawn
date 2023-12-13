@@ -51,7 +51,7 @@ message Type {
         TypeStruct struct = 6;
         TypeAtomic atomic = 7;
         TypeDepthTexture depth_texture = 8;
-        // TODO: textures, samplers
+        TypeSampler sampler = 9;
     }
 }
 
@@ -107,6 +107,10 @@ message TypeAtomic {
 
 message TypeDepthTexture {
     TextureDimension dimension = 1;
+}
+
+message TypeSampler {
+    SamplerKind kind = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -390,6 +394,11 @@ enum TextureDimension {
     _3d = 3;
     cube = 4;
     cube_array = 5;
+}
+
+enum SamplerKind {
+    sampler = 0;
+    comparison = 1;
 }
 
 enum InterpolationType {

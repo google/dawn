@@ -510,6 +510,8 @@ struct Decoder {
                 return CreateTypeArray(type_in.array());
             case pb::Type::KindCase::kDepthTexture:
                 return CreateTypeDepthTexture(type_in.depth_texture());
+            case pb::Type::KindCase::kSampler:
+                return CreateTypeSampler(type_in.sampler());
             default:
                 break;
         }
@@ -617,6 +619,11 @@ struct Decoder {
     const type::DepthTexture* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         return mod_out_.Types().Get<type::DepthTexture>(dimension);
+    }
+
+    const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {
+        auto kind = SamplerKind(sampler_in.kind());
+        return mod_out_.Types().Get<type::Sampler>(kind);
     }
 
     const type::Type* Type(size_t id) { return id > 0 ? types_[id - 1] : nullptr; }
@@ -852,6 +859,20 @@ struct Decoder {
 
         TINT_ICE() << "invalid TextureDimension: " << in;
         return core::type::TextureDimension::k1d;
+    }
+
+    core::type::SamplerKind SamplerKind(pb::SamplerKind in) {
+        switch (in) {
+            case pb::SamplerKind::sampler:
+                return core::type::SamplerKind::kSampler;
+            case pb::SamplerKind::comparison:
+                return core::type::SamplerKind::kComparisonSampler;
+            default:
+                break;
+        }
+
+        TINT_ICE() << "invalid SamplerKind: " << in;
+        return core::type::SamplerKind::kSampler;
     }
 
     core::InterpolationType InterpolationType(pb::InterpolationType in) {
