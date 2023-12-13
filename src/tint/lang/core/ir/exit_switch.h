@@ -46,6 +46,9 @@ class ExitSwitch final : public Castable<ExitSwitch, Exit> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no operands, no switch)
+    ExitSwitch();
+
     /// Constructor
     /// @param sw the switch being exited
     /// @param args the target MultiInBlock arguments

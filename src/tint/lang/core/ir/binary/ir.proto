@@ -215,7 +215,9 @@ message Instruction {
         InstructionStoreVectorElement store_vector_element = 18;
         InstructionSwizzle swizzle = 19;
         InstructionIf if = 20;
-        InstructionExitIf exit_if = 21;
+        InstructionSwitch switch = 21;
+        InstructionExitIf exit_if = 22;
+        InstructionExitSwitch exit_switch = 23;
     }
 }
 
@@ -270,7 +272,19 @@ message InstructionIf {
     optional uint32 false = 2;  // Module.blocks
 }
 
+message InstructionSwitch {
+    repeated SwitchCase cases = 1;  // Module.blocks
+}
+
 message InstructionExitIf {}
+
+message InstructionExitSwitch {}
+
+message SwitchCase {
+    uint32 block = 1;               // Module.blocks
+    repeated uint32 selectors = 2;  // Module.constant_values
+    bool is_default = 3;
+}
 
 message BindingPoint {
     uint32 group = 1;

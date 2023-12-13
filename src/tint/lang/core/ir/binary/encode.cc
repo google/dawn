@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
+#include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -50,6 +51,7 @@
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
+#include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -154,7 +156,7 @@ struct Encoder {
     // Instructions
     ////////////////////////////////////////////////////////////////////////////
     void Instruction(pb::Instruction& inst_out, const ir::Instruction* inst_in) {
-        Switch(
+        tint::Switch(
             inst_in,  //
             [&](const ir::Access* i) { InstructionAccess(*inst_out.mutable_access(), i); },
             [&](const ir::Binary* i) { InstructionBinary(*inst_out.mutable_binary(), i); },
@@ -165,6 +167,9 @@ struct Encoder {
             [&](const ir::Convert* i) { InstructionConvert(*inst_out.mutable_convert(), i); },
             [&](const ir::Discard* i) { InstructionDiscard(*inst_out.mutable_discard(), i); },
             [&](const ir::ExitIf* i) { InstructionExitIf(*inst_out.mutable_exit_if(), i); },
+            [&](const ir::ExitSwitch* i) {
+                InstructionExitSwitch(*inst_out.mutable_exit_switch(), i);
+            },
             [&](const ir::If* i) { InstructionIf(*inst_out.mutable_if_(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
             [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
@@ -176,6 +181,7 @@ struct Encoder {
             [&](const ir::StoreVectorElement* i) {
                 InstructionStoreVectorElement(*inst_out.mutable_store_vector_element(), i);
             },
+            [&](const ir::Switch* i) { InstructionSwitch(*inst_out.mutable_switch_(), i); },
             [&](const ir::Swizzle* i) { InstructionSwizzle(*inst_out.mutable_swizzle(), i); },
             [&](const ir::Unary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
@@ -217,6 +223,8 @@ struct Encoder {
 
     void InstructionExitIf(pb::InstructionExitIf&, const ir::ExitIf*) {}
 
+    void InstructionExitSwitch(pb::InstructionExitSwitch&, const ir::ExitSwitch*) {}
+
     void InstructionLet(pb::InstructionLet&, const ir::Let*) {}
 
     void InstructionLoad(pb::InstructionLoad&, const ir::Load*) {}
@@ -234,6 +242,20 @@ struct Encoder {
     void InstructionSwizzle(pb::InstructionSwizzle& swizzle_out, const ir::Swizzle* swizzle_in) {
         for (auto idx : swizzle_in->Indices()) {
             swizzle_out.add_indices(idx);
+        }
+    }
+
+    void InstructionSwitch(pb::InstructionSwitch& switch_out, const ir::Switch* switch_in) {
+        for (auto& case_in : switch_in->Cases()) {
+            auto& case_out = *switch_out.add_cases();
+            case_out.set_block(Block(case_in.block));
+            for (auto& selector_in : case_in.selectors) {
+                if (selector_in.IsDefault()) {
+                    case_out.set_is_default(true);
+                } else {
+                    case_out.add_selectors(ConstantValue(selector_in.val->Value()));
+                }
+            }
         }
     }
 
@@ -260,7 +282,7 @@ struct Encoder {
         }
         return types_.GetOrCreate(type_in, [&]() -> uint32_t {
             pb::Type type_out;
-            Switch(
+            tint::Switch(
                 type_in,  //
                 [&](const core::type::Void*) { type_out.set_basic(pb::TypeBasic::void_); },
                 [&](const core::type::Bool*) { type_out.set_basic(pb::TypeBasic::bool_); },
@@ -341,7 +363,7 @@ struct Encoder {
     void TypeArray(pb::TypeArray& array_out, const core::type::Array* array_in) {
         array_out.set_element(Type(array_in->ElemType()));
         array_out.set_stride(array_in->Stride());
-        Switch(
+        tint::Switch(
             array_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) { array_out.set_count(c->value); },
             TINT_ICE_ON_NO_MATCH);
@@ -356,7 +378,7 @@ struct Encoder {
         }
         return values_.GetOrCreate(value_in, [&] {
             auto& value_out = *mod_out_.add_values();
-            Switch(
+            tint::Switch(
                 value_in,
                 [&](const ir::InstructionResult* v) {
                     InstructionResult(*value_out.mutable_instruction_result(), v);
@@ -395,7 +417,7 @@ struct Encoder {
         }
         return constant_values_.GetOrCreate(constant_in, [&] {
             pb::ConstantValue constant_out;
-            Switch(
+            tint::Switch(
                 constant_in,  //
                 [&](const core::constant::Scalar<bool>* b) {
                     constant_out.mutable_scalar()->set_bool_(b->value);

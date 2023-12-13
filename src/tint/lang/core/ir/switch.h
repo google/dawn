@@ -81,6 +81,9 @@ class Switch final : public Castable<Switch, ControlInstruction> {
         ConstPropagatingPtr<ir::Block> block;
     };
 
+    /// Constructor (no results, no operands, no cases)
+    Switch();
+
     /// Constructor
     /// @param cond the condition
     explicit Switch(Value* cond);

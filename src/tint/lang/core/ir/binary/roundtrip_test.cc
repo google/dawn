@@ -497,5 +497,35 @@ TEST_F(IRBinaryRoundtripTest, IfResults) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Switch) {
+    auto* x = b.FunctionParam<i32>("x");
+    auto* fn = b.Function("Function", ty.i32());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        auto* switch_ = b.Switch(x);
+        b.Append(b.Case(switch_, {b.Constant(1_i)}), [&] { b.Return(fn, 1_i); });
+        b.Append(b.Case(switch_, {b.Constant(2_i), b.Constant(3_i)}), [&] { b.Return(fn, 2_i); });
+        b.Append(b.Case(switch_, {nullptr}), [&] { b.Return(fn, 3_i); });
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, SwitchResults) {
+    auto* x = b.FunctionParam<i32>("x");
+    auto* fn = b.Function("Function", ty.i32());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        auto* switch_ = b.Switch(x);
+        auto* res = b.InstructionResult<i32>();
+        switch_->SetResults(Vector{res});
+        b.Append(b.Case(switch_, {b.Constant(1_i)}), [&] { b.ExitSwitch(switch_, 1_i); });
+        b.Append(b.Case(switch_, {b.Constant(2_i), b.Constant(3_i)}),
+                 [&] { b.ExitSwitch(switch_, 2_i); });
+        b.Append(b.Case(switch_, {nullptr}), [&] { b.ExitSwitch(switch_, 3_i); });
+        b.Return(fn, res);
+    });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

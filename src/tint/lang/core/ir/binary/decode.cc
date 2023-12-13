@@ -53,6 +53,7 @@ struct Decoder {
     Builder b{mod_out_};
 
     Vector<ir::ExitIf*, 32> exit_ifs_{};
+    Vector<ir::ExitSwitch*, 32> exit_switches_{};
 
     void Decode() {
         {
@@ -105,6 +106,9 @@ struct Decoder {
 
         for (auto* exit : exit_ifs_) {
             InferControlInstruction(exit, &ExitIf::SetIf);
+        }
+        for (auto* exit : exit_switches_) {
+            InferControlInstruction(exit, &ExitSwitch::SetSwitch);
         }
     }
 
@@ -204,6 +208,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kExitIf:
                 inst_out = CreateInstructionExitIf(inst_in.exit_if());
                 break;
+            case pb::Instruction::KindCase::kExitSwitch:
+                inst_out = CreateInstructionExitSwitch(inst_in.exit_switch());
+                break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
@@ -230,6 +237,9 @@ struct Decoder {
                 break;
             case pb::Instruction::KindCase::kSwizzle:
                 inst_out = CreateInstructionSwizzle(inst_in.swizzle());
+                break;
+            case pb::Instruction::KindCase::kSwitch:
+                inst_out = CreateInstructionSwitch(inst_in.switch_());
                 break;
             case pb::Instruction::KindCase::kUnary:
                 inst_out = CreateInstructionUnary(inst_in.unary());
@@ -291,6 +301,12 @@ struct Decoder {
         return exit_out;
     }
 
+    ir::ExitSwitch* CreateInstructionExitSwitch(const pb::InstructionExitSwitch&) {
+        auto* exit_out = mod_out_.instructions.Create<ir::ExitSwitch>();
+        exit_switches_.Push(exit_out);
+        return exit_out;
+    }
+
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
         return mod_out_.instructions.Create<ir::Discard>();
     }
@@ -340,6 +356,26 @@ struct Decoder {
         }
         swizzle_out->SetIndices(indices);
         return swizzle_out;
+    }
+
+    ir::Switch* CreateInstructionSwitch(const pb::InstructionSwitch& switch_in) {
+        auto* switch_out = mod_out_.instructions.Create<ir::Switch>();
+        for (auto& case_in : switch_in.cases()) {
+            ir::Switch::Case case_out{};
+            case_out.block = Block(case_in.block());
+            case_out.block->SetParent(switch_out);
+            for (auto selector_in : case_in.selectors()) {
+                ir::Switch::CaseSelector selector_out{};
+                selector_out.val = b.Constant(ConstantValue(selector_in));
+                case_out.selectors.Push(std::move(selector_out));
+            }
+            if (case_in.is_default()) {
+                ir::Switch::CaseSelector selector_out{};
+                case_out.selectors.Push(std::move(selector_out));
+            }
+            switch_out->Cases().Push(std::move(case_out));
+        }
+        return switch_out;
     }
 
     ir::Unary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
