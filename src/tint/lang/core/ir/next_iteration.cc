@@ -39,6 +39,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::NextIteration);
 
 namespace tint::core::ir {
 
+NextIteration::NextIteration() = default;
+
 NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
     : loop_(loop) {
     TINT_ASSERT(loop_);
@@ -56,6 +58,16 @@ NextIteration* NextIteration::Clone(CloneContext& ctx) {
     auto* new_loop = ctx.Clone(loop_);
     auto args = ctx.Remap<NextIteration::kDefaultNumOperands>(Args());
     return ctx.ir.instructions.Create<NextIteration>(new_loop, args);
+}
+
+void NextIteration::SetLoop(ir::Loop* loop) {
+    if (loop_ && loop_->Body()) {
+        loop_->Body()->RemoveInboundSiblingBranch(this);
+    }
+    loop_ = loop;
+    if (loop) {
+        loop->Body()->AddInboundSiblingBranch(this);
+    }
 }
 
 }  // namespace tint::core::ir

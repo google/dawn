@@ -46,6 +46,9 @@ class ExitLoop final : public Castable<ExitLoop, Exit> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no operands, no loop)
+    ExitLoop();
+
     /// Constructor
     /// @param loop the loop being exited
     /// @param args the target MultiInBlock arguments

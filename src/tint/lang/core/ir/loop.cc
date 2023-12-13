@@ -36,6 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Loop);
 
 namespace tint::core::ir {
 
+Loop::Loop() = default;
+
 Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c)
     : initializer_(i), body_(b), continuing_(c) {
     TINT_ASSERT(initializer_);
@@ -84,8 +86,42 @@ void Loop::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     }
 }
 
-bool Loop::HasInitializer() {
+bool Loop::HasInitializer() const {
     return initializer_->Terminator() != nullptr;
+}
+
+void Loop::SetInitializer(ir::Block* block) {
+    if (initializer_ && initializer_->Parent() == this) {
+        initializer_->SetParent(nullptr);
+    }
+    initializer_ = block;
+    if (block) {
+        block->SetParent(this);
+    }
+}
+
+void Loop::SetBody(ir::MultiInBlock* block) {
+    if (body_ && body_->Parent() == this) {
+        body_->SetParent(nullptr);
+    }
+    body_ = block;
+    if (block) {
+        block->SetParent(this);
+    }
+}
+
+bool Loop::HasContinuing() const {
+    return continuing_->Terminator() != nullptr;
+}
+
+void Loop::SetContinuing(ir::MultiInBlock* block) {
+    if (continuing_ && continuing_->Parent() == this) {
+        continuing_->SetParent(nullptr);
+    }
+    continuing_ = block;
+    if (block) {
+        block->SetParent(this);
+    }
 }
 
 }  // namespace tint::core::ir

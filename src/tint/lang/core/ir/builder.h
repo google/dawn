@@ -1257,6 +1257,16 @@ class Builder {
     /// @returns the value
     ir::BlockParam* BlockParam(std::string_view name, const core::type::Type* type);
 
+    /// Creates a new `BlockParam` with a name.
+    /// @tparam TYPE the parameter type
+    /// @param name the parameter name
+    /// @returns the value
+    template <typename TYPE>
+    ir::BlockParam* BlockParam(std::string_view name) {
+        auto* type = ir.Types().Get<TYPE>();
+        return BlockParam(name, type);
+    }
+
     /// Creates a new `FunctionParam`
     /// @param type the parameter type
     /// @returns the value

@@ -40,6 +40,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::BreakIf);
 
 namespace tint::core::ir {
 
+BreakIf::BreakIf() = default;
+
 BreakIf::BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
     TINT_ASSERT(loop_);
 
@@ -58,6 +60,16 @@ BreakIf* BreakIf::Clone(CloneContext& ctx) {
     auto* cond = ctx.Remap(Condition());
     auto args = ctx.Remap<BreakIf::kDefaultNumOperands>(Args());
     return ctx.ir.instructions.Create<BreakIf>(cond, loop, args);
+}
+
+void BreakIf::SetLoop(ir::Loop* loop) {
+    if (loop_ && loop_->Body()) {
+        loop_->Body()->RemoveInboundSiblingBranch(this);
+    }
+    loop_ = loop;
+    if (loop) {
+        loop->Body()->AddInboundSiblingBranch(this);
+    }
 }
 
 }  // namespace tint::core::ir

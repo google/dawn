@@ -71,6 +71,10 @@ class MultiInBlock : public Castable<MultiInBlock, Block> {
     /// @param branch the branch to add
     void AddInboundSiblingBranch(ir::Terminator* branch);
 
+    /// Removes the given branch to the list of branches made to this block by sibling blocks
+    /// @param branch the branch to remove
+    void RemoveInboundSiblingBranch(ir::Terminator* branch);
+
   private:
     Vector<BlockParam*, 2> params_;
     Vector<ir::Terminator*, 2> inbound_sibling_branches_;

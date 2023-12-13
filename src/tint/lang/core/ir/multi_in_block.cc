@@ -63,11 +63,13 @@ void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
 }
 
 void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {
-    TINT_ASSERT(node != nullptr);
+    TINT_ASSERT_OR_RETURN(node != nullptr);
+    inbound_sibling_branches_.Push(node);
+}
 
-    if (node) {
-        inbound_sibling_branches_.Push(node);
-    }
+void MultiInBlock::RemoveInboundSiblingBranch(ir::Terminator* node) {
+    TINT_ASSERT_OR_RETURN(node != nullptr);
+    inbound_sibling_branches_.EraseIf([node](ir::Terminator* i) { return i == node; });
 }
 
 }  // namespace tint::core::ir

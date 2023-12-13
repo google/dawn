@@ -40,6 +40,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Continue);
 
 namespace tint::core::ir {
 
+Continue::Continue() = default;
+
 Continue::Continue(ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
     TINT_ASSERT(loop_);
 
@@ -57,6 +59,16 @@ Continue* Continue::Clone(CloneContext& ctx) {
     auto args = ctx.Remap<Continue::kDefaultNumOperands>(Args());
 
     return ctx.ir.instructions.Create<Continue>(loop, args);
+}
+
+void Continue::SetLoop(ir::Loop* loop) {
+    if (loop_ && loop_->Body()) {
+        loop_->Body()->RemoveInboundSiblingBranch(this);
+    }
+    loop_ = loop;
+    if (loop) {
+        loop->Body()->AddInboundSiblingBranch(this);
+    }
 }
 
 }  // namespace tint::core::ir

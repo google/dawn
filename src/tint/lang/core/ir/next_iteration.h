@@ -47,6 +47,9 @@ class NextIteration final : public Castable<NextIteration, Terminator> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no operands, no loop)
+    NextIteration();
+
     /// Constructor
     /// @param loop the loop being iterated
     /// @param args the arguments for the MultiInBlock
@@ -61,6 +64,9 @@ class NextIteration final : public Castable<NextIteration, Terminator> {
 
     /// @returns the loop being iterated
     const ir::Loop* Loop() const { return loop_; }
+
+    /// @param loop the new loop being iterated
+    void SetLoop(ir::Loop* loop);
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "next_iteration"; }

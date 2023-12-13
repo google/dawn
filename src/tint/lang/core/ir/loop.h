@@ -72,6 +72,9 @@ namespace tint::core::ir {
 /// ```
 class Loop final : public Castable<Loop, ControlInstruction> {
   public:
+    /// Constructor (no results, no operands, no blocks)
+    Loop();
+
     /// Constructor
     /// @param i the initializer block
     /// @param b the body block
@@ -93,7 +96,10 @@ class Loop final : public Castable<Loop, ControlInstruction> {
 
     /// @returns true if the loop uses an initializer block. If true, then the Loop first branches
     /// to the initializer block, otherwise it first branches to the body block.
-    bool HasInitializer();
+    bool HasInitializer() const;
+
+    /// @param block the new switch initializer block
+    void SetInitializer(ir::Block* block);
 
     /// @returns the switch start block
     ir::MultiInBlock* Body() { return body_; }
@@ -101,11 +107,21 @@ class Loop final : public Castable<Loop, ControlInstruction> {
     /// @returns the switch start block
     const ir::MultiInBlock* Body() const { return body_; }
 
+    /// @param block the new switch body block
+    void SetBody(ir::MultiInBlock* block);
+
     /// @returns the switch continuing block
     ir::MultiInBlock* Continuing() { return continuing_; }
 
     /// @returns the switch continuing block
     const ir::MultiInBlock* Continuing() const { return continuing_; }
+
+    /// @returns true if the loop uses an continuing block. If true, then the Loop first branches
+    /// to the continuing block, otherwise it first branches to the body block.
+    bool HasContinuing() const;
+
+    /// @param block the new switch continuing block
+    void SetContinuing(ir::MultiInBlock* block);
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "loop"; }

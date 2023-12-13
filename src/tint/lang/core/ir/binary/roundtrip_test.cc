@@ -527,5 +527,73 @@ TEST_F(IRBinaryRoundtripTest, SwitchResults) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, LoopBody) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] { b.Return(fn, 1_i); });
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, LoopInitBody) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            b.Let("L", 1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.Return(fn, 2_i); });
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, LoopInitBodyCont) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            b.Let("L", 1_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, false); });
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, LoopResults) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        auto* res = b.InstructionResult<i32>();
+        loop->SetResults(Vector{res});
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop, 1_i); });
+        b.Return(fn, res);
+    });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, LoopBlockParams) {
+    auto* fn = b.Function("Function", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            b.Let("L", 1_i);
+            b.NextIteration(loop);
+        });
+        auto* x = b.BlockParam<i32>("x");
+        auto* y = b.BlockParam<f32>("y");
+        loop->Body()->SetParams({x, y});
+        b.Append(loop->Body(), [&] { b.Continue(loop, 1_u, true); });
+        auto* z = b.BlockParam<u32>("z");
+        auto* w = b.BlockParam<bool>("w");
+        loop->Continuing()->SetParams({z, w});
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, false, 3_i, 4_f); });
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
 }  // namespace
 }  // namespace tint::core::ir::binary

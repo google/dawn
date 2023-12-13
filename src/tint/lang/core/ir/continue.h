@@ -47,6 +47,9 @@ class Continue final : public Castable<Continue, Terminator> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// Constructor (no operands, no loop)
+    Continue();
+
     /// Constructor
     /// @param loop the loop owning the continue block
     /// @param args the arguments for the MultiInBlock
@@ -61,6 +64,9 @@ class Continue final : public Castable<Continue, Terminator> {
 
     /// @returns the loop owning the continue block
     const ir::Loop* Loop() const { return loop_; }
+
+    /// @param loop the new loop owning the continue block
+    void SetLoop(ir::Loop* loop);
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "continue"; }

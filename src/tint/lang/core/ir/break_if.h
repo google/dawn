@@ -51,6 +51,9 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     /// The base offset in Operands() for the arguments
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// Constructor (no operands, no loop)
+    BreakIf();
+
     /// Constructor
     /// @param condition the break condition
     /// @param loop the loop containing the break-if
@@ -75,6 +78,9 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
 
     /// @returns the loop containing the break-if
     const ir::Loop* Loop() const { return loop_; }
+
+    /// @param loop the new loop containing the continue
+    void SetLoop(ir::Loop* loop);
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "break_if"; }
