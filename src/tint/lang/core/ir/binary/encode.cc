@@ -92,6 +92,13 @@ struct Encoder {
     Hashmap<const core::constant::Value*, uint32_t, 32> constant_values_{};
 
     void Encode() {
+        // Encode all user-declared structures first. This is to ensure that the IR disassembly
+        // (which prints structure types first) does not reorder after encoding and decoding.
+        for (auto* ty : mod_in_.Types()) {
+            if (auto* str = ty->As<core::type::Struct>()) {
+                Type(str);
+            }
+        }
         Vector<pb::Function*, 8> fns_out;
         for (auto& fn_in : mod_in_.functions) {
             uint32_t id = static_cast<uint32_t>(fns_out.Length() + 1);
