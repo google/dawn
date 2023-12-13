@@ -37,6 +37,7 @@
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::glsl::writer {
@@ -95,6 +96,20 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         if (!program->IsValid()) {
             ADD_FAILURE() << program->Diagnostics();
         }
+
+        // Run the glsl keyword renamer before all other transforms.
+        ast::transform::Manager transform_manager;
+        ast::transform::DataMap transform_data;
+        ast::transform::DataMap outputs;
+        transform_data.Add<ast::transform::Renamer::Config>(
+            ast::transform::Renamer::Target::kGlslKeywords,
+            /* preserve_unicode */ false);
+        transform_manager.Add<tint::ast::transform::Renamer>();
+        auto result = transform_manager.Run(*program, transform_data, outputs);
+        if (!result.IsValid()) {
+            ADD_FAILURE() << result.Diagnostics();
+        }
+        *program = std::move(result);
 
         auto sanitized_result = Sanitize(*program, options, /* entry_point */ "");
         if (!sanitized_result.program.IsValid()) {

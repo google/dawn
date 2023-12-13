@@ -47,17 +47,17 @@ void main() {
 #version 310 es
 precision highp float;
 
-struct tint_symbol {
+struct tint_symbol_3 {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
-  tint_symbol inner;
-} tint_symbol_1;
+layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
+  tint_symbol_3 inner;
+} tint_symbol_4;
 
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(tint_symbol_1.inner.texture_builtin_value_0);
+  res = int(tint_symbol_4.inner.texture_builtin_value_0);
   return;
 }
 
@@ -80,17 +80,17 @@ void main() {
 }
 #version 310 es
 
-struct tint_symbol {
+struct tint_symbol_3 {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
-  tint_symbol inner;
-} tint_symbol_1;
+layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
+  tint_symbol_3 inner;
+} tint_symbol_4;
 
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(tint_symbol_1.inner.texture_builtin_value_0);
+  res = int(tint_symbol_4.inner.texture_builtin_value_0);
   return;
 }
 

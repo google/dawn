@@ -151,9 +151,6 @@ SanitizedResult Sanitize(const Program& in,
         manager.Add<ast::transform::SingleEntryPoint>();
         data.Add<ast::transform::SingleEntryPoint::Config>(entry_point);
     }
-    manager.Add<ast::transform::Renamer>();
-    data.Add<ast::transform::Renamer::Config>(ast::transform::Renamer::Target::kGlslKeywords,
-                                              /* preserve_unicode */ false);
 
     manager.Add<ast::transform::PreservePadding>();  // Must come before DirectVariableAccess
 
