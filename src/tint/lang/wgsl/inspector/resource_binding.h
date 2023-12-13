@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_H_
 
 #include <cstdint>
+#include <string>
 
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -116,6 +117,8 @@ struct ResourceBinding {
     SampledKind sampled_kind;
     /// Format of data, if defined.
     TexelFormat image_format;
+    /// Variable name of the binding.
+    std::string variable_name;
 };
 
 /// Convert from internal core::type::TextureDimension to public

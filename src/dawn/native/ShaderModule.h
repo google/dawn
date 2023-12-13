@@ -174,6 +174,9 @@ struct ShaderBindingInfo {
     BindingNumber binding;
     BindingInfoType bindingType;
 
+    // The variable name of the binding resource.
+    std::string name;
+
     BufferBindingLayout buffer;
     ShaderSamplerBindingInfo sampler;
     ShaderTextureBindingInfo texture;

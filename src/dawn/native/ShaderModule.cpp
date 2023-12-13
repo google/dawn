@@ -813,6 +813,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         ShaderBindingInfo info;
 
         info.bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
+        info.name = resource.variable_name;
 
         switch (info.bindingType) {
             case BindingInfoType::Buffer:

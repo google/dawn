@@ -372,6 +372,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
         } else {
             entry.size_no_padding = entry.size;
         }
+        entry.variable_name = var->Declaration()->name->symbol.Name();
 
         result.push_back(entry);
     }
@@ -405,6 +406,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(const std::st
         entry.resource_type = ResourceBinding::ResourceType::kSampler;
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
+        entry.variable_name = rs.first->Declaration()->name->symbol.Name();
 
         result.push_back(entry);
     }
@@ -429,6 +431,7 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
         entry.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
+        entry.variable_name = rcs.first->Declaration()->name->symbol.Name();
 
         result.push_back(entry);
     }
@@ -470,6 +473,7 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
         entry.resource_type = resource_type;
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
+        entry.variable_name = var->Declaration()->name->symbol.Name();
 
         auto* tex = var->Type()->UnwrapRef()->As<core::type::Texture>();
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->dim());
@@ -673,6 +677,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
         } else {
             entry.size_no_padding = entry.size;
         }
+        entry.variable_name = var->Declaration()->name->symbol.Name();
 
         result.push_back(entry);
     }
@@ -703,6 +708,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
                                   : ResourceBinding::ResourceType::kSampledTexture;
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
+        entry.variable_name = var->Declaration()->name->symbol.Name();
 
         auto* texture_type = var->Type()->UnwrapRef()->As<core::type::Texture>();
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->dim());
@@ -753,6 +759,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
         }
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
+        entry.variable_name = var->Declaration()->name->symbol.Name();
 
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->dim());
 
