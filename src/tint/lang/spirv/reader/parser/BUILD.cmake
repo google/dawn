@@ -34,35 +34,24 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/spirv/reader/ast_lower/BUILD.cmake)
-include(lang/spirv/reader/ast_parser/BUILD.cmake)
-include(lang/spirv/reader/common/BUILD.cmake)
-include(lang/spirv/reader/parser/BUILD.cmake)
-
 if(TINT_BUILD_SPV_READER)
 ################################################################################
-# Target:    tint_lang_spirv_reader
+# Target:    tint_lang_spirv_reader_parser
 # Kind:      lib
 # Condition: TINT_BUILD_SPV_READER
 ################################################################################
-tint_add_target(tint_lang_spirv_reader lib
-  lang/spirv/reader/reader.cc
-  lang/spirv/reader/reader.h
+tint_add_target(tint_lang_spirv_reader_parser lib
+  lang/spirv/reader/parser/parser.cc
+  lang/spirv/reader/parser/parser.h
 )
 
-tint_target_add_dependencies(tint_lang_spirv_reader lib
+tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_spirv_reader_common
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_common
-  tint_lang_wgsl_features
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -78,11 +67,13 @@ tint_target_add_dependencies(tint_lang_spirv_reader lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies(tint_lang_spirv_reader lib
-    tint_lang_spirv_reader_ast_parser
-    tint_lang_spirv_reader_parser
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+  tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
+    tint_lang_spirv_validate
   )
-endif(TINT_BUILD_SPV_READER)
+  tint_target_add_external_dependencies(tint_lang_spirv_reader_parser lib
+    "spirv-tools"
+  )
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_READER)

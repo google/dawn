@@ -85,6 +85,7 @@ cc_library(
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "//src/tint/lang/spirv/validate",
+      "@spirv_tools",
     ],
     "//conditions:default": [],
   }),

@@ -267,6 +267,9 @@ if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
     tint_lang_spirv_validate
   )
+  tint_target_add_external_dependencies(tint_lang_spirv_writer_fuzz fuzz
+    "spirv-tools"
+  )
 endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_SPV_WRITER)

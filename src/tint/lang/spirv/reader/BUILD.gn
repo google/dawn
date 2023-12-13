@@ -72,7 +72,10 @@ if (tint_build_spv_reader) {
     ]
 
     if (tint_build_spv_reader) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/ast_parser" ]
+      deps += [
+        "${tint_src_dir}/lang/spirv/reader/ast_parser",
+        "${tint_src_dir}/lang/spirv/reader/parser",
+      ]
     }
   }
 }
