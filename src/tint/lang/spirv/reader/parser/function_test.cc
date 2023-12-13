@@ -109,5 +109,75 @@ TEST_F(SpirvParserTest, MultipleEntryPoints) {
 )");
 }
 
+TEST_F(SpirvParserTest, FunctionCall) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+  %func_type = OpTypeFunction %void
+
+        %foo = OpFunction %void None %func_type
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %func_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %void %foo
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:void = call %1
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FunctionCall_ForwardReference) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+  %func_type = OpTypeFunction %void
+
+       %main = OpFunction %void None %func_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %void %foo
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %void None %func_type
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %2:void = call %3
+    ret
+  }
+}
+%3 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

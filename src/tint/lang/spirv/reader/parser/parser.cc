@@ -103,12 +103,21 @@ class Parser {
         return Type(spirv_context_->get_type_mgr()->GetType(id));
     }
 
+    /// @param id a SPIR-V result ID for a function declaration instruction
+    /// @returns a Tint function object
+    core::ir::Function* Function(uint32_t id) {
+        return functions_.GetOrCreate(id, [&] {
+            return b_.Function(ty_.void_(), core::ir::Function::PipelineStage::kUndefined,
+                               std::nullopt);
+        });
+    }
+
     /// Emit the functions.
     void EmitFunctions() {
         for (auto& func : *spirv_context_->module()) {
             // TODO(crbug.com/tint/1907): Emit function parameters as well.
-            current_function_ = b_.Function(
-                Type(func.type_id()), core::ir::Function::PipelineStage::kUndefined, std::nullopt);
+            current_function_ = Function(func.result_id());
+            current_function_->SetReturnType(Type(func.type_id()));
             functions_.Add(func.result_id(), current_function_);
             EmitBlock(current_function_->Block(), *func.entry());
         }
@@ -119,8 +128,7 @@ class Parser {
         // Handle OpEntryPoint declarations.
         for (auto& entry_point : spirv_context_->module()->entry_points()) {
             auto model = entry_point.GetSingleWordInOperand(0);
-            auto* func = functions_.Get(entry_point.GetSingleWordInOperand(1)).value_or(nullptr);
-            TINT_ASSERT_OR_RETURN(func);
+            auto* func = Function(entry_point.GetSingleWordInOperand(1));
 
             // Set the pipeline stage.
             switch (spv::ExecutionModel(model)) {
@@ -159,6 +167,9 @@ class Parser {
     void EmitBlock(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
         for (auto& inst : src) {
             switch (inst.opcode()) {
+                case spv::Op::OpFunctionCall:
+                    dst->Append(EmitFunctionCall(inst));
+                    break;
                 case spv::Op::OpReturn:
                     dst->Append(b_.Return(current_function_));
                     break;
@@ -167,6 +178,13 @@ class Parser {
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    /// @param inst the SPIR-V instruction for OpFunctionCall
+    /// @returns the Tint IR instruction
+    core::ir::UserCall* EmitFunctionCall(const spvtools::opt::Instruction& inst) {
+        // TODO(crbug.com/tint/1907): Handle parameters and capture result.
+        return b_.Call(Function(inst.GetSingleWordInOperand(0)));
     }
 
   private:
