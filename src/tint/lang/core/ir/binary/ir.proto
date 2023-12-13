@@ -50,6 +50,7 @@ message Type {
         TypePointer pointer = 5;
         TypeStruct struct = 6;
         TypeAtomic atomic = 7;
+        TypeDepthTexture depth_texture = 8;
         // TODO: textures, samplers
     }
 }
@@ -102,6 +103,10 @@ message TypeStructMember {
 
 message TypeAtomic {
     uint32 type = 1;  // Module.types
+}
+
+message TypeDepthTexture {
+    TextureDimension dimension = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -376,6 +381,15 @@ enum BinaryOp {
     greater_than_equal = 13;
     shift_left = 14;
     shift_right = 15;
+}
+
+enum TextureDimension {
+    _1d = 0;
+    _2d = 1;
+    _2d_array = 2;
+    _3d = 3;
+    cube = 4;
+    cube_array = 5;
 }
 
 enum InterpolationType {

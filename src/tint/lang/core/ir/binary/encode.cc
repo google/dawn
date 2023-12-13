@@ -64,6 +64,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
@@ -333,6 +334,9 @@ struct Encoder {
                 [&](const core::type::Struct* s) { TypeStruct(*type_out.mutable_struct_(), s); },
                 [&](const core::type::Atomic* a) { TypeAtomic(*type_out.mutable_atomic(), a); },
                 [&](const core::type::Array* m) { TypeArray(*type_out.mutable_array(), m); },
+                [&](const core::type::DepthTexture* t) {
+                    TypeDepthTexture(*type_out.mutable_depth_texture(), t);
+                },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_types()->Add(std::move(type_out));
@@ -404,6 +408,11 @@ struct Encoder {
             array_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) { array_out.set_count(c->value); },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void TypeDepthTexture(pb::TypeDepthTexture& texture_out,
+                          const core::type::DepthTexture* texture_in) {
+        texture_out.set_dimension(TextureDimension(texture_in->dim()));
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -601,6 +610,28 @@ struct Encoder {
 
         TINT_ICE() << "invalid BinaryOp: " << in;
         return pb::BinaryOp::add_;
+    }
+
+    pb::TextureDimension TextureDimension(core::type::TextureDimension in) {
+        switch (in) {
+            case core::type::TextureDimension::k1d:
+                return pb::TextureDimension::_1d;
+            case core::type::TextureDimension::k2d:
+                return pb::TextureDimension::_2d;
+            case core::type::TextureDimension::k2dArray:
+                return pb::TextureDimension::_2d_array;
+            case core::type::TextureDimension::k3d:
+                return pb::TextureDimension::_3d;
+            case core::type::TextureDimension::kCube:
+                return pb::TextureDimension::cube;
+            case core::type::TextureDimension::kCubeArray:
+                return pb::TextureDimension::cube_array;
+            default:
+                break;
+        }
+
+        TINT_ICE() << "invalid TextureDimension: " << in;
+        return pb::TextureDimension::_1d;
     }
 
     pb::InterpolationType InterpolationType(core::InterpolationType in) {

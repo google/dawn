@@ -31,6 +31,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/compiler.h"
 
@@ -507,6 +508,8 @@ struct Decoder {
                 return CreateTypeAtomic(type_in.atomic());
             case pb::Type::KindCase::kArray:
                 return CreateTypeArray(type_in.array());
+            case pb::Type::KindCase::kDepthTexture:
+                return CreateTypeDepthTexture(type_in.depth_texture());
             default:
                 break;
         }
@@ -608,6 +611,11 @@ struct Decoder {
         uint32_t stride = static_cast<uint32_t>(array_in.stride());
         uint32_t count = static_cast<uint32_t>(array_in.count());
         return mod_out_.Types().array(element, count, stride);
+    }
+
+    const type::DepthTexture* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
+        auto dimension = TextureDimension(texture_in.dimension());
+        return mod_out_.Types().Get<type::DepthTexture>(dimension);
     }
 
     const type::Type* Type(size_t id) { return id > 0 ? types_[id - 1] : nullptr; }
@@ -821,6 +829,28 @@ struct Decoder {
                 TINT_ICE() << "invalid BinaryOp: " << in;
                 return core::ir::BinaryOp::kAdd;
         }
+    }
+
+    core::type::TextureDimension TextureDimension(pb::TextureDimension in) {
+        switch (in) {
+            case pb::TextureDimension::_1d:
+                return core::type::TextureDimension::k1d;
+            case pb::TextureDimension::_2d:
+                return core::type::TextureDimension::k2d;
+            case pb::TextureDimension::_2d_array:
+                return core::type::TextureDimension::k2dArray;
+            case pb::TextureDimension::_3d:
+                return core::type::TextureDimension::k3d;
+            case pb::TextureDimension::cube:
+                return core::type::TextureDimension::kCube;
+            case pb::TextureDimension::cube_array:
+                return core::type::TextureDimension::kCubeArray;
+            default:
+                break;
+        }
+
+        TINT_ICE() << "invalid TextureDimension: " << in;
+        return core::type::TextureDimension::k1d;
     }
 
     core::InterpolationType InterpolationType(pb::InterpolationType in) {
