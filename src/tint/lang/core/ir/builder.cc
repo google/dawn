@@ -51,14 +51,21 @@ MultiInBlock* Builder::MultiInBlock() {
     return ir.blocks.Create<ir::MultiInBlock>();
 }
 
-Function* Builder::Function(std::string_view name,
-                            const core::type::Type* return_type,
+Function* Builder::Function(const core::type::Type* return_type,
                             Function::PipelineStage stage,
                             std::optional<std::array<uint32_t, 3>> wg_size) {
     auto* ir_func = ir.values.Create<ir::Function>(return_type, stage, wg_size);
     ir_func->SetBlock(Block());
-    ir.SetName(ir_func, name);
     ir.functions.Push(ir_func);
+    return ir_func;
+}
+
+Function* Builder::Function(std::string_view name,
+                            const core::type::Type* return_type,
+                            Function::PipelineStage stage,
+                            std::optional<std::array<uint32_t, 3>> wg_size) {
+    auto* ir_func = Function(return_type, stage, wg_size);
+    ir.SetName(ir_func, name);
     return ir_func;
 }
 

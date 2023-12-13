@@ -235,12 +235,21 @@ class Builder {
     /// @returns a new multi-in block
     ir::MultiInBlock* MultiInBlock();
 
-    /// Creates a function instruction
+    /// Creates an unnamed function
+    /// @param return_type the function return type
+    /// @param stage the function stage
+    /// @param wg_size the workgroup_size
+    /// @returns the function
+    ir::Function* Function(const core::type::Type* return_type,
+                           Function::PipelineStage stage = Function::PipelineStage::kUndefined,
+                           std::optional<std::array<uint32_t, 3>> wg_size = {});
+
+    /// Creates a function
     /// @param name the function name
     /// @param return_type the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    /// @returns the instruction
+    /// @returns the function
     ir::Function* Function(std::string_view name,
                            const core::type::Type* return_type,
                            Function::PipelineStage stage = Function::PipelineStage::kUndefined,

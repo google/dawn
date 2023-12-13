@@ -127,6 +127,10 @@ if (tint_build_unittests) {
       deps += [ "${tint_src_dir}/lang/msl/writer/ast_raise:unittests" ]
     }
 
+    if (tint_build_spv_reader) {
+      deps += [ "${tint_src_dir}/lang/spirv/reader/parser:unittests" ]
+    }
+
     if (tint_build_spv_reader && tint_build_wgsl_reader &&
         tint_build_wgsl_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/reader/ast_lower:unittests" ]

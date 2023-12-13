@@ -72,6 +72,56 @@ if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
     tint_lang_spirv_validate
   )
   tint_target_add_external_dependencies(tint_lang_spirv_reader_parser lib
+    "spirv-opt-internal"
+    "spirv-tools"
+  )
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+
+endif(TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
+################################################################################
+# Target:    tint_lang_spirv_reader_parser_test
+# Kind:      test
+# Condition: TINT_BUILD_SPV_READER
+################################################################################
+tint_add_target(tint_lang_spirv_reader_parser_test test
+  lang/spirv/reader/parser/function_test.cc
+  lang/spirv/reader/parser/helper_test.h
+)
+
+tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_spirv_reader_parser_test test
+  "gtest"
+)
+
+if(TINT_BUILD_SPV_READER)
+  tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
+    tint_lang_spirv_reader_parser
+  )
+endif(TINT_BUILD_SPV_READER)
+
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+  tint_target_add_external_dependencies(tint_lang_spirv_reader_parser_test test
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)

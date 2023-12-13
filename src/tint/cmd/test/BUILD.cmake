@@ -133,6 +133,12 @@ if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   )
 endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 
+if(TINT_BUILD_SPV_READER)
+  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_spirv_reader_parser_test
+  )
+endif(TINT_BUILD_SPV_READER)
+
 if(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_spirv_reader_ast_lower_test
