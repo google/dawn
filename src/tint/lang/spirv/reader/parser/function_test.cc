@@ -44,8 +44,65 @@ TEST_F(SpirvParserTest, EmptyEntryPoint) {
                OpFunctionEnd
 )",
               R"(
-%1 = func():void -> %b1 {
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, LocalSize) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 3 4 5
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(3, 4, 5) func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, MultipleEntryPoints) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %foo "foo"
+               OpEntryPoint GLCompute %bar "bar"
+               OpExecutionMode %foo LocalSize 3 4 5
+               OpExecutionMode %bar LocalSize 6 7 8
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+
+        %foo = OpFunction %void None %ep_type
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %ep_type
+  %bar_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%foo = @compute @workgroup_size(3, 4, 5) func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%bar = @compute @workgroup_size(6, 7, 8) func():void -> %b2 {
+  %b2 = block {
     ret
   }
 }
