@@ -7,5 +7,7 @@ fn main(
   @location(4) @interpolate(perspective, sample) perspective_sample : f32,
   @location(5) @interpolate(linear, center) linear_center : f32,
   @location(6) @interpolate(linear, centroid) linear_centroid : f32,
-  @location(7) @interpolate(linear, sample) linear_sample : f32) {
+  @location(7) @interpolate(linear, sample) linear_sample : f32,
+  @location(8) @interpolate(perspective) perspective_default : f32,
+  @location(9) @interpolate(linear) linear_default : f32) {
 }

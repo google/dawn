@@ -97,6 +97,9 @@ std::string InterpolationToAttribute(core::InterpolationType type,
             attr = "sample_";
             break;
         case core::InterpolationSampling::kUndefined:
+            if (type != core::InterpolationType::kFlat) {
+                attr = "center_";
+            }
             break;
     }
     switch (type) {
