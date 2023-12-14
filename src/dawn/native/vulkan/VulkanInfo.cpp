@@ -88,6 +88,10 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
         }
     }
 
+    DAWN_INVALID_IF(info.apiVersion < VK_API_VERSION_1_1,
+                    "Vulkan API version (%x) was not at least VK_API_VERSION_1_1 (%x).",
+                    info.apiVersion, VK_API_VERSION_1_1);
+
     // Gather the info about the instance layers
     {
         uint32_t count = 0;
