@@ -183,9 +183,7 @@ ResultOrError<Pageable*> ResidencyManager::RemoveSingleEntryFromLRU(
 
     // We must ensure that any previous use of a resource has completed before the resource can
     // be evicted.
-    if (lastSubmissionSerial > mDevice->GetQueue()->GetCompletedCommandSerial()) {
-        DAWN_TRY(mDevice->WaitForSerial(lastSubmissionSerial));
-    }
+    DAWN_TRY(ToBackend(mDevice->GetQueue())->WaitForSerial(lastSubmissionSerial));
 
     pageable->RemoveFromList();
     return pageable;

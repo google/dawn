@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/tests/white_box/GPUTimestampCalibrationTests.h"
 
 namespace dawn {
@@ -37,18 +38,20 @@ class GPUTimestampCalibrationTestsD3D12 : public GPUTimestampCalibrationTestBack
   public:
     explicit GPUTimestampCalibrationTestsD3D12(const wgpu::Device& device) {
         mBackendDevice = native::d3d12::ToBackend(native::FromAPI(device.Get()));
+        mBackendQueue = native::d3d12::ToBackend(mBackendDevice->GetQueue());
     }
 
     bool IsSupported() const override { return true; }
 
     void GetTimestampCalibration(uint64_t* gpuTimestamp, uint64_t* cpuTimestamp) override {
-        mBackendDevice->GetCommandQueue()->GetClockCalibration(gpuTimestamp, cpuTimestamp);
+        mBackendQueue->GetCommandQueue()->GetClockCalibration(gpuTimestamp, cpuTimestamp);
     }
 
     float GetTimestampPeriod() const override { return mBackendDevice->GetTimestampPeriodInNS(); }
 
   private:
     native::d3d12::Device* mBackendDevice;
+    native::d3d12::Queue* mBackendQueue;
 };
 
 }  // anonymous namespace

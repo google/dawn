@@ -91,13 +91,8 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
     DAWN_ASSERT(mD3d12Device != nullptr);
 
-    // Create device-global objects
-    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    DAWN_TRY(
-        CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
-                     "D3D12 create command queue"));
+    Ref<Queue> queue;
+    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
 
     if ((HasFeature(Feature::TimestampQuery) ||
          HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses)) &&
@@ -107,30 +102,18 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         // always support timestamps except where there are bugs in Windows container and vGPU
         // implementations.
         uint64_t frequency;
-        DAWN_TRY(CheckHRESULT(mCommandQueue->GetTimestampFrequency(&frequency),
+        DAWN_TRY(CheckHRESULT(queue->GetCommandQueue()->GetTimestampFrequency(&frequency),
                               "D3D12 get timestamp frequency"));
         // Calculate the period in nanoseconds by the frequency.
         mTimestampPeriod = static_cast<float>(1e9) / frequency;
     }
 
-    // If PIX is not attached, the QueryInterface fails. Hence, no need to check the return
-    // value.
-    mCommandQueue.As(&mD3d12SharingContract);
-
-    DAWN_TRY(CheckHRESULT(mD3d12Device->CreateFence(uint64_t(kBeginningOfGPUTime),
-                                                    D3D12_FENCE_FLAG_SHARED, IID_PPV_ARGS(&mFence)),
-                          "D3D12 create fence"));
-
-    mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    DAWN_ASSERT(mFenceEvent != nullptr);
-
-    DAWN_TRY(CheckHRESULT(mD3d12Device->CreateSharedHandle(mFence.Get(), nullptr, GENERIC_ALL,
+    DAWN_TRY(CheckHRESULT(mD3d12Device->CreateSharedHandle(queue->GetFence(), nullptr, GENERIC_ALL,
                                                            nullptr, &mFenceHandle),
                           "D3D12 create fence handle"));
     DAWN_ASSERT(mFenceHandle != nullptr);
 
     // Initialize backend services
-    mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
 
     // Zero sized allocator is never requested and does not need to exist.
     for (uint32_t countIndex = 0; countIndex < kNumViewDescriptorAllocators; countIndex++) {
@@ -191,10 +174,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
                                              IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
-    DAWN_TRY(DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue)));
-    // Device shouldn't be used until after DeviceBase::Initialize so we must wait until after
-    // device initialization to call NextSerial
-    DAWN_TRY(NextSerial());
+    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
 
     // Ensure DXC if use_dxc toggle is set.
     DAWN_TRY(EnsureDXCIfRequired());
@@ -215,18 +195,6 @@ Device::~Device() = default;
 
 ID3D12Device* Device::GetD3D12Device() const {
     return mD3d12Device.Get();
-}
-
-ID3D12Fence* Device::GetD3D12Fence() const {
-    return mFence.Get();
-}
-
-ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {
-    return mCommandQueue;
-}
-
-ID3D12SharingContract* Device::GetSharingContract() const {
-    return mD3d12SharingContract.Get();
 }
 
 ComPtr<ID3D12CommandSignature> Device::GetDispatchIndirectSignature() const {
@@ -257,25 +225,14 @@ const PlatformFunctions* Device::GetFunctions() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetFunctions();
 }
 
-CommandAllocatorManager* Device::GetCommandAllocatorManager() const {
-    return mCommandAllocatorManager.get();
-}
-
 MutexProtected<ResidencyManager>& Device::GetResidencyManager() const {
     return *mResidencyManager;
 }
 
 ResultOrError<CommandRecordingContext*> Device::GetPendingCommandContext(
     Device::SubmitMode submitMode) {
-    // Callers of GetPendingCommandList do so to record commands. Only reserve a command
-    // allocator when it is needed so we don't submit empty command lists
-    if (!mPendingCommands.IsOpen()) {
-        DAWN_TRY(mPendingCommands.Open(mD3d12Device.Get(), mCommandAllocatorManager.get()));
-    }
-    if (submitMode == Device::SubmitMode::Normal) {
-        mPendingCommands.SetNeedsSubmit();
-    }
-    return &mPendingCommands;
+    // TODO(dawn:1413): Make callers of this method use the queue directly.
+    return ToBackend(GetQueue())->GetPendingCommandContext(submitMode);
 }
 
 MaybeError Device::CreateZeroBuffer() {
@@ -334,81 +291,21 @@ MaybeError Device::TickImpl() {
     ExecutionSerial completedSerial = GetQueue()->GetCompletedCommandSerial();
 
     (*mResourceAllocatorManager)->Tick(completedSerial);
-    DAWN_TRY(mCommandAllocatorManager->Tick(completedSerial));
     (*mViewShaderVisibleDescriptorAllocator)->Tick(completedSerial);
     (*mSamplerShaderVisibleDescriptorAllocator)->Tick(completedSerial);
     (*mRenderTargetViewAllocator)->Tick(completedSerial);
     (*mDepthStencilViewAllocator)->Tick(completedSerial);
     mUsedComObjectRefs->ClearUpTo(completedSerial);
 
-    if (mPendingCommands.IsOpen() && mPendingCommands.NeedsSubmit()) {
-        DAWN_TRY(ExecutePendingCommandContext());
-        DAWN_TRY(NextSerial());
-    }
+    DAWN_TRY(ToBackend(GetQueue())->SubmitPendingCommands());
 
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
 
     return {};
 }
 
-MaybeError Device::NextSerial() {
-    GetQueue()->IncrementLastSubmittedCommandSerial();
-
-    TRACE_EVENT1(GetPlatform(), General, "D3D12Device::SignalFence", "serial",
-                 uint64_t(GetLastSubmittedCommandSerial()));
-
-    return CheckHRESULT(
-        mCommandQueue->Signal(mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),
-        "D3D12 command queue signal fence");
-}
-
-MaybeError Device::WaitForSerial(ExecutionSerial serial) {
-    DAWN_TRY(GetQueue()->CheckPassedSerials());
-    if (GetQueue()->GetCompletedCommandSerial() < serial) {
-        DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(uint64_t(serial), mFenceEvent),
-                              "D3D12 set event on completion"));
-        WaitForSingleObject(mFenceEvent, INFINITE);
-        DAWN_TRY(GetQueue()->CheckPassedSerials());
-    }
-    return {};
-}
-
-ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-    ExecutionSerial completedSerial = ExecutionSerial(mFence->GetCompletedValue());
-    if (DAWN_UNLIKELY(completedSerial == ExecutionSerial(UINT64_MAX))) {
-        // GetCompletedValue returns UINT64_MAX if the device was removed.
-        // Try to query the failure reason.
-        DAWN_TRY(CheckHRESULT(mD3d12Device->GetDeviceRemovedReason(),
-                              "ID3D12Device::GetDeviceRemovedReason"));
-        // Otherwise, return a generic device lost error.
-        return DAWN_DEVICE_LOST_ERROR("Device lost");
-    }
-
-    if (completedSerial <= GetQueue()->GetCompletedCommandSerial()) {
-        return ExecutionSerial(0);
-    }
-
-    return completedSerial;
-}
-
 void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
     mUsedComObjectRefs->Enqueue(std::move(object), GetPendingCommandSerial());
-}
-
-bool Device::HasPendingCommands() const {
-    return mPendingCommands.NeedsSubmit();
-}
-
-void Device::ForceEventualFlushOfCommands() {
-    if (mPendingCommands.IsOpen()) {
-        mPendingCommands.SetNeedsSubmit();
-    }
-}
-
-MaybeError Device::ExecutePendingCommandContext() {
-    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
-
-    return mPendingCommands.ExecuteCommandList(this);
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -665,17 +562,6 @@ const D3D12DeviceInfo& Device::GetDeviceInfo() const {
     return ToBackend(GetPhysicalDevice())->GetDeviceInfo();
 }
 
-MaybeError Device::WaitForIdleForDestruction() {
-    // Immediately forget about all pending commands
-    mPendingCommands.Release();
-
-    DAWN_TRY(NextSerial());
-    // Wait for all in-flight commands to finish executing
-    DAWN_TRY(WaitForSerial(GetLastSubmittedCommandSerial()));
-
-    return {};
-}
-
 void AppendDebugLayerMessagesToError(ID3D12InfoQueue* infoQueue,
                                      uint64_t totalErrors,
                                      ErrorData* error) {
@@ -780,14 +666,6 @@ void Device::DestroyImpl() {
 
     mZeroBuffer = nullptr;
 
-    // Immediately forget about all pending commands for the case where device is lost on its
-    // own and WaitForIdleForDestruction isn't called.
-    mPendingCommands.Release();
-
-    if (mFenceEvent != nullptr) {
-        ::CloseHandle(mFenceEvent);
-    }
-
     // Release recycled resource heaps and all other objects waiting for deletion in the resource
     // allocation manager.
     mResourceAllocatorManager.reset();
@@ -796,11 +674,6 @@ void Device::DestroyImpl() {
     mUsedComObjectRefs->ClearUpTo(std::numeric_limits<ExecutionSerial>::max());
 
     DAWN_ASSERT(mUsedComObjectRefs->Empty());
-    DAWN_ASSERT(!mPendingCommands.IsOpen());
-
-    // Now that we've cleared out pending work from the queue, we can safely release it and reclaim
-    // memory.
-    mCommandQueue.Reset();
 }
 
 MutexProtected<ShaderVisibleDescriptorAllocator>& Device::GetViewShaderVisibleDescriptorAllocator()

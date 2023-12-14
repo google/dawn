@@ -29,14 +29,14 @@
 
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/QueueD3D12.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 
 namespace dawn::native::d3d12 {
 
-CommandAllocatorManager::CommandAllocatorManager(Device* device)
-    : device(device), mAllocatorCount(0) {
+CommandAllocatorManager::CommandAllocatorManager(Queue* queue) : mQueue(queue), mAllocatorCount(0) {
     mFreeAllocators.set();
 }
 
@@ -44,7 +44,7 @@ ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAl
     // If there are no free allocators, get the oldest serial in flight and wait on it
     if (mFreeAllocators.none()) {
         const ExecutionSerial firstSerial = mInFlightCommandAllocators.FirstSerial();
-        DAWN_TRY(device->WaitForSerial(firstSerial));
+        DAWN_TRY(mQueue->WaitForSerial(firstSerial));
         DAWN_TRY(Tick(firstSerial));
     }
 
@@ -56,9 +56,11 @@ ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAl
     if (firstFreeIndex >= mAllocatorCount) {
         DAWN_ASSERT(firstFreeIndex == mAllocatorCount);
         mAllocatorCount++;
+
+        ID3D12Device* d3d12Device = ToBackend(mQueue->GetDevice())->GetD3D12Device();
         DAWN_TRY(CheckHRESULT(
-            device->GetD3D12Device()->CreateCommandAllocator(
-                D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])),
+            d3d12Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+                                                IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])),
             "D3D12 create command allocator"));
     }
 
@@ -68,7 +70,7 @@ ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAl
     // Enqueue the command allocator. It will be scheduled for reset after the next
     // ExecuteCommandLists
     mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex},
-                                       device->GetPendingCommandSerial());
+                                       mQueue->GetPendingCommandSerial());
     return mCommandAllocators[firstFreeIndex].Get();
 }
 

@@ -54,7 +54,12 @@ class D3D12DescriptorHeapTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+
+        // Tests reach directly in d3d12::Device and friends so skip them on wire and with implicit
+        // device sync.
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(IsImplicitDeviceSyncEnabled());
+
         mD3DDevice = ToBackend(FromAPI(device.Get()));
         mD3DQueue = ToBackend(mD3DDevice->GetQueue());
 
@@ -257,7 +262,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         // CheckPassedSerials() will update the last internally completed serial.
         EXPECT_TRUE(mD3DQueue->CheckPassedSerials().IsSuccess());
         // NextSerial() will increment the last internally submitted serial.
-        EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
+        EXPECT_TRUE(mD3DQueue->NextSerial().IsSuccess());
     }
 
     // Repeat up to |kFrameDepth| again but ensure heaps are the same in the expected order
@@ -269,7 +274,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         EXPECT_TRUE(heaps.front() == heap);
         heaps.pop_front();
         EXPECT_TRUE(mD3DQueue->CheckPassedSerials().IsSuccess());
-        EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
+        EXPECT_TRUE(mD3DQueue->NextSerial().IsSuccess());
     }
 
     EXPECT_TRUE(heaps.empty());
@@ -1053,18 +1058,17 @@ TEST_P(D3D12DescriptorHeapTests, AllocateDeallocateMany) {
 // Verifies that gpu descriptor heap allocations are only valid during the serial they were created
 // on.
 TEST_P(D3D12DescriptorHeapTests, InvalidateAllocationAfterSerial) {
-    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
-    auto& gpuAllocator = d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    auto& gpuAllocator = mD3DDevice->GetViewShaderVisibleDescriptorAllocator();
 
     GPUDescriptorHeapAllocation gpuHeapDescAllocation;
 
     D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor;
-    gpuAllocator->AllocateGPUDescriptors(1, d3dDevice->GetPendingCommandSerial(),
+    gpuAllocator->AllocateGPUDescriptors(1, mD3DDevice->GetPendingCommandSerial(),
                                          &baseCPUDescriptor, &gpuHeapDescAllocation);
 
     EXPECT_TRUE(gpuAllocator->IsAllocationStillValid(gpuHeapDescAllocation));
 
-    EXPECT_TRUE(d3dDevice->NextSerial().IsSuccess());
+    EXPECT_TRUE(mD3DQueue->NextSerial().IsSuccess());
 
     EXPECT_FALSE(gpuAllocator->IsAllocationStillValid(gpuHeapDescAllocation));
 }

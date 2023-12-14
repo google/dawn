@@ -78,70 +78,73 @@ MaybeError CommandRecordingContext::Open(ID3D12Device* d3d12Device,
     return {};
 }
 
-MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
-    if (IsOpen()) {
-        for (Texture* texture : mSharedTextures) {
-            DAWN_TRY(texture->SynchronizeImportedTextureBeforeUse());
-        }
-
-        MaybeError error =
-            CheckHRESULT(mD3d12CommandList->Close(), "D3D12 closing pending command list");
-        if (error.IsError()) {
-            Release();
-            DAWN_TRY(std::move(error));
-        }
-        DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(mHeapsPendingUsage.data(),
-                                                                       mHeapsPendingUsage.size()));
-
-        if (device->IsToggleEnabled(Toggle::RecordDetailedTimingInTraceEvents)) {
-            uint64_t gpuTimestamp;
-            uint64_t cpuTimestamp;
-            FILETIME fileTimeNonPrecise;
-            SYSTEMTIME systemTimeNonPrecise;
-
-            // Both supported since Windows 2000, have a accuracy of 1ms
-            GetSystemTimeAsFileTime(&fileTimeNonPrecise);
-            GetSystemTime(&systemTimeNonPrecise);
-            // Query CPU and GPU timestamps at almost the same time
-            device->GetCommandQueue()->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
-
-            uint64_t gpuFrequency;
-            uint64_t cpuFrequency;
-            LARGE_INTEGER cpuFrequencyLargeInteger;
-            device->GetCommandQueue()->GetTimestampFrequency(&gpuFrequency);
-            QueryPerformanceFrequency(&cpuFrequencyLargeInteger);  // Supported since Windows 2000
-            cpuFrequency = cpuFrequencyLargeInteger.QuadPart;
-
-            std::string timingInfo = absl::StrFormat(
-                "UTC Time: %u/%u/%u %02u:%02u:%02u.%03u, File Time: %u, CPU "
-                "Timestamp: %u, GPU Timestamp: %u, CPU Tick Frequency: %u, GPU Tick Frequency: "
-                "%u",
-                systemTimeNonPrecise.wYear, systemTimeNonPrecise.wMonth, systemTimeNonPrecise.wDay,
-                systemTimeNonPrecise.wHour, systemTimeNonPrecise.wMinute,
-                systemTimeNonPrecise.wSecond, systemTimeNonPrecise.wMilliseconds,
-                (static_cast<uint64_t>(fileTimeNonPrecise.dwHighDateTime) << 32) +
-                    fileTimeNonPrecise.dwLowDateTime,
-                cpuTimestamp, gpuTimestamp, cpuFrequency, gpuFrequency);
-
-            TRACE_EVENT_INSTANT1(
-                device->GetPlatform(), General,
-                "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing", "Timing",
-                timingInfo.c_str());
-        }
-
-        ID3D12CommandList* d3d12CommandList = GetCommandList();
-        device->GetCommandQueue()->ExecuteCommandLists(1, &d3d12CommandList);
-
-        for (Texture* texture : mSharedTextures) {
-            DAWN_TRY(texture->SynchronizeImportedTextureAfterUse());
-        }
-
-        mIsOpen = false;
-        mNeedsSubmit = false;
-        mSharedTextures.clear();
-        mHeapsPendingUsage.clear();
-        mTempBuffers.clear();
+MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
+                                                       ID3D12CommandQueue* commandQueue) {
+    if (!IsOpen()) {
+        return {};
     }
+
+    for (Texture* texture : mSharedTextures) {
+        DAWN_TRY(texture->SynchronizeImportedTextureBeforeUse());
+    }
+
+    MaybeError error =
+        CheckHRESULT(mD3d12CommandList->Close(), "D3D12 closing pending command list");
+    if (error.IsError()) {
+        Release();
+        DAWN_TRY(std::move(error));
+    }
+    DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(mHeapsPendingUsage.data(),
+                                                                   mHeapsPendingUsage.size()));
+
+    if (device->IsToggleEnabled(Toggle::RecordDetailedTimingInTraceEvents)) {
+        uint64_t gpuTimestamp;
+        uint64_t cpuTimestamp;
+        FILETIME fileTimeNonPrecise;
+        SYSTEMTIME systemTimeNonPrecise;
+
+        // Both supported since Windows 2000, have a accuracy of 1ms
+        GetSystemTimeAsFileTime(&fileTimeNonPrecise);
+        GetSystemTime(&systemTimeNonPrecise);
+        // Query CPU and GPU timestamps at almost the same time
+        commandQueue->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
+
+        uint64_t gpuFrequency;
+        uint64_t cpuFrequency;
+        LARGE_INTEGER cpuFrequencyLargeInteger;
+        commandQueue->GetTimestampFrequency(&gpuFrequency);
+        QueryPerformanceFrequency(&cpuFrequencyLargeInteger);  // Supported since Windows 2000
+        cpuFrequency = cpuFrequencyLargeInteger.QuadPart;
+
+        std::string timingInfo = absl::StrFormat(
+            "UTC Time: %u/%u/%u %02u:%02u:%02u.%03u, File Time: %u, CPU "
+            "Timestamp: %u, GPU Timestamp: %u, CPU Tick Frequency: %u, GPU Tick Frequency: "
+            "%u",
+            systemTimeNonPrecise.wYear, systemTimeNonPrecise.wMonth, systemTimeNonPrecise.wDay,
+            systemTimeNonPrecise.wHour, systemTimeNonPrecise.wMinute, systemTimeNonPrecise.wSecond,
+            systemTimeNonPrecise.wMilliseconds,
+            (static_cast<uint64_t>(fileTimeNonPrecise.dwHighDateTime) << 32) +
+                fileTimeNonPrecise.dwLowDateTime,
+            cpuTimestamp, gpuTimestamp, cpuFrequency, gpuFrequency);
+
+        TRACE_EVENT_INSTANT1(device->GetPlatform(), General,
+                             "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing",
+                             "Timing", timingInfo.c_str());
+    }
+
+    ID3D12CommandList* d3d12CommandList = GetCommandList();
+    commandQueue->ExecuteCommandLists(1, &d3d12CommandList);
+
+    for (Texture* texture : mSharedTextures) {
+        DAWN_TRY(texture->SynchronizeImportedTextureAfterUse());
+    }
+
+    mIsOpen = false;
+    mNeedsSubmit = false;
+    mSharedTextures.clear();
+    mHeapsPendingUsage.clear();
+    mTempBuffers.clear();
+
     return {};
 }
 
