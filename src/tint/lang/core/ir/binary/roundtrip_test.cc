@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 namespace tint::core::ir::binary {
 namespace {
@@ -121,6 +122,23 @@ TEST_F(IRBinaryRoundtripTest, Fn_Parameters) {
     auto* p2 = b.FunctionParam(ty.f32());
     b.ir.SetName(p1, "p1");
     fn->SetParams({p0, p1, p2});
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation) {
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetReturnLocation(42, std::nullopt);
+    b.ir.SetName(fn, "Function");
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation_Interpolation) {
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetReturnLocation(0, core::Interpolation{
+                                 core::InterpolationType::kPerspective,
+                                 core::InterpolationSampling::kCentroid,
+                             });
+    b.ir.SetName(fn, "Function");
     RUN_TEST();
 }
 
@@ -250,6 +268,12 @@ TEST_F(IRBinaryRoundtripTest, atomic_i32) {
 
 TEST_F(IRBinaryRoundtripTest, depth_texture) {
     auto* tex = ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d);
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, sampled_texture) {
+    auto* tex = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.i32());
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }

@@ -51,7 +51,8 @@ message Type {
         TypeStruct struct = 6;
         TypeAtomic atomic = 7;
         TypeDepthTexture depth_texture = 8;
-        TypeSampler sampler = 9;
+        TypeSampledTexture sampled_texture = 9;
+        TypeSampler sampler = 10;
     }
 }
 
@@ -107,6 +108,11 @@ message TypeAtomic {
 
 message TypeDepthTexture {
     TextureDimension dimension = 1;
+}
+
+message TypeSampledTexture {
+    TextureDimension dimension = 1;
+    uint32 sub_type = 2;  // Module.types
 }
 
 message TypeSampler {
@@ -183,6 +189,7 @@ message Function {
     optional PipelineStage pipeline_stage = 4;
     optional WorkgroupSize workgroup_size = 5;
     repeated uint32 parameters = 6;  // Module.values
+    optional ReturnLocation return_location = 7;
 }
 
 enum PipelineStage {
@@ -195,6 +202,11 @@ message WorkgroupSize {
     uint32 x = 1;
     uint32 y = 2;
     uint32 z = 3;
+}
+
+message ReturnLocation {
+    uint32 value = 1;
+    optional Interpolation interpolation = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -334,11 +346,11 @@ message AttributesStructMember {
     optional uint32 index = 2;
     optional uint32 color = 3;
     optional BuiltinValue builtin = 4;
-    optional AttributesInterpolation interpolation = 5;
+    optional Interpolation interpolation = 5;
     bool invariant = 6;
 }
 
-message AttributesInterpolation {
+message Interpolation {
     InterpolationType type = 1;
     optional InterpolationSampling sampling = 2;
 }
