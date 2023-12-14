@@ -143,7 +143,12 @@ TEST(ErrorTests, TRY_AddsToBacktrace) {
     std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
     std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
 
+    // Backtraces are only added in debug mode.
+#if defined(DAWN_ENABLE_ASSERTS)
     ASSERT_EQ(singleData->GetBacktrace().size() + 1, doubleData->GetBacktrace().size());
+#else
+    ASSERT_EQ(singleData->GetBacktrace().size(), doubleData->GetBacktrace().size());
+#endif
 }
 
 // Check DAWN_TRY_ASSIGN handles successes correctly.
@@ -216,7 +221,12 @@ TEST(ErrorTests, TRY_RESULT_AddsToBacktrace) {
     std::unique_ptr<ErrorData> singleData = singleResult.AcquireError();
     std::unique_ptr<ErrorData> doubleData = doubleResult.AcquireError();
 
+    // Backtraces are only added in debug mode.
+#if defined(DAWN_ENABLE_ASSERTS)
     ASSERT_EQ(singleData->GetBacktrace().size() + 1, doubleData->GetBacktrace().size());
+#else
+    ASSERT_EQ(singleData->GetBacktrace().size(), doubleData->GetBacktrace().size());
+#endif
 }
 
 // Check a ResultOrError can be DAWN_TRY_ASSIGNED in a function that returns an Error

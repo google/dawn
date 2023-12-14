@@ -154,6 +154,18 @@ struct IsResultOrError<ResultOrError<T>> {
 #define DAWN_CONCAT2(x, y) DAWN_CONCAT1(x, y)
 #define DAWN_LOCAL_VAR(name) DAWN_CONCAT2(DAWN_CONCAT2(_localVar, __LINE__), name)
 
+// Backtrace information adds a lot of binary size with the name of all the files and functions,
+// plus additional calls to AppendBacktrace. Only add the backtrace in Debug so as to save binary
+// size in release. Most backtrace information useful to developers is already added via
+// DAWN_TRY_CONTEXT anyway.
+#if defined(DAWN_ENABLE_ASSERTS)
+#define DAWN_APPEND_ERROR_BACKTRACE(error) error->AppendBacktrace(__FILE__, __func__, __LINE__)
+#else  // defined(DAWN_ENABLE_ASSERTS)
+#define DAWN_APPEND_ERROR_BACKTRACE(error) \
+    for (;;)                               \
+    break
+#endif  // defined(DAWN_ENABLE_ASSERTS)
+
 // When Errors aren't handled explicitly, calls to functions returning errors should be
 // wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
 // the current function.
@@ -169,8 +181,7 @@ struct IsResultOrError<ResultOrError<T>> {
         if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
             auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
             {BODY} /* comment to force the formatter to insert a newline */     \
-            DAWN_LOCAL_VAR(Error)                                               \
-                ->AppendBacktrace(__FILE__, __func__, __LINE__);                \
+            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                 \
             return {std::move(DAWN_LOCAL_VAR(Error))};                          \
         }                                                                       \
     }                                                                           \
@@ -229,8 +240,7 @@ struct IsResultOrError<ResultOrError<T>> {
         if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
             auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
             {BODY} /* comment to force the formatter to insert a newline */     \
-            DAWN_LOCAL_VAR(Error)                                               \
-                ->AppendBacktrace(__FILE__, __func__, __LINE__);                \
+            DAWN_APPEND_ERROR_BACKTRACE(DAWN_LOCAL_VAR(Error));                 \
             return (RET);                                                       \
         }                                                                       \
         VAR = DAWN_LOCAL_VAR(Result).AcquireSuccess();                          \
