@@ -52,7 +52,8 @@ message Type {
         TypeAtomic atomic = 7;
         TypeDepthTexture depth_texture = 8;
         TypeSampledTexture sampled_texture = 9;
-        TypeSampler sampler = 10;
+        TypeStorageTexture storage_texture = 10;
+        TypeSampler sampler = 11;
     }
 }
 
@@ -113,6 +114,12 @@ message TypeDepthTexture {
 message TypeSampledTexture {
     TextureDimension dimension = 1;
     uint32 sub_type = 2;  // Module.types
+}
+
+message TypeStorageTexture {
+    TextureDimension dimension = 1;
+    TexelFormat texel_format = 2;
+    AccessControl access = 3;
 }
 
 message TypeSampler {
@@ -406,6 +413,26 @@ enum TextureDimension {
     _3d = 3;
     cube = 4;
     cube_array = 5;
+}
+
+enum TexelFormat {
+    bgra8_unorm = 0;
+    r32_float = 1;
+    r32_sint = 2;
+    r32_uint = 3;
+    rg32_float = 4;
+    rg32_sint = 5;
+    rg32_uint = 6;
+    rgba16_float = 7;
+    rgba16_sint = 8;
+    rgba16_uint = 9;
+    rgba32_float = 10;
+    rgba32_sint = 11;
+    rgba32_uint = 12;
+    rgba8_sint = 13;
+    rgba8_snorm = 14;
+    rgba8_uint = 15;
+    rgba8_unorm = 16;
 }
 
 enum SamplerKind {

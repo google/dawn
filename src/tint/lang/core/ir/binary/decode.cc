@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/compiler.h"
 
@@ -522,6 +523,8 @@ struct Decoder {
                 return CreateTypeDepthTexture(type_in.depth_texture());
             case pb::Type::KindCase::kSampledTexture:
                 return CreateTypeSampledTexture(type_in.sampled_texture());
+            case pb::Type::KindCase::kStorageTexture:
+                return CreateTypeStorageTexture(type_in.storage_texture());
             case pb::Type::KindCase::kSampler:
                 return CreateTypeSampler(type_in.sampler());
             default:
@@ -565,7 +568,7 @@ struct Decoder {
     const type::Pointer* CreateTypePointer(const pb::TypePointer& pointer_in) {
         auto address_space = AddressSpace(pointer_in.address_space());
         auto* store_ty = Type(pointer_in.store_type());
-        auto access = Access(pointer_in.access());
+        auto access = AccessControl(pointer_in.access());
         return mod_out_.Types().ptr(address_space, store_ty, access);
     }
 
@@ -630,6 +633,15 @@ struct Decoder {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
         return mod_out_.Types().Get<type::SampledTexture>(dimension, sub_type);
+    }
+
+    const type::StorageTexture* CreateTypeStorageTexture(const pb::TypeStorageTexture& texture_in) {
+        auto dimension = TextureDimension(texture_in.dimension());
+        auto texel_format = TexelFormat(texture_in.texel_format());
+        auto access = AccessControl(texture_in.access());
+        return mod_out_.Types().Get<type::StorageTexture>(
+            dimension, texel_format, access,
+            type::StorageTexture::SubtypeFor(texel_format, b.ir.Types()));
     }
 
     const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {
@@ -794,7 +806,7 @@ struct Decoder {
         }
     }
 
-    core::Access Access(pb::AccessControl in) {
+    core::Access AccessControl(pb::AccessControl in) {
         switch (in) {
             case pb::AccessControl::read:
                 return core::Access::kRead;
@@ -882,6 +894,50 @@ struct Decoder {
 
         TINT_ICE() << "invalid TextureDimension: " << in;
         return core::type::TextureDimension::k1d;
+    }
+
+    core::TexelFormat TexelFormat(pb::TexelFormat in) {
+        switch (in) {
+            case pb::TexelFormat::bgra8_unorm:
+                return core::TexelFormat::kBgra8Unorm;
+            case pb::TexelFormat::r32_float:
+                return core::TexelFormat::kR32Float;
+            case pb::TexelFormat::r32_sint:
+                return core::TexelFormat::kR32Sint;
+            case pb::TexelFormat::r32_uint:
+                return core::TexelFormat::kR32Uint;
+            case pb::TexelFormat::rg32_float:
+                return core::TexelFormat::kRg32Float;
+            case pb::TexelFormat::rg32_sint:
+                return core::TexelFormat::kRg32Sint;
+            case pb::TexelFormat::rg32_uint:
+                return core::TexelFormat::kRg32Uint;
+            case pb::TexelFormat::rgba16_float:
+                return core::TexelFormat::kRgba16Float;
+            case pb::TexelFormat::rgba16_sint:
+                return core::TexelFormat::kRgba16Sint;
+            case pb::TexelFormat::rgba16_uint:
+                return core::TexelFormat::kRgba16Uint;
+            case pb::TexelFormat::rgba32_float:
+                return core::TexelFormat::kRgba32Float;
+            case pb::TexelFormat::rgba32_sint:
+                return core::TexelFormat::kRgba32Sint;
+            case pb::TexelFormat::rgba32_uint:
+                return core::TexelFormat::kRgba32Uint;
+            case pb::TexelFormat::rgba8_sint:
+                return core::TexelFormat::kRgba8Sint;
+            case pb::TexelFormat::rgba8_snorm:
+                return core::TexelFormat::kRgba8Snorm;
+            case pb::TexelFormat::rgba8_uint:
+                return core::TexelFormat::kRgba8Uint;
+            case pb::TexelFormat::rgba8_unorm:
+                return core::TexelFormat::kRgba8Unorm;
+            default:
+                break;
+        }
+
+        TINT_ICE() << "invalid TexelFormat: " << in;
+        return core::TexelFormat::kBgra8Unorm;
     }
 
     core::type::SamplerKind SamplerKind(pb::SamplerKind in) {
