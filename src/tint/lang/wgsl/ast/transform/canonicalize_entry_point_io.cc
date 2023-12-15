@@ -552,7 +552,8 @@ struct CanonicalizeEntryPointIO::State {
 
     /// Comparison function used to reorder struct members such that all members with
     /// color attributes appear first (ordered by color slot), then location attributes (ordered by
-    /// location slot), followed by those with builtin attributes (ordered by BuiltinOrder).
+    /// location slot), then index attributes (ordered by index slot), followed by those with
+    /// builtin attributes (ordered by BuiltinOrder).
     /// @param x a struct member
     /// @param y another struct member
     /// @returns true if a comes before b
@@ -573,6 +574,15 @@ struct CanonicalizeEntryPointIO::State {
         if (x.location.has_value() != y.location.has_value()) {
             // The member with the location goes first
             return x.location.has_value();
+        }
+
+        if (x.index.has_value() && y.index.has_value()) {
+            // Both have index attributes: smallest goes first.
+            return x.index < y.index;
+        }
+        if (x.index.has_value() != y.index.has_value()) {
+            // The member with the index goes first
+            return x.index.has_value();
         }
 
         {
@@ -635,8 +645,8 @@ struct CanonicalizeEntryPointIO::State {
             wrapper_struct_output_members.Push({
                 /* member */ b.Member(name, outval.type, std::move(outval.attributes)),
                 /* location */ outval.location,
+                /* index */ outval.index,
                 /* color */ std::nullopt,
-                /* index */ std::nullopt,
             });
             assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));
         }
