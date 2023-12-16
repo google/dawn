@@ -43,7 +43,7 @@ class Backend : public BackendConnection {
     Backend(InstanceBase* instance, wgpu::BackendType backendType);
 
     std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
-        const RequestAdapterOptions* options) override;
+        const UnpackedPtr<RequestAdapterOptions>& options) override;
     void ClearPhysicalDevices() override;
     size_t GetPhysicalDeviceCountForTesting() const override;
 

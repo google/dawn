@@ -283,7 +283,8 @@ TEST_F(DestroyObjectTests, MappedBufferImplicit) {
 
 TEST_F(DestroyObjectTests, CommandBufferNativeExplicit) {
     CommandEncoderDescriptor commandEncoderDesc = {};
-    Ref<CommandEncoder> commandEncoder = CommandEncoder::Create(mDeviceMock, &commandEncoderDesc);
+    Ref<CommandEncoder> commandEncoder =
+        CommandEncoder::Create(mDeviceMock, Unpack(&commandEncoderDesc));
 
     CommandBufferDescriptor commandBufferDesc = {};
 
@@ -365,8 +366,7 @@ TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor textureViewDesc = {};
     textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -396,8 +396,7 @@ TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor textureViewDesc = {};
     textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -431,8 +430,7 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor textureViewDesc = {};
     textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -654,7 +652,7 @@ TEST_F(DestroyObjectTests, TextureNativeExplicit) {
     desc.size.height = 1;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, Unpack(&desc)));
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
     EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
 
     EXPECT_TRUE(textureMock->IsAlive());
@@ -669,7 +667,7 @@ TEST_F(DestroyObjectTests, TextureApiExplicit) {
     desc.size.height = 1;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, Unpack(&desc)));
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
     EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
 
     EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(ByMove(std::move(textureMock))));
@@ -689,7 +687,7 @@ TEST_F(DestroyObjectTests, TextureImplicit) {
     desc.size.height = 1;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, Unpack(&desc)));
+    Ref<TextureMock> textureMock = AcquireRef(new TextureMock(mDeviceMock, &desc));
     EXPECT_CALL(*textureMock.Get(), DestroyImpl).Times(1);
     {
         ScopedRawPtrExpectation scoped(textureMock.Get());
@@ -708,8 +706,7 @@ TEST_F(DestroyObjectTests, TextureViewNativeExplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor desc = {};
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -741,8 +738,7 @@ TEST_F(DestroyObjectTests, TextureViewApiExplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor viewDesc = {};
     viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -769,8 +765,7 @@ TEST_F(DestroyObjectTests, TextureViewImplicit) {
     textureDesc.size.width = 1;
     textureDesc.size.height = 1;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    Ref<TextureMock> textureMock =
-        AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&textureDesc)));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &textureDesc));
 
     TextureViewDescriptor viewDesc = {};
     viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -963,7 +958,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
-        textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, Unpack(&desc)));
+        textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &desc));
         EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(textureMock));
         texture = device.CreateTexture(ToCppAPI(&desc));
     }

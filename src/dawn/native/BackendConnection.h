@@ -52,7 +52,7 @@ class BackendConnection : NonMovable {
     // Calling this multiple times in succession should return a vector with duplicate
     // references to the same PhysicalDevices (i.e. the backend should cache them).
     virtual std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
-        const RequestAdapterOptions* options) = 0;
+        const UnpackedPtr<RequestAdapterOptions>& options) = 0;
 
     // Clear all internal refs to physical devices.
     virtual void ClearPhysicalDevices() = 0;

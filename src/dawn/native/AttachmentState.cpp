@@ -60,12 +60,12 @@ AttachmentState::AttachmentState(DeviceBase* device,
 }
 
 AttachmentState::AttachmentState(DeviceBase* device,
-                                 const RenderPipelineDescriptor* descriptor,
+                                 const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
                                  const PipelineLayoutBase* layout)
     : ObjectBase(device), mSampleCount(descriptor->multisample.count) {
-    const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
-    FindInChain(descriptor->multisample.nextInChain, &msaaRenderToSingleSampledDesc);
-    if (msaaRenderToSingleSampledDesc != nullptr) {
+    UnpackedPtr<MultisampleState> unpackedMultisampleState = Unpack(&descriptor->multisample);
+    if (auto* msaaRenderToSingleSampledDesc =
+            unpackedMultisampleState.Get<DawnMultisampleStateRenderToSingleSampled>()) {
         mIsMSAARenderToSingleSampledEnabled = msaaRenderToSingleSampledDesc->enabled;
     }
 
@@ -92,7 +92,8 @@ AttachmentState::AttachmentState(DeviceBase* device,
     SetContentHash(ComputeContentHash());
 }
 
-AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor* descriptor)
+AttachmentState::AttachmentState(DeviceBase* device,
+                                 const UnpackedPtr<RenderPassDescriptor>& descriptor)
     : ObjectBase(device) {
     auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
         descriptor->colorAttachments, descriptor->colorAttachmentCount);
@@ -104,9 +105,9 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
         mColorAttachmentsSet.set(i);
         mColorFormats[i] = attachment->GetFormat().format;
 
-        const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc =
-            nullptr;
-        FindInChain(colorAttachment.nextInChain, &msaaRenderToSingleSampledDesc);
+        UnpackedPtr<RenderPassColorAttachment> unpackedColorAttachment = Unpack(&colorAttachment);
+        auto* msaaRenderToSingleSampledDesc =
+            unpackedColorAttachment.Get<DawnRenderPassColorAttachmentRenderToSingleSampled>();
         uint32_t attachmentSampleCount;
         if (msaaRenderToSingleSampledDesc != nullptr &&
             msaaRenderToSingleSampledDesc->implicitSampleCount > 1) {
@@ -135,9 +136,7 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
     }
 
     // Gather the PLS information.
-    const RenderPassPixelLocalStorage* pls = nullptr;
-    FindInChain(descriptor->nextInChain, &pls);
-    if (pls != nullptr) {
+    if (auto* pls = descriptor.Get<RenderPassPixelLocalStorage>()) {
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);

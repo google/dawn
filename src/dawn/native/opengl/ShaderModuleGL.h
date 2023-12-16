@@ -83,10 +83,11 @@ using CombinedSamplerInfo = std::vector<CombinedSampler>;
 
 class ShaderModule final : public ShaderModuleBase {
   public:
-    static ResultOrError<Ref<ShaderModule>> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult,
-                                                   OwnedCompilationMessages* compilationMessages);
+    static ResultOrError<Ref<ShaderModule>> Create(
+        Device* device,
+        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+        ShaderModuleParseResult* parseResult,
+        OwnedCompilationMessages* compilationMessages);
 
     ResultOrError<GLuint> CompileShader(
         const OpenGLFunctions& gl,
@@ -100,7 +101,7 @@ class ShaderModule final : public ShaderModuleBase {
         const;
 
   private:
-    ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+    ShaderModule(Device* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
     ~ShaderModule() override = default;
     MaybeError Initialize(ShaderModuleParseResult* parseResult,
                           OwnedCompilationMessages* compilationMessages);

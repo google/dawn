@@ -71,10 +71,11 @@ class ShaderModule final : public ShaderModuleBase {
         const char* remappedEntryPoint;
     };
 
-    static ResultOrError<Ref<ShaderModule>> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult,
-                                                   OwnedCompilationMessages* compilationMessages);
+    static ResultOrError<Ref<ShaderModule>> Create(
+        Device* device,
+        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+        ShaderModuleParseResult* parseResult,
+        OwnedCompilationMessages* compilationMessages);
 
     ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(
         SingleShaderStage stage,
@@ -84,7 +85,7 @@ class ShaderModule final : public ShaderModuleBase {
         std::optional<uint32_t> maxSubgroupSizeForFullSubgroups);
 
   private:
-    ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+    ShaderModule(Device* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
     ~ShaderModule() override;
     MaybeError Initialize(ShaderModuleParseResult* parseResult,
                           OwnedCompilationMessages* compilationMessages);

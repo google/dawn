@@ -91,7 +91,7 @@ struct VertexBufferInfo {
 class RenderPipelineBase : public PipelineBase,
                            public ContentLessObjectCacheable<RenderPipelineBase> {
   public:
-    RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    RenderPipelineBase(DeviceBase* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipelineBase() override;
 
     static RenderPipelineBase* MakeError(DeviceBase* device, const char* label);

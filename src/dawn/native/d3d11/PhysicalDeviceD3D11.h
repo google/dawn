@@ -62,7 +62,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
 
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
-                                                    const DeviceDescriptor* descriptor,
+                                                    const UnpackedPtr<DeviceDescriptor>& descriptor,
                                                     const TogglesState& deviceToggles) override;
 
     MaybeError ResetInternalDeviceForTestingImpl() override;

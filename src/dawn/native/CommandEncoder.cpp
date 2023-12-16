@@ -915,8 +915,9 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
             std::clamp(originalColor.a, minValue, maxValue)};
 }
 
-MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
-                                            const CommandEncoderDescriptor* descriptor) {
+ResultOrError<UnpackedPtr<CommandEncoderDescriptor>> ValidateCommandEncoderDescriptor(
+    const DeviceBase* device,
+    const CommandEncoderDescriptor* descriptor) {
     UnpackedPtr<CommandEncoderDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
@@ -924,12 +925,13 @@ MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(internalUsageDesc != nullptr &&
                         !device->APIHasFeature(wgpu::FeatureName::DawnInternalUsages),
                     "%s is not available.", wgpu::FeatureName::DawnInternalUsages);
-    return {};
+    return unpacked;
 }
 
 // static
-Ref<CommandEncoder> CommandEncoder::Create(DeviceBase* device,
-                                           const CommandEncoderDescriptor* descriptor) {
+Ref<CommandEncoder> CommandEncoder::Create(
+    DeviceBase* device,
+    const UnpackedPtr<CommandEncoderDescriptor>& descriptor) {
     return AcquireRef(new CommandEncoder(device, descriptor));
 }
 
@@ -938,13 +940,12 @@ CommandEncoder* CommandEncoder::MakeError(DeviceBase* device, const char* label)
     return new CommandEncoder(device, ObjectBase::kError, label);
 }
 
-CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor)
+CommandEncoder::CommandEncoder(DeviceBase* device,
+                               const UnpackedPtr<CommandEncoderDescriptor>& descriptor)
     : ApiObjectBase(device, descriptor->label), mEncodingContext(device, this) {
     GetObjectTrackingList()->Track(this);
 
-    const DawnEncoderInternalUsageDescriptor* internalUsageDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &internalUsageDesc);
-
+    auto* internalUsageDesc = descriptor.Get<DawnEncoderInternalUsageDescriptor>();
     if (internalUsageDesc != nullptr && internalUsageDesc->useInternalUsages) {
         mUsageValidationMode = UsageValidationMode::Internal;
     } else {
@@ -1097,7 +1098,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                 allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
             cmd->label = std::string(descriptor->label ? descriptor->label : "");
 
-            cmd->attachmentState = device->GetOrCreateAttachmentState(*descriptor);
+            cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
             attachmentState = cmd->attachmentState;
 
             auto descColorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(

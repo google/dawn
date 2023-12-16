@@ -38,7 +38,7 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor) {
     UnpackedPtr<ComputePipelineDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-    const auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
+    auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
     DAWN_INVALID_IF(
         (fullSubgroupsOption && !device->HasFeature(Feature::ChromiumExperimentalSubgroups)),
         "DawnComputePipelineFullSubgroups is used without %s enabled.",
@@ -62,7 +62,7 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
 // ComputePipelineBase
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
-                                         const ComputePipelineDescriptor* descriptor)
+                                         const UnpackedPtr<ComputePipelineDescriptor>& descriptor)
     : PipelineBase(
           device,
           descriptor->layout,
@@ -73,9 +73,7 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
     SetContentHash(ComputeContentHash());
     GetObjectTrackingList()->Track(this);
 
-    const DawnComputePipelineFullSubgroups* fullSubgroupsOption = nullptr;
-    FindInChain(descriptor->nextInChain, &fullSubgroupsOption);
-    if (fullSubgroupsOption) {
+    if (auto* fullSubgroupsOption = descriptor.Get<DawnComputePipelineFullSubgroups>()) {
         mRequiresFullSubgroups = fullSubgroupsOption->requiresFullSubgroups;
     }
 

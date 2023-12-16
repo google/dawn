@@ -334,11 +334,11 @@ MTLCullMode ToMTLCullMode(wgpu::CullMode mode) {
 // static
 Ref<RenderPipelineBase> RenderPipeline::CreateUninitialized(
     Device* device,
-    const RenderPipelineDescriptor* descriptor) {
+    const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-RenderPipeline::RenderPipeline(DeviceBase* dev, const RenderPipelineDescriptor* desc)
+RenderPipeline::RenderPipeline(DeviceBase* dev, const UnpackedPtr<RenderPipelineDescriptor>& desc)
     : RenderPipelineBase(dev, desc) {}
 
 RenderPipeline::~RenderPipeline() = default;

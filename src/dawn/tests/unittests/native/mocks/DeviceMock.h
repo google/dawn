@@ -87,11 +87,11 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<BufferBase>>,
                 CreateBufferImpl,
-                (const BufferDescriptor*),
+                (const UnpackedPtr<BufferDescriptor>&),
                 (override));
     MOCK_METHOD(Ref<ComputePipelineBase>,
                 CreateUninitializedComputePipelineImpl,
-                (const ComputePipelineDescriptor*),
+                (const UnpackedPtr<ComputePipelineDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<ExternalTextureBase>>,
                 CreateExternalTextureImpl,
@@ -99,7 +99,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<PipelineLayoutBase>>,
                 CreatePipelineLayoutImpl,
-                (const PipelineLayoutDescriptor*),
+                (const UnpackedPtr<PipelineLayoutDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<QuerySetBase>>,
                 CreateQuerySetImpl,
@@ -107,7 +107,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(Ref<RenderPipelineBase>,
                 CreateUninitializedRenderPipelineImpl,
-                (const RenderPipelineDescriptor*),
+                (const UnpackedPtr<RenderPipelineDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<SamplerBase>>,
                 CreateSamplerImpl,
@@ -115,7 +115,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<ShaderModuleBase>>,
                 CreateShaderModuleImpl,
-                (const ShaderModuleDescriptor*,
+                (const UnpackedPtr<ShaderModuleDescriptor>&,
                  ShaderModuleParseResult*,
                  OwnedCompilationMessages*),
                 (override));

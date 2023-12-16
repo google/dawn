@@ -352,7 +352,7 @@ VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc(const DepthStencil
 // static
 Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     Device* device,
-    const RenderPipelineDescriptor* descriptor) {
+    const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 

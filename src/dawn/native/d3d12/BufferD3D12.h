@@ -43,7 +43,8 @@ class Device;
 
 class Buffer final : public BufferBase {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
+    static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                             const UnpackedPtr<BufferDescriptor>& descriptor);
 
     ID3D12Resource* GetD3D12Resource() const;
     D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
@@ -68,7 +69,7 @@ class Buffer final : public BufferBase {
     void SetLabelImpl() override;
 
   private:
-    Buffer(Device* device, const BufferDescriptor* descriptor);
+    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     ~Buffer() override;
 
     MaybeError Initialize(bool mappedAtCreation);

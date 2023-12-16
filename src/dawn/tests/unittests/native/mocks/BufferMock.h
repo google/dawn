@@ -39,6 +39,7 @@ namespace dawn::native {
 
 class BufferMock : public BufferBase {
   public:
+    BufferMock(DeviceMock* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     BufferMock(DeviceMock* device, const BufferDescriptor* descriptor);
     ~BufferMock() override;
 

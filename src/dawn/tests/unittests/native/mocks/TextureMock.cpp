@@ -27,12 +27,17 @@
 
 #include "dawn/tests/unittests/native/mocks/TextureMock.h"
 
+#include "dawn/native/ChainUtils.h"
+
 namespace dawn::native {
 
 TextureMock::TextureMock(DeviceMock* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->TextureBase::DestroyImpl(); });
 }
+
+TextureMock::TextureMock(DeviceMock* device, const TextureDescriptor* descriptor)
+    : TextureMock(device, Unpack(descriptor)) {}
 
 TextureMock::~TextureMock() = default;
 

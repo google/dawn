@@ -36,7 +36,7 @@ namespace dawn::native::d3d11 {
 // static
 ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
     Device* device,
-    const PipelineLayoutDescriptor* descriptor) {
+    const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) {
     Ref<PipelineLayout> pipelineLayout = AcquireRef(new PipelineLayout(device, descriptor));
     DAWN_TRY(pipelineLayout->Initialize(device));
     return pipelineLayout;

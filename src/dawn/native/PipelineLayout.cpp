@@ -47,13 +47,15 @@
 
 namespace dawn::native {
 
-MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
-                                            const PipelineLayoutDescriptor* descriptor,
-                                            PipelineCompatibilityToken pipelineCompatibilityToken) {
+ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
+    DeviceBase* device,
+    const PipelineLayoutDescriptor* descriptor,
+    PipelineCompatibilityToken pipelineCompatibilityToken) {
+    UnpackedPtr<PipelineLayoutDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
     // Validation for any pixel local storage.
-    const PipelineLayoutPixelLocalStorage* pls = nullptr;
-    FindInChain(descriptor->nextInChain, &pls);
-    if (pls != nullptr) {
+    if (auto* pls = unpacked.Get<PipelineLayoutPixelLocalStorage>()) {
         StackVector<StorageAttachmentInfoForValidation, 4> attachments;
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
             const PipelineLayoutStorageAttachment& attachment = pls->storageAttachments[i];
@@ -91,7 +93,7 @@ MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
     }
 
     DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts));
-    return {};
+    return unpacked;
 }
 
 StageAndDescriptor::StageAndDescriptor(SingleShaderStage shaderStage,
@@ -108,7 +110,7 @@ StageAndDescriptor::StageAndDescriptor(SingleShaderStage shaderStage,
 // PipelineLayoutBase
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                       const PipelineLayoutDescriptor* descriptor,
+                                       const UnpackedPtr<PipelineLayoutDescriptor>& descriptor,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label) {
     DAWN_ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
@@ -121,9 +123,7 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     }
 
     // Gather the PLS information.
-    const PipelineLayoutPixelLocalStorage* pls = nullptr;
-    FindInChain(descriptor->nextInChain, &pls);
-    if (pls != nullptr) {
+    if (auto* pls = descriptor.Get<PipelineLayoutPixelLocalStorage>()) {
         mHasPLS = true;
         mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
@@ -135,7 +135,7 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
 }
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                       const PipelineLayoutDescriptor* descriptor)
+                                       const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
     : PipelineLayoutBase(device, descriptor, kUntrackedByDevice) {
     GetObjectTrackingList()->Track(this);
 }
@@ -384,10 +384,12 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     desc.bindGroupLayouts = bgls.data();
     desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
 
-    DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc, pipelineCompatibilityToken));
+    UnpackedPtr<PipelineLayoutDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked,
+                    ValidatePipelineLayoutDescriptor(device, &desc, pipelineCompatibilityToken));
 
     Ref<PipelineLayoutBase> result;
-    DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(&desc));
+    DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(unpacked));
     DAWN_ASSERT(!result->IsError());
 
     // Check in debug that the pipeline layout is compatible with the current pipeline.

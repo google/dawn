@@ -39,6 +39,8 @@ class ShaderModuleMock : public ShaderModuleBase {
   public:
     // Creates a shader module mock based on a descriptor or wgsl source.
     static Ref<ShaderModuleMock> Create(DeviceMock* device,
+                                        const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
+    static Ref<ShaderModuleMock> Create(DeviceMock* device,
                                         const ShaderModuleDescriptor* descriptor);
     static Ref<ShaderModuleMock> Create(DeviceMock* device, const char* source);
 
@@ -47,7 +49,7 @@ class ShaderModuleMock : public ShaderModuleBase {
     MOCK_METHOD(void, DestroyImpl, (), (override));
 
   protected:
-    ShaderModuleMock(DeviceMock* device, const ShaderModuleDescriptor* descriptor);
+    ShaderModuleMock(DeviceMock* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
 };
 
 }  // namespace dawn::native

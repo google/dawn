@@ -116,12 +116,11 @@ size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
 }  // namespace
 
 // static
-ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
+ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
+                                          const UnpackedPtr<BufferDescriptor>& descriptor) {
     Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
 
-    const BufferHostMappedPointer* hostMappedDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &hostMappedDesc);
-    if (hostMappedDesc != nullptr) {
+    if (auto* hostMappedDesc = descriptor.Get<BufferHostMappedPointer>()) {
         DAWN_TRY(buffer->InitializeHostMapped(hostMappedDesc));
     } else {
         DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
@@ -129,7 +128,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor
     return buffer;
 }
 
-Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
+Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : BufferBase(device, descriptor) {}
 
 MaybeError Buffer::Initialize(bool mappedAtCreation) {

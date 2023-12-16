@@ -50,8 +50,9 @@ static_assert(kClampFragDepthArgsSize == 8u);
 
 class PipelineLayout final : public PipelineLayoutBase {
   public:
-    static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
-                                                     const PipelineLayoutDescriptor* descriptor);
+    static ResultOrError<Ref<PipelineLayout>> Create(
+        Device* device,
+        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
 
     VkPipelineLayout GetHandle() const;
 

@@ -27,15 +27,21 @@
 
 #include "dawn/tests/unittests/native/mocks/PipelineLayoutMock.h"
 
+#include "dawn/native/ChainUtils.h"
+
 namespace dawn::native {
 
 PipelineLayoutMock::PipelineLayoutMock(DeviceMock* device,
-                                       const PipelineLayoutDescriptor* descriptor)
+                                       const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
     : PipelineLayoutBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->PipelineLayoutBase::DestroyImpl(); });
 
     SetContentHash(ComputeContentHash());
 }
+
+PipelineLayoutMock::PipelineLayoutMock(DeviceMock* device,
+                                       const PipelineLayoutDescriptor* descriptor)
+    : PipelineLayoutMock(device, Unpack(descriptor)) {}
 
 PipelineLayoutMock::~PipelineLayoutMock() = default;
 

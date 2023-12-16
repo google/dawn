@@ -44,7 +44,8 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
 class ComputePipelineBase : public PipelineBase,
                             public ContentLessObjectCacheable<ComputePipelineBase> {
   public:
-    ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
+    ComputePipelineBase(DeviceBase* device,
+                        const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
     ~ComputePipelineBase() override;
 
     static ComputePipelineBase* MakeError(DeviceBase* device, const char* label);

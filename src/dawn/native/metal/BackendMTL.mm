@@ -33,6 +33,7 @@
 #include "dawn/common/NSRef.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/MetalBackend.h"
 #include "dawn/native/metal/BufferMTL.h"
@@ -305,7 +306,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
   private:
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
-                                                    const DeviceDescriptor* descriptor,
+                                                    const UnpackedPtr<DeviceDescriptor>& descriptor,
                                                     const TogglesState& deviceToggles) override {
         return Device::Create(adapter, mDevice, descriptor, deviceToggles);
     }
@@ -955,7 +956,7 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
 Backend::~Backend() = default;
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
-    const RequestAdapterOptions* options) {
+    const UnpackedPtr<RequestAdapterOptions>& options) {
     if (options->forceFallbackAdapter) {
         return {};
     }

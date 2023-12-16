@@ -1006,24 +1006,23 @@ class TintSource {
 };
 
 MaybeError ValidateAndParseShaderModule(DeviceBase* device,
-                                        const ShaderModuleDescriptor* descriptor,
+                                        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                         ShaderModuleParseResult* parseResult,
                                         OwnedCompilationMessages* outMessages) {
     DAWN_ASSERT(parseResult != nullptr);
 
-    UnpackedPtr<ShaderModuleDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     wgpu::SType moduleType;
     // A WGSL (or SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V options
 // descriptor is allowed when using SPIR-V.
 #if TINT_BUILD_SPV_READER
     DAWN_TRY_ASSIGN(
         moduleType,
-        (unpacked.ValidateBranches<
+        (descriptor.ValidateBranches<
             Branch<ShaderModuleWGSLDescriptor>,
             Branch<ShaderModuleSPIRVDescriptor, DawnShaderModuleSPIRVOptionsDescriptor>>()));
 #else
-    DAWN_TRY_ASSIGN(moduleType, (unpacked.ValidateBranches<Branch<ShaderModuleWGSLDescriptor>>()));
+    DAWN_TRY_ASSIGN(moduleType,
+                    (descriptor.ValidateBranches<Branch<ShaderModuleWGSLDescriptor>>()));
 #endif
     DAWN_ASSERT(moduleType != wgpu::SType::Invalid);
 
@@ -1041,8 +1040,8 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         case wgpu::SType::ShaderModuleSPIRVDescriptor: {
             DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowSpirv),
                             "SPIR-V is disallowed.");
-            const auto* spirvDesc = unpacked.Get<ShaderModuleSPIRVDescriptor>();
-            const auto* spirvOptions = unpacked.Get<DawnShaderModuleSPIRVOptionsDescriptor>();
+            const auto* spirvDesc = descriptor.Get<ShaderModuleSPIRVDescriptor>();
+            const auto* spirvOptions = descriptor.Get<DawnShaderModuleSPIRVOptionsDescriptor>();
 
             // TODO(dawn:2033): Avoid unnecessary copies of the SPIR-V code.
             std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
@@ -1060,7 +1059,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         }
 #endif  // TINT_BUILD_SPV_READER
         case wgpu::SType::ShaderModuleWGSLDescriptor: {
-            wgslDesc = unpacked.Get<ShaderModuleWGSLDescriptor>();
+            wgslDesc = descriptor.Get<ShaderModuleWGSLDescriptor>();
             break;
         }
         default:
@@ -1229,26 +1228,22 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 // ShaderModuleBase
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
-                                   const ShaderModuleDescriptor* descriptor,
+                                   const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label), mType(Type::Undefined) {
-    DAWN_ASSERT(descriptor->nextInChain != nullptr);
-    const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &spirvDesc);
-    const ShaderModuleWGSLDescriptor* wgslDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &wgslDesc);
-    DAWN_ASSERT(spirvDesc || wgslDesc);
-
-    if (spirvDesc) {
+    if (auto* spirvDesc = descriptor.Get<ShaderModuleSPIRVDescriptor>()) {
         mType = Type::Spirv;
         mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
-    } else if (wgslDesc) {
+    } else if (auto* wgslDesc = descriptor.Get<ShaderModuleWGSLDescriptor>()) {
         mType = Type::Wgsl;
         mWgsl = std::string(wgslDesc->code);
+    } else {
+        DAWN_ASSERT(false);
     }
 }
 
-ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
+ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
+                                   const UnpackedPtr<ShaderModuleDescriptor>& descriptor)
     : ShaderModuleBase(device, descriptor, kUntrackedByDevice) {
     GetObjectTrackingList()->Track(this);
 }

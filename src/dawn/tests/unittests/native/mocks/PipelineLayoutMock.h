@@ -37,6 +37,7 @@ namespace dawn::native {
 
 class PipelineLayoutMock : public PipelineLayoutBase {
   public:
+    PipelineLayoutMock(DeviceMock* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
     PipelineLayoutMock(DeviceMock* device, const PipelineLayoutDescriptor* descriptor);
     ~PipelineLayoutMock() override;
 

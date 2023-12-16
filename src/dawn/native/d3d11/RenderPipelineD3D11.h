@@ -42,8 +42,9 @@ class ScopedSwapStateCommandRecordingContext;
 
 class RenderPipeline final : public RenderPipelineBase {
   public:
-    static Ref<RenderPipeline> CreateUninitialized(Device* device,
-                                                   const RenderPipelineDescriptor* descriptor);
+    static Ref<RenderPipeline> CreateUninitialized(
+        Device* device,
+        const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
 
     static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
                                 WGPUCreateRenderPipelineAsyncCallback callback,
@@ -61,7 +62,7 @@ class RenderPipeline final : public RenderPipelineBase {
     bool UsesInstanceIndex() const { return mUsesInstanceIndex; }
 
   private:
-    RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
+    RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipeline() override;
 
     MaybeError Initialize() override;

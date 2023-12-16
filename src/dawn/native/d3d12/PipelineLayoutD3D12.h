@@ -43,8 +43,9 @@ class Device;
 
 class PipelineLayout final : public PipelineLayoutBase {
   public:
-    static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
-                                                     const PipelineLayoutDescriptor* descriptor);
+    static ResultOrError<Ref<PipelineLayout>> Create(
+        Device* device,
+        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
 
     uint32_t GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const;
     uint32_t GetSamplerRootParameterIndex(BindGroupIndex group) const;

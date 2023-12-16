@@ -68,9 +68,10 @@ MaybeError PhysicalDeviceBase::Initialize() {
     return {};
 }
 
-ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDevice(AdapterBase* adapter,
-                                                                const DeviceDescriptor* descriptor,
-                                                                const TogglesState& deviceToggles) {
+ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDevice(
+    AdapterBase* adapter,
+    const UnpackedPtr<DeviceDescriptor>& descriptor,
+    const TogglesState& deviceToggles) {
     return CreateDeviceImpl(adapter, descriptor, deviceToggles);
 }
 

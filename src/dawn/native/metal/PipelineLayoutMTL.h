@@ -51,7 +51,8 @@ static constexpr BindGroupIndex kPullingBufferBindingSet = BindGroupIndex(kMaxBi
 
 class PipelineLayout final : public PipelineLayoutBase {
   public:
-    static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDescriptor* descriptor);
+    static Ref<PipelineLayout> Create(Device* device,
+                                      const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
 
     using BindingIndexInfo =
         PerBindGroup<ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>>;
@@ -61,7 +62,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     uint32_t GetBufferBindingCount(SingleShaderStage stage) const;
 
   private:
-    PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
+    PipelineLayout(Device* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
     ~PipelineLayout() override;
     PerStage<BindingIndexInfo> mIndexInfo;
     PerStage<uint32_t> mBufferBindingCount;

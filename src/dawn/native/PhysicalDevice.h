@@ -39,6 +39,7 @@
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
+#include "dawn/native/Forward.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
@@ -65,7 +66,7 @@ class PhysicalDeviceBase : public RefCounted {
     MaybeError Initialize();
 
     ResultOrError<Ref<DeviceBase>> CreateDevice(AdapterBase* adapter,
-                                                const DeviceDescriptor* descriptor,
+                                                const UnpackedPtr<DeviceDescriptor>& descriptor,
                                                 const TogglesState& deviceToggles);
 
     uint32_t GetVendorId() const;
@@ -133,9 +134,10 @@ class PhysicalDeviceBase : public RefCounted {
     void GetDefaultLimitsForSupportedFeatureLevel(Limits* limits) const;
 
   private:
-    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
-                                                            const DeviceDescriptor* descriptor,
-                                                            const TogglesState& deviceToggles) = 0;
+    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+        AdapterBase* adapter,
+        const UnpackedPtr<DeviceDescriptor>& descriptor,
+        const TogglesState& deviceToggles) = 0;
 
     virtual MaybeError InitializeImpl() = 0;
 

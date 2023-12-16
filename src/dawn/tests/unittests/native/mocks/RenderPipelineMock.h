@@ -39,6 +39,8 @@ class RenderPipelineMock : public RenderPipelineBase {
   public:
     // Creates a compute pipeline given the descriptor.
     static Ref<RenderPipelineMock> Create(DeviceMock* device,
+                                          const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
+    static Ref<RenderPipelineMock> Create(DeviceMock* device,
                                           const RenderPipelineDescriptor* descriptor);
 
     ~RenderPipelineMock() override;
@@ -47,7 +49,7 @@ class RenderPipelineMock : public RenderPipelineBase {
     MOCK_METHOD(void, DestroyImpl, (), (override));
 
   protected:
-    RenderPipelineMock(DeviceMock* device, const RenderPipelineDescriptor* descriptor);
+    RenderPipelineMock(DeviceMock* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
 };
 
 }  // namespace dawn::native

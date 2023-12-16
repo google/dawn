@@ -95,7 +95,8 @@ struct BindingCounts {
 
 struct CombinedLimits;
 
-void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry);
+void IncrementBindingCounts(BindingCounts* bindingCounts,
+                            const UnpackedPtr<BindGroupLayoutEntry>& entry);
 void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& rhs);
 MaybeError ValidateBindingCounts(const CombinedLimits& limits, const BindingCounts& bindingCounts);
 

@@ -247,10 +247,6 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
 void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
                                      WGPURequestAdapterCallback callback,
                                      void* userdata) {
-    static constexpr RequestAdapterOptions kDefaultOptions = {};
-    if (options == nullptr) {
-        options = &kDefaultOptions;
-    }
     auto adapters = EnumerateAdapters(options);
     if (adapters.empty()) {
         callback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters.", userdata);
@@ -303,22 +299,22 @@ const FeatureInfo* InstanceBase::GetFeatureInfo(wgpu::FeatureName feature) {
 
 std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     const RequestAdapterOptions* options) {
+    static constexpr RequestAdapterOptions kDefaultOptions = {};
     if (options == nullptr) {
         // Default path that returns all WebGPU core adapters on the system with default toggles.
-        RequestAdapterOptions defaultOptions = {};
-        return EnumerateAdapters(&defaultOptions);
+        return EnumerateAdapters(&kDefaultOptions);
     }
 
-    const DawnTogglesDescriptor* togglesDesc = nullptr;
-    FindInChain(options->nextInChain, &togglesDesc);
+    UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(options);
+    auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
     FeatureLevel featureLevel =
         options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
     std::vector<Ref<AdapterBase>> adapters;
-    for (const auto& physicalDevice : EnumeratePhysicalDevices(options)) {
+    for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
         DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
         adapters.push_back(
-            CreateAdapter(physicalDevice, featureLevel, togglesDesc, options->powerPreference));
+            CreateAdapter(physicalDevice, featureLevel, togglesDesc, unpacked->powerPreference));
     }
     return SortAdapters(std::move(adapters), options);
 }
@@ -399,7 +395,7 @@ BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendT
 }
 
 std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
-    const RequestAdapterOptions* options) {
+    const UnpackedPtr<RequestAdapterOptions>& options) {
     DAWN_ASSERT(options);
 
     BackendsBitset backendsToFind;

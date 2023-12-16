@@ -46,13 +46,14 @@ bool HasDeprecatedColor(const RenderPassColorAttachment& attachment);
 
 Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format& format);
 
-MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
-                                            const CommandEncoderDescriptor* descriptor);
+ResultOrError<UnpackedPtr<CommandEncoderDescriptor>> ValidateCommandEncoderDescriptor(
+    const DeviceBase* device,
+    const CommandEncoderDescriptor* descriptor);
 
 class CommandEncoder final : public ApiObjectBase {
   public:
     static Ref<CommandEncoder> Create(DeviceBase* device,
-                                      const CommandEncoderDescriptor* descriptor);
+                                      const UnpackedPtr<CommandEncoderDescriptor>& descriptor);
     static CommandEncoder* MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
@@ -133,7 +134,7 @@ class CommandEncoder final : public ApiObjectBase {
     [[nodiscard]] InternalUsageScope MakeInternalUsageScope();
 
   private:
-    CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
+    CommandEncoder(DeviceBase* device, const UnpackedPtr<CommandEncoderDescriptor>& descriptor);
     CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     void DestroyImpl() override;

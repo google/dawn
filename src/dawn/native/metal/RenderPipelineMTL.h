@@ -40,13 +40,14 @@ class Device;
 
 class RenderPipeline final : public RenderPipelineBase {
   public:
-    static Ref<RenderPipelineBase> CreateUninitialized(Device* device,
-                                                       const RenderPipelineDescriptor* descriptor);
+    static Ref<RenderPipelineBase> CreateUninitialized(
+        Device* device,
+        const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
                                 WGPUCreateRenderPipelineAsyncCallback callback,
                                 void* userdata);
 
-    RenderPipeline(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    RenderPipeline(DeviceBase* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipeline() override;
 
     MTLPrimitiveType GetMTLPrimitiveTopology() const;

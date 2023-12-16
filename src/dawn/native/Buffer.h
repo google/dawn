@@ -47,7 +47,9 @@ struct CopyTextureToBufferCmd;
 
 enum class MapType : uint32_t;
 
-MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
+ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
+    DeviceBase* device,
+    const BufferDescriptor* descriptor);
 
 static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
@@ -121,7 +123,7 @@ class BufferBase : public ApiObjectBase {
     uint64_t APIGetSize() const;
 
   protected:
-    BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
+    BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
     void DestroyImpl() override;

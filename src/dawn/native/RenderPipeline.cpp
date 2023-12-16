@@ -348,9 +348,10 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
 }
 
 MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleState* descriptor) {
-    const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &msaaRenderToSingleSampledDesc);
-    if (msaaRenderToSingleSampledDesc != nullptr) {
+    UnpackedPtr<MultisampleState> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (auto* msaaRenderToSingleSampledDesc =
+            unpacked.Get<DawnMultisampleStateRenderToSingleSampled>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::MSAARenderToSingleSampled),
                         "The msaaRenderToSingleSampledDesc is not empty while the "
                         "msaa-render-to-single-sampled feature is not enabled.");
@@ -753,7 +754,8 @@ bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
 
 MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                             const RenderPipelineDescriptor* descriptor) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
+    UnpackedPtr<RenderPipelineDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
     if (descriptor->layout != nullptr) {
         DAWN_TRY(device->ValidateObject(descriptor->layout));
@@ -837,11 +839,11 @@ bool StencilTestEnabled(const DepthStencilState* depthStencil) {
 // RenderPipelineBase
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
-                                       const RenderPipelineDescriptor* descriptor)
+                                       const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
     : PipelineBase(device,
                    descriptor->layout,
                    descriptor->label,
-                   GetRenderStagesAndSetPlaceholderShader(device, descriptor)),
+                   GetRenderStagesAndSetPlaceholderShader(device, *descriptor)),
       mAttachmentState(device->GetOrCreateAttachmentState(descriptor, GetLayout())) {
     mVertexBufferCount = descriptor->vertex.bufferCount;
 
@@ -896,9 +898,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     }
 
     mPrimitive = descriptor->primitive;
-    const PrimitiveDepthClipControl* depthClipControl = nullptr;
-    FindInChain(mPrimitive.nextInChain, &depthClipControl);
-    if (depthClipControl) {
+    UnpackedPtr<PrimitiveState> unpackedPrimitive = Unpack(&mPrimitive);
+    if (auto* depthClipControl = unpackedPrimitive.Get<PrimitiveDepthClipControl>()) {
         mUnclippedDepth = depthClipControl->unclippedDepth;
     }
 

@@ -62,10 +62,10 @@ DeviceMock::DeviceMock() {
             return AcquireRef(new NiceMock<BindGroupLayoutMock>(this, descriptor));
         }));
     ON_CALL(*this, CreateBufferImpl)
-        .WillByDefault(WithArgs<0>(
-            [this](const BufferDescriptor* descriptor) -> ResultOrError<Ref<BufferBase>> {
-                return AcquireRef(new NiceMock<BufferMock>(this, descriptor));
-            }));
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<BufferDescriptor>& descriptor)
+                                       -> ResultOrError<Ref<BufferBase>> {
+            return AcquireRef(new NiceMock<BufferMock>(this, descriptor));
+        }));
     ON_CALL(*this, CreateCommandBuffer)
         .WillByDefault(WithArgs<0, 1>(
             [this](CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
@@ -78,7 +78,7 @@ DeviceMock::DeviceMock() {
             return ExternalTextureMock::Create(this, descriptor);
         }));
     ON_CALL(*this, CreatePipelineLayoutImpl)
-        .WillByDefault(WithArgs<0>([this](const PipelineLayoutDescriptor* descriptor)
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
                                        -> ResultOrError<Ref<PipelineLayoutBase>> {
             return AcquireRef(new NiceMock<PipelineLayoutMock>(this, descriptor));
         }));
@@ -93,7 +93,7 @@ DeviceMock::DeviceMock() {
                 return AcquireRef(new NiceMock<SamplerMock>(this, descriptor));
             }));
     ON_CALL(*this, CreateShaderModuleImpl)
-        .WillByDefault(WithArgs<0>([this](const ShaderModuleDescriptor* descriptor)
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<ShaderModuleDescriptor>& descriptor)
                                        -> ResultOrError<Ref<ShaderModuleBase>> {
             return ShaderModuleMock::Create(this, descriptor);
         }));
@@ -109,15 +109,15 @@ DeviceMock::DeviceMock() {
                 return AcquireRef(new NiceMock<TextureViewMock>(texture, descriptor));
             }));
     ON_CALL(*this, CreateUninitializedComputePipelineImpl)
-        .WillByDefault(WithArgs<0>(
-            [this](const ComputePipelineDescriptor* descriptor) -> Ref<ComputePipelineBase> {
-                return ComputePipelineMock::Create(this, descriptor);
-            }));
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<ComputePipelineDescriptor>& descriptor)
+                                       -> Ref<ComputePipelineBase> {
+            return ComputePipelineMock::Create(this, descriptor);
+        }));
     ON_CALL(*this, CreateUninitializedRenderPipelineImpl)
-        .WillByDefault(WithArgs<0>(
-            [this](const RenderPipelineDescriptor* descriptor) -> Ref<RenderPipelineBase> {
-                return RenderPipelineMock::Create(this, descriptor);
-            }));
+        .WillByDefault(WithArgs<0>([this](const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
+                                       -> Ref<RenderPipelineBase> {
+            return RenderPipelineMock::Create(this, descriptor);
+        }));
 
     // By default, the mock's TickImpl will succeed.
     ON_CALL(*this, TickImpl).WillByDefault([]() -> MaybeError { return {}; });

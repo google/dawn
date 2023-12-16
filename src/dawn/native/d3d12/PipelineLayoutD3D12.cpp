@@ -156,7 +156,7 @@ HRESULT SerializeRootParameter1_0(Device* device,
 
 ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
     Device* device,
-    const PipelineLayoutDescriptor* descriptor) {
+    const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) {
     Ref<PipelineLayout> layout = AcquireRef(new PipelineLayout(device, descriptor));
     DAWN_TRY(layout->Initialize());
     return layout;

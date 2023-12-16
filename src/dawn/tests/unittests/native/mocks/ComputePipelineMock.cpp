@@ -27,12 +27,14 @@
 
 #include "dawn/tests/unittests/native/mocks/ComputePipelineMock.h"
 
+#include "dawn/native/ChainUtils.h"
+
 namespace dawn::native {
 
 using ::testing::NiceMock;
 
 ComputePipelineMock::ComputePipelineMock(DeviceBase* device,
-                                         const ComputePipelineDescriptor* descriptor)
+                                         const UnpackedPtr<ComputePipelineDescriptor>& descriptor)
     : ComputePipelineBase(device, descriptor) {
     ON_CALL(*this, Initialize).WillByDefault([]() -> MaybeError { return {}; });
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->ComputePipelineBase::DestroyImpl(); });
@@ -41,13 +43,20 @@ ComputePipelineMock::ComputePipelineMock(DeviceBase* device,
 ComputePipelineMock::~ComputePipelineMock() = default;
 
 // static
-Ref<ComputePipelineMock> ComputePipelineMock::Create(DeviceMock* device,
-                                                     const ComputePipelineDescriptor* descriptor) {
+Ref<ComputePipelineMock> ComputePipelineMock::Create(
+    DeviceMock* device,
+    const UnpackedPtr<ComputePipelineDescriptor>& descriptor) {
     ComputePipelineDescriptor appliedDescriptor;
     Ref<PipelineLayoutBase> layoutRef = ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
-                                            device, *descriptor, &appliedDescriptor)
+                                            device, **descriptor, &appliedDescriptor)
                                             .AcquireSuccess();
-    return AcquireRef(new NiceMock<ComputePipelineMock>(device, &appliedDescriptor));
+    return AcquireRef(new NiceMock<ComputePipelineMock>(device, Unpack(&appliedDescriptor)));
+}
+
+// static
+Ref<ComputePipelineMock> ComputePipelineMock::Create(DeviceMock* device,
+                                                     const ComputePipelineDescriptor* descriptor) {
+    return Create(device, Unpack(descriptor));
 }
 
 }  // namespace dawn::native

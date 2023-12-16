@@ -77,7 +77,7 @@ struct TrackedFutureWaitInfo;
 class DeviceBase : public RefCountedWithExternalCount {
   public:
     DeviceBase(AdapterBase* adapter,
-               const DeviceDescriptor* descriptor,
+               const UnpackedPtr<DeviceDescriptor>& descriptor,
                const TogglesState& deviceToggles);
     ~DeviceBase() override;
 
@@ -213,21 +213,23 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<TextureViewBase>> GetOrCreatePlaceholderTextureViewForExternalTexture();
 
     ResultOrError<Ref<PipelineLayoutBase>> GetOrCreatePipelineLayout(
-        const PipelineLayoutDescriptor* descriptor);
+        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
 
     ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
 
     ResultOrError<Ref<ShaderModuleBase>> GetOrCreateShaderModule(
-        const ShaderModuleDescriptor* descriptor,
+        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages);
 
     Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentState* blueprint);
     Ref<AttachmentState> GetOrCreateAttachmentState(
         const RenderBundleEncoderDescriptor* descriptor);
-    Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor,
-                                                    const PipelineLayoutBase* layout);
-    Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
+    Ref<AttachmentState> GetOrCreateAttachmentState(
+        const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
+        const PipelineLayoutBase* layout);
+    Ref<AttachmentState> GetOrCreateAttachmentState(
+        const UnpackedPtr<RenderPassDescriptor>& descriptor);
 
     Ref<PipelineCacheBase> GetOrCreatePipelineCache(const CacheKey& key);
 
@@ -238,7 +240,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor,
         bool allowInternalBinding = false);
-    ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* descriptor);
+    ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* rawDescriptor);
     ResultOrError<Ref<CommandEncoder>> CreateCommandEncoder(
         const CommandEncoderDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ComputePipelineBase>> CreateComputePipeline(
@@ -246,7 +248,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<ComputePipelineBase>> CreateUninitializedComputePipeline(
         const ComputePipelineDescriptor* descriptor);
     ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayout(
-        const PipelineLayoutDescriptor* descriptor);
+        const PipelineLayoutDescriptor* rawDescriptor);
     ResultOrError<Ref<QuerySetBase>> CreateQuerySet(const QuerySetDescriptor* descriptor);
     ResultOrError<Ref<RenderBundleEncoder>> CreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor);
@@ -478,17 +480,18 @@ class DeviceBase : public RefCountedWithExternalCount {
         const BindGroupDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<BindGroupLayoutInternalBase>> CreateBindGroupLayoutImpl(
         const BindGroupLayoutDescriptor* descriptor) = 0;
-    virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(const BufferDescriptor* descriptor) = 0;
+    virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
+        const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
         const ExternalTextureDescriptor* descriptor);
     virtual ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
-        const PipelineLayoutDescriptor* descriptor) = 0;
+        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
         const QuerySetDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
         const SamplerDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
-        const ShaderModuleDescriptor* descriptor,
+        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
@@ -502,9 +505,9 @@ class DeviceBase : public RefCountedWithExternalCount {
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) = 0;
     virtual Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
-        const ComputePipelineDescriptor* descriptor) = 0;
+        const UnpackedPtr<ComputePipelineDescriptor>& descriptor) = 0;
     virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
-        const RenderPipelineDescriptor* descriptor) = 0;
+        const UnpackedPtr<RenderPipelineDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
         const SharedTextureMemoryDescriptor* descriptor);
     virtual ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
@@ -535,7 +538,7 @@ class DeviceBase : public RefCountedWithExternalCount {
                                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                                    void* userdata);
 
-    void ApplyFeatures(const DeviceDescriptor* deviceDescriptor);
+    void ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor);
 
     void SetWGSLExtensionAllowList();
 

@@ -33,7 +33,8 @@ namespace dawn::native {
 
 using ::testing::NiceMock;
 
-ShaderModuleMock::ShaderModuleMock(DeviceMock* device, const ShaderModuleDescriptor* descriptor)
+ShaderModuleMock::ShaderModuleMock(DeviceMock* device,
+                                   const UnpackedPtr<ShaderModuleDescriptor>& descriptor)
     : ShaderModuleBase(device, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->ShaderModuleBase::DestroyImpl(); });
 
@@ -43,14 +44,22 @@ ShaderModuleMock::ShaderModuleMock(DeviceMock* device, const ShaderModuleDescrip
 ShaderModuleMock::~ShaderModuleMock() = default;
 
 // static
-Ref<ShaderModuleMock> ShaderModuleMock::Create(DeviceMock* device,
-                                               const ShaderModuleDescriptor* descriptor) {
-    Ref<ShaderModuleMock> shaderModule =
-        AcquireRef(new NiceMock<ShaderModuleMock>(device, descriptor));
+Ref<ShaderModuleMock> ShaderModuleMock::Create(
+    DeviceMock* device,
+    const UnpackedPtr<ShaderModuleDescriptor>& descriptor) {
     ShaderModuleParseResult parseResult;
     ValidateAndParseShaderModule(device, descriptor, &parseResult, nullptr).AcquireSuccess();
+
+    Ref<ShaderModuleMock> shaderModule =
+        AcquireRef(new NiceMock<ShaderModuleMock>(device, descriptor));
     shaderModule->InitializeBase(&parseResult, nullptr).AcquireSuccess();
     return shaderModule;
+}
+
+// static
+Ref<ShaderModuleMock> ShaderModuleMock::Create(DeviceMock* device,
+                                               const ShaderModuleDescriptor* descriptor) {
+    return Create(device, Unpack(descriptor));
 }
 
 // static

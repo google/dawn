@@ -191,7 +191,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     // Enumerate physical devices according to options and return them.
     std::vector<Ref<PhysicalDeviceBase>> EnumeratePhysicalDevices(
-        const RequestAdapterOptions* options);
+        const UnpackedPtr<RequestAdapterOptions>& options);
 
     // Helper function that create adapter on given physical device handling required adapter
     // toggles descriptor.

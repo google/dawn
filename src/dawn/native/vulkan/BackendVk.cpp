@@ -34,6 +34,7 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/DeviceVk.h"
@@ -548,7 +549,7 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
 Backend::~Backend() = default;
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
-    const RequestAdapterOptions* options) {
+    const UnpackedPtr<RequestAdapterOptions>& options) {
     std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
     InstanceBase* instance = GetInstance();
     for (ICD icd : kICDs) {

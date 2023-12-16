@@ -44,7 +44,8 @@ struct VulkanFunctions;
 
 class Buffer final : public BufferBase {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
+    static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                             const UnpackedPtr<BufferDescriptor>& descriptor);
 
     VkBuffer GetHandle() const;
 

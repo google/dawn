@@ -93,25 +93,6 @@ constexpr inline wgpu::SType STypeFor = detail::STypeForImpl<T>;
 template <typename T>
 constexpr inline wgpu::SType STypeFor<const T*> = detail::STypeForImpl<T>;
 
-template <typename T>
-void FindInChain(const ChainedStruct* chain, const T** out) {
-    for (; chain; chain = chain->nextInChain) {
-        if (chain->sType == STypeFor<T>) {
-            *out = static_cast<const T*>(chain);
-            break;
-        }
-    }
-}
-template <typename T>
-void FindInChain(ChainedStructOut* chain, T** out) {
-    for (; chain; chain = chain->nextInChain) {
-        if (chain->sType == STypeFor<T>) {
-            *out = static_cast<T*>(chain);
-            break;
-        }
-    }
-}
-
 }  // namespace {{native_namespace}}
 
 // Include specializations before declaring types for ordering purposes.

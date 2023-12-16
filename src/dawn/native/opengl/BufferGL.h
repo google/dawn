@@ -42,7 +42,7 @@ class Buffer final : public BufferBase {
                                                            const BufferDescriptor* descriptor,
                                                            bool shouldLazyClear);
 
-    Buffer(Device* device, const BufferDescriptor* descriptor);
+    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor);
 
     GLuint GetHandle() const;
 
@@ -53,7 +53,7 @@ class Buffer final : public BufferBase {
     void TrackUsage() { MarkUsedInPendingCommands(); }
 
   private:
-    Buffer(Device* device, const BufferDescriptor* descriptor, bool shouldLazyClear);
+    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, bool shouldLazyClear);
     ~Buffer() override;
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;

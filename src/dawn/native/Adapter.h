@@ -60,7 +60,7 @@ class AdapterBase : public RefCounted {
                           WGPURequestDeviceCallback callback,
                           void* userdata);
     DeviceBase* APICreateDevice(const DeviceDescriptor* descriptor = nullptr);
-    ResultOrError<Ref<DeviceBase>> CreateDevice(const DeviceDescriptor* descriptor);
+    ResultOrError<Ref<DeviceBase>> CreateDevice(const DeviceDescriptor* rawDescriptor);
 
     void SetUseTieredLimits(bool useTieredLimits);
 

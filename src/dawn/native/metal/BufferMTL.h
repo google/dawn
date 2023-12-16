@@ -41,9 +41,10 @@ class Device;
 
 class Buffer final : public BufferBase {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
+    static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                             const UnpackedPtr<BufferDescriptor>& descriptor);
 
-    Buffer(DeviceBase* device, const BufferDescriptor* descriptor);
+    Buffer(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
 
     id<MTLBuffer> GetMTLBuffer() const;
 

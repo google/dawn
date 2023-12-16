@@ -206,10 +206,10 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
 // DeviceBase
 
 DeviceBase::DeviceBase(AdapterBase* adapter,
-                       const DeviceDescriptor* descriptor,
+                       const UnpackedPtr<DeviceDescriptor>& descriptor,
                        const TogglesState& deviceToggles)
     : mAdapter(adapter), mToggles(deviceToggles), mNextPipelineCompatibilityToken(1) {
-    DAWN_ASSERT(descriptor != nullptr);
+    DAWN_ASSERT(descriptor);
 
     mDeviceLostCallback = descriptor->deviceLostCallback;
     mDeviceLostUserdata = descriptor->deviceLostUserdata;
@@ -220,8 +220,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     ApplyFeatures(descriptor);
 
     DawnCacheDeviceDescriptor defaultCacheDesc = {};
-    const DawnCacheDeviceDescriptor* cacheDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &cacheDesc);
+    auto* cacheDesc = descriptor.Get<DawnCacheDeviceDescriptor>();
     if (cacheDesc == nullptr) {
         cacheDesc = &defaultCacheDesc;
     }
@@ -869,7 +868,7 @@ ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreateEmptyPipelineLayout() {
     desc.bindGroupLayoutCount = 0;
     desc.bindGroupLayouts = nullptr;
 
-    return GetOrCreatePipelineLayout(&desc);
+    return GetOrCreatePipelineLayout(Unpack(&desc));
 }
 
 BindGroupLayoutBase* DeviceBase::GetEmptyBindGroupLayout() {
@@ -962,7 +961,7 @@ DeviceBase::GetOrCreatePlaceholderTextureViewForExternalTexture() {
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(
-    const PipelineLayoutDescriptor* descriptor) {
+    const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) {
     PipelineLayoutBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
 
     const size_t blueprintHash = blueprint.ComputeContentHash();
@@ -993,7 +992,7 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
 }
 
 ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
-    const ShaderModuleDescriptor* descriptor,
+    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     ShaderModuleParseResult* parseResult,
     OwnedCompilationMessages* compilationMessages) {
     DAWN_ASSERT(parseResult != nullptr);
@@ -1041,14 +1040,14 @@ Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-    const RenderPipelineDescriptor* descriptor,
+    const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
     const PipelineLayoutBase* layout) {
     AttachmentState blueprint(this, descriptor, layout);
     return GetOrCreateAttachmentState(&blueprint);
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-    const RenderPassDescriptor* descriptor) {
+    const UnpackedPtr<RenderPassDescriptor>& descriptor) {
     AttachmentState blueprint(this, descriptor);
     return GetOrCreateAttachmentState(&blueprint);
 }
@@ -1281,30 +1280,21 @@ wgpu::TextureUsage DeviceBase::APIGetSupportedSurfaceUsage(Surface* surface) {
 // For Dawn Wire
 
 BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
-    BufferDescriptor fakeDescriptor = *desc;
-    fakeDescriptor.nextInChain = nullptr;
-
-    // The validation errors on BufferDescriptor should be prior to any OOM errors when
-    // MapppedAtCreation == false.
-    MaybeError maybeError = ValidateBufferDescriptor(this, &fakeDescriptor);
-
-    // Set the size of the error buffer to 0 as this function is called only when an OOM happens at
-    // the client side.
-    fakeDescriptor.size = 0;
-
-    if (maybeError.IsError()) {
-        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-        error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
-        HandleError(std::move(error), InternalErrorType::OutOfMemory);
-    } else {
-        const DawnBufferDescriptorErrorInfoFromWireClient* clientErrorInfo = nullptr;
-        FindInChain(desc->nextInChain, &clientErrorInfo);
+    UnpackedPtr<BufferDescriptor> unpacked;
+    if (!ConsumedError(ValidateBufferDescriptor(this, desc), &unpacked,
+                       InternalErrorType::OutOfMemory, "calling %s.CreateBuffer(%s).", this,
+                       desc)) {
+        auto* clientErrorInfo = unpacked.Get<DawnBufferDescriptorErrorInfoFromWireClient>();
         if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
             HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
                         InternalErrorType::OutOfMemory);
         }
     }
 
+    // Set the size of the error buffer to 0 as this function is called only when an OOM happens at
+    // the client side.
+    BufferDescriptor fakeDescriptor = *desc;
+    fakeDescriptor.size = 0;
     return BufferBase::MakeError(this, &fakeDescriptor);
 }
 
@@ -1434,7 +1424,7 @@ ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
     return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
-void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
+void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor) {
     DAWN_ASSERT(deviceDescriptor);
     // Validate all required features with device toggles.
     DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
@@ -1629,10 +1619,13 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateBindGroupLayout(
     return GetOrCreateBindGroupLayout(descriptor);
 }
 
-ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
+ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* rawDescriptor) {
     DAWN_TRY(ValidateIsAlive());
+    UnpackedPtr<BufferDescriptor> descriptor;
     if (IsValidationEnabled()) {
-        DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(this, rawDescriptor));
+    } else {
+        descriptor = Unpack(rawDescriptor);
     }
 
     Ref<BufferBase> buffer;
@@ -1675,10 +1668,13 @@ ResultOrError<Ref<CommandEncoder>> DeviceBase::CreateCommandEncoder(
     }
 
     DAWN_TRY(ValidateIsAlive());
+    UnpackedPtr<CommandEncoderDescriptor> unpacked;
     if (IsValidationEnabled()) {
-        DAWN_TRY(ValidateCommandEncoderDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(unpacked, ValidateCommandEncoderDescriptor(this, descriptor));
+    } else {
+        unpacked = Unpack(descriptor);
     }
-    return CommandEncoder::Create(this, descriptor);
+    return CommandEncoder::Create(this, unpacked);
 }
 
 // Overwritten on the backends to return pipeline caches if supported.
@@ -1698,7 +1694,7 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateUninitializedComputePi
     DAWN_TRY_ASSIGN(layoutRef, ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
                                    this, *descriptor, &appliedDescriptor));
 
-    return CreateUninitializedComputePipelineImpl(&appliedDescriptor);
+    return CreateUninitializedComputePipelineImpl(Unpack(&appliedDescriptor));
 }
 
 // This function is overwritten with the async version on the backends that supports
@@ -1744,10 +1740,13 @@ void DeviceBase::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> rende
 ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreatePipelineLayout(
     const PipelineLayoutDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
+    UnpackedPtr<PipelineLayoutDescriptor> unpacked;
     if (IsValidationEnabled()) {
-        DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
+        DAWN_TRY_ASSIGN(unpacked, ValidatePipelineLayoutDescriptor(this, descriptor));
+    } else {
+        unpacked = Unpack(descriptor);
     }
-    return GetOrCreatePipelineLayout(descriptor);
+    return GetOrCreatePipelineLayout(unpacked);
 }
 
 ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureImpl(
@@ -1819,7 +1818,7 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipe
     DAWN_TRY_ASSIGN(layoutRef, ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
                                    this, *descriptor, &appliedDescriptor));
 
-    return CreateUninitializedRenderPipelineImpl(&appliedDescriptor);
+    return CreateUninitializedRenderPipelineImpl(Unpack(&appliedDescriptor));
 }
 
 ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
@@ -1842,13 +1841,18 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     // long as dawn_native don't use the compilationMessages of these internal shader modules.
     ShaderModuleParseResult parseResult;
 
+    UnpackedPtr<ShaderModuleDescriptor> unpacked;
     if (IsValidationEnabled()) {
+        DAWN_TRY_ASSIGN_CONTEXT(unpacked, ValidateAndUnpack(descriptor),
+                                "validating and unpacking %s", descriptor);
         DAWN_TRY_CONTEXT(
-            ValidateAndParseShaderModule(this, descriptor, &parseResult, compilationMessages),
+            ValidateAndParseShaderModule(this, unpacked, &parseResult, compilationMessages),
             "validating %s", descriptor);
+    } else {
+        unpacked = Unpack(descriptor);
     }
 
-    return GetOrCreateShaderModule(descriptor, &parseResult, compilationMessages);
+    return GetOrCreateShaderModule(unpacked, &parseResult, compilationMessages);
 }
 
 ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(

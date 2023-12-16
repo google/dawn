@@ -45,7 +45,7 @@ class PlatformFunctions;
 class Device : public DeviceBase {
   public:
     Device(AdapterBase* adapter,
-           const DeviceDescriptor* descriptor,
+           const UnpackedPtr<DeviceDescriptor>& descriptor,
            const TogglesState& deviceToggles);
     ~Device() override;
 

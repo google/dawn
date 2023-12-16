@@ -40,7 +40,7 @@ Backend::Backend(InstanceBase* instance, wgpu::BackendType backendType)
     : BackendConnection(instance, backendType) {}
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
-    const RequestAdapterOptions* options) {
+    const UnpackedPtr<RequestAdapterOptions>& options) {
     if (options->forceFallbackAdapter) {
         return {};
     }
@@ -52,9 +52,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     void* (*getProc)(const char* name) = nullptr;
     EGLDisplay display = EGL_NO_DISPLAY;
 
-    const RequestAdapterOptionsGetGLProc* glGetProcOptions = nullptr;
-    FindInChain(options->nextInChain, &glGetProcOptions);
-    if (glGetProcOptions) {
+    if (auto* glGetProcOptions = options.Get<RequestAdapterOptionsGetGLProc>()) {
         getProc = glGetProcOptions->getProc;
         display = glGetProcOptions->display;
     }

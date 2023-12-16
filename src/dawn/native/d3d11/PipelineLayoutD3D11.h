@@ -59,8 +59,9 @@ class PipelineLayout final : public PipelineLayoutBase {
     static constexpr uint32_t kReservedConstantsBindGroupIndex = kMaxBindGroups;
     static constexpr uint32_t kFirstIndexOffsetBindingNumber = 0u;
 
-    static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
-                                                     const PipelineLayoutDescriptor* descriptor);
+    static ResultOrError<Ref<PipelineLayout>> Create(
+        Device* device,
+        const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
 
     using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, uint32_t>>;
     const BindingIndexInfo& GetBindingIndexInfo() const;

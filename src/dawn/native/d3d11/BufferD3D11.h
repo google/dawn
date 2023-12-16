@@ -42,7 +42,7 @@ class ScopedCommandRecordingContext;
 class Buffer final : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const BufferDescriptor* descriptor,
+                                             const UnpackedPtr<BufferDescriptor>& descriptor,
                                              const ScopedCommandRecordingContext* commandContext);
 
     MaybeError EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext);

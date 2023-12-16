@@ -214,7 +214,9 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
     }
 };
 
-MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor) {
+ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
+    DeviceBase* device,
+    const BufferDescriptor* descriptor) {
     UnpackedPtr<BufferDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
 
@@ -273,12 +275,12 @@ MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* 
                     "Buffer size (%u) exceeds the max buffer size limit (%u).", descriptor->size,
                     device->GetLimits().v1.maxBufferSize);
 
-    return {};
+    return unpacked;
 }
 
 // Buffer
 
-BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
+BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : ApiObjectBase(device, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
@@ -318,8 +320,7 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
         }
     }
 
-    const BufferHostMappedPointer* hostMappedDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &hostMappedDesc);
+    auto* hostMappedDesc = descriptor.Get<BufferHostMappedPointer>();
     if (hostMappedDesc != nullptr) {
         mState = BufferState::HostMappedPersistent;
     }

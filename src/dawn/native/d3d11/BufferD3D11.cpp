@@ -34,6 +34,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -151,7 +152,7 @@ size_t D3D11BufferSizeAlignment(wgpu::BufferUsage usage) {
 
 // static
 ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
-                                          const BufferDescriptor* descriptor,
+                                          const UnpackedPtr<BufferDescriptor>& descriptor,
                                           const ScopedCommandRecordingContext* commandContext) {
     Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
     DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation, commandContext));
@@ -597,7 +598,7 @@ MaybeError Buffer::WriteInternal(const ScopedCommandRecordingContext* commandCon
     descriptor.label = "DawnWriteStagingBuffer";
     Ref<BufferBase> stagingBuffer;
     DAWN_TRY_ASSIGN(stagingBuffer,
-                    Buffer::Create(ToBackend(GetDevice()), &descriptor, commandContext));
+                    Buffer::Create(ToBackend(GetDevice()), Unpack(&descriptor), commandContext));
 
     DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
 

@@ -126,7 +126,7 @@ struct ShaderModuleEntryPoint {
 };
 
 MaybeError ValidateAndParseShaderModule(DeviceBase* device,
-                                        const ShaderModuleDescriptor* descriptor,
+                                        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                         ShaderModuleParseResult* parseResult,
                                         OwnedCompilationMessages* outMessages);
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
@@ -293,9 +293,9 @@ class ShaderModuleBase : public ApiObjectBase,
                          public ContentLessObjectCacheable<ShaderModuleBase> {
   public:
     ShaderModuleBase(DeviceBase* device,
-                     const ShaderModuleDescriptor* descriptor,
+                     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                      ApiObjectBase::UntrackedByDeviceTag tag);
-    ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
+    ShaderModuleBase(DeviceBase* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
     ~ShaderModuleBase() override;
 
     static Ref<ShaderModuleBase> MakeError(DeviceBase* device, const char* label);

@@ -27,11 +27,13 @@
 
 #include "dawn/tests/unittests/native/mocks/BufferMock.h"
 
+#include "dawn/native/ChainUtils.h"
+
 namespace dawn::native {
 
 using ::testing::Return;
 
-BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
+BufferMock::BufferMock(DeviceMock* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : BufferBase(device, descriptor) {
     mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
     mAllocatedSize = GetSize();
@@ -42,6 +44,9 @@ BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     });
 }
+
+BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
+    : BufferMock(device, Unpack(descriptor)) {}
 
 BufferMock::~BufferMock() = default;
 
