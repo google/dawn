@@ -1,0 +1,69 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %pos_1 %vertex_point_size
+               OpName %pos_1 "pos_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %VSOut "VSOut"
+               OpMemberName %VSOut 0 "pos"
+               OpName %foo "foo"
+               OpName %out "out"
+               OpName %pos "pos"
+               OpName %main_inner "main_inner"
+               OpName %out_0 "out"
+               OpName %main "main"
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpMemberDecorate %VSOut 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+       %void = OpTypeVoid
+      %VSOut = OpTypeStruct %v4float
+%_ptr_Function_VSOut = OpTypePointer Function %VSOut
+          %9 = OpTypeFunction %void %_ptr_Function_VSOut
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %20 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+         %28 = OpTypeFunction %VSOut
+         %32 = OpConstantNull %VSOut
+         %36 = OpTypeFunction %void
+        %foo = OpFunction %void None %9
+        %out = OpFunctionParameter %_ptr_Function_VSOut
+         %15 = OpLabel
+        %pos = OpVariable %_ptr_Function_v4float Function %5
+               OpStore %pos %20
+         %26 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+         %27 = OpLoad %v4float %pos
+               OpStore %26 %27
+               OpReturn
+               OpFunctionEnd
+ %main_inner = OpFunction %VSOut None %28
+         %30 = OpLabel
+      %out_0 = OpVariable %_ptr_Function_VSOut Function %32
+         %33 = OpFunctionCall %void %foo %out_0
+         %35 = OpLoad %VSOut %out_0
+               OpReturnValue %35
+               OpFunctionEnd
+       %main = OpFunction %void None %36
+         %38 = OpLabel
+         %39 = OpFunctionCall %VSOut %main_inner
+         %40 = OpCompositeExtract %v4float %39 0
+               OpStore %pos_1 %40
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

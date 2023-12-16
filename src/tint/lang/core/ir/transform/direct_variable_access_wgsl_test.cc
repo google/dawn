@@ -621,7 +621,7 @@ fn b() {
 fn c_U() {
   let v_2 = first();
   let v_3 = second();
-  for(var i : i32; (i < 3i); a_U_X_X(10i, array<u32, 2u>(u32(v_2), u32(v_3)), 20i)) {
+  for(var i : i32 = 0i; (i < 3i); a_U_X_X(10i, array<u32, 2u>(u32(v_2), u32(v_3)), 20i)) {
     i = (i + 1i);
   }
 }

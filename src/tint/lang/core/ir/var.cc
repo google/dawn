@@ -58,6 +58,10 @@ Var* Var::Clone(CloneContext& ctx) {
     new_var->binding_point_ = binding_point_;
     new_var->attributes_ = attributes_;
 
+    if (auto* init = Initializer()) {
+        new_var->SetInitializer(ctx.Clone(init));
+    }
+
     auto name = ctx.ir.NameOf(this);
     if (name.IsValid()) {
         ctx.ir.SetName(new_var, name.Name());
