@@ -467,9 +467,11 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, Cap::None, ByteSize(4), kAnyFloat, ComponentCount(3));
 
     // 8 bytes color formats
-    AddColorFormat(wgpu::TextureFormat::RG32Uint, Cap::Renderable | Cap::StorageW, ByteSize(8), SampleTypeBit::Uint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RG32Sint, Cap::Renderable | Cap::StorageW, ByteSize(8), SampleTypeBit::Sint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RG32Float, Cap::Renderable | Cap::StorageW, ByteSize(8), sampleTypeFor32BitFloatFormats, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
+    auto rg32StorageCaps = device->IsCompatibilityMode() ? Cap::None : Cap::StorageW;
+
+    AddColorFormat(wgpu::TextureFormat::RG32Uint, Cap::Renderable | rg32StorageCaps, ByteSize(8), SampleTypeBit::Uint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
+    AddColorFormat(wgpu::TextureFormat::RG32Sint, Cap::Renderable | rg32StorageCaps, ByteSize(8), SampleTypeBit::Sint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
+    AddColorFormat(wgpu::TextureFormat::RG32Float, Cap::Renderable | rg32StorageCaps, ByteSize(8), sampleTypeFor32BitFloatFormats, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
     AddColorFormat(wgpu::TextureFormat::RGBA16Uint, Cap::Renderable | Cap::StorageW | Cap::Multisample, ByteSize(8), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RGBA16Sint, Cap::Renderable | Cap::StorageW | Cap::Multisample, ByteSize(8), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RGBA16Float, Cap::Renderable | Cap::StorageW | Cap::Multisample | Cap::Resolve, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));

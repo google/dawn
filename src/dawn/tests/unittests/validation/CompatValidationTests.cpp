@@ -293,6 +293,30 @@ TEST_F(CompatValidationTest, CanNotUseShaderWithUnsupportedInterpolateTypeOrSamp
     }
 }
 
+TEST_F(CompatValidationTest, CanNotCreateRGxxxStorageTexture) {
+    const wgpu::TextureFormat formats[] = {
+        wgpu::TextureFormat::RGBA8Unorm,  // pass check
+        wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RG32Uint,
+        wgpu::TextureFormat::RG32Float,
+    };
+    for (auto format : formats) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {1, 1, 1};
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.format = format;
+        descriptor.usage = wgpu::TextureUsage::StorageBinding;
+        wgpu::Texture texture;
+
+        if (format == wgpu::TextureFormat::RGBA8Unorm) {
+            texture = device.CreateTexture(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(texture = device.CreateTexture(&descriptor));
+        }
+        texture.Destroy();
+    }
+}
+
 constexpr const char* kRenderTwoTexturesOneBindgroupWGSL = R"(
     @vertex
     fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
