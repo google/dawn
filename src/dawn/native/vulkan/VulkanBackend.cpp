@@ -77,10 +77,11 @@ ExternalImageExportInfoAHardwareBuffer::ExternalImageExportInfoAHardwareBuffer()
 #endif
 
 WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* descriptor) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    auto deviceLock(backendDevice->GetScopedLock());
     switch (descriptor->GetType()) {
 #if DAWN_PLATFORM_IS(ANDROID)
         case ExternalImageType::AHardwareBuffer: {
-            Device* backendDevice = ToBackend(FromAPI(device));
             const ExternalImageDescriptorAHardwareBuffer* ahbDescriptor =
                 static_cast<const ExternalImageDescriptorAHardwareBuffer*>(descriptor);
 
@@ -90,7 +91,6 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
 #elif DAWN_PLATFORM_IS(LINUX)
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
-            Device* backendDevice = ToBackend(FromAPI(device));
             const ExternalImageDescriptorFD* fdDescriptor =
                 static_cast<const ExternalImageDescriptorFD*>(descriptor);
 
@@ -110,13 +110,14 @@ bool ExportVulkanImage(WGPUTexture texture,
     if (texture == nullptr) {
         return false;
     }
+    Texture* backendTexture = ToBackend(FromAPI(texture));
+    Device* device = ToBackend(backendTexture->GetDevice());
+    auto deviceLock(device->GetScopedLock());
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(LINUX)
     switch (info->GetType()) {
         case ExternalImageType::AHardwareBuffer:
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
-            Texture* backendTexture = ToBackend(FromAPI(texture));
-            Device* device = ToBackend(backendTexture->GetDevice());
             ExternalImageExportInfoFD* fdInfo = static_cast<ExternalImageExportInfoFD*>(info);
 
             return device->SignalAndExportExternalTexture(backendTexture, desiredLayout, fdInfo,
