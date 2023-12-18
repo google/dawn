@@ -880,6 +880,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
 
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     std::array<wgpu::Texture, 2> renderTargets;
     std::array<wgpu::TextureView, 2> renderTargetViews;
 

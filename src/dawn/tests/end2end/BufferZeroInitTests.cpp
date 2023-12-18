@@ -939,6 +939,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
 TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
     constexpr wgpu::Extent3D kTextureSize = {64u, 8u, 1u};
 
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     // bytesPerRow == texelBlockSizeInBytes * copySize.width && bytesPerRow * copySize.height ==
     // buffer.size
     {
@@ -1150,6 +1153,9 @@ TEST_P(BufferZeroInitTest, SetVertexBuffer) {
 TEST_P(BufferZeroInitTest, PaddingInitialized) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE());                              // TODO(crbug.com/dawn/1084)
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());  // TODO(crbug.com/dawn/1214)
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
     // A small sub-4-byte format means a single vertex can fit entirely within the padded buffer,

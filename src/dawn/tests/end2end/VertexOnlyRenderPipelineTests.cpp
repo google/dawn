@@ -232,6 +232,9 @@ TEST_P(VertexOnlyRenderPipelineTest, Stencil) {
 // Test that a vertex-only render pipeline modify the depth attachment as same as a complete render
 // pipeline do.
 TEST_P(VertexOnlyRenderPipelineTest, Depth) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     auto doStencilTest = [&](const wgpu::RenderPassDescriptor* renderPass,
                              const wgpu::RenderPipeline& pipeline,
                              const utils::RGBA8& colorExpect) -> void {

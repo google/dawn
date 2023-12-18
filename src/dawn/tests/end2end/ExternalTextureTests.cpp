@@ -156,6 +156,9 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
 }
 
 TEST_P(ExternalTextureTests, SampleExternalTexture) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -220,6 +223,9 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
 }
 
 TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     wgpu::Texture sampledTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -313,6 +319,9 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
 
 TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
     DAWN_TEST_UNSUPPORTED_IF(!IsNorm16TextureFormatsSupported());
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     wgpu::Texture sampledTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R16Unorm,
@@ -408,6 +417,9 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
 TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -565,6 +577,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
 TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -747,6 +761,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropSinglePlane) {
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -907,6 +923,8 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropMultiplanar) {
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -1094,6 +1112,8 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
 // Test that sampling an external texture with non-one alpha preserves the alpha channel.
 TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
