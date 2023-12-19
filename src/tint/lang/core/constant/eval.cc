@@ -3268,6 +3268,34 @@ Eval::Result Eval::pack4x8unorm(const core::type::Type* ty,
     return CreateScalar(source, ty, ret);
 }
 
+Eval::Result Eval::pack4xI8(const core::type::Type* ty,
+                            VectorRef<const Value*> args,
+                            const Source& source) {
+    auto* e = args[0];
+    auto e0 = e->Index(0)->ValueAs<i32>();
+    auto e1 = e->Index(1)->ValueAs<i32>();
+    auto e2 = e->Index(2)->ValueAs<i32>();
+    auto e3 = e->Index(3)->ValueAs<i32>();
+
+    int32_t mask = 0xff;
+    u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
+    return CreateScalar(source, ty, ret);
+}
+
+Eval::Result Eval::pack4xU8(const core::type::Type* ty,
+                            VectorRef<const Value*> args,
+                            const Source& source) {
+    auto* e = args[0];
+    auto e0 = e->Index(0)->ValueAs<u32>();
+    auto e1 = e->Index(1)->ValueAs<u32>();
+    auto e2 = e->Index(2)->ValueAs<u32>();
+    auto e3 = e->Index(3)->ValueAs<u32>();
+
+    uint32_t mask = 0xff;
+    u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
+    return CreateScalar(source, ty, ret);
+}
+
 Eval::Result Eval::pow(const core::type::Type* ty,
                        VectorRef<const Value*> args,
                        const Source& source) {

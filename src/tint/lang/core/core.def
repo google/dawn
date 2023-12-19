@@ -632,6 +632,8 @@ match workgroup
 @must_use @const fn pack2x16unorm(vec2<f32>) -> u32
 @must_use @const fn pack4x8snorm(vec4<f32>) -> u32
 @must_use @const fn pack4x8unorm(vec4<f32>) -> u32
+@must_use @const fn pack4xI8(vec4<i32>) -> u32
+@must_use @const fn pack4xU8(vec4<u32>) -> u32
 @must_use @const fn pow<T: fa_f32_f16>(T, T) -> T
 @must_use @const fn pow<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @must_use @const fn quantizeToF16(f32) -> f32

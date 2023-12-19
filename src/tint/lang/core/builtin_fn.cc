@@ -219,6 +219,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "pack4x8unorm") {
         return BuiltinFn::kPack4X8Unorm;
     }
+    if (name == "pack4xI8") {
+        return BuiltinFn::kPack4XI8;
+    }
+    if (name == "pack4xU8") {
+        return BuiltinFn::kPack4XU8;
+    }
     if (name == "pow") {
         return BuiltinFn::kPow;
     }
@@ -514,6 +520,10 @@ const char* str(BuiltinFn i) {
             return "pack4x8snorm";
         case BuiltinFn::kPack4X8Unorm:
             return "pack4x8unorm";
+        case BuiltinFn::kPack4XI8:
+            return "pack4xI8";
+        case BuiltinFn::kPack4XU8:
+            return "pack4xU8";
         case BuiltinFn::kPow:
             return "pow";
         case BuiltinFn::kQuantizeToF16:
@@ -690,7 +700,8 @@ bool IsAtomic(BuiltinFn f) {
 }
 
 bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
-    return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed;
+    return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed ||
+           f == BuiltinFn::kPack4XI8 || f == BuiltinFn::kPack4XU8;
 }
 
 bool IsSubgroup(BuiltinFn f) {

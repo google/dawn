@@ -105,6 +105,8 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kPack2X16Unorm)
         CASE(kPack4X8Snorm)
         CASE(kPack4X8Unorm)
+        CASE(kPack4XI8)
+        CASE(kPack4XU8)
         CASE(kPow)
         CASE(kQuantizeToF16)
         CASE(kRadians)

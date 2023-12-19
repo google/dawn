@@ -101,7 +101,8 @@ bool IsAtomic(BuiltinFn f) {
 }
 
 bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
-    return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed;
+    return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed ||
+           f == BuiltinFn::kPack4XI8 || f == BuiltinFn::kPack4XU8;
 }
 
 bool IsSubgroup(BuiltinFn f) {

@@ -777,6 +777,20 @@ class Eval {
                         VectorRef<const Value*> args,
                         const Source& source);
 
+    /// pack4xI8 builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack4xI8(const core::type::Type* ty, VectorRef<const Value*> args, const Source& source);
+
+    /// pack4xU8 builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack4xU8(const core::type::Type* ty, VectorRef<const Value*> args, const Source& source);
+
     /// pow builtin
     /// @param ty the expression type
     /// @param args the input arguments
