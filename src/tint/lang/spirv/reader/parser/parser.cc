@@ -210,6 +210,9 @@ class Parser {
                 case spv::ExecutionModel::GLCompute:
                     func->SetStage(core::ir::Function::PipelineStage::kCompute);
                     break;
+                case spv::ExecutionModel::Fragment:
+                    func->SetStage(core::ir::Function::PipelineStage::kFragment);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled execution model: " << model;
             }
@@ -229,6 +232,8 @@ class Parser {
                     func->SetWorkgroupSize(execution_mode.GetSingleWordInOperand(2),
                                            execution_mode.GetSingleWordInOperand(3),
                                            execution_mode.GetSingleWordInOperand(4));
+                    break;
+                case spv::ExecutionMode::OriginUpperLeft:
                     break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled execution mode: " << mode;

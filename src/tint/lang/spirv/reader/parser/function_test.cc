@@ -30,7 +30,7 @@
 namespace tint::spirv::reader {
 namespace {
 
-TEST_F(SpirvParserTest, EmptyEntryPoint) {
+TEST_F(SpirvParserTest, ComputeShader) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -67,6 +67,28 @@ TEST_F(SpirvParserTest, LocalSize) {
 )",
               R"(
 %main = @compute @workgroup_size(3, 4, 5) func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FragmentShader) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void -> %b1 {
   %b1 = block {
     ret
   }
