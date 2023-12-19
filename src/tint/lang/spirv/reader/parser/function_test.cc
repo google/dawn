@@ -96,6 +96,27 @@ TEST_F(SpirvParserTest, FragmentShader) {
 )");
 }
 
+TEST_F(SpirvParserTest, VertexShader) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main"
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @vertex func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, MultipleEntryPoints) {
     EXPECT_IR(R"(
                OpCapability Shader

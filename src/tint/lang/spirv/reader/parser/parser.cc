@@ -213,6 +213,9 @@ class Parser {
                 case spv::ExecutionModel::Fragment:
                     func->SetStage(core::ir::Function::PipelineStage::kFragment);
                     break;
+                case spv::ExecutionModel::Vertex:
+                    func->SetStage(core::ir::Function::PipelineStage::kVertex);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled execution model: " << model;
             }
