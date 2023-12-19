@@ -205,6 +205,9 @@ class Parser {
                 case spv::Op::OpReturn:
                     dst->Append(b_.Return(current_function_));
                     break;
+                case spv::Op::OpReturnValue:
+                    dst->Append(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());

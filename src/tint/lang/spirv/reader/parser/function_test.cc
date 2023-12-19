@@ -317,5 +317,82 @@ TEST_F(SpirvParserTest, FunctionCall_WithMultipleParams) {
 )");
 }
 
+TEST_F(SpirvParserTest, FunctionCall_ReturnValue) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+   %foo_type = OpTypeFunction %bool
+  %main_type = OpTypeFunction %void
+
+        %foo = OpFunction %bool None %foo_type
+  %foo_start = OpLabel
+               OpReturnValue %true
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %bool %foo
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func():bool -> %b1 {
+  %b1 = block {
+    ret true
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:bool = call %1
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FunctionCall_ParamAndReturnValue) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+   %foo_type = OpTypeFunction %bool %bool
+  %main_type = OpTypeFunction %void
+
+        %foo = OpFunction %bool None %foo_type
+      %param = OpFunctionParameter %bool
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %bool %foo %true
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func(%2:bool):bool -> %b1 {
+  %b1 = block {
+    ret %2
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %4:bool = call %1, true
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
