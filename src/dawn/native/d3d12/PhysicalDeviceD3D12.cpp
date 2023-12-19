@@ -540,13 +540,18 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // By default use the maximum shader-visible heap size allowed.
     deviceToggles->Default(Toggle::UseD3D12SmallShaderVisibleHeapForTesting, false);
 
-    // By default use D3D12 Root Signature Version 1.1 when possible, otherwise we should never
-    // enable this toggle.
-    if (!GetDeviceInfo().supportsRootSignatureVersion1_1) {
+    // By default use D3D12 Root Signature Version 1.1 when possible, otherwise we should force
+    // disable this toggle.
+    // Additionally, DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS was only added in the
+    // Windows 10 2018 Spring Creator's Update. Force disable the toggle if we do not have
+    // at least WWDM 2.4.
+    // https://microsoft.github.io/DirectX-Specs/d3d/ResourceBinding.html#flags-added-in-root-signature-version-11
+    if (!GetDeviceInfo().supportsRootSignatureVersion1_1 || GetDriverVersion()[0] < 24) {
         deviceToggles->ForceSet(Toggle::D3D12UseRootSignatureVersion1_1, false);
+    } else {
+        deviceToggles->Default(Toggle::D3D12UseRootSignatureVersion1_1,
+                               GetDeviceInfo().supportsRootSignatureVersion1_1);
     }
-    deviceToggles->Default(Toggle::D3D12UseRootSignatureVersion1_1,
-                           GetDeviceInfo().supportsRootSignatureVersion1_1);
 
     // By default create MSAA textures with 64KB (D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT)
     // alignment when possible, otherwise we should never enable this toggle.
