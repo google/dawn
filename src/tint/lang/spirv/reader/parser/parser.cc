@@ -75,7 +75,7 @@ class Parser {
             return Failure("failed to build the internal representation of the module");
         }
 
-        // TODO(crbug.com/tint/1907): Emit module-scope variables.
+        EmitModuleScopeVariables();
 
         EmitFunctions();
 
@@ -93,6 +93,8 @@ class Parser {
         switch (sc) {
             case spv::StorageClass::Function:
                 return core::AddressSpace::kFunction;
+            case spv::StorageClass::Private:
+                return core::AddressSpace::kPrivate;
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
@@ -199,6 +201,15 @@ class Parser {
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;
+    }
+
+    /// Emit the module-scope variables.
+    void EmitModuleScopeVariables() {
+        for (auto& inst : spirv_context_->module()->types_values()) {
+            if (inst.opcode() == spv::Op::OpVariable) {
+                ir_.root_block->Append(EmitVar(inst));
+            }
+        }
     }
 
     /// Emit the functions.

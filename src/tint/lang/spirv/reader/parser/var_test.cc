@@ -83,5 +83,64 @@ TEST_F(SpirvParserTest, FunctionVar_Initializer) {
 )");
 }
 
+TEST_F(SpirvParserTest, PrivateVar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %u32_ptr = OpTypePointer Private %u32
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %u32_ptr Private
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%b1 = block {  # root
+  %1:ptr<private, u32, read_write> = var
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, PrivateVar_Initializer) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+     %u32_42 = OpConstant %u32 42
+    %u32_ptr = OpTypePointer Private %u32
+    %ep_type = OpTypeFunction %void
+        %var = OpVariable %u32_ptr Private %u32_42
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%b1 = block {  # root
+  %1:ptr<private, u32, read_write> = var, 42u
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
