@@ -34,9 +34,17 @@ namespace dawn::native::opengl {
 MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
     DAWN_TRY(mVersion.Initialize(getProc));
     if (mVersion.IsES()) {
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
         DAWN_TRY(LoadOpenGLESProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
+#else
+        return DAWN_INTERNAL_ERROR("The OpenGLES backend is not enabled");
+#endif
     } else {
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
         DAWN_TRY(LoadDesktopGLProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
+#else
+        return DAWN_INTERNAL_ERROR("The OpenGL backend is not enabled");
+#endif
     }
 
     return {};

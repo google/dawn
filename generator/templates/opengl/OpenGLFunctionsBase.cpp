@@ -38,6 +38,7 @@ MaybeError OpenGLFunctionsBase::LoadProc(GetProcAddress getProc, T* memberProc, 
     return {};
 }
 
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
 MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int majorVersion, int minorVersion) {
     {% for block in gles_blocks %}
         // OpenGL ES {{block.version.major}}.{{block.version.minor}}
@@ -71,7 +72,9 @@ MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int ma
 
     return {};
 }
+#endif
 
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
 MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GetProcAddress getProc, int majorVersion, int minorVersion) {
     {% for block in desktop_gl_blocks %}
         // Desktop OpenGL {{block.version.major}}.{{block.version.minor}}
@@ -96,6 +99,7 @@ MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GetProcAddress getProc, int m
 
     return {};
 }
+#endif
 
 void OpenGLFunctionsBase::InitializeSupportedGLExtensions() {
     int32_t numExtensions;

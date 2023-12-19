@@ -56,8 +56,12 @@ namespace dawn::native::opengl {
         bool IsGLExtensionSupported(const char* extension) const;
 
       protected:
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
         MaybeError LoadDesktopGLProcs(GetProcAddress getProc, int majorVersion, int minorVersion);
+#endif
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
         MaybeError LoadOpenGLESProcs(GetProcAddress getProc, int majorVersion, int minorVersion);
+#endif
 
       private:
         template<typename T>
