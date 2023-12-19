@@ -87,6 +87,19 @@ class Parser {
         return std::move(ir_);
     }
 
+    /// @param sc a SPIR-V storage class
+    /// @returns the Tint address space for a SPIR-V storage class
+    core::AddressSpace AddressSpace(spv::StorageClass sc) {
+        switch (sc) {
+            case spv::StorageClass::Function:
+                return core::AddressSpace::kFunction;
+            default:
+                TINT_UNIMPLEMENTED()
+                    << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
+                return core::AddressSpace::kUndefined;
+        }
+    }
+
     /// @param type a SPIR-V type object
     /// @returns a Tint type object
     const core::type::Type* Type(const spvtools::opt::analysis::Type* type) {
@@ -115,6 +128,10 @@ class Parser {
                         << "unsupported floating point type width: " << float_ty->width();
                     return ty_.void_();
                 }
+            }
+            case spvtools::opt::analysis::Type::kPointer: {
+                auto* ptr_ty = type->AsPointer();
+                return ty_.ptr(AddressSpace(ptr_ty->storage_class()), Type(ptr_ty->pointee_type()));
             }
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
@@ -259,6 +276,9 @@ class Parser {
                 case spv::Op::OpReturnValue:
                     dst->Append(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
                     break;
+                case spv::Op::OpVariable:
+                    dst->Append(EmitVar(inst));
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -275,6 +295,16 @@ class Parser {
             args.Push(Value(inst.GetSingleWordOperand(i)));
         }
         return b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args));
+    }
+
+    /// @param inst the SPIR-V instruction for OpVariable
+    /// @returns the Tint IR instruction
+    core::ir::Var* EmitVar(const spvtools::opt::Instruction& inst) {
+        auto* var = b_.Var(Type(inst.type_id())->As<core::type::Pointer>());
+        if (inst.NumOperands() > 3) {
+            var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
+        }
+        return var;
     }
 
   private:
