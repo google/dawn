@@ -104,6 +104,18 @@ class Parser {
                     return ty_.u32();
                 }
             }
+            case spvtools::opt::analysis::Type::kFloat: {
+                auto* float_ty = type->AsFloat();
+                if (float_ty->width() == 16) {
+                    return ty_.f16();
+                } else if (float_ty->width() == 32) {
+                    return ty_.f32();
+                } else {
+                    TINT_UNREACHABLE()
+                        << "unsupported floating point type width: " << float_ty->width();
+                    return ty_.void_();
+                }
+            }
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
                 return ty_.void_();
@@ -150,6 +162,17 @@ class Parser {
                 return b_.Constant(i32(i->GetS32BitValue()));
             } else {
                 return b_.Constant(u32(i->GetU32BitValue()));
+            }
+        }
+        if (auto* f = constant->AsFloatConstant()) {
+            auto* float_ty = f->type()->AsFloat();
+            if (float_ty->width() == 16) {
+                return b_.Constant(f16::FromBits(static_cast<uint16_t>(f->words()[0])));
+            } else if (float_ty->width() == 32) {
+                return b_.Constant(f32(f->GetFloat()));
+            } else {
+                TINT_UNREACHABLE() << "unsupported floating point type width";
+                return nullptr;
             }
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
