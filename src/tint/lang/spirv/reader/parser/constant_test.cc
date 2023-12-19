@@ -39,7 +39,8 @@ TEST_F(SpirvParserTest, Constant_Bool) {
        %void = OpTypeVoid
        %bool = OpTypeBool
        %true = OpConstantTrue %bool
-      %false = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+       %null = OpConstantNull %bool
     %void_fn = OpTypeFunction %void
     %fn_type = OpTypeFunction %void %bool
 
@@ -58,6 +59,7 @@ TEST_F(SpirvParserTest, Constant_Bool) {
   %bar_start = OpLabel
           %1 = OpFunctionCall %void %foo %true
           %2 = OpFunctionCall %void %foo %false
+          %3 = OpFunctionCall %void %foo %null
                OpReturn
                OpFunctionEnd
 )",
@@ -65,7 +67,8 @@ TEST_F(SpirvParserTest, Constant_Bool) {
 %4 = func():void -> %b3 {
   %b3 = block {
     %5:void = call %2, true
-    %6:void = call %2, true
+    %6:void = call %2, false
+    %7:void = call %2, false
     ret
   }
 }
@@ -85,6 +88,7 @@ TEST_F(SpirvParserTest, Constant_I32) {
      %i32_n1 = OpConstant %i32 -1
     %i32_max = OpConstant %i32 2147483647
     %i32_min = OpConstant %i32 -2147483648
+   %i32_null = OpConstantNull %i32
     %void_fn = OpTypeFunction %void
     %fn_type = OpTypeFunction %void %i32
 
@@ -106,6 +110,7 @@ TEST_F(SpirvParserTest, Constant_I32) {
           %3 = OpFunctionCall %void %foo %i32_n1
           %4 = OpFunctionCall %void %foo %i32_max
           %5 = OpFunctionCall %void %foo %i32_min
+          %6 = OpFunctionCall %void %foo %i32_null
                OpReturn
                OpFunctionEnd
 )",
@@ -117,6 +122,7 @@ TEST_F(SpirvParserTest, Constant_I32) {
     %7:void = call %2, -1i
     %8:void = call %2, 2147483647i
     %9:void = call %2, -2147483648i
+    %10:void = call %2, 0i
     ret
   }
 }
@@ -134,6 +140,7 @@ TEST_F(SpirvParserTest, Constant_U32) {
       %u32_0 = OpConstant %u32 0
       %u32_1 = OpConstant %u32 1
     %u32_max = OpConstant %u32 4294967295
+    %u32_null = OpConstantNull %u32
     %void_fn = OpTypeFunction %void
     %fn_type = OpTypeFunction %void %u32
 
@@ -153,6 +160,7 @@ TEST_F(SpirvParserTest, Constant_U32) {
           %1 = OpFunctionCall %void %foo %u32_0
           %2 = OpFunctionCall %void %foo %u32_1
           %3 = OpFunctionCall %void %foo %u32_max
+          %4 = OpFunctionCall %void %foo %u32_null
                OpReturn
                OpFunctionEnd
 )",
@@ -162,6 +170,7 @@ TEST_F(SpirvParserTest, Constant_U32) {
     %5:void = call %2, 0u
     %6:void = call %2, 1u
     %7:void = call %2, 4294967295u
+    %8:void = call %2, 0u
     ret
   }
 }
@@ -182,6 +191,7 @@ TEST_F(SpirvParserTest, Constant_F16) {
     %f16_max = OpConstant %f16 0x1.ffcp+15
     %f16_min = OpConstant %f16 -0x1.ffcp+15
  %f16_denorm = OpConstant %f16 0x0.004p-14
+   %f16_null = OpConstantNull %f16
     %void_fn = OpTypeFunction %void
     %fn_type = OpTypeFunction %void %f16
 
@@ -203,6 +213,7 @@ TEST_F(SpirvParserTest, Constant_F16) {
           %3 = OpFunctionCall %void %foo %f16_max
           %4 = OpFunctionCall %void %foo %f16_min
           %5 = OpFunctionCall %void %foo %f16_denorm
+          %6 = OpFunctionCall %void %foo %f16_null
                OpReturn
                OpFunctionEnd
 )",
@@ -214,6 +225,7 @@ TEST_F(SpirvParserTest, Constant_F16) {
     %7:void = call %2, 65504.0h
     %8:void = call %2, -65504.0h
     %9:void = call %2, 0.00000005960464477539h
+    %10:void = call %2, 0.0h
     ret
   }
 }
@@ -233,6 +245,7 @@ TEST_F(SpirvParserTest, Constant_F32) {
     %f32_max = OpConstant %f32 0x1.fffffep+127
     %f32_min = OpConstant %f32 -0x1.fffffep+127
  %f32_denorm = OpConstant %f32 0x0.000002p-126
+    %f32_null = OpConstantNull %f32
     %void_fn = OpTypeFunction %void
     %fn_type = OpTypeFunction %void %f32
 
@@ -254,6 +267,7 @@ TEST_F(SpirvParserTest, Constant_F32) {
           %3 = OpFunctionCall %void %foo %f32_max
           %4 = OpFunctionCall %void %foo %f32_min
           %5 = OpFunctionCall %void %foo %f32_denorm
+          %6 = OpFunctionCall %void %foo %f32_null
                OpReturn
                OpFunctionEnd
 )",
@@ -265,6 +279,7 @@ TEST_F(SpirvParserTest, Constant_F32) {
     %7:void = call %2, 340282346638528859811704183484516925440.0f
     %8:void = call %2, -340282346638528859811704183484516925440.0f
     %9:void = call %2, 1.40129846e-45f
+    %10:void = call %2, 0.0f
     ret
   }
 }

@@ -169,6 +169,11 @@ class Parser {
     /// @param constant a SPIR-V constant object
     /// @returns a Tint constant object
     core::ir::Constant* Constant(const spvtools::opt::analysis::Constant* constant) {
+        // Handle OpConstantNull for all types.
+        if (constant->AsNullConstant()) {
+            return b_.Constant(ir_.constant_values.Zero(Type(constant->type())));
+        }
+
         if (auto* bool_ = constant->AsBoolConstant()) {
             return b_.Constant(bool_->value());
         }
