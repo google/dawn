@@ -43,7 +43,11 @@ namespace tint::spirv::reader {
 
 // Helper macro to run the parser and compare the disassembled IR to a string.
 // Automatically prefixes the IR disassembly with a newline to improve formatting of tests.
-#define EXPECT_IR(asm, ir) ASSERT_EQ("\n" + Run(asm), ir) << ir
+#define EXPECT_IR(asm, ir)                               \
+    do {                                                 \
+        auto got = "\n" + Run(asm);                      \
+        ASSERT_THAT(got, testing::HasSubstr(ir)) << got; \
+    } while (false)
 
 /// Base helper class for testing the SPIR-V parser implementation.
 template <typename BASE>

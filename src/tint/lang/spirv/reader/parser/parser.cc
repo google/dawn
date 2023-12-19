@@ -45,6 +45,8 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 
+using namespace tint::core::fluent_types;  // NOLINT
+
 namespace tint::spirv::reader {
 
 namespace {
@@ -93,6 +95,15 @@ class Parser {
                 return ty_.void_();
             case spvtools::opt::analysis::Type::kBool:
                 return ty_.bool_();
+            case spvtools::opt::analysis::Type::kInteger: {
+                auto* int_ty = type->AsInteger();
+                TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, ty_.void_());
+                if (int_ty->IsSigned()) {
+                    return ty_.i32();
+                } else {
+                    return ty_.u32();
+                }
+            }
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
                 return ty_.void_();
@@ -131,6 +142,15 @@ class Parser {
     core::ir::Constant* Constant(const spvtools::opt::analysis::Constant* constant) {
         if (auto* bool_ = constant->AsBoolConstant()) {
             return b_.Constant(bool_->value());
+        }
+        if (auto* i = constant->AsIntConstant()) {
+            auto* int_ty = i->type()->AsInteger();
+            TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, nullptr);
+            if (int_ty->IsSigned()) {
+                return b_.Constant(i32(i->GetS32BitValue()));
+            } else {
+                return b_.Constant(u32(i->GetU32BitValue()));
+            }
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;
