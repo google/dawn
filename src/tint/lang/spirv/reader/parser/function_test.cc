@@ -179,5 +179,143 @@ TEST_F(SpirvParserTest, FunctionCall_ForwardReference) {
 )");
 }
 
+TEST_F(SpirvParserTest, FunctionCall_WithParam) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+   %foo_type = OpTypeFunction %void %bool
+  %main_type = OpTypeFunction %void
+
+        %foo = OpFunction %void None %foo_type
+      %param = OpFunctionParameter %bool
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %void %foo %true
+          %2 = OpFunctionCall %void %foo %false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %4:void = call %1, true
+    %5:void = call %1, false
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FunctionCall_Chained_WithParam) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+   %foo_type = OpTypeFunction %void %bool
+  %main_type = OpTypeFunction %void
+
+        %bar = OpFunction %void None %foo_type
+  %bar_param = OpFunctionParameter %bool
+  %bar_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %void None %foo_type
+  %foo_param = OpFunctionParameter %bool
+  %foo_start = OpLabel
+          %3 = OpFunctionCall %void %bar %foo_param
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %void %foo %true
+          %2 = OpFunctionCall %void %foo %false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%3 = func(%4:bool):void -> %b2 {
+  %b2 = block {
+    %5:void = call %1, %4
+    ret
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %7:void = call %3, true
+    %8:void = call %3, false
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FunctionCall_WithMultipleParams) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+   %foo_type = OpTypeFunction %void %bool %bool
+  %main_type = OpTypeFunction %void
+
+        %foo = OpFunction %void None %foo_type
+    %param_1 = OpFunctionParameter %bool
+    %param_2 = OpFunctionParameter %bool
+  %foo_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %void %foo %true %false
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func(%2:bool, %3:bool):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %5:void = call %1, true, false
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

@@ -91,6 +91,8 @@ class Parser {
         switch (type->kind()) {
             case spvtools::opt::analysis::Type::kVoid:
                 return ty_.void_();
+            case spvtools::opt::analysis::Type::kBool:
+                return ty_.bool_();
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
                 return ty_.void_();
@@ -112,12 +114,42 @@ class Parser {
         });
     }
 
+    /// @param id a SPIR-V result ID
+    /// @returns a Tint value object
+    core::ir::Value* Value(uint32_t id) {
+        return values_.GetOrCreate(id, [&]() -> core::ir::Value* {
+            if (auto* c = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id)) {
+                return Constant(c);
+            }
+            TINT_UNREACHABLE() << "missing value for result ID " << id;
+            return nullptr;
+        });
+    }
+
+    /// @param constant a SPIR-V constant object
+    /// @returns a Tint constant object
+    core::ir::Constant* Constant(const spvtools::opt::analysis::Constant* constant) {
+        if (auto* bool_ = constant->AsBoolConstant()) {
+            return b_.Constant(bool_->value());
+        }
+        TINT_UNIMPLEMENTED() << "unhandled constant type";
+        return nullptr;
+    }
+
     /// Emit the functions.
     void EmitFunctions() {
         for (auto& func : *spirv_context_->module()) {
-            // TODO(crbug.com/tint/1907): Emit function parameters as well.
+            Vector<core::ir::FunctionParam*, 4> params;
+            func.ForEachParam([&](spvtools::opt::Instruction* spirv_param) {
+                auto* param = b_.FunctionParam(Type(spirv_param->type_id()));
+                values_.Add(spirv_param->result_id(), param);
+                params.Push(param);
+            });
+
             current_function_ = Function(func.result_id());
+            current_function_->SetParams(std::move(params));
             current_function_->SetReturnType(Type(func.type_id()));
+
             functions_.Add(func.result_id(), current_function_);
             EmitBlock(current_function_->Block(), *func.entry());
         }
@@ -183,8 +215,12 @@ class Parser {
     /// @param inst the SPIR-V instruction for OpFunctionCall
     /// @returns the Tint IR instruction
     core::ir::UserCall* EmitFunctionCall(const spvtools::opt::Instruction& inst) {
-        // TODO(crbug.com/tint/1907): Handle parameters and capture result.
-        return b_.Call(Function(inst.GetSingleWordInOperand(0)));
+        // TODO(crbug.com/tint/1907): Capture result.
+        Vector<core::ir::Value*, 4> args;
+        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
+            args.Push(Value(inst.GetSingleWordOperand(i)));
+        }
+        return b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args));
     }
 
   private:
@@ -199,6 +235,8 @@ class Parser {
     core::ir::Function* current_function_ = nullptr;
     /// A map from a SPIR-V function definition result ID to the corresponding Tint function object.
     Hashmap<uint32_t, core::ir::Function*, 8> functions_;
+    /// A map from a SPIR-V result ID to the corresponding Tint value object.
+    Hashmap<uint32_t, core::ir::Value*, 8> values_;
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
