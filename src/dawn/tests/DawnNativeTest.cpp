@@ -73,10 +73,8 @@ void DawnNativeTest::SetUp() {
 
     wgpu::InstanceDescriptor instanceDesc;
     instanceDesc.nextInChain = &dawnInstanceDesc;
-
     instance = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
-    instance->EnableAdapterBlocklist(false);
 
     wgpu::RequestAdapterOptions options = {};
     options.backendType = wgpu::BackendType::Null;

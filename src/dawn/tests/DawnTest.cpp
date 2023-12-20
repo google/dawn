@@ -411,6 +411,8 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
 
     dawn::native::DawnInstanceDescriptor dawnInstanceDesc;
     dawnInstanceDesc.platform = platform;
+    dawnInstanceDesc.beginCaptureOnStartup = mBeginCaptureOnStartup;
+    dawnInstanceDesc.backendValidationLevel = mBackendValidationLevel;
     dawnInstanceDesc.nextInChain = &instanceToggles;
 
     wgpu::InstanceDescriptor instanceDesc{};
@@ -419,9 +421,6 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
 
     auto instance = std::make_unique<native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
-    instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
-    instance->SetBackendValidationLevel(mBackendValidationLevel);
-    instance->EnableAdapterBlocklist(false);
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
     if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {

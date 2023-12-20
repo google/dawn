@@ -225,6 +225,10 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
             mRuntimeSearchPaths.push_back(dawnDesc->additionalRuntimeSearchPaths[i]);
         }
         SetPlatform(dawnDesc->platform);
+
+        mBackendValidationLevel = dawnDesc->backendValidationLevel;
+        mBeginCaptureOnStartup = dawnDesc->beginCaptureOnStartup;
+        mEnableAdapterBlocklist = dawnDesc->enableAdapterBlocklist;
     }
 
     // Default paths to search are next to the shared library, next to the executable, and

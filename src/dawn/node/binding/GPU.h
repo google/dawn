@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPU_H_
 #define SRC_DAWN_NODE_BINDING_GPU_H_
 
+#include <memory>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 
@@ -50,7 +52,7 @@ class GPU final : public interop::GPU {
 
   private:
     const Flags flags_;
-    dawn::native::Instance instance_;
+    std::unique_ptr<dawn::native::Instance> instance_;
 };
 
 }  // namespace wgpu::binding

@@ -137,6 +137,10 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     const char* const* additionalRuntimeSearchPaths;
     dawn::platform::Platform* platform = nullptr;
 
+    BackendValidationLevel backendValidationLevel = BackendValidationLevel::Disabled;
+    bool beginCaptureOnStartup = false;
+    bool enableAdapterBlocklist = false;
+
     // Equality operators, mostly for testing. Note that this tests
     // strict pointer-pointer equality if the struct contains member pointers.
     bool operator==(const DawnInstanceDescriptor& rhs) const;

@@ -90,7 +90,6 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
     std::vector<wgpu::AdapterProperties> availableAdapterProperties;
     {
         auto instance = std::make_unique<native::Instance>();
-        instance->EnableAdapterBlocklist(false);
         for (const native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
@@ -107,7 +106,6 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
         wgpu::Device device;
 
         auto instance = std::make_unique<native::Instance>();
-        instance->EnableAdapterBlocklist(false);
         for (native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
@@ -137,7 +135,6 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
     std::vector<wgpu::AdapterProperties> availableAdapterProperties;
     {
         auto instance = std::make_unique<native::Instance>();
-        instance->EnableAdapterBlocklist(false);
         for (const native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
@@ -157,7 +154,6 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
         wgpu::Adapter adapter;
 
         auto instance = std::make_unique<native::Instance>();
-        instance->EnableAdapterBlocklist(false);
         // Save a pointer to the instance.
         // It will only be valid as long as the instance is alive.
         WGPUInstance unsafeInstancePtr = instance->Get();
