@@ -4136,7 +4136,7 @@ fn f() {
 fn tint_pack_4xi8(a : vec4<i32>) -> u32 {
   const n = vec4<u32>(0, 8, 16, 24);
   let a_i8 = vec4<u32>(((a & vec4<i32>(255)) << n));
-  return (a_i8[0] | (a_i8[1] | (a_i8[2] | a_i8[3])));
+  return dot(a_i8, vec4<u32>(1));
 }
 
 fn f() {
@@ -4162,7 +4162,7 @@ fn f() {
 fn tint_pack_4xu8(a : vec4<u32>) -> u32 {
   const n = vec4<u32>(0, 8, 16, 24);
   let a_u8 = ((a & vec4<u32>(255)) << n);
-  return (a_u8[0] | (a_u8[1] | (a_u8[2] | a_u8[3])));
+  return dot(a_u8, vec4<u32>(1));
 }
 
 fn f() {

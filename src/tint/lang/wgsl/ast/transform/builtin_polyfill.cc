@@ -955,12 +955,10 @@ struct BuiltinPolyfill::State {
         auto body = tint::Vector{
             // const n = vec4u(0, 8, 16, 24);
             // let a_i8 = vec4u((a & vec4i(0xff)) << n);
-            // return a_i8[0] | a_i8[1] | a_i8[2] | a_i8[3];
+            // return dot(a_i8, vec4u(1));
             b.Decl(b.Const("n", b.Call<vec4u>(0_a, 8_a, 16_a, 24_a))),
             b.Decl(b.Let("a_i8", b.Call<vec4u>(b.Shl(b.And("a", b.Call<vec4i>(0xff_a)), "n")))),
-            b.Return(b.Or(b.IndexAccessor("a_i8", 0_a),
-                          b.Or(b.IndexAccessor("a_i8", 1_a),
-                               b.Or(b.IndexAccessor("a_i8", 2_a), b.IndexAccessor("a_i8", 3_a))))),
+            b.Return(b.Call("dot", "a_i8", b.Call<vec4u>(1_a))),
         };
         b.Func(name,
                tint::Vector{
@@ -980,13 +978,11 @@ struct BuiltinPolyfill::State {
 
         auto body = tint::Vector{
             // const n = vec4u(0, 8, 16, 24);
-            // let a_i8 = (a & vec4u(0xff)) << n;
-            // return a_i8[0] | a_i8[1] | a_i8[2] | a_i8[3];
+            // let a_u8 = (a & vec4u(0xff)) << n;
+            // return dot(a_u8, vec4u(1));
             b.Decl(b.Const("n", b.Call<vec4u>(0_a, 8_a, 16_a, 24_a))),
             b.Decl(b.Let("a_u8", b.Shl(b.And("a", b.Call<vec4u>(0xff_a)), "n"))),
-            b.Return(b.Or(b.IndexAccessor("a_u8", 0_a),
-                          b.Or(b.IndexAccessor("a_u8", 1_a),
-                               b.Or(b.IndexAccessor("a_u8", 2_a), b.IndexAccessor("a_u8", 3_a))))),
+            b.Return(b.Call("dot", "a_u8", b.Call<vec4u>(1_a))),
         };
         b.Func(name,
                tint::Vector{

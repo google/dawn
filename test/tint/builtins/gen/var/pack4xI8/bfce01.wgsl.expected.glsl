@@ -1,8 +1,12 @@
 #version 310 es
 
+uint tint_int_dot(uvec4 a, uvec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
 uint tint_pack_4xi8(ivec4 a) {
   uvec4 a_i8 = uvec4(((a & ivec4(255)) << uvec4(0u, 8u, 16u, 24u)));
-  return (a_i8[0] | (a_i8[1] | (a_i8[2] | a_i8[3])));
+  return tint_int_dot(a_i8, uvec4(1u));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -31,9 +35,13 @@ void main() {
 #version 310 es
 precision highp float;
 
+uint tint_int_dot(uvec4 a, uvec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
 uint tint_pack_4xi8(ivec4 a) {
   uvec4 a_i8 = uvec4(((a & ivec4(255)) << uvec4(0u, 8u, 16u, 24u)));
-  return (a_i8[0] | (a_i8[1] | (a_i8[2] | a_i8[3])));
+  return tint_int_dot(a_i8, uvec4(1u));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -56,9 +64,13 @@ void main() {
 }
 #version 310 es
 
+uint tint_int_dot(uvec4 a, uvec4 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
 uint tint_pack_4xi8(ivec4 a) {
   uvec4 a_i8 = uvec4(((a & ivec4(255)) << uvec4(0u, 8u, 16u, 24u)));
-  return (a_i8[0] | (a_i8[1] | (a_i8[2] | a_i8[3])));
+  return tint_int_dot(a_i8, uvec4(1u));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

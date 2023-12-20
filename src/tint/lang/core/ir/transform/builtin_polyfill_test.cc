@@ -1434,13 +1434,8 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xI8) {
     %5:vec4<i32> = and %arg, %4
     %6:vec4<i32> = shiftl %5, %3
     %7:vec4<u32> = convert %6
-    %8:u32 = access %7, 0u
-    %9:u32 = access %7, 1u
-    %10:u32 = access %7, 2u
-    %11:u32 = access %7, 3u
-    %12:u32 = or %10, %11
-    %13:u32 = or %9, %12
-    %result:u32 = or %8, %13
+    %8:vec4<u32> = construct 1u
+    %result:u32 = dot %7, %8
     ret %result
   }
 }
@@ -1473,13 +1468,8 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xU8) {
     %4:vec4<u32> = construct 255u
     %5:vec4<u32> = and %arg, %4
     %6:vec4<u32> = shiftl %5, %3
-    %7:u32 = access %6, 0u
-    %8:u32 = access %6, 1u
-    %9:u32 = access %6, 2u
-    %10:u32 = access %6, 3u
-    %11:u32 = or %9, %10
-    %12:u32 = or %8, %11
-    %result:u32 = or %7, %12
+    %7:vec4<u32> = construct 1u
+    %result:u32 = dot %6, %7
     ret %result
   }
 }
