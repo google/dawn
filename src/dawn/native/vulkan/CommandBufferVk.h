@@ -46,6 +46,10 @@ namespace dawn::native::vulkan {
 struct CommandRecordingContext;
 class Device;
 
+MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
+                                 Device* device,
+                                 BeginRenderPassCmd* renderPass);
+
 class CommandBuffer final : public CommandBufferBase {
   public:
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,

@@ -1048,9 +1048,6 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
 
 // Test that if the texture is uninitialized, it is cleared on first use.
 TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
-    // TODO(dawn:1745): Diagnose and fix on Android Qualcomm.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1063,79 +1060,89 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
             continue;
         }
 
-        wgpu::Texture texture = memory.CreateTexture();
+        // Helper function to test that unintialized textures are lazy cleared upon use.
+        auto DoTest = [&](auto UseTexture) {
+            wgpu::Texture texture = memory.CreateTexture();
 
-        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
-        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+            wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+            auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
 
-        wgpu::SharedTextureMemoryEndAccessState endState = {};
-        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+            wgpu::SharedTextureMemoryEndAccessState endState = {};
+            auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
 
-        // First fill the texture with data, so we can check that using it uninitialized
-        // makes it black.
-        {
-            wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(device, texture);
+            // First fill the texture with data, so we can check that using it uninitialized
+            // makes it black.
+            {
+                wgpu::CommandBuffer commandBuffer =
+                    MakeFourColorsClearCommandBuffer(device, texture);
 
-            beginDesc.initialized = true;
-            memory.BeginAccess(texture, &beginDesc);
-            device.GetQueue().Submit(1, &commandBuffer);
-            memory.EndAccess(texture, &endState);
-        }
+                beginDesc.initialized = true;
+                memory.BeginAccess(texture, &beginDesc);
+                device.GetQueue().Submit(1, &commandBuffer);
+                memory.EndAccess(texture, &endState);
+            }
 
-        // Now, BeginAccess on the texture as uninitialized.
-        beginDesc.fenceCount = endState.fenceCount;
-        beginDesc.fences = endState.fences;
-        beginDesc.signaledValues = endState.signaledValues;
-        beginDesc.initialized = false;
-        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
-        memory.BeginAccess(texture, &beginDesc);
-
-        // Use the texture on the GPU which should lazy clear it.
-        if (properties.usage & wgpu::TextureUsage::CopySrc) {
-            UseInCopy(device, texture);
-        } else {
-            DAWN_ASSERT(properties.usage & wgpu::TextureUsage::RenderAttachment);
-            UseInRenderPass(device, texture);
-        }
-
-        AsNonConst(endState.initialized) = false;  // should be overrwritten
-        memory.EndAccess(texture, &endState);
-        // The texture should be initialized now.
-        EXPECT_TRUE(endState.initialized);
-
-        // Begin access again - and check that the texture contents are zero.
-        {
-            auto [commandBuffer, colorTarget] = MakeCheckBySamplingCommandBuffer(device, texture);
-
+            // Now, BeginAccess on the texture as uninitialized.
             beginDesc.fenceCount = endState.fenceCount;
             beginDesc.fences = endState.fences;
             beginDesc.signaledValues = endState.signaledValues;
-            beginDesc.initialized = endState.initialized;
-
+            beginDesc.initialized = false;
             backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
             memory.BeginAccess(texture, &beginDesc);
-            device.GetQueue().Submit(1, &commandBuffer);
-            memory.EndAccess(texture, &endState);
 
-            uint8_t alphaVal;
-            switch (properties.format) {
-                case wgpu::TextureFormat::RGBA8Unorm:
-                case wgpu::TextureFormat::BGRA8Unorm:
-                case wgpu::TextureFormat::RGB10A2Unorm:
-                case wgpu::TextureFormat::RGBA16Float:
-                    alphaVal = 0;
-                    break;
-                default:
-                    // The test checks by sampling. Formats that don't
-                    // have alpha return 1 for alpha when sampled in a shader.
-                    alphaVal = 255;
-                    break;
+            // Use the texture on the GPU which should lazy clear it.
+            UseTexture(texture);
+
+            AsNonConst(endState.initialized) = false;  // should be overrwritten
+            memory.EndAccess(texture, &endState);
+            // The texture should be initialized now.
+            EXPECT_TRUE(endState.initialized);
+
+            // Begin access again - and check that the texture contents are zero.
+            {
+                auto [commandBuffer, colorTarget] =
+                    MakeCheckBySamplingCommandBuffer(device, texture);
+
+                beginDesc.fenceCount = endState.fenceCount;
+                beginDesc.fences = endState.fences;
+                beginDesc.signaledValues = endState.signaledValues;
+                beginDesc.initialized = endState.initialized;
+
+                backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+                memory.BeginAccess(texture, &beginDesc);
+                device.GetQueue().Submit(1, &commandBuffer);
+                memory.EndAccess(texture, &endState);
+
+                uint8_t alphaVal;
+                switch (properties.format) {
+                    case wgpu::TextureFormat::RGBA8Unorm:
+                    case wgpu::TextureFormat::BGRA8Unorm:
+                    case wgpu::TextureFormat::RGB10A2Unorm:
+                    case wgpu::TextureFormat::RGBA16Float:
+                        alphaVal = 0;
+                        break;
+                    default:
+                        // The test checks by sampling. Formats that don't
+                        // have alpha return 1 for alpha when sampled in a shader.
+                        alphaVal = 255;
+                        break;
+                }
+                std::vector<utils::RGBA8> expected(texture.GetWidth() * texture.GetHeight(),
+                                                   utils::RGBA8{0, 0, 0, alphaVal});
+                EXPECT_TEXTURE_EQ(device, expected.data(), colorTarget, {0, 0},
+                                  {colorTarget.GetWidth(), colorTarget.GetHeight()})
+                    << "format: " << static_cast<uint32_t>(properties.format);
             }
-            std::vector<utils::RGBA8> expected(texture.GetWidth() * texture.GetHeight(),
-                                               utils::RGBA8{0, 0, 0, alphaVal});
-            EXPECT_TEXTURE_EQ(device, expected.data(), colorTarget, {0, 0},
-                              {colorTarget.GetWidth(), colorTarget.GetHeight()})
-                << "format: " << static_cast<uint32_t>(properties.format);
+        };
+
+        // Test that using a texture in a render pass lazy clears it.
+        if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
+            DoTest([&](wgpu::Texture& texture) { UseInRenderPass(device, texture); });
+        }
+
+        // Teset that using a texture in a copy lazy clears it.
+        if (properties.usage & wgpu::TextureUsage::CopySrc) {
+            DoTest([&](wgpu::Texture& texture) { UseInCopy(device, texture); });
         }
     }
 }

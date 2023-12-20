@@ -37,6 +37,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/BufferVk.h"
+#include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContext.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -1447,20 +1448,116 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
     const bool isZero = clearValue == TextureBase::ClearValue::Zero;
     uint32_t uClearColor = isZero ? 0 : 1;
-    int32_t sClearColor = isZero ? 0 : 1;
     float fClearColor = isZero ? 0.f : 1.f;
-
-    TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, wgpu::ShaderStage::None,
-                       range);
 
     VkImageSubresourceRange imageRange = {};
     imageRange.levelCount = 1;
     imageRange.layerCount = 1;
 
-    if (GetFormat().isCompressed || GetFormat().IsMultiPlanar()) {
+    if ((GetInternalUsage() & wgpu::TextureUsage::RenderAttachment) && GetFormat().IsColor() &&
+        !GetFormat().IsMultiPlanar()) {
+        TransitionUsageNow(recordingContext, wgpu::TextureUsage::RenderAttachment,
+                           wgpu::ShaderStage::None, range);
+
+        for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+             ++level) {
+            for (uint32_t layer = range.baseArrayLayer;
+                 layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                Aspect aspects = Aspect::None;
+                for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                    if (clearValue == TextureBase::ClearValue::Zero &&
+                        IsSubresourceContentInitialized(
+                            SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
+                        // Skip lazy clears if already initialized.
+                        continue;
+                    }
+                    aspects |= aspect;
+                }
+
+                if (aspects == Aspect::None) {
+                    continue;
+                }
+
+                Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level, aspects);
+                BeginRenderPassCmd beginCmd{};
+                beginCmd.width = mipSize.width;
+                beginCmd.height = mipSize.height;
+
+                TextureViewDescriptor viewDesc = {};
+                viewDesc.format = GetFormat().format;
+                viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+                viewDesc.baseMipLevel = level;
+                viewDesc.mipLevelCount = 1u;
+                viewDesc.baseArrayLayer = layer;
+                viewDesc.arrayLayerCount = 1u;
+
+                ColorAttachmentIndex ca0(uint8_t(0));
+                DAWN_TRY_ASSIGN(beginCmd.colorAttachments[ca0].view,
+                                TextureView::Create(this, &viewDesc));
+
+                RenderPassColorAttachment colorAttachment{};
+                colorAttachment.view = beginCmd.colorAttachments[ca0].view.Get();
+                beginCmd.colorAttachments[ca0].clearColor = colorAttachment.clearValue = {
+                    fClearColor, fClearColor, fClearColor, fClearColor};
+                beginCmd.colorAttachments[ca0].loadOp = colorAttachment.loadOp =
+                    wgpu::LoadOp::Clear;
+                beginCmd.colorAttachments[ca0].storeOp = colorAttachment.storeOp =
+                    wgpu::StoreOp::Store;
+
+                RenderPassDescriptor passDesc{};
+                passDesc.colorAttachmentCount = 1u;
+                passDesc.colorAttachments = &colorAttachment;
+                beginCmd.attachmentState = device->GetOrCreateAttachmentState(Unpack(&passDesc));
+
+                DAWN_TRY(
+                    RecordBeginRenderPass(recordingContext, ToBackend(GetDevice()), &beginCmd));
+                ToBackend(GetDevice())->fn.CmdEndRenderPass(recordingContext->commandBuffer);
+            }
+        }
+    } else if (GetFormat().HasDepthOrStencil()) {
+        TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, wgpu::ShaderStage::None,
+                           range);
+
+        for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+             ++level) {
+            imageRange.baseMipLevel = level;
+            for (uint32_t layer = range.baseArrayLayer;
+                 layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                Aspect aspects = Aspect::None;
+                for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                    if (clearValue == TextureBase::ClearValue::Zero &&
+                        IsSubresourceContentInitialized(
+                            SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
+                        // Skip lazy clears if already initialized.
+                        continue;
+                    }
+                    aspects |= aspect;
+                }
+
+                if (aspects == Aspect::None) {
+                    continue;
+                }
+
+                imageRange.aspectMask = VulkanAspectMask(aspects);
+                imageRange.baseMipLevel = level;
+                imageRange.baseArrayLayer = layer;
+
+                VkClearDepthStencilValue clearDepthStencilValue[1];
+                clearDepthStencilValue[0].depth = fClearColor;
+                clearDepthStencilValue[0].stencil = uClearColor;
+                device->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
+                                                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                     clearDepthStencilValue, 1, &imageRange);
+            }
+        }
+    } else {
         if (range.aspects == Aspect::None) {
             return {};
         }
+
+        TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, wgpu::ShaderStage::None,
+                           range);
+
         // need to clear the texture with a copy from buffer
         DAWN_ASSERT(range.aspects == Aspect::Color || range.aspects == Aspect::Plane0 ||
                     range.aspects == Aspect::Plane1 || range.aspects == Aspect::Plane2);
@@ -1510,67 +1607,6 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         device->fn.CmdCopyBufferToImage(
             recordingContext->commandBuffer, ToBackend(uploadHandle.stagingBuffer)->GetHandle(),
             GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
-    } else {
-        for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
-             ++level) {
-            imageRange.baseMipLevel = level;
-            for (uint32_t layer = range.baseArrayLayer;
-                 layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                Aspect aspects = Aspect::None;
-                for (Aspect aspect : IterateEnumMask(range.aspects)) {
-                    if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(
-                            SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
-                        // Skip lazy clears if already initialized.
-                        continue;
-                    }
-                    aspects |= aspect;
-                }
-
-                if (aspects == Aspect::None) {
-                    continue;
-                }
-
-                imageRange.aspectMask = VulkanAspectMask(aspects);
-                imageRange.baseArrayLayer = layer;
-
-                if (aspects & (Aspect::Depth | Aspect::Stencil | Aspect::CombinedDepthStencil)) {
-                    VkClearDepthStencilValue clearDepthStencilValue[1];
-                    clearDepthStencilValue[0].depth = fClearColor;
-                    clearDepthStencilValue[0].stencil = uClearColor;
-                    device->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer,
-                                                         GetHandle(),
-                                                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                         clearDepthStencilValue, 1, &imageRange);
-                } else {
-                    DAWN_ASSERT(aspects == Aspect::Color);
-                    VkClearColorValue clearColorValue;
-                    switch (GetFormat().GetAspectInfo(Aspect::Color).baseType) {
-                        case TextureComponentType::Float:
-                            clearColorValue.float32[0] = fClearColor;
-                            clearColorValue.float32[1] = fClearColor;
-                            clearColorValue.float32[2] = fClearColor;
-                            clearColorValue.float32[3] = fClearColor;
-                            break;
-                        case TextureComponentType::Sint:
-                            clearColorValue.int32[0] = sClearColor;
-                            clearColorValue.int32[1] = sClearColor;
-                            clearColorValue.int32[2] = sClearColor;
-                            clearColorValue.int32[3] = sClearColor;
-                            break;
-                        case TextureComponentType::Uint:
-                            clearColorValue.uint32[0] = uClearColor;
-                            clearColorValue.uint32[1] = uClearColor;
-                            clearColorValue.uint32[2] = uClearColor;
-                            clearColorValue.uint32[3] = uClearColor;
-                            break;
-                    }
-                    device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
-                                                  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                  &clearColorValue, 1, &imageRange);
-                }
-            }
-        }
     }
 
     if (clearValue == TextureBase::ClearValue::Zero) {

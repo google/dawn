@@ -262,6 +262,100 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
     return {};
 }
 
+// Reset the query sets used on render pass because the reset command must be called outside
+// render pass.
+void ResetUsedQuerySetsOnRenderPass(Device* device,
+                                    VkCommandBuffer commands,
+                                    QuerySetBase* querySet,
+                                    const std::vector<bool>& availability) {
+    DAWN_ASSERT(availability.size() == querySet->GetQueryAvailability().size());
+
+    auto currentIt = availability.begin();
+    auto lastIt = availability.end();
+    // Traverse the used queries which availability are true.
+    while (currentIt != lastIt) {
+        auto firstTrueIt = std::find(currentIt, lastIt, true);
+        // No used queries need to be reset
+        if (firstTrueIt == lastIt) {
+            break;
+        }
+
+        auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
+
+        uint32_t queryIndex = std::distance(availability.begin(), firstTrueIt);
+        uint32_t queryCount = std::distance(firstTrueIt, nextFalseIt);
+
+        // Reset the queries between firstTrueIt and nextFalseIt (which is at most
+        // lastIt)
+        device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(), queryIndex,
+                                     queryCount);
+
+        // Set current iterator to next false
+        currentIt = nextFalseIt;
+    }
+}
+
+void RecordWriteTimestampCmd(CommandRecordingContext* recordingContext,
+                             Device* device,
+                             QuerySetBase* querySet,
+                             uint32_t queryIndex,
+                             bool isRenderPass,
+                             VkPipelineStageFlagBits pipelineStage) {
+    VkCommandBuffer commands = recordingContext->commandBuffer;
+
+    // The queries must be reset between uses, and the reset command cannot be called in render
+    // pass.
+    if (!isRenderPass) {
+        device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(), queryIndex, 1);
+    }
+
+    device->fn.CmdWriteTimestamp(commands, pipelineStage, ToBackend(querySet)->GetHandle(),
+                                 queryIndex);
+}
+
+void RecordResolveQuerySetCmd(VkCommandBuffer commands,
+                              Device* device,
+                              QuerySet* querySet,
+                              uint32_t firstQuery,
+                              uint32_t queryCount,
+                              Buffer* destination,
+                              uint64_t destinationOffset) {
+    const std::vector<bool>& availability = querySet->GetQueryAvailability();
+
+    auto currentIt = availability.begin() + firstQuery;
+    auto lastIt = availability.begin() + firstQuery + queryCount;
+
+    // Traverse available queries in the range of [firstQuery, firstQuery +  queryCount - 1]
+    while (currentIt != lastIt) {
+        auto firstTrueIt = std::find(currentIt, lastIt, true);
+        // No available query found for resolving
+        if (firstTrueIt == lastIt) {
+            break;
+        }
+        auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
+
+        // The query index of firstTrueIt where the resolving starts
+        uint32_t resolveQueryIndex = std::distance(availability.begin(), firstTrueIt);
+        // The queries count between firstTrueIt and nextFalseIt need to be resolved
+        uint32_t resolveQueryCount = std::distance(firstTrueIt, nextFalseIt);
+
+        // Calculate destinationOffset based on the current resolveQueryIndex and firstQuery
+        uint32_t resolveDestinationOffset =
+            destinationOffset + (resolveQueryIndex - firstQuery) * sizeof(uint64_t);
+
+        // Resolve the queries between firstTrueIt and nextFalseIt (which is at most lastIt)
+        device->fn.CmdCopyQueryPoolResults(commands, querySet->GetHandle(), resolveQueryIndex,
+                                           resolveQueryCount, destination->GetHandle(),
+                                           resolveDestinationOffset, sizeof(uint64_t),
+                                           VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+
+        // Set current iterator to next false
+        currentIt = nextFalseIt;
+    }
+}
+
+}  // anonymous namespace
+
 MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                  Device* device,
                                  BeginRenderPassCmd* renderPass) {
@@ -407,100 +501,6 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
     return {};
 }
-
-// Reset the query sets used on render pass because the reset command must be called outside
-// render pass.
-void ResetUsedQuerySetsOnRenderPass(Device* device,
-                                    VkCommandBuffer commands,
-                                    QuerySetBase* querySet,
-                                    const std::vector<bool>& availability) {
-    DAWN_ASSERT(availability.size() == querySet->GetQueryAvailability().size());
-
-    auto currentIt = availability.begin();
-    auto lastIt = availability.end();
-    // Traverse the used queries which availability are true.
-    while (currentIt != lastIt) {
-        auto firstTrueIt = std::find(currentIt, lastIt, true);
-        // No used queries need to be reset
-        if (firstTrueIt == lastIt) {
-            break;
-        }
-
-        auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
-
-        uint32_t queryIndex = std::distance(availability.begin(), firstTrueIt);
-        uint32_t queryCount = std::distance(firstTrueIt, nextFalseIt);
-
-        // Reset the queries between firstTrueIt and nextFalseIt (which is at most
-        // lastIt)
-        device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(), queryIndex,
-                                     queryCount);
-
-        // Set current iterator to next false
-        currentIt = nextFalseIt;
-    }
-}
-
-void RecordWriteTimestampCmd(CommandRecordingContext* recordingContext,
-                             Device* device,
-                             QuerySetBase* querySet,
-                             uint32_t queryIndex,
-                             bool isRenderPass,
-                             VkPipelineStageFlagBits pipelineStage) {
-    VkCommandBuffer commands = recordingContext->commandBuffer;
-
-    // The queries must be reset between uses, and the reset command cannot be called in render
-    // pass.
-    if (!isRenderPass) {
-        device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(), queryIndex, 1);
-    }
-
-    device->fn.CmdWriteTimestamp(commands, pipelineStage, ToBackend(querySet)->GetHandle(),
-                                 queryIndex);
-}
-
-void RecordResolveQuerySetCmd(VkCommandBuffer commands,
-                              Device* device,
-                              QuerySet* querySet,
-                              uint32_t firstQuery,
-                              uint32_t queryCount,
-                              Buffer* destination,
-                              uint64_t destinationOffset) {
-    const std::vector<bool>& availability = querySet->GetQueryAvailability();
-
-    auto currentIt = availability.begin() + firstQuery;
-    auto lastIt = availability.begin() + firstQuery + queryCount;
-
-    // Traverse available queries in the range of [firstQuery, firstQuery +  queryCount - 1]
-    while (currentIt != lastIt) {
-        auto firstTrueIt = std::find(currentIt, lastIt, true);
-        // No available query found for resolving
-        if (firstTrueIt == lastIt) {
-            break;
-        }
-        auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
-
-        // The query index of firstTrueIt where the resolving starts
-        uint32_t resolveQueryIndex = std::distance(availability.begin(), firstTrueIt);
-        // The queries count between firstTrueIt and nextFalseIt need to be resolved
-        uint32_t resolveQueryCount = std::distance(firstTrueIt, nextFalseIt);
-
-        // Calculate destinationOffset based on the current resolveQueryIndex and firstQuery
-        uint32_t resolveDestinationOffset =
-            destinationOffset + (resolveQueryIndex - firstQuery) * sizeof(uint64_t);
-
-        // Resolve the queries between firstTrueIt and nextFalseIt (which is at most lastIt)
-        device->fn.CmdCopyQueryPoolResults(commands, querySet->GetHandle(), resolveQueryIndex,
-                                           resolveQueryCount, destination->GetHandle(),
-                                           resolveDestinationOffset, sizeof(uint64_t),
-                                           VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
-
-        // Set current iterator to next false
-        currentIt = nextFalseIt;
-    }
-}
-
-}  // anonymous namespace
 
 // static
 Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
