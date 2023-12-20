@@ -124,8 +124,12 @@ GPU::GPU(Flags flags) : flags_(std::move(flags)) {
         dawnDesc.backendValidationLevel = dawn::native::BackendValidationLevel::Full;
     }
 
+    TogglesLoader togglesLoader(flags_);
+    DawnTogglesDescriptor togglesDesc = togglesLoader.GetDescriptor();
+    togglesDesc.nextInChain = &dawnDesc;
+
     wgpu::InstanceDescriptor desc;
-    desc.nextInChain = &dawnDesc;
+    desc.nextInChain = &togglesDesc;
     instance_ = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&desc));
 }
