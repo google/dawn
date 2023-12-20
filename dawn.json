@@ -1022,9 +1022,9 @@
         "category": "enum",
         "tags": ["dawn"],
         "values": [
-            {"value": 0, "name": "premultiplied"},
-            {"value": 1, "name": "unpremultiplied"},
-            {"value": 2, "name": "opaque"}
+            {"value": 1, "name": "opaque"},
+            {"value": 2, "name": "premultiplied"},
+            {"value": 3, "name": "unpremultiplied"}
         ]
     },
     "copy texture for browser options": {
@@ -2086,6 +2086,7 @@
     "callback mode": {
         "category": "enum",
         "emscripten_no_enum_table": true,
+        "_comment": "TODO(crbug.com/dawn/2224): Should this be renumbered to reserve 0?",
         "values": [
             {"value": 0, "name": "wait any only"},
             {"value": 1, "name": "allow process events"},
@@ -2278,6 +2279,7 @@
     "present mode": {
         "category": "enum",
         "emscripten_no_enum_table": true,
+        "_comment": "TODO(crbug.com/dawn/2224): Should this be renumbered to reserve 0?",
         "values": [
             {"value": 0, "name": "fifo"},
             {"value": 1, "name": "fifo relaxed", "tags": ["upstream"]},
@@ -2340,8 +2342,8 @@
     "query type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "occlusion"},
-            {"value": 1, "name": "timestamp"}
+            {"value": 1, "name": "occlusion"},
+            {"value": 2, "name": "timestamp"}
         ]
     },
     "queue": {
