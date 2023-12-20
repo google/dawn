@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-12-17 05:01:45AM
+# Last rolled: 2023-12-20 09:24:04AM
 
 # Flaky on all platforms
 # KEEP
@@ -561,6 +561,7 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 # New flakes. Please triage:
 ################################################################################
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,cross:abstract_float:* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_rw" [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
@@ -577,7 +578,7 @@ crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_s
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc4-r-unorm";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc5-rg-snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc5-rg-unorm";dimension="2d" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc6h-rgb-float";dimension="2d" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc6h-rgb-float";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc6h-rgb-ufloat";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc7-rgba-unorm";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="bc7-rgba-unorm-srgb";dimension="2d" [ Failure ]
@@ -612,7 +613,6 @@ crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:offsets_and_s
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
@@ -630,13 +630,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,li
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="sameGroup" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:texture_usage:* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:interpolation_sampling:isAsync=false;output="%40interpolate(linear,%20center)";input="%40interpolate(linear)" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:interpolation_sampling:isAsync=true;output="%40interpolate(linear,%20center)";input="%40interpolate(linear)" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=false;output="%40interpolate(linear,%20center)";input="%40interpolate(linear,%20center)" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=true;output="%40interpolate(linear,%20center)";input="%40interpolate(linear,%20center)" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,shader_module:interpolate:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
@@ -645,8 +638,13 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_r" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xI8Clamp:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xU8Clamp:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,unpack4xI8:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,unpack4xU8:supported:* [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
