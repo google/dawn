@@ -295,8 +295,12 @@ std::vector<const ToggleInfo*> AllToggleInfos() {
     return TogglesInfo::AllToggleInfos();
 }
 
-FeatureInfo GetFeatureInfo(wgpu::FeatureName featureName) {
-    return kFeatureNameAndInfoList[FromAPI(featureName)];
+const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) {
+    Feature f = FromAPI(feature);
+    if (f == Feature::InvalidEnum) {
+        return nullptr;
+    }
+    return &kFeatureNameAndInfoList[FromAPI(feature)];
 }
 
 }  // namespace dawn::native

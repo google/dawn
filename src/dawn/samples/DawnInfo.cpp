@@ -242,9 +242,9 @@ void DumpAdapterFeatures(const wgpu::Adapter& adapter) {
     std::cout << "  ========\n";
     for (const auto& f : features) {
         auto info = dawn::native::GetFeatureInfo(f);
-        std::cout << "   * " << info.name << "\n";
-        std::cout << WrapString(info.description, "      ") << "\n";
-        std::cout << "      " << info.url << "\n";
+        std::cout << "   * " << info->name << "\n";
+        std::cout << WrapString(info->description, "      ") << "\n";
+        std::cout << "      " << info->url << "\n";
     }
 }
 

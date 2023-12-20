@@ -274,7 +274,9 @@ DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);
 
 DAWN_NATIVE_EXPORT std::vector<const ToggleInfo*> AllToggleInfos();
 
-DAWN_NATIVE_EXPORT FeatureInfo GetFeatureInfo(wgpu::FeatureName featureName);
+// Used to query the details of an feature. Return nullptr if featureName is not a valid
+// name of an feature supported in Dawn.
+DAWN_NATIVE_EXPORT const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature);
 
 }  // namespace dawn::native
 
