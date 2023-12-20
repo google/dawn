@@ -2255,6 +2255,105 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
     EXPECT_TRUE(outer_pairs[1].second == inner_pairs_2[0].second);
 }
 
+TEST_F(ResolverTest, TextureSampler_TextureSampleInFunctionPassedAsArguments) {
+    GlobalVar("gt", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Group(1_a),
+              Binding(1_a));
+    GlobalVar("gs", ty.sampler(core::type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
+
+    auto* inner_coords = Param("coords", ty.vec2<f32>());
+    auto* inner_t = Param("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+    auto* inner_s = Param("s", ty.sampler(core::type::SamplerKind::kSampler));
+    auto* inner_call = Assign(Phony(), Call("textureSample", inner_t, inner_s, inner_coords));
+    const ast::Function* inner_func =
+        Func("inner_func", Vector{inner_coords, inner_t, inner_s}, ty.void_(), Vector{inner_call});
+
+    auto* middle_coords = Param("coords", ty.vec2<f32>());
+    auto* middle_s = Param("s", ty.sampler(core::type::SamplerKind::kSampler));
+    auto* middle_t = Param("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+    auto* middle_call = CallStmt(Call("inner_func", middle_coords, "t", "s"));
+    const ast::Function* middle_func = Func(
+        "middle_func", Vector{middle_coords, middle_s, middle_t}, ty.void_(), Vector{middle_call});
+
+    auto* outer_call = CallStmt(Call("middle_func", Call<vec2<f32>>(1_f, 2_f), "gs", "gt"));
+    const ast::Function* outer_func =
+        Func("outer_func", tint::Empty, ty.void_(), Vector{outer_call},
+             Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto inner_pairs = Sem().Get(inner_func)->TextureSamplerPairs();
+    ASSERT_EQ(inner_pairs.Length(), 1u);
+    auto* inner_pair_texture = As<sem::Parameter>(inner_pairs[0].first);
+    ASSERT_NE(inner_pair_texture, nullptr);
+    EXPECT_EQ(inner_pair_texture->Index(), 1u);
+    auto* inner_pair_sampler = As<sem::Parameter>(inner_pairs[0].second);
+    ASSERT_NE(inner_pair_sampler, nullptr);
+    EXPECT_EQ(inner_pair_sampler->Index(), 2u);
+
+    auto middle_pairs = Sem().Get(middle_func)->TextureSamplerPairs();
+    ASSERT_EQ(middle_pairs.Length(), 1u);
+    auto* middle_pair_texture = As<sem::Parameter>(middle_pairs[0].first);
+    ASSERT_NE(middle_pair_texture, nullptr);
+    EXPECT_EQ(middle_pair_texture->Index(), 2u);
+    auto* middle_pair_sampler = As<sem::Parameter>(middle_pairs[0].second);
+    ASSERT_NE(middle_pair_sampler, nullptr);
+    EXPECT_EQ(middle_pair_sampler->Index(), 1u);
+
+    auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
+    ASSERT_EQ(outer_pairs.Length(), 1u);
+    EXPECT_TRUE(outer_pairs[0].first != nullptr);
+    EXPECT_TRUE(outer_pairs[0].second != nullptr);
+}
+
+TEST_F(ResolverTest, TextureSampler_UnusedTextureSampleInFunctionPassedAsArguments) {
+    GlobalVar("gt", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Group(1_a),
+              Binding(1_a));
+    GlobalVar("gs", ty.sampler(core::type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
+
+    auto* inner_coords = Param("coords", ty.vec2<f32>());
+    auto* inner_t = Param("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+    auto* inner_s = Param("s", ty.sampler(core::type::SamplerKind::kSampler));
+    const ast::Function* inner_func =
+        Func("inner_func", Vector{inner_coords, inner_t, inner_s}, ty.void_(), Empty);
+
+    auto* middle_coords = Param("coords", ty.vec2<f32>());
+    auto* middle_s = Param("s", ty.sampler(core::type::SamplerKind::kSampler));
+    auto* middle_t = Param("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+    auto* middle_call = CallStmt(Call("inner_func", middle_coords, "t", "s"));
+    const ast::Function* middle_func = Func(
+        "middle_func", Vector{middle_coords, middle_s, middle_t}, ty.void_(), Vector{middle_call});
+
+    auto* outer_call = CallStmt(Call("middle_func", Call<vec2<f32>>(1_f, 2_f), "gs", "gt"));
+    const ast::Function* outer_func =
+        Func("outer_func", tint::Empty, ty.void_(), Vector{outer_call},
+             Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto inner_pairs = Sem().Get(inner_func)->TextureSamplerPairs();
+    ASSERT_EQ(inner_pairs.Length(), 2u);
+    auto* inner_pair_texture = As<sem::Parameter>(inner_pairs[0].first);
+    ASSERT_NE(inner_pair_texture, nullptr);
+    EXPECT_EQ(inner_pair_texture->Index(), 1u);
+    auto* inner_pair_sampler = As<sem::Parameter>(inner_pairs[1].second);
+    ASSERT_NE(inner_pair_sampler, nullptr);
+    EXPECT_EQ(inner_pair_sampler->Index(), 2u);
+
+    auto middle_pairs = Sem().Get(middle_func)->TextureSamplerPairs();
+    ASSERT_EQ(middle_pairs.Length(), 2u);
+    auto* middle_pair_texture = As<sem::Parameter>(middle_pairs[0].first);
+    ASSERT_NE(middle_pair_texture, nullptr);
+    EXPECT_EQ(middle_pair_texture->Index(), 2u);
+    auto* middle_pair_sampler = As<sem::Parameter>(middle_pairs[1].second);
+    ASSERT_NE(middle_pair_sampler, nullptr);
+    EXPECT_EQ(middle_pair_sampler->Index(), 1u);
+
+    auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
+    ASSERT_EQ(outer_pairs.Length(), 2u);
+    EXPECT_TRUE(outer_pairs[0].first != nullptr);
+    EXPECT_TRUE(outer_pairs[1].second != nullptr);
+}
+
 TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
     GlobalVar("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Group(1_a),
               Binding(2_a));

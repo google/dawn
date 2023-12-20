@@ -1008,14 +1008,14 @@ fn main() {
 }
 )";
     auto* expect = R"(
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
-
-fn f() -> u32 {
+fn f(tex_1 : texture_2d<f32>) -> u32 {
   return 1u;
 }
 
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
+
 fn main() {
-  _ = f();
+  _ = f(t_1);
 }
 )";
 
@@ -1039,14 +1039,14 @@ fn main() {
 }
 )";
     auto* expect = R"(
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
-fn f() -> u32 {
+fn f(sampler1_1 : sampler) -> u32 {
   return 1u;
 }
 
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
+
 fn main() {
-  _ = f();
+  _ = f(s_1);
 }
 )";
 
@@ -1072,16 +1072,16 @@ fn main() {
 }
 )";
     auto* expect = R"(
+fn f(sampler1_1 : sampler, tex_1 : texture_2d<f32>) -> u32 {
+  return 1u;
+}
+
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
 
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
 
-fn f() -> u32 {
-  return 1u;
-}
-
 fn main() {
-  _ = f();
+  _ = f(s_1, t_1);
 }
 )";
 
@@ -1109,18 +1109,18 @@ fn main() {
 }
 )";
     auto* expect = R"(
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t1_1 : texture_2d<f32>;
-
-fn f(tex3_1 : texture_2d_array<f32>) -> u32 {
+fn f(sampler1_1 : sampler, tex3_1 : texture_2d_array<f32>, tex1_1 : texture_2d<f32>) -> u32 {
   return (1u + textureNumLayers(tex3_1));
 }
 
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
+
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t2_1 : texture_2d_array<f32>;
 
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t1_1 : texture_2d<f32>;
+
 fn main() {
-  _ = f(t2_1);
+  _ = f(s_1, t2_1, t1_1);
 }
 )";
 
