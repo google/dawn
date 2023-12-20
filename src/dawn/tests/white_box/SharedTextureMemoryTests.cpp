@@ -1667,6 +1667,87 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
     }
 }
 
+// Test that textures created from SharedTextureMemory may perform sRGB reinterpretation.
+TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
+    // TODO(crbug.com/dawn/2304): Implement on Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memories[1].GetProperties(&properties);
+
+        wgpu::TextureDescriptor textureDesc = {};
+        textureDesc.format = properties.format;
+        textureDesc.size = properties.size;
+        textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
+
+        wgpu::TextureViewDescriptor viewDesc = {};
+        if (properties.format == wgpu::TextureFormat::RGBA8Unorm) {
+            viewDesc.format = wgpu::TextureFormat::RGBA8UnormSrgb;
+        } else if (properties.format == wgpu::TextureFormat::BGRA8Unorm) {
+            viewDesc.format = wgpu::TextureFormat::BGRA8UnormSrgb;
+        } else {
+            continue;
+        }
+
+        textureDesc.viewFormatCount = 1;
+        textureDesc.viewFormats = &viewDesc.format;
+
+        // Create the texture on device 1.
+        wgpu::Texture texture = memories[1].CreateTexture(&textureDesc);
+
+        // Submit a clear operation to sRGB value rgb(234, 51, 35).
+        utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView(&viewDesc)}, {});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {234.0 / 255.0, 51.0 / 255.0,
+                                                                35.0 / 255.0, 1.0};
+        wgpu::CommandEncoder encoder = devices[1].CreateCommandEncoder();
+        encoder.BeginRenderPass(&renderPassDescriptor).End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+
+        memories[1].BeginAccess(texture, &beginDesc);
+        devices[1].GetQueue().Submit(1, &commands);
+        memories[1].EndAccess(texture, &endState);
+
+        // Create the texture on device 0.
+        texture = memories[0].CreateTexture();
+
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[0], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        memories[0].BeginAccess(texture, &beginDesc);
+
+        // Expect the contents to be approximately rgb(246 124 104)
+        if (properties.format == wgpu::TextureFormat::RGBA8Unorm) {
+            EXPECT_PIXEL_RGBA8_BETWEEN(            //
+                utils::RGBA8(245, 123, 103, 255),  //
+                utils::RGBA8(247, 125, 105, 255), texture, 0, 0);
+        } else {
+            EXPECT_PIXEL_RGBA8_BETWEEN(            //
+                utils::RGBA8(103, 123, 245, 255),  //
+                utils::RGBA8(105, 125, 247, 255), texture, 0, 0);
+        }
+    }
+}
+
 class SharedTextureMemoryVulkanTests : public DawnTest {};
 
 // Test that only a single Vulkan fence feature may be enabled at once.
