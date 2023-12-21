@@ -197,7 +197,7 @@ float frag_main_inner(float4 coord) {
 }
 
 tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  const float inner_result = frag_main_inner(tint_symbol.coord);
+  const float inner_result = frag_main_inner(float4(tint_symbol.coord.xyz, (1.0f / tint_symbol.coord.w)));
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -282,7 +282,7 @@ void frag_main_inner(Interface inputs) {
 }
 
 void frag_main(tint_symbol_2 tint_symbol_1) {
-  const Interface tint_symbol_4 = {tint_symbol_1.pos, tint_symbol_1.col1, tint_symbol_1.col2};
+  const Interface tint_symbol_4 = {float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w)), tint_symbol_1.col1, tint_symbol_1.col2};
   frag_main_inner(tint_symbol_4);
   return;
 }

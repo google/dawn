@@ -2217,6 +2217,58 @@ TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollideMixedStructDef) {
     device.CreateRenderPipeline(&desc);
 }
 
+// Test that the `w` component of fragment builtin position behaves correctly.
+TEST_P(ShaderTests, FragmentPositionW) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+@vertex fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4f {
+  let pos = array(
+    vec4f(-1.0, -1.0, 0.0, 2.0),
+    vec4f(-0.5,  0.0, 0.0, 2.0),
+    vec4f( 0.0, -1.0, 0.0, 2.0),
+
+    vec4f( 0.0, -1.0, 0.0, 4.0),
+    vec4f( 0.5,  0.0, 0.0, 4.0),
+    vec4f( 1.0, -1.0, 0.0, 4.0),
+
+    vec4f(-0.5,  0.0, 0.0, 8.0),
+    vec4f( 0.0,  1.0, 0.0, 8.0),
+    vec4f( 0.5,  0.0, 0.0, 8.0),
+  )[vertex_index];
+
+  return vec4(pos.xy * pos.w, 0.0, pos.w);
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+@fragment fn main(@builtin(position) position : vec4f) -> @location(0) vec4f {
+    return vec4f(position.w, 0.0, 1.0, 1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 64, 64);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(9);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(126, 0, 255, 255), utils::RGBA8(129, 0, 255, 255),
+                               renderPass.color, 16, 48);
+    EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(62, 0, 255, 255), utils::RGBA8(65, 0, 255, 255),
+                               renderPass.color, 48, 48);
+    EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(30, 0, 255, 255), utils::RGBA8(33, 0, 255, 255),
+                               renderPass.color, 32, 16);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

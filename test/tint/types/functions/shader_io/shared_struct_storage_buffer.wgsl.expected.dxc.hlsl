@@ -26,7 +26,7 @@ void frag_main_inner(S input) {
 }
 
 void frag_main(tint_symbol_1 tint_symbol) {
-  const S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, tint_symbol.v};
+  const S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w))};
   frag_main_inner(tint_symbol_2);
   return;
 }

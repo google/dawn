@@ -35,7 +35,7 @@ void frag_main_inner(Interface colors) {
 }
 
 void frag_main(tint_symbol_2 tint_symbol_1) {
-  const Interface tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
+  const Interface tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
   frag_main_inner(tint_symbol_4);
   return;
 }

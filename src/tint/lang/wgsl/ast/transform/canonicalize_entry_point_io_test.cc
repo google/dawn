@@ -184,7 +184,7 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>, color : vec4
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord, tint_symbol.color);
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, vec4<f32>(tint_symbol.coord.xyz, (1 / tint_symbol.coord.w)), tint_symbol.color);
 }
 )";
 
@@ -634,7 +634,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(vec4<f32>(tint_symbol.coord.xyz, (1 / tint_symbol.coord.w))), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 )";
 
@@ -697,7 +697,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(vec4<f32>(tint_symbol.coord.xyz, (1 / tint_symbol.coord.w))), FragColors(tint_symbol.col3, tint_symbol.col1, tint_symbol.col2));
 }
 
 struct FragBuiltins {
@@ -2519,7 +2519,7 @@ fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
-  let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
+  let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, vec4<f32>(tint_symbol.coord.xyz, (1 / tint_symbol.coord.w)), tint_symbol.loc0));
   var wrapper_result : tint_symbol_2;
   wrapper_result.value = inner_result.value;
   return wrapper_result;
@@ -2572,7 +2572,7 @@ fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
 
 @fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
-  let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
+  let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, vec4<f32>(tint_symbol.coord.xyz, (1 / tint_symbol.coord.w)), tint_symbol.loc0));
   var wrapper_result : tint_symbol_2;
   wrapper_result.value = inner_result.value;
   return wrapper_result;
@@ -2693,7 +2693,7 @@ fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 
 @fragment
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
-  frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
+  frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, vec4<f32>(tint_symbol_1.pos.xyz, (1 / tint_symbol_1.pos.w)), tint_symbol_1.a), tint_symbol_1.b);
 }
 )";
 
@@ -2783,7 +2783,7 @@ fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 
 @fragment
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
-  frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
+  frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, vec4<f32>(tint_symbol_1.pos.xyz, (1 / tint_symbol_1.pos.w)), tint_symbol_1.a), tint_symbol_1.b);
 }
 
 struct VertexOutput {

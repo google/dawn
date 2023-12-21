@@ -45,6 +45,6 @@ void f_inner_1(float4 pos, float4 uv) {
 }
 
 void f(tint_symbol_1 tint_symbol) {
-  f_inner_1(tint_symbol.pos, tint_symbol.uv);
+  f_inner_1(float4(tint_symbol.pos.xyz, (1.0f / tint_symbol.pos.w)), tint_symbol.uv);
   return;
 }

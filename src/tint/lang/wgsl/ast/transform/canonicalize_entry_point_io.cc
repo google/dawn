@@ -354,7 +354,18 @@ struct CanonicalizeEntryPointIO::State {
                                                              : b.Symbols().New(name);
             wrapper_struct_param_members.Push({b.Member(symbol, ast_type, std::move(attrs)),
                                                location, /* index */ std::nullopt, color});
-            return b.MemberAccessor(InputStructSymbol(), symbol);
+            const Expression* expr = b.MemberAccessor(InputStructSymbol(), symbol);
+
+            // If this is a fragment position builtin and we're targeting D3D, we need to invert the
+            // 'w' component of the vector.
+            if (cfg.shader_style == ShaderStyle::kHlsl &&
+                builtin_attr == core::BuiltinValue::kPosition) {
+                auto* xyz = b.MemberAccessor(expr, "xyz");
+                auto* w = b.MemberAccessor(b.MemberAccessor(InputStructSymbol(), symbol), "w");
+                expr = b.Call<vec4<f32>>(xyz, b.Div(1_a, w));
+            }
+
+            return expr;
         }
     }
 

@@ -29,7 +29,7 @@ void main_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint samp
 }
 
 void main(tint_symbol_1 tint_symbol) {
-  const FragmentInputs0 tint_symbol_2 = {tint_symbol.position, tint_symbol.loc0};
+  const FragmentInputs0 tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.loc0};
   const FragmentInputs1 tint_symbol_3 = {tint_symbol.loc3, tint_symbol.sample_mask};
   main_inner(tint_symbol_2, tint_symbol.front_facing, tint_symbol.loc1, tint_symbol.sample_index, tint_symbol_3, tint_symbol.loc2);
   return;

@@ -45,7 +45,7 @@ int frag_main_inner(Interface inputs) {
 }
 
 tint_symbol_3 frag_main(tint_symbol_2 tint_symbol_1) {
-  const Interface tint_symbol_5 = {tint_symbol_1.i, tint_symbol_1.u, tint_symbol_1.vi, tint_symbol_1.vu, tint_symbol_1.pos};
+  const Interface tint_symbol_5 = {tint_symbol_1.i, tint_symbol_1.u, tint_symbol_1.vi, tint_symbol_1.vu, float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
   const int inner_result_1 = frag_main_inner(tint_symbol_5);
   tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
   wrapper_result_1.value = inner_result_1;

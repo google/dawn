@@ -47,7 +47,7 @@ void f_inner_1(In tint_symbol) {
 }
 
 void f(tint_symbol_2 tint_symbol_1) {
-  const In tint_symbol_3 = {tint_symbol_1.pos};
+  const In tint_symbol_3 = {float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
   f_inner_1(tint_symbol_3);
   return;
 }

@@ -51,7 +51,7 @@ f_res f_inner_1(float4 my_pos) {
 }
 
 tint_symbol_2 f(tint_symbol_1 tint_symbol) {
-  const f_res inner_result = f_inner_1(tint_symbol.my_pos);
+  const f_res inner_result = f_inner_1(float4(tint_symbol.my_pos.xyz, (1.0f / tint_symbol.my_pos.w)));
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.output_0 = inner_result.output_0;
   wrapper_result.output_1 = inner_result.output_1;

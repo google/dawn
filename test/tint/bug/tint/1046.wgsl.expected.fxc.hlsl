@@ -55,7 +55,7 @@ FragmentOutput main_inner(FragmentInput fragment) {
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const FragmentInput tint_symbol_3 = {tint_symbol.position, tint_symbol.view_position, tint_symbol.normal, tint_symbol.uv, tint_symbol.color};
+  const FragmentInput tint_symbol_3 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.view_position, tint_symbol.normal, tint_symbol.uv, tint_symbol.color};
   const FragmentOutput inner_result = main_inner(tint_symbol_3);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.color = inner_result.color;
