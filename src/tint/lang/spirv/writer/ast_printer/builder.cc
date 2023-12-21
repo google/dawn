@@ -2997,8 +2997,10 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     }
 
     if (!image_operands.empty()) {
-        std::sort(image_operands.begin(), image_operands.end(),
-                  [](auto& a, auto& b) { return a.mask < b.mask; });
+        // Use a stable sort to preserve the order of the Grad dpdx and dpdy
+        // operands.
+        std::stable_sort(image_operands.begin(), image_operands.end(),
+                         [](auto& a, auto& b) { return a.mask < b.mask; });
         uint32_t mask = 0;
         for (auto& image_operand : image_operands) {
             mask |= image_operand.mask;
