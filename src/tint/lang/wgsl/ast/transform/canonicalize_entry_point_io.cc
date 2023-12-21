@@ -102,6 +102,7 @@ uint32_t BuiltinOrder(core::BuiltinValue builtin) {
         default:
             break;
     }
+    TINT_UNREACHABLE();
     return 0;
 }
 
@@ -569,29 +570,26 @@ struct CanonicalizeEntryPointIO::State {
     /// @param y another struct member
     /// @returns true if a comes before b
     bool StructMemberComparator(const MemberInfo& x, const MemberInfo& y) {
-        if (x.color.has_value() && y.color.has_value()) {
+        if (x.color.has_value() && y.color.has_value() && x.color != y.color) {
             // Both have color attributes: smallest goes first.
             return x.color < y.color;
-        }
-        if (x.color.has_value() != y.color.has_value()) {
+        } else if (x.color.has_value() != y.color.has_value()) {
             // The member with the color goes first
             return x.color.has_value();
         }
 
-        if (x.location.has_value() && y.location.has_value()) {
+        if (x.location.has_value() && y.location.has_value() && x.location != y.location) {
             // Both have location attributes: smallest goes first.
             return x.location < y.location;
-        }
-        if (x.location.has_value() != y.location.has_value()) {
+        } else if (x.location.has_value() != y.location.has_value()) {
             // The member with the location goes first
             return x.location.has_value();
         }
 
-        if (x.index.has_value() && y.index.has_value()) {
+        if (x.index.has_value() && y.index.has_value() && x.index != y.index) {
             // Both have index attributes: smallest goes first.
             return x.index < y.index;
-        }
-        if (x.index.has_value() != y.index.has_value()) {
+        } else if (x.index.has_value() != y.index.has_value()) {
             // The member with the index goes first
             return x.index.has_value();
         }
@@ -603,15 +601,19 @@ struct CanonicalizeEntryPointIO::State {
                 // Both are builtins: order matters for FXC.
                 auto builtin_a = BuiltinOf(x_blt);
                 auto builtin_b = BuiltinOf(y_blt);
-                return BuiltinOrder(builtin_a) < BuiltinOrder(builtin_b);
-            }
-            if ((x_blt != nullptr) != (y_blt != nullptr)) {
+                auto order_a = BuiltinOrder(builtin_a);
+                auto order_b = BuiltinOrder(builtin_b);
+                if (order_a != order_b) {
+                    return order_a < order_b;
+                }
+            } else if ((x_blt != nullptr) != (y_blt != nullptr)) {
                 // The member with the builtin goes first
                 return x_blt != nullptr;
             }
         }
 
-        TINT_UNREACHABLE();
+        // Control flow reaches here if x is the same as y.
+        // Sort algorithms sometimes do that.
         return false;
     }
 
