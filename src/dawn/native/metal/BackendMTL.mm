@@ -298,8 +298,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override {
-        // Via dawn::native::metal::WrapIOSurface
-        return true;
+        // SharedTextureMemory is the supported means of importing IOSurfaces.
+        return false;
     }
 
     bool SupportsFeatureLevel(FeatureLevel) const override { return true; }

@@ -41,19 +41,6 @@ ExternalImageDescriptorIOSurface::ExternalImageDescriptorIOSurface()
 
 ExternalImageDescriptorIOSurface::~ExternalImageDescriptorIOSurface() = default;
 
-WGPUTexture WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurface* cDescriptor) {
-    Device* backendDevice = ToBackend(FromAPI(device));
-    std::vector<MTLSharedEventAndSignalValue> waitEvents;
-    for (const auto& waitEvent : cDescriptor->waitEvents) {
-        waitEvents.push_back(
-            {static_cast<id<MTLSharedEvent>>(waitEvent.sharedEvent), waitEvent.signaledValue});
-    }
-    auto deviceLock(backendDevice->GetScopedLock());
-    Ref<TextureBase> texture = backendDevice->CreateTextureWrappingIOSurface(
-        cDescriptor, cDescriptor->ioSurface, std::move(waitEvents));
-    return ToAPI(texture.Detach());
-}
-
 void IOSurfaceEndAccess(WGPUTexture cTexture,
                         ExternalImageIOSurfaceEndAccessDescriptor* descriptor) {
     Texture* texture = ToBackend(FromAPI(cTexture));

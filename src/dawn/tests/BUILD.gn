@@ -643,10 +643,7 @@ source_set("end2end_tests_sources") {
 
   if (is_mac || is_ios) {
     if (dawn_enable_metal) {
-      sources += [
-        "end2end/IOSurfaceWrappingTests.cpp",
-        "end2end/VideoViewsTests_mac.cpp",
-      ]
+      sources += [ "end2end/VideoViewsTests_mac.cpp" ]
     }
     sources += [ "end2end/BufferHostMappedPointerTests_apple.mm" ]
 

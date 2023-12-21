@@ -80,9 +80,6 @@ struct DAWN_NATIVE_EXPORT ExternalImageIOSurfaceEndAccessDescriptor
     bool isInitialized;
 };
 
-DAWN_NATIVE_EXPORT WGPUTexture WrapIOSurface(WGPUDevice device,
-                                             const ExternalImageDescriptorIOSurface* descriptor);
-
 DAWN_NATIVE_EXPORT void IOSurfaceEndAccess(WGPUTexture texture,
                                            ExternalImageIOSurfaceEndAccessDescriptor* descriptor);
 
