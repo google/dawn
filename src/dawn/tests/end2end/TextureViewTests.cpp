@@ -464,6 +464,7 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 

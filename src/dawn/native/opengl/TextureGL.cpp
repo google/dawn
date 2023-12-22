@@ -128,10 +128,6 @@ bool RequiresCreatingNewTextureView(const TextureBase* texture,
         return true;
     }
 
-    if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
-        return true;
-    }
-
     if (ToBackend(texture)->GetGLFormat().format == GL_DEPTH_STENCIL &&
         (texture->GetUsage() & wgpu::TextureUsage::TextureBinding) != 0 &&
         textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
@@ -255,11 +251,6 @@ const GLFormat& Texture::GetGLFormat() const {
 
 MaybeError Texture::ClearTexture(const SubresourceRange& range,
                                  TextureBase::ClearValue clearValue) {
-    // TODO(crbug.com/dawn/850): initialize the textures with compressed formats.
-    if (GetFormat().isCompressed) {
-        return {};
-    }
-
     Device* device = ToBackend(GetDevice());
     const OpenGLFunctions& gl = device->GetGL();
 

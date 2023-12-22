@@ -355,6 +355,9 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                                     break;
                             }
                         }
+                        gl.TexParameteri(target, GL_TEXTURE_BASE_LEVEL, view->GetBaseMipLevel());
+                        gl.TexParameteri(target, GL_TEXTURE_MAX_LEVEL,
+                                         view->GetBaseMipLevel() + view->GetLevelCount() - 1);
                     }
 
                     // Some texture builtin function data needs emulation to update into the
