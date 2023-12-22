@@ -496,7 +496,18 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
         AssertBeginRenderPassError(&renderPass);
     }
 
-    // TODO(dawn:1020): Add tests to check depthSlice must not be set for non-3D attachments.
+    // Control case: It's valid if depthSlice is unset for a non-3D color attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass({colorView2D});
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It's invalid if depthSlice is set for a non-3D color attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass({colorView2D});
+        renderPass.cColorAttachments[0].depthSlice = 0;
+        AssertBeginRenderPassError(&renderPass);
+    }
 }
 
 // Check that the depth slices of a 3D color attachment cannot overlap in same render pass.

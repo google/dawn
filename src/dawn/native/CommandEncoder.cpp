@@ -113,7 +113,7 @@ class RenderPassValidationState final : public NonMovable {
     // attachment in the render pass descriptor.
     MaybeError AddAttachment(const TextureViewBase* attachment,
                              AttachmentType attachmentType,
-                             uint32_t depthSlice = WGPU_DEPTH_SLICE_UNDEFINED) {
+                             uint32_t depthSlice = wgpu::kDepthSliceUndefined) {
         if (attachment == nullptr) {
             return {};
         }
@@ -168,9 +168,7 @@ class RenderPassValidationState final : public NonMovable {
             DAWN_ASSERT(attachment->GetBaseArrayLayer() == 0);
             record.depthOrArrayLayer = depthSlice;
         } else {
-            // TODO(dawn:1020): Assert depthSlice should be the 'WGPU_DEPTH_SLICE_UNDEFINED' value
-            // if the attachment is a non-3d texture view after it's initialized correctly in Blink.
-            // DAWN_ASSERT(depthSlice == WGPU_DEPTH_SLICE_UNDEFINED);
+            DAWN_ASSERT(depthSlice == wgpu::kDepthSliceUndefined);
             record.depthOrArrayLayer = attachment->GetBaseArrayLayer();
         }
 
@@ -356,16 +354,15 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
 MaybeError ValidateColorAttachmentDepthSlice(const TextureViewBase* attachment,
                                              uint32_t depthSlice) {
     if (attachment->GetDimension() != wgpu::TextureViewDimension::e3D) {
-        // TODO(dawn:1020): Validate depthSlice must not set for non-3d attachments. The depthSlice
-        // from WebGPU is not the 'WGPU_DEPTH_SLICE_UNDEFINED' value if it's not defined, we need to
-        // initialize it in Blink first, otherwise it will always be validated as set.
+        DAWN_INVALID_IF(depthSlice != wgpu::kDepthSliceUndefined,
+                        "depthSlice (%u) is defined for a non-3D attachment (%s).", depthSlice,
+                        attachment);
         return {};
     }
 
-    DAWN_INVALID_IF(depthSlice == WGPU_DEPTH_SLICE_UNDEFINED,
-                    "depthSlice (%u) must be set and must not be undefined value (%u) for a 3D "
-                    "attachment (%s).",
-                    depthSlice, WGPU_DEPTH_SLICE_UNDEFINED, attachment);
+    DAWN_INVALID_IF(depthSlice == wgpu::kDepthSliceUndefined,
+                    "depthSlice (%u) for a 3D attachment (%s) is undefined.", depthSlice,
+                    attachment);
 
     const Extent3D& attachmentSize = attachment->GetSingleSubresourceVirtualSize();
     DAWN_INVALID_IF(depthSlice >= attachmentSize.depthOrArrayLayers,
@@ -1116,10 +1113,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
                     cmdColorAttachment.view = colorTarget;
                     // Explicitly set depthSlice to 0 if it's undefined. The
-                    // WGPU_DEPTH_SLICE_UNDEFINED is defined to differentiate between `undefined`
+                    // wgpu::kDepthSliceUndefined is defined to differentiate between `undefined`
                     // and 0 for depthSlice, but we use it as 0 for 2d attachments in backends.
                     cmdColorAttachment.depthSlice =
-                        descColorAttachment.depthSlice == WGPU_DEPTH_SLICE_UNDEFINED
+                        descColorAttachment.depthSlice == wgpu::kDepthSliceUndefined
                             ? 0
                             : descColorAttachment.depthSlice;
                     cmdColorAttachment.loadOp = descColorAttachment.loadOp;
