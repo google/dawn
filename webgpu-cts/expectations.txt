@@ -654,7 +654,6 @@ crbug.com/dawn/1960 [ android-r ] webgpu:api,validation,error_scope:parent_scope
 # Shader corr failing flakily on Android ARM (Pixel 6)
 ################################################################################
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
 
 ################################################################################
 # Tint unimplemented feature
@@ -758,15 +757,12 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 web
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,binary,f16_addition:vector:inputSource="const";vectorize=3 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="storage";storageMode="read_write";access="write";dynamicOffset=false;containerType="vector";shadowingMode="module-scope";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,access,vector:vector:case="var_3u";vector_decl="var";vector_width=4;element_type="f32" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,abs:values:stage="constant";type="vec2%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="vec3%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="vec3%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,length:vec3:stage="constant";type="vec3%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="constant";type="vec4%3Cabstract-float%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="constant";type="vec4%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,radians:values:stage="constant";type="vec2%3Cf32%3E" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,round:values:stage="constant";type="vec4%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 target-cpu-32 webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="depth24plus-stencil8" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 target-cpu-32 webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="r16sint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba16float" [ RetryOnFailure ]
