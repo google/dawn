@@ -22,6 +22,7 @@ struct S {
 
 void compute_main_inner(uint local_invocation_index, threadgroup tint_array<S, 10>* const tint_symbol) {
   for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = idx;
     (*(tint_symbol))[i].x = 0;
     atomic_store_explicit(&((*(tint_symbol))[i].a), 0u, memory_order_relaxed);

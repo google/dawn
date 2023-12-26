@@ -40,6 +40,7 @@ void assign_and_preserve_padding_1(device strided_arr* const dest, strided_arr v
 
 void assign_and_preserve_padding(device tint_array<strided_arr, 2>* const dest, tint_array<strided_arr, 2> value) {
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    __asm__("");
     assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
   }
 }

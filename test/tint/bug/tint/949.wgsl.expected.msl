@@ -331,6 +331,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, texture2d<
   currSampledHeight = 1.0f;
   i = 0;
   while (true) {
+    __asm__("");
     int const x_388 = i;
     if ((x_388 < 15)) {
     } else {

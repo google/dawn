@@ -19,6 +19,7 @@ struct tint_symbol_2 {
 
 void tint_symbol_inner(float x) {
   while (true) {
+    __asm__("");
     {
       if ((x > 0.0f)) { break; }
     }

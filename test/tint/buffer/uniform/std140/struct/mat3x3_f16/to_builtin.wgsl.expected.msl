@@ -31,6 +31,7 @@ struct S_tint_packed_vec3 {
 half3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f16_array_element, 3> in) {
   half3x3 result = half3x3(0.0h);
   for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    __asm__("");
     result[i] = half3(in[i].elements);
   }
   return result;

@@ -4,6 +4,7 @@ using namespace metal;
 int f() {
   int i = 0;
   while (true) {
+    __asm__("");
     i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
     if ((i > 4)) {
       return i;

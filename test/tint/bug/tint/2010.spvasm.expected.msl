@@ -47,6 +47,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   uint const x_52 = (*(tint_private_vars)).x_3[0];
   x_54 = 0u;
   while (true) {
+    __asm__("");
     uint x_55 = 0u;
     x_58 = (*(tint_symbol_3)).field0.field0;
     if ((x_54 < x_58)) {
@@ -79,6 +80,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   x_85 = x_76.xyxy;
   x_88 = 1u;
   while (true) {
+    __asm__("");
     float4 x_111 = 0.0f;
     float4 x_86 = 0.0f;
     uint x_89 = 0u;
@@ -129,6 +131,7 @@ void tint_symbol_inner(uint3 x_3_param, uint local_invocation_index, thread tint
     atomic_store_explicit(tint_symbol_14, 0u, memory_order_relaxed);
   }
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 32u)) {
+    __asm__("");
     uint const i = idx;
     S const tint_symbol_1 = S{};
     (*(tint_symbol_15))[i] = tint_symbol_1;

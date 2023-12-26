@@ -35,6 +35,7 @@ struct Outer_tint_packed_vec3 {
 half3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f16_array_element, 3> in) {
   half3x3 result = half3x3(0.0h);
   for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    __asm__("");
     result[i] = half3(in[i].elements);
   }
   return result;
@@ -53,6 +54,7 @@ Inner tint_unpack_vec3_in_composite_1(Inner_tint_packed_vec3 in) {
 tint_array<Inner, 4> tint_unpack_vec3_in_composite_2(tint_array<Inner_tint_packed_vec3, 4> in) {
   tint_array<Inner, 4> result = {};
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = tint_unpack_vec3_in_composite_1(in[i]);
   }
   return result;
@@ -71,6 +73,7 @@ Outer tint_unpack_vec3_in_composite_3(Outer_tint_packed_vec3 in) {
 tint_array<Outer, 4> tint_unpack_vec3_in_composite_4(tint_array<Outer_tint_packed_vec3, 4> in) {
   tint_array<Outer, 4> result = {};
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = tint_unpack_vec3_in_composite_3(in[i]);
   }
   return result;

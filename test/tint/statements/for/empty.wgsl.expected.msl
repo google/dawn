@@ -3,6 +3,7 @@
 using namespace metal;
 void f() {
   for(; false; ) {
+    __asm__("");
   }
 }
 

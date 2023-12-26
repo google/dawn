@@ -36,6 +36,7 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup S_atomic* con
   (*(tint_symbol)).y = 0u;
   idx = local_invocation_index_2;
   while (true) {
+    __asm__("");
     if (!((idx < 10u))) {
       break;
     }
@@ -62,6 +63,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param, thread tint_priva
     (*(tint_symbol_2)).y = 0u;
   }
   for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
+    __asm__("");
     uint const i = idx_1;
     atomic_store_explicit(&((*(tint_symbol_2)).a[i]), 0u, memory_order_relaxed);
   }

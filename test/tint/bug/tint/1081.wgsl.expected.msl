@@ -23,6 +23,7 @@ struct tint_symbol_3 {
 int tint_symbol_inner(int3 x, thread tint_private_vars_struct* const tint_private_vars) {
   int y = x[0];
   while (true) {
+    __asm__("");
     int const r = f(y, tint_private_vars);
     if ((r == 0)) {
       break;

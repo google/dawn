@@ -19,6 +19,7 @@ void foo(thread tint_private_vars_struct* const tint_private_vars) {
 kernel void tint_symbol() {
   thread tint_private_vars_struct tint_private_vars = {};
   for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    __asm__("");
     foo(&(tint_private_vars));
   }
   return;

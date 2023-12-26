@@ -16,6 +16,7 @@ struct tint_array {
 
 void compute_main_inner(uint local_invocation_index, threadgroup tint_array<tint_array<tint_array<atomic_uint, 1>, 2>, 3>* const tint_symbol) {
   for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = (idx / 2u);
     uint const i_1 = (idx % 2u);
     uint const i_2 = (idx % 1u);

@@ -30,6 +30,7 @@ void tint_symbol_inner(uint3 global_id, const constant Uniforms* const tint_symb
   uint const dimOutter = (*(tint_symbol_1)).outShape[1];
   uint result = 0u;
   for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
+    __asm__("");
     uint const a = (i + (resultCell[0] * dimInner));
     uint const b = (resultCell[1] + (i * dimOutter));
     result = (result + ((*(tint_symbol_2)).numbers[a] * (*(tint_symbol_3)).numbers[b]));

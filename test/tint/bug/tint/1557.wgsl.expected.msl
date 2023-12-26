@@ -8,6 +8,7 @@ int f() {
 void g() {
   int j = 0;
   while (true) {
+    __asm__("");
     if ((j >= 1)) {
       break;
     }

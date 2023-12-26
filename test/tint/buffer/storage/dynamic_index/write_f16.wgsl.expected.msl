@@ -158,6 +158,7 @@ void assign_and_preserve_padding_5(device tint_array<tint_packed_vec3_f16_array_
 
 void assign_and_preserve_padding_6(device tint_array<tint_packed_vec3_f32_array_element, 2>* const dest, tint_array<float3, 2> value) {
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    __asm__("");
     (*(dest))[i].elements = packed_float3(value[i]);
   }
 }

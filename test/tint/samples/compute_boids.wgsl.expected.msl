@@ -86,6 +86,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   float2 pos = 0.0f;
   float2 vel = 0.0f;
   for(uint i = 0u; (i < 5u); i = (i + 1u)) {
+    __asm__("");
     if ((i == index)) {
       continue;
     }

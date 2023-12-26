@@ -20,6 +20,7 @@ int g() {
 
 int f() {
   while (true) {
+    __asm__("");
     g();
     break;
   }
@@ -29,6 +30,7 @@ int f() {
 
 kernel void tint_symbol(device tint_array<uint, 1>* tint_symbol_1 [[buffer(0)]]) {
   while (true) {
+    __asm__("");
     if (((*(tint_symbol_1))[0] == 0u)) {
       break;
     }

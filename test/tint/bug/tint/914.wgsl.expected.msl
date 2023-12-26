@@ -53,6 +53,7 @@ uint tint_div(uint lhs, uint rhs) {
 
 void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_index, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_11, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_12, const constant Uniforms* const tint_symbol_13, const device Matrix* const tint_symbol_14, const device Matrix* const tint_symbol_15, device Matrix* const tint_symbol_16) {
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
+    __asm__("");
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
     (*(tint_symbol_11))[i][i_1] = 0.0f;
@@ -68,6 +69,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   float ACached = 0.0f;
   tint_array<float, 4> BCached = {};
   for(uint index = 0u; (index < 16u); index = (index + 1u)) {
+    __asm__("");
     acc[index] = 0.0f;
   }
   uint const ColPerThreadA = 4u;
@@ -75,8 +77,11 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   uint const RowPerThreadB = 4u;
   uint const tileRowB = (local_id[1] * RowPerThreadB);
   for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    __asm__("");
     for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+      __asm__("");
       for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+        __asm__("");
         uint const inputRow = (tileRow + innerRow);
         uint const inputCol = (tileColA + innerCol);
         uint const tint_symbol_1 = inputRow;
@@ -85,7 +90,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
       }
     }
     for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+      __asm__("");
       for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+        __asm__("");
         uint const inputRow = (tileRowB + innerRow);
         uint const inputCol = (tileCol + innerCol);
         uint const tint_symbol_3 = innerCol;
@@ -95,12 +102,16 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
     for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+      __asm__("");
       for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
+        __asm__("");
         BCached[inner] = (*(tint_symbol_12))[k][(tileCol + inner)];
       }
       for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+        __asm__("");
         ACached = (*(tint_symbol_11))[(tileRow + innerRow)][k];
         for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+          __asm__("");
           uint const index = ((innerRow * 4u) + innerCol);
           acc[index] = (acc[index] + (ACached * BCached[innerCol]));
         }
@@ -109,7 +120,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
     threadgroup_barrier(mem_flags::mem_threadgroup);
   }
   for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    __asm__("");
     for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+      __asm__("");
       uint const index = ((innerRow * 4u) + innerCol);
       mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index], tint_symbol_13, tint_symbol_16);
     }

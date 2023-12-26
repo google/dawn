@@ -86,6 +86,7 @@ struct S_tint_packed_vec3 {
 float2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 2> in) {
   float2x3 result = float2x3(0.0f);
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;
@@ -94,6 +95,7 @@ float2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
 float3x3 tint_unpack_vec3_in_composite_1(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
   float3x3 result = float3x3(0.0f);
   for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;
@@ -102,6 +104,7 @@ float3x3 tint_unpack_vec3_in_composite_1(tint_array<tint_packed_vec3_f32_array_e
 float4x3 tint_unpack_vec3_in_composite_2(tint_array<tint_packed_vec3_f32_array_element, 4> in) {
   float4x3 result = float4x3(0.0f);
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;
@@ -110,6 +113,7 @@ float4x3 tint_unpack_vec3_in_composite_2(tint_array<tint_packed_vec3_f32_array_e
 half2x3 tint_unpack_vec3_in_composite_3(tint_array<tint_packed_vec3_f16_array_element, 2> in) {
   half2x3 result = half2x3(0.0h);
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    __asm__("");
     result[i] = half3(in[i].elements);
   }
   return result;
@@ -118,6 +122,7 @@ half2x3 tint_unpack_vec3_in_composite_3(tint_array<tint_packed_vec3_f16_array_el
 half3x3 tint_unpack_vec3_in_composite_4(tint_array<tint_packed_vec3_f16_array_element, 3> in) {
   half3x3 result = half3x3(0.0h);
   for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+    __asm__("");
     result[i] = half3(in[i].elements);
   }
   return result;
@@ -126,6 +131,7 @@ half3x3 tint_unpack_vec3_in_composite_4(tint_array<tint_packed_vec3_f16_array_el
 half4x3 tint_unpack_vec3_in_composite_5(tint_array<tint_packed_vec3_f16_array_element, 4> in) {
   half4x3 result = half4x3(0.0h);
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = half3(in[i].elements);
   }
   return result;
@@ -134,6 +140,7 @@ half4x3 tint_unpack_vec3_in_composite_5(tint_array<tint_packed_vec3_f16_array_el
 tint_array<float3, 2> tint_unpack_vec3_in_composite_6(tint_array<tint_packed_vec3_f32_array_element, 2> in) {
   tint_array<float3, 2> result = {};
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;

@@ -22,6 +22,7 @@ struct tint_packed_vec3_f32_array_element {
 float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 4> in) {
   float4x3 result = float4x3(0.0f);
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;
@@ -30,6 +31,7 @@ float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
 tint_array<float4x3, 4> tint_unpack_vec3_in_composite_1(tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4> in) {
   tint_array<float4x3, 4> result = {};
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = tint_unpack_vec3_in_composite(in[i]);
   }
   return result;
@@ -44,6 +46,7 @@ void assign_and_preserve_padding_1(device tint_array<tint_packed_vec3_f32_array_
 
 void assign_and_preserve_padding(device tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4>* const dest, tint_array<float4x3, 4> value) {
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
   }
 }

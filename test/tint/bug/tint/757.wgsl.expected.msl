@@ -27,6 +27,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d_array<float, access::
   flatIndex = (flatIndex * 1u);
   float4 texel = tint_symbol_1.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
   for(uint i = 0u; (i < 1u); i = (i + 1u)) {
+    __asm__("");
     (*(tint_symbol_2)).values[(flatIndex + i)] = texel[0];
   }
 }

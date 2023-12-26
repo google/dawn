@@ -11,6 +11,7 @@ kernel void tint_symbol() {
   bool2 v2b = false;
   bool2 v2b_2 = false;
   for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    __asm__("");
     v2f[i] = 1.0f;
     v3i[i] = 1;
     v4u[i] = 1u;

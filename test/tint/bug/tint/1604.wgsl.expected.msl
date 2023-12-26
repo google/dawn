@@ -5,6 +5,7 @@ kernel void tint_symbol(const constant int* tint_symbol_1 [[buffer(0)]]) {
   switch(*(tint_symbol_1)) {
     case 0: {
       while (true) {
+        __asm__("");
         return;
       }
       break;

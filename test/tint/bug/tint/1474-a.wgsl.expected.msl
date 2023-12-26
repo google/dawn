@@ -3,6 +3,7 @@
 using namespace metal;
 kernel void tint_symbol() {
   while(true) {
+    __asm__("");
     if (true) {
       break;
     } else {

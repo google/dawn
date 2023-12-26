@@ -378,6 +378,10 @@ class ASTPrinter : public tint::TextGenerator {
                               const ast::CallExpression* expr,
                               const sem::BuiltinFn* builtin);
 
+    /// Emits a code sequence that preserves a loop during
+    /// optimizations even if the loop is infinite.
+    void EmitLoopPreserver();
+
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin
     /// @returns the name or "" if not valid

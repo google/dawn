@@ -20,6 +20,7 @@ struct tint_symbol_2 {
 void tint_symbol_inner(float x, texture2d<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
   float4 v = float4(0.0f);
   while((x > v[0])) {
+    __asm__("");
     v = tint_symbol_3.sample(tint_symbol_4, float2(0.0f));
   }
 }

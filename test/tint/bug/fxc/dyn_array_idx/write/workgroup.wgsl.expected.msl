@@ -28,6 +28,7 @@ struct Result {
 
 void f_inner(uint local_invocation_index, threadgroup S* const tint_symbol, const constant UBO* const tint_symbol_1, device Result* const tint_symbol_2) {
   for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = idx;
     (*(tint_symbol)).data[i] = 0;
   }

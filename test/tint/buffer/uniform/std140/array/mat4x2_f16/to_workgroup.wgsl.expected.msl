@@ -20,6 +20,7 @@ struct tint_symbol_5 {
 
 void f_inner(uint local_invocation_index, threadgroup tint_array<half4x2, 4>* const tint_symbol, const constant tint_array<half4x2, 4>* const tint_symbol_1) {
   for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = idx;
     (*(tint_symbol))[i] = half4x2(half2(0.0h), half2(0.0h), half2(0.0h), half2(0.0h));
   }

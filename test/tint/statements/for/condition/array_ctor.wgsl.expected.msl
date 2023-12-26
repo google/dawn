@@ -4,6 +4,7 @@ using namespace metal;
 void f() {
   int i = 0;
   for(; (i < 1); ) {
+    __asm__("");
   }
 }
 

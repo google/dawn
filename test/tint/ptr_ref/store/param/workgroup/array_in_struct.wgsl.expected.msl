@@ -25,6 +25,7 @@ void func(threadgroup tint_array<int, 4>* const pointer) {
 
 void tint_symbol_inner(uint local_invocation_index, threadgroup str* const tint_symbol_2) {
   for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = idx;
     (*(tint_symbol_2)).arr[i] = 0;
   }

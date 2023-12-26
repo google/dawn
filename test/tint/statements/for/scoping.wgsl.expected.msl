@@ -3,6 +3,7 @@
 using namespace metal;
 void f() {
   for(int must_not_collide = 0; ; ) {
+    __asm__("");
     break;
   }
   int must_not_collide = 0;

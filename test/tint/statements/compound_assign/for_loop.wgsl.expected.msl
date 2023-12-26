@@ -46,6 +46,7 @@ void foo(thread tint_private_vars_struct* const tint_private_vars) {
     int const tint_symbol_save = tint_symbol_2;
     a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
     while (true) {
+      __asm__("");
       int const tint_symbol_3 = idx2(tint_private_vars);
       if (!((a[tint_symbol_3] < 10.0f))) {
         break;

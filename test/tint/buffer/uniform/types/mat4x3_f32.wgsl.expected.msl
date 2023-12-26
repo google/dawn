@@ -22,6 +22,7 @@ struct tint_packed_vec3_f32_array_element {
 float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 4> in) {
   float4x3 result = float4x3(0.0f);
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     result[i] = float3(in[i].elements);
   }
   return result;

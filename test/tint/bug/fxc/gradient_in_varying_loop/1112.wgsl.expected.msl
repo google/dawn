@@ -13,6 +13,7 @@ float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbo
   float3 const random = tint_symbol_4.sample(tint_symbol_5, vUV).rgb;
   int i = 0;
   while (true) {
+    __asm__("");
     if ((i < 1)) {
     } else {
       break;

@@ -31,6 +31,7 @@ void assign_and_preserve_padding_1(device S* const dest, S value) {
 
 void assign_and_preserve_padding(device tint_array<S, 4>* const dest, tint_array<S, 4> value) {
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    __asm__("");
     assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
   }
 }

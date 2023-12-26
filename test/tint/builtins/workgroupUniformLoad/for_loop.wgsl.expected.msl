@@ -12,6 +12,7 @@ void foo(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbo
   {
     int i = 0;
     while (true) {
+      __asm__("");
       int const tint_symbol = i;
       int const tint_symbol_1 = tint_workgroupUniformLoad(tint_symbol_4);
       if (!((tint_symbol < tint_symbol_1))) {

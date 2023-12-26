@@ -3,20 +3,28 @@
 using namespace metal;
 void f() {
   for(int i0520 = 0; false; ) {
+    __asm__("");
   }
   for(int i62 = 0; false; ) {
+    __asm__("");
   }
   for(int i0520 = 0; false; ) {
+    __asm__("");
   }
   for(int i62 = 0; false; ) {
+    __asm__("");
   }
   for(int i62 = 0; false; ) {
+    __asm__("");
   }
   for(int i60 = 0; false; ) {
+    __asm__("");
   }
   for(int i62 = 0; false; ) {
+    __asm__("");
   }
   for(int i60 = 0; false; ) {
+    __asm__("");
   }
 }
 

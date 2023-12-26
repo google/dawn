@@ -3,6 +3,7 @@
 using namespace metal;
 void tint_symbol(device uint* const tint_symbol_1) {
   for(*(tint_symbol_1) = (*(tint_symbol_1) - 1u); (*(tint_symbol_1) < 10u); ) {
+    __asm__("");
   }
 }
 

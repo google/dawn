@@ -17,6 +17,7 @@ fragment void tint_symbol(device int* tint_symbol_1 [[buffer(0)]], device float*
   if ((*(tint_symbol_2) < 0.0f)) {
     int i = 0;
     while (true) {
+      __asm__("");
       if ((*(tint_symbol_2) > float(i))) {
         if (!(tint_private_vars.tint_discarded)) {
           *(tint_symbol_2) = float(i);

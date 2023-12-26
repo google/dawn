@@ -20,6 +20,7 @@ struct tint_symbol_2 {
 void tint_symbol_inner(float x) {
   float4 v = float4(0.0f);
   while(((x > 0.0f) && (dfdx(1.0f) > 0.0f))) {
+    __asm__("");
   }
 }
 

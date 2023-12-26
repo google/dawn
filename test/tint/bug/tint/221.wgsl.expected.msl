@@ -26,6 +26,7 @@ uint tint_mod(uint lhs, uint rhs) {
 kernel void tint_symbol(device Buf* tint_symbol_1 [[buffer(0)]]) {
   uint i = 0u;
   while (true) {
+    __asm__("");
     if ((i >= (*(tint_symbol_1)).count)) {
       break;
     }

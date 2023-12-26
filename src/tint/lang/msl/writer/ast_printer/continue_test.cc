@@ -43,6 +43,7 @@ TEST_F(MslASTPrinterTest, Emit_Continue) {
 
     ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
     EXPECT_EQ(gen.Result(), R"(  while (true) {
+    __asm__("");
     if (false) {
       break;
     }

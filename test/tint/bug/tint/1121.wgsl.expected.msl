@@ -85,7 +85,9 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
   int const TILE_COUNT_X = 2;
   int const TILE_COUNT_Y = 2;
   for(int y = 0; (y < TILE_COUNT_Y); y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)))) {
+    __asm__("");
     for(int x = 0; (x < TILE_COUNT_X); x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)))) {
+      __asm__("");
       int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_SIZE))));
       float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
       float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
@@ -97,6 +99,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
       frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord[1] / viewNear), 0.0f);
       float dp = 0.0f;
       for(uint i = 0u; (i < 6u); i = (i + 1u)) {
+        __asm__("");
         float4 p = 0.0f;
         if ((frustumPlanes[i][0] > 0.0f)) {
           p[0] = boxMax[0];

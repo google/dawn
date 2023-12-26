@@ -26,6 +26,7 @@ void compute_main_inner(uint local_invocation_index, threadgroup S* const tint_s
     (*(tint_symbol)).y = 0u;
   }
   for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
+    __asm__("");
     uint const i = idx;
     atomic_store_explicit(&((*(tint_symbol)).a[i]), 0u, memory_order_relaxed);
   }

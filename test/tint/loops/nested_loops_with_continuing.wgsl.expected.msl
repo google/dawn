@@ -5,10 +5,12 @@ int f() {
   int i = 0;
   int j = 0;
   while (true) {
+    __asm__("");
     if ((i > 4)) {
       return 1;
     }
     while (true) {
+      __asm__("");
       if ((j > 4)) {
         return 2;
       }

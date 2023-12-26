@@ -2123,6 +2123,7 @@ bool ASTPrinter::EmitLoop(const ast::LoopStatement* stmt) {
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
     Line() << "while (true) {";
+    EmitLoopPreserver();
     {
         ScopedIndent si(this);
         if (!EmitStatements(stmt->body->statements)) {
@@ -2193,6 +2194,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
         Line() << "while (true) {";
+        EmitLoopPreserver();
         IncrementIndent();
         TINT_DEFER({
             DecrementIndent();
@@ -2233,6 +2235,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
             }
             out << " {";
         }
+        EmitLoopPreserver();
         {
             auto emit_continuing = [] { return true; };
             TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
@@ -2266,6 +2269,7 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
         Line() << "while (true) {";
+        EmitLoopPreserver();
         IncrementIndent();
         TINT_DEFER({
             DecrementIndent();
@@ -2288,6 +2292,7 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
             }
             out << " {";
         }
+        EmitLoopPreserver();
         if (!EmitStatementsWithIndent(stmt->body->statements)) {
             return false;
         }
@@ -3024,6 +3029,14 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
     out << ";";
 
     return true;
+}
+
+void ASTPrinter::EmitLoopPreserver() {
+    IncrementIndent();
+    // This statement prevents the MSL compiler from erasing a loop during
+    // optimimzations.
+    Line() << R"(__asm__("");)";
+    DecrementIndent();
 }
 
 template <typename F>
