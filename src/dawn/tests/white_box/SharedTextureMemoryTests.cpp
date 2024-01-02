@@ -28,8 +28,8 @@
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 
 #include <memory>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -128,9 +128,8 @@ void SharedTextureMemoryTests::TearDown() {
     GetParam().mBackend->TearDown();
 }
 
-wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(
-    const wgpu::Device& importingDevice, const wgpu::SharedFence& fence) {
-
+wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(const wgpu::Device& importingDevice,
+                                                                const wgpu::SharedFence& fence) {
     wgpu::SharedFenceExportInfo exportInfo;
     fence.ExportInfo(&exportInfo);
 

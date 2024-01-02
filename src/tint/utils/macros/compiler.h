@@ -99,8 +99,8 @@
     _Pragma("clang diagnostic ignored \"-Wextra-semi-stmt\"")
 #define TINT_DISABLE_WARNING_ZERO_AS_NULLPTR \
     _Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"")
-#define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE                                   \
-    _Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"")                  \
+#define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE                  \
+    _Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
         _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"")
 
 // clang-format off
