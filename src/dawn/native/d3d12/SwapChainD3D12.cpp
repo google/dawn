@@ -98,7 +98,7 @@ MaybeError SwapChain::PresentImpl() {
 
     // Record that "new" is the last time the buffer has been used.
     DAWN_TRY(queue->NextSerial());
-    mBufferLastUsedSerials[mCurrentBuffer] = queue->GetPendingCommandSerial();
+    mBufferLastUsedSerials[mCurrentBuffer] = queue->GetLastSubmittedCommandSerial();
 
     mApiTexture->APIDestroy();
     mApiTexture = nullptr;
