@@ -14,23 +14,28 @@ struct tint_array {
     T elements[N];
 };
 
-void a(tint_array<float2x2, 4> a_1) {
+float a(tint_array<float2x2, 4> a_1) {
+  return a_1[0][0][0];
 }
 
-void b(float2x2 m) {
+float b(float2x2 m) {
+  return m[0][0];
 }
 
-void c(float2 v) {
+float c(float2 v) {
+  return v[0];
 }
 
-void d(float f_1) {
+float d(float f_1) {
+  return f_1;
 }
 
-kernel void f(const constant tint_array<float2x2, 4>* tint_symbol [[buffer(0)]]) {
-  a(*(tint_symbol));
-  b((*(tint_symbol))[1]);
-  c((*(tint_symbol))[1][0].yx);
-  d((*(tint_symbol))[1][0].yx[0]);
+kernel void f(const constant tint_array<float2x2, 4>* tint_symbol_4 [[buffer(0)]], device float* tint_symbol_5 [[buffer(1)]]) {
+  float const tint_symbol = a(*(tint_symbol_4));
+  float const tint_symbol_1 = b((*(tint_symbol_4))[1]);
+  float const tint_symbol_2 = c((*(tint_symbol_4))[1][0].yx);
+  float const tint_symbol_3 = d((*(tint_symbol_4))[1][0].yx[0]);
+  *(tint_symbol_5) = (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3);
   return;
 }
 

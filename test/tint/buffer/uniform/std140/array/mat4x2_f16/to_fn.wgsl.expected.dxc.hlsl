@@ -1,17 +1,22 @@
 cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
+RWByteAddressBuffer s : register(u1);
 
-void a(matrix<float16_t, 4, 2> a_1[4]) {
+float16_t a(matrix<float16_t, 4, 2> a_1[4]) {
+  return a_1[0][0].x;
 }
 
-void b(matrix<float16_t, 4, 2> m) {
+float16_t b(matrix<float16_t, 4, 2> m) {
+  return m[0].x;
 }
 
-void c(vector<float16_t, 2> v) {
+float16_t c(vector<float16_t, 2> v) {
+  return v.x;
 }
 
-void d(float16_t f_1) {
+float16_t d(float16_t f_1) {
+  return f_1;
 }
 
 matrix<float16_t, 4, 2> u_load_1(uint offset) {
@@ -39,11 +44,12 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(u_load(0u));
-  b(u_load_1(16u));
+  const float16_t tint_symbol = a(u_load(0u));
+  const float16_t tint_symbol_1 = b(u_load_1(16u));
   uint ubo_load_4 = u[1].x;
-  c(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
+  const float16_t tint_symbol_2 = c(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
   uint ubo_load_5 = u[1].x;
-  d(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  const float16_t tint_symbol_3 = d(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  s.Store<float16_t>(0u, (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3));
   return;
 }

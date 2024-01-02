@@ -28,10 +28,11 @@ float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
   return result;
 }
 
-kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4>* tint_symbol [[buffer(0)]]) {
+kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4>* tint_symbol [[buffer(0)]], device float* tint_symbol_1 [[buffer(1)]]) {
   float3x4 const t = transpose(tint_unpack_vec3_in_composite((*(tint_symbol))[2]));
   float const l = length(float3((*(tint_symbol))[0][1].elements).zxy);
   float const a = fabs(float3((*(tint_symbol))[0][1].elements).zxy[0]);
+  *(tint_symbol_1) = ((t[0][0] + float(l)) + float(a));
   return;
 }
 

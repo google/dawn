@@ -14,23 +14,28 @@ struct tint_array {
     T elements[N];
 };
 
-void a(tint_array<half2x4, 4> a_1) {
+half a(tint_array<half2x4, 4> a_1) {
+  return a_1[0][0][0];
 }
 
-void b(half2x4 m) {
+half b(half2x4 m) {
+  return m[0][0];
 }
 
-void c(half4 v) {
+half c(half4 v) {
+  return v[0];
 }
 
-void d(half f_1) {
+half d(half f_1) {
+  return f_1;
 }
 
-kernel void f(const constant tint_array<half2x4, 4>* tint_symbol [[buffer(0)]]) {
-  a(*(tint_symbol));
-  b((*(tint_symbol))[1]);
-  c((*(tint_symbol))[1][0].ywxz);
-  d((*(tint_symbol))[1][0].ywxz[0]);
+kernel void f(const constant tint_array<half2x4, 4>* tint_symbol_4 [[buffer(0)]], device half* tint_symbol_5 [[buffer(1)]]) {
+  half const tint_symbol = a(*(tint_symbol_4));
+  half const tint_symbol_1 = b((*(tint_symbol_4))[1]);
+  half const tint_symbol_2 = c((*(tint_symbol_4))[1][0].ywxz);
+  half const tint_symbol_3 = d((*(tint_symbol_4))[1][0].ywxz[0]);
+  *(tint_symbol_5) = (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3);
   return;
 }
 

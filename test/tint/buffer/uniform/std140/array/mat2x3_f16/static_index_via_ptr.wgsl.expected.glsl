@@ -10,6 +10,10 @@ layout(binding = 0, std140) uniform a_block_std140_ubo {
   mat2x3_f16 inner[4];
 } a;
 
+layout(binding = 1, std430) buffer s_block_ssbo {
+  float16_t inner;
+} s;
+
 f16mat2x3 conv_mat2x3_f16(mat2x3_f16 val) {
   return f16mat2x3(val.col0, val.col1);
 }
@@ -31,6 +35,7 @@ void f() {
   f16mat2x3 l_a[4] = conv_arr4_mat2x3_f16(a.inner);
   f16mat2x3 l_a_i = conv_mat2x3_f16(a.inner[2u]);
   f16vec3 l_a_i_i = a.inner[2u].col1;
+  s.inner = (((a.inner[2u].col1[0u] + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

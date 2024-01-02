@@ -9,16 +9,24 @@ layout(binding = 0, std140) uniform u_block_std140_ubo {
   mat2x2_f32 inner[4];
 } u;
 
-void a(mat2 a_1[4]) {
+layout(binding = 1, std430) buffer s_block_ssbo {
+  float inner;
+} s;
+
+float a(mat2 a_1[4]) {
+  return a_1[0][0].x;
 }
 
-void b(mat2 m) {
+float b(mat2 m) {
+  return m[0].x;
 }
 
-void c(vec2 v) {
+float c(vec2 v) {
+  return v.x;
 }
 
-void d(float f_1) {
+float d(float f_1) {
+  return f_1;
 }
 
 mat2 conv_mat2x2_f32(mat2x2_f32 val) {
@@ -36,10 +44,11 @@ mat2[4] conv_arr4_mat2x2_f32(mat2x2_f32 val[4]) {
 }
 
 void f() {
-  a(conv_arr4_mat2x2_f32(u.inner));
-  b(conv_mat2x2_f32(u.inner[1u]));
-  c(u.inner[1u].col0.yx);
-  d(u.inner[1u].col0.yx[0u]);
+  float tint_symbol = a(conv_arr4_mat2x2_f32(u.inner));
+  float tint_symbol_1 = b(conv_mat2x2_f32(u.inner[1u]));
+  float tint_symbol_2 = c(u.inner[1u].col0.yx);
+  float tint_symbol_3 = d(u.inner[1u].col0.yx[0u]);
+  s.inner = (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

@@ -1,6 +1,7 @@
 cbuffer cbuffer_u : register(b0) {
   uint4 u[16];
 };
+RWByteAddressBuffer s : register(u1);
 static float4x4 p[4] = (float4x4[4])0;
 
 float4x4 u_load_1(uint offset) {
@@ -28,5 +29,6 @@ void f() {
   p[1] = u_load_1(128u);
   p[1][0] = asfloat(u[1]).ywxz;
   p[1][0].x = asfloat(u[1].x);
+  s.Store(0u, asuint(p[1][0].x));
   return;
 }

@@ -9,6 +9,10 @@ layout(binding = 0, std140) uniform u_block_std140_ubo {
   mat2x2_f32 inner[4];
 } u;
 
+layout(binding = 1, std430) buffer s_block_ssbo {
+  float inner;
+} s;
+
 mat2 p[4] = mat2[4](mat2(0.0f, 0.0f, 0.0f, 0.0f), mat2(0.0f, 0.0f, 0.0f, 0.0f), mat2(0.0f, 0.0f, 0.0f, 0.0f), mat2(0.0f, 0.0f, 0.0f, 0.0f));
 mat2 conv_mat2x2_f32(mat2x2_f32 val) {
   return mat2(val.col0, val.col1);
@@ -29,6 +33,7 @@ void f() {
   p[1] = conv_mat2x2_f32(u.inner[2u]);
   p[1][0] = u.inner[0u].col1.yx;
   p[1][0].x = u.inner[0u].col1[0u];
+  s.inner = p[1][0].x;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

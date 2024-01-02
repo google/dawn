@@ -1,6 +1,7 @@
 cbuffer cbuffer_a : register(b0) {
   uint4 a[4];
 };
+RWByteAddressBuffer s : register(u1);
 static int counter = 0;
 
 int i() {
@@ -40,5 +41,8 @@ void f() {
   const uint scalar_offset_4 = (((16u * uint(p_a_i_save)) + (4u * uint(p_a_i_i_save)))) / 4;
   uint ubo_load_4 = a[scalar_offset_4 / 4][scalar_offset_4 % 4];
   const vector<float16_t, 2> l_a_i_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16)));
+  const uint scalar_offset_bytes = (((16u * uint(p_a_i_save)) + (4u * uint(p_a_i_i_save))));
+  const uint scalar_offset_index = scalar_offset_bytes / 4;
+  s.Store<float16_t>(0u, (((float16_t(f16tof32(((a[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF))) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x));
   return;
 }

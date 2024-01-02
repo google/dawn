@@ -14,10 +14,11 @@ struct tint_array {
     T elements[N];
 };
 
-kernel void f(const constant tint_array<half4x4, 4>* tint_symbol [[buffer(0)]]) {
+kernel void f(const constant tint_array<half4x4, 4>* tint_symbol [[buffer(0)]], device half* tint_symbol_1 [[buffer(1)]]) {
   tint_array<half4x4, 4> const l_a = *(tint_symbol);
   half4x4 const l_a_i = (*(tint_symbol))[2];
   half4 const l_a_i_i = (*(tint_symbol))[2][1];
+  *(tint_symbol_1) = ((((*(tint_symbol))[2][1][0] + l_a[0][0][0]) + l_a_i[0][0]) + l_a_i_i[0]);
   return;
 }
 

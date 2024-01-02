@@ -4,23 +4,32 @@ layout(binding = 0, std140) uniform u_block_ubo {
   mat2x4 inner[4];
 } u;
 
-void a(mat2x4 a_1[4]) {
+layout(binding = 1, std430) buffer s_block_ssbo {
+  float inner;
+} s;
+
+float a(mat2x4 a_1[4]) {
+  return a_1[0][0].x;
 }
 
-void b(mat2x4 m) {
+float b(mat2x4 m) {
+  return m[0].x;
 }
 
-void c(vec4 v) {
+float c(vec4 v) {
+  return v.x;
 }
 
-void d(float f_1) {
+float d(float f_1) {
+  return f_1;
 }
 
 void f() {
-  a(u.inner);
-  b(u.inner[1]);
-  c(u.inner[1][0].ywxz);
-  d(u.inner[1][0].ywxz.x);
+  float tint_symbol = a(u.inner);
+  float tint_symbol_1 = b(u.inner[1]);
+  float tint_symbol_2 = c(u.inner[1][0].ywxz);
+  float tint_symbol_3 = d(u.inner[1][0].ywxz.x);
+  s.inner = (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

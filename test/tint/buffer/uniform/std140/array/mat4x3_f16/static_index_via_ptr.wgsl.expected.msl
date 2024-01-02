@@ -37,10 +37,11 @@ tint_array<half4x3, 4> tint_unpack_vec3_in_composite_1(tint_array<tint_array<tin
   return result;
 }
 
-kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* tint_symbol [[buffer(0)]]) {
+kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* tint_symbol [[buffer(0)]], device half* tint_symbol_1 [[buffer(1)]]) {
   tint_array<half4x3, 4> const l_a = tint_unpack_vec3_in_composite_1(*(tint_symbol));
   half4x3 const l_a_i = tint_unpack_vec3_in_composite((*(tint_symbol))[2]);
   half3 const l_a_i_i = half3((*(tint_symbol))[2][1].elements);
+  *(tint_symbol_1) = ((((*(tint_symbol))[2][1].elements[0] + l_a[0][0][0]) + l_a_i[0][0]) + l_a_i_i[0]);
   return;
 }
 

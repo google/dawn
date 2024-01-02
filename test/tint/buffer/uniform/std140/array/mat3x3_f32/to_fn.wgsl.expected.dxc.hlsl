@@ -1,17 +1,22 @@
 cbuffer cbuffer_u : register(b0) {
   uint4 u[12];
 };
+RWByteAddressBuffer s : register(u1);
 
-void a(float3x3 a_1[4]) {
+float a(float3x3 a_1[4]) {
+  return a_1[0][0].x;
 }
 
-void b(float3x3 m) {
+float b(float3x3 m) {
+  return m[0].x;
 }
 
-void c(float3 v) {
+float c(float3 v) {
+  return v.x;
 }
 
-void d(float f_1) {
+float d(float f_1) {
+  return f_1;
 }
 
 float3x3 u_load_1(uint offset) {
@@ -34,9 +39,10 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(u_load(0u));
-  b(u_load_1(48u));
-  c(asfloat(u[3].xyz).zxy);
-  d(asfloat(u[3].xyz).zxy.x);
+  const float tint_symbol = a(u_load(0u));
+  const float tint_symbol_1 = b(u_load_1(48u));
+  const float tint_symbol_2 = c(asfloat(u[3].xyz).zxy);
+  const float tint_symbol_3 = d(asfloat(u[3].xyz).zxy.x);
+  s.Store(0u, asuint((((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3)));
   return;
 }
