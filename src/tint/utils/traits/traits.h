@@ -190,11 +190,12 @@ static constexpr bool IsTypeIn = traits::detail::IsTypeIn<T, TypeContainer>::val
 template <typename T>
 using PtrElTy = Decay<std::remove_pointer_t<Decay<T>>>;
 
-/// Evaluates to true if `T` decayed is a `std::string`, `std::string_view` or `const char*`
+/// Evaluates to true if `T` decayed is a `std::string`, `std::string_view`, `const char*` or
+/// `char*`
 template <typename T>
 static constexpr bool IsStringLike =
     std::is_same_v<Decay<T>, std::string> || std::is_same_v<Decay<T>, std::string_view> ||
-    std::is_same_v<Decay<T>, const char*>;
+    std::is_same_v<Decay<T>, const char*> || std::is_same_v<Decay<T>, char*>;
 
 namespace detail {
 /// Helper for CharArrayToCharPtr

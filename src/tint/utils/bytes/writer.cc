@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/bytes/reader.h"
+#include "src/tint/utils/bytes/writer.h"
 
 namespace tint::bytes {
 
-Reader::~Reader() = default;
+Writer::~Writer() = default;
 
-BufferReader::~BufferReader() = default;
-
-size_t BufferReader::Read(std::byte* out, size_t count) {
-    size_t n = std::min(count, bytes_remaining_);
-    memcpy(out, data_, n);
-    data_ += n;
-    bytes_remaining_ -= n;
-    return n;
 }
-
-}  // namespace tint::bytes

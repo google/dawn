@@ -41,12 +41,15 @@ cc_library(
   srcs = [
     "bytes.cc",
     "reader.cc",
+    "writer.cc",
   ],
   hdrs = [
+    "buffer_writer.h",
     "decoder.h",
     "endianness.h",
     "reader.h",
     "swap.h",
+    "writer.h",
   ],
   deps = [
     "//src/tint/utils/containers",
@@ -68,6 +71,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "buffer_writer_test.cc",
     "decoder_test.cc",
     "reader_test.cc",
     "swap_test.cc",

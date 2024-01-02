@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,44 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/bytes/reader.h"
+#ifndef SRC_TINT_UTILS_BYTES_BUFFER_WRITER_H_
+#define SRC_TINT_UTILS_BYTES_BUFFER_WRITER_H_
+
+#include <stdint.h>
+
+#include "src/tint/utils/bytes/writer.h"
 
 namespace tint::bytes {
 
-Reader::~Reader() = default;
+/// BufferWriter is an implementation of the Writer interface backed by a buffer.
+template <size_t N>
+class BufferWriter final : public Writer {
+  public:
+    /// @copydoc Writer::Write
+    Result<SuccessType> Write(const std::byte* in, size_t count) override {
+        size_t at = buffer.Length();
+        buffer.Resize(at + count);
+        memcpy(&buffer[at], in, count);
+        return Success;
+    }
 
-BufferReader::~BufferReader() = default;
+    /// @returns the buffer content as a string view
+    std::string_view BufferString() const {
+        if (buffer.IsEmpty()) {
+            return "";
+        }
+        auto* data = reinterpret_cast<const char*>(&buffer[0]);
+        static_assert(sizeof(std::byte) == sizeof(char), "length needs calculation");
+        return std::string_view(data, buffer.Length());
+    }
 
-size_t BufferReader::Read(std::byte* out, size_t count) {
-    size_t n = std::min(count, bytes_remaining_);
-    memcpy(out, data_, n);
-    data_ += n;
-    bytes_remaining_ -= n;
-    return n;
-}
+    /// The buffer holding the written data
+    Vector<std::byte, N> buffer;
+};
+
+/// Deduction guide for BufferWriter
+BufferWriter() -> BufferWriter<32>;
 
 }  // namespace tint::bytes
+
+#endif  // SRC_TINT_UTILS_BYTES_BUFFER_WRITER_H_

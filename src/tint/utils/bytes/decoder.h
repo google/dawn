@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "src/tint/utils/bytes/reader.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::bytes {
 

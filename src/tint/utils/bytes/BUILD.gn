@@ -44,12 +44,15 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("bytes") {
   sources = [
+    "buffer_writer.h",
     "bytes.cc",
     "decoder.h",
     "endianness.h",
     "reader.cc",
     "reader.h",
     "swap.h",
+    "writer.cc",
+    "writer.h",
   ]
   deps = [
     "${tint_src_dir}/utils/containers",
@@ -68,6 +71,7 @@ libtint_source_set("bytes") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "buffer_writer_test.cc",
       "decoder_test.cc",
       "reader_test.cc",
       "swap_test.cc",

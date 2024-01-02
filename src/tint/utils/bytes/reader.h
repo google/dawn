@@ -35,7 +35,6 @@
 #include "src/tint/utils/bytes/endianness.h"
 #include "src/tint/utils/bytes/swap.h"
 #include "src/tint/utils/containers/slice.h"
-#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::bytes {
@@ -43,6 +42,9 @@ namespace tint::bytes {
 /// A binary stream reader interface
 class Reader {
   public:
+    /// Destructor
+    virtual ~Reader();
+
     /// Read reads bytes from the stream, blocking until there are @p count bytes available, or the
     /// end of the stream has been reached.
     /// @param out a pointer to the byte buffer that will be filled with the read data. Must be at
@@ -51,9 +53,6 @@ class Reader {
     /// @returns the number of bytes read from the stream. If Read() returns less than @p count,
     /// then the end of the stream has been reached.
     virtual size_t Read(std::byte* out, size_t count) = 0;
-
-    // Destructor
-    virtual ~Reader();
 
     /// Reads an integer from the stream, performing byte swapping if the stream's endianness
     /// differs from the native endianness.
@@ -126,6 +125,12 @@ class BufferReader final : public Reader {
     }
 
     /// Constructor
+    /// @param string the string to read from
+    explicit BufferReader(std::string_view string)
+        : data_(reinterpret_cast<const std::byte*>(string.data())),
+          bytes_remaining_(string.length()) {}
+
+    /// Constructor
     /// @param slice the byte slice to read from
     explicit BufferReader(Slice<const std::byte> slice)
         : data_(slice.data), bytes_remaining_(slice.len) {
@@ -133,13 +138,7 @@ class BufferReader final : public Reader {
     }
 
     /// @copydoc Reader::Read
-    size_t Read(std::byte* out, size_t count) override {
-        size_t n = std::min(count, bytes_remaining_);
-        memcpy(out, data_, n);
-        data_ += n;
-        bytes_remaining_ -= n;
-        return n;
-    }
+    size_t Read(std::byte* out, size_t count) override;
 
   private:
     /// The data to read from
