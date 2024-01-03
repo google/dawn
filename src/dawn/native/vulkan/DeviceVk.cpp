@@ -557,14 +557,6 @@ VulkanFunctions* Device::GetMutableFunctions() {
     return const_cast<VulkanFunctions*>(&fn);
 }
 
-CommandRecordingContext* Device::GetPendingRecordingContext(Device::SubmitMode submitMode) {
-    return ToBackend(GetQueue())->GetPendingRecordingContext(submitMode);
-}
-
-MaybeError Device::SubmitPendingCommands() {
-    return ToBackend(GetQueue())->SubmitPendingCommands();
-}
-
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t sourceOffset,
                                                BufferBase* destination,
@@ -575,7 +567,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
     DAWN_ASSERT(size != 0);
 
     CommandRecordingContext* recordingContext =
-        GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
+        ToBackend(GetQueue())->GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
 
     ToBackend(destination)
         ->EnsureDataInitializedAsDestination(recordingContext, destinationOffset, size);
@@ -608,7 +600,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     // does an implicit availability, visibility and domain operation.
 
     CommandRecordingContext* recordingContext =
-        GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
+        ToBackend(GetQueue())->GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
 
     VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, dst, copySizePixels);
     VkImageSubresourceLayers subresource = region.imageSubresource;

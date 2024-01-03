@@ -78,11 +78,6 @@ class Device final : public DeviceBase {
     MutexProtected<ResourceMemoryAllocator>& GetResourceMemoryAllocator() const;
     external_semaphore::Service* GetExternalSemaphoreService() const;
 
-    // TODO(dawn:1413): Remove these proxy commands and use the queue directly instead.
-    CommandRecordingContext* GetPendingRecordingContext(
-        Device::SubmitMode submitMode = Device::SubmitMode::Normal);
-    MaybeError SubmitPendingCommands();
-
     void EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator);
 
     // Dawn Native API

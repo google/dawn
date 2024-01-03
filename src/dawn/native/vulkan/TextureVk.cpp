@@ -42,6 +42,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
+#include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/ResourceHeapVk.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -861,13 +862,13 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
         textureIsBuggy &= GetDimension() == wgpu::TextureDimension::e2D;
         textureIsBuggy &= IsPowerOfTwo(GetBaseSize().width) && IsPowerOfTwo(GetBaseSize().height);
         if (textureIsBuggy) {
-            DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
+            DAWN_TRY(ClearTexture(ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext(),
                                   GetAllSubresources(), TextureBase::ClearValue::Zero));
         }
     }
 
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
+        DAWN_TRY(ClearTexture(ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext(),
                               GetAllSubresources(), TextureBase::ClearValue::NonZero));
     }
 
@@ -1047,10 +1048,10 @@ MaybeError Texture::EndAccess(ExternalSemaphoreHandle* handle,
     if (mExternalSemaphoreHandle == kNullExternalSemaphoreHandle || targetLayout != currentLayout) {
         mDesiredExportLayout = targetLayout;
 
-        Device* device = ToBackend(GetDevice());
-        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+        Queue* queue = ToBackend(GetDevice()->GetQueue());
+        CommandRecordingContext* recordingContext = queue->GetPendingRecordingContext();
         recordingContext->externalTexturesForEagerTransition.insert(this);
-        DAWN_TRY(device->SubmitPendingCommands());
+        DAWN_TRY(queue->SubmitPendingCommands());
 
         currentLayout = targetLayout;
     }

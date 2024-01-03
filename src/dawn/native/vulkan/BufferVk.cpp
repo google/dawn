@@ -41,6 +41,7 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/ResourceHeapVk.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -250,7 +251,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // BufferBase::MapAtCreation().
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
         !mappedAtCreation) {
-        ClearBuffer(device->GetPendingRecordingContext(), 0x01010101);
+        ClearBuffer(ToBackend(device->GetQueue())->GetPendingRecordingContext(), 0x01010101);
     }
 
     // Initialize the padding bytes to zero.
@@ -260,7 +261,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             uint32_t clearSize = Align(paddingBytes, 4);
             uint64_t clearOffset = GetAllocatedSize() - clearSize;
 
-            CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+            CommandRecordingContext* recordingContext =
+                ToBackend(device->GetQueue())->GetPendingRecordingContext();
             ClearBuffer(recordingContext, 0, clearOffset, clearSize);
         }
     }
@@ -511,9 +513,8 @@ MaybeError Buffer::MapAtCreationImpl() {
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
-    Device* device = ToBackend(GetDevice());
-
-    CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+    CommandRecordingContext* recordingContext =
+        ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext();
 
     // TODO(crbug.com/dawn/852): initialize mapped buffer in CPU side.
     EnsureDataInitialized(recordingContext);
