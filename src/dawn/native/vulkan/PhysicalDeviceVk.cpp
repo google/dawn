@@ -498,8 +498,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         vkLimits.maxVertexInputAttributeOffset < baseLimits.v1.maxVertexBufferArrayStride - 1) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxVertexBufferArrayStride");
     }
+    // Note that some drivers have UINT32_MAX as maxVertexInputAttributeOffset so we do that +1 only
+    // after the std::min.
     limits->v1.maxVertexBufferArrayStride =
-        std::min(vkLimits.maxVertexInputBindingStride, vkLimits.maxVertexInputAttributeOffset + 1);
+        std::min(vkLimits.maxVertexInputBindingStride - 1, vkLimits.maxVertexInputAttributeOffset) +
+        1;
 
     if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderComponents ||
         vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderComponents) {
