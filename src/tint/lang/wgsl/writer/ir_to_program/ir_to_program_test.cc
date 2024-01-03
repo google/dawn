@@ -144,7 +144,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, EntryPoint_Vertex) {
     auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
-    fn->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     fn->Block()->Append(b.Return(fn, b.Splat(ty.vec4<f32>(), 0_f, 4)));
 
@@ -158,7 +158,7 @@ fn f() -> @builtin(position) vec4<f32> {
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_FragDepth) {
     auto* fn = b.Function("f", ty.f32(), core::ir::Function::PipelineStage::kFragment);
-    fn->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kFragDepth);
+    fn->SetReturnBuiltin(core::BuiltinValue::kFragDepth);
 
     fn->Block()->Append(b.Return(fn, b.Constant(0.5_f)));
 
@@ -172,7 +172,7 @@ fn f() -> @builtin(frag_depth) f32 {
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_SampleMask) {
     auto* fn = b.Function("f", ty.u32(), core::ir::Function::PipelineStage::kFragment);
-    fn->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kSampleMask);
+    fn->SetReturnBuiltin(core::BuiltinValue::kSampleMask);
 
     fn->Block()->Append(b.Return(fn, b.Constant(3_u)));
 
@@ -186,7 +186,7 @@ fn f() -> @builtin(sample_mask) u32 {
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Invariant) {
     auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
-    fn->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
     fn->SetReturnInvariant(true);
 
     fn->Block()->Append(b.Return(fn, b.Splat(ty.vec4<f32>(), 0_f, 4)));

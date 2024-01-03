@@ -53,8 +53,8 @@ TEST_F(IR_FunctionTest, Fail_DoubleReturnBuiltin) {
             Module mod;
             Builder b{mod};
             auto* f = b.Function("my_func", mod.Types().void_());
-            f->SetReturnBuiltin(Function::ReturnBuiltin::kFragDepth);
-            f->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
+            f->SetReturnBuiltin(BuiltinValue::kFragDepth);
+            f->SetReturnBuiltin(BuiltinValue::kPosition);
         },
         "");
 }
@@ -84,7 +84,7 @@ TEST_F(IR_FunctionTest, Fail_NullBlock) {
 TEST_F(IR_FunctionTest, Clone) {
     auto* f =
         b.Function("my_func", mod.Types().i32(), Function::PipelineStage::kCompute, {{2, 3, 4}});
-    f->SetReturnBuiltin(Function::ReturnBuiltin::kFragDepth);
+    f->SetReturnBuiltin(BuiltinValue::kFragDepth);
     f->SetReturnLocation(
         1, Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid});
     f->SetReturnInvariant(true);
@@ -110,7 +110,7 @@ TEST_F(IR_FunctionTest, Clone) {
     EXPECT_EQ(mod.Types().i32(), new_f->ReturnType());
 
     EXPECT_TRUE(new_f->ReturnBuiltin().has_value());
-    EXPECT_EQ(Function::ReturnBuiltin::kFragDepth, new_f->ReturnBuiltin().value());
+    EXPECT_EQ(BuiltinValue::kFragDepth, new_f->ReturnBuiltin().value());
 
     EXPECT_TRUE(new_f->ReturnLocation().has_value());
     auto loc = new_f->ReturnLocation().value();

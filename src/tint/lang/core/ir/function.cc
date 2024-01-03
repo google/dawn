@@ -93,16 +93,4 @@ std::string_view ToString(Function::PipelineStage value) {
     return "<unknown>";
 }
 
-std::string_view ToString(enum Function::ReturnBuiltin value) {
-    switch (value) {
-        case Function::ReturnBuiltin::kFragDepth:
-            return "frag_depth";
-        case Function::ReturnBuiltin::kSampleMask:
-            return "sample_mask";
-        case Function::ReturnBuiltin::kPosition:
-            return "position";
-    }
-    return "<unknown>";
-}
-
 }  // namespace tint::core::ir

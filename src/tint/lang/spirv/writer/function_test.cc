@@ -315,7 +315,7 @@ TEST_F(SpirvWriterTest, Function_Call_Void) {
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
     auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
-    func->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(func->Block(), [&] {  //
         b.Return(func, b.Construct(ty.vec4<f32>(), 0.5_f));
     });

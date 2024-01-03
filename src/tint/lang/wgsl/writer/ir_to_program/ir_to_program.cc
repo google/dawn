@@ -300,14 +300,17 @@ class State {
         // Emit return type attributes.
         if (auto builtin = fn->ReturnBuiltin()) {
             switch (builtin.value()) {
-                case core::ir::Function::ReturnBuiltin::kPosition:
+                case core::BuiltinValue::kPosition:
                     ret_attrs.Push(b.Builtin(core::BuiltinValue::kPosition));
                     break;
-                case core::ir::Function::ReturnBuiltin::kFragDepth:
+                case core::BuiltinValue::kFragDepth:
                     ret_attrs.Push(b.Builtin(core::BuiltinValue::kFragDepth));
                     break;
-                case core::ir::Function::ReturnBuiltin::kSampleMask:
+                case core::BuiltinValue::kSampleMask:
                     ret_attrs.Push(b.Builtin(core::BuiltinValue::kSampleMask));
+                    break;
+                default:
+                    TINT_UNIMPLEMENTED() << builtin.value();
                     break;
             }
         }

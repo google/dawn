@@ -340,24 +340,7 @@ class Impl {
                                 program_.Sem()
                                     .Get(b)
                                     ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
-                            switch (ident_sem->Value()) {
-                                case core::BuiltinValue::kPosition:
-                                    ir_func->SetReturnBuiltin(
-                                        core::ir::Function::ReturnBuiltin::kPosition);
-                                    break;
-                                case core::BuiltinValue::kFragDepth:
-                                    ir_func->SetReturnBuiltin(
-                                        core::ir::Function::ReturnBuiltin::kFragDepth);
-                                    break;
-                                case core::BuiltinValue::kSampleMask:
-                                    ir_func->SetReturnBuiltin(
-                                        core::ir::Function::ReturnBuiltin::kSampleMask);
-                                    break;
-                                default:
-                                    TINT_ICE() << "Unknown builtin value in return attributes "
-                                               << ident_sem->Value();
-                                    return;
-                            }
+                            ir_func->SetReturnBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";
                             return;

@@ -420,7 +420,7 @@ Inputs = struct @align(16) {
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
-    ep->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     ep->SetReturnInvariant(true);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
@@ -1065,7 +1065,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
     // Vertex shader.
     {
         auto* ep = b.Function("vert", ty.vec4<f32>());
-        ep->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+        ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
         ep->SetReturnInvariant(true);
         ep->SetStage(core::ir::Function::PipelineStage::kVertex);
 
@@ -1446,7 +1446,7 @@ FragDepthClampArgs = struct @align(4), @block {
 TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
-    ep->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));

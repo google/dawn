@@ -62,16 +62,6 @@ class Function : public Castable<Function, Value> {
         kVertex,
     };
 
-    /// Builtin attached to return types
-    enum class ReturnBuiltin {
-        /// Builtin Position attribute
-        kPosition,
-        /// Builtin FragDepth attribute
-        kFragDepth,
-        /// Builtin SampleMask
-        kSampleMask,
-    };
-
     /// Constructor
     Function();
 
@@ -114,12 +104,12 @@ class Function : public Castable<Function, Value> {
 
     /// Sets the return attributes
     /// @param builtin the builtin to set
-    void SetReturnBuiltin(ReturnBuiltin builtin) {
+    void SetReturnBuiltin(BuiltinValue builtin) {
         TINT_ASSERT(!return_.builtin.has_value());
         return_.builtin = builtin;
     }
     /// @returns the return builtin attribute
-    std::optional<enum ReturnBuiltin> ReturnBuiltin() const { return return_.builtin; }
+    std::optional<BuiltinValue> ReturnBuiltin() const { return return_.builtin; }
 
     /// Clears the return builtin attribute.
     void ClearReturnBuiltin() { return_.builtin = {}; }
@@ -184,7 +174,7 @@ class Function : public Castable<Function, Value> {
 
     struct {
         const core::type::Type* type = nullptr;
-        std::optional<enum ReturnBuiltin> builtin;
+        std::optional<BuiltinValue> builtin;
         std::optional<Location> location;
         bool invariant = false;
     } return_;
@@ -202,18 +192,6 @@ std::string_view ToString(Function::PipelineStage value);
 /// @returns @p out so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& out, Function::PipelineStage value) {
-    return out << ToString(value);
-}
-
-/// @param value the enum value
-/// @returns the string for the given enum value
-std::string_view ToString(enum Function::ReturnBuiltin value);
-
-/// @param out the stream to write to
-/// @param value the Function::ReturnBuiltin
-/// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, enum Function::ReturnBuiltin value) {
     return out << ToString(value);
 }
 

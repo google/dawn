@@ -41,18 +41,6 @@ namespace tint::core::ir::transform {
 
 namespace {
 
-core::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
-    switch (builtin) {
-        case Function::ReturnBuiltin::kPosition:
-            return core::BuiltinValue::kPosition;
-        case Function::ReturnBuiltin::kFragDepth:
-            return core::BuiltinValue::kFragDepth;
-        case Function::ReturnBuiltin::kSampleMask:
-            return core::BuiltinValue::kSampleMask;
-    }
-    return core::BuiltinValue::kUndefined;
-}
-
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
@@ -191,7 +179,7 @@ struct State {
                 }
                 func->ClearReturnLocation();
             } else if (auto builtin = func->ReturnBuiltin()) {
-                attributes.builtin = ReturnBuiltin(*builtin);
+                attributes.builtin = *builtin;
                 func->ClearReturnBuiltin();
             }
             attributes.invariant = func->ReturnInvariant();
