@@ -146,11 +146,6 @@ cc_library(
 )
 
 alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
-)
-
-alias(
   name = "tint_build_wgsl_writer",
   actual = "//src/tint:tint_build_wgsl_writer_true",
 )

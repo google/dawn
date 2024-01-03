@@ -122,7 +122,7 @@ if (tint_build_wgsl_reader) {
     }
 
     if (tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer:fuzz" ]
+      deps += [ "${tint_src_dir}/lang/wgsl/writer:fuzz" ]
     }
   }
 }

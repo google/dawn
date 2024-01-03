@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -27,18 +27,18 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
-#include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 
 namespace tint::wgsl::writer {
 namespace {
 
-void ASTPrinterFuzzer(const tint::Program& program) {
-    ASTPrinter{program}.Generate();
+void WriterFuzzer(const tint::Program& program) {
+    [[maybe_unused]] auto res = tint::wgsl::writer::Generate(program, {});
 }
 
 }  // namespace
 }  // namespace tint::wgsl::writer
 
-TINT_WGSL_PROGRAM_FUZZER(tint::wgsl::writer::ASTPrinterFuzzer);
+TINT_WGSL_PROGRAM_FUZZER(tint::wgsl::writer::WriterFuzzer);
