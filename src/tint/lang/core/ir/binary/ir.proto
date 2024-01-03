@@ -52,9 +52,10 @@ message Type {
         TypeAtomic atomic = 7;
         TypeDepthTexture depth_texture = 8;
         TypeSampledTexture sampled_texture = 9;
-        TypeStorageTexture storage_texture = 10;
-        TypeExternalTexture external_texture = 11;
-        TypeSampler sampler = 12;
+        TypeMultisampledTexture multisampled_texture = 10;
+        TypeStorageTexture storage_texture = 11;
+        TypeExternalTexture external_texture = 12;
+        TypeSampler sampler = 13;
     }
 }
 
@@ -113,6 +114,11 @@ message TypeDepthTexture {
 }
 
 message TypeSampledTexture {
+    TextureDimension dimension = 1;
+    uint32 sub_type = 2;  // Module.types
+}
+
+message TypeMultisampledTexture {
     TextureDimension dimension = 1;
     uint32 sub_type = 2;  // Module.types
 }

@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/utils/containers/transform.h"
@@ -531,6 +532,8 @@ struct Decoder {
                 return CreateTypeDepthTexture(type_in.depth_texture());
             case pb::Type::KindCase::kSampledTexture:
                 return CreateTypeSampledTexture(type_in.sampled_texture());
+            case pb::Type::KindCase::kMultisampledTexture:
+                return CreateTypeMultisampledTexture(type_in.multisampled_texture());
             case pb::Type::KindCase::kStorageTexture:
                 return CreateTypeStorageTexture(type_in.storage_texture());
             case pb::Type::KindCase::kExternalTexture:
@@ -643,6 +646,13 @@ struct Decoder {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
         return mod_out_.Types().Get<type::SampledTexture>(dimension, sub_type);
+    }
+
+    const type::MultisampledTexture* CreateTypeMultisampledTexture(
+        const pb::TypeMultisampledTexture& texture_in) {
+        auto dimension = TextureDimension(texture_in.dimension());
+        auto sub_type = Type(texture_in.sub_type());
+        return mod_out_.Types().Get<type::MultisampledTexture>(dimension, sub_type);
     }
 
     const type::StorageTexture* CreateTypeStorageTexture(const pb::TypeStorageTexture& texture_in) {

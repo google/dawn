@@ -72,6 +72,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
@@ -365,6 +366,9 @@ struct Encoder {
                 [&](const core::type::SampledTexture* t) {
                     TypeSampledTexture(*type_out.mutable_sampled_texture(), t);
                 },
+                [&](const core::type::MultisampledTexture* t) {
+                    TypeMultisampledTexture(*type_out.mutable_multisampled_texture(), t);
+                },
                 [&](const core::type::StorageTexture* t) {
                     TypeStorageTexture(*type_out.mutable_storage_texture(), t);
                 },
@@ -449,6 +453,12 @@ struct Encoder {
 
     void TypeSampledTexture(pb::TypeSampledTexture& texture_out,
                             const core::type::SampledTexture* texture_in) {
+        texture_out.set_dimension(TextureDimension(texture_in->dim()));
+        texture_out.set_sub_type(Type(texture_in->type()));
+    }
+
+    void TypeMultisampledTexture(pb::TypeMultisampledTexture& texture_out,
+                                 const core::type::MultisampledTexture* texture_in) {
         texture_out.set_dimension(TextureDimension(texture_in->dim()));
         texture_out.set_sub_type(Type(texture_in->type()));
     }
