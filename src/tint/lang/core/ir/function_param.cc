@@ -41,38 +41,6 @@ FunctionParam::FunctionParam(const core::type::Type* ty) : type_(ty) {
 
 FunctionParam::~FunctionParam() = default;
 
-std::string_view ToString(enum FunctionParam::Builtin value) {
-    switch (value) {
-        case FunctionParam::Builtin::kVertexIndex:
-            return "vertex_index";
-        case FunctionParam::Builtin::kInstanceIndex:
-            return "instance_index";
-        case FunctionParam::Builtin::kPosition:
-            return "position";
-        case FunctionParam::Builtin::kFrontFacing:
-            return "front_facing";
-        case FunctionParam::Builtin::kLocalInvocationId:
-            return "local_invocation_id";
-        case FunctionParam::Builtin::kLocalInvocationIndex:
-            return "local_invocation_index";
-        case FunctionParam::Builtin::kGlobalInvocationId:
-            return "global_invocation_id";
-        case FunctionParam::Builtin::kWorkgroupId:
-            return "workgroup_id";
-        case FunctionParam::Builtin::kNumWorkgroups:
-            return "num_workgroups";
-        case FunctionParam::Builtin::kSampleIndex:
-            return "sample_index";
-        case FunctionParam::Builtin::kSampleMask:
-            return "sample_mask";
-        case FunctionParam::Builtin::kSubgroupInvocationId:
-            return "subgroup_invocation_id";
-        case FunctionParam::Builtin::kSubgroupSize:
-            return "subgroup_size";
-    }
-    return "<unknown>";
-}
-
 FunctionParam* FunctionParam::Clone(CloneContext& ctx) {
     auto* out = ctx.ir.values.Create<FunctionParam>(type_);
     out->builtin_ = builtin_;

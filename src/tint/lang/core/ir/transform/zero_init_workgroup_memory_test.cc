@@ -1434,9 +1434,9 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
 
     auto* func = MakeEntryPoint("main", 1, 1, 1);
     auto* global_id = b.FunctionParam("global_id", ty.vec4<u32>());
-    global_id->SetBuiltin(FunctionParam::Builtin::kGlobalInvocationId);
+    global_id->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     auto* index = b.FunctionParam("index", ty.u32());
-    index->SetBuiltin(FunctionParam::Builtin::kLocalInvocationIndex);
+    index->SetBuiltin(BuiltinValue::kLocalInvocationIndex);
     func->SetParams({global_id, index});
     b.Append(func->Block(), [&] {  //
         b.Load(var);

@@ -393,63 +393,7 @@ class Impl {
                                 program_.Sem()
                                     .Get(b)
                                     ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
-                            switch (ident_sem->Value()) {
-                                case core::BuiltinValue::kVertexIndex:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kVertexIndex);
-                                    break;
-                                case core::BuiltinValue::kInstanceIndex:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kInstanceIndex);
-                                    break;
-                                case core::BuiltinValue::kPosition:
-                                    param->SetBuiltin(core::ir::FunctionParam::Builtin::kPosition);
-                                    break;
-                                case core::BuiltinValue::kFrontFacing:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kFrontFacing);
-                                    break;
-                                case core::BuiltinValue::kLocalInvocationId:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kLocalInvocationId);
-                                    break;
-                                case core::BuiltinValue::kLocalInvocationIndex:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kLocalInvocationIndex);
-                                    break;
-                                case core::BuiltinValue::kGlobalInvocationId:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kGlobalInvocationId);
-                                    break;
-                                case core::BuiltinValue::kWorkgroupId:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kWorkgroupId);
-                                    break;
-                                case core::BuiltinValue::kNumWorkgroups:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kNumWorkgroups);
-                                    break;
-                                case core::BuiltinValue::kSampleIndex:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kSampleIndex);
-                                    break;
-                                case core::BuiltinValue::kSampleMask:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kSampleMask);
-                                    break;
-                                case core::BuiltinValue::kSubgroupInvocationId:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kSubgroupInvocationId);
-                                    break;
-                                case core::BuiltinValue::kSubgroupSize:
-                                    param->SetBuiltin(
-                                        core::ir::FunctionParam::Builtin::kSubgroupSize);
-                                    break;
-                                default:
-                                    TINT_ICE() << "Unknown builtin value in parameter attributes "
-                                               << ident_sem->Value();
-                                    return;
-                            }
+                            param->SetBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";
                             return;

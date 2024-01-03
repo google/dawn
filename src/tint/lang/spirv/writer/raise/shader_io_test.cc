@@ -68,9 +68,9 @@ TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
 TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* position = b.FunctionParam("position", ty.vec4<f32>());
-    position->SetBuiltin(core::ir::FunctionParam::Builtin::kPosition);
+    position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
     auto* color1 = b.FunctionParam("color1", ty.f32());
     color1->SetLocation(0, {});
@@ -328,7 +328,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
 
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* str_param = b.FunctionParam("inputs", str_ty);
     auto* color2 = b.FunctionParam("color2", ty.f32());
     color2->SetLocation(1, core::Interpolation{core::InterpolationType::kLinear,
@@ -975,7 +975,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                              });
 
     auto* mask_in = b.FunctionParam("mask_in", ty.u32());
-    mask_in->SetBuiltin(core::ir::FunctionParam::Builtin::kSampleMask);
+    mask_in->SetBuiltin(core::BuiltinValue::kSampleMask);
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);

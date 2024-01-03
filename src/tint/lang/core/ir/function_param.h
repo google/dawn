@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/vector.h"
@@ -42,36 +43,6 @@ namespace tint::core::ir {
 /// A function parameter in the IR.
 class FunctionParam : public Castable<FunctionParam, Value> {
   public:
-    /// Builtin attribute
-    enum class Builtin {
-        /// Builtin Vertex index
-        kVertexIndex,
-        /// Builtin Instance index
-        kInstanceIndex,
-        /// Builtin Position
-        kPosition,
-        /// Builtin FrontFacing
-        kFrontFacing,
-        /// Builtin Local invocation id
-        kLocalInvocationId,
-        /// Builtin Local invocation index
-        kLocalInvocationIndex,
-        /// Builtin Global invocation id
-        kGlobalInvocationId,
-        /// Builtin Workgroup id
-        kWorkgroupId,
-        /// Builtin Num workgroups
-        kNumWorkgroups,
-        /// Builtin Sample index
-        kSampleIndex,
-        /// Builtin Sample mask
-        kSampleMask,
-        /// Builtin Subgroup invocation id
-        kSubgroupInvocationId,
-        /// Builtin Subgroup size
-        kSubgroupSize,
-    };
-
     /// Constructor
     /// @param type the type of the var
     explicit FunctionParam(const core::type::Type* type);
@@ -85,12 +56,12 @@ class FunctionParam : public Castable<FunctionParam, Value> {
 
     /// Sets the builtin information. Note, it is currently an error if the builtin is already set.
     /// @param val the builtin to set
-    void SetBuiltin(FunctionParam::Builtin val) {
+    void SetBuiltin(core::BuiltinValue val) {
         TINT_ASSERT(!builtin_.has_value());
         builtin_ = val;
     }
     /// @returns the builtin set for the parameter
-    std::optional<FunctionParam::Builtin> Builtin() const { return builtin_; }
+    std::optional<core::BuiltinValue> Builtin() const { return builtin_; }
     /// Clears the builtin attribute.
     void ClearBuiltin() { builtin_ = {}; }
 
@@ -120,23 +91,11 @@ class FunctionParam : public Castable<FunctionParam, Value> {
 
   private:
     const core::type::Type* type_ = nullptr;
-    std::optional<enum FunctionParam::Builtin> builtin_;
+    std::optional<core::BuiltinValue> builtin_;
     std::optional<struct Location> location_;
     std::optional<struct BindingPoint> binding_point_;
     bool invariant_ = false;
 };
-
-/// @param value the enum value
-/// @returns the string for the given enum value
-std::string_view ToString(enum FunctionParam::Builtin value);
-
-/// @param out the stream to write to
-/// @param value the FunctionParam::Builtin
-/// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, enum FunctionParam::Builtin value) {
-    return out << ToString(value);
-}
 
 }  // namespace tint::core::ir
 

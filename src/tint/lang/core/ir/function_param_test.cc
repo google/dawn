@@ -53,8 +53,8 @@ TEST_F(IR_FunctionParamTest, Fail_SetDuplicateBuiltin) {
             Module mod;
             Builder b{mod};
             auto* fp = b.FunctionParam(mod.Types().f32());
-            fp->SetBuiltin(FunctionParam::Builtin::kVertexIndex);
-            fp->SetBuiltin(FunctionParam::Builtin::kSampleMask);
+            fp->SetBuiltin(BuiltinValue::kVertexIndex);
+            fp->SetBuiltin(BuiltinValue::kSampleMask);
         },
         "");
 }
@@ -72,7 +72,7 @@ TEST_F(IR_FunctionParamTest, CloneEmpty) {
 
 TEST_F(IR_FunctionParamTest, Clone) {
     auto* fp = b.FunctionParam(mod.Types().f32());
-    fp->SetBuiltin(FunctionParam::Builtin::kVertexIndex);
+    fp->SetBuiltin(BuiltinValue::kVertexIndex);
     fp->SetLocation(
         1, Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid});
     fp->SetInvariant(true);
@@ -84,7 +84,7 @@ TEST_F(IR_FunctionParamTest, Clone) {
     EXPECT_EQ(new_fp->Type(), mod.Types().f32());
 
     EXPECT_TRUE(new_fp->Builtin().has_value());
-    EXPECT_EQ(FunctionParam::Builtin::kVertexIndex, new_fp->Builtin().value());
+    EXPECT_EQ(BuiltinValue::kVertexIndex, new_fp->Builtin().value());
 
     EXPECT_TRUE(new_fp->Location().has_value());
     auto loc = new_fp->Location();

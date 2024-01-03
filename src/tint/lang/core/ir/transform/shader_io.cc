@@ -41,38 +41,6 @@ namespace tint::core::ir::transform {
 
 namespace {
 
-core::BuiltinValue FunctionParamBuiltin(enum FunctionParam::Builtin builtin) {
-    switch (builtin) {
-        case FunctionParam::Builtin::kVertexIndex:
-            return core::BuiltinValue::kVertexIndex;
-        case FunctionParam::Builtin::kInstanceIndex:
-            return core::BuiltinValue::kInstanceIndex;
-        case FunctionParam::Builtin::kPosition:
-            return core::BuiltinValue::kPosition;
-        case FunctionParam::Builtin::kFrontFacing:
-            return core::BuiltinValue::kFrontFacing;
-        case FunctionParam::Builtin::kLocalInvocationId:
-            return core::BuiltinValue::kLocalInvocationId;
-        case FunctionParam::Builtin::kLocalInvocationIndex:
-            return core::BuiltinValue::kLocalInvocationIndex;
-        case FunctionParam::Builtin::kGlobalInvocationId:
-            return core::BuiltinValue::kGlobalInvocationId;
-        case FunctionParam::Builtin::kWorkgroupId:
-            return core::BuiltinValue::kWorkgroupId;
-        case FunctionParam::Builtin::kNumWorkgroups:
-            return core::BuiltinValue::kNumWorkgroups;
-        case FunctionParam::Builtin::kSampleIndex:
-            return core::BuiltinValue::kSampleIndex;
-        case FunctionParam::Builtin::kSampleMask:
-            return core::BuiltinValue::kSampleMask;
-        case FunctionParam::Builtin::kSubgroupInvocationId:
-            return core::BuiltinValue::kSubgroupInvocationId;
-        case FunctionParam::Builtin::kSubgroupSize:
-            return core::BuiltinValue::kSubgroupSize;
-    }
-    return core::BuiltinValue::kUndefined;
-}
-
 core::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
     switch (builtin) {
         case Function::ReturnBuiltin::kPosition:
@@ -185,7 +153,7 @@ struct State {
                     }
                     param->ClearLocation();
                 } else if (auto builtin = param->Builtin()) {
-                    attributes.builtin = FunctionParamBuiltin(*builtin);
+                    attributes.builtin = *builtin;
                     param->ClearBuiltin();
                 }
                 attributes.invariant = param->Invariant();

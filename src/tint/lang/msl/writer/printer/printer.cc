@@ -270,31 +270,31 @@ class Printer : public tint::TextGenerator {
                 if (param->Builtin().has_value()) {
                     out << " [[";
                     switch (param->Builtin().value()) {
-                        case core::ir::FunctionParam::Builtin::kFrontFacing:
+                        case core::BuiltinValue::kFrontFacing:
                             out << "front_facing";
                             break;
-                        case core::ir::FunctionParam::Builtin::kGlobalInvocationId:
+                        case core::BuiltinValue::kGlobalInvocationId:
                             out << "thread_position_in_grid";
                             break;
-                        case core::ir::FunctionParam::Builtin::kLocalInvocationId:
+                        case core::BuiltinValue::kLocalInvocationId:
                             out << "thread_position_in_threadgroup";
                             break;
-                        case core::ir::FunctionParam::Builtin::kLocalInvocationIndex:
+                        case core::BuiltinValue::kLocalInvocationIndex:
                             out << "thread_index_in_threadgroup";
                             break;
-                        case core::ir::FunctionParam::Builtin::kNumWorkgroups:
+                        case core::BuiltinValue::kNumWorkgroups:
                             out << "threadgroups_per_grid";
                             break;
-                        case core::ir::FunctionParam::Builtin::kPosition:
+                        case core::BuiltinValue::kPosition:
                             out << "position";
                             break;
-                        case core::ir::FunctionParam::Builtin::kSampleIndex:
+                        case core::BuiltinValue::kSampleIndex:
                             out << "sample_id";
                             break;
-                        case core::ir::FunctionParam::Builtin::kSampleMask:
+                        case core::BuiltinValue::kSampleMask:
                             out << "sample_mask";
                             break;
-                        case core::ir::FunctionParam::Builtin::kWorkgroupId:
+                        case core::BuiltinValue::kWorkgroupId:
                             out << "threadgroup_position_in_grid";
                             break;
 

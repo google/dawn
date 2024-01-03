@@ -39,7 +39,7 @@ TEST_F(SpirvWriterTest, Discard) {
     mod.root_block->Append(buffer);
 
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
@@ -91,7 +91,7 @@ TEST_F(SpirvWriterTest, DiscardBeforeAtomic) {
     mod.root_block->Append(buffer);
 
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
