@@ -50,18 +50,8 @@
 
 #if DAWN_PLATFORM_IS(64_BIT)
 #define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = struct object##_T*;
-// This function is needed because MSVC doesn't accept reinterpret_cast from uint64_t from uint64_t
-// TODO(cwallez@chromium.org): Remove this once we rework vulkan_platform.h
-template <typename T>
-T NativeNonDispatachableHandleFromU64(uint64_t u64) {
-    return reinterpret_cast<T>(u64);
-}
 #elif DAWN_PLATFORM_IS(32_BIT)
 #define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = uint64_t;
-template <typename T>
-T NativeNonDispatachableHandleFromU64(uint64_t u64) {
-    return u64;
-}
 #else
 #error "Unsupported platform"
 #endif
