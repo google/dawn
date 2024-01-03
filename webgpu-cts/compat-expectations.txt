@@ -162,24 +162,6 @@ crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,refract:f32_
 crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
 crbug.com/dawn/2077 webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Failure ]
 
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_advanced:workgroupSize=256;scalarType="i32" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="i32" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
-crbug.com/dawn/2077 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
-crbug.com/dawn/2077 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:* [ Failure ]
-crbug.com/dawn/2077 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:* [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:alias_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:function_const_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:function_let_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:function_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:function_param_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:function_var_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:module_const_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:module_var_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:override_name:ident="bitcast" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,validation,parse,identifiers:struct_name:ident="bitcast" [ Failure ]
-
 # Video test failing due to mismatched interstage variables
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
@@ -309,9 +291,28 @@ crbug.com/dawn/2219 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2D
 crbug.com/dawn/2219 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
 crbug.com/dawn/2219 webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
 
+# workgroup_size(256, 1, 1) exceeds the maximum allowed (128, 128, 64)
+crbug.com/dawn/2318 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_advanced:workgroupSize=256;scalarType="i32" [ Failure ]
+crbug.com/dawn/2318 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_storage_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
+crbug.com/dawn/2318 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="i32" [ Failure ]
+crbug.com/dawn/2318 webgpu:shader,execution,expression,call,builtin,atomics,atomicCompareExchangeWeak:compare_exchange_weak_workgroup_advanced:workgroupSize=256;scalarType="u32" [ Failure ]
+
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
 ### validation has been added
+
+### This section represents unimplemented features in Tint
+
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:alias_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:function_const_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:function_let_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:function_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:function_param_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:function_var_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:module_const_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:module_var_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:override_name:ident="bitcast" [ Failure ]
+crbug.com/tint/1864 webgpu:shader,validation,parse,identifiers:struct_name:ident="bitcast" [ Failure ]
 
 ### This section represents platform-specific issues that are likely unfixable
 ### in Compat
@@ -330,6 +331,11 @@ crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="
 crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
 crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
 crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
+
+# clamp expression tests failing on NVidia
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:* [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:* [ Failure ]
 
 # alpha_to_coverage occlusion query tests failing on Intel
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
@@ -365,10 +371,10 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.5 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.75 [ Failure ]
 
-# Intel getCurrentTexture failures
+# getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
-crbug.com/dawn/2114 [ nvidia-0x2184 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
+crbug.com/dawn/2114 [ nvidia-0x2184 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 
 # Limits issues on NVidia GL
 crbug.com/dawn/2123 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxBufferSize:createBuffer,at_over:limitTest="atMaximum";testValueName="atLimit" [ Failure ]
