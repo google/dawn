@@ -140,6 +140,13 @@ TEST_F(IRBinaryRoundtripTest, Fn_ParameterAttributes) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Fn_ReturnBuiltin) {
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetReturnBuiltin(BuiltinValue::kFragDepth);
+    b.ir.SetName(fn, "Function");
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation) {
     auto* fn = b.Function("Function", ty.void_());
     fn->SetReturnLocation(42, std::nullopt);
@@ -153,6 +160,13 @@ TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation_Interpolation) {
                                  core::InterpolationType::kPerspective,
                                  core::InterpolationSampling::kCentroid,
                              });
+    b.ir.SetName(fn, "Function");
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, Fn_ReturnInvariant) {
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetReturnInvariant(true);
     b.ir.SetName(fn, "Function");
     RUN_TEST();
 }

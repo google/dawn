@@ -198,6 +198,8 @@ message Function {
     optional WorkgroupSize workgroup_size = 5;
     repeated uint32 parameters = 6;  // Module.values
     optional Location return_location = 7;
+    optional BuiltinValue return_builtin = 8;
+    bool return_invariant = 9;
 }
 
 enum PipelineStage {

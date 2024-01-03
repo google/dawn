@@ -138,6 +138,12 @@ struct Encoder {
             auto& ret_loc_out = *fn_out->mutable_return_location();
             Location(ret_loc_out, *ret_loc_in);
         }
+        if (auto builtin_in = fn_in->ReturnBuiltin()) {
+            fn_out->set_return_builtin(BuiltinValue(*builtin_in));
+        }
+        if (fn_in->ReturnInvariant()) {
+            fn_out->set_return_invariant(true);
+        }
         fn_out->set_block(Block(fn_in->Block()));
     }
 

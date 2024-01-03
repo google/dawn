@@ -173,6 +173,12 @@ struct Decoder {
         if (fn_in.has_return_location()) {
             fn_out->SetReturnLocation(Location(fn_in.return_location()));
         }
+        if (fn_in.has_return_builtin()) {
+            fn_out->SetReturnBuiltin(BuiltinValue(fn_in.return_builtin()));
+        }
+        if (fn_in.return_invariant()) {
+            fn_out->SetReturnInvariant(true);
+        }
         fn_out->SetParams(std::move(params_out));
         fn_out->SetBlock(Block(fn_in.block()));
     }
