@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -312,6 +313,12 @@ TEST_F(IRBinaryRoundtripTest, sampled_texture) {
 TEST_F(IRBinaryRoundtripTest, multisampled_texture) {
     auto* tex =
         ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, depth_multisampled_texture) {
+    auto* tex = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }

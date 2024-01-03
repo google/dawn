@@ -67,6 +67,7 @@
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -375,6 +376,9 @@ struct Encoder {
                 [&](const core::type::MultisampledTexture* t) {
                     TypeMultisampledTexture(*type_out.mutable_multisampled_texture(), t);
                 },
+                [&](const core::type::DepthMultisampledTexture* t) {
+                    TypeDepthMultisampledTexture(*type_out.mutable_depth_multisampled_texture(), t);
+                },
                 [&](const core::type::StorageTexture* t) {
                     TypeStorageTexture(*type_out.mutable_storage_texture(), t);
                 },
@@ -467,6 +471,11 @@ struct Encoder {
                                  const core::type::MultisampledTexture* texture_in) {
         texture_out.set_dimension(TextureDimension(texture_in->dim()));
         texture_out.set_sub_type(Type(texture_in->type()));
+    }
+
+    void TypeDepthMultisampledTexture(pb::TypeDepthMultisampledTexture& texture_out,
+                                      const core::type::DepthMultisampledTexture* texture_in) {
+        texture_out.set_dimension(TextureDimension(texture_in->dim()));
     }
 
     void TypeStorageTexture(pb::TypeStorageTexture& texture_out,

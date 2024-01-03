@@ -53,9 +53,10 @@ message Type {
         TypeDepthTexture depth_texture = 8;
         TypeSampledTexture sampled_texture = 9;
         TypeMultisampledTexture multisampled_texture = 10;
-        TypeStorageTexture storage_texture = 11;
-        TypeExternalTexture external_texture = 12;
-        TypeSampler sampler = 13;
+        TypeDepthMultisampledTexture depth_multisampled_texture = 11;
+        TypeStorageTexture storage_texture = 12;
+        TypeExternalTexture external_texture = 13;
+        TypeSampler sampler = 14;
     }
 }
 
@@ -121,6 +122,10 @@ message TypeSampledTexture {
 message TypeMultisampledTexture {
     TextureDimension dimension = 1;
     uint32 sub_type = 2;  // Module.types
+}
+
+message TypeDepthMultisampledTexture {
+    TextureDimension dimension = 1;
 }
 
 message TypeStorageTexture {
