@@ -532,6 +532,14 @@ TEST_F(IRBinaryRoundtripTest, Swizzle) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Bitcast) {
+    auto* x = b.FunctionParam<vec4<f32>>("x");
+    auto* fn = b.Function("Function", ty.vec4<u32>());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Bitcast<vec4<u32>>(x)); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Convert) {
     auto* x = b.FunctionParam<vec4<f32>>("x");
     auto* fn = b.Function("Function", ty.vec4<u32>());

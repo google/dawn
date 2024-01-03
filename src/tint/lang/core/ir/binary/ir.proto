@@ -240,25 +240,26 @@ message Instruction {
         InstructionDiscard discard = 7;
         InstructionLet let = 8;
         InstructionVar var = 9;
-        InstructionConstruct construct = 10;
-        InstructionConvert convert = 11;
-        InstructionAccess access = 12;
-        InstructionUserCall user_call = 13;
-        InstructionBuiltinCall builtin_call = 14;
-        InstructionLoad load = 15;
-        InstructionStore store = 16;
-        InstructionLoadVectorElement load_vector_element = 17;
-        InstructionStoreVectorElement store_vector_element = 18;
-        InstructionSwizzle swizzle = 19;
-        InstructionIf if = 20;
-        InstructionSwitch switch = 21;
-        InstructionLoop loop = 22;
-        InstructionExitIf exit_if = 23;
-        InstructionExitSwitch exit_switch = 24;
-        InstructionExitLoop exit_loop = 25;
-        InstructionNextIteration next_iteration = 26;
-        InstructionContinue continue = 27;
-        InstructionBreakIf break_if = 28;
+        InstructionBitcast bitcast = 10;
+        InstructionConstruct construct = 11;
+        InstructionConvert convert = 12;
+        InstructionAccess access = 13;
+        InstructionUserCall user_call = 14;
+        InstructionBuiltinCall builtin_call = 15;
+        InstructionLoad load = 16;
+        InstructionStore store = 17;
+        InstructionLoadVectorElement load_vector_element = 18;
+        InstructionStoreVectorElement store_vector_element = 19;
+        InstructionSwizzle swizzle = 20;
+        InstructionIf if = 21;
+        InstructionSwitch switch = 22;
+        InstructionLoop loop = 23;
+        InstructionExitIf exit_if = 24;
+        InstructionExitSwitch exit_switch = 25;
+        InstructionExitLoop exit_loop = 26;
+        InstructionNextIteration next_iteration = 27;
+        InstructionContinue continue = 28;
+        InstructionBreakIf break_if = 29;
     }
 }
 
@@ -274,7 +275,9 @@ message InstructionBinary {
 
 message InstructionBuiltin {}
 
-message InstructionConstructor {}
+message InstructionBitcast {}
+
+message InstructionConstruct {}
 
 message InstructionDiscard {}
 
@@ -283,8 +286,6 @@ message InstructionLet {}
 message InstructionVar {
     optional BindingPoint binding_point = 1;
 }
-
-message InstructionConstruct {}
 
 message InstructionConvert {}
 

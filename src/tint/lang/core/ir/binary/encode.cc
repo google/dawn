@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
@@ -195,6 +196,7 @@ struct Encoder {
             inst_in,  //
             [&](const ir::Access* i) { InstructionAccess(*inst_out.mutable_access(), i); },
             [&](const ir::Binary* i) { InstructionBinary(*inst_out.mutable_binary(), i); },
+            [&](const ir::Bitcast* i) { InstructionBitcast(*inst_out.mutable_bitcast(), i); },
             [&](const ir::BreakIf* i) { InstructionBreakIf(*inst_out.mutable_break_if(), i); },
             [&](const ir::CoreBuiltinCall* i) {
                 InstructionBuiltinCall(*inst_out.mutable_builtin_call(), i);
@@ -242,6 +244,8 @@ struct Encoder {
     void InstructionBinary(pb::InstructionBinary& binary_out, const ir::Binary* binary_in) {
         binary_out.set_op(BinaryOp(binary_in->Op()));
     }
+
+    void InstructionBitcast(pb::InstructionBitcast&, const ir::Bitcast*) {}
 
     void InstructionBreakIf(pb::InstructionBreakIf&, const ir::BreakIf*) {}
 

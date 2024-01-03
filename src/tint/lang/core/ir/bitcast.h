@@ -41,6 +41,9 @@ class Bitcast final : public Castable<Bitcast, Call> {
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
+    /// Constructor (no results, no operands)
+    Bitcast();
+
     /// Constructor
     /// @param result the result value
     /// @param val the value being bitcast

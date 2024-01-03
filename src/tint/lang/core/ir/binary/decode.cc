@@ -245,6 +245,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kBinary:
                 inst_out = CreateInstructionBinary(inst_in.binary());
                 break;
+            case pb::Instruction::KindCase::kBitcast:
+                inst_out = CreateInstructionBitcast(inst_in.bitcast());
+                break;
             case pb::Instruction::KindCase::kBreakIf:
                 inst_out = CreateInstructionBreakIf(inst_in.break_if());
                 break;
@@ -343,6 +346,10 @@ struct Decoder {
         auto* binary_out = mod_out_.instructions.Create<ir::Binary>();
         binary_out->SetOp(BinaryOp(binary_in.op()));
         return binary_out;
+    }
+
+    ir::Bitcast* CreateInstructionBitcast(const pb::InstructionBitcast&) {
+        return mod_out_.instructions.Create<ir::Bitcast>();
     }
 
     ir::BreakIf* CreateInstructionBreakIf(const pb::InstructionBreakIf&) {
