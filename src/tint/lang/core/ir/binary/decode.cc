@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/utils/containers/transform.h"
@@ -525,6 +526,8 @@ struct Decoder {
                 return CreateTypeSampledTexture(type_in.sampled_texture());
             case pb::Type::KindCase::kStorageTexture:
                 return CreateTypeStorageTexture(type_in.storage_texture());
+            case pb::Type::KindCase::kExternalTexture:
+                return CreateTypeExternalTexture(type_in.external_texture());
             case pb::Type::KindCase::kSampler:
                 return CreateTypeSampler(type_in.sampler());
             default:
@@ -642,6 +645,10 @@ struct Decoder {
         return mod_out_.Types().Get<type::StorageTexture>(
             dimension, texel_format, access,
             type::StorageTexture::SubtypeFor(texel_format, b.ir.Types()));
+    }
+
+    const type::ExternalTexture* CreateTypeExternalTexture(const pb::TypeExternalTexture&) {
+        return mod_out_.Types().Get<type::ExternalTexture>();
     }
 
     const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {

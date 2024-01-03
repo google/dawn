@@ -66,6 +66,7 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
@@ -363,6 +364,9 @@ struct Encoder {
                 [&](const core::type::StorageTexture* t) {
                     TypeStorageTexture(*type_out.mutable_storage_texture(), t);
                 },
+                [&](const core::type::ExternalTexture* t) {
+                    TypeExternalTexture(*type_out.mutable_external_texture(), t);
+                },
                 [&](const core::type::Sampler* s) { TypeSampler(*type_out.mutable_sampler(), s); },
                 TINT_ICE_ON_NO_MATCH);
 
@@ -451,6 +455,8 @@ struct Encoder {
         texture_out.set_texel_format(TexelFormat(texture_in->texel_format()));
         texture_out.set_access(AccessControl(texture_in->access()));
     }
+
+    void TypeExternalTexture(pb::TypeExternalTexture&, const core::type::ExternalTexture*) {}
 
     void TypeSampler(pb::TypeSampler& sampler_out, const core::type::Sampler* sampler_in) {
         sampler_out.set_kind(SamplerKind(sampler_in->kind()));
