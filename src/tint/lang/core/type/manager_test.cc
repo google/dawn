@@ -28,14 +28,18 @@
 #include "src/tint/lang/core/type/manager.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
 
 namespace tint::core::type {
 namespace {
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 template <typename T>
 size_t count(const T& range_loopable) {
@@ -122,6 +126,20 @@ TEST_F(ManagerTest, WrapDoesntAffectInner) {
 
     EXPECT_EQ(count(inner), 1u);
     EXPECT_EQ(count(outer), 1u);
+}
+
+TEST_F(ManagerTest, ArrayImplicitStride) {
+    Manager tm;
+    auto* arr = tm.array<mat4x4<f32>, 4>();
+    EXPECT_EQ(arr->Stride(), 64u);
+    EXPECT_EQ(arr->ImplicitStride(), 64u);
+}
+
+TEST_F(ManagerTest, RuntimeSizedArrayImplicitStride) {
+    Manager tm;
+    auto* arr = tm.array<mat4x4<f32>>();
+    EXPECT_EQ(arr->Stride(), 64u);
+    EXPECT_EQ(arr->ImplicitStride(), 64u);
 }
 
 }  // namespace
