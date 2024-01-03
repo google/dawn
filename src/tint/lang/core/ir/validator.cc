@@ -580,7 +580,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
                                             args, core::EvaluationStage::kRuntime, Source{});
-    if (result) {
+    // TODO(bclayton): Error if result != Success
+    if (result == Success) {
         if (result->return_type != call->Result(0)->Type()) {
             AddError(call, InstError(call, "call result type does not match builtin return type"));
         }
@@ -932,7 +933,7 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
 
 #ifndef NDEBUG
     auto result = Validate(ir);
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
 #endif

@@ -49,19 +49,19 @@ class IRToProgramRenameConflictsTest : public testing::Test {
         // Validate the input IR.
         {
             auto res = core::ir::Validate(mod);
-            EXPECT_TRUE(res) << res.Failure().reason.str();
-            if (!res) {
+            EXPECT_EQ(res, Success);
+            if (res != Success) {
                 return;
             }
         }
 
         // Run the transforms.
         auto result = RenameConflicts(&mod);
-        EXPECT_TRUE(result) << result.Failure();
+        EXPECT_EQ(result, Success);
 
         // Validate the output IR.
         auto res = core::ir::Validate(mod);
-        EXPECT_TRUE(res) << res.Failure().reason.str();
+        EXPECT_EQ(res, Success);
     }
 
     /// @returns the transformed module as a disassembled string

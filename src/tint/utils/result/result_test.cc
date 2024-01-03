@@ -34,33 +34,34 @@
 namespace tint {
 namespace {
 
+struct S {
+    int value;
+};
+static inline bool operator==(const S& a, const S& b) {
+    return a.value == b.value;
+}
+
 TEST(ResultTest, SuccessInt) {
     auto r = Result<int>(123);
-    EXPECT_TRUE(r);
-    EXPECT_FALSE(!r);
+    ASSERT_EQ(r, Success);
     EXPECT_EQ(r.Get(), 123);
 }
 
 TEST(ResultTest, SuccessStruct) {
-    struct S {
-        int value;
-    };
     auto r = Result<S>({123});
-    EXPECT_TRUE(r);
-    EXPECT_FALSE(!r);
+    ASSERT_EQ(r, Success);
     EXPECT_EQ(r->value, 123);
+    EXPECT_EQ(r, S{123});
 }
 
 TEST(ResultTest, Failure) {
     auto r = Result<int>(Failure{});
-    EXPECT_FALSE(r);
-    EXPECT_TRUE(!r);
+    EXPECT_NE(r, Success);
 }
 
 TEST(ResultTest, CustomFailure) {
     auto r = Result<int, std::string>("oh noes!");
-    EXPECT_FALSE(r);
-    EXPECT_TRUE(!r);
+    EXPECT_NE(r, Success);
     EXPECT_EQ(r.Failure(), "oh noes!");
 }
 

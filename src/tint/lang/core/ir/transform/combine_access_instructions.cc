@@ -81,7 +81,7 @@ struct State {
 
 Result<SuccessType> CombineAccessInstructions(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "CombineAccessInstructions transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

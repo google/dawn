@@ -357,7 +357,7 @@ struct State {
 
 Result<SuccessType> Std140(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "Std140 transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

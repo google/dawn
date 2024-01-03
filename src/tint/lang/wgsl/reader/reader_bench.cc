@@ -35,7 +35,7 @@ namespace {
 
 void ParseWGSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadInputFile(input_name);
-    if (!res) {
+    if (res != Success) {
         state.SkipWithError(res.Failure().reason.str());
         return;
     }

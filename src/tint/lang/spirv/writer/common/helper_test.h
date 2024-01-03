@@ -116,13 +116,13 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @returns true if generation and validation succeeded
     bool Generate(Options options = {}, bool zero_init_workgroup_memory = false) {
         auto raised = raise::Raise(mod, options);
-        if (!raised) {
+        if (raised != Success) {
             err_ = raised.Failure().reason.str();
             return false;
         }
 
         auto spirv = PrintModule(mod, zero_init_workgroup_memory);
-        if (!spirv) {
+        if (spirv != Success) {
             err_ = spirv.Failure().reason.str();
             return false;
         }

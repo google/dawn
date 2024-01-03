@@ -205,7 +205,7 @@ void Run(core::ir::Module& ir) {
 
 Result<SuccessType> VarForDynamicIndex(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "VarForDynamicIndex transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

@@ -76,11 +76,11 @@ void Register(const IRFuzzer& fuzzer) {
             }
 
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
-            if (!ir) {
+            if (ir != Success) {
                 return;
             }
 
-            if (auto val = core::ir::Validate(ir.Get()); !val) {
+            if (auto val = core::ir::Validate(ir.Get()); val != Success) {
                 TINT_ICE() << val.Failure();
                 return;
             }

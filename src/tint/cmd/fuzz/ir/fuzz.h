@@ -57,7 +57,8 @@ struct IRFuzzer {
                     return;
                 }
                 bytes::BufferReader reader{data};
-                if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader)) {
+                if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
+                    data_args == Success) {
                     auto all_args =
                         std::tuple_cat(std::tuple<core::ir::Module&>{module}, data_args.Get());
                     std::apply(*fn, all_args);

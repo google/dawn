@@ -51,14 +51,13 @@ class TransformTestBase : public BASE {
     void Run(TRANSFORM&& transform_func, ARGS&&... args) {
         // Run the transform.
         auto result = transform_func(mod, args...);
-        EXPECT_TRUE(result) << result.Failure();
-        if (!result) {
+        EXPECT_EQ(result, Success);
+        if (result != Success) {
             return;
         }
 
         // Validate the output IR.
-        auto valid = ir::Validate(mod);
-        EXPECT_TRUE(valid) << valid.Failure().reason.str();
+        EXPECT_EQ(ir::Validate(mod), Success);
     }
 
     /// @returns the transformed module as a disassembled string

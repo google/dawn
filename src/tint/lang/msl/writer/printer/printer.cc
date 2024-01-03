@@ -107,7 +107,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the generated MSL shader
     tint::Result<std::string> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "MSL writer");
-        if (!valid) {
+        if (valid != Success) {
             return std::move(valid.Failure());
         }
 

@@ -37,12 +37,12 @@ namespace {
 void IRPrinterFuzzer(core::ir::Module& module, Options options) {
     options.bindings = GenerateBindings(module);
     auto output = Generate(module, options);
-    if (!output) {
+    if (output != Success) {
         return;
     }
     auto& spirv = output->spirv;
     if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
-        !res) {
+        res != Success) {
         TINT_ICE() << "Output of SPIR-V writer failed to validate with SPIR-V Tools\n"
                    << res.Failure();
     }

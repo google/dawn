@@ -40,13 +40,13 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options, const std:
     Output output;
 
     // Raise from core-dialect to GLSL-dialect.
-    if (auto res = raise::Raise(ir); !res) {
+    if (auto res = raise::Raise(ir); res != Success) {
         return res.Failure();
     }
 
     // Generate the GLSL code.
     auto result = Print(ir, options.version);
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
     output.glsl = result.Get();

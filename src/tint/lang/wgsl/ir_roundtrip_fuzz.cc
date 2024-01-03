@@ -41,7 +41,7 @@
 namespace tint::wgsl {
 
 void IRRoundtripFuzzer(core::ir::Module& ir) {
-    if (auto res = tint::wgsl::writer::Raise(ir); !res) {
+    if (auto res = tint::wgsl::writer::Raise(ir); res != Success) {
         TINT_ICE() << res.Failure();
         return;
     }
@@ -49,7 +49,7 @@ void IRRoundtripFuzzer(core::ir::Module& ir) {
     auto dst = tint::wgsl::writer::IRToProgram(ir);
     if (!dst.IsValid()) {
         std::cerr << "IR:\n" << core::ir::Disassemble(ir) << std::endl;
-        if (auto result = tint::wgsl::writer::Generate(dst, {}); result) {
+        if (auto result = tint::wgsl::writer::Generate(dst, {}); result == Success) {
             std::cerr << "WGSL:\n" << result->wgsl << std::endl << std::endl;
         }
         TINT_ICE() << dst.Diagnostics();

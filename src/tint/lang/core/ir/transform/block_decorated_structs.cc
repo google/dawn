@@ -107,7 +107,7 @@ void Run(Module& ir) {
 
 Result<SuccessType> BlockDecoratedStructs(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "BlockDecoratedStructs transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

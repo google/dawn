@@ -46,7 +46,7 @@ struct Case {
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "input: " << c.input;
-    if (c.expected) {
+    if (c.expected == Success) {
         o << ", expected: " << c.expected.Get().value;
     } else {
         o << ", expected failed bitcast to " << c.expected.Failure().create_ptrs;
@@ -72,7 +72,7 @@ TEST_P(ConstEvalBitcastTest, Test) {
 
     // Get the target type CreatePtrs
     builder::CreatePtrs target_create_ptrs;
-    if (expected) {
+    if (expected == tint::Success) {
         target_create_ptrs = expected.Get().value.create_ptrs;
     } else {
         target_create_ptrs = expected.Failure().create_ptrs;
@@ -87,7 +87,7 @@ TEST_P(ConstEvalBitcastTest, Test) {
 
     auto* target_sem_ty = target_create_ptrs.sem(*this);
 
-    if (expected) {
+    if (expected == tint::Success) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         auto* sem = Sem().GetVal(expr);

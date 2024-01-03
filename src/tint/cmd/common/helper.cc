@@ -116,7 +116,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 #if TINT_BUILD_WGSL_WRITER
         // Parse the SPIR-V binary to a core Tint IR module.
         auto result = tint::spirv::reader::ReadIR(data);
-        if (!result) {
+        if (result != Success) {
             std::cerr << "Failed to parse SPIR-V: " << result.Failure() << "\n";
             exit(1);
         }
@@ -164,7 +164,7 @@ void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options options;
     auto result = tint::wgsl::writer::Generate(program, options);
-    if (result) {
+    if (result == Success) {
         out << std::endl << result->wgsl << std::endl;
     } else {
         out << result.Failure() << std::endl;

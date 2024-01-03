@@ -51,7 +51,7 @@ inline std::string str(const Program& program) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
-    if (!result) {
+    if (result != Success) {
         return result.Failure().reason.str();
     }
 

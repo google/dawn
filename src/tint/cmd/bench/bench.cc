@@ -127,7 +127,7 @@ Result<Source::File> LoadInputFile(std::string name) {
     if (tint::HasSuffix(path, ".wgsl")) {
 #if TINT_BUILD_WGSL_READER
         auto data = ReadFile<uint8_t>(path);
-        if (!data) {
+        if (data != Success) {
             return data.Failure();
         }
         return tint::Source::File(path, std::string(data->begin(), data->end()));
@@ -143,7 +143,7 @@ Result<Source::File> LoadInputFile(std::string name) {
 #else
 
         auto spirv = ReadFile<uint32_t>(path);
-        if (spirv) {
+        if (spirv == Success) {
             tint::spirv::reader::Options spirv_opts;
             spirv_opts.allow_non_uniform_derivatives = true;
             auto program = tint::spirv::reader::Read(spirv.Get(), spirv_opts);
@@ -151,7 +151,7 @@ Result<Source::File> LoadInputFile(std::string name) {
                 return Failure{program.Diagnostics()};
             }
             auto result = tint::wgsl::writer::Generate(program, {});
-            if (!result) {
+            if (result != Success) {
                 return result.Failure();
             }
             return tint::Source::File(path, result->wgsl);
@@ -164,7 +164,7 @@ Result<Source::File> LoadInputFile(std::string name) {
 
 Result<ProgramAndFile> LoadProgram(std::string name) {
     auto res = bench::LoadInputFile(name);
-    if (!res) {
+    if (res != Success) {
         return res.Failure();
     }
     auto file = std::make_unique<Source::File>(res.Get());

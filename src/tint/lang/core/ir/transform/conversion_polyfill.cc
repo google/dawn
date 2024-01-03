@@ -228,7 +228,7 @@ struct State {
 
 Result<SuccessType> ConversionPolyfill(Module& ir, const ConversionPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "ConversionPolyfill transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

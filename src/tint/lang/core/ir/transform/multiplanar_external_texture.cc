@@ -582,7 +582,7 @@ struct State {
 
 Result<SuccessType> MultiplanarExternalTexture(Module& ir, const ExternalTextureOptions& options) {
     auto result = ValidateAndDumpIfNeeded(ir, "MultiplanarExternalTexture transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

@@ -415,14 +415,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             if (r.use_tint_ir) {
                 // Convert the AST program to an IR module.
                 auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-                DAWN_INVALID_IF(!ir, "An error occurred while generating Tint IR\n%s",
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.str());
 
                 tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
             } else {
                 tintResult = tint::spirv::writer::Generate(program, r.tintOptions);
             }
-            DAWN_INVALID_IF(!tintResult, "An error occurred while generating SPIR-V\n%s",
+            DAWN_INVALID_IF(tintResult != tint::Success,
+                            "An error occurred while generating SPIR-V\n%s",
                             tintResult.Failure().reason.str());
 
             CompiledSpirv result;

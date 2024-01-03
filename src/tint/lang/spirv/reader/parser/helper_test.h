@@ -73,13 +73,13 @@ class SpirvParserTestHelperBase : public BASE {
 
         // Parse the SPIR-V to produce an IR module.
         auto parsed = Parse(Slice(binary.data(), binary.size()));
-        if (!parsed) {
+        if (parsed != Success) {
             return parsed.Failure().reason.str();
         }
 
         // Validate the IR module.
         auto validated = core::ir::Validate(parsed.Get());
-        if (!validated) {
+        if (validated != Success) {
             return validated.Failure().reason.str();
         }
 

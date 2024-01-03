@@ -640,7 +640,7 @@ struct State {
 
 Result<SuccessType> BuiltinPolyfill(Module& ir, const BuiltinPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

@@ -383,7 +383,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             }
 
             auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
-            DAWN_INVALID_IF(!result, "An error occurred while generating GLSL:\n%s",
+            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.str());
 
             return GLSLCompilation{{std::move(result->glsl), result->needs_internal_uniform_buffer,

@@ -104,7 +104,7 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const ProgramOptions& options) {
-        if (auto res = core::ir::Validate(mod); !res) {
+        if (auto res = core::ir::Validate(mod); res != Success) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;
             return Program{resolver::Resolve(b)};

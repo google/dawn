@@ -45,7 +45,7 @@ namespace tint::msl::writer {
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     {
         auto res = ValidateBindingOptions(options);
-        if (!res) {
+        if (res != Success) {
             return res.Failure();
         }
     }
@@ -53,13 +53,13 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect to MSL-dialect.
-    if (auto res = raise::Raise(ir, options); !res) {
+    if (auto res = raise::Raise(ir, options); res != Success) {
         return res.Failure();
     }
 
     // Generate the MSL code.
     auto result = Print(ir);
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
     output.msl = result.Get();
@@ -73,7 +73,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
 
     {
         auto res = ValidateBindingOptions(options);
-        if (!res) {
+        if (res != Success) {
             return res.Failure();
         }
     }

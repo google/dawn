@@ -62,13 +62,13 @@ class GlslPrinterTestHelperBase : public BASE {
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
     bool Generate() {
-        if (auto raised = raise::Raise(mod); !raised) {
+        if (auto raised = raise::Raise(mod); raised != Success) {
             err_ = raised.Failure().reason.str();
             return false;
         }
 
         auto result = Print(mod, version);
-        if (!result) {
+        if (result != Success) {
             err_ = result.Failure().reason.str();
             return false;
         }

@@ -79,7 +79,7 @@ struct Decoder<std::string, void> {
     /// @returns the decoded string, or an error if the stream is too short.
     static Result<std::string> Decode(Reader& reader) {
         auto len = reader.Int<uint16_t>();
-        if (!len) {
+        if (len != Success) {
             return len.Failure();
         }
         return reader.String(len.Get());
@@ -106,7 +106,7 @@ struct Decoder<T, std::enable_if_t<HasReflection<T>>> {
         diag::List errs;
         ForeachField(object, [&](auto& field) {  //
             auto value = bytes::Decode<std::decay_t<decltype(field)>>(reader);
-            if (value) {
+            if (value == Success) {
                 field = value.Get();
             } else {
                 errs.add(value.Failure().reason);
@@ -130,18 +130,18 @@ struct Decoder<std::unordered_map<K, V>, void> {
 
         while (true) {
             auto stop = bytes::Decode<bool>(reader);
-            if (!stop) {
+            if (stop != Success) {
                 return stop.Failure();
             }
             if (stop.Get()) {
                 break;
             }
             auto key = bytes::Decode<K>(reader);
-            if (!key) {
+            if (key != Success) {
                 return key.Failure();
             }
             auto val = bytes::Decode<V>(reader);
-            if (!val) {
+            if (val != Success) {
                 return val.Failure();
             }
             out.emplace(std::move(key.Get()), std::move(val.Get()));
@@ -159,12 +159,12 @@ struct Decoder<std::tuple<FIRST, OTHERS...>, void> {
     /// @returns the decoded tuple, or an error if the stream is too short.
     static Result<std::tuple<FIRST, OTHERS...>> Decode(Reader& reader) {
         auto first = bytes::Decode<FIRST>(reader);
-        if (!first) {
+        if (first != Success) {
             return first.Failure();
         }
         if constexpr (sizeof...(OTHERS) > 0) {
             auto others = bytes::Decode<std::tuple<OTHERS...>>(reader);
-            if (!others) {
+            if (others != Success) {
                 return others.Failure();
             }
             return std::tuple_cat(std::tuple<FIRST>(first.Get()), others.Get());

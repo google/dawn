@@ -37,7 +37,7 @@ namespace tint::spirv::reader {
 
 Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
     auto mod = Parse(Slice(input.data(), input.size()));
-    if (!mod) {
+    if (mod != Success) {
         return mod.Failure();
     }
 

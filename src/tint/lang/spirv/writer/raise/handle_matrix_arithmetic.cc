@@ -168,7 +168,7 @@ void Run(core::ir::Module& ir) {
 
 Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "HandleMatrixArithmetic transform");
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
 

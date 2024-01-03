@@ -48,9 +48,9 @@ TEST(BufferReaderTest, IntegerBigEndian) {
 TEST(BufferReaderTest, IntegerBigEndian_TooShort) {
     auto data = Data(0x10, 0x20);
     auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kBig);
-    EXPECT_FALSE(u32);
+    EXPECT_NE(u32, Success);
     auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kBig);
-    EXPECT_FALSE(i32);
+    EXPECT_NE(i32, Success);
 }
 
 TEST(BufferReaderTest, IntegerLittleEndian) {
@@ -64,22 +64,22 @@ TEST(BufferReaderTest, IntegerLittleEndian) {
 TEST(BufferReaderTest, IntegerLittleEndian_TooShort) {
     auto data = Data(0x30, 0x40);
     auto u32 = BufferReader{Slice{data}}.Int<uint32_t>(Endianness::kLittle);
-    EXPECT_FALSE(u32);
+    EXPECT_NE(u32, Success);
     auto i32 = BufferReader{Slice{data}}.Int<int32_t>(Endianness::kLittle);
-    EXPECT_FALSE(i32);
+    EXPECT_NE(i32, Success);
 }
 
 TEST(BufferReaderTest, Float) {
     auto data = Data(0x00, 0x00, 0x08, 0x41);
     auto f32 = BufferReader{Slice{data}}.Float<float>();
-    ASSERT_TRUE(f32);
+    ASSERT_EQ(f32, Success);
     EXPECT_EQ(f32.Get(), 8.5f);
 }
 
 TEST(BufferReaderTest, Float_TooShort) {
     auto data = Data(0x08, 0x41);
     auto f32 = BufferReader{Slice{data}}.Float<float>();
-    EXPECT_FALSE(f32);
+    EXPECT_NE(f32, Success);
 }
 
 }  // namespace

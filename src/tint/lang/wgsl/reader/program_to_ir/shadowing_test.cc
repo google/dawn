@@ -57,7 +57,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(S = struct @align(4) {
   i:i32 @offset(0)
@@ -85,7 +85,7 @@ fn f(S : S) -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(S = struct @align(4) {
   i:i32 @offset(0)
@@ -111,7 +111,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, i32, read_write> = var, 1i
@@ -143,7 +143,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, i32, read_write> = var, 1i
@@ -176,7 +176,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -215,7 +215,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -250,7 +250,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -296,7 +296,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -340,7 +340,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -384,7 +384,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -427,7 +427,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -474,7 +474,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -525,7 +525,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -579,7 +579,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -633,7 +633,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -683,7 +683,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -733,7 +733,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {
@@ -781,7 +781,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
   %b1 = block {

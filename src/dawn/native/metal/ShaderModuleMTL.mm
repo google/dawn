@@ -344,7 +344,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
             auto result = tint::msl::writer::Generate(program, r.tintOptions);
-            DAWN_INVALID_IF(!result, "An error occurred while generating MSL:\n%s",
+            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
                             result.Failure().reason.str());
 
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall

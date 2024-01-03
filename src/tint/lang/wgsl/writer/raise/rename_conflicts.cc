@@ -285,7 +285,7 @@ struct State {
 
 Result<SuccessType> RenameConflicts(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "RenameConflicts transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

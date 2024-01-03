@@ -49,7 +49,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)                   \
     do {                                           \
         auto result = name(module, ##__VA_ARGS__); \
-        if (!result) {                             \
+        if (result != Success) {                   \
             return result;                         \
         }                                          \
     } while (false)

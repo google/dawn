@@ -46,11 +46,11 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
     std::pair<std::string, std::string> Roundtrip() {
         auto pre = Disassemble(this->mod);
         auto encoded = Encode(this->mod);
-        if (!encoded) {
+        if (encoded != Success) {
             return {pre, encoded.Failure().reason.str()};
         }
         auto decoded = Decode(encoded->Slice());
-        if (!decoded) {
+        if (decoded != Success) {
             return {pre, decoded.Failure().reason.str()};
         }
         auto post = Disassemble(decoded.Get());

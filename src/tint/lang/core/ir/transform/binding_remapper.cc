@@ -78,7 +78,7 @@ Result<SuccessType> BindingRemapper(
     Module& ir,
     const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
     auto result = ValidateAndDumpIfNeeded(ir, "BindingRemapper transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

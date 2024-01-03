@@ -58,7 +58,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
     }
 
     auto output = wgsl::writer::Generate(output_program, {});
-    if (!output) {
+    if (output != Success) {
         std::stringstream ss;
         ss << "wgsl::Generate() errored: " << output.Failure();
         result.err = ss.str();

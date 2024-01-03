@@ -146,7 +146,7 @@ void Run(core::ir::Module& ir) {
 
 Result<SuccessType> ExpandImplicitSplats(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "ExpandImplicitSplats transform");
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
 

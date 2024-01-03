@@ -79,7 +79,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
         o << a << ", ";
     }
     o << "expected: ";
-    if (c.expected) {
+    if (c.expected == Success) {
         auto s = c.expected.Get();
         if (s.values.Length() == 1) {
             o << s.values[0];
@@ -168,7 +168,7 @@ TEST_P(ConstEvalBuiltinTest, Test) {
     auto* expr = Call(Source{{12, 34}}, core::str(builtin), std::move(args));
     GlobalConst("C", expr);
 
-    if (c.expected) {
+    if (c.expected == Success) {
         auto expected_case = c.expected.Get();
 
         ASSERT_TRUE(r()->Resolve()) << r()->error();

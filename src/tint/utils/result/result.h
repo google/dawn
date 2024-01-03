@@ -111,23 +111,11 @@ struct [[nodiscard]] Result {
               typename = std::void_t<decltype(SUCCESS_TYPE{std::declval<S>()}),
                                      decltype(FAILURE_TYPE{std::declval<F>()})>>
     Result(const Result<S, F>& other) {  // NOLINT(runtime/explicit):
-        if (other) {
+        if (other == Success) {
             value = SUCCESS_TYPE{other.Get()};
         } else {
             value = FAILURE_TYPE{other.Failure()};
         }
-    }
-
-    /// @returns true if the result was a success
-    operator bool() const {
-        Validate();
-        return std::holds_alternative<SUCCESS_TYPE>(value);
-    }
-
-    /// @returns true if the result was a failure
-    bool operator!() const {
-        Validate();
-        return std::holds_alternative<FAILURE_TYPE>(value);
     }
 
     /// @returns the success value
@@ -173,25 +161,54 @@ struct [[nodiscard]] Result {
     }
 
     /// Equality operator
-    /// @param val the value to compare this Result to
-    /// @returns true if this result holds a success value equal to `value`
-    bool operator==(SUCCESS_TYPE val) const {
-        Validate();
-        if (auto* v = std::get_if<SUCCESS_TYPE>(&value)) {
-            return *v == val;
-        }
-        return false;
+    /// @param other the Result to compare this Result to
+    /// @returns true if this Result is equal to @p other
+    template <typename T>
+    bool operator==(const Result& other) const {
+        return value == other.value;
     }
 
     /// Equality operator
     /// @param val the value to compare this Result to
-    /// @returns true if this result holds a failure value equal to `value`
-    bool operator==(FAILURE_TYPE val) const {
+    /// @returns true if this result holds a success or failure value equal to `value`
+    template <typename T>
+    bool operator==(const T& val) const {
         Validate();
-        if (auto* v = std::get_if<FAILURE_TYPE>(&value)) {
-            return *v == val;
+
+        using D = std::decay_t<T>;
+        static constexpr bool is_success = std::is_same_v<D, tint::SuccessType>;  // T == Success
+        static constexpr bool is_success_ty =
+            std::is_same_v<D, SUCCESS_TYPE> ||
+            (traits::IsStringLike<SUCCESS_TYPE> && traits::IsStringLike<D>);  // T == SUCCESS_TYPE
+        static constexpr bool is_failure_ty =
+            std::is_same_v<D, FAILURE_TYPE> ||
+            (traits::IsStringLike<FAILURE_TYPE> && traits::IsStringLike<D>);  // T == FAILURE_TYPE
+
+        static_assert(is_success || is_success_ty || is_failure_ty,
+                      "unsupported type for Result equality operator");
+        static_assert(!(is_success_ty && is_failure_ty),
+                      "ambiguous success / failure type for Result equality operator");
+
+        if constexpr (is_success) {
+            return std::holds_alternative<SUCCESS_TYPE>(value);
+        } else if constexpr (is_success_ty) {
+            if (auto* v = std::get_if<SUCCESS_TYPE>(&value)) {
+                return *v == val;
+            }
+            return false;
+        } else if constexpr (is_failure_ty) {
+            if (auto* v = std::get_if<FAILURE_TYPE>(&value)) {
+                return *v == val;
+            }
+            return false;
         }
-        return false;
+    }
+    /// Inequality operator
+    /// @param val the value to compare this Result to
+    /// @returns false if this result holds a success or failure value equal to `value`
+    template <typename T>
+    bool operator!=(const T& val) const {
+        return !(*this == val);
     }
 
   private:
@@ -210,7 +227,7 @@ template <typename STREAM,
           typename FAILURE,
           typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& out, const Result<SUCCESS, FAILURE>& res) {
-    if (res) {
+    if (res == Success) {
         if constexpr (traits::HasOperatorShiftLeft<STREAM&, SUCCESS>) {
             return out << "success: " << res.Get();
         } else {

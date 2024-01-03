@@ -70,7 +70,7 @@ TEST_F(IntrinsicTableTest, MatchF32) {
     auto* f32 = create<core::type::F32>();
     auto result =
         table.Lookup(core::BuiltinFn::kCos, Vector{f32}, EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -81,7 +81,7 @@ TEST_F(IntrinsicTableTest, MismatchF32) {
     auto* i32 = create<core::type::I32>();
     auto result =
         table.Lookup(core::BuiltinFn::kCos, Vector{i32}, EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -91,7 +91,7 @@ TEST_F(IntrinsicTableTest, MatchU32) {
     auto* vec2_f32 = create<core::type::Vector>(f32, 2u);
     auto result = table.Lookup(core::BuiltinFn::kUnpack2X16Float, Vector{u32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec2_f32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -102,7 +102,7 @@ TEST_F(IntrinsicTableTest, MismatchU32) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kUnpack2X16Float, Vector{f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -113,7 +113,7 @@ TEST_F(IntrinsicTableTest, MatchI32) {
     auto* tex = create<core::type::SampledTexture>(core::type::TextureDimension::k1d, f32);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec4_f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -130,7 +130,7 @@ TEST_F(IntrinsicTableTest, MismatchI32) {
     auto* tex = create<core::type::SampledTexture>(core::type::TextureDimension::k1d, f32);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -138,7 +138,7 @@ TEST_F(IntrinsicTableTest, MatchIU32AsI32) {
     auto* i32 = create<core::type::I32>();
     auto result = table.Lookup(core::BuiltinFn::kCountOneBits, Vector{i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, i32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -149,7 +149,7 @@ TEST_F(IntrinsicTableTest, MatchIU32AsU32) {
     auto* u32 = create<core::type::U32>();
     auto result = table.Lookup(core::BuiltinFn::kCountOneBits, Vector{u32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, u32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -160,7 +160,7 @@ TEST_F(IntrinsicTableTest, MismatchIU32) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kCountOneBits, Vector{f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -168,7 +168,7 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsI32) {
     auto* i32 = create<core::type::I32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{i32, i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, i32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -181,7 +181,7 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsU32) {
     auto* u32 = create<core::type::U32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{u32, u32, u32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, u32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -194,7 +194,7 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsF32) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{f32, f32, f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -207,7 +207,7 @@ TEST_F(IntrinsicTableTest, MismatchFIU32) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{bool_, bool_, bool_},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -216,7 +216,7 @@ TEST_F(IntrinsicTableTest, MatchBool) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{f32, f32, bool_},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -229,7 +229,7 @@ TEST_F(IntrinsicTableTest, MismatchBool) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{f32, f32, f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -240,7 +240,7 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
                                             core::Access::kReadWrite);
     auto result = table.Lookup(core::BuiltinFn::kAtomicLoad, Vector{ptr},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, i32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -252,7 +252,7 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
     auto* atomicI32 = create<core::type::Atomic>(i32);
     auto result = table.Lookup(core::BuiltinFn::kAtomicLoad, Vector{atomicI32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -263,7 +263,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
         create<core::type::Pointer>(core::AddressSpace::kStorage, arr, core::Access::kReadWrite);
     auto result = table.Lookup(core::BuiltinFn::kArrayLength, Vector{arr_ptr},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_TRUE(result->return_type->Is<core::type::U32>());
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -276,7 +276,7 @@ TEST_F(IntrinsicTableTest, MismatchArray) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kArrayLength, Vector{f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -288,7 +288,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
     auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kSampler);
     auto result = table.Lookup(core::BuiltinFn::kTextureSample, Vector{tex, sampler, vec2_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec4_f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -306,7 +306,7 @@ TEST_F(IntrinsicTableTest, MismatchSampler) {
     auto* tex = create<core::type::SampledTexture>(core::type::TextureDimension::k2d, f32);
     auto result = table.Lookup(core::BuiltinFn::kTextureSample, Vector{tex, f32, vec2_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -318,7 +318,7 @@ TEST_F(IntrinsicTableTest, MatchSampledTexture) {
     auto* tex = create<core::type::SampledTexture>(core::type::TextureDimension::k2d, f32);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, vec2_i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec4_f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -338,7 +338,7 @@ TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
     auto* tex = create<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, f32);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, vec2_i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec4_f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -357,7 +357,7 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
     auto* tex = create<core::type::DepthTexture>(core::type::TextureDimension::k2d);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, vec2_i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -376,7 +376,7 @@ TEST_F(IntrinsicTableTest, MatchDepthMultisampledTexture) {
     auto* tex = create<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, vec2_i32, i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -396,7 +396,7 @@ TEST_F(IntrinsicTableTest, MatchExternalTexture) {
     auto* tex = create<core::type::ExternalTexture>();
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{tex, vec2_i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec4_f32);
     ASSERT_EQ(result->parameters.Length(), 2u);
@@ -418,7 +418,7 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
 
     auto result = table.Lookup(core::BuiltinFn::kTextureStore, Vector{tex, vec2_i32, vec4_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_TRUE(result->return_type->Is<type::Void>());
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -436,7 +436,7 @@ TEST_F(IntrinsicTableTest, MismatchTexture) {
     auto* vec2_i32 = create<core::type::Vector>(i32, 2u);
     auto result = table.Lookup(core::BuiltinFn::kTextureLoad, Vector{f32, vec2_i32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -448,7 +448,7 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
                                                                  core::Access::kReadWrite),
                                },
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -459,7 +459,7 @@ TEST_F(IntrinsicTableTest, MatchTemplateType) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{f32, f32, f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     EXPECT_EQ(result->parameters[0].type, f32);
@@ -472,7 +472,7 @@ TEST_F(IntrinsicTableTest, MismatchTemplateType) {
     auto* u32 = create<core::type::U32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{f32, u32, f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -481,7 +481,7 @@ TEST_F(IntrinsicTableTest, MatchOpenSizeVector) {
     auto* vec2_f32 = create<core::type::Vector>(f32, 2u);
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{vec2_f32, vec2_f32, vec2_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, vec2_f32);
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -496,7 +496,7 @@ TEST_F(IntrinsicTableTest, MismatchOpenSizeVector) {
     auto* vec2_f32 = create<core::type::Vector>(f32, 2u);
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{vec2_f32, u32, vec2_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -506,7 +506,7 @@ TEST_F(IntrinsicTableTest, MatchOpenSizeMatrix) {
     auto* mat3_f32 = create<core::type::Matrix>(vec3_f32, 3u);
     auto result = table.Lookup(core::BuiltinFn::kDeterminant, Vector{mat3_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, f32);
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -519,7 +519,7 @@ TEST_F(IntrinsicTableTest, MismatchOpenSizeMatrix) {
     auto* mat3x2_f32 = create<core::type::Matrix>(vec2_f32, 3u);
     auto result = table.Lookup(core::BuiltinFn::kDeterminant, Vector{mat3x2_f32},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -528,7 +528,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{af, af, bool_},
                                EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, af);
@@ -544,7 +544,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
         core::AddressSpace::kFunction, create<core::type::Bool>(), core::Access::kReadWrite);
     auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{af, af, bool_ref},
                                EvaluationStage::kRuntime, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_TRUE(result->return_type->Is<core::type::F32>());
@@ -559,7 +559,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
     auto* u32 = create<core::type::U32>();
     auto result = table.Lookup(core::BinaryOp::kShiftLeft, ai, u32, EvaluationStage::kConstant,
                                Source{}, false);
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_NE(result->const_eval_fn, nullptr) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, ai);
@@ -572,7 +572,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_RuntimeEval) {
     auto* u32 = create<core::type::U32>();
     auto result = table.Lookup(core::BinaryOp::kShiftLeft, ai, u32, EvaluationStage::kRuntime,
                                Source{}, false);
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_NE(result->const_eval_fn, nullptr) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_TRUE(result->return_type->Is<core::type::I32>());
@@ -586,7 +586,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::BuiltinFn::kTextureDimensions, Vector{bool_, bool_},
                                EvaluationStage::kConstant, Source{});
-    EXPECT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_EQ(Diagnostics().str(),
               R"(error: no matching call to textureDimensions(bool, bool)
 
@@ -626,7 +626,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::BuiltinFn::kTextureDimensions, Vector{tex, bool_},
                                EvaluationStage::kConstant, Source{});
-    EXPECT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_EQ(Diagnostics().str(),
               R"(error: no matching call to textureDimensions(texture_depth_2d, bool)
 
@@ -674,7 +674,7 @@ TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
     auto* bool_ = create<core::type::Bool>();
     auto result =
         table.Lookup(core::UnaryOp::kNegation, bool_, EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator - (bool)
 
 2 candidate operators:
@@ -718,7 +718,7 @@ TEST_F(IntrinsicTableTest, MismatchBinaryOp) {
     auto result = table.Lookup(core::BinaryOp::kMultiply, f32, bool_, EvaluationStage::kConstant,
                                Source{{12, 34}},
                                /* is_compound */ false);
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator * (f32, bool)
 
 9 candidate operators:
@@ -752,7 +752,7 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
     auto result = table.Lookup(core::BinaryOp::kMultiply, f32, bool_, EvaluationStage::kConstant,
                                Source{{12, 34}},
                                /* is_compound */ true);
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator *= (f32, bool)
 
 9 candidate operators:
@@ -773,7 +773,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
     auto* vec3_i32 = create<core::type::Vector>(i32, 3u);
     auto result = table.Lookup(CtorConv::kVec3, nullptr, Vector{i32, i32, i32},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_EQ(result->return_type, vec3_i32);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -788,7 +788,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
     auto* vec3_i32 = create<core::type::Vector>(i32, 3u);
     auto result = table.Lookup(CtorConv::kVec3, i32, Vector{i32, i32, i32},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_EQ(result->return_type, vec3_i32);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
@@ -803,7 +803,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(CtorConv::kVec3, nullptr, Vector{i32, f32, i32},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
 
@@ -830,7 +830,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(CtorConv::kVec3, i32, Vector{i32, f32, i32},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
 
@@ -857,7 +857,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
     auto* vec3_ai = create<core::type::Vector>(ai, 3u);
     auto result = table.Lookup(CtorConv::kVec3, nullptr, Vector{vec3_ai},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_EQ(result->return_type, vec3_ai);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -872,7 +872,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
     auto* mat2x2_af = create<core::type::Matrix>(vec2_af, 2u);
     auto result = table.Lookup(CtorConv::kMat2x2, nullptr, Vector{vec2_ai, vec2_ai},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_TYPE(result->return_type, mat2x2_af);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 2u);
@@ -886,7 +886,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* vec3_ai = create<core::type::Vector>(ai, 3u);
     auto result = table.Lookup(CtorConv::kVec3, nullptr, Vector{ai, ai, ai},
                                EvaluationStage::kConstant, Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_ai);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -903,7 +903,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
                                EvaluationStage::kRuntime, Source{{12, 34}});
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_i32);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -921,7 +921,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
     auto* vec3_f32 = create<core::type::Vector>(f32, 3u);
     auto result = table.Lookup(CtorConv::kVec3, i32, Vector{vec3_f32}, EvaluationStage::kConstant,
                                Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_EQ(result->return_type, vec3_i32);
     EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
@@ -934,7 +934,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(CtorConv::kVec3, f32, Vector{arr}, EvaluationStage::kConstant,
                                Source{{12, 34}});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
 
@@ -964,7 +964,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     auto* vec3_f32 = create<core::type::Vector>(f32, 3u);
     auto result = table.Lookup(CtorConv::kVec3, af, Vector{vec3_ai}, EvaluationStage::kConstant,
                                Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_NE(result->const_eval_fn, nullptr);
     // NOTE: Conversions are explicit, so there's no way to have it return abstracts
     EXPECT_EQ(result->return_type, vec3_f32);
@@ -981,7 +981,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     auto* vec3_i32 = create<core::type::Vector>(create<core::type::I32>(), 3u);
     auto result = table.Lookup(CtorConv::kVec3, af, Vector{vec3_ai}, EvaluationStage::kRuntime,
                                Source{{12, 34}});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_f32);
     EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -995,7 +995,7 @@ TEST_F(IntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
     arg_tys.Resize(257, f32);
     auto result = table.Lookup(core::BuiltinFn::kAbs, std::move(arg_tys),
                                EvaluationStage::kConstant, Source{});
-    ASSERT_FALSE(result);
+    ASSERT_NE(result, Success);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
@@ -1008,7 +1008,7 @@ TEST_F(IntrinsicTableTest, OverloadResolution) {
     auto* i32 = create<core::type::I32>();
     auto result =
         table.Lookup(CtorConv::kI32, nullptr, Vector{ai}, EvaluationStage::kConstant, Source{});
-    ASSERT_TRUE(result) << Diagnostics();
+    ASSERT_EQ(result, Success) << Diagnostics();
     EXPECT_EQ(result->return_type, i32);
     EXPECT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, ai);
@@ -1053,7 +1053,7 @@ TEST_P(IntrinsicTableAbstractBinaryTest, MatchAdd) {
                                Source{{12, 34}},
                                /* is_compound */ false);
 
-    bool matched = result;
+    bool matched = result == Success;
     bool expected_match = GetParam().expected_match;
     EXPECT_EQ(matched, expected_match) << Diagnostics();
 
@@ -1238,21 +1238,21 @@ TEST_P(IntrinsicTableAbstractTernaryTest, MatchClamp) {
                                 EvaluationStage::kConstant, Source{{12, 34}});
 
     bool expected_match = GetParam().expected_match;
-    EXPECT_EQ(builtin == true, expected_match) << Diagnostics();
+    EXPECT_EQ(builtin == Success, expected_match) << Diagnostics();
 
-    auto* result = builtin ? builtin->return_type : nullptr;
+    auto* result = builtin == Success ? builtin->return_type : nullptr;
     auto* expected_result = GetParam().expected_result(*this);
     EXPECT_TYPE(result, expected_result);
 
-    auto* param_a = builtin ? builtin->parameters[0].type : nullptr;
+    auto* param_a = builtin == Success ? builtin->parameters[0].type : nullptr;
     auto* expected_param_a = GetParam().expected_param_a(*this);
     EXPECT_TYPE(param_a, expected_param_a);
 
-    auto* param_b = builtin ? builtin->parameters[1].type : nullptr;
+    auto* param_b = builtin == Success ? builtin->parameters[1].type : nullptr;
     auto* expected_param_b = GetParam().expected_param_b(*this);
     EXPECT_TYPE(param_b, expected_param_b);
 
-    auto* param_c = builtin ? builtin->parameters[2].type : nullptr;
+    auto* param_c = builtin == Success ? builtin->parameters[2].type : nullptr;
     auto* expected_param_c = GetParam().expected_param_c(*this);
     EXPECT_TYPE(param_c, expected_param_c);
 }

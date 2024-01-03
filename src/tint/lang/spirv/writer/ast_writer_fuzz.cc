@@ -43,12 +43,12 @@ void ASTPrinterFuzzer(const tint::Program& program, const Options& options) {
         return;
     }
     auto output = Generate(no_overrides, options);
-    if (!output) {
+    if (output != Success) {
         return;
     }
     auto& spirv = output->spirv;
     if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
-        !res) {
+        res != Success) {
         TINT_ICE() << "Output of SPIR-V writer failed to validate with SPIR-V Tools\n"
                    << res.Failure();
     }

@@ -344,7 +344,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             }
 
             auto result = spirv::writer::Generate(program, options_spirv_);
-            if (result) {
+            if (result == Success) {
                 generated_spirv_ = std::move(result->spirv);
 
                 if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {

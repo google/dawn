@@ -54,7 +54,8 @@ struct ProgramFuzzer {
                     return;
                 }
                 bytes::BufferReader reader{data};
-                if (auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader)) {
+                auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
+                if (data_args == Success) {
                     auto all_args =
                         std::tuple_cat(std::tuple<const Program&>{program}, data_args.Get());
                     std::apply(*fn, all_args);

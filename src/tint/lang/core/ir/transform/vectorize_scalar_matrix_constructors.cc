@@ -97,7 +97,7 @@ struct State {
 
 Result<SuccessType> VectorizeScalarMatrixConstructors(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "VectorizeScalarMatrixConstructors transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

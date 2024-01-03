@@ -75,7 +75,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, const char*** argv) {
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
-    if (auto res = opts.Parse(arguments, parse_opts); !res) {
+    if (auto res = opts.Parse(arguments, parse_opts); res != tint::Success) {
         show_help();
         std::cerr << res.Failure();
         return 0;

@@ -189,7 +189,7 @@ class Printer {
 
     /// @returns the generated SPIR-V code on success, or failure
     Result<std::vector<uint32_t>> Code() {
-        if (auto res = Generate(); !res) {
+        if (auto res = Generate(); res != Success) {
             return res.Failure();
         }
 
@@ -202,7 +202,7 @@ class Printer {
 
     /// @returns the generated SPIR-V module on success, or failure
     Result<writer::Module> Module() {
-        if (auto res = Generate(); !res) {
+        if (auto res = Generate(); res != Success) {
             return res.Failure();
         }
 
@@ -292,7 +292,7 @@ class Printer {
     /// Builds the SPIR-V from the IR
     Result<SuccessType> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "SPIR-V writer");
-        if (!valid) {
+        if (valid != Success) {
             return valid.Failure();
         }
 

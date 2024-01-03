@@ -183,7 +183,7 @@ struct State {
 
 Result<SuccessType> Bgra8UnormPolyfill(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "Bgra8UnormPolyfill transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

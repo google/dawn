@@ -39,13 +39,13 @@ namespace {
 
 void GenerateSPIRV(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
-    if (!res) {
+    if (res != Success) {
         state.SkipWithError(res.Failure().reason.str());
         return;
     }
     for (auto _ : state) {
         auto gen_res = Generate(res->program, {});
-        if (!gen_res) {
+        if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason.str());
         }
     }
@@ -54,20 +54,20 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
 void GenerateSPIRV_UseIR(benchmark::State& state, std::string input_name) {
 #if TINT_BUILD_WGSL_READER
     auto res = bench::LoadProgram(input_name);
-    if (!res) {
+    if (res != Success) {
         state.SkipWithError(res.Failure().reason.str());
         return;
     }
     for (auto _ : state) {
         // Convert the AST program to an IR module.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
-        if (!ir) {
+        if (ir != Success) {
             state.SkipWithError(ir.Failure().reason.str());
             return;
         }
 
         auto gen_res = Generate(ir.Get(), {});
-        if (!gen_res) {
+        if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason.str());
         }
     }

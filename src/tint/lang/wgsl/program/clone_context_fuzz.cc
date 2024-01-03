@@ -50,7 +50,7 @@ namespace tint::program {
 #define ASSERT_TRUE(A)                                                                           \
     do {                                                                                         \
         decltype(A) assert_a = (A);                                                              \
-        if (!assert_a) {                                                                         \
+        if (assert_a != Success) {                                                               \
             TINT_ICE() << "ASSERT_TRUE(" #A ") failed:\n" << #A << " was: " << assert_a << "\n"; \
         }                                                                                        \
     } while (false)

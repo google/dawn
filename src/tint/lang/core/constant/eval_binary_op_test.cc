@@ -83,7 +83,7 @@ Case E(T lhs, U rhs, std::string error) {
 /// Prints Case to ostream
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "lhs: " << c.lhs << ", rhs: " << c.rhs << ", expected: ";
-    if (c.expected) {
+    if (c.expected == Success) {
         auto& s = c.expected.Get();
         o << s.value;
     } else {
@@ -110,7 +110,7 @@ TEST_P(ConstEvalBinaryOpTest, Test) {
     auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, op, lhs_expr, rhs_expr);
     GlobalConst("C", expr);
 
-    if (c.expected) {
+    if (c.expected == Success) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
         auto expected_case = c.expected.Get();
         auto& expected = expected_case.value;

@@ -47,14 +47,14 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
         auto input = tint::TrimSpace(input_wgsl);
         Source::File file("test.wgsl", std::string(input));
         auto ir_module = wgsl::reader::WgslToIR(&file, options);
-        ASSERT_TRUE(ir_module) << ir_module;
+        ASSERT_EQ(ir_module, Success);
 
         auto disassembly = tint::core::ir::Disassemble(ir_module.Get());
 
         writer::ProgramOptions program_options;
         program_options.allowed_features = AllowedFeatures::Everything();
         auto output = wgsl::writer::WgslFromIR(ir_module.Get(), program_options);
-        if (!output) {
+        if (output != Success) {
             FAIL() << output.Failure() << std::endl  //
                    << "IR:" << std::endl             //
                    << disassembly << std::endl;

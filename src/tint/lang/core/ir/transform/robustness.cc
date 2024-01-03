@@ -350,7 +350,7 @@ struct State {
 
 Result<SuccessType> Robustness(Module& ir, const RobustnessConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "Robustness transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

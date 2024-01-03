@@ -174,7 +174,7 @@ struct State {
 
 Result<SuccessType> ValueToLet(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "ValueToLet transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

@@ -38,7 +38,7 @@ namespace {
 
 void GenerateMSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
-    if (!res) {
+    if (res != Success) {
         state.SkipWithError(res.Failure().reason.str());
         return;
     }
@@ -66,7 +66,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
 
     for (auto _ : state) {
         auto gen_res = Generate(program, gen_options);
-        if (!gen_res) {
+        if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason.str());
         }
     }

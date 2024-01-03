@@ -247,7 +247,7 @@ struct State {
 
 Result<SuccessType> BinaryPolyfill(Module& ir, const BinaryPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

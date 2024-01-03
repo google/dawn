@@ -368,7 +368,7 @@ struct State {
 
 Result<SuccessType> ZeroInitWorkgroupMemory(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "ZeroInitWorkgroupMemory transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

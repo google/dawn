@@ -68,12 +68,12 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
         }
 
         auto module = wgsl::reader::ProgramToIR(program);
-        if (!module) {
+        if (module != Success) {
             return "ProgramToIR() failed:\n" + module.Failure().reason.str();
         }
 
         auto res = DirectVariableAccess(module.Get(), options);
-        if (!res) {
+        if (res != Success) {
             return "DirectVariableAccess failed:\n" + res.Failure().reason.str();
         }
 
@@ -88,7 +88,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
         }
 
         auto output = wgsl::writer::Generate(transformed, wgsl::writer::Options{});
-        if (!output) {
+        if (output != Success) {
             return "wgsl::writer::Generate() failed: \n" + output.Failure().reason.str();
         }
 

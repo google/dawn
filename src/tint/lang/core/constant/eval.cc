@@ -273,7 +273,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
         } else if constexpr (std::is_same_v<FROM, bool>) {
             // [bool -> x]
             return ctx.mgr.Get<Scalar<TO>>(target_ty, TO(scalar->value ? 1 : 0));
-        } else if (auto conv = CheckedConvert<TO>(scalar->value)) {
+        } else if (auto conv = CheckedConvert<TO>(scalar->value); conv == Success) {
             // Conversion success
             return ctx.mgr.Get<Scalar<TO>>(target_ty, conv.Get());
             // --- Below this point are the failure cases ---
@@ -497,7 +497,8 @@ TransformElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformElements(mgr, composite_el_ty, f, index + i, cs->Index(i)...)) {
+        if (auto el = TransformElements(mgr, composite_el_ty, f, index + i, cs->Index(i)...);
+            el == Success) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -525,7 +526,8 @@ Eval::Result TransformUnaryElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformUnaryElements(mgr, composite_el_ty, f, c0->Index(i))) {
+        if (auto el = TransformUnaryElements(mgr, composite_el_ty, f, c0->Index(i));
+            el == Success) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -556,8 +558,8 @@ Eval::Result TransformBinaryElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el =
-                TransformBinaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i))) {
+        if (auto el = TransformBinaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i));
+            el == Success) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -592,7 +594,8 @@ Eval::Result TransformBinaryDifferingArityElements(Manager& mgr,
             return (num_elems == 1) ? c : c->Index(i);
         };
         if (auto el = TransformBinaryDifferingArityElements(
-                mgr, element_ty, f, nested_or_self(c0, n0), nested_or_self(c1, n1))) {
+                mgr, element_ty, f, nested_or_self(c0, n0), nested_or_self(c1, n1));
+            el == Success) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -624,7 +627,8 @@ Eval::Result TransformTernaryElements(Manager& mgr,
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
         if (auto el = TransformTernaryElements(mgr, composite_el_ty, f, c0->Index(i), c1->Index(i),
-                                               c2->Index(i))) {
+                                               c2->Index(i));
+            el == Success) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -840,15 +844,15 @@ tint::Result<NumberT, Eval::Error> Eval::Dot2(const Source& source,
                                               NumberT b1,
                                               NumberT b2) {
     auto r1 = Mul(source, a1, b1);
-    if (!r1) {
+    if (r1 != Success) {
         return error;
     }
     auto r2 = Mul(source, a2, b2);
-    if (!r2) {
+    if (r2 != Success) {
         return error;
     }
     auto r = Add(source, r1.Get(), r2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return r;
@@ -863,23 +867,23 @@ tint::Result<NumberT, Eval::Error> Eval::Dot3(const Source& source,
                                               NumberT b2,
                                               NumberT b3) {
     auto r1 = Mul(source, a1, b1);
-    if (!r1) {
+    if (r1 != Success) {
         return error;
     }
     auto r2 = Mul(source, a2, b2);
-    if (!r2) {
+    if (r2 != Success) {
         return error;
     }
     auto r3 = Mul(source, a3, b3);
-    if (!r3) {
+    if (r3 != Success) {
         return error;
     }
     auto r = Add(source, r1.Get(), r2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     r = Add(source, r.Get(), r3.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return r;
@@ -896,31 +900,31 @@ tint::Result<NumberT, Eval::Error> Eval::Dot4(const Source& source,
                                               NumberT b3,
                                               NumberT b4) {
     auto r1 = Mul(source, a1, b1);
-    if (!r1) {
+    if (r1 != Success) {
         return error;
     }
     auto r2 = Mul(source, a2, b2);
-    if (!r2) {
+    if (r2 != Success) {
         return error;
     }
     auto r3 = Mul(source, a3, b3);
-    if (!r3) {
+    if (r3 != Success) {
         return error;
     }
     auto r4 = Mul(source, a4, b4);
-    if (!r4) {
+    if (r4 != Success) {
         return error;
     }
     auto r = Add(source, r1.Get(), r2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     r = Add(source, r.Get(), r3.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     r = Add(source, r.Get(), r4.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return r;
@@ -940,15 +944,15 @@ tint::Result<NumberT, Eval::Error> Eval::Det2(const Source& source,
     // a * d - c * b
 
     auto r1 = Mul(source, a, d);
-    if (!r1) {
+    if (r1 != Success) {
         return error;
     }
     auto r2 = Mul(source, c, b);
-    if (!r2) {
+    if (r2 != Success) {
         return error;
     }
     auto r = Sub(source, r1.Get(), r2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return r;
@@ -975,31 +979,31 @@ tint::Result<NumberT, Eval::Error> Eval::Det3(const Source& source,
     //   | f i |     | c i |     | c f |
 
     auto det1 = Det2(source, e, f, h, i);
-    if (!det1) {
+    if (det1 != Success) {
         return error;
     }
     auto a_det1 = Mul(source, a, det1.Get());
-    if (!a_det1) {
+    if (a_det1 != Success) {
         return error;
     }
     auto det2 = Det2(source, b, c, h, i);
-    if (!det2) {
+    if (det2 != Success) {
         return error;
     }
     auto d_det2 = Mul(source, d, det2.Get());
-    if (!d_det2) {
+    if (d_det2 != Success) {
         return error;
     }
     auto det3 = Det2(source, b, c, e, f);
-    if (!det3) {
+    if (det3 != Success) {
         return error;
     }
     auto g_det3 = Mul(source, g, det3.Get());
-    if (!g_det3) {
+    if (g_det3 != Success) {
         return error;
     }
     auto r = Sub(source, a_det1.Get(), d_det2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return Add(source, r.Get(), g_det3.Get());
@@ -1035,43 +1039,43 @@ tint::Result<NumberT, Eval::Error> Eval::Det4(const Source& source,
     //   | h l p |     | d l p |     | d h p |     | d h l |
 
     auto det1 = Det3(source, f, g, h, j, k, l, n, o, p);
-    if (!det1) {
+    if (det1 != Success) {
         return error;
     }
     auto a_det1 = Mul(source, a, det1.Get());
-    if (!a_det1) {
+    if (a_det1 != Success) {
         return error;
     }
     auto det2 = Det3(source, b, c, d, j, k, l, n, o, p);
-    if (!det2) {
+    if (det2 != Success) {
         return error;
     }
     auto e_det2 = Mul(source, e, det2.Get());
-    if (!e_det2) {
+    if (e_det2 != Success) {
         return error;
     }
     auto det3 = Det3(source, b, c, d, f, g, h, n, o, p);
-    if (!det3) {
+    if (det3 != Success) {
         return error;
     }
     auto i_det3 = Mul(source, i, det3.Get());
-    if (!i_det3) {
+    if (i_det3 != Success) {
         return error;
     }
     auto det4 = Det3(source, b, c, d, f, g, h, j, k, l);
-    if (!det4) {
+    if (det4 != Success) {
         return error;
     }
     auto m_det4 = Mul(source, m, det4.Get());
-    if (!m_det4) {
+    if (m_det4 != Success) {
         return error;
     }
     auto r = Sub(source, a_det1.Get(), e_det2.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     r = Add(source, r.Get(), i_det3.Get());
-    if (!r) {
+    if (r != Success) {
         return error;
     }
     return Sub(source, r.Get(), m_det4.Get());
@@ -1092,7 +1096,7 @@ tint::Result<NumberT, Eval::Error> Eval::Sqrt(const Source& source, NumberT v) {
 
 auto Eval::SqrtFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto v) -> Eval::Result {
-        if (auto r = Sqrt(source, v)) {
+        if (auto r = Sqrt(source, v); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1117,7 +1121,7 @@ tint::Result<NumberT, Eval::Error> Eval::Clamp(const Source& source,
 
 auto Eval::ClampFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto e, auto low, auto high) -> Eval::Result {
-        if (auto r = Clamp(source, e, low, high)) {
+        if (auto r = Clamp(source, e, low, high); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1126,7 +1130,7 @@ auto Eval::ClampFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::AddFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Add(source, a1, a2)) {
+        if (auto r = Add(source, a1, a2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1135,7 +1139,7 @@ auto Eval::AddFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::SubFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Sub(source, a1, a2)) {
+        if (auto r = Sub(source, a1, a2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1144,7 +1148,7 @@ auto Eval::SubFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::MulFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Mul(source, a1, a2)) {
+        if (auto r = Mul(source, a1, a2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1153,7 +1157,7 @@ auto Eval::MulFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::DivFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Div(source, a1, a2)) {
+        if (auto r = Div(source, a1, a2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1162,7 +1166,7 @@ auto Eval::DivFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::ModFunc(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2) -> Eval::Result {
-        if (auto r = Mod(source, a1, a2)) {
+        if (auto r = Mod(source, a1, a2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1171,7 +1175,7 @@ auto Eval::ModFunc(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::Dot2Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2, auto b1, auto b2) -> Eval::Result {
-        if (auto r = Dot2(source, a1, a2, b1, b2)) {
+        if (auto r = Dot2(source, a1, a2, b1, b2); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1180,7 +1184,7 @@ auto Eval::Dot2Func(const Source& source, const core::type::Type* elem_ty) {
 
 auto Eval::Dot3Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2, auto a3, auto b1, auto b2, auto b3) -> Eval::Result {
-        if (auto r = Dot3(source, a1, a2, a3, b1, b2, b3)) {
+        if (auto r = Dot3(source, a1, a2, a3, b1, b2, b3); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1190,7 +1194,7 @@ auto Eval::Dot3Func(const Source& source, const core::type::Type* elem_ty) {
 auto Eval::Dot4Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a1, auto a2, auto a3, auto a4, auto b1, auto b2, auto b3,
                auto b4) -> Eval::Result {
-        if (auto r = Dot4(source, a1, a2, a3, a4, b1, b2, b3, b4)) {
+        if (auto r = Dot4(source, a1, a2, a3, a4, b1, b2, b3, b4); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1235,7 +1239,7 @@ Eval::Result Eval::Length(const Source& source, const core::type::Type* ty, cons
 
     // Evaluates to sqrt(e[0]^2 + e[1]^2 + ...) if T is a vector type.
     auto d = Dot(source, c0, c0);
-    if (!d) {
+    if (d != Success) {
         return error;
     }
     return Dispatch_fa_f32_f16(SqrtFunc(source, ty), d.Get());
@@ -1263,7 +1267,7 @@ Eval::Result Eval::Sub(const Source& source,
 
 auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a, auto b, auto c, auto d) -> Eval::Result {
-        if (auto r = Det2(source, a, b, c, d)) {
+        if (auto r = Det2(source, a, b, c, d); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1273,7 +1277,7 @@ auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
 auto Eval::Det3Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h,
                auto i) -> Eval::Result {
-        if (auto r = Det3(source, a, b, c, d, e, f, g, h, i)) {
+        if (auto r = Det3(source, a, b, c, d, e, f, g, h, i); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1283,7 +1287,7 @@ auto Eval::Det3Func(const Source& source, const core::type::Type* elem_ty) {
 auto Eval::Det4Func(const Source& source, const core::type::Type* elem_ty) {
     return [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h, auto i, auto j,
                auto k, auto l, auto m, auto n, auto o, auto p) -> Eval::Result {
-        if (auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)) {
+        if (auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p); r == Success) {
             return CreateScalar(source, elem_ty, r.Get());
         }
         return error;
@@ -1504,31 +1508,35 @@ Eval::Result Eval::Bitcast(const core::type::Type* ty, const Value* value, const
             dst_el_ty,
             [&](const core::type::U32*) {  //
                 auto r = CreateScalar(source, dst_el_ty, u32(v));
-                if (r) {
-                    els.Push(r.Get());
+                if (r != Success) {
+                    return false;
                 }
-                return r;
+                els.Push(r.Get());
+                return true;
             },
             [&](const core::type::I32*) {  //
                 auto r = CreateScalar(source, dst_el_ty, tint::Bitcast<i32>(v));
-                if (r) {
-                    els.Push(r.Get());
+                if (r != Success) {
+                    return false;
                 }
-                return r;
+                els.Push(r.Get());
+                return true;
             },
             [&](const core::type::F32*) {  //
                 auto r = CreateScalar(source, dst_el_ty, tint::Bitcast<f32>(v));
-                if (r) {
-                    els.Push(r.Get());
+                if (r != Success) {
+                    return false;
                 }
-                return r;
+                els.Push(r.Get());
+                return true;
             },
             [&](const core::type::F16*) {  //
                 auto r = CreateScalar(source, dst_el_ty, f16::FromBits(static_cast<uint16_t>(v)));
-                if (r) {
-                    els.Push(r.Get());
+                if (r != Success) {
+                    return false;
                 }
-                return r;
+                els.Push(r.Get());
+                return true;
             });
     };
 
@@ -1657,7 +1665,7 @@ Eval::Result Eval::MultiplyMatVec(const core::type::Type* ty,
     Vector<const Value*, 4> result;
     for (size_t i = 0; i < mat_ty->rows(); ++i) {
         auto r = dot(args[0], i, args[1]);  // matrix row i * vector
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         result.Push(r.Get());
@@ -1707,7 +1715,7 @@ Eval::Result Eval::MultiplyVecMat(const core::type::Type* ty,
     Vector<const Value*, 4> result;
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
         auto r = dot(args[0], args[1], i);  // vector * matrix col i
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         result.Push(r.Get());
@@ -1766,7 +1774,7 @@ Eval::Result Eval::MultiplyMatMat(const core::type::Type* ty,
         Vector<const Value*, 4> col_vec;
         for (size_t r = 0; r < mat1_ty->rows(); ++r) {
             auto v = dot(mat1, r, mat2, c);  // mat1 row r * mat2 col c
-            if (!v) {
+            if (v != Success) {
                 return error;
             }
             col_vec.Push(v.Get());  // mat1 row r * mat2 col c
@@ -2403,15 +2411,15 @@ Eval::Result Eval::cross(const core::type::Type* ty,
     auto* v2 = v->Index(2);
 
     auto x = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), u1, u2, v1, v2);
-    if (!x) {
+    if (x != Success) {
         return error;
     }
     auto y = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), v0, v2, u0, u2);
-    if (!y) {
+    if (y != Success) {
         return error;
     }
     auto z = Dispatch_fa_f32_f16(Det2Func(source, elem_ty), u0, u1, v0, v1);
-    if (!z) {
+    if (z != Success) {
         return error;
     }
 
@@ -2428,12 +2436,12 @@ Eval::Result Eval::degrees(const core::type::Type* ty,
 
             auto pi = kPi<T>;
             auto scale = Div(source, NumberT(180), NumberT(pi));
-            if (!scale) {
+            if (scale != Success) {
                 AddNote("when calculating degrees", source);
                 return error;
             }
             auto result = Mul(source, e, scale.Get());
-            if (!result) {
+            if (result != Success) {
                 AddNote("when calculating degrees", source);
                 return error;
             }
@@ -2474,7 +2482,7 @@ Eval::Result Eval::determinant(const core::type::Type* ty,
         return error;
     };
     auto r = calculate();
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating determinant", source);
     }
     return r;
@@ -2489,12 +2497,12 @@ Eval::Result Eval::distance(const core::type::Type* ty,
     };
 
     auto minus = Minus(args[0]->Type(), args, source);
-    if (!minus) {
+    if (minus != Success) {
         return err();
     }
 
     auto len = Length(source, ty, minus.Get());
-    if (!len) {
+    if (len != Success) {
         return err();
     }
     return len;
@@ -2504,7 +2512,7 @@ Eval::Result Eval::dot(const core::type::Type*,
                        VectorRef<const Value*> args,
                        const Source& source) {
     auto r = Dot(source, args[0], args[1]);
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating dot", source);
     }
     return r;
@@ -2652,7 +2660,7 @@ Eval::Result Eval::faceForward(const core::type::Type* ty,
     auto* e2 = args[1];
     auto* e3 = args[2];
     auto r = Dot(source, e2, e3);
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating faceForward", source);
         return error;
     }
@@ -2756,12 +2764,12 @@ Eval::Result Eval::fma(const core::type::Type* ty,
             };
 
             auto mul = Mul(source, e1, e2);
-            if (!mul) {
+            if (mul != Success) {
                 return err_msg();
             }
 
             auto val = Add(source, mul.Get(), e3);
-            if (!val) {
+            if (val != Success) {
                 return err_msg();
             }
             return CreateScalar(source, c1->Type(), val.Get());
@@ -2826,7 +2834,7 @@ Eval::Result Eval::frexp(const core::type::Type* ty,
         Vector<const Value*, 4> exp_els;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             auto fe = scalar(arg->Index(i));
-            if (!fe.fract || !fe.exp) {
+            if (fe.fract != Success || fe.exp != Success) {
                 return error;
             }
             fract_els.Push(fe.fract.Get());
@@ -2840,7 +2848,7 @@ Eval::Result Eval::frexp(const core::type::Type* ty,
                                  });
     } else {
         auto fe = scalar(arg);
-        if (!fe.fract || !fe.exp) {
+        if (fe.fract != Success || fe.exp != Success) {
             return error;
         }
         return mgr.Composite(ty, Vector<const Value*, 2>{
@@ -2929,11 +2937,11 @@ Eval::Result Eval::inverseSqrt(const core::type::Type* ty,
             };
 
             auto s = Sqrt(source, e);
-            if (!s) {
+            if (s != Success) {
                 return err();
             }
             auto div = Div(source, NumberT(1), s.Get());
-            if (!div) {
+            if (div != Success) {
                 return err();
             }
 
@@ -2995,7 +3003,7 @@ Eval::Result Eval::length(const core::type::Type* ty,
                           VectorRef<const Value*> args,
                           const Source& source) {
     auto r = Length(source, ty, args[0]);
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating length", source);
     }
     return r;
@@ -3084,19 +3092,19 @@ Eval::Result Eval::mix(const core::type::Type* ty,
             // Implement as `e1 * (1 - e3) + e2 * e3)` instead of as `e1 + e3 * (e2 - e1)` to avoid
             // float precision loss when e1 and e2 significantly differ in magnitude.
             auto one_sub_e3 = Sub(source, NumberT{1}, e3);
-            if (!one_sub_e3) {
+            if (one_sub_e3 != Success) {
                 return error;
             }
             auto e1_mul_one_sub_e3 = Mul(source, e1, one_sub_e3.Get());
-            if (!e1_mul_one_sub_e3) {
+            if (e1_mul_one_sub_e3 != Success) {
                 return error;
             }
             auto e2_mul_e3 = Mul(source, e2, e3);
-            if (!e2_mul_e3) {
+            if (e2_mul_e3 != Success) {
                 return error;
             }
             auto r = Add(source, e1_mul_one_sub_e3.Get(), e2_mul_e3.Get());
-            if (!r) {
+            if (r != Success) {
                 return error;
             }
             return CreateScalar(source, c0->Type(), r.Get());
@@ -3104,7 +3112,7 @@ Eval::Result Eval::mix(const core::type::Type* ty,
         return Dispatch_fa_f32_f16(create, c0, c1);
     };
     auto r = TransformElements(mgr, ty, transform, 0, args[0], args[1]);
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating mix", source);
     }
     return r;
@@ -3128,13 +3136,15 @@ Eval::Result Eval::modf(const core::type::Type* ty,
 
     Vector<const Value*, 2> fields;
 
-    if (auto fract = TransformUnaryElements(mgr, args[0]->Type(), transform_fract, args[0])) {
+    if (auto fract = TransformUnaryElements(mgr, args[0]->Type(), transform_fract, args[0]);
+        fract == Success) {
         fields.Push(fract.Get());
     } else {
         return error;
     }
 
-    if (auto whole = TransformUnaryElements(mgr, args[0]->Type(), transform_whole, args[0])) {
+    if (auto whole = TransformUnaryElements(mgr, args[0]->Type(), transform_whole, args[0]);
+        whole == Success) {
         fields.Push(whole.Get());
     } else {
         return error;
@@ -3148,7 +3158,7 @@ Eval::Result Eval::normalize(const core::type::Type* ty,
                              const Source& source) {
     auto* len_ty = ty->DeepestElement();
     auto len = Length(source, len_ty, args[0]);
-    if (!len) {
+    if (len != Success) {
         AddNote("when calculating normalize", source);
         return error;
     }
@@ -3169,7 +3179,7 @@ Eval::Result Eval::pack2x16float(const core::type::Type* ty,
                                  const Source& source) {
     auto convert = [&](f32 val) -> tint::Result<uint32_t, Error> {
         auto conv = CheckedConvert<f16>(val);
-        if (!conv) {
+        if (conv != Success) {
             AddError(OverflowErrorMessage(val, "f16"), source);
             if (use_runtime_semantics_) {
                 return 0;
@@ -3183,12 +3193,12 @@ Eval::Result Eval::pack2x16float(const core::type::Type* ty,
 
     auto* e = args[0];
     auto e0 = convert(e->Index(0)->ValueAs<f32>());
-    if (!e0) {
+    if (e0 != Success) {
         return error;
     }
 
     auto e1 = convert(e->Index(1)->ValueAs<f32>());
-    if (!e1) {
+    if (e1 != Success) {
         return error;
     }
 
@@ -3327,12 +3337,12 @@ Eval::Result Eval::radians(const core::type::Type* ty,
 
             auto pi = kPi<T>;
             auto scale = Div(source, NumberT(pi), NumberT(180));
-            if (!scale) {
+            if (scale != Success) {
                 AddNote("when calculating radians", source);
                 return error;
             }
             auto result = Mul(source, e, scale.Get());
-            if (!result) {
+            if (result != Success) {
                 AddNote("when calculating radians", source);
                 return error;
             }
@@ -3356,7 +3366,7 @@ Eval::Result Eval::reflect(const core::type::Type* ty,
 
         // dot(e2, e1)
         auto dot_e2_e1 = Dot(source, e2, e1);
-        if (!dot_e2_e1) {
+        if (dot_e2_e1 != Success) {
             return error;
         }
 
@@ -3366,13 +3376,13 @@ Eval::Result Eval::reflect(const core::type::Type* ty,
             return CreateScalar(source, el_ty, NumberT{NumberT{2} * v});
         };
         auto dot_e2_e1_2 = Dispatch_fa_f32_f16(mul2, dot_e2_e1.Get());
-        if (!dot_e2_e1_2) {
+        if (dot_e2_e1_2 != Success) {
             return error;
         }
 
         // 2 * dot(e2, e1) * e2
         auto dot_e2_e1_2_e2 = Mul(source, ty, dot_e2_e1_2.Get(), e2);
-        if (!dot_e2_e1_2_e2) {
+        if (dot_e2_e1_2_e2 != Success) {
             return error;
         }
 
@@ -3380,7 +3390,7 @@ Eval::Result Eval::reflect(const core::type::Type* ty,
         return Sub(source, ty, e1, dot_e2_e1_2_e2.Get());
     };
     auto r = calculate();
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating reflect", source);
     }
     return r;
@@ -3396,23 +3406,23 @@ Eval::Result Eval::refract(const core::type::Type* ty,
         using NumberT = decltype(e3);
         // let k = 1.0 - e3 * e3 * (1.0 - dot(e2, e1) * dot(e2, e1))
         auto e3_squared = Mul(source, e3, e3);
-        if (!e3_squared) {
+        if (e3_squared != Success) {
             return error;
         }
         auto dot_e2_e1_squared = Mul(source, dot_e2_e1, dot_e2_e1);
-        if (!dot_e2_e1_squared) {
+        if (dot_e2_e1_squared != Success) {
             return error;
         }
         auto r = Sub(source, NumberT(1), dot_e2_e1_squared.Get());
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         r = Mul(source, e3_squared.Get(), r.Get());
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         r = Sub(source, NumberT(1), r.Get());
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         return CreateScalar(source, el_ty, r.Get());
@@ -3421,15 +3431,15 @@ Eval::Result Eval::refract(const core::type::Type* ty,
     auto compute_e2_scale = [&](auto e3, auto dot_e2_e1, auto k) -> Eval::Result {
         // e3 * dot(e2, e1) + sqrt(k)
         auto sqrt_k = Sqrt(source, k);
-        if (!sqrt_k) {
+        if (sqrt_k != Success) {
             return error;
         }
         auto r = Mul(source, e3, dot_e2_e1);
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         r = Add(source, r.Get(), sqrt_k.Get());
-        if (!r) {
+        if (r != Success) {
             return error;
         }
         return CreateScalar(source, el_ty, r.Get());
@@ -3447,13 +3457,13 @@ Eval::Result Eval::refract(const core::type::Type* ty,
 
         // dot(e2, e1)
         auto dot_e2_e1 = Dot(source, e2, e1);
-        if (!dot_e2_e1) {
+        if (dot_e2_e1 != Success) {
             return error;
         }
 
         // let k = 1.0 - e3 * e3 * (1.0 - dot(e2, e1) * dot(e2, e1))
         auto k = Dispatch_fa_f32_f16(compute_k, e3, dot_e2_e1.Get());
-        if (!k) {
+        if (k != Success) {
             return error;
         }
 
@@ -3464,21 +3474,21 @@ Eval::Result Eval::refract(const core::type::Type* ty,
 
         // Otherwise return the refraction vector e3 * e1 - (e3 * dot(e2, e1) + sqrt(k)) * e2
         auto e1_scaled = Mul(source, ty, e3, e1);
-        if (!e1_scaled) {
+        if (e1_scaled != Success) {
             return error;
         }
         auto e2_scale = Dispatch_fa_f32_f16(compute_e2_scale, e3, dot_e2_e1.Get(), k.Get());
-        if (!e2_scale) {
+        if (e2_scale != Success) {
             return error;
         }
         auto e2_scaled = Mul(source, ty, e2_scale.Get(), e2);
-        if (!e2_scaled) {
+        if (e2_scaled != Success) {
             return error;
         }
         return Sub(source, ty, e1_scaled.Get(), e2_scaled.Get());
     };
     auto r = calculate();
-    if (!r) {
+    if (r != Success) {
         AddNote("when calculating refract", source);
     }
     return r;
@@ -3653,12 +3663,12 @@ Eval::Result Eval::smoothstep(const core::type::Type* ty,
             // t = clamp((x - low) / (high - low), 0.0, 1.0)
             auto x_minus_low = Sub(source, x, low);
             auto high_minus_low = Sub(source, high, low);
-            if (!x_minus_low || !high_minus_low) {
+            if (x_minus_low != Success || high_minus_low != Success) {
                 return err();
             }
 
             auto div = Div(source, x_minus_low.Get(), high_minus_low.Get());
-            if (!div) {
+            if (div != Success) {
                 return err();
             }
 
@@ -3668,17 +3678,17 @@ Eval::Result Eval::smoothstep(const core::type::Type* ty,
             // result = t * t * (3.0 - 2.0 * t)
             auto t_times_t = Mul(source, t, t);
             auto t_times_2 = Mul(source, NumberT(2), t);
-            if (!t_times_t || !t_times_2) {
+            if (t_times_t != Success || t_times_2 != Success) {
                 return err();
             }
 
             auto three_minus_t_times_2 = Sub(source, NumberT(3), t_times_2.Get());
-            if (!three_minus_t_times_2) {
+            if (three_minus_t_times_2 != Success) {
                 return err();
             }
 
             auto result = Mul(source, t_times_t.Get(), three_minus_t_times_2.Get());
-            if (!result) {
+            if (result != Success) {
                 return err();
             }
             return CreateScalar(source, c0->Type(), result.Get());
@@ -3781,7 +3791,7 @@ Eval::Result Eval::unpack2x16float(const core::type::Type* ty,
     for (size_t i = 0; i < 2; ++i) {
         auto in = f16::FromBits(uint16_t((e >> (16 * i)) & 0x0000'ffff));
         auto val = CheckedConvert<f32>(in);
-        if (!val) {
+        if (val != Success) {
             AddError(OverflowErrorMessage(in, "f32"), source);
             if (use_runtime_semantics_) {
                 val = f32(0.f);
@@ -3790,7 +3800,7 @@ Eval::Result Eval::unpack2x16float(const core::type::Type* ty,
             }
         }
         auto el = CreateScalar(source, inner_ty, val.Get());
-        if (!el) {
+        if (el != Success) {
             return el;
         }
         els.Push(el.Get());
@@ -3810,7 +3820,7 @@ Eval::Result Eval::unpack2x16snorm(const core::type::Type* ty,
         auto val = f32(
             std::max(static_cast<float>(int16_t((e >> (16 * i)) & 0x0000'ffff)) / 32767.f, -1.f));
         auto el = CreateScalar(source, inner_ty, val);
-        if (!el) {
+        if (el != Success) {
             return el;
         }
         els.Push(el.Get());
@@ -3829,7 +3839,7 @@ Eval::Result Eval::unpack2x16unorm(const core::type::Type* ty,
     for (size_t i = 0; i < 2; ++i) {
         auto val = f32(static_cast<float>(uint16_t((e >> (16 * i)) & 0x0000'ffff)) / 65535.f);
         auto el = CreateScalar(source, inner_ty, val);
-        if (!el) {
+        if (el != Success) {
             return el;
         }
         els.Push(el.Get());
@@ -3849,7 +3859,7 @@ Eval::Result Eval::unpack4x8snorm(const core::type::Type* ty,
         auto val =
             f32(std::max(static_cast<float>(int8_t((e >> (8 * i)) & 0x0000'00ff)) / 127.f, -1.f));
         auto el = CreateScalar(source, inner_ty, val);
-        if (!el) {
+        if (el != Success) {
             return el;
         }
         els.Push(el.Get());
@@ -3868,7 +3878,7 @@ Eval::Result Eval::unpack4x8unorm(const core::type::Type* ty,
     for (size_t i = 0; i < 4; ++i) {
         auto val = f32(static_cast<float>(uint8_t((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
         auto el = CreateScalar(source, inner_ty, val);
-        if (!el) {
+        if (el != Success) {
             return el;
         }
         els.Push(el.Get());
@@ -3882,7 +3892,7 @@ Eval::Result Eval::quantizeToF16(const core::type::Type* ty,
     auto transform = [&](const Value* c) -> Eval::Result {
         auto value = c->ValueAs<f32>();
         auto conv = CheckedConvert<f32>(f16(value));
-        if (!conv) {
+        if (conv != Success) {
             AddError(OverflowErrorMessage(value, "f16"), source);
             if (use_runtime_semantics_) {
                 return mgr.Zero(c->Type());

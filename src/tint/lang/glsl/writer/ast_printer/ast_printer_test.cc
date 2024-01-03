@@ -40,7 +40,7 @@ TEST_F(GlslASTPrinterTest, InvalidProgram) {
     auto program = resolver::Resolve(*this);
     ASSERT_FALSE(program.IsValid());
     auto result = Generate(program, Options{}, "");
-    EXPECT_FALSE(result);
+    EXPECT_NE(result, Success);
     EXPECT_EQ(result.Failure().reason.str(), "error: make the program invalid");
 }
 

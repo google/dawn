@@ -430,8 +430,9 @@ std::optional<Token> Lexer::try_float() {
     }
 
     auto ret = tint::strconv::ParseDouble(std::string_view(&at(start), end - start));
-    double value = ret ? ret.Get() : 0.0;
-    bool overflow = !ret && ret.Failure() == tint::strconv::ParseNumberError::kResultOutOfRange;
+    double value = ret == Success ? ret.Get() : 0.0;
+    bool overflow =
+        ret != Success && ret.Failure() == tint::strconv::ParseNumberError::kResultOutOfRange;
 
     // If the value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an
     // error.
@@ -466,7 +467,7 @@ std::optional<Token> Lexer::try_float() {
 
     if (has_f_suffix) {
         auto f = core::CheckedConvert<f32>(AFloat(value));
-        if (!overflow && f) {
+        if (!overflow && f == Success) {
             advance(1);
             end_source(source);
             return Token{Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
@@ -476,7 +477,7 @@ std::optional<Token> Lexer::try_float() {
 
     if (has_h_suffix) {
         auto f = core::CheckedConvert<f16>(AFloat(value));
-        if (!overflow && f) {
+        if (!overflow && f == Success) {
             advance(1);
             end_source(source);
             return Token{Token::Type::kFloatLiteral_H, source, static_cast<double>(f.Get())};
@@ -909,7 +910,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     advance(static_cast<size_t>(res.ptr - start_ptr) + prefix_count);
 
     if (matches(pos(), 'u')) {
-        if (!overflow && core::CheckedConvert<u32>(AInt(value))) {
+        if (!overflow && core::CheckedConvert<u32>(AInt(value)) == Success) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_U, source, value};
@@ -918,7 +919,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     }
 
     if (matches(pos(), 'i')) {
-        if (!overflow && core::CheckedConvert<i32>(AInt(value))) {
+        if (!overflow && core::CheckedConvert<i32>(AInt(value)) == Success) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_I, source, value};

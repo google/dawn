@@ -217,7 +217,7 @@ struct State {
 
 Result<SuccessType> DemoteToHelper(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "DemoteToHelper transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

@@ -283,7 +283,7 @@ class ValueOption : public Option {
 
         if constexpr (is_number) {
             auto result = strconv::ParseNumber<T>(arg);
-            if (result) {
+            if (result == tint::Success) {
                 value = result.Get();
                 arguments.pop_front();
                 return Success;

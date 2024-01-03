@@ -44,7 +44,7 @@ TEST_F(ProgramToIRMaterializeTest, EmitExpression_MaterializedCall) {
     Func("test_function", {}, ty.f32(), expr, tint::Empty);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = func():f32 -> %b1 {
   %b1 = block {

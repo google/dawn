@@ -63,7 +63,7 @@ class Parser {
     Result<core::ir::Module> Run(Slice<const uint32_t> spirv) {
         // Validate the incoming SPIR-V binary.
         auto result = validate::Validate(spirv, kTargetEnv);
-        if (!result) {
+        if (result != Success) {
             return result.Failure();
         }
 

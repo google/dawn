@@ -44,7 +44,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Add) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -68,7 +68,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Increment) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -91,7 +91,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAdd) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -114,7 +114,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Subtract) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -138,7 +138,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Decrement) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, i32, read_write> = var
@@ -161,7 +161,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundSubtract) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -184,7 +184,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Multiply) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -208,7 +208,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundMultiply) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -231,7 +231,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Div) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -255,7 +255,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundDiv) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -278,7 +278,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Modulo) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -302,7 +302,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundModulo) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -325,7 +325,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_And) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -349,7 +349,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAnd) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, bool, read_write> = var
@@ -372,7 +372,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Or) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -396,7 +396,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundOr) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, bool, read_write> = var
@@ -419,7 +419,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Xor) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -443,7 +443,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundXor) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -467,7 +467,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
     WrapInFunction(let, expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
@@ -504,7 +504,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalOr) {
     WrapInFunction(let, expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
@@ -540,7 +540,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Equal) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -564,7 +564,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_NotEqual) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -588,7 +588,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThan) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -612,7 +612,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThan) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -636,7 +636,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThanEqual) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -660,7 +660,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThanEqual) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -684,7 +684,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftLeft) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -708,7 +708,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -731,7 +731,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftRight) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -755,7 +755,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, u32, read_write> = var
@@ -780,7 +780,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %b1 {
   %b1 = block {
@@ -818,7 +818,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound_WithConstEval) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << m;
+    ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:bool):bool -> %b1 {
   %b1 = block {

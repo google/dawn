@@ -174,7 +174,7 @@ struct State {
 
 Result<SuccessType> PreservePadding(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "PreservePadding transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

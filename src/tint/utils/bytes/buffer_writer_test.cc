@@ -40,25 +40,25 @@ Vector<T, N> Cast(const Vector<U, N>& in) {
 
 TEST(BufferWriterTest, IntegerBigEndian) {
     BufferWriter<16> writer;
-    EXPECT_TRUE(writer.Int(0x10203040u, Endianness::kBig));
+    EXPECT_EQ(writer.Int(0x10203040u, Endianness::kBig), Success);
     EXPECT_THAT(Cast<int>(writer.buffer), testing::ElementsAre(0x10, 0x20, 0x30, 0x40));
 }
 
 TEST(BufferWriterTest, IntegerLittleEndian) {
     BufferWriter<16> writer;
-    EXPECT_TRUE(writer.Int(0x10203040u, Endianness::kLittle));
+    EXPECT_EQ(writer.Int(0x10203040u, Endianness::kLittle), Success);
     EXPECT_THAT(Cast<int>(writer.buffer), testing::ElementsAre(0x40, 0x30, 0x20, 0x10));
 }
 
 TEST(BufferWriterTest, Float) {
     BufferWriter<16> writer;
-    EXPECT_TRUE(writer.Float<float>(8.5f));
+    EXPECT_EQ(writer.Float<float>(8.5f), Success);
     EXPECT_THAT(Cast<int>(writer.buffer), testing::ElementsAre(0x00, 0x00, 0x08, 0x41));
 }
 
 TEST(BufferWriterTest, Bool) {
     BufferWriter<16> writer;
-    EXPECT_TRUE(writer.Bool(true));
+    EXPECT_EQ(writer.Bool(true), Success);
     EXPECT_THAT(Cast<int>(writer.buffer), testing::ElementsAre(0x01));
 }
 

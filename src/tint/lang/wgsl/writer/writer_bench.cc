@@ -35,13 +35,13 @@ namespace {
 
 void GenerateWGSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
-    if (!res) {
+    if (res != Success) {
         state.SkipWithError(res.Failure().reason.str());
         return;
     }
     for (auto _ : state) {
         auto gen_res = Generate(res->program, {});
-        if (!gen_res) {
+        if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason.str());
         }
     }

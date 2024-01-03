@@ -223,7 +223,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "ShaderIO transform");
-    if (!result) {
+    if (result != Success) {
         return result;
     }
 

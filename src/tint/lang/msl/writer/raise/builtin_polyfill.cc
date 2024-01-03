@@ -145,7 +145,7 @@ struct State {
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
-    if (!result) {
+    if (result != Success) {
         return result.Failure();
     }
 
