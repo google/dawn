@@ -266,6 +266,7 @@ message Instruction {
         InstructionNextIteration next_iteration = 27;
         InstructionContinue continue = 28;
         InstructionBreakIf break_if = 29;
+        InstructionUnreachable unreachable = 30;
     }
 }
 
@@ -352,6 +353,8 @@ message InstructionNextIteration {}
 message InstructionContinue {}
 
 message InstructionBreakIf {}
+
+message InstructionUnreachable {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attributes

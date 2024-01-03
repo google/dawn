@@ -708,5 +708,12 @@ TEST_F(IRBinaryRoundtripTest, LoopBlockParams) {
     });
     RUN_TEST();
 }
+
+TEST_F(IRBinaryRoundtripTest, Unreachable) {
+    auto* fn = b.Function("Function", ty.i32());
+    b.Append(fn->Block(), [&] { b.Unreachable(); });
+    RUN_TEST();
+}
+
 }  // namespace
 }  // namespace tint::core::ir::binary

@@ -318,6 +318,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kVar:
                 inst_out = CreateInstructionVar(inst_in.var());
                 break;
+            case pb::Instruction::KindCase::kUnreachable:
+                inst_out = CreateInstructionUnreachable(inst_in.unreachable());
+                break;
             default:
                 TINT_UNIMPLEMENTED() << inst_in.kind_case();
                 break;
@@ -507,6 +510,10 @@ struct Decoder {
             var_out->SetBindingPoint(bp_in.group(), bp_in.binding());
         }
         return var_out;
+    }
+
+    ir::Unreachable* CreateInstructionUnreachable(const pb::InstructionUnreachable&) {
+        return b.Unreachable();
     }
 
     ////////////////////////////////////////////////////////////////////////////

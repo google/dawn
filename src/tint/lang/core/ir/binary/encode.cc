@@ -61,6 +61,7 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unary.h"
+#include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/texel_format.h"
@@ -231,6 +232,9 @@ struct Encoder {
             [&](const ir::Unary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
             [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
+            [&](const ir::Unreachable* i) {
+                InstructionUnreachable(*inst_out.mutable_unreachable(), i);
+            },
             TINT_ICE_ON_NO_MATCH);
         for (auto* operand : inst_in->Operands()) {
             inst_out.add_operands(Value(operand));
@@ -336,6 +340,8 @@ struct Encoder {
             BindingPoint(bp_out, *bp_in);
         }
     }
+
+    void InstructionUnreachable(pb::InstructionUnreachable&, const ir::Unreachable*) {}
 
     ////////////////////////////////////////////////////////////////////////////
     // Types
