@@ -126,6 +126,20 @@ TEST_F(IRBinaryRoundtripTest, Fn_Parameters) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, Fn_ParameterAttributes) {
+    auto* fn = b.Function("Function", ty.void_());
+    auto* p0 = b.FunctionParam(ty.i32());
+    auto* p1 = b.FunctionParam(ty.u32());
+    auto* p2 = b.FunctionParam(ty.f32());
+    auto* p3 = b.FunctionParam(ty.bool_());
+    p0->SetBuiltin(BuiltinValue::kGlobalInvocationId);
+    p1->SetInvariant(true);
+    p2->SetLocation(10, Interpolation{InterpolationType::kFlat, InterpolationSampling::kCenter});
+    p3->SetBindingPoint(20, 30);
+    fn->SetParams({p0, p1, p2, p3});
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation) {
     auto* fn = b.Function("Function", ty.void_());
     fn->SetReturnLocation(42, std::nullopt);

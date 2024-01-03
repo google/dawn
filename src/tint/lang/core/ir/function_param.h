@@ -62,14 +62,20 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     }
     /// @returns the builtin set for the parameter
     std::optional<core::BuiltinValue> Builtin() const { return builtin_; }
+
     /// Clears the builtin attribute.
     void ClearBuiltin() { builtin_ = {}; }
 
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
     void SetInvariant(bool val) { invariant_ = val; }
+
     /// @returns true if parameter is invariant
     bool Invariant() const { return invariant_; }
+
+    /// Sets the location
+    /// @param location the location
+    void SetLocation(ir::Location location) { location_ = std::move(location); }
 
     /// Sets the location
     /// @param loc the location value
@@ -77,8 +83,10 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     void SetLocation(uint32_t loc, std::optional<core::Interpolation> interpolation) {
         location_ = {loc, interpolation};
     }
+
     /// @returns the location if `Attributes` contains `kLocation`
-    std::optional<struct Location> Location() const { return location_; }
+    std::optional<ir::Location> Location() const { return location_; }
+
     /// Clears the location attribute.
     void ClearLocation() { location_ = {}; }
 
@@ -86,6 +94,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param group the group
     /// @param binding the binding
     void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
+
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 

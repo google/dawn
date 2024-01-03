@@ -171,13 +171,7 @@ struct Decoder {
             params_out.Push(ValueAs<ir::FunctionParam>(param_in));
         }
         if (fn_in.has_return_location()) {
-            auto& ret_loc_in = fn_in.return_location();
-            core::ir::Location ret_loc_out{};
-            ret_loc_out.value = ret_loc_in.value();
-            if (ret_loc_in.has_interpolation()) {
-                ret_loc_out.interpolation = Interpolation(ret_loc_in.interpolation());
-            }
-            fn_out->SetReturnLocation(ret_loc_out.value, std::move(ret_loc_out.interpolation));
+            fn_out->SetReturnLocation(Location(fn_in.return_location()));
         }
         fn_out->SetParams(std::move(params_out));
         fn_out->SetBlock(Block(fn_in.block()));
@@ -657,46 +651,71 @@ struct Decoder {
     ir::Value* CreateValue(const pb::Value& value_in) {
         ir::Value* value_out = nullptr;
         switch (value_in.kind_case()) {
-            case pb::Value::KindCase::kFunction: {
+            case pb::Value::KindCase::kFunction:
                 value_out = Function(value_in.function());
                 break;
-            }
-            case pb::Value::KindCase::kInstructionResult: {
-                auto& res_in = value_in.instruction_result();
-                auto* type = Type(res_in.type());
-                value_out = b.InstructionResult(type);
-                if (res_in.has_name()) {
-                    mod_out_.SetName(value_out, res_in.name());
-                }
+            case pb::Value::KindCase::kInstructionResult:
+                value_out = InstructionResult(value_in.instruction_result());
                 break;
-            }
-            case pb::Value::KindCase::kFunctionParameter: {
-                auto& param_in = value_in.function_parameter();
-                auto* type = Type(param_in.type());
-                value_out = b.FunctionParam(type);
-                if (param_in.has_name()) {
-                    mod_out_.SetName(value_out, param_in.name());
-                }
+            case pb::Value::KindCase::kFunctionParameter:
+                value_out = FunctionParameter(value_in.function_parameter());
                 break;
-            }
-            case pb::Value::KindCase::kBlockParameter: {
-                auto& param_in = value_in.block_parameter();
-                auto* type = Type(param_in.type());
-                value_out = b.BlockParam(type);
-                if (param_in.has_name()) {
-                    mod_out_.SetName(value_out, param_in.name());
-                }
+            case pb::Value::KindCase::kBlockParameter:
+                value_out = BlockParameter(value_in.block_parameter());
                 break;
-            }
-            case pb::Value::KindCase::kConstant: {
+            case pb::Value::KindCase::kConstant:
                 value_out = b.Constant(ConstantValue(value_in.constant()));
                 break;
-            }
             default:
                 TINT_ICE() << "invalid TypeDecl.kind: " << value_in.kind_case();
                 return nullptr;
         }
         return value_out;
+    }
+
+    ir::InstructionResult* InstructionResult(const pb::InstructionResult& res_in) {
+        auto* type = Type(res_in.type());
+        auto* res_out = b.InstructionResult(type);
+        if (res_in.has_name()) {
+            mod_out_.SetName(res_out, res_in.name());
+        }
+        return res_out;
+    }
+
+    ir::FunctionParam* FunctionParameter(const pb::FunctionParameter& param_in) {
+        auto* type = Type(param_in.type());
+        auto* param_out = b.FunctionParam(type);
+        if (param_in.has_name()) {
+            mod_out_.SetName(param_out, param_in.name());
+        }
+
+        if (param_in.has_attributes()) {
+            auto& attrs_in = param_in.attributes();
+            if (attrs_in.has_binding_point()) {
+                auto& bp_in = attrs_in.binding_point();
+                param_out->SetBindingPoint(bp_in.group(), bp_in.binding());
+            }
+            if (attrs_in.has_location()) {
+                param_out->SetLocation(Location(attrs_in.location()));
+            }
+            if (attrs_in.has_builtin()) {
+                param_out->SetBuiltin(BuiltinValue(attrs_in.builtin()));
+            }
+            if (attrs_in.invariant()) {
+                param_out->SetInvariant(true);
+            }
+        }
+
+        return param_out;
+    }
+
+    ir::BlockParam* BlockParameter(const pb::BlockParameter& param_in) {
+        auto* type = Type(param_in.type());
+        auto* param_out = b.BlockParam(type);
+        if (param_in.has_name()) {
+            mod_out_.SetName(param_out, param_in.name());
+        }
+        return param_out;
     }
 
     ir::Value* Value(uint32_t id) { return id > 0 ? values_[id - 1] : nullptr; }
@@ -770,6 +789,15 @@ struct Decoder {
     ////////////////////////////////////////////////////////////////////////////
     // Attributes
     ////////////////////////////////////////////////////////////////////////////
+    ir::Location Location(const pb::Location& location_in) {
+        core::ir::Location location_out{};
+        location_out.value = location_in.value();
+        if (location_in.has_interpolation()) {
+            location_out.interpolation = Interpolation(location_in.interpolation());
+        }
+        return location_out;
+    }
+
     core::Interpolation Interpolation(const pb::Interpolation& interpolation_in) {
         core::Interpolation interpolation_out{};
         interpolation_out.type = InterpolationType(interpolation_in.type());

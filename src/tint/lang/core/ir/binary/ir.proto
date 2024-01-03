@@ -147,6 +147,7 @@ message InstructionResult {
 message FunctionParameter {
     uint32 type = 1;  // Module.types
     optional string name = 2;
+    optional AttributesFunctionParameter attributes = 3;
 }
 
 message BlockParameter {
@@ -196,7 +197,7 @@ message Function {
     optional PipelineStage pipeline_stage = 4;
     optional WorkgroupSize workgroup_size = 5;
     repeated uint32 parameters = 6;  // Module.values
-    optional ReturnLocation return_location = 7;
+    optional Location return_location = 7;
 }
 
 enum PipelineStage {
@@ -209,11 +210,6 @@ message WorkgroupSize {
     uint32 x = 1;
     uint32 y = 2;
     uint32 z = 3;
-}
-
-message ReturnLocation {
-    uint32 value = 1;
-    optional Interpolation interpolation = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -357,9 +353,21 @@ message AttributesStructMember {
     bool invariant = 6;
 }
 
+message AttributesFunctionParameter {
+    optional BuiltinValue builtin = 1;
+    optional Location location = 2;
+    optional BindingPoint binding_point = 3;
+    bool invariant = 4;
+}
+
 message Interpolation {
     InterpolationType type = 1;
     optional InterpolationSampling sampling = 2;
+}
+
+message Location {
+    uint32 value = 1;
+    optional Interpolation interpolation = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

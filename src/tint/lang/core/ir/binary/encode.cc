@@ -136,11 +136,7 @@ struct Encoder {
         }
         if (auto ret_loc_in = fn_in->ReturnLocation()) {
             auto& ret_loc_out = *fn_out->mutable_return_location();
-            if (auto interpolation_in = ret_loc_in->interpolation) {
-                auto& interpolation_out = *ret_loc_out.mutable_interpolation();
-                Interpolation(interpolation_out, *interpolation_in);
-            }
-            ret_loc_out.set_value(ret_loc_in->value);
+            Location(ret_loc_out, *ret_loc_in);
         }
         fn_out->set_block(Block(fn_in->Block()));
     }
@@ -325,8 +321,7 @@ struct Encoder {
     void InstructionVar(pb::InstructionVar& var_out, const ir::Var* var_in) {
         if (auto bp_in = var_in->BindingPoint()) {
             auto& bp_out = *var_out.mutable_binding_point();
-            bp_out.set_group(bp_in->group);
-            bp_out.set_binding(bp_in->binding);
+            BindingPoint(bp_out, *bp_in);
         }
     }
 
@@ -497,6 +492,20 @@ struct Encoder {
         if (auto name = mod_in_.NameOf(param_in); name.IsValid()) {
             param_out.set_name(name.Name());
         }
+        if (auto bp_in = param_in->BindingPoint()) {
+            auto& bp_out = *param_out.mutable_attributes()->mutable_binding_point();
+            BindingPoint(bp_out, *bp_in);
+        }
+        if (auto location_in = param_in->Location()) {
+            auto& location_out = *param_out.mutable_attributes()->mutable_location();
+            Location(location_out, *location_in);
+        }
+        if (auto builtin_in = param_in->Builtin()) {
+            param_out.mutable_attributes()->set_builtin(BuiltinValue(*builtin_in));
+        }
+        if (param_in->Invariant()) {
+            param_out.mutable_attributes()->set_invariant(true);
+        }
     }
 
     void BlockParameter(pb::BlockParameter& param_out, const ir::BlockParam* param_in) {
@@ -563,12 +572,25 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     // Attributes
     ////////////////////////////////////////////////////////////////////////////
+    void Location(pb::Location& location_out, const ir::Location& location_in) {
+        if (auto interpolation_in = location_in.interpolation) {
+            auto& interpolation_out = *location_out.mutable_interpolation();
+            Interpolation(interpolation_out, *interpolation_in);
+        }
+        location_out.set_value(location_in.value);
+    }
+
     void Interpolation(pb::Interpolation& interpolation_out,
                        const core::Interpolation& interpolation_in) {
         interpolation_out.set_type(InterpolationType(interpolation_in.type));
         if (interpolation_in.sampling != InterpolationSampling::kUndefined) {
             interpolation_out.set_sampling(InterpolationSampling(interpolation_in.sampling));
         }
+    }
+
+    void BindingPoint(pb::BindingPoint& binding_point_out, const BindingPoint& binding_point_in) {
+        binding_point_out.set_group(binding_point_in.group);
+        binding_point_out.set_binding(binding_point_in.binding);
     }
 
     ////////////////////////////////////////////////////////////////////////////
