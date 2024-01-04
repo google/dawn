@@ -847,10 +847,10 @@ void Disassembler::EmitBinary(const Binary* b) {
             out_ << "gte";
             break;
         case BinaryOp::kShiftLeft:
-            out_ << "shiftl";
+            out_ << "shl";
             break;
         case BinaryOp::kShiftRight:
-            out_ << "shiftr";
+            out_ << "shr";
             break;
     }
     out_ << " ";

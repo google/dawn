@@ -694,7 +694,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftLeft) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:u32 = call %my_func
-    %4:u32 = shiftl %3, 4u
+    %4:u32 = shl %3, 4u
     %tint_symbol:u32 = let %4
     ret
   }
@@ -717,7 +717,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:u32 = load %v1
-    %4:u32 = shiftl %3, 1u
+    %4:u32 = shl %3, 1u
     store %v1, %4
     ret
   }
@@ -741,7 +741,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftRight) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:u32 = call %my_func
-    %4:u32 = shiftr %3, 4u
+    %4:u32 = shr %3, 4u
     %tint_symbol:u32 = let %4
     ret
   }
@@ -764,7 +764,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:u32 = load %v1
-    %4:u32 = shiftr %3, 1u
+    %4:u32 = shr %3, 1u
     store %v1, %4
     ret
   }

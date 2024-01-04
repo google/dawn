@@ -67,7 +67,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_NoPolyfill) {
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
-    %result:i32 = shiftl %lhs, %rhs
+    %result:i32 = shl %lhs, %rhs
     ret %result
   }
 }
@@ -87,7 +87,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_NoPolyfill) {
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
-    %result:i32 = shiftr %lhs, %rhs
+    %result:i32 = shr %lhs, %rhs
     ret %result
   }
 }
@@ -107,7 +107,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
-    %result:i32 = shiftl %lhs, %rhs
+    %result:i32 = shl %lhs, %rhs
     ret %result
   }
 }
@@ -116,7 +116,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
     %4:i32 = and %rhs, 31u
-    %result:i32 = shiftl %lhs, %4
+    %result:i32 = shl %lhs, %4
     ret %result
   }
 }
@@ -135,7 +135,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_U32) {
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 -> %b1 {
   %b1 = block {
-    %result:u32 = shiftl %lhs, %rhs
+    %result:u32 = shl %lhs, %rhs
     ret %result
   }
 }
@@ -144,7 +144,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_U32) {
 %foo = func(%lhs:u32, %rhs:u32):u32 -> %b1 {
   %b1 = block {
     %4:u32 = and %rhs, 31u
-    %result:u32 = shiftl %lhs, %4
+    %result:u32 = shl %lhs, %4
     ret %result
   }
 }
@@ -163,7 +163,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
   %b1 = block {
-    %result:vec2<i32> = shiftl %lhs, %rhs
+    %result:vec2<i32> = shl %lhs, %rhs
     ret %result
   }
 }
@@ -172,7 +172,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
   %b1 = block {
     %4:vec2<i32> = and %rhs, vec2<u32>(31u)
-    %result:vec2<i32> = shiftl %lhs, %4
+    %result:vec2<i32> = shl %lhs, %4
     ret %result
   }
 }
@@ -191,7 +191,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec3U32) {
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> -> %b1 {
   %b1 = block {
-    %result:vec3<u32> = shiftl %lhs, %rhs
+    %result:vec3<u32> = shl %lhs, %rhs
     ret %result
   }
 }
@@ -200,7 +200,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec3U32) {
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> -> %b1 {
   %b1 = block {
     %4:vec3<u32> = and %rhs, vec3<u32>(31u)
-    %result:vec3<u32> = shiftl %lhs, %4
+    %result:vec3<u32> = shl %lhs, %4
     ret %result
   }
 }
@@ -219,7 +219,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
-    %result:i32 = shiftr %lhs, %rhs
+    %result:i32 = shr %lhs, %rhs
     ret %result
   }
 }
@@ -228,7 +228,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
 %foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
   %b1 = block {
     %4:i32 = and %rhs, 31u
-    %result:i32 = shiftr %lhs, %4
+    %result:i32 = shr %lhs, %4
     ret %result
   }
 }
@@ -247,7 +247,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_U32) {
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 -> %b1 {
   %b1 = block {
-    %result:u32 = shiftr %lhs, %rhs
+    %result:u32 = shr %lhs, %rhs
     ret %result
   }
 }
@@ -256,7 +256,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_U32) {
 %foo = func(%lhs:u32, %rhs:u32):u32 -> %b1 {
   %b1 = block {
     %4:u32 = and %rhs, 31u
-    %result:u32 = shiftr %lhs, %4
+    %result:u32 = shr %lhs, %4
     ret %result
   }
 }
@@ -275,7 +275,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
   %b1 = block {
-    %result:vec2<i32> = shiftr %lhs, %rhs
+    %result:vec2<i32> = shr %lhs, %rhs
     ret %result
   }
 }
@@ -284,7 +284,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
   %b1 = block {
     %4:vec2<i32> = and %rhs, vec2<u32>(31u)
-    %result:vec2<i32> = shiftr %lhs, %4
+    %result:vec2<i32> = shr %lhs, %4
     ret %result
   }
 }
@@ -303,7 +303,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec3U32) {
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> -> %b1 {
   %b1 = block {
-    %result:vec3<u32> = shiftr %lhs, %rhs
+    %result:vec3<u32> = shr %lhs, %rhs
     ret %result
   }
 }
@@ -312,7 +312,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec3U32) {
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> -> %b1 {
   %b1 = block {
     %4:vec3<u32> = and %rhs, vec3<u32>(31u)
-    %result:vec3<u32> = shiftr %lhs, %4
+    %result:vec3<u32> = shr %lhs, %4
     ret %result
   }
 }
