@@ -4,8 +4,8 @@ This repository contains the implementation of Dawn, which is itself composed of
 
 ## Directory structure
 
-- [`dawn.json`](../../dawn.json): contains a description of the native WebGPU in JSON form. It is the data model that's used by the code generators.
-- [`dawn_wire.json`](../../dawn_wire.json): contains additional information used to generate `dawn_wire` files, such as commands in addition to regular WebGPU commands.
+- [`dawn.json`](../../src/dawn/dawn.json): contains a description of the native WebGPU in JSON form. It is the data model that's used by the code generators.
+- [`dawn_wire.json`](../../src/dawn/dawn_wire.json): contains additional information used to generate `dawn_wire` files, such as commands in addition to regular WebGPU commands.
 - [`generator`](../../generator): directory containg the code generators and their templates. Generators are based on Jinja2 and parse data-models from JSON files.
     - [`dawn_json_generator.py`](../../generator/dawn_json_generator.py): the main code generator that outputs the WebGPU headers, C++ wrapper, client-server implementation, etc.
     - [`templates`](../../generator/templates): Jinja2 templates for the generator, with subdirectories for groups of templates that are all used in the same library.

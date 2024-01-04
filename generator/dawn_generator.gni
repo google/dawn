@@ -83,9 +83,9 @@ template("dawn_json_generator") {
     # target using templates in this directory.
     args = [
       "--dawn-json",
-      rebase_path("${dawn_root}/dawn.json", root_build_dir),
+      rebase_path("${dawn_root}/src/dawn/dawn.json", root_build_dir),
       "--wire-json",
-      rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
+      rebase_path("${dawn_root}/src/dawn/dawn_wire.json", root_build_dir),
       "--targets",
       invoker.target,
     ]
@@ -102,9 +102,9 @@ template("dawn_json_lpm_generator") {
     # target using templates in this directory.
     args = [
       "--dawn-json",
-      rebase_path("${dawn_root}/dawn.json", root_build_dir),
+      rebase_path("${dawn_root}/src/dawn/dawn.json", root_build_dir),
       "--wire-json",
-      rebase_path("${dawn_root}/dawn_wire.json", root_build_dir),
+      rebase_path("${dawn_root}/src/dawn/dawn_wire.json", root_build_dir),
       "--lpm-json",
       rebase_path("${dawn_root}/src/dawn/fuzzers/lpmfuzz/dawn_lpm.json",
                   root_build_dir),

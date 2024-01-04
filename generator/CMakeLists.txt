@@ -121,9 +121,9 @@ function(DawnJSONGenerator)
     DawnGenerator(
         SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_json_generator.py"
         ARGS --dawn-json
-             "${Dawn_SOURCE_DIR}/dawn.json"
+             "${Dawn_SOURCE_DIR}/src/dawn/dawn.json"
              --wire-json
-             "${Dawn_SOURCE_DIR}/dawn_wire.json"
+             "${Dawn_SOURCE_DIR}/src/dawn/dawn_wire.json"
              --targets
              ${G_TARGET}
         RESULT_VARIABLE RET
