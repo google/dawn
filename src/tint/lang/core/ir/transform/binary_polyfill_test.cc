@@ -63,9 +63,9 @@ class IR_BinaryPolyfillTest : public TransformTest {
 };
 
 TEST_F(IR_BinaryPolyfillTest, ShiftLeft_NoPolyfill) {
-    Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.i32());
+    Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
     %result:i32 = shl %lhs, %rhs
     ret %result
@@ -83,9 +83,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_NoPolyfill) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, ShiftRight_NoPolyfill) {
-    Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.i32());
+    Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
     %result:i32 = shr %lhs, %rhs
     ret %result
@@ -103,9 +103,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_NoPolyfill) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
-    Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.i32());
+    Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
     %result:i32 = shl %lhs, %rhs
     ret %result
@@ -113,9 +113,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
-    %4:i32 = and %rhs, 31u
+    %4:u32 = and %rhs, 31u
     %result:i32 = shl %lhs, %4
     ret %result
   }
@@ -159,9 +159,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_U32) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
-    Build(BinaryOp::kShiftLeft, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<i32>());
+    Build(BinaryOp::kShiftLeft, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<u32>());
     auto* src = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
+%foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> -> %b1 {
   %b1 = block {
     %result:vec2<i32> = shl %lhs, %rhs
     ret %result
@@ -169,9 +169,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
+%foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> -> %b1 {
   %b1 = block {
-    %4:vec2<i32> = and %rhs, vec2<u32>(31u)
+    %4:vec2<u32> = and %rhs, vec2<u32>(31u)
     %result:vec2<i32> = shl %lhs, %4
     ret %result
   }
@@ -215,9 +215,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec3U32) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
-    Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.i32());
+    Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
     %result:i32 = shr %lhs, %rhs
     ret %result
@@ -225,9 +225,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:i32, %rhs:i32):i32 -> %b1 {
+%foo = func(%lhs:i32, %rhs:u32):i32 -> %b1 {
   %b1 = block {
-    %4:i32 = and %rhs, 31u
+    %4:u32 = and %rhs, 31u
     %result:i32 = shr %lhs, %4
     ret %result
   }
@@ -271,9 +271,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_U32) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
-    Build(BinaryOp::kShiftRight, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<i32>());
+    Build(BinaryOp::kShiftRight, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<u32>());
     auto* src = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
+%foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> -> %b1 {
   %b1 = block {
     %result:vec2<i32> = shr %lhs, %rhs
     ret %result
@@ -281,9 +281,9 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> -> %b1 {
+%foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> -> %b1 {
   %b1 = block {
-    %4:vec2<i32> = and %rhs, vec2<u32>(31u)
+    %4:vec2<u32> = and %rhs, vec2<u32>(31u)
     %result:vec2<i32> = shr %lhs, %4
     ret %result
   }

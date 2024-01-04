@@ -202,7 +202,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
         b.Append(fn->Block(), [&] {
             auto* load_outer = b.Load(outer);
 
-            auto* inner = b.Var(ty.ptr<function, f32>());
+            auto* inner = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(inner, "v");
 
             auto* load_inner = b.Load(inner);
@@ -218,8 +218,8 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
 %f = func():i32 -> %b2 {
   %b2 = block {
     %3:i32 = load %v
-    %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-    %5:f32 = load %v_1
+    %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+    %5:i32 = load %v_1
     %6:i32 = add %3, %5
     ret %6
   }
@@ -241,7 +241,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
 
         auto* fn = b.Function("f", ty.i32());
         b.Append(fn->Block(), [&] {
-            auto* inner = b.Var(ty.ptr<function, f32>());
+            auto* inner = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(inner, "v");
 
             auto* load_outer = b.Load(outer);
@@ -257,9 +257,9 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
 
 %f = func():i32 -> %b2 {
   %b2 = block {
-    %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
+    %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
     %4:i32 = load %v
-    %5:f32 = load %v_1
+    %5:i32 = load %v_1
     %6:i32 = add %4, %5
     ret %6
   }
@@ -274,9 +274,9 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
 
 %f = func():i32 -> %b2 {
   %b2 = block {
-    %v_1:ptr<function, f32, read_write> = var
+    %v_1:ptr<function, i32, read_write> = var
     %4:i32 = load %v
-    %5:f32 = load %v_1
+    %5:i32 = load %v_1
     %6:i32 = add %4, %5
     ret %6
   }
@@ -291,14 +291,14 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
 TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_ShadowedBy_IfVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
-        auto* outer = b.Var(ty.ptr<function, f32>());
+        auto* outer = b.Var(ty.ptr<function, i32>());
         b.ir.SetName(outer, "v");
 
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] {
             auto* load_outer = b.Load(outer);
 
-            auto* inner = b.Var(ty.ptr<function, f32>());
+            auto* inner = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(inner, "v");
 
             auto* load_inner = b.Load(inner);
@@ -311,12 +311,12 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_ShadowedBy_IfVar) {
     auto* src = R"(
 %f = func():i32 -> %b1 {
   %b1 = block {
-    %v:ptr<function, f32, read_write> = var
+    %v:ptr<function, i32, read_write> = var
     if true [t: %b2] {  # if_1
       %b2 = block {  # true
-        %3:f32 = load %v
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %5:f32 = load %v_1
+        %3:i32 = load %v
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %5:i32 = load %v_1
         %6:i32 = add %3, %5
         ret %6
       }
@@ -337,12 +337,12 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_ShadowedBy_IfVar) {
 TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
-        auto* outer = b.Var(ty.ptr<function, f32>());
+        auto* outer = b.Var(ty.ptr<function, i32>());
         b.ir.SetName(outer, "v");
 
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] {
-            auto* inner = b.Var(ty.ptr<function, f32>());
+            auto* inner = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(inner, "v");
 
             auto* load_outer = b.Load(outer);
@@ -356,12 +356,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* src = R"(
 %f = func():i32 -> %b1 {
   %b1 = block {
-    %v:ptr<function, f32, read_write> = var
+    %v:ptr<function, i32, read_write> = var
     if true [t: %b2] {  # if_1
       %b2 = block {  # true
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
@@ -375,12 +375,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* expect = R"(
 %f = func():i32 -> %b1 {
   %b1 = block {
-    %v:ptr<function, f32, read_write> = var
+    %v:ptr<function, i32, read_write> = var
     if true [t: %b2] {  # if_1
       %b2 = block {  # true
-        %v_1:ptr<function, f32, read_write> = var
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
@@ -400,14 +400,14 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyV
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
-            auto* outer = b.Var(ty.ptr<function, f32>());
+            auto* outer = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(outer, "v");
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
                 auto* load_outer = b.Load(outer);
 
-                auto* inner = b.Var(ty.ptr<function, f32>());
+                auto* inner = b.Var(ty.ptr<function, i32>());
                 b.ir.SetName(inner, "v");
 
                 auto* load_inner = b.Load(inner);
@@ -423,13 +423,13 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyV
   %b1 = block {
     loop [i: %b2, b: %b3] {  # loop_1
       %b2 = block {  # initializer
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         next_iteration %b3
       }
       %b3 = block {  # body
-        %3:f32 = load %v
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %5:f32 = load %v_1
+        %3:i32 = load %v
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %5:i32 = load %v_1
         %6:i32 = add %3, %5
         ret %6
       }
@@ -452,12 +452,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
-            auto* outer = b.Var(ty.ptr<function, f32>());
+            auto* outer = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(outer, "v");
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
-                auto* inner = b.Var(ty.ptr<function, f32>());
+                auto* inner = b.Var(ty.ptr<function, i32>());
                 b.ir.SetName(inner, "v");
 
                 auto* load_outer = b.Load(outer);
@@ -474,13 +474,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
   %b1 = block {
     loop [i: %b2, b: %b3] {  # loop_1
       %b2 = block {  # initializer
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         next_iteration %b3
       }
       %b3 = block {  # body
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
@@ -496,13 +496,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
   %b1 = block {
     loop [i: %b2, b: %b3] {  # loop_1
       %b2 = block {  # initializer
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         next_iteration %b3
       }
       %b3 = block {  # body
-        %v_1:ptr<function, f32, read_write> = var
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
@@ -523,14 +523,14 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopBodyVar_ShadowedBy_LoopContV
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] { b.NextIteration(loop); });
         b.Append(loop->Body(), [&] {
-            auto* outer = b.Var(ty.ptr<function, f32>());
+            auto* outer = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(outer, "v");
             b.Continue(loop);
 
             b.Append(loop->Continuing(), [&] {
                 auto* load_outer = b.Load(outer);
 
-                auto* inner = b.Var(ty.ptr<function, f32>());
+                auto* inner = b.Var(ty.ptr<function, i32>());
                 b.ir.SetName(inner, "v");
 
                 auto* load_inner = b.Load(inner);
@@ -549,13 +549,13 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopBodyVar_ShadowedBy_LoopContV
         next_iteration %b3
       }
       %b3 = block {  # body
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         continue %b4
       }
       %b4 = block {  # continuing
-        %3:f32 = load %v
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %5:f32 = load %v_1
+        %3:i32 = load %v
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %5:i32 = load %v_1
         %6:i32 = add %3, %5
         ret %6
       }
@@ -579,12 +579,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] { b.NextIteration(loop); });
         b.Append(loop->Body(), [&] {
-            auto* outer = b.Var(ty.ptr<function, f32>());
+            auto* outer = b.Var(ty.ptr<function, i32>());
             b.ir.SetName(outer, "v");
             b.Continue(loop);
 
             b.Append(loop->Continuing(), [&] {
-                auto* inner = b.Var(ty.ptr<function, f32>());
+                auto* inner = b.Var(ty.ptr<function, i32>());
                 b.ir.SetName(inner, "v");
 
                 auto* load_outer = b.Load(outer);
@@ -604,13 +604,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
         next_iteration %b3
       }
       %b3 = block {  # body
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         continue %b4
       }
       %b4 = block {  # continuing
-        %v_1:ptr<function, f32, read_write> = var  # %v_1: 'v'
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
@@ -629,13 +629,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
         next_iteration %b3
       }
       %b3 = block {  # body
-        %v:ptr<function, f32, read_write> = var
+        %v:ptr<function, i32, read_write> = var
         continue %b4
       }
       %b4 = block {  # continuing
-        %v_1:ptr<function, f32, read_write> = var
-        %4:f32 = load %v
-        %5:f32 = load %v_1
+        %v_1:ptr<function, i32, read_write> = var
+        %4:i32 = load %v
+        %5:i32 = load %v_1
         %6:i32 = add %4, %5
         ret %6
       }
