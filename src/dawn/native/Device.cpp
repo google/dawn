@@ -1822,14 +1822,21 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipe
     return CreateUninitializedRenderPipelineImpl(Unpack(&appliedDescriptor));
 }
 
-ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
-    const SamplerDescriptor defaultDescriptor = {};
+ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescriptor* descriptorOrig) {
     DAWN_TRY(ValidateIsAlive());
-    descriptor = descriptor != nullptr ? descriptor : &defaultDescriptor;
-    if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateSamplerDescriptor(this, descriptor), "validating %s", descriptor);
+
+    SamplerDescriptor descriptor = {};
+    if (descriptorOrig) {
+        descriptor = *descriptorOrig;
     }
-    return GetOrCreateSampler(descriptor);
+    descriptor.ApplyTrivialFrontendDefaults();
+
+    if (IsValidationEnabled()) {
+        DAWN_TRY_CONTEXT(ValidateSamplerDescriptor(this, &descriptor), "validating %s",
+                         &descriptor);
+    }
+
+    return GetOrCreateSampler(&descriptor);
 }
 
 ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(

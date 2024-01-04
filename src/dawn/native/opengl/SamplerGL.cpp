@@ -40,6 +40,8 @@ GLenum MagFilterMode(wgpu::FilterMode filter) {
             return GL_NEAREST;
         case wgpu::FilterMode::Linear:
             return GL_LINEAR;
+        case wgpu::FilterMode::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -52,6 +54,8 @@ GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::MipmapFilterMode mipMapFi
                     return GL_NEAREST_MIPMAP_NEAREST;
                 case wgpu::MipmapFilterMode::Linear:
                     return GL_NEAREST_MIPMAP_LINEAR;
+                case wgpu::MipmapFilterMode::Undefined:
+                    DAWN_UNREACHABLE();
             }
         case wgpu::FilterMode::Linear:
             switch (mipMapFilter) {
@@ -59,7 +63,11 @@ GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::MipmapFilterMode mipMapFi
                     return GL_LINEAR_MIPMAP_NEAREST;
                 case wgpu::MipmapFilterMode::Linear:
                     return GL_LINEAR_MIPMAP_LINEAR;
+                case wgpu::MipmapFilterMode::Undefined:
+                    DAWN_UNREACHABLE();
             }
+        case wgpu::FilterMode::Undefined:
+            DAWN_UNREACHABLE();
     }
     DAWN_UNREACHABLE();
 }
@@ -72,6 +80,8 @@ GLenum WrapMode(wgpu::AddressMode mode) {
             return GL_MIRRORED_REPEAT;
         case wgpu::AddressMode::ClampToEdge:
             return GL_CLAMP_TO_EDGE;
+        case wgpu::AddressMode::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }

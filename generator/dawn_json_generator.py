@@ -117,17 +117,22 @@ class EnumType(Type):
         Type.__init__(self, name, json_data)
 
         self.values = []
+        self.hasUndefined = False
         self.contiguousFromZero = True
         lastValue = -1
         for m in self.json_data['values']:
             if not is_enabled(m):
                 continue
             value = m['value']
+            name = m['name']
+            if name == "undefined":
+                assert value == 0
+                self.hasUndefined = True
             if value != lastValue + 1:
                 self.contiguousFromZero = False
             lastValue = value
             self.values.append(
-                EnumValue(Name(m['name']), value, m.get('valid', True), m))
+                EnumValue(Name(name), value, m.get('valid', True), m))
 
         # Assert that all values are unique in enums
         all_values = set()
@@ -197,6 +202,11 @@ class RecordMember:
         self.id_type = None
         self.default_value = default_value
         self.skip_serialize = skip_serialize
+
+        self.requires_struct_defaulting = False
+        if self.default_value not in [None, "undefined"] and self.annotation == "value" and \
+                self.type.category == "enum" and self.type.hasUndefined:
+            self.requires_struct_defaulting = True
 
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
@@ -296,6 +306,11 @@ class StructureType(Record, Type):
             if m.annotation != 'value':
                 return True
         return False
+
+    @property
+    def any_member_requires_struct_defaulting(self):
+        return any(member.requires_struct_defaulting
+                   for member in self.members)
 
 
 class ConstantDefinition():

@@ -45,7 +45,10 @@ D3D11_TEXTURE_ADDRESS_MODE D3D11TextureAddressMode(wgpu::AddressMode mode) {
             return D3D11_TEXTURE_ADDRESS_MIRROR;
         case wgpu::AddressMode::ClampToEdge:
             return D3D11_TEXTURE_ADDRESS_CLAMP;
+        case wgpu::AddressMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D11_FILTER_TYPE D3D11FilterType(wgpu::FilterMode mode) {
@@ -54,7 +57,10 @@ D3D11_FILTER_TYPE D3D11FilterType(wgpu::FilterMode mode) {
             return D3D11_FILTER_TYPE_POINT;
         case wgpu::FilterMode::Linear:
             return D3D11_FILTER_TYPE_LINEAR;
+        case wgpu::FilterMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D11_FILTER_TYPE D3D11MipmapFilterType(wgpu::MipmapFilterMode mode) {
@@ -63,7 +69,10 @@ D3D11_FILTER_TYPE D3D11MipmapFilterType(wgpu::MipmapFilterMode mode) {
             return D3D11_FILTER_TYPE_POINT;
         case wgpu::MipmapFilterMode::Linear:
             return D3D11_FILTER_TYPE_LINEAR;
+        case wgpu::MipmapFilterMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace

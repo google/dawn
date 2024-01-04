@@ -188,7 +188,7 @@ namespace {{metadata.namespace}} {
         CType mHandle = nullptr;
     };
 
-{% macro render_cpp_default_value(member, is_struct=True, force_default=False) -%}
+{% macro render_cpp_default_value(member, is_struct, force_default=False) -%}
     {%- if member.json_data.get("no_default", false) -%}
     {%- elif member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
@@ -280,7 +280,7 @@ namespace {{metadata.namespace}} {
                 ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, False, type.has_free_members_function) %}
+                {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function) %}
                 {% if type.chained and loop.first %}
                     //* Align the first member after ChainedStruct to match the C struct layout.
                     //* It has to be aligned both to its natural and ChainedStruct's alignment.

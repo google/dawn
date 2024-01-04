@@ -226,9 +226,10 @@
     "address mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "repeat"},
-            {"value": 1, "name": "mirror repeat"},
-            {"value": 2, "name": "clamp to edge"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "clamp to edge"},
+            {"value": 2, "name": "repeat"},
+            {"value": 3, "name": "mirror repeat"}
         ]
     },
     "backend type": {
@@ -1976,8 +1977,9 @@
     "filter mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "nearest"},
-            {"value": 1, "name": "linear"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "nearest"},
+            {"value": 2, "name": "linear"}
         ]
     },
     "float": {
@@ -2199,8 +2201,9 @@
     "mipmap filter mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "nearest"},
-            {"value": 1, "name": "linear"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "nearest"},
+            {"value": 2, "name": "linear"}
         ]
     },
     "store op": {

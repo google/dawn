@@ -43,7 +43,10 @@ D3D12_TEXTURE_ADDRESS_MODE AddressMode(wgpu::AddressMode mode) {
             return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
         case wgpu::AddressMode::ClampToEdge:
             return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        case wgpu::AddressMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 }  // namespace
 
@@ -62,6 +65,8 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         case wgpu::FilterMode::Linear:
             minFilter = D3D12_FILTER_TYPE_LINEAR;
             break;
+        case wgpu::FilterMode::Undefined:
+            DAWN_UNREACHABLE();
     }
 
     D3D12_FILTER_TYPE magFilter;
@@ -72,6 +77,8 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         case wgpu::FilterMode::Linear:
             magFilter = D3D12_FILTER_TYPE_LINEAR;
             break;
+        case wgpu::FilterMode::Undefined:
+            DAWN_UNREACHABLE();
     }
 
     D3D12_FILTER_TYPE mipmapFilter;
@@ -82,6 +89,8 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         case wgpu::MipmapFilterMode::Linear:
             mipmapFilter = D3D12_FILTER_TYPE_LINEAR;
             break;
+        case wgpu::MipmapFilterMode::Undefined:
+            DAWN_UNREACHABLE();
     }
 
     D3D12_FILTER_REDUCTION_TYPE reduction = descriptor->compare == wgpu::CompareFunction::Undefined

@@ -68,6 +68,16 @@ namespace {{native_namespace}} {
                          "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endfor %}
 
+        {% if type.any_member_requires_struct_defaulting %}
+            void {{CppType}}::ApplyTrivialFrontendDefaults() {
+                {% for member in type.members if member.requires_struct_defaulting %}
+                    {% set memberName = member.name.camelCase() %}
+                    if ({{memberName}} == {{namespace}}::{{as_cppType(member.type.name)}}::Undefined) {
+                        {{memberName}} = {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}};
+                    }
+                {% endfor %}
+            }
+        {% endif %}
         bool {{CppType}}::operator==(const {{as_cppType(type.name)}}& rhs) const {
             return {% if type.extensible or type.chained -%}
                 (nextInChain == rhs.nextInChain) &&

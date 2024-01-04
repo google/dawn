@@ -133,17 +133,14 @@ class TextureViewSamplingTest : public TextureViewTestBase {
 
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        wgpu::FilterMode kFilterMode = wgpu::FilterMode::Nearest;
-        wgpu::MipmapFilterMode kMipmapFilterMode = wgpu::MipmapFilterMode::Nearest;
-        wgpu::AddressMode kAddressMode = wgpu::AddressMode::ClampToEdge;
-
         wgpu::SamplerDescriptor samplerDescriptor = {};
-        samplerDescriptor.minFilter = kFilterMode;
-        samplerDescriptor.magFilter = kFilterMode;
-        samplerDescriptor.mipmapFilter = kMipmapFilterMode;
-        samplerDescriptor.addressModeU = kAddressMode;
-        samplerDescriptor.addressModeV = kAddressMode;
-        samplerDescriptor.addressModeW = kAddressMode;
+        // (Off-topic) spot-test for defaulting of these six fields.
+        samplerDescriptor.minFilter = wgpu::FilterMode::Undefined;
+        samplerDescriptor.magFilter = wgpu::FilterMode::Undefined;
+        samplerDescriptor.mipmapFilter = wgpu::MipmapFilterMode::Undefined;
+        samplerDescriptor.addressModeU = wgpu::AddressMode::Undefined;
+        samplerDescriptor.addressModeV = wgpu::AddressMode::Undefined;
+        samplerDescriptor.addressModeW = wgpu::AddressMode::Undefined;
         mSampler = device.CreateSampler(&samplerDescriptor);
 
         mVSModule = CreateDefaultVertexShaderModule(device);
