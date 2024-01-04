@@ -154,6 +154,27 @@ TEST(BytesDecoderTest, UnorderedMap) {
     EXPECT_NE(Decode<M>(reader), Success);
 }
 
+TEST(BytesDecoderTest, Optional) {
+    auto data = Data(0x00,  //
+                     0x01, 0x42);
+    auto reader = BufferReader{Slice{data}};
+    auto first = Decode<std::optional<uint8_t>>(reader);
+    auto second = Decode<std::optional<uint8_t>>(reader);
+    auto third = Decode<std::optional<uint8_t>>(reader);
+    ASSERT_EQ(first, Success);
+    ASSERT_EQ(second, Success);
+    EXPECT_NE(third, Success);
+    EXPECT_EQ(first.Get(), std::nullopt);
+    EXPECT_EQ(second.Get(), std::optional<uint8_t>{0x42});
+}
+
+TEST(BytesDecoderTest, Bitset) {
+    auto data = Data(0x2D, 0x6D);
+    auto reader = BufferReader{Slice{data}};
+    auto got = Decode<std::bitset<14>>(reader);
+    EXPECT_EQ(got, std::bitset<14>(0x6D2D));
+}
+
 TEST(BytesDecoderTest, Tuple) {
     using T = std::tuple<uint8_t, uint16_t, uint32_t>;
     auto data = Data(0x10,                    //

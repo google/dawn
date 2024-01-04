@@ -28,6 +28,9 @@
 #ifndef SRC_TINT_UTILS_BYTES_DECODER_H_
 #define SRC_TINT_UTILS_BYTES_DECODER_H_
 
+#include <bitset>
+#include <climits>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -147,6 +150,52 @@ struct Decoder<std::unordered_map<K, V>, void> {
             out.emplace(std::move(key.Get()), std::move(val.Get()));
         }
 
+        return out;
+    }
+};
+
+/// Decoder specialization for std::optional
+template <typename T>
+struct Decoder<std::optional<T>, void> {
+    /// Decode decodes the optional from @p reader.
+    /// @param reader the reader to decode from
+    /// @returns the decoded optional, or an error if the stream is too short.
+    static Result<std::optional<T>> Decode(Reader& reader) {
+        auto has_value = bytes::Decode<bool>(reader);
+        if (has_value != Success) {
+            return has_value.Failure();
+        }
+        if (!has_value.Get()) {
+            return std::optional<T>{std::nullopt};
+        }
+        auto value = bytes::Decode<T>(reader);
+        if (value != Success) {
+            return value.Failure();
+        }
+        return std::optional<T>{value.Get()};
+    }
+};
+
+/// Decoder specialization for std::bitset
+template <std::size_t N>
+struct Decoder<std::bitset<N>, void> {
+    /// Decode decodes the bitset from @p reader.
+    /// @param reader the reader to decode from
+    /// @returns the decoded bitset, or an error if the stream is too short.
+    static Result<std::bitset<N>> Decode(Reader& reader) {
+        Vector<std::byte, 32> vec;
+        vec.Resize((N + CHAR_BIT - 1) / CHAR_BIT);
+
+        if (auto len = reader.Read(&vec[0], vec.Length()); len != vec.Length()) {
+            return Failure{"EOF"};
+        }
+
+        std::bitset<N> out;
+        for (std::size_t i = 0; i < N; i++) {
+            std::size_t w = i / CHAR_BIT;
+            std::size_t b = i - (w * CHAR_BIT);
+            out[i] = ((vec[w] >> b) & std::byte{1}) != std::byte{0};
+        }
         return out;
     }
 };
