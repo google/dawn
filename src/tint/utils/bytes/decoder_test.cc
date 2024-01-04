@@ -34,9 +34,19 @@
 
 #include "gmock/gmock.h"
 
+namespace tint {
+namespace {
+/// An enum used for decoder tests below.
+enum class TestEnum : uint8_t { A = 2, B = 3, C = 4 };
+}  // namespace
+
+/// Reflect valid value ranges for the TestEnum enum.
+TINT_REFLECT_ENUM_RANGE(TestEnum, A, C);
+
+}  // namespace tint
+
 namespace tint::bytes {
 namespace {
-
 template <typename... ARGS>
 auto Data(ARGS&&... args) {
     return std::array{std::byte{static_cast<uint8_t>(args)}...};
@@ -115,6 +125,15 @@ TEST(BytesDecoderTest, ReflectedObject) {
     EXPECT_EQ(got->b, 0x3020u);
     EXPECT_EQ(got->c, 0x70605040u);
     EXPECT_NE(Decode<S>(reader), Success);
+}
+
+TEST(BytesDecoderTest, ReflectedEnum) {
+    auto data = Data(0x03, 0x01, 0x05);
+    auto reader = BufferReader{Slice{data}};
+    auto got = Decode<TestEnum>(reader);
+    EXPECT_EQ(got, TestEnum::B);
+    EXPECT_NE(Decode<S>(reader), Success);  // Out of range
+    EXPECT_NE(Decode<S>(reader), Success);  // Out of range
 }
 
 TEST(BytesDecoderTest, UnorderedMap) {

@@ -174,6 +174,29 @@ struct Decoder<std::tuple<FIRST, OTHERS...>, void> {
     }
 };
 
+/// Decoder specialization for enum types that have a range defined with TINT_REFLECT_ENUM_RANGE
+template <typename T>
+struct Decoder<T, std::void_t<decltype(tint::EnumRange<T>::kMax)>> {
+    /// Decode decodes the enum type from @p reader.
+    /// @param reader the reader to decode from
+    /// @param endianness the endianness of the enum
+    /// @returns the decoded enum type, or an error if the stream is too short.
+    static Result<T> Decode(Reader& reader, Endianness endianness = Endianness::kLittle) {
+        using Range = tint::EnumRange<T>;
+        using U = std::underlying_type_t<T>;
+        auto value = reader.Int<U>(endianness);
+        if (value != Success) {
+            return value.Failure();
+        }
+        static constexpr U kMin = static_cast<U>(Range::kMin);
+        static constexpr U kMax = static_cast<U>(Range::kMax);
+        if (value.Get() < kMin || value.Get() > kMax) {
+            return Failure{"value " + std::to_string(value.Get()) + " out of range for enum"};
+        }
+        return static_cast<T>(value.Get());
+    }
+};
+
 }  // namespace tint::bytes
 
 #endif  // SRC_TINT_UTILS_BYTES_DECODER_H_
