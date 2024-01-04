@@ -1169,7 +1169,7 @@ int main(int argc, const char** argv) {
         tint::wgsl::writer::Options gen_options;
         gen_options.use_syntax_tree_writer = true;
         auto result = tint::wgsl::writer::Generate(info.program, gen_options);
-        if (!result) {
+        if (result != tint::Success) {
             std::cerr << "Failed to dump AST: " << result.Failure() << "\n";
         } else {
             std::cout << result->wgsl << "\n";
