@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-12-20 09:24:04AM
+# Last rolled: 2024-01-02 07:34:11AM
 
 # Flaky on all platforms
 # KEEP
@@ -572,7 +572,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
@@ -598,11 +597,14 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_r" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xI8Clamp:supported:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xU8Clamp:supported:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,unpack4xI8:supported:* [ Failure ]
