@@ -31,6 +31,7 @@
 #ifndef SRC_DAWN_NODE_INTEROP_CORE_H_
 #define SRC_DAWN_NODE_INTEROP_CORE_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <limits>
@@ -521,8 +522,16 @@ class Converter<EnforceRangeInteger<T>> {
         }
 
         // Check for out of range and throw a type error.
-        constexpr double kMin = static_cast<double>(std::numeric_limits<T>::min());
-        constexpr double kMax = static_cast<double>(std::numeric_limits<T>::max());
+        // Note that the number must both be representable in the integer type, but also below
+        // MAX_SAFE_INTEGER after which consecutive double values might skip over some integer
+        // values.
+        constexpr double kMaxSafeInteger = (uint64_t(1) << 53) - uint64_t(1);
+        constexpr double kMinSafeInteger = -kMaxSafeInteger;
+
+        constexpr double kMin =
+            std::max(kMinSafeInteger, static_cast<double>(std::numeric_limits<T>::min()));
+        constexpr double kMax =
+            std::min(kMaxSafeInteger, static_cast<double>(std::numeric_limits<T>::max()));
         if (!(kMin <= doubleValue && doubleValue <= kMax)) {
             return Error("Values are out of the range of that integer.");
         }
