@@ -255,6 +255,7 @@ target_link_libraries(dawn_native
             SPIRV-Tools-opt
             absl_strings
             absl_str_format_internal
+            absl_flat_hash_map
             absl_flat_hash_set
 )
 
