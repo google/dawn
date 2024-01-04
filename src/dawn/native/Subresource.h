@@ -117,13 +117,9 @@ static constexpr uint32_t kMaxPlanesPerFormat = 3;
 
 }  // namespace dawn::native
 
-namespace dawn {
-
 template <>
-struct IsDawnBitmask<dawn::native::Aspect> {
+struct wgpu::IsWGPUBitmask<dawn::native::Aspect> {
     static constexpr bool enable = true;
 };
-
-}  // namespace dawn
 
 #endif  // SRC_DAWN_NATIVE_SUBRESOURCE_H_

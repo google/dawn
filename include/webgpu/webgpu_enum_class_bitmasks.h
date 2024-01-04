@@ -25,27 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
-#define INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
+#ifndef WEBGPU_ENUM_CLASS_BITMASKS_H_
+#define WEBGPU_ENUM_CLASS_BITMASKS_H_
 
 #include <type_traits>
 
-// The operators in dawn:: namespace need be introduced into other namespaces with
+// The operators in wgpu:: namespace need be introduced into other namespaces with
 // using-declarations for C++ Argument Dependent Lookup to work.
-#define DAWN_IMPORT_BITMASK_OPERATORS \
-    using dawn::operator|;            \
-    using dawn::operator&;            \
-    using dawn::operator^;            \
-    using dawn::operator~;            \
-    using dawn::operator&=;           \
-    using dawn::operator|=;           \
-    using dawn::operator^=;           \
-    using dawn::HasZeroOrOneBits;
+#define WGPU_IMPORT_BITMASK_OPERATORS \
+    using wgpu::operator|;            \
+    using wgpu::operator&;            \
+    using wgpu::operator^;            \
+    using wgpu::operator~;            \
+    using wgpu::operator&=;           \
+    using wgpu::operator|=;           \
+    using wgpu::operator^=;           \
+    using wgpu::HasZeroOrOneBits;
 
-namespace dawn {
+namespace wgpu {
 
 template <typename T>
-struct IsDawnBitmask {
+struct IsWGPUBitmask {
     static constexpr bool enable = false;
 };
 
@@ -55,7 +55,7 @@ struct LowerBitmask {
 };
 
 template <typename T>
-struct LowerBitmask<T, typename std::enable_if<IsDawnBitmask<T>::enable>::type> {
+struct LowerBitmask<T, typename std::enable_if<IsWGPUBitmask<T>::enable>::type> {
     static constexpr bool enable = true;
     using type = T;
     constexpr static T Lower(T t) { return t; }
@@ -123,7 +123,7 @@ constexpr BoolConvertible<typename LowerBitmask<T1>::type> operator~(T1 t) {
 template <
     typename T,
     typename T2,
-    typename = typename std::enable_if<IsDawnBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
+    typename = typename std::enable_if<IsWGPUBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
 constexpr T& operator&=(T& l, T2 right) {
     T r = LowerBitmask<T2>::Lower(right);
     l = l & r;
@@ -133,7 +133,7 @@ constexpr T& operator&=(T& l, T2 right) {
 template <
     typename T,
     typename T2,
-    typename = typename std::enable_if<IsDawnBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
+    typename = typename std::enable_if<IsWGPUBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
 constexpr T& operator|=(T& l, T2 right) {
     T r = LowerBitmask<T2>::Lower(right);
     l = l | r;
@@ -143,7 +143,7 @@ constexpr T& operator|=(T& l, T2 right) {
 template <
     typename T,
     typename T2,
-    typename = typename std::enable_if<IsDawnBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
+    typename = typename std::enable_if<IsWGPUBitmask<T>::enable && LowerBitmask<T2>::enable>::type>
 constexpr T& operator^=(T& l, T2 right) {
     T r = LowerBitmask<T2>::Lower(right);
     l = l ^ r;
@@ -156,6 +156,6 @@ constexpr bool HasZeroOrOneBits(T value) {
     return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
 }
 
-}  // namespace dawn
+}  // namespace wgpu
 
-#endif  // INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
+#endif  // WEBGPU_ENUM_CLASS_BITMASKS_H_

@@ -35,6 +35,18 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
+enum class CheckIndex : uint32_t {
+    Vertex = 0x0000001,
+    Instance = 0x0000002,
+};
+}  // namespace dawn
+
+template <>
+struct wgpu::IsWGPUBitmask<dawn::CheckIndex> {
+    static constexpr bool enable = true;
+};
+
+namespace dawn {
 namespace {
 
 constexpr uint32_t kRTSize = 1;
@@ -46,21 +58,11 @@ enum class DrawMode {
     IndexedIndirect,
 };
 
-enum class CheckIndex : uint32_t {
-    Vertex = 0x0000001,
-    Instance = 0x0000002,
-};
-
 bool IsIndirectDraw(DrawMode mode) {
     return mode == DrawMode::NonIndexedIndirect || mode == DrawMode::IndexedIndirect;
 }
 
 }  // anonymous namespace
-
-template <>
-struct IsDawnBitmask<CheckIndex> {
-    static constexpr bool enable = true;
-};
 
 namespace {
 

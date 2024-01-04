@@ -34,9 +34,9 @@
 #ifndef {{API}}_CPP_H_
 #define {{API}}_CPP_H_
 
-#include "dawn/{{api}}.h"
-#include "dawn/{{api}}_cpp_chained_struct.h"
-#include "dawn/EnumClassBitmasks.h"
+#include "{{api}}/{{api}}.h"
+#include "{{api}}/{{api}}_cpp_chained_struct.h"
+#include "{{api}}/{{api}}_enum_class_bitmasks.h"
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -294,20 +294,22 @@ namespace {{metadata.namespace}} {
 
     {% endfor %}
 
-    // The operators of EnumClassBitmmasks in the dawn:: namespace need to be imported
-    // in the {{metadata.namespace}} namespace for Argument Dependent Lookup.
-    DAWN_IMPORT_BITMASK_OPERATORS
+    {%- if metadata.namespace != 'wgpu' %}
+        // The operators of webgpu_enum_class_bitmasks.h are in the wgpu:: namespace,
+        // and need to be imported into this namespace for Argument Dependent Lookup.
+        WGPU_IMPORT_BITMASK_OPERATORS
+    {% endif %}
 }  // namespace {{metadata.namespace}}
 
-namespace dawn {
+namespace wgpu {
     {% for type in by_category["bitmask"] %}
         template<>
-        struct IsDawnBitmask<{{metadata.namespace}}::{{as_cppType(type.name)}}> {
+        struct IsWGPUBitmask<{{metadata.namespace}}::{{as_cppType(type.name)}}> {
             static constexpr bool enable = true;
         };
 
     {% endfor %}
-} // namespace dawn
+} // namespace wgpu
 
 namespace std {
 // Custom boolean class needs corresponding hash function so that it appears as a transparent bool.

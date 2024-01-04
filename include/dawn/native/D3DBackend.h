@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp_chained_struct.h"
+#include "webgpu/webgpu_cpp_chained_struct.h"
 
 namespace dawn::native::d3d {
 

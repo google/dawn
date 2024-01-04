@@ -84,9 +84,10 @@ dawn_json_generator("webgpu_headers_gen") {
 dawn_json_generator("emscripten_bits_gen") {
   target = "emscripten_bits"
   outputs = [
-    "emscripten-bits/webgpu.h",
-    "emscripten-bits/webgpu_cpp.h",
-    "emscripten-bits/webgpu_cpp.cpp",
+    "emscripten-bits/system/include/webgpu/webgpu.h",
+    "emscripten-bits/system/include/webgpu/webgpu_cpp.h",
+    "emscripten-bits/system/include/webgpu/webgpu_cpp_chained_struct.h",
+    "emscripten-bits/system/lib/webgpu/webgpu_cpp.cpp",
     "emscripten-bits/webgpu_struct_info.json",
     "emscripten-bits/library_webgpu_enum_tables.js",
   ]

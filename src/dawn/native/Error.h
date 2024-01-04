@@ -263,13 +263,9 @@ AbslFormatConvert(InternalErrorType value,
 }  // namespace dawn::native
 
 // Enable dawn enum bitmask for error types.
-namespace dawn {
-
 template <>
-struct IsDawnBitmask<native::InternalErrorType> {
+struct wgpu::IsWGPUBitmask<dawn::native::InternalErrorType> {
     static constexpr bool enable = true;
 };
-
-}  // namespace dawn
 
 #endif  // SRC_DAWN_NATIVE_ERROR_H_

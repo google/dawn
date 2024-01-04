@@ -44,14 +44,10 @@ struct EnumBitmaskSize<TestAspect> {
 
 }  // namespace dawn::native
 
-namespace dawn {
-
 template <>
-struct IsDawnBitmask<native::TestAspect> {
+struct wgpu::IsWGPUBitmask<dawn::native::TestAspect> {
     static constexpr bool enable = true;
 };
-
-}  // namespace dawn
 
 namespace dawn::native {
 

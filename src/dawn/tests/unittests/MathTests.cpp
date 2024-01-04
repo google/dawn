@@ -29,26 +29,27 @@
 #include <limits>
 #include <vector>
 
-#include "dawn/EnumClassBitmasks.h"
 #include "dawn/common/Math.h"
 #include "dawn/webgpu_cpp.h"
 #include "gtest/gtest.h"
+#include "webgpu/webgpu_enum_class_bitmasks.h"
 
 namespace wgpu {
+
 enum class TestEnum {
     A = 0x1,
     B = 0x2,
     C = 0x4,
 };
-}  // namespace wgpu
-
-namespace dawn {
 
 template <>
-struct IsDawnBitmask<wgpu::TestEnum> {
+struct IsWGPUBitmask<TestEnum> {
     static constexpr bool enable = true;
 };
 
+}  // namespace wgpu
+
+namespace dawn {
 namespace {
 
 // Tests for ScanForward

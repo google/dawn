@@ -202,13 +202,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
 }  // namespace dawn::native
 
-namespace dawn {
-
 template <>
-struct IsDawnBitmask<dawn::native::SampleTypeBit> {
+struct wgpu::IsWGPUBitmask<dawn::native::SampleTypeBit> {
     static constexpr bool enable = true;
 };
-
-}  // namespace dawn
 
 #endif  // SRC_DAWN_NATIVE_FORMAT_H_

@@ -45,12 +45,12 @@ enum class Cap : uint16_t {
     StorageRW = 0x10,  // Implies StorageW
     PLS = 0x20,
 };
+}  // namespace dawn
 
 template <>
-struct IsDawnBitmask<Cap> {
+struct wgpu::IsWGPUBitmask<dawn::Cap> {
     static constexpr bool enable = true;
 };
-}  // namespace dawn
 
 namespace dawn::native {
 

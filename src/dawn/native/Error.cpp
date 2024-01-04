@@ -27,6 +27,7 @@
 
 #include "dawn/native/Error.h"
 
+#include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/dawn_platform.h"
 

@@ -27,9 +27,14 @@
 
 #include "gtest/gtest.h"
 
-#include "dawn/EnumClassBitmasks.h"
+#include "webgpu/webgpu_enum_class_bitmasks.h"
 
-namespace dawn {
+// This shows an example of how to set up a bitmask in a namespace other than
+// wgpu. The namespace can be either named or anonymous. In dawn, it is usually
+// the dawn or dawn::native namespace.
+namespace {
+
+WGPU_IMPORT_BITMASK_OPERATORS
 
 enum class Color : uint32_t {
     R = 1,
@@ -38,8 +43,10 @@ enum class Color : uint32_t {
     A = 8,
 };
 
+}  // namespace
+
 template <>
-struct IsDawnBitmask<Color> {
+struct wgpu::IsWGPUBitmask<Color> {
     static constexpr bool enable = true;
 };
 
@@ -102,5 +109,3 @@ TEST(BitmaskTests, ZeroOrOneBits) {
     ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
     ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
 }
-
-}  // namespace dawn

@@ -57,8 +57,8 @@ dawn_json_generator("cpp_headers_gen") {
   target = "cpp_headers"
   outputs = [
     "include/dawn/webgpu_cpp.h",
-    "include/dawn/webgpu_cpp_chained_struct.h",
     "include/dawn/webgpu_cpp_print.h",
+    "include/webgpu/webgpu_cpp_chained_struct.h",
   ]
 }
 
@@ -69,7 +69,7 @@ source_set("cpp_headers") {
   ]
 
   sources = get_target_outputs(":cpp_headers_gen")
-  sources += [ "${dawn_root}/include/dawn/EnumClassBitmasks.h" ]
+  sources += [ "${dawn_root}/include/webgpu/webgpu_enum_class_bitmasks.h" ]
 }
 
 ###############################################################################

@@ -31,6 +31,12 @@
 //* information for its own code generators.
 //* https://github.com/emscripten-core/emscripten/blob/main/src/struct_info.json
 //*
+[
+    // ===========================================
+    // WebGPU
+    //   NOTE: This section is auto-generated.
+    //   See system/include/webgpu/README.md for details.
+    // ===========================================
     {
         {% set api = metadata.api.lower() %}
         "file": "{{api}}/{{api}}.h",
@@ -62,3 +68,4 @@
 
         }
     }
+]
