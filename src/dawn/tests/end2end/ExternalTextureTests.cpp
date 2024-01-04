@@ -226,7 +226,6 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
 TEST_P(ExternalTextureTests, SampleExternalTextureDifferingGroup) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,

@@ -153,7 +153,8 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 }
 
 // The remapped binding data and external texture data need to coordinate in order to put things in
-// the correct place when we're done.
+// the correct place when we're done. The binding remapper is run first, so make sure that the
+// external texture uses the new binding point.
 //
 // When the data comes in we have a list of all WGSL origin (group,binding) pairs to MSL
 // (binding) in the `uniform`, `storage`, `texture`, and `sampler` arrays.
@@ -193,9 +194,10 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
         BindingPoint plane1_binding_point{0, plane1.binding};
         BindingPoint metadata_binding_point{0, metadata.binding};
 
-        // Use the re-bound msl plane0 value for the lookup key.
+        // Use the re-bound MSL plane0 value for the lookup key. The group goes to `0` which is the
+        // value always used for re-bound data.
         external_texture.bindings_map.emplace(
-            BindingPoint{src_binding_point.group, plane0_binding_point.binding},
+            BindingPoint{0, plane0_binding_point.binding},
             ExternalTextureOptions::BindingPoints{plane1_binding_point, metadata_binding_point});
 
         // Bindings which go to the same slot in MSL do not need to be re-bound.
