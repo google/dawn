@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <array>
 #include <mutex>
+#include <unordered_set>
 #include <utility>
 
 #include "dawn/common/Log.h"
