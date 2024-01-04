@@ -30,10 +30,10 @@
 
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/ContentLessObjectCache.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/native/CacheKey.h"
@@ -592,7 +592,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     struct DeprecationWarnings;
     std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
 
-    std::unordered_set<std::string> mWarnings;
+    absl::flat_hash_set<std::string> mWarnings;
 
     State mState = State::BeingCreated;
 

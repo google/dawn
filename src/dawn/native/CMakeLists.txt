@@ -255,6 +255,7 @@ target_link_libraries(dawn_native
             SPIRV-Tools-opt
             absl_strings
             absl_str_format_internal
+            absl_flat_hash_set
 )
 
 target_include_directories(dawn_native PRIVATE ${DAWN_ABSEIL_DIR})
