@@ -96,6 +96,9 @@ class Type : public Castable<Type, UniqueNode> {
     /// @returns the inner type if this is a reference, `this` otherwise
     const Type* UnwrapRef() const;
 
+    /// @returns the inner type if this is a pointer or a reference, `this` otherwise
+    const Type* UnwrapPtrOrRef() const;
+
     /// @returns the size in bytes of the type. This may include tail padding.
     /// @note opaque types will return a size of 0.
     virtual uint32_t Size() const;

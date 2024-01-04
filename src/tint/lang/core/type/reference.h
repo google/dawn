@@ -30,20 +30,18 @@
 
 #include <string>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/memory_view.h"
 
 namespace tint::core::type {
 
 /// A reference type.
-class Reference final : public Castable<Reference, Type> {
+class Reference final : public Castable<Reference, MemoryView> {
   public:
     /// Constructor
     /// @param address_space the address space of the reference
-    /// @param subtype the pointee type
+    /// @param store_type the store type
     /// @param access the resolved access control of the reference
-    Reference(core::AddressSpace address_space, const Type* subtype, core::Access access);
+    Reference(core::AddressSpace address_space, const Type* store_type, core::Access access);
 
     /// Destructor
     ~Reference() override;
@@ -52,15 +50,6 @@ class Reference final : public Castable<Reference, Type> {
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;
 
-    /// @returns the pointee type
-    const Type* StoreType() const { return subtype_; }
-
-    /// @returns the address space of the reference
-    core::AddressSpace AddressSpace() const { return address_space_; }
-
-    /// @returns the resolved access control of the reference.
-    core::Access Access() const { return access_; }
-
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName() const override;
@@ -68,11 +57,6 @@ class Reference final : public Castable<Reference, Type> {
     /// @param ctx the clone context
     /// @returns a clone of this type
     Reference* Clone(CloneContext& ctx) const override;
-
-  private:
-    Type const* const subtype_;
-    core::AddressSpace const address_space_;
-    core::Access const access_;
 };
 
 }  // namespace tint::core::type

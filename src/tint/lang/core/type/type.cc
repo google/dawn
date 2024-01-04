@@ -72,6 +72,14 @@ const Type* Type::UnwrapRef() const {
     return type;
 }
 
+const Type* Type::UnwrapPtrOrRef() const {
+    auto* type = UnwrapPtr();
+    if (type != this) {
+        return type;
+    }
+    return UnwrapRef();
+}
+
 uint32_t Type::Size() const {
     return 0;
 }

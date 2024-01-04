@@ -77,6 +77,8 @@ libtint_source_set("type") {
     "manager.h",
     "matrix.cc",
     "matrix.h",
+    "memory_view.cc",
+    "memory_view.h",
     "multisampled_texture.cc",
     "multisampled_texture.h",
     "node.cc",

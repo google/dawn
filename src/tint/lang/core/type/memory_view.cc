@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,44 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/memory_view.h"
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::type::Reference);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::MemoryView);
 
 namespace tint::core::type {
 
-Reference::Reference(core::AddressSpace address_space, const Type* store_type, core::Access access)
-    : Base(Hash(tint::TypeInfo::Of<Pointer>().full_hashcode), address_space, store_type, access) {}
-
-bool Reference::Equals(const UniqueNode& other) const {
-    if (auto* o = other.As<Reference>()) {
-        return o->AddressSpace() == AddressSpace() && o->StoreType() == StoreType() &&
-               o->Access() == Access();
-    }
-    return false;
+MemoryView::MemoryView(size_t hash,
+                       core::AddressSpace address_space,
+                       const Type* store_type,
+                       core::Access access)
+    : Base(hash, core::type::Flags{}),
+      store_type_(store_type),
+      address_space_(address_space),
+      access_(access) {
+    TINT_ASSERT(access != core::Access::kUndefined);
 }
 
-std::string Reference::FriendlyName() const {
-    StringStream out;
-    out << "ref<";
-    if (AddressSpace() != core::AddressSpace::kUndefined) {
-        out << AddressSpace() << ", ";
-    }
-    out << StoreType()->FriendlyName() << ", " << Access();
-    out << ">";
-    return out.str();
-}
-
-Reference::~Reference() = default;
-
-Reference* Reference::Clone(CloneContext& ctx) const {
-    auto* ty = StoreType()->Clone(ctx);
-    return ctx.dst.mgr->Get<Reference>(AddressSpace(), ty, Access());
-}
+MemoryView::~MemoryView() = default;
 
 }  // namespace tint::core::type
