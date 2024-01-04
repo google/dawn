@@ -27,6 +27,7 @@
 
 #include "src/dawn/node/binding/GPUAdapter.h"
 
+#include <limits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -142,16 +143,25 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         return {env, interop::kUnusedPromise};
     }
 
+    interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
+
     wgpu::RequiredLimits limits;
-#define COPY_LIMIT(LIMIT)                                        \
-    if (descriptor.requiredLimits.count(#LIMIT)) {               \
-        limits.limits.LIMIT = descriptor.requiredLimits[#LIMIT]; \
-        descriptor.requiredLimits.erase(#LIMIT);                 \
+#define COPY_LIMIT(LIMIT)                                                                    \
+    if (descriptor.requiredLimits.count(#LIMIT)) {                                           \
+        using DawnLimitType = decltype(WGPULimits::LIMIT);                                   \
+        DawnLimitType* dawnLimit = &limits.limits.LIMIT;                                     \
+        uint64_t jsLimit = descriptor.requiredLimits[#LIMIT];                                \
+        if (jsLimit > std::numeric_limits<DawnLimitType>::max() - 1) {                       \
+            promise.Reject(                                                                  \
+                binding::Errors::OperationError(env, "Limit \"" #LIMIT "\" out of range.")); \
+            return promise;                                                                  \
+        }                                                                                    \
+        *dawnLimit = jsLimit;                                                                \
+        descriptor.requiredLimits.erase(#LIMIT);                                             \
     }
     FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT
 
-    interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
     for (auto [key, _] : descriptor.requiredLimits) {
         promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
         return promise;
