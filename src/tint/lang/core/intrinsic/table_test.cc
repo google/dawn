@@ -440,21 +440,6 @@ TEST_F(IntrinsicTableTest, MismatchTexture) {
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
-TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
-    auto* f32 = create<core::type::F32>();
-    auto result = table.Lookup(core::BuiltinFn::kCos,
-                               Vector{
-                                   create<core::type::Reference>(core::AddressSpace::kFunction, f32,
-                                                                 core::Access::kReadWrite),
-                               },
-                               EvaluationStage::kConstant, Source{});
-    ASSERT_EQ(result, Success) << Diagnostics();
-    ASSERT_EQ(Diagnostics().str(), "");
-    EXPECT_EQ(result->return_type, f32);
-    ASSERT_EQ(result->parameters.Length(), 1u);
-    EXPECT_EQ(result->parameters[0].type, f32);
-}
-
 TEST_F(IntrinsicTableTest, MatchTemplateType) {
     auto* f32 = create<core::type::F32>();
     auto result = table.Lookup(core::BuiltinFn::kClamp, Vector{f32, f32, f32},
@@ -540,9 +525,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
     auto* af = create<core::type::AbstractFloat>();
-    auto* bool_ref = create<core::type::Reference>(
-        core::AddressSpace::kFunction, create<core::type::Bool>(), core::Access::kReadWrite);
-    auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{af, af, bool_ref},
+    auto result = table.Lookup(core::BuiltinFn::kSelect, Vector{af, af, create<core::type::Bool>()},
                                EvaluationStage::kRuntime, Source{});
     ASSERT_EQ(result, Success) << Diagnostics();
     ASSERT_EQ(Diagnostics().str(), "");

@@ -198,7 +198,7 @@ std::string CallSignature(std::string_view intrinsic_name,
                 ss << ", ";
             }
             first = false;
-            ss << arg->UnwrapRef()->FriendlyName();
+            ss << arg->FriendlyName();
         }
     }
     ss << ")";
@@ -321,7 +321,7 @@ Candidate ScoreOverload(Context& context,
         auto* type_indices = context.data[parameter.type_matcher_indices];
         auto* number_indices = context.data[parameter.number_matcher_indices];
         if (!Match(context, templates, overload, type_indices, number_indices, earliest_eval_stage)
-                 .Type(args[p]->UnwrapRef())) {
+                 .Type(args[p])) {
             score += kMismatchedParamTypePenalty;
         }
     }
@@ -380,7 +380,7 @@ Candidate ScoreOverload(Context& context,
             auto* number_indices = context.data[parameter.number_matcher_indices];
             auto* ty = Match(context, templates, overload, type_indices, number_indices,
                              earliest_eval_stage)
-                           .Type(args[p]->UnwrapRef());
+                           .Type(args[p]);
             parameters.Emplace(ty, parameter.usage);
         }
     }
