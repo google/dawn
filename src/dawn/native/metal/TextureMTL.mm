@@ -221,39 +221,6 @@ bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
 #undef SRGB_PAIR
 }
 
-ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
-    switch (format) {
-        case kCVPixelFormatType_64RGBAHalf:
-            return wgpu::TextureFormat::RGBA16Float;
-        case kCVPixelFormatType_TwoComponent16Half:
-            return wgpu::TextureFormat::RG16Float;
-        case kCVPixelFormatType_OneComponent16Half:
-            return wgpu::TextureFormat::R16Float;
-        case kCVPixelFormatType_ARGB2101010LEPacked:
-            return wgpu::TextureFormat::RGB10A2Unorm;
-        case kCVPixelFormatType_32RGBA:
-            return wgpu::TextureFormat::RGBA8Unorm;
-        case kCVPixelFormatType_32BGRA:
-            return wgpu::TextureFormat::BGRA8Unorm;
-        case kCVPixelFormatType_TwoComponent8:
-            return wgpu::TextureFormat::RG8Unorm;
-        case kCVPixelFormatType_OneComponent8:
-            return wgpu::TextureFormat::R8Unorm;
-        case kCVPixelFormatType_TwoComponent16:
-            return wgpu::TextureFormat::RG16Unorm;
-        case kCVPixelFormatType_OneComponent16:
-            return wgpu::TextureFormat::R16Unorm;
-        case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
-            return wgpu::TextureFormat::R8BG8Biplanar420Unorm;
-        case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-            return wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm;
-        case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
-            return wgpu::TextureFormat::R8BG8A8Triplanar420Unorm;
-        default:
-            return DAWN_VALIDATION_ERROR("Unsupported IOSurface format (%x).", format);
-    }
-}
-
 #if DAWN_PLATFORM_IS(MACOS)
 MTLStorageMode kIOSurfaceStorageMode = MTLStorageModeManaged;
 #elif DAWN_PLATFORM_IS(IOS)
@@ -658,41 +625,6 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
     }
 }
 
-MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase*,
-                                         const UnpackedPtr<TextureDescriptor>& descriptor,
-                                         IOSurfaceRef ioSurface) {
-    DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
-                    "Texture dimension (%s) is not %s.", descriptor->dimension,
-                    wgpu::TextureDimension::e2D);
-
-    DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
-                    descriptor->mipLevelCount);
-
-    DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1, "Array layer count (%u) is not 1.",
-                    descriptor->size.depthOrArrayLayers);
-
-    DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
-                    descriptor->sampleCount);
-
-    uint32_t surfaceWidth = IOSurfaceGetWidth(ioSurface);
-    uint32_t surfaceHeight = IOSurfaceGetHeight(ioSurface);
-
-    DAWN_INVALID_IF(
-        descriptor->size.width != surfaceWidth || descriptor->size.height != surfaceHeight ||
-            descriptor->size.depthOrArrayLayers != 1,
-        "IOSurface size (width: %u, height %u, depth: 1) doesn't match descriptor size %s.",
-        surfaceWidth, surfaceHeight, &descriptor->size);
-
-    wgpu::TextureFormat ioSurfaceFormat;
-    DAWN_TRY_ASSIGN(ioSurfaceFormat,
-                    GetFormatEquivalentToIOSurfaceFormat(IOSurfaceGetPixelFormat(ioSurface)));
-    DAWN_INVALID_IF(descriptor->format != ioSurfaceFormat,
-                    "IOSurface format (%s) doesn't match the descriptor format (%s).",
-                    ioSurfaceFormat, descriptor->format);
-
-    return {};
-}
-
 NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
     MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
@@ -793,19 +725,6 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                        TextureBase::ClearValue::Zero));
     }
 
-    return texture;
-}
-
-// static
-ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
-    Device* device,
-    const ExternalImageDescriptor* descriptor,
-    const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-    IOSurfaceRef ioSurface,
-    std::vector<MTLSharedEventAndSignalValue> waitEvents) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, textureDescriptor));
-    DAWN_TRY(texture->InitializeFromIOSurface(descriptor, textureDescriptor, ioSurface,
-                                              std::move(waitEvents)));
     return texture;
 }
 

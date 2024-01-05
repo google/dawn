@@ -363,43 +363,6 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     return {};
 }
 
-Ref<Texture> Device::CreateTextureWrappingIOSurface(
-    const ExternalImageDescriptor* descriptor,
-    IOSurfaceRef ioSurface,
-    std::vector<MTLSharedEventAndSignalValue> waitEvents) {
-    UnpackedPtr<TextureDescriptor> textureDescriptor;
-    if (ConsumedError(ValidateIsAlive())) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
-                      &textureDescriptor)) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor,
-                                                AllowMultiPlanarTextureFormat::Yes))) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateIOSurfaceCanBeWrapped(this, textureDescriptor, ioSurface))) {
-        return nullptr;
-    }
-    // TODO(dawn:1337): Allow creating uninitialized texture for rendering.
-    if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&
-        !descriptor->isInitialized) {
-        bool consumed = ConsumedError(DAWN_VALIDATION_ERROR(
-            "External textures with multiplanar formats must be initialized."));
-        DAWN_UNUSED(consumed);
-        return nullptr;
-    }
-
-    Ref<Texture> result;
-    if (ConsumedError(Texture::CreateFromIOSurface(this, descriptor, textureDescriptor, ioSurface,
-                                                   std::move(waitEvents)),
-                      &result)) {
-        return nullptr;
-    }
-    return result;
-}
-
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
     // TODO(crbug.com/dawn/831): DestroyImpl is called from two places.

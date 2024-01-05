@@ -48,20 +48,11 @@ struct MTLSharedEventAndSignalValue;
 class SharedTextureMemory;
 
 MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
-MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
-                                         const UnpackedPtr<TextureDescriptor>& descriptor,
-                                         IOSurfaceRef ioSurface);
 
 class Texture final : public TextureBase {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const UnpackedPtr<TextureDescriptor>& descriptor);
-    static ResultOrError<Ref<Texture>> CreateFromIOSurface(
-        Device* device,
-        const ExternalImageDescriptor* descriptor,
-        const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-        IOSurfaceRef ioSurface,
-        std::vector<MTLSharedEventAndSignalValue> waitEvents);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
         const UnpackedPtr<TextureDescriptor>& descriptor);
