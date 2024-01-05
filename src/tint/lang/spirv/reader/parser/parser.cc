@@ -136,6 +136,12 @@ class Parser {
                 TINT_ASSERT_OR_RETURN_VALUE(vec_ty->element_count() <= 4, ty_.void_());
                 return ty_.vec(Type(vec_ty->element_type()), vec_ty->element_count());
             }
+            case spvtools::opt::analysis::Type::kMatrix: {
+                auto* mat_ty = type->AsMatrix();
+                TINT_ASSERT_OR_RETURN_VALUE(mat_ty->element_count() <= 4, ty_.void_());
+                return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
+                               mat_ty->element_count());
+            }
             case spvtools::opt::analysis::Type::kPointer: {
                 auto* ptr_ty = type->AsPointer();
                 return ty_.ptr(AddressSpace(ptr_ty->storage_class()), Type(ptr_ty->pointee_type()));
@@ -210,6 +216,13 @@ class Parser {
                 elements.Push(Constant(el));
             }
             return ir_.constant_values.Composite(Type(v->type()), std::move(elements));
+        }
+        if (auto* m = constant->AsMatrixConstant()) {
+            Vector<const core::constant::Value*, 4> columns;
+            for (auto& el : m->GetComponents()) {
+                columns.Push(Constant(el));
+            }
+            return ir_.constant_values.Composite(Type(m->type()), std::move(columns));
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;
