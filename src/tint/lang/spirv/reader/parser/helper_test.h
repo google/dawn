@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_PARSER_HELPER_TEST_H_
 #define SRC_TINT_LANG_SPIRV_READER_PARSER_HELPER_TEST_H_
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -53,11 +54,10 @@ namespace tint::spirv::reader {
 template <typename BASE>
 class SpirvParserTestHelperBase : public BASE {
   protected:
-    /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
-    /// @param spirv_asm the SPIR-V assembly to parse
-    /// @returns the disassembled Tint IR
-    std::string Run(std::string spirv_asm) {
-        // Assemble the SPIR-V input.
+    /// Assemble a textual SPIR-V module into a SPIR-V binary.
+    /// @param spirv_asm the textual SPIR-V assembly
+    /// @returns the SPIR-V binary data, or an error string
+    static Result<std::vector<uint32_t>, std::string> Assemble(std::string spirv_asm) {
         StringStream err;
         std::vector<uint32_t> binary;
         spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
@@ -65,14 +65,24 @@ class SpirvParserTestHelperBase : public BASE {
             [&err](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
                 err << "SPIR-V assembly failed:" << pos.line << ":" << pos.column << ": " << msg;
             });
-        auto assembled =
-            tools.Assemble(spirv_asm, &binary, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
-        if (!assembled) {
+        if (!tools.Assemble(spirv_asm, &binary, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
             return err.str();
+        }
+        return binary;
+    }
+
+    /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
+    /// @param spirv_asm the SPIR-V assembly to parse
+    /// @returns the disassembled Tint IR
+    std::string Run(std::string spirv_asm) {
+        // Assemble the SPIR-V input.
+        auto binary = Assemble(spirv_asm);
+        if (binary != Success) {
+            return binary.Failure();
         }
 
         // Parse the SPIR-V to produce an IR module.
-        auto parsed = Parse(Slice(binary.data(), binary.size()));
+        auto parsed = Parse(Slice(binary.Get().data(), binary.Get().size()));
         if (parsed != Success) {
             return parsed.Failure().reason.str();
         }

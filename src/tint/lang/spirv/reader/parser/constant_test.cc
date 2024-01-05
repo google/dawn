@@ -624,5 +624,106 @@ TEST_F(SpirvParserTest, Constant_Array_Array_F32) {
 )");
 }
 
+TEST_F(SpirvParserTest, Constant_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+        %str = OpTypeStruct %i32 %f32
+     %i32_42 = OpConstant %i32 42
+     %f32_n1 = OpConstant %f32 -1
+  %str_const = OpConstantComposite %str %i32_42 %f32_n1
+       %null = OpConstantNull %str
+    %void_fn = OpTypeFunction %void
+    %fn_type = OpTypeFunction %str %str
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %str None %fn_type
+      %param = OpFunctionParameter %str
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %void_fn
+  %bar_start = OpLabel
+          %1 = OpFunctionCall %str %foo %str_const
+          %2 = OpFunctionCall %str %foo %null
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%4 = func():void -> %b3 {
+  %b3 = block {
+    %5:tint_symbol_2 = call %2, tint_symbol_2(42i, -1.0f)
+    %6:tint_symbol_2 = call %2, tint_symbol_2(0i, 0.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Constant_Struct_Nested) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+      %i32_2 = OpConstant %i32 2
+      %inner = OpTypeStruct %i32 %f32
+        %arr = OpTypeArray %inner %i32_2
+      %outer = OpTypeStruct %arr %arr
+     %i32_42 = OpConstant %i32 42
+     %i32_n1 = OpConstant %i32 -1
+     %f32_n1 = OpConstant %f32 -1
+     %f32_42 = OpConstant %f32 42
+%inner_const_0 = OpConstantComposite %inner %i32_42 %f32_n1
+%inner_const_1 = OpConstantComposite %inner %i32_n1 %f32_42
+  %arr_const_0 = OpConstantComposite %arr %inner_const_0 %inner_const_1
+  %arr_const_1 = OpConstantComposite %arr %inner_const_1 %inner_const_0
+  %outer_const = OpConstantComposite %outer %arr_const_0 %arr_const_1
+       %null = OpConstantNull %outer
+    %void_fn = OpTypeFunction %void
+    %fn_type = OpTypeFunction %outer %outer
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %outer None %fn_type
+      %param = OpFunctionParameter %outer
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %void_fn
+  %bar_start = OpLabel
+          %1 = OpFunctionCall %outer %foo %outer_const
+          %2 = OpFunctionCall %outer %foo %null
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%4 = func():void -> %b3 {
+  %b3 = block {
+    %5:tint_symbol_5 = call %2, tint_symbol_5(array<tint_symbol_2, 2>(tint_symbol_2(42i, -1.0f), tint_symbol_2(-1i, 42.0f)), array<tint_symbol_2, 2>(tint_symbol_2(-1i, 42.0f), tint_symbol_2(42i, -1.0f)))
+    %6:tint_symbol_5 = call %2, tint_symbol_5(array<tint_symbol_2, 2>(tint_symbol_2(0i, 0.0f)))
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

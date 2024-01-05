@@ -82,6 +82,7 @@ cc_library(
     "constant_test.cc",
     "function_test.cc",
     "helper_test.h",
+    "struct_test.cc",
     "var_test.cc",
   ],
   deps = [

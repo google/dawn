@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -105,53 +106,58 @@ class Parser {
     /// @param type a SPIR-V type object
     /// @returns a Tint type object
     const core::type::Type* Type(const spvtools::opt::analysis::Type* type) {
-        switch (type->kind()) {
-            case spvtools::opt::analysis::Type::kVoid:
-                return ty_.void_();
-            case spvtools::opt::analysis::Type::kBool:
-                return ty_.bool_();
-            case spvtools::opt::analysis::Type::kInteger: {
-                auto* int_ty = type->AsInteger();
-                TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, ty_.void_());
-                if (int_ty->IsSigned()) {
-                    return ty_.i32();
-                } else {
-                    return ty_.u32();
-                }
-            }
-            case spvtools::opt::analysis::Type::kFloat: {
-                auto* float_ty = type->AsFloat();
-                if (float_ty->width() == 16) {
-                    return ty_.f16();
-                } else if (float_ty->width() == 32) {
-                    return ty_.f32();
-                } else {
-                    TINT_UNREACHABLE()
-                        << "unsupported floating point type width: " << float_ty->width();
+        return types_.GetOrCreate(type, [&]() -> const core::type::Type* {
+            switch (type->kind()) {
+                case spvtools::opt::analysis::Type::kVoid:
                     return ty_.void_();
+                case spvtools::opt::analysis::Type::kBool:
+                    return ty_.bool_();
+                case spvtools::opt::analysis::Type::kInteger: {
+                    auto* int_ty = type->AsInteger();
+                    TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, ty_.void_());
+                    if (int_ty->IsSigned()) {
+                        return ty_.i32();
+                    } else {
+                        return ty_.u32();
+                    }
                 }
+                case spvtools::opt::analysis::Type::kFloat: {
+                    auto* float_ty = type->AsFloat();
+                    if (float_ty->width() == 16) {
+                        return ty_.f16();
+                    } else if (float_ty->width() == 32) {
+                        return ty_.f32();
+                    } else {
+                        TINT_UNREACHABLE()
+                            << "unsupported floating point type width: " << float_ty->width();
+                        return ty_.void_();
+                    }
+                }
+                case spvtools::opt::analysis::Type::kVector: {
+                    auto* vec_ty = type->AsVector();
+                    TINT_ASSERT_OR_RETURN_VALUE(vec_ty->element_count() <= 4, ty_.void_());
+                    return ty_.vec(Type(vec_ty->element_type()), vec_ty->element_count());
+                }
+                case spvtools::opt::analysis::Type::kMatrix: {
+                    auto* mat_ty = type->AsMatrix();
+                    TINT_ASSERT_OR_RETURN_VALUE(mat_ty->element_count() <= 4, ty_.void_());
+                    return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
+                                   mat_ty->element_count());
+                }
+                case spvtools::opt::analysis::Type::kArray:
+                    return EmitArray(type->AsArray());
+                case spvtools::opt::analysis::Type::kStruct:
+                    return EmitStruct(type->AsStruct());
+                case spvtools::opt::analysis::Type::kPointer: {
+                    auto* ptr_ty = type->AsPointer();
+                    return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
+                                   Type(ptr_ty->pointee_type()));
+                }
+                default:
+                    TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
+                    return ty_.void_();
             }
-            case spvtools::opt::analysis::Type::kVector: {
-                auto* vec_ty = type->AsVector();
-                TINT_ASSERT_OR_RETURN_VALUE(vec_ty->element_count() <= 4, ty_.void_());
-                return ty_.vec(Type(vec_ty->element_type()), vec_ty->element_count());
-            }
-            case spvtools::opt::analysis::Type::kMatrix: {
-                auto* mat_ty = type->AsMatrix();
-                TINT_ASSERT_OR_RETURN_VALUE(mat_ty->element_count() <= 4, ty_.void_());
-                return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
-                               mat_ty->element_count());
-            }
-            case spvtools::opt::analysis::Type::kArray:
-                return EmitArray(type->AsArray());
-            case spvtools::opt::analysis::Type::kPointer: {
-                auto* ptr_ty = type->AsPointer();
-                return ty_.ptr(AddressSpace(ptr_ty->storage_class()), Type(ptr_ty->pointee_type()));
-            }
-            default:
-                TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
-                return ty_.void_();
-        }
+        });
     }
 
     /// @param id a SPIR-V result ID for a type declaration instruction
@@ -180,6 +186,48 @@ class Parser {
         // TODO(crbug.com/1907): Handle decorations that affect the array layout.
 
         return ty_.array(Type(arr_ty->element_type()), static_cast<uint32_t>(count_val));
+    }
+
+    /// @param struct_ty a SPIR-V struct object
+    /// @returns a Tint struct object
+    const core::type::Type* EmitStruct(const spvtools::opt::analysis::Struct* struct_ty) {
+        if (struct_ty->NumberOfComponents() == 0) {
+            TINT_ICE() << "empty structures are not supported";
+            return ty_.void_();
+        }
+
+        // Build a list of struct members.
+        uint32_t current_size = 0u;
+        Vector<core::type::StructMember*, 4> members;
+        for (uint32_t i = 0; i < struct_ty->NumberOfComponents(); i++) {
+            auto* member_ty = Type(struct_ty->element_types()[i]);
+            uint32_t align = std::max<uint32_t>(member_ty->Align(), 1u);
+            uint32_t offset = tint::RoundUp(align, current_size);
+            core::type::StructMemberAttributes attributes;
+
+            // Handle member decorations that affect layout or attributes.
+            if (struct_ty->element_decorations().count(i)) {
+                for (auto& deco : struct_ty->element_decorations().at(i)) {
+                    switch (spv::Decoration(deco[0])) {
+                        case spv::Decoration::Offset:
+                            offset = deco[1];
+                            break;
+                        default:
+                            TINT_UNIMPLEMENTED() << "unhandled member decoration: " << deco[0];
+                            break;
+                    }
+                }
+            }
+
+            // TODO(crbug.com/tint/1907): Use OpMemberName to name it.
+            members.Push(ty_.Get<core::type::StructMember>(ir_.symbols.New(), member_ty, i, offset,
+                                                           align, member_ty->Size(),
+                                                           std::move(attributes)));
+
+            current_size = offset + member_ty->Size();
+        }
+        // TODO(crbug.com/tint/1907): Use OpName to name it.
+        return ty_.Struct(ir_.symbols.New(), std::move(members));
     }
 
     /// @param id a SPIR-V result ID for a function declaration instruction
@@ -254,6 +302,13 @@ class Parser {
                 elements.Push(Constant(el));
             }
             return ir_.constant_values.Composite(Type(a->type()), std::move(elements));
+        }
+        if (auto* s = constant->AsStructConstant()) {
+            Vector<const core::constant::Value*, 16> elements;
+            for (auto& el : s->GetComponents()) {
+                elements.Push(Constant(el));
+            }
+            return ir_.constant_values.Composite(Type(s->type()), std::move(elements));
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;
@@ -389,6 +444,8 @@ class Parser {
 
     /// The Tint IR function that is currently being emitted.
     core::ir::Function* current_function_ = nullptr;
+    /// A map from a SPIR-V type declaration result ID to the corresponding Tint type object.
+    Hashmap<const spvtools::opt::analysis::Type*, const core::type::Type*, 16> types_;
     /// A map from a SPIR-V function definition result ID to the corresponding Tint function object.
     Hashmap<uint32_t, core::ir::Function*, 8> functions_;
     /// A map from a SPIR-V result ID to the corresponding Tint value object.
