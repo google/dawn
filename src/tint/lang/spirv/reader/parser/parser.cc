@@ -142,6 +142,8 @@ class Parser {
                 return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
                                mat_ty->element_count());
             }
+            case spvtools::opt::analysis::Type::kArray:
+                return EmitArray(type->AsArray());
             case spvtools::opt::analysis::Type::kPointer: {
                 auto* ptr_ty = type->AsPointer();
                 return ty_.ptr(AddressSpace(ptr_ty->storage_class()), Type(ptr_ty->pointee_type()));
@@ -156,6 +158,28 @@ class Parser {
     /// @returns a Tint type object
     const core::type::Type* Type(uint32_t id) {
         return Type(spirv_context_->get_type_mgr()->GetType(id));
+    }
+
+    /// @param arr_ty a SPIR-V array object
+    /// @returns a Tint array object
+    const core::type::Type* EmitArray(const spvtools::opt::analysis::Array* arr_ty) {
+        const auto& length = arr_ty->length_info();
+        TINT_ASSERT_OR_RETURN_VALUE(!length.words.empty(), ty_.void_());
+        if (length.words[0] != spvtools::opt::analysis::Array::LengthInfo::kConstant) {
+            TINT_UNIMPLEMENTED() << "specialized array lengths";
+            return ty_.void_();
+        }
+
+        // Get the value from the constant used for the element count.
+        const auto* count_const =
+            spirv_context_->get_constant_mgr()->FindDeclaredConstant(length.id);
+        TINT_ASSERT_OR_RETURN_VALUE(count_const, ty_.void_());
+        const uint64_t count_val = count_const->GetZeroExtendedValue();
+        TINT_ASSERT_OR_RETURN_VALUE(count_val <= UINT32_MAX, ty_.void_());
+
+        // TODO(crbug.com/1907): Handle decorations that affect the array layout.
+
+        return ty_.array(Type(arr_ty->element_type()), static_cast<uint32_t>(count_val));
     }
 
     /// @param id a SPIR-V result ID for a function declaration instruction
@@ -223,6 +247,13 @@ class Parser {
                 columns.Push(Constant(el));
             }
             return ir_.constant_values.Composite(Type(m->type()), std::move(columns));
+        }
+        if (auto* a = constant->AsArrayConstant()) {
+            Vector<const core::constant::Value*, 16> elements;
+            for (auto& el : a->GetComponents()) {
+                elements.Push(Constant(el));
+            }
+            return ir_.constant_values.Composite(Type(a->type()), std::move(elements));
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;
