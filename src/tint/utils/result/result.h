@@ -53,6 +53,10 @@ struct Failure {
     /// @param err the single error diagnostic
     explicit Failure(std::string_view err);
 
+    /// Constructor with a single diagnostic
+    /// @param diagnostic the failure diagnostic
+    explicit Failure(diag::Diagnostic diagnostic);
+
     /// Constructor with a list of diagnostics
     /// @param diagnostics the failure diagnostics
     explicit Failure(diag::List diagnostics);

@@ -575,16 +575,17 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
         call->TableData(),
         type_mgr,
         symbols,
-        diagnostics_,
     };
 
     auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                            args, core::EvaluationStage::kRuntime, Source{});
-    // TODO(bclayton): Error if result != Success
-    if (result == Success) {
-        if (result->return_type != call->Result(0)->Type()) {
-            AddError(call, InstError(call, "call result type does not match builtin return type"));
-        }
+                                            args, core::EvaluationStage::kRuntime);
+    if (result != Success) {
+        AddError(call, InstError(call, result.Failure()));
+        return;
+    }
+
+    if (result->return_type != call->Result(0)->Type()) {
+        AddError(call, InstError(call, "call result type does not match builtin return type"));
     }
 }
 

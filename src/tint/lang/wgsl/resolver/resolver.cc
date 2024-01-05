@@ -127,7 +127,7 @@ Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed
     : b(*builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
-      intrinsic_table_{builder->Types(), builder->Symbols(), builder->Diagnostics()},
+      intrinsic_table_{builder->Types(), builder->Symbols()},
       sem_(builder),
       validator_(builder,
                  sem_,
@@ -2099,8 +2099,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto ctor_or_conv = [&](CtorConvIntrinsic ty,
                             const core::type::Type* template_arg) -> sem::Call* {
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-        auto match = intrinsic_table_.Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
+        auto match = intrinsic_table_.Lookup(ty, template_arg, arg_tys, args_stage);
         if (match != Success) {
+            AddError(match.Failure(), expr->source);
             return nullptr;
         }
 
@@ -2371,8 +2372,9 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-    auto overload = intrinsic_table_.Lookup(fn, arg_tys, arg_stage, expr->source);
+    auto overload = intrinsic_table_.Lookup(fn, arg_tys, arg_stage);
     if (overload != Success) {
+        AddError(overload.Failure(), expr->source);
         return nullptr;
     }
 
@@ -3546,8 +3548,9 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
 
     auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
     auto overload = intrinsic_table_.Lookup(expr->op, lhs->Type()->UnwrapRef(),
-                                            rhs->Type()->UnwrapRef(), stage, expr->source, false);
+                                            rhs->Type()->UnwrapRef(), stage, false);
     if (overload != Success) {
+        AddError(overload.Failure(), expr->source);
         return nullptr;
     }
 
@@ -3667,9 +3670,9 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         default: {
             stage = expr->Stage();
-            auto overload =
-                intrinsic_table_.Lookup(unary->op, expr_ty->UnwrapRef(), stage, unary->source);
+            auto overload = intrinsic_table_.Lookup(unary->op, expr_ty->UnwrapRef(), stage);
             if (overload != Success) {
+                AddError(overload.Failure(), unary->source);
                 return nullptr;
             }
             ty = overload->return_type;
@@ -4751,10 +4754,10 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
 
         auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
-        auto overload =
-            intrinsic_table_.Lookup(stmt->op, lhs->Type()->UnwrapRef(), rhs->Type()->UnwrapRef(),
-                                    stage, stmt->source, true);
+        auto overload = intrinsic_table_.Lookup(stmt->op, lhs->Type()->UnwrapRef(),
+                                                rhs->Type()->UnwrapRef(), stage, true);
         if (overload != Success) {
+            AddError(overload.Failure(), stmt->source);
             return false;
         }
 
