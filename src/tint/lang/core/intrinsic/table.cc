@@ -636,13 +636,18 @@ Result<Overload> LookupUnary(Context& context,
             intrinsic_info = &context.data.unary_minus;
             intrinsic_name = "operator - ";
             break;
+        case core::UnaryOp::kAddressOf:
+            intrinsic_info = &context.data.unary_and;
+            intrinsic_name = "operator & ";
+            break;
+        case core::UnaryOp::kIndirection:
+            intrinsic_info = &context.data.unary_star;
+            intrinsic_name = "operator * ";
+            break;
         case core::UnaryOp::kNot:
             intrinsic_info = &context.data.unary_not;
             intrinsic_name = "operator ! ";
             break;
-        default:
-            TINT_UNREACHABLE() << "invalid unary op: " << op;
-            return Failure{};
     }
 
     Vector args{arg};

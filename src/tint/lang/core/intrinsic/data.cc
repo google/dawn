@@ -12382,6 +12382,8 @@ const core::intrinsic::TableData Dialect::kData{
     /* unary '!' */ kUnaryOperators[kUnaryOperatorNot],
     /* unary '~' */ kUnaryOperators[kUnaryOperatorComplement],
     /* unary '-' */ kUnaryOperators[kUnaryOperatorMinus],
+    /* unary '*' */ tint::core::intrinsic::kNoOverloads,
+    /* unary '&' */ tint::core::intrinsic::kNoOverloads,
 };
 
 }  // namespace tint::core::intrinsic

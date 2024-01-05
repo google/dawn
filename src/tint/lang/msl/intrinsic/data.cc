@@ -183,6 +183,8 @@ const core::intrinsic::TableData Dialect::kData{
     /* unary '!' */ tint::core::intrinsic::kNoOverloads,
     /* unary '~' */ tint::core::intrinsic::kNoOverloads,
     /* unary '-' */ tint::core::intrinsic::kNoOverloads,
+    /* unary '*' */ tint::core::intrinsic::kNoOverloads,
+    /* unary '&' */ tint::core::intrinsic::kNoOverloads,
 };
 
 }  // namespace tint::msl::intrinsic

@@ -615,6 +615,10 @@ struct TableData {
     const IntrinsicInfo& unary_complement;
     /// The IntrinsicInfo for the unary operator 'minus'
     const IntrinsicInfo& unary_minus;
+    /// The IntrinsicInfo for the unary operator 'star'
+    const IntrinsicInfo& unary_star;
+    /// The IntrinsicInfo for the unary operator 'and'
+    const IntrinsicInfo& unary_and;
 };
 
 const core::type::Type* MatchState::Type(const core::type::Type* ty) {

@@ -300,7 +300,7 @@ const core::intrinsic::TableData {{$.Name}}{
 {{-   $N := Eval "OperatorName" $op }}
   /* binary '{{$op}}' */ {{if $bin_ops.Get .}}kBinaryOperators[kBinaryOperator{{$N}}]{{else}}tint::core::intrinsic::kNoOverloads{{end}},
 {{- end}}
-{{- range $op := List "!" "~" "-"}}
+{{- range $op := List "!" "~" "-" "*" "&"}}
 {{-   $N := Eval "OperatorName" $op }}
   /* unary '{{$op}}' */ {{if $unary_ops.Get .}}kUnaryOperators[kUnaryOperator{{$N}}]{{else}}tint::core::intrinsic::kNoOverloads{{end}},
 {{- end}}
