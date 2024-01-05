@@ -131,6 +131,11 @@ class Parser {
                     return ty_.void_();
                 }
             }
+            case spvtools::opt::analysis::Type::kVector: {
+                auto* vec_ty = type->AsVector();
+                TINT_ASSERT_OR_RETURN_VALUE(vec_ty->element_count() <= 4, ty_.void_());
+                return ty_.vec(Type(vec_ty->element_type()), vec_ty->element_count());
+            }
             case spvtools::opt::analysis::Type::kPointer: {
                 auto* ptr_ty = type->AsPointer();
                 return ty_.ptr(AddressSpace(ptr_ty->storage_class()), Type(ptr_ty->pointee_type()));
@@ -161,7 +166,7 @@ class Parser {
     core::ir::Value* Value(uint32_t id) {
         return values_.GetOrCreate(id, [&]() -> core::ir::Value* {
             if (auto* c = spirv_context_->get_constant_mgr()->FindDeclaredConstant(id)) {
-                return Constant(c);
+                return b_.Constant(Constant(c));
             }
             TINT_UNREACHABLE() << "missing value for result ID " << id;
             return nullptr;
@@ -169,35 +174,42 @@ class Parser {
     }
 
     /// @param constant a SPIR-V constant object
-    /// @returns a Tint constant object
-    core::ir::Constant* Constant(const spvtools::opt::analysis::Constant* constant) {
+    /// @returns a Tint constant value
+    const core::constant::Value* Constant(const spvtools::opt::analysis::Constant* constant) {
         // Handle OpConstantNull for all types.
         if (constant->AsNullConstant()) {
-            return b_.Constant(ir_.constant_values.Zero(Type(constant->type())));
+            return ir_.constant_values.Zero(Type(constant->type()));
         }
 
         if (auto* bool_ = constant->AsBoolConstant()) {
-            return b_.Constant(bool_->value());
+            return b_.ConstantValue(bool_->value());
         }
         if (auto* i = constant->AsIntConstant()) {
             auto* int_ty = i->type()->AsInteger();
             TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, nullptr);
             if (int_ty->IsSigned()) {
-                return b_.Constant(i32(i->GetS32BitValue()));
+                return b_.ConstantValue(i32(i->GetS32BitValue()));
             } else {
-                return b_.Constant(u32(i->GetU32BitValue()));
+                return b_.ConstantValue(u32(i->GetU32BitValue()));
             }
         }
         if (auto* f = constant->AsFloatConstant()) {
             auto* float_ty = f->type()->AsFloat();
             if (float_ty->width() == 16) {
-                return b_.Constant(f16::FromBits(static_cast<uint16_t>(f->words()[0])));
+                return b_.ConstantValue(f16::FromBits(static_cast<uint16_t>(f->words()[0])));
             } else if (float_ty->width() == 32) {
-                return b_.Constant(f32(f->GetFloat()));
+                return b_.ConstantValue(f32(f->GetFloat()));
             } else {
                 TINT_UNREACHABLE() << "unsupported floating point type width";
                 return nullptr;
             }
+        }
+        if (auto* v = constant->AsVectorConstant()) {
+            Vector<const core::constant::Value*, 4> elements;
+            for (auto& el : v->GetComponents()) {
+                elements.Push(Constant(el));
+            }
+            return ir_.constant_values.Composite(Type(v->type()), std::move(elements));
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
         return nullptr;

@@ -286,5 +286,143 @@ TEST_F(SpirvParserTest, Constant_F32) {
 )");
 }
 
+TEST_F(SpirvParserTest, Constant_Vec2Bool) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+      %vec2b = OpTypeVector %bool 2
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+%vec2b_const = OpConstantComposite %vec2b %true %false
+       %null = OpConstantNull %vec2b
+    %void_fn = OpTypeFunction %void
+    %fn_type = OpTypeFunction %vec2b %vec2b
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %vec2b None %fn_type
+      %param = OpFunctionParameter %vec2b
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %void_fn
+  %bar_start = OpLabel
+          %1 = OpFunctionCall %vec2b %foo %vec2b_const
+          %2 = OpFunctionCall %vec2b %foo %null
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%4 = func():void -> %b3 {
+  %b3 = block {
+    %5:vec2<bool> = call %2, vec2<bool>(true, false)
+    %6:vec2<bool> = call %2, vec2<bool>(false)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Constant_Vec3I32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+      %vec3i = OpTypeVector %i32 3
+      %i32_0 = OpConstant %i32 0
+      %i32_1 = OpConstant %i32 1
+     %i32_n1 = OpConstant %i32 -1
+%vec3i_const = OpConstantComposite %vec3i %i32_0 %i32_1 %i32_n1
+       %null = OpConstantNull %vec3i
+    %void_fn = OpTypeFunction %void
+    %fn_type = OpTypeFunction %vec3i %vec3i
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %vec3i None %fn_type
+      %param = OpFunctionParameter %vec3i
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %void_fn
+  %bar_start = OpLabel
+          %1 = OpFunctionCall %vec3i %foo %vec3i_const
+          %2 = OpFunctionCall %vec3i %foo %null
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%4 = func():void -> %b3 {
+  %b3 = block {
+    %5:vec3<i32> = call %2, vec3<i32>(0i, 1i, -1i)
+    %6:vec3<i32> = call %2, vec3<i32>(0i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Constant_Vec4F32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+      %f32_0 = OpConstant %f32 0
+      %f32_1 = OpConstant %f32 1
+    %f32_max = OpConstant %f32 0x1.fffffep+127
+    %f32_min = OpConstant %f32 -0x1.fffffep+127
+%vec4f_const = OpConstantComposite %vec4f %f32_0 %f32_1 %f32_max %f32_min
+       %null = OpConstantNull %vec4f
+    %void_fn = OpTypeFunction %void
+    %fn_type = OpTypeFunction %vec4f %vec4f
+
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %vec4f None %fn_type
+      %param = OpFunctionParameter %vec4f
+  %foo_start = OpLabel
+               OpReturnValue %param
+               OpFunctionEnd
+
+        %bar = OpFunction %void None %void_fn
+  %bar_start = OpLabel
+          %1 = OpFunctionCall %vec4f %foo %vec4f_const
+          %2 = OpFunctionCall %vec4f %foo %null
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%4 = func():void -> %b3 {
+  %b3 = block {
+    %5:vec4<f32> = call %2, vec4<f32>(0.0f, 1.0f, 340282346638528859811704183484516925440.0f, -340282346638528859811704183484516925440.0f)
+    %6:vec4<f32> = call %2, vec4<f32>(0.0f)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
