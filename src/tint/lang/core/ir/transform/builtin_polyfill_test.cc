@@ -1430,10 +1430,10 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xI8) {
 %foo = func(%arg:vec4<i32>):u32 -> %b1 {
   %b1 = block {
     %3:vec4<u32> = construct 0u, 8u, 16u, 24u
-    %4:vec4<i32> = construct 255i
-    %5:vec4<i32> = and %arg, %4
-    %6:vec4<i32> = shl %5, %3
-    %7:vec4<u32> = convert %6
+    %4:vec4<u32> = bitcast %arg
+    %5:vec4<u32> = construct 255u
+    %6:vec4<u32> = and %4, %5
+    %7:vec4<u32> = shl %6, %3
     %8:vec4<u32> = construct 1u
     %result:u32 = dot %7, %8
     ret %result
@@ -1470,6 +1470,146 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xU8) {
     %6:vec4<u32> = shl %5, %3
     %7:vec4<u32> = construct 1u
     %result:u32 = dot %6, %7
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.pack_unpack_4x8 = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Pack4xI8Clamp) {
+    Build(core::BuiltinFn::kPack4XI8Clamp, ty.u32(), Vector{ty.vec4<i32>()});
+
+    auto* src = R"(
+%foo = func(%arg:vec4<i32>):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = pack4xI8Clamp %arg
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:vec4<i32>):u32 -> %b1 {
+  %b1 = block {
+    %3:vec4<u32> = construct 0u, 8u, 16u, 24u
+    %4:vec4<i32> = construct -128i
+    %5:vec4<i32> = construct 127i
+    %6:vec4<i32> = clamp %arg, %4, %5
+    %7:vec4<u32> = bitcast %6
+    %8:vec4<u32> = construct 255u
+    %9:vec4<u32> = and %7, %8
+    %10:vec4<u32> = shl %9, %3
+    %11:vec4<u32> = construct 1u
+    %result:u32 = dot %10, %11
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.pack_unpack_4x8 = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Pack4xU8Clamp) {
+    Build(core::BuiltinFn::kPack4XU8Clamp, ty.u32(), Vector{ty.vec4<u32>()});
+
+    auto* src = R"(
+%foo = func(%arg:vec4<u32>):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = pack4xU8Clamp %arg
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:vec4<u32>):u32 -> %b1 {
+  %b1 = block {
+    %3:vec4<u32> = construct 0u, 8u, 16u, 24u
+    %4:vec4<u32> = construct 0u
+    %5:vec4<u32> = construct 255u
+    %6:vec4<u32> = clamp %arg, %4, %5
+    %7:vec4<u32> = shl %6, %3
+    %8:vec4<u32> = construct 1u
+    %result:u32 = dot %7, %8
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.pack_unpack_4x8 = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Unpack4xI8) {
+    Build(core::BuiltinFn::kUnpack4XI8, ty.vec4<i32>(), Vector{ty.u32()});
+
+    auto* src = R"(
+%foo = func(%arg:u32):vec4<i32> -> %b1 {
+  %b1 = block {
+    %result:vec4<i32> = unpack4xI8 %arg
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:u32):vec4<i32> -> %b1 {
+  %b1 = block {
+    %3:vec4<u32> = construct 24u, 16u, 8u, 0u
+    %4:vec4<u32> = convert %arg
+    %5:vec4<u32> = shl %4, %3
+    %6:vec4<i32> = bitcast %5
+    %7:vec4<u32> = construct 24u
+    %result:vec4<i32> = shr %6, %7
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.pack_unpack_4x8 = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Unpack4xU8) {
+    Build(core::BuiltinFn::kUnpack4XU8, ty.vec4<u32>(), Vector{ty.u32()});
+
+    auto* src = R"(
+%foo = func(%arg:u32):vec4<u32> -> %b1 {
+  %b1 = block {
+    %result:vec4<u32> = unpack4xU8 %arg
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:u32):vec4<u32> -> %b1 {
+  %b1 = block {
+    %3:vec4<u32> = construct 0u, 8u, 16u, 24u
+    %4:vec4<u32> = convert %arg
+    %5:vec4<u32> = shr %4, %3
+    %6:vec4<u32> = construct 255u
+    %result:vec4<u32> = and %5, %6
     ret %result
   }
 }

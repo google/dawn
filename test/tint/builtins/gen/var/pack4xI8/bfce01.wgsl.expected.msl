@@ -7,8 +7,9 @@ T tint_dot4(vec<T,4> a, vec<T,4> b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 uint tint_pack_4xi8(int4 a) {
-  uint4 const a_i8 = uint4(as_type<int4>((as_type<uint4>((a & int4(255))) << uint4(0u, 8u, 16u, 24u))));
-  return tint_dot4(a_i8, uint4(1u));
+  uint4 const a_u32 = as_type<uint4>(a);
+  uint4 const a_u8 = ((a_u32 & uint4(255u)) << uint4(0u, 8u, 16u, 24u));
+  return tint_dot4(a_u8, uint4(1u));
 }
 
 void pack4xI8_bfce01(device uint* const tint_symbol_1) {

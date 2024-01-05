@@ -1,0 +1,41 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int4 tint_unpack_4xi8(uint a) {
+  uint4 const a_vec4u = uint4(a);
+  int4 const a_vec4i = as_type<int4>((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  return (a_vec4i >> uint4(24u));
+}
+
+void unpack4xI8_830900(device int4* const tint_symbol_1) {
+  uint arg_0 = 1u;
+  int4 res = tint_unpack_4xi8(arg_0);
+  *(tint_symbol_1) = res;
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner(device int4* const tint_symbol_2) {
+  unpack4xI8_830900(tint_symbol_2);
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main(device int4* tint_symbol_3 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(device int4* tint_symbol_4 [[buffer(0)]]) {
+  unpack4xI8_830900(tint_symbol_4);
+  return;
+}
+
+kernel void compute_main(device int4* tint_symbol_5 [[buffer(0)]]) {
+  unpack4xI8_830900(tint_symbol_5);
+  return;
+}
+

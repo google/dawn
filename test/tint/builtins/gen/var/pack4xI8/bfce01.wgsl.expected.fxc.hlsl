@@ -1,6 +1,7 @@
 uint tint_pack_4xi8(int4 a) {
-  const uint4 a_i8 = uint4(((a & (255).xxxx) << uint4(0u, 8u, 16u, 24u)));
-  return dot(a_i8, (1u).xxxx);
+  const uint4 a_u32 = asuint(a);
+  const uint4 a_u8 = ((a_u32 & (255u).xxxx) << uint4(0u, 8u, 16u, 24u));
+  return dot(a_u8, (1u).xxxx);
 }
 
 RWByteAddressBuffer prevent_dce : register(u0, space2);

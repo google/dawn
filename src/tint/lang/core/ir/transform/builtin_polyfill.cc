@@ -120,7 +120,11 @@ struct State {
                         }
                         break;
                     case core::BuiltinFn::kPack4XI8:
-                    case core::BuiltinFn::kPack4XU8: {
+                    case core::BuiltinFn::kPack4XU8:
+                    case core::BuiltinFn::kPack4XI8Clamp:
+                    case core::BuiltinFn::kPack4XU8Clamp:
+                    case core::BuiltinFn::kUnpack4XI8:
+                    case core::BuiltinFn::kUnpack4XU8: {
                         if (config.pack_unpack_4x8) {
                             worklist.Push(builtin);
                         }
@@ -168,6 +172,18 @@ struct State {
                     break;
                 case core::BuiltinFn::kPack4XU8:
                     replacement = Pack4xU8(builtin);
+                    break;
+                case core::BuiltinFn::kPack4XI8Clamp:
+                    replacement = Pack4xI8Clamp(builtin);
+                    break;
+                case core::BuiltinFn::kPack4XU8Clamp:
+                    replacement = Pack4xU8Clamp(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack4XI8:
+                    replacement = Unpack4xI8(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack4XU8:
+                    replacement = Unpack4xU8(builtin);
                     break;
                 default:
                     break;
@@ -585,33 +601,33 @@ struct State {
         return result;
     }
 
-    /// Polyfill a `Pack4xI8()` builtin call
+    /// Polyfill a `pack4xI8()` builtin call
     /// @param call the builtin call instruction
     /// @returns the replacement value
     ir::Value* Pack4xI8(ir::CoreBuiltinCall* call) {
         // Replace `pack4xI8(%x)` with:
         //   %n      = vec4u(0, 8, 16, 24);
-        //   %x_i8   = vec4u((%x & vec4i(0xff)) << n);
-        //   %result = dot(%x_i8, vec4u(1));
+        //   %x_u32  = bitcast<vec4u>(%x)
+        //   %x_u8   = (%x_u32 & vec4u(0xff)) << n;
+        //   %result = dot(%x_u8, vec4u(1));
         ir::Value* result = nullptr;
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
-            auto* vec4i = ty.vec4<i32>();
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
-            auto* x_i8 = b.Convert(
-                vec4u,
-                b.ShiftLeft(vec4i, b.And(vec4i, x, b.Construct(vec4i, b.Constant(i32(0xff)))), n));
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_i8,
+            auto* x_u32 = b.Bitcast(vec4u, x);
+            auto* x_u8 = b.ShiftLeft(
+                vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
                             b.Construct(vec4u, (b.Constant(u32(1)))))
                          ->Result(0);
         });
         return result;
     }
 
-    /// Polyfill a `Pack4xU8()` builtin call
+    /// Polyfill a `pack4xU8()` builtin call
     /// @param call the builtin call instruction
     /// @returns the replacement value
     ir::Value* Pack4xU8(ir::CoreBuiltinCall* call) {
@@ -631,6 +647,114 @@ struct State {
             result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
                             b.Construct(vec4u, (b.Constant(u32(1)))))
                          ->Result(0);
+        });
+        return result;
+    }
+
+    /// Polyfill a `pack4xI8Clamp()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Pack4xI8Clamp(ir::CoreBuiltinCall* call) {
+        // Replace `pack4xI8Clamp(%x)` with:
+        //   %n           = vec4u(0, 8, 16, 24);
+        //   %min_i8_vec4 = vec4i(-128);
+        //   %max_i8_vec4 = vec4i(127);
+        //   %x_clamp     = clamp(%x, %min_i8_vec4, %max_i8_vec4);
+        //   %x_u32       = bitcast<vec4u>(%x_clamp);
+        //   %x_u8        = (%x_u32 & vec4u(0xff)) << n;
+        //   %result      = dot(%x_u8, vec4u(1));
+        ir::Value* result = nullptr;
+        auto* x = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* vec4i = ty.vec4<i32>();
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
+                                  b.Constant(u32(16)), b.Constant(u32(24)));
+            auto* min_i8_vec4 = b.Construct(vec4i, b.Constant(i32(-128)));
+            auto* max_i8_vec4 = b.Construct(vec4i, b.Constant(i32(127)));
+            auto* x_clamp = b.Call(vec4i, core::BuiltinFn::kClamp, x, min_i8_vec4, max_i8_vec4);
+            auto* x_u32 = b.Bitcast(vec4u, x_clamp);
+            auto* x_u8 = b.ShiftLeft(
+                vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
+            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
+                            b.Construct(vec4u, (b.Constant(u32(1)))))
+                         ->Result(0);
+        });
+        return result;
+    }
+
+    /// Polyfill a `pack4xU8Clamp()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Pack4xU8Clamp(ir::CoreBuiltinCall* call) {
+        // Replace `pack4xU8Clamp(%x)` with:
+        //   %n       = vec4u(0, 8, 16, 24);
+        //   %min_u8_vec4 = vec4u(0);
+        //   %max_u8_vec4 = vec4u(255);
+        //   %x_clamp = clamp(%x, vec4u(0), vec4u(255));
+        //   %x_u8    = %x_clamp << n;
+        //   %result  = dot(%x_u8, vec4u(1));
+        ir::Value* result = nullptr;
+        auto* x = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
+                                  b.Constant(u32(16)), b.Constant(u32(24)));
+            auto* min_u8_vec4 = b.Construct(vec4u, b.Constant(u32(0)));
+            auto* max_u8_vec4 = b.Construct(vec4u, b.Constant(u32(255)));
+            auto* x_clamp = b.Call(vec4u, core::BuiltinFn::kClamp, x, min_u8_vec4, max_u8_vec4);
+            auto* x_u8 = b.ShiftLeft(vec4u, x_clamp, n);
+            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
+                            b.Construct(vec4u, (b.Constant(u32(1)))))
+                         ->Result(0);
+        });
+        return result;
+    }
+
+    /// Polyfill a `unpack4xI8()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Unpack4xI8(ir::CoreBuiltinCall* call) {
+        // Replace `unpack4xI8(%x)` with:
+        //   %n       = vec4u(24, 16, 8, 0);
+        //   %x_vec4u = vec4u(x);
+        //   %x_vec4i = bitcast<vec4i>(%x_vec4u << n);
+        //   %result  = %x_vec4i >> vec4u(24);
+        ir::Value* result = nullptr;
+        auto* x = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* vec4i = ty.vec4<i32>();
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* n = b.Construct(vec4u, b.Constant(u32(24)), b.Constant(u32(16)),
+                                  b.Constant(u32(8)), b.Constant(u32(0)));
+            auto* x_vec4u = b.Convert(vec4u, x);
+            auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(vec4u, x_vec4u, n));
+            result =
+                b.ShiftRight(vec4i, x_vec4i, b.Construct(vec4u, b.Constant(u32(24))))->Result(0);
+        });
+        return result;
+    }
+
+    /// Polyfill a `unpack4xU8()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Unpack4xU8(ir::CoreBuiltinCall* call) {
+        // Replace `unpack4xU8(%x)` with:
+        //   %n       = vec4u(0, 8, 16, 24);
+        //   %x_vec4u = vec4u(x) >> n;
+        //   %result  = %x_vec4u & vec4u(0xff);
+        ir::Value* result = nullptr;
+        auto* x = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* vec4u = ty.vec4<u32>();
+
+            auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
+                                  b.Constant(u32(16)), b.Constant(u32(24)));
+            auto* x_vec4u = b.ShiftRight(vec4u, b.Convert(vec4u, x), n);
+            result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))))->Result(0);
         });
         return result;
     }

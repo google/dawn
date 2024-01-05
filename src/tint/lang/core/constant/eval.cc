@@ -3306,6 +3306,37 @@ Eval::Result Eval::pack4xU8(const core::type::Type* ty,
     return CreateScalar(source, ty, ret);
 }
 
+Eval::Result Eval::pack4xI8Clamp(const core::type::Type* ty,
+                                 VectorRef<const Value*> args,
+                                 const Source& source) {
+    auto calc = [&](i32 val) -> i32 { return Clamp(source, val, i32(-128), i32(127)).Get(); };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->ValueAs<i32>());
+    auto e1 = calc(e->Index(1)->ValueAs<i32>());
+    auto e2 = calc(e->Index(2)->ValueAs<i32>());
+    auto e3 = calc(e->Index(3)->ValueAs<i32>());
+
+    int32_t mask = 0xff;
+    u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
+    return CreateScalar(source, ty, ret);
+}
+
+Eval::Result Eval::pack4xU8Clamp(const core::type::Type* ty,
+                                 VectorRef<const Value*> args,
+                                 const Source& source) {
+    auto calc = [&](u32 val) -> u32 { return Clamp(source, val, u32(0), u32(255)).Get(); };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->ValueAs<u32>());
+    auto e1 = calc(e->Index(1)->ValueAs<u32>());
+    auto e2 = calc(e->Index(2)->ValueAs<u32>());
+    auto e3 = calc(e->Index(3)->ValueAs<u32>());
+
+    u32 ret = u32(e0 | (e1 << 8) | (e2 << 16) | (e3 << 24));
+    return CreateScalar(source, ty, ret);
+}
+
 Eval::Result Eval::pow(const core::type::Type* ty,
                        VectorRef<const Value*> args,
                        const Source& source) {
@@ -3877,6 +3908,47 @@ Eval::Result Eval::unpack4x8unorm(const core::type::Type* ty,
     els.Reserve(4);
     for (size_t i = 0; i < 4; ++i) {
         auto val = f32(static_cast<float>(uint8_t((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
+        auto el = CreateScalar(source, inner_ty, val);
+        if (el != Success) {
+            return el;
+        }
+        els.Push(el.Get());
+    }
+    return mgr.Composite(ty, std::move(els));
+}
+
+Eval::Result Eval::unpack4xI8(const core::type::Type* ty,
+                              VectorRef<const Value*> args,
+                              const Source& source) {
+    auto* inner_ty = ty->DeepestElement();
+    auto e = args[0]->ValueAs<u32>().value;
+
+    Vector<const Value*, 4> els;
+    els.Reserve(4);
+
+    for (size_t i = 0; i < 4; ++i) {
+        uint8_t e_i = (e >> (8 * i)) & 0xff;
+        auto val = i32(*reinterpret_cast<int8_t*>(&e_i));
+        auto el = CreateScalar(source, inner_ty, val);
+        if (el != Success) {
+            return el;
+        }
+        els.Push(el.Get());
+    }
+    return mgr.Composite(ty, std::move(els));
+}
+
+Eval::Result Eval::unpack4xU8(const core::type::Type* ty,
+                              VectorRef<const Value*> args,
+                              const Source& source) {
+    auto* inner_ty = ty->DeepestElement();
+    auto e = args[0]->ValueAs<u32>().value;
+
+    Vector<const Value*, 4> els;
+    els.Reserve(4);
+
+    for (size_t i = 0; i < 4; ++i) {
+        auto val = u32((e >> (8 * i)) & 0xff);
         auto el = CreateScalar(source, inner_ty, val);
         if (el != Success) {
             return el;
