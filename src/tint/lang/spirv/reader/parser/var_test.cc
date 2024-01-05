@@ -142,5 +142,41 @@ TEST_F(SpirvParserTest, PrivateVar_Initializer) {
 )");
 }
 
+TEST_F(SpirvParserTest, UniformVar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %str = OpTypeStruct %uint
+%_ptr_Uniform_str = OpTypePointer Uniform %str
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_Uniform_str Uniform
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<uniform, tint_symbol_1, read_write> = var
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

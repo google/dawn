@@ -96,6 +96,8 @@ class Parser {
                 return core::AddressSpace::kFunction;
             case spv::StorageClass::Private:
                 return core::AddressSpace::kPrivate;
+            case spv::StorageClass::Uniform:
+                return core::AddressSpace::kUniform;
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
