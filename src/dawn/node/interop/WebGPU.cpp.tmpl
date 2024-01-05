@@ -170,8 +170,8 @@ Wrappers* Wrappers::instance = nullptr;
 {{-  range $a := $attributes}}
 {{-   if not (HasAnnotation $a "SameObject")}}
         InstanceAccessor("{{$a.Name}}", &W{{$.Name}}::get{{Title $a.Name}},
-{{-    if $a.Readonly}} nullptr{{else}} &W{{$.Name}}::set{{Title $a.Name}}{{end -}}
-        ),
+{{-    if $a.Readonly}} nullptr,{{else}} &W{{$.Name}}::set{{Title $a.Name}},{{end -}}
+        napi_enumerable),
 {{-   end}}
 {{-  end}}
 {{-  range $c := $constants}}
