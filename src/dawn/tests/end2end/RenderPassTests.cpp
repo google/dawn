@@ -161,7 +161,10 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = mVSModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        // (Off-topic) spot-test for defaulting of these three fields.
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::Undefined;
+        descriptor.primitive.frontFace = wgpu::FrontFace::Undefined;
+        descriptor.primitive.cullMode = wgpu::CullMode::Undefined;
         descriptor.cTargets[0].format = kFormat;
         descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 

@@ -117,8 +117,10 @@ MTLVertexStepFunction VertexStepModeFunction(wgpu::VertexStepMode mode) {
         case wgpu::VertexStepMode::Instance:
             return MTLVertexStepFunctionPerInstance;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            DAWN_UNREACHABLE();
+        case wgpu::VertexStepMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLPrimitiveType MTLPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
@@ -133,7 +135,10 @@ MTLPrimitiveType MTLPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology)
             return MTLPrimitiveTypeTriangle;
         case wgpu::PrimitiveTopology::TriangleStrip:
             return MTLPrimitiveTypeTriangleStrip;
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLPrimitiveTopologyClass MTLInputPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
@@ -146,7 +151,10 @@ MTLPrimitiveTopologyClass MTLInputPrimitiveTopology(wgpu::PrimitiveTopology prim
         case wgpu::PrimitiveTopology::TriangleList:
         case wgpu::PrimitiveTopology::TriangleStrip:
             return MTLPrimitiveTopologyClassTriangle;
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLBlendFactor MetalBlendFactor(wgpu::BlendFactor factor, bool alpha) {
@@ -185,7 +193,10 @@ MTLBlendFactor MetalBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             return MTLBlendFactorSource1Alpha;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return MTLBlendFactorOneMinusSource1Alpha;
+        case wgpu::BlendFactor::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLBlendOperation MetalBlendOperation(wgpu::BlendOperation operation) {
@@ -200,7 +211,10 @@ MTLBlendOperation MetalBlendOperation(wgpu::BlendOperation operation) {
             return MTLBlendOperationMin;
         case wgpu::BlendOperation::Max:
             return MTLBlendOperationMax;
+        case wgpu::BlendOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLColorWriteMask MetalColorWriteMask(wgpu::ColorWriteMask writeMask,
@@ -262,7 +276,10 @@ MTLStencilOperation MetalStencilOperation(wgpu::StencilOperation stencilOperatio
             return MTLStencilOperationIncrementWrap;
         case wgpu::StencilOperation::DecrementWrap:
             return MTLStencilOperationDecrementWrap;
+        case wgpu::StencilOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc(const DepthStencilState* descriptor) {
@@ -315,7 +332,10 @@ MTLWinding MTLFrontFace(wgpu::FrontFace face) {
             return MTLWindingClockwise;
         case wgpu::FrontFace::CCW:
             return MTLWindingCounterClockwise;
+        case wgpu::FrontFace::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 MTLCullMode ToMTLCullMode(wgpu::CullMode mode) {
@@ -326,7 +346,10 @@ MTLCullMode ToMTLCullMode(wgpu::CullMode mode) {
             return MTLCullModeFront;
         case wgpu::CullMode::Back:
             return MTLCullModeBack;
+        case wgpu::CullMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 }  // anonymous namespace

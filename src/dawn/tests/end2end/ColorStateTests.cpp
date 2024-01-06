@@ -321,9 +321,10 @@ constexpr std::array<utils::RGBA8, 8> kColors = {{
 // Test compilation and usage of the fixture
 TEST_P(ColorStateTest, Basic) {
     wgpu::BlendComponent blendComponent;
-    blendComponent.operation = wgpu::BlendOperation::Add;
-    blendComponent.srcFactor = wgpu::BlendFactor::One;
-    blendComponent.dstFactor = wgpu::BlendFactor::Zero;
+    // Spot-test for defaulting of these three fields.
+    blendComponent.operation = wgpu::BlendOperation::Undefined;  // add
+    blendComponent.srcFactor = wgpu::BlendFactor::Undefined;     // one
+    blendComponent.dstFactor = wgpu::BlendFactor::Undefined;     // zero
 
     wgpu::BlendState blend;
     blend.color = blendComponent;

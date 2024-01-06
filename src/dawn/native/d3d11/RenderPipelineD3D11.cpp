@@ -54,8 +54,10 @@ D3D11_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
         case wgpu::VertexStepMode::Instance:
             return D3D11_INPUT_PER_INSTANCE_DATA;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            DAWN_UNREACHABLE();
+        case wgpu::VertexStepMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D_PRIMITIVE_TOPOLOGY D3DPrimitiveTopology(wgpu::PrimitiveTopology topology) {
@@ -70,9 +72,10 @@ D3D_PRIMITIVE_TOPOLOGY D3DPrimitiveTopology(wgpu::PrimitiveTopology topology) {
             return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         case wgpu::PrimitiveTopology::TriangleStrip:
             return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-        default:
-            DAWN_UNREACHABLE();
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D11_CULL_MODE D3DCullMode(wgpu::CullMode cullMode) {
@@ -83,9 +86,10 @@ D3D11_CULL_MODE D3DCullMode(wgpu::CullMode cullMode) {
             return D3D11_CULL_FRONT;
         case wgpu::CullMode::Back:
             return D3D11_CULL_BACK;
-        default:
-            DAWN_UNREACHABLE();
+        case wgpu::CullMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D11_BLEND D3DBlendFactor(wgpu::BlendFactor blendFactor) {
@@ -124,9 +128,10 @@ D3D11_BLEND D3DBlendFactor(wgpu::BlendFactor blendFactor) {
             return D3D11_BLEND_SRC1_ALPHA;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return D3D11_BLEND_INV_SRC1_ALPHA;
-        default:
-            DAWN_UNREACHABLE();
+        case wgpu::BlendFactor::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 // When a blend factor is defined for the alpha channel, any of the factors that don't
@@ -165,9 +170,10 @@ D3D11_BLEND_OP D3DBlendOperation(wgpu::BlendOperation blendOperation) {
             return D3D11_BLEND_OP_MIN;
         case wgpu::BlendOperation::Max:
             return D3D11_BLEND_OP_MAX;
-        default:
-            DAWN_UNREACHABLE();
+        case wgpu::BlendOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 UINT D3DColorWriteMask(wgpu::ColorWriteMask colorWriteMask) {
@@ -197,7 +203,10 @@ D3D11_STENCIL_OP StencilOp(wgpu::StencilOperation op) {
             return D3D11_STENCIL_OP_INCR;
         case wgpu::StencilOperation::DecrementWrap:
             return D3D11_STENCIL_OP_DECR;
+        case wgpu::StencilOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D11_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilFaceState& descriptor) {

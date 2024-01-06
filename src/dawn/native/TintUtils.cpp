@@ -133,6 +133,7 @@ tint::ast::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode m
         case wgpu::VertexStepMode::Instance:
             return tint::ast::transform::VertexStepMode::kInstance;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
+        case wgpu::VertexStepMode::Undefined:
             break;
     }
     DAWN_UNREACHABLE();

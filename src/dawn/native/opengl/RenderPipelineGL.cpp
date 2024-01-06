@@ -48,6 +48,8 @@ GLenum GLPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
             return GL_TRIANGLES;
         case wgpu::PrimitiveTopology::TriangleStrip:
             return GL_TRIANGLE_STRIP;
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -106,7 +108,8 @@ GLenum GLBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             return GL_SRC1_ALPHA;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return GL_ONE_MINUS_SRC1_ALPHA;
-            DAWN_UNREACHABLE();
+        case wgpu::BlendFactor::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -123,6 +126,8 @@ GLenum GLBlendMode(wgpu::BlendOperation operation) {
             return GL_MIN;
         case wgpu::BlendOperation::Max:
             return GL_MAX;
+        case wgpu::BlendOperation::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -189,6 +194,8 @@ GLuint OpenGLStencilOperation(wgpu::StencilOperation stencilOperation) {
             return GL_INCR_WRAP;
         case wgpu::StencilOperation::DecrementWrap:
             return GL_DECR_WRAP;
+        case wgpu::StencilOperation::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -300,6 +307,7 @@ void RenderPipeline::CreateVAOForVertexState() {
                     gl.VertexAttribDivisor(glAttrib, 1);
                     break;
                 case wgpu::VertexStepMode::VertexBufferNotUsed:
+                case wgpu::VertexStepMode::Undefined:
                     DAWN_UNREACHABLE();
             }
         }

@@ -558,7 +558,8 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
     // All the other vertex buffers default to no attributes
     vertexState.vertexBufferCount = kMaxVertexBuffers;
     vertexState.cVertexBuffers[kBufferIndex].arrayStride = 4 * sizeof(float);
-    vertexState.cVertexBuffers[kBufferIndex].stepMode = VertexStepMode::Vertex;
+    // (Off-topic) spot-test for defaulting of .stepMode.
+    vertexState.cVertexBuffers[kBufferIndex].stepMode = VertexStepMode::Undefined;
     vertexState.cVertexBuffers[kBufferIndex].attributeCount = 1;
     vertexState.cVertexBuffers[kBufferIndex].attributes = &vertexState.cAttributes[0];
     vertexState.cAttributes[0].shaderLocation = 0;

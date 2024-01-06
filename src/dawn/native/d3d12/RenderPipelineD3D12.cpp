@@ -55,8 +55,10 @@ D3D12_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
         case wgpu::VertexStepMode::Instance:
             return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            DAWN_UNREACHABLE();
+        case wgpu::VertexStepMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
@@ -71,7 +73,10 @@ D3D12_PRIMITIVE_TOPOLOGY D3D12PrimitiveTopology(wgpu::PrimitiveTopology primitiv
             return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         case wgpu::PrimitiveTopology::TriangleStrip:
             return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(
@@ -85,7 +90,10 @@ D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12PrimitiveTopologyType(
         case wgpu::PrimitiveTopology::TriangleList:
         case wgpu::PrimitiveTopology::TriangleStrip:
             return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        case wgpu::PrimitiveTopology::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D12_CULL_MODE D3D12CullMode(wgpu::CullMode mode) {
@@ -96,7 +104,10 @@ D3D12_CULL_MODE D3D12CullMode(wgpu::CullMode mode) {
             return D3D12_CULL_MODE_FRONT;
         case wgpu::CullMode::Back:
             return D3D12_CULL_MODE_BACK;
+        case wgpu::CullMode::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D12_BLEND D3D12Blend(wgpu::BlendFactor factor) {
@@ -135,7 +146,10 @@ D3D12_BLEND D3D12Blend(wgpu::BlendFactor factor) {
             return D3D12_BLEND_SRC1_ALPHA;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return D3D12_BLEND_INV_SRC1_ALPHA;
+        case wgpu::BlendFactor::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 // When a blend factor is defined for the alpha channel, any of the factors that don't
@@ -174,7 +188,10 @@ D3D12_BLEND_OP D3D12BlendOperation(wgpu::BlendOperation operation) {
             return D3D12_BLEND_OP_MIN;
         case wgpu::BlendOperation::Max:
             return D3D12_BLEND_OP_MAX;
+        case wgpu::BlendOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 uint8_t D3D12RenderTargetWriteMask(wgpu::ColorWriteMask writeMask) {
@@ -253,7 +270,10 @@ D3D12_STENCIL_OP StencilOp(wgpu::StencilOperation op) {
             return D3D12_STENCIL_OP_INCR;
         case wgpu::StencilOperation::DecrementWrap:
             return D3D12_STENCIL_OP_DECR;
+        case wgpu::StencilOperation::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilFaceState& descriptor) {

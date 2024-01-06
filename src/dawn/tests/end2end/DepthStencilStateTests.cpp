@@ -387,10 +387,11 @@ class DepthStencilStateTest : public DawnTest {
 // Test compilation and usage of the fixture
 TEST_P(DepthStencilStateTest, Basic) {
     wgpu::StencilFaceState stencilFace;
-    stencilFace.compare = wgpu::CompareFunction::Always;
-    stencilFace.failOp = wgpu::StencilOperation::Keep;
-    stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
-    stencilFace.passOp = wgpu::StencilOperation::Keep;
+    // Spot-test for defaulting of these four fields.
+    stencilFace.compare = wgpu::CompareFunction::Undefined;
+    stencilFace.failOp = wgpu::StencilOperation::Undefined;
+    stencilFace.depthFailOp = wgpu::StencilOperation::Undefined;
+    stencilFace.passOp = wgpu::StencilOperation::Undefined;
 
     wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;

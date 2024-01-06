@@ -274,10 +274,8 @@ MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState
 
 MaybeError ValidateDepthStencilState(const DeviceBase* device,
                                      const DepthStencilState* descriptor) {
-    if (descriptor->depthCompare != wgpu::CompareFunction::Undefined) {
-        DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
-                         "validating depth compare function");
-    }
+    DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
+                     "validating depth compare function");
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->stencilFront.compare),
                      "validating stencil front compare function");
     DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilFront.failOp),
@@ -849,11 +847,16 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
     auto buffers =
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
-    for (auto [slot, buffer] : Enumerate(buffers)) {
+    for (auto [slot, bufferOrig] : Enumerate(buffers)) {
         // Skip unused slots
-        if (buffer.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
+        if (bufferOrig.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
             continue;
         }
+
+        // Make a local copy with defaulting applied, before copying the
+        // now-defaulted values into mVertexBufferInfos.
+        VertexBufferLayout buffer = bufferOrig;
+        buffer.ApplyTrivialFrontendDefaults();
 
         mVertexBuffersUsed.set(slot);
         mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
@@ -867,7 +870,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
             case wgpu::VertexStepMode::Instance:
                 mVertexBuffersUsedAsInstanceBuffer.set(slot);
                 break;
-            default:
+            case wgpu::VertexStepMode::VertexBufferNotUsed:
+            case wgpu::VertexStepMode::Undefined:
                 DAWN_UNREACHABLE();
         }
 
@@ -898,6 +902,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     }
 
     mPrimitive = descriptor->primitive;
+    mPrimitive.ApplyTrivialFrontendDefaults();
     UnpackedPtr<PrimitiveState> unpackedPrimitive = Unpack(&mPrimitive);
     if (auto* depthClipControl = unpackedPrimitive.Get<PrimitiveDepthClipControl>()) {
         mUnclippedDepth = depthClipControl->unclippedDepth;
@@ -907,6 +912,9 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
     if (mAttachmentState->HasDepthStencilAttachment()) {
         mDepthStencil = *descriptor->depthStencil;
+        mDepthStencil.stencilFront.ApplyTrivialFrontendDefaults();
+        mDepthStencil.stencilBack.ApplyTrivialFrontendDefaults();
+
         // Reify depth option for stencil-only formats
         const Format& format = device->GetValidInternalFormat(mDepthStencil.format);
         if (!format.HasDepth()) {
@@ -937,22 +945,10 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         // The values indicate that depth and stencil test are disabled when backends
         // set their own depth stencil states/descriptors according to the values in
         // mDepthStencil.
-        mDepthStencil.format = wgpu::TextureFormat::Undefined;
-        mDepthStencil.depthWriteEnabled = false;
+        // - Most defaults come from the dawn::native::DepthStencilState definition.
+        mDepthStencil = {};
+        // - depthCompare is nullable for validation purposes but should default to Always.
         mDepthStencil.depthCompare = wgpu::CompareFunction::Always;
-        mDepthStencil.stencilBack.compare = wgpu::CompareFunction::Always;
-        mDepthStencil.stencilBack.failOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilBack.passOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilFront.compare = wgpu::CompareFunction::Always;
-        mDepthStencil.stencilFront.failOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilFront.passOp = wgpu::StencilOperation::Keep;
-        mDepthStencil.stencilReadMask = 0xff;
-        mDepthStencil.stencilWriteMask = 0xff;
-        mDepthStencil.depthBias = 0;
-        mDepthStencil.depthBiasSlopeScale = 0.0f;
-        mDepthStencil.depthBiasClamp = 0.0f;
     }
 
     for (auto i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
@@ -964,6 +960,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
         if (target->blend != nullptr) {
             mTargetBlend[i] = *target->blend;
+            mTargetBlend[i].alpha.ApplyTrivialFrontendDefaults();
+            mTargetBlend[i].color.ApplyTrivialFrontendDefaults();
             mTargets[i].blend = &mTargetBlend[i];
         }
     }

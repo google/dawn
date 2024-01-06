@@ -455,34 +455,37 @@
     },
     "blend factor": {
         "category": "enum",
+        "_comment": "TODO(github.com/gpuweb/gpuweb/issues/4283): make sure the dual source blending names match the spec when it lands, and remove the tags.",
         "values": [
-            {"value": 0, "name": "zero"},
-            {"value": 1, "name": "one"},
-            {"value": 2, "name": "src"},
-            {"value": 3, "name": "one minus src"},
-            {"value": 4, "name": "src alpha"},
-            {"value": 5, "name": "one minus src alpha"},
-            {"value": 6, "name": "dst"},
-            {"value": 7, "name": "one minus dst"},
-            {"value": 8, "name": "dst alpha"},
-            {"value": 9, "name": "one minus dst alpha"},
-            {"value": 10, "name": "src alpha saturated"},
-            {"value": 11, "name": "constant"},
-            {"value": 12, "name": "one minus constant"},
-            {"value": 13, "name": "src1", "tags": ["dawn"]},
-            {"value": 14, "name": "one minus src1", "tags": ["dawn"]},
-            {"value": 15, "name": "src1 alpha", "tags": ["dawn"]},
-            {"value": 16, "name": "one minus src1 alpha", "tags": ["dawn"]}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "zero"},
+            {"value": 2, "name": "one"},
+            {"value": 3, "name": "src"},
+            {"value": 4, "name": "one minus src"},
+            {"value": 5, "name": "src alpha"},
+            {"value": 6, "name": "one minus src alpha"},
+            {"value": 7, "name": "dst"},
+            {"value": 8, "name": "one minus dst"},
+            {"value": 9, "name": "dst alpha"},
+            {"value": 10, "name": "one minus dst alpha"},
+            {"value": 11, "name": "src alpha saturated"},
+            {"value": 12, "name": "constant"},
+            {"value": 13, "name": "one minus constant"},
+            {"value": 14, "name": "src1", "tags": ["dawn"]},
+            {"value": 15, "name": "one minus src1", "tags": ["dawn"]},
+            {"value": 16, "name": "src1 alpha", "tags": ["dawn"]},
+            {"value": 17, "name": "one minus src1 alpha", "tags": ["dawn"]}
         ]
     },
     "blend operation": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "add"},
-            {"value": 1, "name": "subtract"},
-            {"value": 2, "name": "reverse subtract"},
-            {"value": 3, "name": "min"},
-            {"value": 4, "name": "max"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "add"},
+            {"value": 2, "name": "subtract"},
+            {"value": 3, "name": "reverse subtract"},
+            {"value": 4, "name": "min"},
+            {"value": 5, "name": "max"}
         ]
     },
     "bool": {
@@ -825,7 +828,7 @@
     "compare function": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "never"},
             {"value": 2, "name": "less"},
             {"value": 3, "name": "equal"},
@@ -1079,9 +1082,10 @@
     "cull mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "none"},
-            {"value": 1, "name": "front"},
-            {"value": 2, "name": "back"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "none"},
+            {"value": 2, "name": "front"},
+            {"value": 3, "name": "back"}
         ]
     },
     "device": {
@@ -1988,8 +1992,9 @@
     "front face": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "CCW"},
-            {"value": 1, "name": "CW"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "CCW"},
+            {"value": 2, "name": "CW"}
         ]
     },
     "image copy buffer": {
@@ -2177,9 +2182,10 @@
     "vertex step mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "vertex"},
-            {"value": 1, "name": "instance"},
-            {"value": 2, "name": "vertex buffer not used", "jsrepr": "undefined", "valid": true}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "vertex buffer not used"},
+            {"value": 2, "name": "vertex"},
+            {"value": 3, "name": "instance"}
         ]
     },
     "load op": {
@@ -2303,11 +2309,12 @@
     "primitive topology": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "point list"},
-            {"value": 1, "name": "line list"},
-            {"value": 2, "name": "line strip"},
-            {"value": 3, "name": "triangle list"},
-            {"value": 4, "name": "triangle strip"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "point list"},
+            {"value": 2, "name": "line list"},
+            {"value": 3, "name": "line strip"},
+            {"value": 4, "name": "triangle list"},
+            {"value": 5, "name": "triangle strip"}
         ]
     },
     "query set": {
@@ -3122,14 +3129,15 @@
     "stencil operation": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "keep"},
-            {"value": 1, "name": "zero"},
-            {"value": 2, "name": "replace"},
-            {"value": 3, "name": "invert"},
-            {"value": 4, "name": "increment clamp"},
-            {"value": 5, "name": "decrement clamp"},
-            {"value": 6, "name": "increment wrap"},
-            {"value": 7, "name": "decrement wrap"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "keep"},
+            {"value": 2, "name": "zero"},
+            {"value": 3, "name": "replace"},
+            {"value": 4, "name": "invert"},
+            {"value": 5, "name": "increment clamp"},
+            {"value": 6, "name": "decrement clamp"},
+            {"value": 7, "name": "increment wrap"},
+            {"value": 8, "name": "decrement wrap"}
         ]
     },
     "stencil face state": {
