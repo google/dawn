@@ -282,7 +282,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
         for (wgpu::TextureFormat format : kWGPUTextureFormatSupportedAsSPIRVImageFormats) {
             std::string computeShader =
                 CreateComputeShaderWithStorageTexture(storageTextureBindingType, format);
-            if (utils::TextureFormatSupportsStorageTexture(format, UseCompatibilityMode())) {
+            if (utils::TextureFormatSupportsStorageTexture(format, device,
+                                                           UseCompatibilityMode())) {
                 utils::CreateShaderModule(device, computeShader.c_str());
             } else {
                 ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader.c_str()));
@@ -440,7 +441,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
             wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.storageTexture.access = bindingType;
             bindGroupLayoutBinding.storageTexture.format = textureFormat;
-            if (utils::TextureFormatSupportsStorageTexture(textureFormat, UseCompatibilityMode())) {
+            if (utils::TextureFormatSupportsStorageTexture(textureFormat, device,
+                                                           UseCompatibilityMode())) {
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
             } else {
                 ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}));
@@ -479,7 +481,7 @@ TEST_F(BGRA8UnormStorageBindGroupLayoutTest, BGRA8UnormAsStorage) {
 TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatchesShaderDeclaration) {
     for (wgpu::StorageTextureAccess bindingType : kSupportedStorageTextureAccess) {
         for (wgpu::TextureFormat storageTextureFormatInShader : utils::kAllTextureFormats) {
-            if (!utils::TextureFormatSupportsStorageTexture(storageTextureFormatInShader,
+            if (!utils::TextureFormatSupportsStorageTexture(storageTextureFormatInShader, device,
                                                             UseCompatibilityMode())) {
                 continue;
             }
@@ -502,7 +504,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
             for (wgpu::TextureFormat storageTextureFormatInBindGroupLayout :
                  utils::kAllTextureFormats) {
                 if (!utils::TextureFormatSupportsStorageTexture(
-                        storageTextureFormatInBindGroupLayout, UseCompatibilityMode())) {
+                        storageTextureFormatInBindGroupLayout, device, UseCompatibilityMode())) {
                     continue;
                 }
 
@@ -665,7 +667,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
         defaultBindGroupLayoutEntry.storageTexture.access = storageBindingType;
 
         for (wgpu::TextureFormat formatInBindGroupLayout : utils::kAllTextureFormats) {
-            if (!utils::TextureFormatSupportsStorageTexture(formatInBindGroupLayout,
+            if (!utils::TextureFormatSupportsStorageTexture(formatInBindGroupLayout, device,
                                                             UseCompatibilityMode())) {
                 continue;
             }
@@ -677,7 +679,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
             for (wgpu::TextureFormat textureViewFormat : utils::kAllTextureFormats) {
-                if (!utils::TextureFormatSupportsStorageTexture(textureViewFormat,
+                if (!utils::TextureFormatSupportsStorageTexture(textureViewFormat, device,
                                                                 UseCompatibilityMode())) {
                     continue;
                 }
@@ -909,7 +911,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
 // formats that support read-write storage texture access.
 TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureFormatInBindGroupLayout) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, UseCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(format, device, UseCompatibilityMode())) {
             continue;
         }
 
@@ -930,7 +932,7 @@ TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureFormatInSh
     constexpr std::array<wgpu::StorageTextureAccess, 2> kStorageTextureAccesses = {
         {wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::ReadWrite}};
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, UseCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(format, device, UseCompatibilityMode())) {
             continue;
         }
 

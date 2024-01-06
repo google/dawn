@@ -790,19 +790,20 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
         createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
     }
 
-    if (requiresViewFormatsList) {
-        if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
-            createInfoChain.Add(&imageFormatListInfo,
-                                VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
-            viewFormats.push_back(VulkanImageFormat(device, GetFormat().format));
-            for (FormatIndex i : IterateBitSet(GetViewFormats())) {
-                const Format& viewFormat = device->GetValidInternalFormat(i);
-                viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
-            }
-
-            imageFormatListInfo.viewFormatCount = viewFormats.size();
-            imageFormatListInfo.pViewFormats = viewFormats.data();
+    // Add the view format list only when the usage does not have storage. Otherwise, the VVL will
+    // say creation of the texture is invalid.
+    // See https://github.com/gpuweb/gpuweb/issues/4426.
+    if (requiresViewFormatsList && device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList) &&
+        !(createInfo.usage & VK_IMAGE_USAGE_STORAGE_BIT)) {
+        createInfoChain.Add(&imageFormatListInfo, VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
+        viewFormats.push_back(VulkanImageFormat(device, GetFormat().format));
+        for (FormatIndex i : IterateBitSet(GetViewFormats())) {
+            const Format& viewFormat = device->GetValidInternalFormat(i);
+            viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
         }
+
+        imageFormatListInfo.viewFormatCount = viewFormats.size();
+        imageFormatListInfo.pViewFormats = viewFormats.data();
     }
 
     DAWN_ASSERT(IsSampleCountSupported(device, createInfo));
@@ -1679,6 +1680,17 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
 
     Device* device = ToBackend(GetTexture()->GetDevice());
     VkImageViewCreateInfo createInfo = GetCreateInfo(descriptor->format, descriptor->dimension);
+
+    // Remove StorageBinding usage if the format doesn't support it.
+    wgpu::TextureUsage usage = GetTexture()->GetInternalUsage();
+    if (!GetFormat().supportsStorageUsage) {
+        usage &= ~wgpu::TextureUsage::StorageBinding;
+    }
+
+    VkImageViewUsageCreateInfo usageInfo = {};
+    usageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO;
+    usageInfo.usage = VulkanImageUsage(usage, GetFormat());
+    createInfo.pNext = &usageInfo;
 
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),

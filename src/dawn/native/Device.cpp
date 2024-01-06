@@ -834,6 +834,19 @@ const Format& DeviceBase::GetValidInternalFormat(FormatIndex index) const {
     return mFormatTable[index];
 }
 
+std::vector<const Format*> DeviceBase::GetCompatibleViewFormats(const Format& format) const {
+    wgpu::TextureFormat viewFormat =
+        format.format == format.baseFormat ? format.baseViewFormat : format.baseFormat;
+    if (viewFormat == wgpu::TextureFormat::Undefined) {
+        return {};
+    }
+    const Format& f = mFormatTable[ComputeFormatIndex(viewFormat)];
+    if (!f.IsSupported()) {
+        return {};
+    }
+    return {&f};
+}
+
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
     const BindGroupLayoutDescriptor* descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken) {

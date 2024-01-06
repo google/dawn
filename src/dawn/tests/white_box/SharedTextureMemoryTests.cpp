@@ -100,6 +100,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::MultiPlanarRenderTargets,
         wgpu::FeatureName::TransientAttachments,
         wgpu::FeatureName::Norm16TextureFormats,
+        wgpu::FeatureName::BGRA8UnormStorage,
     };
     for (auto feature : kOptionalFeatures) {
         if (SupportsFeatures({feature})) {
@@ -393,6 +394,50 @@ wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsClearCommandBuffer(
     return encoder.Finish();
 }
 
+// Make a command buffer that clears the texture to four different colors in each quadrant.
+wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsComputeCommandBuffer(
+    wgpu::Device& deviceObj,
+    wgpu::Texture& texture) {
+    std::string wgslFormat = utils::GetWGSLImageFormatQualifier(texture.GetFormat());
+
+    std::string shader = R"(
+      @group(0) @binding(0) var storageImage : texture_storage_2d<)" +
+                         wgslFormat + R"(, write>;
+
+      @workgroup_size(1)
+      @compute fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+          let dims = textureDimensions(storageImage);
+          if (global_id.x < dims.x / 2) {
+            if (global_id.y < dims.y / 2) {
+              textureStore(storageImage, global_id.xy, vec4f(0.0, 1.0, 0.0, 0.501));
+            } else {
+              textureStore(storageImage, global_id.xy, vec4f(1.0, 0.0, 0.0, 0.501));
+            }
+          } else {
+            if (global_id.y < dims.y / 2) {
+              textureStore(storageImage, global_id.xy, vec4f(0.0, 0.0, 1.0, 0.501));
+            } else {
+              textureStore(storageImage, global_id.xy, vec4f(1.0, 1.0, 0.0, 0.501));
+            }
+          }
+      }
+    )";
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.compute.module = utils::CreateShaderModule(deviceObj, shader.c_str());
+    pipelineDesc.compute.entryPoint = "main";
+
+    wgpu::ComputePipeline pipeline = deviceObj.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::CommandEncoder encoder = deviceObj.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, utils::MakeBindGroup(deviceObj, pipeline.GetBindGroupLayout(0),
+                                              {{0, texture.CreateView()}}));
+    pass.DispatchWorkgroups(texture.GetWidth(), texture.GetHeight());
+    pass.End();
+    return encoder.Finish();
+}
+
 // Make a command buffer that samples the contents of the input texture into an RGBA8Unorm texture.
 std::pair<wgpu::CommandBuffer, wgpu::Texture>
 SharedTextureMemoryTests::MakeCheckBySamplingCommandBuffer(wgpu::Device& deviceObj,
@@ -677,8 +722,8 @@ TEST_P(SharedTextureMemoryTests, TextureUsages) {
         // texture (the relevant flag is currently always passed in the test
         // context). Add tests where the D3D/Vulkan texture is not created with the
         // relevant flag.
-        if (isSinglePlanar &&
-            utils::TextureFormatSupportsStorageTexture(properties.format, IsCompatibilityMode())) {
+        if (isSinglePlanar && utils::TextureFormatSupportsStorageTexture(properties.format, device,
+                                                                         IsCompatibilityMode())) {
             expectedUsage |= wgpu::TextureUsage::StorageBinding;
         }
 
@@ -1668,8 +1713,9 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
 
 // Test that textures created from SharedTextureMemory may perform sRGB reinterpretation.
 TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
-    // TODO(crbug.com/dawn/2304): Implement on Vulkan.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    // TODO(crbug.com/dawn/2304): Investigate if the VVL is wrong here.
+    DAWN_SUPPRESS_TEST_IF(GetParam().mBackend->Name().find("dma buf") != std::string::npos &&
+                          IsBackendValidationEnabled());
 
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
@@ -1744,6 +1790,64 @@ TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
                 utils::RGBA8(103, 123, 245, 255),  //
                 utils::RGBA8(105, 125, 247, 255), texture, 0, 0);
         }
+    }
+}
+
+// Test writing to texture memory in compute pass on one device, then sampling it using another
+// device.
+TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
+    // TODO(crbug.com/dawn/1745): Diagnose and fix on Apple GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsApple());
+
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding)) {
+        // Create the textures on each SharedTextureMemory.
+        wgpu::Texture texture0 = memories[0].CreateTexture();
+        wgpu::Texture texture1 = memories[1].CreateTexture();
+
+        // Make a command buffer to populate the texture contents in a compute shader.
+        wgpu::CommandBuffer commandBuffer0 =
+            MakeFourColorsComputeCommandBuffer(devices[0], texture0);
+
+        // Make a command buffer to sample and check the texture contents.
+        wgpu::Texture resultTarget;
+        wgpu::CommandBuffer commandBuffer1;
+        std::tie(commandBuffer1, resultTarget) =
+            MakeCheckBySamplingCommandBuffer(devices[1], texture1);
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+
+        // Begin access on memory 0, submit the compute pass, end access.
+        memories[0].BeginAccess(texture0, &beginDesc);
+        devices[0].GetQueue().Submit(1, &commandBuffer0);
+        memories[0].EndAccess(texture0, &endState);
+
+        // Import fences to device 1.
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        // Begin access on memory 1, check the contents, end access.
+        memories[1].BeginAccess(texture1, &beginDesc);
+        devices[1].GetQueue().Submit(1, &commandBuffer1);
+        memories[1].EndAccess(texture1, &endState);
+
+        // Check all the sampled colors are correct.
+        CheckFourColors(devices[1], texture1.GetFormat(), resultTarget);
     }
 }
 

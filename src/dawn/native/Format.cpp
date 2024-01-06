@@ -28,6 +28,8 @@
 #include "dawn/native/Format.h"
 
 #include <bitset>
+#include <unordered_map>
+#include <utility>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Device.h"
@@ -583,6 +585,15 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     // been added or removed recently, check that kKnownFormatCount has been updated.
     DAWN_ASSERT(formatsSet.all());
 
+    for (const Format& f : table) {
+        if (f.format != f.baseFormat) {
+            auto& baseViewFormat = table[ComputeFormatIndex(f.baseFormat)].baseViewFormat;
+            // Currently, Dawn only supports sRGB reinterpretation, so there should only be one
+            // view format.
+            DAWN_ASSERT(baseViewFormat == wgpu::TextureFormat::Undefined);
+            baseViewFormat = f.format;
+        }
+    }
     return table;
 }
 

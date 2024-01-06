@@ -158,6 +158,10 @@ struct Format {
     // If two formats has the same baseFormat, they could copy to and be viewed as the other
     // format. Currently two formats have the same baseFormat if they differ only in sRGB-ness.
     wgpu::TextureFormat baseFormat = wgpu::TextureFormat::Undefined;
+    // Additional view format a base format is compatible with. Only populated for true base
+    // formats. Only stores a single view format because Dawn currently only supports sRGB format
+    // reinterpretation.
+    wgpu::TextureFormat baseViewFormat = wgpu::TextureFormat::Undefined;
 
     // Returns true if the formats are copy compatible.
     // Currently means they differ only in sRGB-ness.

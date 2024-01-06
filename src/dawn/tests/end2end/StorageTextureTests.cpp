@@ -680,7 +680,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, IsCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
             continue;
         }
 
@@ -716,7 +716,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsStorageTexture(format, IsCompatibilityMode())) {
+        if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
             continue;
         }
 

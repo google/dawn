@@ -273,14 +273,19 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding |
                        wgpu::TextureUsage::RenderAttachment;
 
+    // Create the SharedTextureMemory object.
+    Ref<SharedTextureMemory> sharedTextureMemory =
+        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_EXTERNAL_KHR);
+
+    // Reflect properties to reify them.
+    sharedTextureMemory->APIGetProperties(&properties);
+
     const Format* internalFormat = nullptr;
     DAWN_TRY_ASSIGN(internalFormat, device->GetInternalFormat(properties.format));
 
-    VkFormat vkFormat = VulkanImageFormat(device, properties.format);
+    const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
 
-    // Reify properties now. This is usually done by the frontend, but we do it here to ensure
-    // we don't use unsupported Vulkan usages.
-    ReifyProperties(device, &properties);
+    VkFormat vkFormat = VulkanImageFormat(device, properties.format);
 
     // Usage flags to create the image with.
     VkImageUsageFlags vkUsageFlags = VulkanImageUsage(properties.usage, *internalFormat);
@@ -292,9 +297,19 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // perform the actual VkImage creation.
     VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {};
     // List of view formats the image can be created.
-    std::array<VkFormat, 2> viewFormats;
+    std::array<VkFormat, 3> viewFormats;
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     imageFormatListInfo.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO;
+
+    // The Vulkan spec seems to be too strict in that:
+    // - use of DRM modifiers requires passing an image format list
+    // - that image format list can't have sRGB formats if the usage has StorageBinding
+    // In practice, it's "fine" to create a normal VkImage with StorageBinding and sRGB in the
+    // format list, and the VVL here may be wrong. See also see
+    // https://github.com/gpuweb/gpuweb/issues/4426. The support check may be unnecessarily strict.
+    // TODO(crbug.com/dawn/2304): Follow up with the Vulkan spec and try to lift this.
+    // Here, we set `addViewFormats` after checking for support to work around the strictness.
+    bool addViewFormats = false;
 
     // Validate that the import is valid.
     {
@@ -355,6 +370,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                                                            wgpu::TextureUsage::TextureBinding |
                                                            wgpu::TextureUsage::StorageBinding;
         const bool mayNeedView = (properties.usage & kUsageRequiringView) != 0;
+
         if (mayNeedView) {
             // Add the mutable format bit for view reinterpretation.
             imageFormatInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
@@ -372,10 +388,21 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                     // Pass the format as the one and only allowed view format.
                     // Use of VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT requires passing a non-zero
                     // list.
-                    // TODO(crbug.com/dawn/1745): Allow other types of WebGPU format
-                    // reinterpretation (srgb).
-                    viewFormats = {vkFormat};
-                    imageFormatListInfo.viewFormatCount = 1;
+                    const bool needsBGRA8UnormStoragePolyfill =
+                        properties.format == wgpu::TextureFormat::BGRA8Unorm &&
+                        (properties.usage & wgpu::TextureUsage::StorageBinding);
+                    if (compatibleViewFormats.empty()) {
+                        DAWN_ASSERT(!needsBGRA8UnormStoragePolyfill);
+                        viewFormats = {vkFormat};
+                        imageFormatListInfo.viewFormatCount = 1;
+                    } else {
+                        viewFormats[imageFormatListInfo.viewFormatCount++] = vkFormat;
+                        if (needsBGRA8UnormStoragePolyfill) {
+                            viewFormats[imageFormatListInfo.viewFormatCount++] =
+                                VK_FORMAT_R8G8B8A8_UNORM;
+                        }
+                        addViewFormats = true;
+                    }
                 }
                 imageFormatListInfo.pViewFormats = viewFormats.data();
             }
@@ -393,9 +420,15 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         }
     }
 
-    // Create the SharedTextureMemory object.
-    Ref<SharedTextureMemory> sharedTextureMemory =
-        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_EXTERNAL_KHR);
+    // Don't add the view format if backend validation is enabled, otherwise most image creations
+    // will fail with VVL. This view format is only needed for sRGB reinterpretation.
+    // TODO(crbug.com/dawn/2304): Investigate if this is a bug in VVL.
+    if (addViewFormats &&
+        !device->GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled()) {
+        DAWN_ASSERT(compatibleViewFormats.size() == 1u);
+        viewFormats[imageFormatListInfo.viewFormatCount++] =
+            VulkanImageFormat(device, compatibleViewFormats[0]->format);
+    }
 
     // Create the VkImage for the import.
     {
@@ -550,12 +583,17 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     DAWN_INVALID_IF(internalFormat->IsMultiPlanar(),
                     "Multi-planar AHardwareBuffer not supported yet.");
 
-    // Reify properties now. This is usually done by the frontend, but we do it here to ensure
-    // we don't use unsupported Vulkan usages.
-    ReifyProperties(device, &properties);
+    // Create the SharedTextureMemory object.
+    Ref<SharedTextureMemory> sharedTextureMemory =
+        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_FOREIGN_EXT);
+
+    // Reflect properties to reify them.
+    sharedTextureMemory->APIGetProperties(&properties);
 
     // Compute the Vulkan usage flags to create the image with.
     VkImageUsageFlags vkUsageFlags = VulkanImageUsage(properties.usage, *internalFormat);
+
+    const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
 
     // Info describing the image import. We will use this to check the import is valid, and then
     // perform the actual VkImage creation.
@@ -579,18 +617,30 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         constexpr wgpu::TextureUsage kUsageRequiringView = wgpu::TextureUsage::RenderAttachment |
                                                            wgpu::TextureUsage::TextureBinding |
                                                            wgpu::TextureUsage::StorageBinding;
-        const bool mayNeedView = (properties.usage & kUsageRequiringView) != 0;
-        if (mayNeedView) {
+        const bool mayNeedViewReinterpretation =
+            (properties.usage & kUsageRequiringView) != 0 && !compatibleViewFormats.empty();
+        const bool needsBGRA8UnormStoragePolyfill =
+            properties.format == wgpu::TextureFormat::BGRA8Unorm &&
+            (properties.usage & wgpu::TextureUsage::StorageBinding);
+        if (mayNeedViewReinterpretation || needsBGRA8UnormStoragePolyfill) {
             // Add the mutable format bit for view reinterpretation.
             imageFormatInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 
-            // Append the list of view formats the image must be compatible with.
-            if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
-                // Pass the format as the one and only allowed view format.
-                // TODO(crbug.com/dawn/1745): Allow other types of WebGPU format
-                // reinterpretation (srgb).
-                viewFormats = {vkFormat};
-                imageFormatListInfo.viewFormatCount = 1;
+            if (properties.usage & wgpu::TextureUsage::StorageBinding) {
+                // Don't use an image format list because it becomes impossible to make an
+                // rgba8unorm storage texture which may be reinterpreted as rgba8unorm-srgb,
+                // because the srgb format doesn't support storage. Creation with an explicit
+                // format list that includes srgb will fail.
+                // This is the same issue seen with the DMA buf import path which has a workaround
+                // to bypass the support check.
+                // TODO(crbug.com/dawn/2304): If the dma buf import is resolved in a better way,
+                // apply the same fix here.
+            } else if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
+                // Set the list of view formats the image can be compatible with.
+                DAWN_ASSERT(compatibleViewFormats.size() == 1u);
+                viewFormats[0] = vkFormat;
+                viewFormats[1] = VulkanImageFormat(device, compatibleViewFormats[0]->format);
+                imageFormatListInfo.viewFormatCount = 2;
                 imageFormatListInfo.pViewFormats = viewFormats.data();
             }
         }
@@ -605,10 +655,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                 "checking import support of AHardwareBuffer");
         }
     }
-
-    // Create the SharedTextureMemory object.
-    Ref<SharedTextureMemory> sharedTextureMemory =
-        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_FOREIGN_EXT);
 
     // Create the VkImage for the import.
     {
@@ -773,6 +819,50 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         properties.usage |= wgpu::TextureUsage::RenderAttachment;
     }
 
+    const Format* internalFormat;
+    DAWN_TRY_ASSIGN(internalFormat, device->GetInternalFormat(properties.format));
+
+    const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
+
+    // Create the SharedTextureMemory object.
+    Ref<SharedTextureMemory> sharedTextureMemory =
+        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_EXTERNAL_KHR);
+
+    // Reflect properties to reify them.
+    sharedTextureMemory->APIGetProperties(&properties);
+
+    constexpr wgpu::TextureUsage kUsageRequiringView = wgpu::TextureUsage::RenderAttachment |
+                                                       wgpu::TextureUsage::TextureBinding |
+                                                       wgpu::TextureUsage::StorageBinding;
+    const bool mayNeedViewReinterpretation =
+        (properties.usage & kUsageRequiringView) != 0 && !compatibleViewFormats.empty();
+
+    DAWN_INVALID_IF(
+        mayNeedViewReinterpretation && !(createInfo->flags & VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT),
+        "VkImageCreateInfo::flags did not have VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT "
+        "which is required for view format reinterpretation.");
+
+    if (imageFormatListInfo && mayNeedViewReinterpretation) {
+        auto viewFormatsBegin = imageFormatListInfo->pViewFormats;
+        auto viewFormatsEnd =
+            imageFormatListInfo->pViewFormats + imageFormatListInfo->viewFormatCount;
+        VkFormat baseVkFormat = VulkanImageFormat(device, properties.format);
+
+        DAWN_INVALID_IF(
+            std::find(viewFormatsBegin, viewFormatsEnd, baseVkFormat) == viewFormatsEnd,
+            "VkImageFormatCreateInfo did not contain VkFormat 0x%x which may be required to "
+            "create a texture view with %s.",
+            baseVkFormat, properties.format);
+
+        for (const auto* f : compatibleViewFormats) {
+            VkFormat vkFormat = VulkanImageFormat(device, f->format);
+            DAWN_INVALID_IF(std::find(viewFormatsBegin, viewFormatsEnd, vkFormat) == viewFormatsEnd,
+                            "VkImageFormatCreateInfo did not contain VkFormat 0x%x which may be "
+                            "required to create a texture view with %s.",
+                            vkFormat, f->format);
+        }
+    }
+
     // Validate that an OpaqueFD import with this createInfo is valid.
     {
         VkPhysicalDeviceImageFormatInfo2 imageFormatInfo;
@@ -796,10 +886,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                 "checking import support for opaque fd import");
         }
     }
-
-    // Create the SharedTextureMemory object.
-    Ref<SharedTextureMemory> sharedTextureMemory =
-        SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_EXTERNAL_KHR);
 
     // Create the VkImage
     {

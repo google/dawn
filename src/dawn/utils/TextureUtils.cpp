@@ -28,7 +28,9 @@
 #include "dawn/utils/TextureUtils.h"
 
 namespace dawn::utils {
-bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format, bool isCompatibilityMode) {
+bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format,
+                                         const wgpu::Device& device,
+                                         bool isCompatibilityMode) {
     switch (format) {
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
@@ -49,6 +51,8 @@ bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format, bool isComp
         case wgpu::TextureFormat::RG32Sint:
         case wgpu::TextureFormat::RG32Float:
             return !isCompatibilityMode;
+        case wgpu::TextureFormat::BGRA8Unorm:
+            return device.HasFeature(wgpu::FeatureName::BGRA8UnormStorage);
 
         default:
             return false;
