@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-01-05 07:33:43AM
+# Last rolled: 2024-01-02 07:34:11AM
 
 # Flaky on all platforms
 # KEEP
@@ -373,8 +373,8 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 
 # getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
-crbug.com/dawn/2114 [ nvidia-0x2184 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
+crbug.com/dawn/2114 [ nvidia-0x2184 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 
 # Limits issues on NVidia GL
 crbug.com/dawn/2123 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxBufferSize:createBuffer,at_over:limitTest="atMaximum";testValueName="atLimit" [ Failure ]
@@ -605,5 +605,8 @@ crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,i
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xI8Clamp:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,pack4xU8Clamp:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,unpack4xI8:supported:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,unpack4xU8:supported:* [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
