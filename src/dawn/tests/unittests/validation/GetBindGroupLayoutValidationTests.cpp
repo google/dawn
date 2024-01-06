@@ -466,7 +466,7 @@ TEST_F(GetBindGroupLayoutTests, ExternalTextureBindingType) {
 }
 
 // Test that texture view dimension matches the shader.
-TEST_F(GetBindGroupLayoutTests, ViewDimension) {
+TEST_F(GetBindGroupLayoutTests, TextureViewDimension) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::BindGroupLayoutEntry binding = {};
@@ -498,6 +498,11 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             @fragment fn main() {
                 _ = textureDimensions(myTexture);
             })");
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+
+        // viewDimension defaults to 2D, so should be cached the same.
+        binding.texture.viewDimension = wgpu::TextureViewDimension::Undefined;
         EXPECT_THAT(device.CreateBindGroupLayout(&desc),
                     BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
     }
@@ -542,6 +547,74 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         binding.texture.viewDimension = wgpu::TextureViewDimension::CubeArray;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_cube_array<f32>;
+
+            @fragment fn main() {
+                _ = textureDimensions(myTexture);
+            })");
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+}
+
+// Test that storageTexture view dimension matches the shader.
+TEST_F(GetBindGroupLayoutTests, StorageTextureViewDimension) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    binding.visibility = wgpu::ShaderStage::Fragment;
+    binding.storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
+    binding.storageTexture.format = wgpu::TextureFormat::R32Float;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    {
+        binding.storageTexture.viewDimension = wgpu::TextureViewDimension::e1D;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+            @group(0) @binding(0) var myTexture : texture_storage_1d<r32float, write>;
+
+            @fragment fn main() {
+                _ = textureDimensions(myTexture);
+            })");
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+
+    {
+        binding.storageTexture.viewDimension = wgpu::TextureViewDimension::e2D;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+            @group(0) @binding(0) var myTexture : texture_storage_2d<r32float, write>;
+
+            @fragment fn main() {
+                _ = textureDimensions(myTexture);
+            })");
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+
+        // viewDimension defaults to 2D, so should be cached the same.
+        binding.storageTexture.viewDimension = wgpu::TextureViewDimension::Undefined;
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+
+    {
+        binding.storageTexture.viewDimension = wgpu::TextureViewDimension::e2DArray;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+            @group(0) @binding(0) var myTexture : texture_storage_2d_array<r32float, write>;
+
+            @fragment fn main() {
+                _ = textureDimensions(myTexture);
+            })");
+        EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+
+    {
+        binding.storageTexture.viewDimension = wgpu::TextureViewDimension::e3D;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+            @group(0) @binding(0) var myTexture : texture_storage_3d<r32float, write>;
 
             @fragment fn main() {
                 _ = textureDimensions(myTexture);

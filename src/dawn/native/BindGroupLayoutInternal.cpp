@@ -401,6 +401,7 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
         bindingInfo.bindingType = BindingInfoType::Texture;
         bindingInfo.texture = binding->texture;
+        bindingInfo.texture.ApplyTrivialFrontendDefaults();
 
         if (binding->texture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingInfo.texture.viewDimension = wgpu::TextureViewDimension::e2D;
@@ -408,6 +409,7 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         bindingInfo.bindingType = BindingInfoType::StorageTexture;
         bindingInfo.storageTexture = binding->storageTexture;
+        bindingInfo.storageTexture.ApplyTrivialFrontendDefaults();
 
         if (binding->storageTexture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingInfo.storageTexture.viewDimension = wgpu::TextureViewDimension::e2D;
