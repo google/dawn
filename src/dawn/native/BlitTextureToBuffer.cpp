@@ -599,6 +599,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         } else {
             wgpu::TextureDimension dimension = src.texture->GetDimension();
             switch (dimension) {
+                case wgpu::TextureDimension::Undefined:
+                    DAWN_UNREACHABLE();
                 case wgpu::TextureDimension::e1D:
                     textureViewDimension = wgpu::TextureViewDimension::e1D;
                     break;

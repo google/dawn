@@ -731,6 +731,8 @@ MaybeError CommandBuffer::Execute() {
 
                 uint8_t* offset = reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(dst.offset));
                 switch (texture->GetDimension()) {
+                    case wgpu::TextureDimension::Undefined:
+                        DAWN_UNREACHABLE();
                     case wgpu::TextureDimension::e1D:
                     case wgpu::TextureDimension::e2D: {
                         if (texture->GetArrayLayers() == 1) {

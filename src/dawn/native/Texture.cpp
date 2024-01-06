@@ -283,6 +283,8 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
     const CombinedLimits& limits = device->GetLimits();
     Extent3D maxExtent;
     switch (descriptor->dimension) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             maxExtent = {limits.v1.maxTextureDimension1D, 1, 1};
             break;
@@ -301,6 +303,8 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
         "Texture size (%s) exceeded maximum texture size (%s).", &descriptor->size, &maxExtent);
 
     switch (descriptor->dimension) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             DAWN_INVALID_IF(descriptor->mipLevelCount != 1,
                             "Texture mip level count (%u) is more than 1 when its dimension is %s.",
@@ -497,6 +501,8 @@ wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension
     }
 
     switch (descriptor->dimension) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             return wgpu::TextureViewDimension::e1D;
         case wgpu::TextureDimension::e2D:
@@ -641,11 +647,15 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     if (descriptor) {
         desc = *descriptor;
     }
+    desc.ApplyTrivialFrontendDefaults();
 
     // The default value for the view dimension depends on the texture's dimension with a
     // special case for 2DArray being chosen if texture is 2D but has more than one array layer.
     if (desc.dimension == wgpu::TextureViewDimension::Undefined) {
         switch (texture->GetDimension()) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
+
             case wgpu::TextureDimension::e1D:
                 desc.dimension = wgpu::TextureViewDimension::e1D;
                 break;
@@ -678,6 +688,7 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
             desc.format = format.format;
         }
     }
+
     if (desc.arrayLayerCount == wgpu::kArrayLayerCountUndefined) {
         switch (desc.dimension) {
             case wgpu::TextureViewDimension::e1D:
@@ -1023,6 +1034,8 @@ bool TextureBase::CoversFullSubresource(uint32_t mipLevel,
                                         const Extent3D& size) const {
     Extent3D levelSize = GetMipLevelSingleSubresourcePhysicalSize(mipLevel, aspect);
     switch (GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             return size.width == levelSize.width;
         case wgpu::TextureDimension::e2D:

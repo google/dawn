@@ -658,6 +658,9 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     // Choose the correct MTLTextureType and paper over differences in how the array layer count
     // is specified.
     switch (GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
+
         case wgpu::TextureDimension::e1D:
             mtlDesc.arrayLength = 1;
             mtlDesc.depth = 1;

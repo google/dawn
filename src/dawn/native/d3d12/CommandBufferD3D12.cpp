@@ -982,6 +982,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             uint32_t sourceLayer = 0;
                             uint32_t sourceZ = 0;
                             switch (source->GetDimension()) {
+                                case wgpu::TextureDimension::Undefined:
+                                    DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
                                     DAWN_ASSERT(copy->source.origin.z == 0);
                                     break;
@@ -996,6 +998,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                             uint32_t destinationLayer = 0;
                             uint32_t destinationZ = 0;
                             switch (destination->GetDimension()) {
+                                case wgpu::TextureDimension::Undefined:
+                                    DAWN_UNREACHABLE();
                                 case wgpu::TextureDimension::e1D:
                                     DAWN_ASSERT(copy->destination.origin.z == 0);
                                     break;

@@ -742,6 +742,8 @@ void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
     for (const auto& copyInfo : splitCopies) {
         uint64_t bufferOffset = copyInfo.bufferOffset;
         switch (texture->GetDimension()) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
             case wgpu::TextureDimension::e1D: {
                 [commandContext->EnsureBlit()
                          copyFromBuffer:mtlBuffer
@@ -996,6 +998,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                     uint64_t bufferOffset = copyInfo.bufferOffset;
 
                     switch (texture->GetDimension()) {
+                        case wgpu::TextureDimension::Undefined:
+                            DAWN_UNREACHABLE();
                         case wgpu::TextureDimension::e1D: {
                             [commandContext->EnsureBlit()
                                          copyFromTexture:texture->GetMTLTexture(src.aspect)

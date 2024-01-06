@@ -97,6 +97,8 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
     region.srcOffset.x = srcCopy.origin.x;
     region.srcOffset.y = srcCopy.origin.y;
     switch (srcTexture->GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             region.srcSubresource.baseArrayLayer = 0;
             region.srcSubresource.layerCount = 1;
@@ -118,6 +120,8 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
     region.dstOffset.x = dstCopy.origin.x;
     region.dstOffset.y = dstCopy.origin.y;
     switch (dstTexture->GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             region.dstSubresource.baseArrayLayer = 0;
             region.dstSubresource.layerCount = 1;

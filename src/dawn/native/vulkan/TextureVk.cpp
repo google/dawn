@@ -279,6 +279,9 @@ void FillVulkanCreateInfoSizesAndType(const Texture& texture, VkImageCreateInfo*
     // Fill in the image type, and paper over differences in how the array layer count is
     // specified between WebGPU and Vulkan.
     switch (texture.GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
+
         case wgpu::TextureDimension::e1D:
             info->imageType = VK_IMAGE_TYPE_1D;
             info->extent = {size.width, 1, 1};

@@ -346,7 +346,7 @@
         "extensible": "in",
         "members": [
             {"name": "sample type", "type": "texture sample type", "default": "undefined"},
-            {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
+            {"name": "view dimension", "type": "texture view dimension", "default": "2D"},
             {"name": "multisampled", "type": "bool", "default": "false"}
         ]
     },
@@ -419,7 +419,7 @@
         "members": [
             {"name": "access", "type": "storage texture access", "default": "undefined"},
             {"name": "format", "type": "texture format", "default": "undefined"},
-            {"name": "view dimension", "type": "texture view dimension", "default": "undefined"}
+            {"name": "view dimension", "type": "texture view dimension", "default": "2D"}
         ]
     },
 
@@ -3454,12 +3454,13 @@
     "texture aspect": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "all"},
-            {"value": 1, "name": "stencil only"},
-            {"value": 2, "name": "depth only"},
-            {"value": 3, "name": "plane 0 only", "tags": ["dawn"]},
-            {"value": 4, "name": "plane 1 only", "tags": ["dawn"]},
-            {"value": 5, "name": "plane 2 only", "tags": ["dawn"]}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "all"},
+            {"value": 2, "name": "stencil only"},
+            {"value": 3, "name": "depth only"},
+            {"value": 4, "name": "plane 0 only", "tags": ["dawn"]},
+            {"value": 5, "name": "plane 1 only", "tags": ["dawn"]},
+            {"value": 6, "name": "plane 2 only", "tags": ["dawn"]}
         ]
     },
     "texture data layout": {
@@ -3497,9 +3498,10 @@
     "texture dimension": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "1D"},
-            {"value": 1, "name": "2D"},
-            {"value": 2, "name": "3D"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "1D"},
+            {"value": 2, "name": "2D"},
+            {"value": 3, "name": "3D"}
         ]
     },
     "texture format": {
@@ -3665,7 +3667,7 @@
     "texture view dimension": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "1D"},
             {"value": 2, "name": "2D"},
             {"value": 3, "name": "2D array"},

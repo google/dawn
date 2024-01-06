@@ -174,6 +174,8 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayo
     region.imageSubresource.mipLevel = textureCopy.mipLevel;
 
     switch (textureCopy.texture->GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             DAWN_ASSERT(textureCopy.origin.z == 0 && copySize.depthOrArrayLayers == 1);
             region.imageOffset.x = textureCopy.origin.x;

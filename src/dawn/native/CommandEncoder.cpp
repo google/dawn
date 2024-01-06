@@ -1575,8 +1575,11 @@ void CommandEncoder::InternalCopyBufferToBufferWithAllocatedSize(BufferBase* sou
 }
 
 void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
-                                            const ImageCopyTexture* destination,
+                                            const ImageCopyTexture* destinationOrig,
                                             const Extent3D* copySize) {
+    ImageCopyTexture destination = *destinationOrig;
+    destination.ApplyTrivialFrontendDefaults();
+
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -1585,40 +1588,40 @@ void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc),
                                  "validating source %s usage.", source->buffer);
 
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
-                DAWN_TRY_CONTEXT(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), destination, *copySize));
+                DAWN_TRY_CONTEXT(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::CopyDst,
                                                   mUsageValidationMode),
-                                 "validating destination %s usage.", destination->texture);
-                DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
+                                 "validating destination %s usage.", destination.texture);
+                DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination.texture));
 
-                DAWN_TRY(ValidateLinearToDepthStencilCopyRestrictions(*destination));
+                DAWN_TRY(ValidateLinearToDepthStencilCopyRestrictions(destination));
                 // We validate texture copy range before validating linear texture data,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), destination, *copySize));
             }
             const TexelBlockInfo& blockInfo =
-                destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
+                destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
                     source->layout, blockInfo,
-                    destination->texture->GetFormat().HasDepthOrStencil()));
+                    destination.texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
                                                    blockInfo, *copySize));
             }
 
             mTopLevelBuffers.insert(source->buffer);
-            mTopLevelTextures.insert(destination->texture);
+            mTopLevelTextures.insert(destination.texture);
 
             TextureDataLayout srcLayout = source->layout;
             ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
 
             TextureCopy dst;
-            dst.texture = destination->texture;
-            dst.origin = destination->origin;
-            dst.mipLevel = destination->mipLevel;
-            dst.aspect = ConvertAspect(destination->texture->GetFormat(), destination->aspect);
+            dst.texture = destination.texture;
+            dst.origin = destination.origin;
+            dst.mipLevel = destination.mipLevel;
+            dst.aspect = ConvertAspect(destination.texture->GetFormat(), destination.aspect);
 
             if (dst.aspect == Aspect::Depth &&
                 GetDevice()->IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy)) {
@@ -1657,23 +1660,26 @@ void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
 
             return {};
         },
-        "encoding %s.CopyBufferToTexture(%s, %s, %s).", this, source->buffer, destination->texture,
+        "encoding %s.CopyBufferToTexture(%s, %s, %s).", this, source->buffer, destination.texture,
         copySize);
 }
 
-void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
+void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* sourceOrig,
                                             const ImageCopyBuffer* destination,
                                             const Extent3D* copySize) {
+    ImageCopyTexture source = *sourceOrig;
+    source.ApplyTrivialFrontendDefaults();
+
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
-                DAWN_TRY_CONTEXT(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), source, *copySize));
+                DAWN_TRY_CONTEXT(ValidateCanUseAs(source.texture, wgpu::TextureUsage::CopySrc,
                                                   mUsageValidationMode),
-                                 "validating source %s usage.", source->texture);
-                DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source->texture));
-                DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(*source));
+                                 "validating source %s usage.", source.texture);
+                DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source.texture));
+                DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(source));
 
                 DAWN_TRY(ValidateImageCopyBuffer(GetDevice(), *destination));
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst),
@@ -1683,24 +1689,24 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), source, *copySize));
 
                 if (GetDevice()->IsCompatibilityMode()) {
                     DAWN_TRY(ValidateTextureFormatForTextureToBufferCopyInCompatibilityMode(
-                        source->texture));
+                        source.texture));
                 }
             }
             const TexelBlockInfo& blockInfo =
-                source->texture->GetFormat().GetAspectInfo(source->aspect).block;
+                source.texture->GetFormat().GetAspectInfo(source.aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
                     destination->layout, blockInfo,
-                    source->texture->GetFormat().HasDepthOrStencil()));
+                    source.texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(
                     destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
             }
 
-            mTopLevelTextures.insert(source->texture);
+            mTopLevelTextures.insert(source.texture);
             mTopLevelBuffers.insert(destination->buffer);
 
             TextureDataLayout dstLayout = destination->layout;
@@ -1712,8 +1718,8 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                 return {};
             }
 
-            auto format = source->texture->GetFormat();
-            auto aspect = ConvertAspect(format, source->aspect);
+            auto format = source.texture->GetFormat();
+            auto aspect = ConvertAspect(format, source.aspect);
 
             // Workaround to use compute pass to emulate texture to buffer copy
             if (ShouldUseTextureToBufferBlit(GetDevice(), format, aspect)) {
@@ -1723,9 +1729,9 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                 auto deviceLock(GetDevice()->GetScopedLock());
 
                 TextureCopy src;
-                src.texture = source->texture;
-                src.origin = source->origin;
-                src.mipLevel = source->mipLevel;
+                src.texture = source.texture;
+                src.origin = source.origin;
+                src.mipLevel = source.mipLevel;
                 src.aspect = aspect;
 
                 BufferCopy dst;
@@ -1742,10 +1748,10 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
 
             CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
-            t2b->source.texture = source->texture;
-            t2b->source.origin = source->origin;
-            t2b->source.mipLevel = source->mipLevel;
-            t2b->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
+            t2b->source.texture = source.texture;
+            t2b->source.origin = source.origin;
+            t2b->source.mipLevel = source.mipLevel;
+            t2b->source.aspect = ConvertAspect(source.texture->GetFormat(), source.aspect);
             t2b->destination.buffer = destination->buffer;
             t2b->destination.offset = dstLayout.offset;
             t2b->destination.bytesPerRow = dstLayout.bytesPerRow;
@@ -1754,65 +1760,69 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
 
             return {};
         },
-        "encoding %s.CopyTextureToBuffer(%s, %s, %s).", this, source->texture, destination->buffer,
+        "encoding %s.CopyTextureToBuffer(%s, %s, %s).", this, source.texture, destination->buffer,
         copySize);
 }
 
-void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
-                                             const ImageCopyTexture* destination,
+void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* sourceOrig,
+                                             const ImageCopyTexture* destinationOrig,
                                              const Extent3D* copySize) {
+    ImageCopyTexture source = *sourceOrig;
+    source.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture destination = *destinationOrig;
+    destination.ApplyTrivialFrontendDefaults();
+
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(GetDevice()->ValidateObject(source->texture));
-                DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
+                DAWN_TRY(GetDevice()->ValidateObject(source.texture));
+                DAWN_TRY(GetDevice()->ValidateObject(destination.texture));
 
-                DAWN_INVALID_IF(source->texture->GetFormat().IsMultiPlanar() ||
-                                    destination->texture->GetFormat().IsMultiPlanar(),
+                DAWN_INVALID_IF(source.texture->GetFormat().IsMultiPlanar() ||
+                                    destination.texture->GetFormat().IsMultiPlanar(),
                                 "Copying between a multiplanar texture and another texture is "
                                 "currently not allowed.");
-                DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), *source, *copySize),
-                                 "validating source %s.", source->texture);
-                DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), *destination, *copySize),
-                                 "validating destination %s.", destination->texture);
+                DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), source, *copySize),
+                                 "validating source %s.", source.texture);
+                DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), destination, *copySize),
+                                 "validating destination %s.", destination.texture);
 
-                DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), *source, *copySize),
-                                 "validating source %s copy range.", source->texture);
-                DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), *destination, *copySize),
-                                 "validating source %s copy range.", destination->texture);
+                DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), source, *copySize),
+                                 "validating source %s copy range.", source.texture);
+                DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), destination, *copySize),
+                                 "validating source %s copy range.", destination.texture);
 
-                DAWN_TRY(
-                    ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
+                DAWN_TRY(ValidateTextureToTextureCopyRestrictions(source, destination, *copySize));
 
-                DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                DAWN_TRY(ValidateCanUseAs(source.texture, wgpu::TextureUsage::CopySrc,
                                           mUsageValidationMode));
-                DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                DAWN_TRY(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::CopyDst,
                                           mUsageValidationMode));
 
                 if (GetDevice()->IsCompatibilityMode()) {
                     DAWN_TRY(ValidateSourceTextureFormatForTextureToTextureCopyInCompatibilityMode(
-                        source->texture));
+                        source.texture));
                 }
             }
 
-            mTopLevelTextures.insert(source->texture);
-            mTopLevelTextures.insert(destination->texture);
+            mTopLevelTextures.insert(source.texture);
+            mTopLevelTextures.insert(destination.texture);
 
-            Aspect aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
+            Aspect aspect = ConvertAspect(source.texture->GetFormat(), source.aspect);
             DAWN_ASSERT(aspect ==
-                        ConvertAspect(destination->texture->GetFormat(), destination->aspect));
+                        ConvertAspect(destination.texture->GetFormat(), destination.aspect));
 
             TextureCopy src;
-            src.texture = source->texture;
-            src.origin = source->origin;
-            src.mipLevel = source->mipLevel;
+            src.texture = source.texture;
+            src.origin = source.origin;
+            src.mipLevel = source.mipLevel;
             src.aspect = aspect;
 
             TextureCopy dst;
-            dst.texture = destination->texture;
-            dst.origin = destination->origin;
-            dst.mipLevel = destination->mipLevel;
+            dst.texture = destination.texture;
+            dst.origin = destination.origin;
+            dst.mipLevel = destination.mipLevel;
             dst.aspect = aspect;
 
             // Emulate RGB9E5Ufloat T2T copy by calling a T2B copy and then a B2T copy
@@ -1824,7 +1834,7 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
 
                 // Calculate needed buffer size to hold copied texel data.
                 const TexelBlockInfo& blockInfo =
-                    source->texture->GetFormat().GetAspectInfo(aspect).block;
+                    source.texture->GetFormat().GetAspectInfo(aspect).block;
                 const uint64_t bytesPerRow =
                     Align(4 * copySize->width, kTextureBytesPerRowAlignment);
                 const uint64_t rowsPerImage = copySize->height;
@@ -1845,8 +1855,8 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                 buf.layout.bytesPerRow = bytesPerRow;
                 buf.layout.rowsPerImage = rowsPerImage;
 
-                APICopyTextureToBuffer(source, &buf, copySize);
-                APICopyBufferToTexture(&buf, destination, copySize);
+                APICopyTextureToBuffer(&source, &buf, copySize);
+                APICopyBufferToTexture(&buf, &destination, copySize);
 
                 return {};
             }
@@ -1877,13 +1887,13 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
 
                 DAWN_TRY_CONTEXT(BlitDepthToDepth(GetDevice(), this, src, dst, *copySize),
                                  "copying depth aspect from %s to %s using blit workaround.",
-                                 source->texture, destination->texture);
+                                 source.texture, destination.texture);
             }
 
             return {};
         },
-        "encoding %s.CopyTextureToTexture(%s, %s, %s).", this, source->texture,
-        destination->texture, copySize);
+        "encoding %s.CopyTextureToTexture(%s, %s, %s).", this, source.texture, destination.texture,
+        copySize);
 }
 
 void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_t size) {

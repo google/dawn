@@ -390,6 +390,8 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     InitTexture(kLayers, kMipLevels);
 
     wgpu::TextureViewDescriptor descriptor;
+    // (Off-topic) spot-test for defaulting of .aspect.
+    descriptor.aspect = wgpu::TextureAspect::Undefined;
     descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
     wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
@@ -432,6 +434,8 @@ TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnSingleLayer2DTexture) {
     descriptor.arrayLayerCount = 1;
     descriptor.baseMipLevel = 0;
     descriptor.mipLevelCount = 1;
+    // (Off-topic) spot-test for defaulting of .aspect.
+    descriptor.aspect = wgpu::TextureAspect::Undefined;
     wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
     const char* fragmentShader = R"(

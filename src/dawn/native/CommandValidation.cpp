@@ -459,6 +459,8 @@ ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture&
             return Aspect::Plane1;
         case wgpu::TextureAspect::Plane2Only:
             return Aspect::Plane2;
+        case wgpu::TextureAspect::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -507,6 +509,9 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
 
     if (src.texture == dst.texture) {
         switch (src.texture->GetDimension()) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
+
             case wgpu::TextureDimension::e1D:
                 DAWN_ASSERT(src.mipLevel == 0);
                 return DAWN_VALIDATION_ERROR("Copy is from %s to itself.", src.texture);

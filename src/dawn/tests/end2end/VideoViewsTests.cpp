@@ -962,6 +962,11 @@ TEST_P(VideoViewsValidationTests, CreateYUVViewValidation) {
     viewDesc.aspect = wgpu::TextureAspect::All;
     ASSERT_DEVICE_ERROR(platformTexture->wgpuTexture.CreateView(&viewDesc));
 
+    // Compatible view format but wrong aspect (due to defaulting).
+    viewDesc.format = GetPlaneFormat(0);
+    viewDesc.aspect = wgpu::TextureAspect::Undefined;
+    ASSERT_DEVICE_ERROR(platformTexture->wgpuTexture.CreateView(&viewDesc));
+
     // Create a single plane texture.
     wgpu::TextureDescriptor desc;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;

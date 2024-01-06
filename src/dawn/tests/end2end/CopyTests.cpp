@@ -564,6 +564,9 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
             utils::CreateImageCopyTexture(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
         wgpu::ImageCopyTexture dstImageCopyTexture =
             utils::CreateImageCopyTexture(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
+        // (Off-topic) spot-test for defaulting of .aspect.
+        srcImageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
+        dstImageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
         encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
 
         // Create an output buffer and use it to completely populate the subresources of the dst
@@ -1682,6 +1685,8 @@ TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
     wgpu::ImageCopyBuffer imageCopyBuffer =
         utils::CreateImageCopyBuffer(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
     wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+    // (Off-topic) spot-test for defaulting of .aspect.
+    imageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
 
     wgpu::Extent3D copySize = textureDescriptor.size;
     encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
@@ -3134,6 +3139,8 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
 
         wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(uploadBuffer);
         wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(destinationTexture);
+        // (Off-topic) spot-test for defaulting of .aspect.
+        imageCopyTexture.aspect = wgpu::TextureAspect::Undefined;
         encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
     };
 

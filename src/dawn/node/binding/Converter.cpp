@@ -727,6 +727,8 @@ bool Converter::Convert(interop::GPUTextureDimension& out, wgpu::TextureDimensio
         case wgpu::TextureDimension::e3D:
             out = interop::GPUTextureDimension::k3D;
             return true;
+        case wgpu::TextureDimension::Undefined:
+            break;
     }
     return false;
 }

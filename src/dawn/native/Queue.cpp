@@ -444,22 +444,25 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
         writeSize));
 }
 
-MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destination,
+MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOrig,
                                            const void* data,
                                            size_t dataSize,
                                            const TextureDataLayout& dataLayout,
                                            const Extent3D* writeSize) {
-    DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
+    ImageCopyTexture destination = *destinationOrig;
+    destination.ApplyTrivialFrontendDefaults();
+
+    DAWN_TRY(ValidateWriteTexture(&destination, dataSize, dataLayout, writeSize));
 
     if (writeSize->width == 0 || writeSize->height == 0 || writeSize->depthOrArrayLayers == 0) {
         return {};
     }
 
     const TexelBlockInfo& blockInfo =
-        destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
+        destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
     TextureDataLayout layout = dataLayout;
     ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
-    return WriteTextureImpl(*destination, data, layout, *writeSize);
+    return WriteTextureImpl(destination, data, layout, *writeSize);
 }
 
 MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
@@ -519,33 +522,40 @@ void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture*
         CopyExternalTextureForBrowserInternal(source, destination, copySize, options)));
 }
 
-MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* source,
-                                                    const ImageCopyTexture* destination,
+MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sourceOrig,
+                                                    const ImageCopyTexture* destinationOrig,
                                                     const Extent3D* copySize,
                                                     const CopyTextureForBrowserOptions* options) {
+    ImageCopyTexture source = *sourceOrig;
+    source.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture destination = *destinationOrig;
+    destination.ApplyTrivialFrontendDefaults();
+
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
-            ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize, options),
-            "validating CopyTextureForBrowser from %s to %s", source->texture,
-            destination->texture);
+            ValidateCopyTextureForBrowser(GetDevice(), &source, &destination, copySize, options),
+            "validating CopyTextureForBrowser from %s to %s", source.texture, destination.texture);
     }
 
-    return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize, options);
+    return DoCopyTextureForBrowser(GetDevice(), &source, &destination, copySize, options);
 }
 
 MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     const ImageCopyExternalTexture* source,
-    const ImageCopyTexture* destination,
+    const ImageCopyTexture* destinationOrig,
     const Extent3D* copySize,
     const CopyTextureForBrowserOptions* options) {
+    ImageCopyTexture destination = *destinationOrig;
+    destination.ApplyTrivialFrontendDefaults();
+
     if (GetDevice()->IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, destination,
+        DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, &destination,
                                                                copySize, options),
                          "validating CopyExternalTextureForBrowser from %s to %s",
-                         source->externalTexture, destination->texture);
+                         source->externalTexture, destination.texture);
     }
 
-    return DoCopyExternalTextureForBrowser(GetDevice(), source, destination, copySize, options);
+    return DoCopyExternalTextureForBrowser(GetDevice(), source, &destination, copySize, options);
 }
 
 MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,

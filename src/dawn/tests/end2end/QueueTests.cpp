@@ -766,6 +766,8 @@ TEST_P(QueueWriteTextureTests, WriteDepthAspectAfterOtherQueueWriteTextureCalls)
 
     constexpr uint16_t kExpectedData1 = (204 << 8) | 205;
     wgpu::ImageCopyTexture imageCopyTexture1 = utils::CreateImageCopyTexture(depthTexture1);
+    // (Off-topic) spot-test for defaulting of .aspect.
+    imageCopyTexture1.aspect = wgpu::TextureAspect::Undefined;
     wgpu::TextureDataLayout textureDataLayout =
         utils::CreateTextureDataLayout(0, sizeof(kExpectedData1));
     queue.WriteTexture(&imageCopyTexture1, &kExpectedData1, sizeof(kExpectedData1),

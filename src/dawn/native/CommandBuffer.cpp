@@ -119,8 +119,9 @@ bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
         case wgpu::TextureDimension::e3D:
             return extent.width == copySize.width && extent.height == copySize.height &&
                    extent.depthOrArrayLayers == copySize.depthOrArrayLayers;
+        case wgpu::TextureDimension::Undefined:
+            break;
     }
-
     DAWN_UNREACHABLE();
 }
 
@@ -142,8 +143,9 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Ex
             return {copy.aspect, {copy.origin.z, copySize.depthOrArrayLayers}, {copy.mipLevel, 1}};
         case wgpu::TextureDimension::e3D:
             return {copy.aspect, {0, 1}, {copy.mipLevel, 1}};
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
     }
-
     DAWN_UNREACHABLE();
 }
 

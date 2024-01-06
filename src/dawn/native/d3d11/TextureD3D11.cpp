@@ -313,6 +313,8 @@ MaybeError Texture::InitializeAsInternalTexture() {
     }
 
     switch (GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D: {
             D3D11_TEXTURE1D_DESC desc = GetD3D11TextureDesc<D3D11_TEXTURE1D_DESC>();
             ComPtr<ID3D11Texture1D> d3d11Texture1D;
@@ -416,6 +418,8 @@ ResultOrError<ComPtr<ID3D11RenderTargetView>> Texture::CreateD3D11RenderTargetVi
         rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
     } else {
         switch (GetDimension()) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
             case wgpu::TextureDimension::e2D:
                 // Currently we always use D3D11_TEX2D_ARRAY_RTV because we cannot specify base
                 // array layer and layer count in D3D11_TEX2D_RTV. For 2D texture views, we treat
@@ -1066,6 +1070,8 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
     srcBox.top = src.origin.y;
     srcBox.bottom = src.origin.y + copy->copySize.height;
     switch (src.texture->GetDimension()) {
+        case wgpu::TextureDimension::Undefined:
+            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
         case wgpu::TextureDimension::e2D:
             srcBox.front = 0;
@@ -1075,8 +1081,6 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
             srcBox.front = src.origin.z;
             srcBox.back = src.origin.z + copy->copySize.depthOrArrayLayers;
             break;
-        default:
-            DAWN_UNREACHABLE();
     }
 
     bool isWholeSubresource =
