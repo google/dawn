@@ -2109,6 +2109,7 @@ dxcompiler_sourceset("clang_lib_sema") {
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaExprObjC.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaFixItUtils.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaHLSL.cpp",
+    "$dawn_dxc_dir/tools/clang/lib/Sema/SemaHLSLDiagnoseTU.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaInit.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaLambda.cpp",
     "$dawn_dxc_dir/tools/clang/lib/Sema/SemaLookup.cpp",
