@@ -2288,12 +2288,11 @@
     "present mode": {
         "category": "enum",
         "emscripten_no_enum_table": true,
-        "_comment": "TODO(crbug.com/dawn/2224): Should this be renumbered to reserve 0?",
         "values": [
-            {"value": 0, "name": "fifo"},
-            {"value": 1, "name": "fifo relaxed", "tags": ["upstream"]},
-            {"value": 2, "name": "immediate"},
-            {"value": 3, "name": "mailbox"}
+            {"value": 1, "name": "fifo"},
+            {"value": 2, "name": "fifo relaxed", "tags": ["upstream"]},
+            {"value": 3, "name": "immediate"},
+            {"value": 4, "name": "mailbox"}
         ]
     },
     "programmable stage descriptor": {
