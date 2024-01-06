@@ -591,14 +591,8 @@ MaybeError Buffer::WriteInternal(const ScopedCommandRecordingContext* commandCon
 
     // If the mD3d11NonConstantBuffer is null, we have to create a staging buffer for transfer the
     // data to mD3d11ConstantBuffer.
-    BufferDescriptor descriptor;
-    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-    descriptor.size = Align(size, D3D11BufferSizeAlignment(descriptor.usage));
-    descriptor.mappedAtCreation = false;
-    descriptor.label = "DawnWriteStagingBuffer";
     Ref<BufferBase> stagingBuffer;
-    DAWN_TRY_ASSIGN(stagingBuffer,
-                    Buffer::Create(ToBackend(GetDevice()), Unpack(&descriptor), commandContext));
+    DAWN_TRY_ASSIGN(stagingBuffer, ToBackend(GetDevice())->GetStagingBuffer(commandContext, size));
 
     DAWN_TRY(ToBackend(stagingBuffer)->WriteInternal(commandContext, 0, data, size));
 
