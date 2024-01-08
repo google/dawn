@@ -45,7 +45,6 @@
 #include "dawn/native/d3d12/CommandAllocatorManager.h"
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
-#include "dawn/native/d3d12/FenceD3D12.h"
 #include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
@@ -491,10 +490,15 @@ ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
                          forceAllocateAsCommittedResource);
 }
 
-ResultOrError<Ref<d3d::Fence>> Device::CreateFence(
-    const d3d::ExternalImageDXGIFenceDescriptor* descriptor) {
-    return Fence::CreateFromHandle(mD3d12Device.Get(), descriptor->fenceHandle,
-                                   descriptor->fenceValue);
+ResultOrError<FenceAndSignalValue> Device::CreateFence(
+    const d3d::ExternalImageDXGIFenceDescriptor* externalImageFenceDesc) {
+    SharedFenceDXGISharedHandleDescriptor sharedFenceDesc;
+    sharedFenceDesc.handle = externalImageFenceDesc->fenceHandle;
+
+    Ref<SharedFence> fence;
+    DAWN_TRY_ASSIGN(fence, SharedFence::Create(this, "Imported DXGI fence", &sharedFenceDesc));
+
+    return FenceAndSignalValue{std::move(fence), externalImageFenceDesc->fenceValue};
 }
 
 ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExternalImageDXGIImplImpl(
@@ -541,7 +545,7 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
 
 Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
-                                                  std::vector<Ref<d3d::Fence>> waitFences,
+                                                  std::vector<FenceAndSignalValue> waitFences,
                                                   bool isSwapChainTexture,
                                                   bool isInitialized) {
     Ref<Texture> dawnTexture;

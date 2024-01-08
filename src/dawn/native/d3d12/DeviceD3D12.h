@@ -142,14 +142,14 @@ class Device final : public d3d::Device {
 
     MutexProtected<StagingDescriptorAllocator>& GetDepthStencilViewAllocator() const;
 
-    ResultOrError<Ref<d3d::Fence>> CreateFence(
+    ResultOrError<FenceAndSignalValue> CreateFence(
         const d3d::ExternalImageDXGIFenceDescriptor* descriptor) override;
     ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
         const ExternalImageDescriptor* descriptor) override;
 
     Ref<TextureBase> CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                               ComPtr<IUnknown> d3dTexture,
-                                              std::vector<Ref<d3d::Fence>> waitFences,
+                                              std::vector<FenceAndSignalValue> waitFences,
                                               bool isSwapChainTexture,
                                               bool isInitialized) override;
 

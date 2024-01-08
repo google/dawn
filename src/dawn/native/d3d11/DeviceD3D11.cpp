@@ -46,7 +46,6 @@
 #include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/CommandBufferD3D11.h"
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
-#include "dawn/native/d3d11/FenceD3D11.h"
 #include "dawn/native/d3d11/PhysicalDeviceD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
@@ -402,10 +401,15 @@ float Device::GetTimestampPeriodInNS() const {
 
 void Device::SetLabelImpl() {}
 
-ResultOrError<Ref<d3d::Fence>> Device::CreateFence(
-    const d3d::ExternalImageDXGIFenceDescriptor* descriptor) {
-    return Fence::CreateFromHandle(mD3d11Device5.Get(), descriptor->fenceHandle,
-                                   descriptor->fenceValue);
+ResultOrError<FenceAndSignalValue> Device::CreateFence(
+    const d3d::ExternalImageDXGIFenceDescriptor* externalImageFenceDesc) {
+    SharedFenceDXGISharedHandleDescriptor sharedFenceDesc;
+    sharedFenceDesc.handle = externalImageFenceDesc->fenceHandle;
+
+    Ref<SharedFence> fence;
+    DAWN_TRY_ASSIGN(fence, SharedFence::Create(this, "Imported DXGI fence", &sharedFenceDesc));
+
+    return FenceAndSignalValue{std::move(fence), externalImageFenceDesc->fenceValue};
 }
 
 ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExternalImageDXGIImplImpl(
@@ -482,7 +486,7 @@ bool Device::IsResolveTextureBlitWithDrawSupported() const {
 
 Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
-                                                  std::vector<Ref<d3d::Fence>> waitFences,
+                                                  std::vector<FenceAndSignalValue> waitFences,
                                                   bool isSwapChainTexture,
                                                   bool isInitialized) {
     Ref<Texture> dawnTexture;

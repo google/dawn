@@ -35,7 +35,6 @@
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/d3d/DeviceD3D.h"
-#include "dawn/native/d3d/Fence.h"
 #include "dawn/native/d3d/Forward.h"
 #include "dawn/native/d3d/QueueD3D.h"
 #include "dawn/native/d3d/SharedFenceD3D.h"
@@ -157,9 +156,9 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
         internalDesc.internalUsage = mUsageInternal;
     }
 
-    std::vector<Ref<Fence>> waitFences;
+    std::vector<FenceAndSignalValue> waitFences;
     for (const d3d::ExternalImageDXGIFenceDescriptor& fenceDescriptor : descriptor->waitFences) {
-        Ref<Fence> fence;
+        FenceAndSignalValue fence;
         if (mBackendDevice->ConsumedError(
                 ToBackend(mBackendDevice.Get())->CreateFence(&fenceDescriptor), &fence)) {
             dawn::ErrorLog() << "Unable to create D3D11 fence for external image";

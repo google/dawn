@@ -67,7 +67,7 @@ class Texture final : public d3d::Texture {
         Device* device,
         const UnpackedPtr<TextureDescriptor>& descriptor,
         ComPtr<IUnknown> d3dTexture,
-        std::vector<Ref<d3d::Fence>> waitFences,
+        std::vector<FenceAndSignalValue> waitFences,
         bool isSwapChainTexture,
         bool isInitialized);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
@@ -138,7 +138,7 @@ class Texture final : public d3d::Texture {
     MaybeError InitializeAsInternalTexture();
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Texture);
     MaybeError InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
-                                           std::vector<Ref<d3d::Fence>> waitFences,
+                                           std::vector<FenceAndSignalValue> waitFences,
                                            bool isSwapChainTexture);
     void SetLabelHelper(const char* prefix);
 

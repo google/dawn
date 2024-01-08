@@ -39,8 +39,6 @@
 
 namespace dawn::native::d3d11 {
 
-class Fence;
-
 // Definition of backend types
 class Device final : public d3d::Device {
   public:
@@ -64,7 +62,7 @@ class Device final : public d3d::Device {
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
     Ref<TextureBase> CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                               ComPtr<IUnknown> d3dTexture,
-                                              std::vector<Ref<d3d::Fence>> waitFences,
+                                              std::vector<FenceAndSignalValue> waitFences,
                                               bool isSwapChainTexture,
                                               bool isInitialized) override;
 
@@ -89,7 +87,7 @@ class Device final : public d3d::Device {
     bool IsResolveTextureBlitWithDrawSupported() const override;
     void SetLabelImpl() override;
 
-    ResultOrError<Ref<d3d::Fence>> CreateFence(
+    ResultOrError<FenceAndSignalValue> CreateFence(
         const d3d::ExternalImageDXGIFenceDescriptor* descriptor) override;
     ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
         const ExternalImageDescriptor* descriptor) override;
