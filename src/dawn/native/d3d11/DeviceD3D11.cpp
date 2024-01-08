@@ -130,9 +130,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
-    DAWN_TRY(CheckHRESULT(
-        queue->GetFence()->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &mFenceHandle),
-        "D3D11: creating fence shared handle"));
 
     DAWN_TRY(DeviceBase::Initialize(queue));
     DAWN_TRY(queue->InitializePendingContext());

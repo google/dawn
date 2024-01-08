@@ -33,6 +33,7 @@
 #include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/CommandBufferD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
+#include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -54,6 +55,10 @@ MaybeError Queue::Initialize() {
 
     // Create the fence event.
     mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    DAWN_ASSERT(mFenceEvent != nullptr);
+
+    DAWN_TRY_ASSIGN(mSharedFence, SharedFence::Create(ToBackend(GetDevice()),
+                                                      "Internal shared DXGI fence", mFence));
 
     return {};
 }
@@ -62,17 +67,25 @@ MaybeError Queue::InitializePendingContext() {
     return mPendingCommands.Initialize(ToBackend(GetDevice()));
 }
 
-void Queue::Destroy() {
+void Queue::DestroyImpl() {
     if (mFenceEvent != nullptr) {
         ::CloseHandle(mFenceEvent);
         mFenceEvent = nullptr;
     }
 
+    // Release the shared fence here to prevent a ref-cycle with the device, but do not destroy the
+    // underlying native fence so that we can return a SharedFence on EndAccess after destruction.
+    mSharedFence = nullptr;
+
     mPendingCommands.Release();
 }
 
-ID3D11Fence* Queue::GetFence() const {
-    return mFence.Get();
+ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
+    if (mSharedFence == nullptr) {
+        DAWN_ASSERT(!IsAlive());
+        return SharedFence::Create(ToBackend(GetDevice()), "Internal shared DXGI fence", mFence);
+    }
+    return mSharedFence;
 }
 
 ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode) {

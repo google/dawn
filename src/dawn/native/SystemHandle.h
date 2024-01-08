@@ -75,6 +75,7 @@ class SystemHandle : public NonCopyable {
     SystemHandle& operator=(SystemHandle&& rhs);
 
     Handle Get() const;
+    Handle* GetMut();
     Handle Detach();
     ResultOrError<SystemHandle> Duplicate() const;
     void Close();

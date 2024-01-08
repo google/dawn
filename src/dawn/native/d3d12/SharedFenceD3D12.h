@@ -42,6 +42,10 @@ class SharedFence : public d3d::SharedFence {
         const char* label,
         const SharedFenceDXGISharedHandleDescriptor* descriptor);
 
+    static ResultOrError<Ref<SharedFence>> Create(Device* device,
+                                                  const char* label,
+                                                  ComPtr<ID3D12Fence> d3d12Fence);
+
     ID3D12Fence* GetD3DFence() const;
 
   private:

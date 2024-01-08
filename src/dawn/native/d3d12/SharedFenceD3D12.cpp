@@ -48,6 +48,22 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->OpenSharedHandle(descriptor->handle,
                                                                      IID_PPV_ARGS(&fence->mFence)),
                           "D3D12 fence open shared handle"));
+
+    return fence;
+}
+
+// static
+ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
+                                                    const char* label,
+                                                    ComPtr<ID3D12Fence> d3d12Fence) {
+    SystemHandle ownedHandle;
+    DAWN_TRY(
+        CheckHRESULT(device->GetD3D12Device()->CreateSharedHandle(
+                         d3d12Fence.Get(), nullptr, GENERIC_ALL, nullptr, ownedHandle.GetMut()),
+                     "D3D12 create fence handle"));
+    DAWN_ASSERT(ownedHandle.IsValid());
+    Ref<SharedFence> fence = AcquireRef(new SharedFence(device, label, std::move(ownedHandle)));
+    fence->mFence = std::move(d3d12Fence);
     return fence;
 }
 

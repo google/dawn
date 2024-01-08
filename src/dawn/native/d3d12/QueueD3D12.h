@@ -40,18 +40,16 @@
 namespace dawn::native::d3d12 {
 
 class Device;
+class SharedFence;
 
 class Queue final : public d3d::Queue {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
-    void Destroy();
-
     MaybeError NextSerial();
     MaybeError WaitForSerial(ExecutionSerial serial);
     ResultOrError<CommandRecordingContext*> GetPendingCommandContext(
         SubmitMode submitMode = SubmitMode::Normal);
-    ID3D12Fence* GetFence() const;
     ID3D12CommandQueue* GetCommandQueue() const;
     ID3D12SharingContract* GetSharingContract() const;
     MaybeError SubmitPendingCommands();
@@ -62,12 +60,14 @@ class Queue final : public d3d::Queue {
 
     MaybeError Initialize();
 
+    void DestroyImpl() override;
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
 
+    ResultOrError<Ref<d3d::SharedFence>> GetOrCreateSharedFence() override;
     void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
 
     // Dawn API
@@ -75,6 +75,7 @@ class Queue final : public d3d::Queue {
 
     ComPtr<ID3D12Fence> mFence;
     HANDLE mFenceEvent = nullptr;
+    Ref<SharedFence> mSharedFence;
 
     CommandRecordingContext mPendingCommands;
     ComPtr<ID3D12CommandQueue> mCommandQueue;

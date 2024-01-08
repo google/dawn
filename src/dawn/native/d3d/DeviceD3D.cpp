@@ -31,6 +31,7 @@
 #include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/Forward.h"
 #include "dawn/native/d3d/PhysicalDeviceD3D.h"
+#include "dawn/native/d3d/SharedFenceD3D.h"
 
 namespace dawn::native::d3d {
 
@@ -41,14 +42,6 @@ Device::Device(AdapterBase* adapter,
 
 Device::~Device() {
     Destroy();
-
-    // Close the handle here instead of in DestroyImpl. The handle is returned from
-    // ExternalImageDXGI, so it needs to live as long as the Device ref does, even if the device
-    // state is destroyed.
-    if (mFenceHandle != nullptr) {
-        ::CloseHandle(mFenceHandle);
-        mFenceHandle = nullptr;
-    }
 }
 
 void Device::DestroyImpl() {
@@ -80,10 +73,6 @@ const PlatformFunctions* Device::GetFunctions() const {
 
 ComPtr<IDXGIFactory4> Device::GetFactory() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetFactory();
-}
-
-HANDLE Device::GetFenceHandle() const {
-    return mFenceHandle;
 }
 
 std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(

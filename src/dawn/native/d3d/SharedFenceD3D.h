@@ -37,6 +37,10 @@ namespace dawn::native::d3d {
 class Device;
 
 class SharedFence : public SharedFenceBase {
+  public:
+    // TODO(sunnyps): Remove after ExternalImageDXGIImpl is gone.
+    HANDLE GetFenceHandle() const;
+
   protected:
     SharedFence(Device* device, const char* label, SystemHandle ownedHandle);
 

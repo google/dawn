@@ -35,7 +35,6 @@
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
-#include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 
 namespace dawn::native::d3d11 {
@@ -160,11 +159,6 @@ ID3D11Resource* SharedTextureMemory::GetD3DResource() const {
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
-}
-
-ResultOrError<Ref<SharedFenceBase>> SharedTextureMemory::CreateFenceImpl(
-    const SharedFenceDXGISharedHandleDescriptor* desc) {
-    return SharedFence::Create(ToBackend(GetDevice()), "Internal shared DXGI fence", desc);
 }
 
 }  // namespace dawn::native::d3d11

@@ -37,6 +37,7 @@
 #include "dawn/native/d3d12/CommandAllocatorManager.h"
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/SharedFenceD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -74,12 +75,15 @@ MaybeError Queue::Initialize() {
     mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
     DAWN_ASSERT(mFenceEvent != nullptr);
 
+    DAWN_TRY_ASSIGN(mSharedFence, SharedFence::Create(ToBackend(GetDevice()),
+                                                      "Internal shared DXGI fence", mFence));
+
     // TODO(dawn:1413): Consider folding the command allocator manager in this class.
     mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
     return {};
 }
 
-void Queue::Destroy() {
+void Queue::DestroyImpl() {
     // Immediately forget about all pending commands for the case where device is lost on its
     // own and WaitForIdleForDestruction isn't called.
     DAWN_ASSERT(!mPendingCommands.IsOpen());
@@ -87,12 +91,22 @@ void Queue::Destroy() {
 
     if (mFenceEvent != nullptr) {
         ::CloseHandle(mFenceEvent);
+        mFenceEvent = nullptr;
     }
+
+    // Release the shared fence here to prevent a ref-cycle with the device, but do not destroy the
+    // underlying native fence so that we can return a SharedFence on EndAccess after destruction.
+    mSharedFence = nullptr;
+
     mCommandQueue.Reset();
 }
 
-ID3D12Fence* Queue::GetFence() const {
-    return mFence.Get();
+ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
+    if (mSharedFence == nullptr) {
+        DAWN_ASSERT(!IsAlive());
+        return SharedFence::Create(ToBackend(GetDevice()), "Internal shared DXGI fence", mFence);
+    }
+    return mSharedFence;
 }
 
 ID3D12CommandQueue* Queue::GetCommandQueue() const {

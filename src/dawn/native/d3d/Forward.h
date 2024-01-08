@@ -32,14 +32,20 @@
 
 namespace dawn::native::d3d {
 
-class PhysicalDevice;
 class Device;
+class PhysicalDevice;
+class Queue;
+class SharedFence;
+class SharedTextureMemory;
 class SwapChain;
 class Texture;
 
 struct D3DBackendTraits {
     using DeviceType = Device;
     using PhysicalDeviceType = PhysicalDevice;
+    using QueueType = Queue;
+    using SharedFenceType = SharedFence;
+    using SharedTextureMemoryType = SharedTextureMemory;
     using SwapChainType = SwapChain;
     using TextureType = Texture;
 };

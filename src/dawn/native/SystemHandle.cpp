@@ -128,13 +128,24 @@ SystemHandle::SystemHandle(SystemHandle&& rhs) {
 
 SystemHandle& SystemHandle::operator=(SystemHandle&& rhs) {
     if (this != &rhs) {
-        std::swap(mHandle, rhs.mHandle);
+        if (IsValid()) {
+            Close();
+        }
+        mHandle = rhs.mHandle;
+        rhs.mHandle = kInvalidHandle;
     }
     return *this;
 }
 
 SystemHandle::Handle SystemHandle::Get() const {
     return mHandle;
+}
+
+SystemHandle::Handle* SystemHandle::GetMut() {
+    if (IsValid()) {
+        Close();
+    }
+    return &mHandle;
 }
 
 SystemHandle::Handle SystemHandle::Detach() {

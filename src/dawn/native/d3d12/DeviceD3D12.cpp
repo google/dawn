@@ -108,11 +108,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mTimestampPeriod = static_cast<float>(1e9) / frequency;
     }
 
-    DAWN_TRY(CheckHRESULT(mD3d12Device->CreateSharedHandle(queue->GetFence(), nullptr, GENERIC_ALL,
-                                                           nullptr, &mFenceHandle),
-                          "D3D12 create fence handle"));
-    DAWN_ASSERT(mFenceHandle != nullptr);
-
     // Initialize backend services
 
     // Zero sized allocator is never requested and does not need to exist.
