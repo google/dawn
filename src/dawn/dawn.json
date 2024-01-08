@@ -409,8 +409,8 @@
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 1, "name": "write only"},
-            {"value": 2, "name": "read only", "tags": ["dawn"]},
-            {"value": 3, "name": "read write", "tags": ["dawn"]}
+            {"value": 2, "name": "read only"},
+            {"value": 3, "name": "read write"}
         ]
     },
     "storage texture binding layout": {
