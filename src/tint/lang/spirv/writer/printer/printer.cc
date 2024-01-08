@@ -893,7 +893,7 @@ class Printer {
                 [&](core::ir::Store* s) { EmitStore(s); },                            //
                 [&](core::ir::StoreVectorElement* s) { EmitStoreVectorElement(s); },  //
                 [&](core::ir::UserCall* c) { EmitUserCall(c); },                      //
-                [&](core::ir::Unary* u) { EmitUnary(u); },                            //
+                [&](core::ir::CoreUnary* u) { EmitUnary(u); },                        //
                 [&](core::ir::Var* v) { EmitVar(v); },                                //
                 [&](core::ir::Let* l) { EmitLet(l); },                                //
                 [&](core::ir::If* i) { EmitIf(i); },                                  //
@@ -1961,20 +1961,23 @@ class Printer {
 
     /// Emit a unary instruction.
     /// @param unary the unary instruction to emit
-    void EmitUnary(core::ir::Unary* unary) {
+    void EmitUnary(core::ir::CoreUnary* unary) {
         auto id = Value(unary);
         auto* ty = unary->Result(0)->Type();
         spv::Op op = spv::Op::Max;
         switch (unary->Op()) {
-            case core::ir::UnaryOp::kComplement:
+            case core::UnaryOp::kComplement:
                 op = spv::Op::OpNot;
                 break;
-            case core::ir::UnaryOp::kNegation:
+            case core::UnaryOp::kNegation:
                 if (ty->is_float_scalar_or_vector()) {
                     op = spv::Op::OpFNegate;
                 } else if (ty->is_signed_integer_scalar_or_vector()) {
                     op = spv::Op::OpSNegate;
                 }
+                break;
+            default:
+                TINT_UNIMPLEMENTED() << unary->Op();
                 break;
         }
         current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});

@@ -749,11 +749,14 @@ class State {
     void Unary(const core::ir::Unary* u) {
         const ast::Expression* expr = nullptr;
         switch (u->Op()) {
-            case core::ir::UnaryOp::kComplement:
+            case core::UnaryOp::kComplement:
                 expr = b.Complement(Expr(u->Val()));
                 break;
-            case core::ir::UnaryOp::kNegation:
+            case core::UnaryOp::kNegation:
                 expr = b.Negation(Expr(u->Val()));
+                break;
+            default:
+                TINT_UNIMPLEMENTED() << u->Op();
                 break;
         }
         Bind(u->Result(0), expr);

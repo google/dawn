@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -64,7 +65,6 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
-#include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/value.h"
@@ -824,9 +824,9 @@ class Builder {
     /// @param val the value of the operation
     /// @returns the operation
     template <typename VAL>
-    ir::Unary* Unary(UnaryOp op, const core::type::Type* type, VAL&& val) {
+    ir::CoreUnary* Unary(UnaryOp op, const core::type::Type* type, VAL&& val) {
         auto* value = Value(std::forward<VAL>(val));
-        return Append(ir.instructions.Create<ir::Unary>(InstructionResult(type), op, value));
+        return Append(ir.instructions.Create<ir::CoreUnary>(InstructionResult(type), op, value));
     }
 
     /// Creates an op for `op val`
@@ -835,7 +835,7 @@ class Builder {
     /// @param val the value of the operation
     /// @returns the operation
     template <typename TYPE, typename VAL>
-    ir::Unary* Unary(UnaryOp op, VAL&& val) {
+    ir::CoreUnary* Unary(UnaryOp op, VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         return Unary(op, type, std::forward<VAL>(val));
     }
@@ -845,8 +845,8 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::Unary* Complement(const core::type::Type* type, VAL&& val) {
-        return Unary(ir::UnaryOp::kComplement, type, std::forward<VAL>(val));
+    ir::CoreUnary* Complement(const core::type::Type* type, VAL&& val) {
+        return Unary(UnaryOp::kComplement, type, std::forward<VAL>(val));
     }
 
     /// Creates a Complement operation
@@ -854,7 +854,7 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename TYPE, typename VAL>
-    ir::Unary* Complement(VAL&& val) {
+    ir::CoreUnary* Complement(VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         return Complement(type, std::forward<VAL>(val));
     }
@@ -864,8 +864,8 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::Unary* Negation(const core::type::Type* type, VAL&& val) {
-        return Unary(ir::UnaryOp::kNegation, type, std::forward<VAL>(val));
+    ir::CoreUnary* Negation(const core::type::Type* type, VAL&& val) {
+        return Unary(UnaryOp::kNegation, type, std::forward<VAL>(val));
     }
 
     /// Creates a Negation operation
@@ -873,7 +873,7 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename TYPE, typename VAL>
-    ir::Unary* Negation(VAL&& val) {
+    ir::CoreUnary* Negation(VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         return Negation(type, std::forward<VAL>(val));
     }

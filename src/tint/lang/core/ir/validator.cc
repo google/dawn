@@ -671,10 +671,30 @@ void Validator::CheckBinary(const Binary* b) {
 
 void Validator::CheckUnary(const Unary* u) {
     CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset);
+    if (u->Val()) {
+        auto symbols = SymbolTable::Wrap(mod_.symbols);
+        auto type_mgr = type::Manager::Wrap(mod_.Types());
+        intrinsic::Context context{
+            u->TableData(),
+            type_mgr,
+            symbols,
+        };
 
-    if (u->Result(0) && u->Val()) {
-        if (u->Result(0)->Type() != u->Val()->Type()) {
-            AddError(u, InstError(u, "result type must match value type"));
+        auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
+                                                     core::EvaluationStage::kRuntime);
+        if (overload != Success) {
+            AddError(u, InstError(u, overload.Failure()));
+            return;
+        }
+
+        if (auto* result = u->Result(0)) {
+            if (overload->return_type != result->Type()) {
+                StringStream err;
+                err << "unary instruction result type (" << result->Type()->FriendlyName()
+                    << ") does not match overload result type ("
+                    << overload->return_type->FriendlyName() << ")";
+                AddError(u, InstError(u, err.str()));
+            }
         }
     }
 }

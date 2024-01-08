@@ -413,6 +413,9 @@ enum AccessControl {
 enum UnaryOp {
     complement = 0;
     negation = 1;
+    address_of = 2;
+    indirection = 3;
+    not = 4;
 }
 
 enum BinaryOp {

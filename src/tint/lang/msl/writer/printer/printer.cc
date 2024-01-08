@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -349,7 +350,7 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::LoadVectorElement*) { /* inlined */ },  //
                 [&](core::ir::Swizzle*) { /* inlined */ },            //
                 [&](core::ir::Bitcast*) { /* inlined */ },            //
-                [&](core::ir::Unary*) { /* inlined */ },              //
+                [&](core::ir::CoreUnary*) { /* inlined */ },          //
                 [&](core::ir::Binary*) { /* inlined */ },             //
                 [&](core::ir::Load*) { /* inlined */ },               //
                 [&](core::ir::Construct*) { /* inlined */ },          //
@@ -365,7 +366,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),                                                          //
-                    [&](const core::ir::Unary* u) { EmitUnary(out, u); },                      //
+                    [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },                  //
                     [&](const core::ir::Binary* b) { EmitBinary(out, b); },                    //
                     [&](const core::ir::Convert* b) { EmitConvert(out, b); },                  //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
@@ -387,13 +388,16 @@ class Printer : public tint::TextGenerator {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    void EmitUnary(StringStream& out, const core::ir::Unary* u) {
+    void EmitUnary(StringStream& out, const core::ir::CoreUnary* u) {
         switch (u->Op()) {
-            case core::ir::UnaryOp::kNegation:
+            case core::UnaryOp::kNegation:
                 out << "-";
                 break;
-            case core::ir::UnaryOp::kComplement:
+            case core::UnaryOp::kComplement:
                 out << "~";
+                break;
+            default:
+                TINT_UNIMPLEMENTED() << u->Op();
                 break;
         }
         out << "(";

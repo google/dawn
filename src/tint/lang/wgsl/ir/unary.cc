@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/unary.h"
+#include "src/tint/lang/wgsl/ir/unary.h"
 
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/wgsl/intrinsic/dialect.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unary);
+TINT_INSTANTIATE_TYPEINFO(tint::wgsl::ir::Unary);
 
-namespace tint::core::ir {
+namespace tint::wgsl::ir {
 
 Unary::Unary() = default;
 
-Unary::Unary(InstructionResult* result, UnaryOp op, Value* val) : op_(op) {
-    AddOperand(Unary::kValueOperandOffset, val);
-    AddResult(result);
-}
+Unary::Unary(core::ir::InstructionResult* result, core::UnaryOp op, core::ir::Value* val)
+    : Base(result, op, val) {}
 
 Unary::~Unary() = default;
 
-}  // namespace tint::core::ir
+Unary* Unary::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result(0));
+    auto* val = ctx.Remap(Val());
+    return ctx.ir.instructions.Create<Unary>(new_result, Op(), val);
+}
+
+const core::intrinsic::TableData& Unary::TableData() const {
+    return wgsl::intrinsic::Dialect::kData;
+}
+
+}  // namespace tint::wgsl::ir

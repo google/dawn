@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -60,7 +61,6 @@
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
-#include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -230,7 +230,7 @@ struct Encoder {
             },
             [&](const ir::Switch* i) { InstructionSwitch(*inst_out.mutable_switch_(), i); },
             [&](const ir::Swizzle* i) { InstructionSwizzle(*inst_out.mutable_swizzle(), i); },
-            [&](const ir::Unary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
+            [&](const ir::CoreUnary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
             [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
             [&](const ir::Unreachable* i) {
@@ -329,7 +329,7 @@ struct Encoder {
         }
     }
 
-    void InstructionUnary(pb::InstructionUnary& unary_out, const ir::Unary* unary_in) {
+    void InstructionUnary(pb::InstructionUnary& unary_out, const ir::CoreUnary* unary_in) {
         unary_out.set_op(UnaryOp(unary_in->Op()));
     }
 
@@ -675,12 +675,18 @@ struct Encoder {
         }
     }
 
-    pb::UnaryOp UnaryOp(core::ir::UnaryOp in) {
+    pb::UnaryOp UnaryOp(core::UnaryOp in) {
         switch (in) {
-            case core::ir::UnaryOp::kComplement:
+            case core::UnaryOp::kComplement:
                 return pb::UnaryOp::complement;
-            case core::ir::UnaryOp::kNegation:
+            case core::UnaryOp::kNegation:
                 return pb::UnaryOp::negation;
+            case core::UnaryOp::kAddressOf:
+                return pb::UnaryOp::address_of;
+            case core::UnaryOp::kIndirection:
+                return pb::UnaryOp::indirection;
+            case core::UnaryOp::kNot:
+                return pb::UnaryOp::not_;
         }
         TINT_ICE() << "invalid UnaryOp: " << in;
         return pb::UnaryOp::complement;

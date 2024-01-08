@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,59 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_UNARY_H_
-#define SRC_TINT_LANG_CORE_IR_UNARY_H_
+#ifndef SRC_TINT_LANG_CORE_IR_CORE_UNARY_H_
+#define SRC_TINT_LANG_CORE_IR_CORE_UNARY_H_
 
-#include <string>
-
-#include "src/tint/lang/core/ir/operand_instruction.h"
-#include "src/tint/lang/core/unary_op.h"
-
-// Forward declarations
-namespace tint::core::intrinsic {
-struct TableData;
-}
+#include "src/tint/lang/core/ir/unary.h"
 
 namespace tint::core::ir {
 
-/// A unary instruction in the IR.
-class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
+/// A core-dialect unary instruction in the IR.
+class CoreUnary final : public Castable<CoreUnary, Unary> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    Unary();
+    CoreUnary();
 
     /// Constructor
     /// @param result the result value
     /// @param op the unary operator
     /// @param val the input value for the instruction
-    Unary(InstructionResult* result, UnaryOp op, Value* val);
-    ~Unary() override;
+    CoreUnary(InstructionResult* result, UnaryOp op, Value* val);
+    ~CoreUnary() override;
 
-    /// @returns the value for the instruction
-    Value* Val() { return operands_[kValueOperandOffset]; }
-
-    /// @returns the value for the instruction
-    const Value* Val() const { return operands_[kValueOperandOffset]; }
-
-    /// @returns the unary operator
-    UnaryOp Op() const { return op_; }
-
-    /// @param op the new unary operator
-    void SetOp(UnaryOp op) { op_ = op; }
-
-    /// @returns the friendly name for the instruction
-    std::string FriendlyName() const override { return "unary"; }
+    /// @copydoc Instruction::Clone()
+    CoreUnary* Clone(CloneContext& ctx) override;
 
     /// @returns the table data to validate this builtin
-    virtual const core::intrinsic::TableData& TableData() const = 0;
-
-  private:
-    UnaryOp op_ = UnaryOp::kComplement;
+    const core::intrinsic::TableData& TableData() const override;
 };
 
 }  // namespace tint::core::ir
 
-#endif  // SRC_TINT_LANG_CORE_IR_UNARY_H_
+#endif  // SRC_TINT_LANG_CORE_IR_CORE_UNARY_H_

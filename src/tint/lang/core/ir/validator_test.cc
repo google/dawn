@@ -1329,7 +1329,7 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     auto* bin =
-        mod.instructions.Create<ir::Unary>(nullptr, ir::UnaryOp::kNegation, b.Constant(2_i));
+        mod.instructions.Create<ir::CoreUnary>(nullptr, UnaryOp::kNegation, b.Constant(2_i));
 
     auto* f = b.Function("my_func", ty.void_());
 
@@ -1368,7 +1368,9 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: unary: result type must match value type
+    EXPECT_EQ(
+        res.Failure().reason.str(),
+        R"(:3:5 error: unary: unary instruction result type (f32) does not match overload result type (i32)
     %2:f32 = complement 2i
     ^^^^^^^^^^^^^^^^^^^^^^
 

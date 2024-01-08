@@ -870,6 +870,15 @@ void Disassembler::EmitUnary(const Unary* u) {
         case UnaryOp::kNegation:
             out_ << "negation";
             break;
+        case UnaryOp::kAddressOf:
+            out_ << "ref-to-ptr";
+            break;
+        case UnaryOp::kIndirection:
+            out_ << "ptr-to-ref";
+            break;
+        case UnaryOp::kNot:
+            out_ << "not";
+            break;
     }
     out_ << " ";
     EmitOperandList(u);

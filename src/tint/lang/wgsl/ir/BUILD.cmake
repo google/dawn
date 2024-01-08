@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_wgsl_ir lib
   lang/wgsl/ir/builtin_call.cc
   lang/wgsl/ir/builtin_call.h
+  lang/wgsl/ir/unary.cc
+  lang/wgsl/ir/unary.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_ir lib

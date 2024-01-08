@@ -494,8 +494,8 @@ struct Decoder {
         return switch_out;
     }
 
-    ir::Unary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
-        auto* unary_out = mod_out_.instructions.Create<ir::Unary>();
+    ir::CoreUnary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
+        auto* unary_out = mod_out_.instructions.Create<ir::CoreUnary>();
         unary_out->SetOp(UnaryOp(unary_in.op()));
         return unary_out;
     }
@@ -894,16 +894,22 @@ struct Decoder {
         }
     }
 
-    core::ir::UnaryOp UnaryOp(pb::UnaryOp in) {
+    core::UnaryOp UnaryOp(pb::UnaryOp in) {
         switch (in) {
             case pb::UnaryOp::complement:
-                return core::ir::UnaryOp::kComplement;
+                return core::UnaryOp::kComplement;
             case pb::UnaryOp::negation:
-                return core::ir::UnaryOp::kNegation;
+                return core::UnaryOp::kNegation;
+            case pb::UnaryOp::address_of:
+                return core::UnaryOp::kAddressOf;
+            case pb::UnaryOp::indirection:
+                return core::UnaryOp::kIndirection;
+            case pb::UnaryOp::not_:
+                return core::UnaryOp::kNot;
 
             default:
                 TINT_ICE() << "invalid UnaryOp: " << in;
-                return core::ir::UnaryOp::kComplement;
+                return core::UnaryOp::kComplement;
         }
     }
 
