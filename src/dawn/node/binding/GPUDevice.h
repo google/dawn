@@ -43,6 +43,8 @@ class GPUDevice final : public interop::GPUDevice {
     GPUDevice(Napi::Env env, const wgpu::DeviceDescriptor& desc, wgpu::Device device);
     ~GPUDevice();
 
+    void ForceLoss(interop::GPUDeviceLostReason reason, const char* message);
+
     // interop::GPUDevice interface compliance
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;

@@ -55,6 +55,10 @@ class GPUAdapter final : public interop::GPUAdapter {
   private:
     dawn::native::Adapter adapter_;
     const Flags& flags_;
+
+    // The adapter becomes invalid after the first successful requestDevice and all subsequent
+    // requestDevice calls will return an already lost device.
+    bool valid_ = true;
 };
 
 }  // namespace wgpu::binding

@@ -191,6 +191,14 @@ GPUDevice::~GPUDevice() {
     }
 }
 
+void GPUDevice::ForceLoss(interop::GPUDeviceLostReason reason, const char* message) {
+    if (lost_promise_.GetState() == interop::PromiseState::Pending) {
+        lost_promise_.Resolve(
+            interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(env_, reason, message));
+    }
+    device_.InjectError(wgpu::ErrorType::DeviceLost, message);
+}
+
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {
     size_t count = device_.EnumerateFeatures(nullptr);
     std::vector<wgpu::FeatureName> features(count);

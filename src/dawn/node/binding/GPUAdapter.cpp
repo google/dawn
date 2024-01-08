@@ -28,6 +28,7 @@
 #include "src/dawn/node/binding/GPUAdapter.h"
 
 #include <limits>
+#include <memory>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -177,11 +178,19 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     desc.nextInChain = &deviceTogglesDesc;
 
     auto wgpu_device = adapter_.CreateDevice(&desc);
-    if (wgpu_device) {
-        promise.Resolve(interop::GPUDevice::Create<GPUDevice>(env, env, desc, wgpu_device));
-    } else {
+    if (wgpu_device == nullptr) {
         promise.Reject(binding::Errors::OperationError(env, "failed to create device"));
+        return promise;
     }
+
+    auto gpu_device = std::make_unique<GPUDevice>(env, desc, wgpu_device);
+    if (!valid_) {
+        gpu_device->ForceLoss(interop::GPUDeviceLostReason::kUnknown,
+                              "Device was marked as lost due to a stale adapter.");
+    }
+    valid_ = false;
+
+    promise.Resolve(interop::GPUDevice::Bind(env, std::move(gpu_device)));
     return promise;
 }
 
