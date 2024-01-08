@@ -61,6 +61,9 @@ struct Options {
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
 
+    /// Set to `true` to disable the polyfills on integer division and modulo.
+    bool disable_polyfill_integer_div_mod = false;
+
     /// The GLSL version to emit
     Version version;
 
@@ -85,6 +88,7 @@ struct Options {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
+                 disable_polyfill_integer_div_mod,
                  version,
                  binding_map,
                  placeholder_binding_point,

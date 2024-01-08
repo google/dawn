@@ -74,6 +74,9 @@ struct Options {
     /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
     bool polyfill_dot_4x8_packed = false;
 
+    /// Set to `true` to disable the polyfills on integer division and modulo.
+    bool disable_polyfill_integer_div_mod = false;
+
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
@@ -106,6 +109,7 @@ struct Options {
                  truncate_interstage_variables,
                  polyfill_reflect_vec2_f32,
                  polyfill_dot_4x8_packed,
+                 disable_polyfill_integer_div_mod,
                  array_length_from_uniform,
                  interstage_locations,
                  root_constant_binding_point,

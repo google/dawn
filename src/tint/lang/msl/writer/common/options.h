@@ -130,6 +130,9 @@ struct Options {
     /// for all vertex shaders in the module.
     bool emit_vertex_point_size = false;
 
+    /// Set to `true` to disable the polyfills on integer division and modulo.
+    bool disable_polyfill_integer_div_mod = false;
+
     /// The index to use when generating a UBO to receive storage buffer sizes.
     /// Defaults to 30, which is the last valid buffer slot.
     uint32_t buffer_size_ubo_index = 30;
@@ -152,6 +155,7 @@ struct Options {
     TINT_REFLECT(disable_robustness,
                  disable_workgroup_init,
                  emit_vertex_point_size,
+                 disable_polyfill_integer_div_mod,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
                  pixel_local_options,

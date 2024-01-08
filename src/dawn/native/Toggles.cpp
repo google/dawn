@@ -500,6 +500,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Make the Instance expose the experimental features but not the unsage ones, so that safe "
       "experimental features can be used without the need for allow_unsafe_apis",
       "https://crbug.com/dawn/2260", ToggleStage::Instance}},
+    {Toggle::DisablePolyfillsOnIntegerDivisonAndModulo,
+     {"disable_polyfills_on_integer_div_and_mod",
+      "Disable the Tint polyfills on integer division and modulo.", "https://crbug.com/tint/2128",
+      ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

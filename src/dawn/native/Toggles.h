@@ -125,6 +125,7 @@ enum class Toggle {
     PolyFillPacked4x8DotProduct,
     ExposeWGSLTestingFeatures,
     ExposeWGSLExperimentalFeatures,
+    DisablePolyfillsOnIntegerDivisonAndModulo,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

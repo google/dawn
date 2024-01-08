@@ -250,7 +250,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
         polyfills.insert_bits = ast::transform::BuiltinPolyfill::Level::kFull;
-        polyfills.int_div_mod = true;
+        polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
         polyfills.precise_float_mod = true;
         polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
