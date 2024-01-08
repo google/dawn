@@ -1572,7 +1572,7 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xI8) {
 %foo = func(%arg:u32):vec4<i32> -> %b1 {
   %b1 = block {
     %3:vec4<u32> = construct 24u, 16u, 8u, 0u
-    %4:vec4<u32> = convert %arg
+    %4:vec4<u32> = construct %arg
     %5:vec4<u32> = shl %4, %3
     %6:vec4<i32> = bitcast %5
     %7:vec4<u32> = construct 24u
@@ -1606,7 +1606,7 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xU8) {
 %foo = func(%arg:u32):vec4<u32> -> %b1 {
   %b1 = block {
     %3:vec4<u32> = construct 0u, 8u, 16u, 24u
-    %4:vec4<u32> = convert %arg
+    %4:vec4<u32> = construct %arg
     %5:vec4<u32> = shr %4, %3
     %6:vec4<u32> = construct 255u
     %result:vec4<u32> = and %5, %6

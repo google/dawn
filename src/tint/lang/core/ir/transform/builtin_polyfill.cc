@@ -719,8 +719,8 @@ struct State {
     ir::Value* Unpack4xI8(ir::CoreBuiltinCall* call) {
         // Replace `unpack4xI8(%x)` with:
         //   %n       = vec4u(24, 16, 8, 0);
-        //   %x_vec4u = vec4u(x);
-        //   %x_vec4i = bitcast<vec4i>(%x_vec4u << n);
+        //   %x_splat = vec4u(x); // splat the scalar to a vector
+        //   %x_vec4i = bitcast<vec4i>(%x_splat << n);
         //   %result  = %x_vec4i >> vec4u(24);
         ir::Value* result = nullptr;
         auto* x = call->Args()[0];
@@ -730,8 +730,8 @@ struct State {
 
             auto* n = b.Construct(vec4u, b.Constant(u32(24)), b.Constant(u32(16)),
                                   b.Constant(u32(8)), b.Constant(u32(0)));
-            auto* x_vec4u = b.Convert(vec4u, x);
-            auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(vec4u, x_vec4u, n));
+            auto* x_splat = b.Construct(vec4u, x);
+            auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(vec4u, x_splat, n));
             result =
                 b.ShiftRight(vec4i, x_vec4i, b.Construct(vec4u, b.Constant(u32(24))))->Result(0);
         });
@@ -744,7 +744,8 @@ struct State {
     ir::Value* Unpack4xU8(ir::CoreBuiltinCall* call) {
         // Replace `unpack4xU8(%x)` with:
         //   %n       = vec4u(0, 8, 16, 24);
-        //   %x_vec4u = vec4u(x) >> n;
+        //   %x_splat = vec4u(x); // splat the scalar to a vector
+        //   %x_vec4u = %x_splat >> n;
         //   %result  = %x_vec4u & vec4u(0xff);
         ir::Value* result = nullptr;
         auto* x = call->Args()[0];
@@ -753,7 +754,8 @@ struct State {
 
             auto* n = b.Construct(vec4u, b.Constant(u32(0)), b.Constant(u32(8)),
                                   b.Constant(u32(16)), b.Constant(u32(24)));
-            auto* x_vec4u = b.ShiftRight(vec4u, b.Convert(vec4u, x), n);
+            auto* x_splat = b.Construct(vec4u, x);
+            auto* x_vec4u = b.ShiftRight(vec4u, x_splat, n);
             result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))))->Result(0);
         });
         return result;
