@@ -4,15 +4,15 @@
 	gclient-condition = dawn_standalone
 [submodule "third_party/clang-format/script"]
 	path = third_party/clang-format/script
-	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/clang/tools/clang-format.git
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/clang/tools/clang-format
 	gclient-condition = dawn_standalone
 [submodule "third_party/libc++/src"]
 	path = third_party/libc++/src
-	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx.git
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx
 	gclient-condition = dawn_standalone
 [submodule "third_party/libc++abi/src"]
 	path = third_party/libc++abi/src
-	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi.git
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi
 	gclient-condition = dawn_standalone
 [submodule "build"]
 	path = build
@@ -32,7 +32,7 @@
 	gclient-condition = dawn_standalone
 [submodule "third_party/libFuzzer/src"]
 	path = third_party/libFuzzer/src
-	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer.git
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/compiler-rt/lib/fuzzer
 	gclient-condition = dawn_standalone
 [submodule "third_party/googletest"]
 	path = third_party/googletest
@@ -40,11 +40,11 @@
 	gclient-condition = dawn_standalone
 [submodule "third_party/catapult"]
 	path = third_party/catapult
-	url = https://chromium.googlesource.com/catapult.git
+	url = https://chromium.googlesource.com/catapult
 	gclient-condition = dawn_standalone
 [submodule "third_party/google_benchmark/src"]
 	path = third_party/google_benchmark/src
-	url = https://chromium.googlesource.com/external/github.com/google/benchmark.git
+	url = https://chromium.googlesource.com/external/github.com/google/benchmark
 	gclient-condition = dawn_standalone
 [submodule "third_party/jinja2"]
 	path = third_party/jinja2
@@ -100,15 +100,15 @@
 	gclient-condition = build_with_chromium
 [submodule "third_party/node-api-headers"]
 	path = third_party/node-api-headers
-	url = https://github.com/nodejs/node-api-headers.git
+	url = https://github.com/nodejs/node-api-headers
 	gclient-condition = dawn_node
 [submodule "third_party/node-addon-api"]
 	path = third_party/node-addon-api
-	url = https://github.com/nodejs/node-addon-api.git
+	url = https://github.com/nodejs/node-addon-api
 	gclient-condition = dawn_node
 [submodule "third_party/gpuweb"]
 	path = third_party/gpuweb
-	url = https://github.com/gpuweb/gpuweb.git
+	url = https://github.com/gpuweb/gpuweb
 	gclient-condition = dawn_node
 [submodule "third_party/protobuf"]
 	path = third_party/protobuf
@@ -120,5 +120,5 @@
 	gclient-condition = dawn_standalone
 [submodule "third_party/partition_alloc"]
 	path = third_party/partition_alloc
-	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator.git
+	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
 	gclient-condition = dawn_standalone
