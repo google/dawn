@@ -400,16 +400,14 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
         bindingInfo.sampler = binding->sampler;
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
         bindingInfo.bindingType = BindingInfoType::Texture;
-        bindingInfo.texture = binding->texture;
-        bindingInfo.texture.ApplyTrivialFrontendDefaults();
+        bindingInfo.texture = binding->texture.WithTrivialFrontendDefaults();
 
         if (binding->texture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingInfo.texture.viewDimension = wgpu::TextureViewDimension::e2D;
         }
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         bindingInfo.bindingType = BindingInfoType::StorageTexture;
-        bindingInfo.storageTexture = binding->storageTexture;
-        bindingInfo.storageTexture.ApplyTrivialFrontendDefaults();
+        bindingInfo.storageTexture = binding->storageTexture.WithTrivialFrontendDefaults();
 
         if (binding->storageTexture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingInfo.storageTexture.viewDimension = wgpu::TextureViewDimension::e2D;
