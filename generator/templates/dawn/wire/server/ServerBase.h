@@ -71,15 +71,6 @@ namespace dawn::wire::server {
             }
         {% endfor %}
 
-        {% for type in by_category["object"] if type.name.CamelCase() in server_reverse_lookup_objects %}
-            const ObjectIdLookupTable<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}ObjectIdTable() const {
-                return m{{type.name.CamelCase()}}IdTable;
-            }
-            ObjectIdLookupTable<{{as_cType(type.name)}}>& {{type.name.CamelCase()}}ObjectIdTable() {
-                return m{{type.name.CamelCase()}}IdTable;
-            }
-        {% endfor %}
-
       private:
         // Implementation of the ObjectIdResolver interface
         {% for type in by_category["object"] %}
@@ -100,10 +91,6 @@ namespace dawn::wire::server {
         //* The list of known IDs for each object type.
         {% for type in by_category["object"] %}
             KnownObjects<{{as_cType(type.name)}}> mKnown{{type.name.CamelCase()}};
-        {% endfor %}
-
-        {% for type in by_category["object"] if type.name.CamelCase() in server_reverse_lookup_objects %}
-            ObjectIdLookupTable<{{as_cType(type.name)}}> m{{type.name.CamelCase()}}IdTable;
         {% endfor %}
     };
 

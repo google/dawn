@@ -83,16 +83,6 @@ namespace dawn::wire::server {
                 {%- endfor -%}
             ));
 
-            {%- for member in command.members if member.is_return_value and member.handle_type -%}
-                {% set Type = member.handle_type.name.CamelCase() %}
-                {% set name = as_varName(member.name) %}
-
-                {% if Type in server_reverse_lookup_objects %}
-                    //* For created objects, store a mapping from them back to their client IDs
-                    {{Type}}ObjectIdTable().Store({{name}}Data->handle, cmd.{{name}}.id);
-                {% endif %}
-            {% endfor %}
-
             return WireResult::Success;
         }
     {% endfor %}

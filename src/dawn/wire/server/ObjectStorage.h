@@ -274,34 +274,6 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
     std::unordered_set<WGPUDevice> mKnownSet;
 };
 
-// ObjectIds are lost in deserialization. Store the ids of deserialized
-// objects here so they can be used in command handlers. This is useful
-// for creating ReturnWireCmds which contain client ids
-template <typename T>
-class ObjectIdLookupTable {
-  public:
-    void Store(T key, ObjectId id) { mTable[key] = id; }
-
-    // Return the cached ObjectId, or 0 (null handle)
-    ObjectId Get(T key) const {
-        const auto it = mTable.find(key);
-        if (it != mTable.end()) {
-            return it->second;
-        }
-        return 0;
-    }
-
-    void Remove(T key) {
-        auto it = mTable.find(key);
-        if (it != mTable.end()) {
-            mTable.erase(it);
-        }
-    }
-
-  private:
-    std::map<T, ObjectId> mTable;
-};
-
 }  // namespace dawn::wire::server
 
 #endif  // SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_

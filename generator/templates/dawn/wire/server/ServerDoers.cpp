@@ -37,7 +37,7 @@ namespace dawn::wire::server {
 
         {% set Suffix = command.name.CamelCase() %}
         {% if Suffix not in client_side_commands %}
-            {% if is_method and Suffix not in server_handwritten_commands %}
+            {% if is_method %}
                 WireResult Server::Do{{Suffix}}(
                     {%- for member in command.members -%}
                         {%- if member.is_return_value -%}
@@ -86,10 +86,6 @@ namespace dawn::wire::server {
 
                     if (obj->state == AllocationState::Allocated) {
                         DAWN_ASSERT(obj->handle != nullptr);
-                        {% if type.name.CamelCase() in server_reverse_lookup_objects %}
-                            {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
-                        {% endif %}
-
                         {% if type.name.get() == "device" %}
                             if (obj->handle != nullptr) {
                                 //* Deregisters uncaptured error and device lost callbacks since

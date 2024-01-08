@@ -262,11 +262,6 @@
         "server_custom_pre_handler_commands": [
             "BufferDestroy",
             "BufferUnmap"
-        ],
-        "server_handwritten_commands": [
-            "QueueSignal"
-        ],
-        "server_reverse_lookup_objects": [
         ]
     }
 }
