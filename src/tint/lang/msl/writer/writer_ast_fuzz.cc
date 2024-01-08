@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_OPTIONS_PIXEL_LOCAL_H_
-#define SRC_TINT_API_OPTIONS_PIXEL_LOCAL_H_
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
-#include <cstdint>
-#include <unordered_map>
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
+#include "src/tint/lang/msl/writer/writer.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 
-#include "src/tint/utils/reflection/reflection.h"
+namespace tint::msl::writer {
+namespace {
 
-namespace tint {
+void ASTFuzzer(const tint::Program& program, Options options) {
+    if (program.AST().HasOverrides()) {
+        return;
+    }
 
-/// Options used to specify pixel local mappings
-struct PixelLocalOptions {
-    /// Index of pixel_local structure member index to attachment index
-    std::unordered_map<uint32_t, uint32_t> attachments;
+    options.bindings = GenerateBindings(program);
 
-    /// The supported pixel local storage attachment format
-    enum class TexelFormat : uint8_t {
-        kR32Sint,
-        kR32Uint,
-        kR32Float,
-        kUndefined,
-    };
-    /// Index of pixel_local structure member index to pixel local storage attachment format
-    std::unordered_map<uint32_t, TexelFormat> attachment_formats;
+    [[maybe_unused]] auto res = tint::msl::writer::Generate(program, options);
+}
 
-    /// The bind group index of all pixel local storage attachments
-    uint32_t pixel_local_group_index = 0;
+}  // namespace
+}  // namespace tint::msl::writer
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(attachments, attachment_formats, pixel_local_group_index);
-};
-
-/// Reflect valid value ranges for the PixelLocalOptions::TexelFormat enum.
-TINT_REFLECT_ENUM_RANGE(PixelLocalOptions::TexelFormat, kR32Sint, kR32Float);
-
-}  // namespace tint
-
-#endif  // SRC_TINT_API_OPTIONS_PIXEL_LOCAL_H_
+TINT_WGSL_PROGRAM_FUZZER(tint::msl::writer::ASTFuzzer);

@@ -79,6 +79,12 @@ if(TINT_BUILD_IR_BINARY)
   )
 endif(TINT_BUILD_IR_BINARY)
 
+if(TINT_BUILD_MSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
+    tint_lang_msl_writer_fuzz
+  )
+endif(TINT_BUILD_MSL_WRITER)
+
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
     tint_lang_spirv_writer_fuzz
