@@ -110,6 +110,10 @@ if (tint_build_wgsl_reader) {
       "${tint_src_dir}/utils/traits",
     ]
 
+    if (tint_build_ir_binary) {
+      deps += [ "${tint_src_dir}/lang/core/ir/binary:fuzz" ]
+    }
+
     if (tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/writer:fuzz" ]
     }

@@ -73,6 +73,12 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_utils_traits
 )
 
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
+    tint_lang_core_ir_binary_fuzz
+  )
+endif(TINT_BUILD_IR_BINARY)
+
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
     tint_lang_spirv_writer_fuzz
