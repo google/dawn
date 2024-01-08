@@ -855,7 +855,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
         // Make a local copy with defaulting applied, before copying the
         // now-defaulted values into mVertexBufferInfos.
-        VertexBufferLayout buffer = bufferOrig.WithTrivialFrontendDefaults();
+        VertexBufferLayout buffer = bufferOrig;
+        buffer.ApplyTrivialFrontendDefaults();
 
         mVertexBuffersUsed.set(slot);
         mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
@@ -900,7 +901,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         }
     }
 
-    mPrimitive = descriptor->primitive.WithTrivialFrontendDefaults();
+    mPrimitive = descriptor->primitive;
+    mPrimitive.ApplyTrivialFrontendDefaults();
     UnpackedPtr<PrimitiveState> unpackedPrimitive = Unpack(&mPrimitive);
     if (auto* depthClipControl = unpackedPrimitive.Get<PrimitiveDepthClipControl>()) {
         mUnclippedDepth = depthClipControl->unclippedDepth;
@@ -909,7 +911,9 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     mMultisample = descriptor->multisample;
 
     if (mAttachmentState->HasDepthStencilAttachment()) {
-        mDepthStencil = descriptor->depthStencil->WithTrivialFrontendDefaults();
+        mDepthStencil = *descriptor->depthStencil;
+        mDepthStencil.stencilFront.ApplyTrivialFrontendDefaults();
+        mDepthStencil.stencilBack.ApplyTrivialFrontendDefaults();
 
         // Reify depth option for stencil-only formats
         const Format& format = device->GetValidInternalFormat(mDepthStencil.format);
@@ -955,7 +959,9 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         mTargets[i] = *target;
 
         if (target->blend != nullptr) {
-            mTargetBlend[i] = target->blend->WithTrivialFrontendDefaults();
+            mTargetBlend[i] = *target->blend;
+            mTargetBlend[i].alpha.ApplyTrivialFrontendDefaults();
+            mTargetBlend[i].color.ApplyTrivialFrontendDefaults();
             mTargets[i].blend = &mTargetBlend[i];
         }
     }

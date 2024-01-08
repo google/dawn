@@ -645,8 +645,9 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
 
     TextureViewDescriptor desc = {};
     if (descriptor) {
-        desc = descriptor->WithTrivialFrontendDefaults();
+        desc = *descriptor;
     }
+    desc.ApplyTrivialFrontendDefaults();
 
     // The default value for the view dimension depends on the texture's dimension with a
     // special case for 2DArray being chosen if texture is 2D but has more than one array layer.
