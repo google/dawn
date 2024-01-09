@@ -1592,15 +1592,18 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
     HandleError(DAWN_MAKE_ERROR(FromWGPUErrorType(type), message), InternalErrorType::OutOfMemory);
 }
 
-void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* desc) {
+void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* descriptorOrig) {
     AllowMultiPlanarTextureFormat allowMultiPlanar;
     if (HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
         allowMultiPlanar = AllowMultiPlanarTextureFormat::Yes;
     } else {
         allowMultiPlanar = AllowMultiPlanarTextureFormat::No;
     }
+
+    TextureDescriptor rawDescriptor = descriptorOrig->WithTrivialFrontendDefaults();
+
     UnpackedPtr<TextureDescriptor> unpacked;
-    if (!ConsumedError(ValidateAndUnpack(desc), &unpacked)) {
+    if (!ConsumedError(ValidateAndUnpack(&rawDescriptor), &unpacked)) {
         DAWN_UNUSED(ConsumedError(ValidateTextureDescriptor(this, unpacked, allowMultiPlanar)));
     }
 }

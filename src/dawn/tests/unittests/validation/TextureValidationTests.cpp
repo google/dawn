@@ -1094,6 +1094,8 @@ TEST_F(TextureValidationTest, APIValidateTextureDescriptor) {
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
     desc.size = {1, 1, 1};
     desc.usage = wgpu::TextureUsage::RenderAttachment;
+    // Spot-test for defaulting of .dimension.
+    desc.dimension = wgpu::TextureDimension::Undefined;
 
     device.ValidateTextureDescriptor(&desc);
 
