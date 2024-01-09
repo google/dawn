@@ -131,3 +131,8 @@ alias(
   actual = "//src/tint:tint_build_glsl_writer_true",
 )
 
+alias(
+  name = "tint_build_wgsl_reader",
+  actual = "//src/tint:tint_build_wgsl_reader_true",
+)
+

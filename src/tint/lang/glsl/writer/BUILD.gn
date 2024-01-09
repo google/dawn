@@ -127,3 +127,47 @@ if (tint_build_benchmarks) {
     }
   }
 }
+if (tint_build_glsl_writer) {
+  tint_fuzz_source_set("fuzz") {
+    sources = []
+    deps = [
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/options",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/wgsl",
+      "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/features",
+      "${tint_src_dir}/lang/wgsl/inspector",
+      "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils/bytes",
+      "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/id",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/symbol",
+      "${tint_src_dir}/utils/text",
+      "${tint_src_dir}/utils/traits",
+    ]
+
+    if (tint_build_glsl_writer) {
+      deps += [
+        "${tint_src_dir}/lang/glsl/writer",
+        "${tint_src_dir}/lang/glsl/writer/common",
+      ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      sources += [ "writer_ast_fuzz.cc" ]
+      deps += [ "${tint_src_dir}/cmd/fuzz/wgsl:fuzz" ]
+    }
+  }
+}

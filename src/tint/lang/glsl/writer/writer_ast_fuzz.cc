@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,59 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_
-#define SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
-#include <cstdint>
-
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/glsl/writer/writer.h"
+#include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/inspector/inspector.h"
 
 namespace tint::glsl::writer {
+namespace {
 
-/// A structure representing the version of GLSL to be generated.
-struct Version {
-    /// Is this version desktop GLSL, or GLSL ES?
-    enum class Standard {
-        kDesktop,
-        kES,
-    };
+void ASTFuzzer(const tint::Program& program, Options options) {
+    if (program.AST().HasOverrides()) {
+        return;
+    }
 
-    /// Constructor
-    /// @param standard_ Desktop or ES
-    /// @param major_ the major version
-    /// @param minor_ the minor version
-    Version(Standard standard_, uint32_t major_, uint32_t minor_)
-        : standard(standard_), major_version(major_), minor_version(minor_) {}
+    auto inspector = tint::inspector::Inspector(program);
+    auto entrypoints = inspector.GetEntryPoints();
 
-    /// Default constructor (see default values below)
-    Version() = default;
+    // Test all of the entry points as GLSL requires specifying which one to generate.
+    for (const auto& ep : entrypoints) {
+        [[maybe_unused]] auto res = tint::glsl::writer::Generate(program, options, ep.name);
+    }
+}
 
-    /// @returns true if this version is GLSL ES
-    bool IsES() const { return standard == Standard::kES; }
-
-    /// @returns true if this version is Desktop GLSL
-    bool IsDesktop() const { return standard == Standard::kDesktop; }
-
-    /// Desktop or ES
-    Standard standard = Standard::kES;
-
-    /// Major GLSL version
-    uint32_t major_version = 3;
-
-    /// Minor GLSL version
-    uint32_t minor_version = 1;
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(standard, major_version, minor_version);
-};
-
+}  // namespace
 }  // namespace tint::glsl::writer
 
-namespace tint {
-
-/// Relect enum information for Version
-TINT_REFLECT_ENUM_RANGE(glsl::writer::Version::Standard, kDesktop, kES);
-
-}  // namespace tint
-
-#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_
+TINT_WGSL_PROGRAM_FUZZER(tint::glsl::writer::ASTFuzzer);
