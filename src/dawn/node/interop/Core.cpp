@@ -148,6 +148,27 @@ Napi::Value Converter<uint64_t>::ToJS(Napi::Env env, uint64_t value) {
     return Napi::Value::From(env, value);
 }
 
+Result
+Converter<std::conditional_t<detail::kSizetIsUniqueType, size_t, detail::InvalidType>>::FromJS(
+    Napi::Env env,
+    Napi::Value value,
+    size_t& out) {
+    if (value.IsNumber()) {
+        // Note that the JS Number type only stores doubles, so the max integer
+        // range of values without precision loss is -2^53 to 2^53 (52 bit mantissa
+        // with 1 implicit bit). This is why there's no UInt64Value() function.
+        out = static_cast<size_t>(value.ToNumber().Int64Value());
+        return Success;
+    }
+    return Error("value is not a number");
+}
+Napi::Value
+Converter<std::conditional_t<detail::kSizetIsUniqueType, size_t, detail::InvalidType>>::ToJS(
+    Napi::Env env,
+    size_t value) {
+    return Napi::Value::From(env, value);
+}
+
 Result Converter<float>::FromJS(Napi::Env env, Napi::Value value, float& out) {
     if (value.IsNumber()) {
         out = value.ToNumber().FloatValue();

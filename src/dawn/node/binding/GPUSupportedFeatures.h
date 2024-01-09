@@ -47,6 +47,7 @@ class GPUSupportedFeatures final : public interop::GPUSupportedFeatures {
     // interop::GPUSupportedFeatures interface compliance
     bool has(Napi::Env, std::string name) override;
     std::vector<std::string> keys(Napi::Env) override;
+    size_t getSize(Napi::Env) override;
 
   private:
     std::unordered_set<interop::GPUFeatureName> enabled_;

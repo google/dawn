@@ -295,6 +295,7 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
             }
             return out;
         }
+        size_t getSize(Napi::Env env) { return features_.size(); }
 
         InteropWGSLFeatureSet features_;
     };

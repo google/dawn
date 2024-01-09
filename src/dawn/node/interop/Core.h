@@ -459,6 +459,21 @@ class Converter<uint64_t> {
     static Napi::Value ToJS(Napi::Env, uint64_t);
 };
 
+// Sometimes size_t is uint32_t, or uint64_t. Only define the conversion to size_t if it is a
+// unique type, otherwise we have C++ compilation error for the redefinition of a template.
+namespace detail {
+struct InvalidType;
+static constexpr bool kSizetIsUniqueType =
+    !std::is_same_v<size_t, uint32_t> && !std::is_same_v<size_t, uint64_t>;
+}  // namespace detail
+
+template <>
+class Converter<std::conditional_t<detail::kSizetIsUniqueType, size_t, detail::InvalidType>> {
+  public:
+    static Result FromJS(Napi::Env, Napi::Value, size_t&);
+    static Napi::Value ToJS(Napi::Env, size_t);
+};
+
 template <>
 class Converter<float> {
   public:

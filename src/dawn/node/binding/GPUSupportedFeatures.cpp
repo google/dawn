@@ -67,4 +67,8 @@ std::vector<std::string> GPUSupportedFeatures::keys(Napi::Env) {
     return out;
 }
 
+size_t GPUSupportedFeatures::getSize(Napi::Env) {
+    return enabled_.size();
+}
+
 }  // namespace wgpu::binding
