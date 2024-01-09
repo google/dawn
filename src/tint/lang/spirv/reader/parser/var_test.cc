@@ -150,6 +150,9 @@ TEST_F(SpirvParserTest, UniformVar) {
                OpExecutionMode %1 LocalSize 1 1 1
                OpDecorate %str Block
                OpMemberDecorate %str 0 Offset 0
+               OpDecorate %6 NonWritable
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
        %void = OpTypeVoid
        %uint = OpTypeInt 32 0
         %str = OpTypeStruct %uint
@@ -167,7 +170,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 %b1 = block {  # root
-  %1:ptr<uniform, tint_symbol_1, read_write> = var
+  %1:ptr<uniform, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
