@@ -449,8 +449,7 @@ MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOr
                                            size_t dataSize,
                                            const TextureDataLayout& dataLayout,
                                            const Extent3D* writeSize) {
-    ImageCopyTexture destination = *destinationOrig;
-    destination.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
 
     DAWN_TRY(ValidateWriteTexture(&destination, dataSize, dataLayout, writeSize));
 
@@ -526,10 +525,8 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sour
                                                     const ImageCopyTexture* destinationOrig,
                                                     const Extent3D* copySize,
                                                     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture source = *sourceOrig;
-    source.ApplyTrivialFrontendDefaults();
-    ImageCopyTexture destination = *destinationOrig;
-    destination.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture source = sourceOrig->WithTrivialFrontendDefaults();
+    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
@@ -545,8 +542,7 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
     const ImageCopyTexture* destinationOrig,
     const Extent3D* copySize,
     const CopyTextureForBrowserOptions* options) {
-    ImageCopyTexture destination = *destinationOrig;
-    destination.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
 
     if (GetDevice()->IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, &destination,

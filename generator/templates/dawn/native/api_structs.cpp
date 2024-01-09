@@ -62,6 +62,12 @@ namespace {{native_namespace}} {
             static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
                     "offsetof mismatch for {{CppType}}::nextInChain");
         {% endif %}
+        {% if type.chained %}
+            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, chain) + offsetof(WGPUChainedStruct, next),
+                    "offsetof mismatch for {{CppType}}::nextInChain");
+            static_assert(offsetof({{CppType}}, sType) == offsetof({{CType}}, chain) + offsetof(WGPUChainedStruct, sType),
+                    "offsetof mismatch for {{CppType}}::sType");
+        {% endif %}
         {% for member in type.members %}
             {% set memberName = member.name.camelCase() %}
             static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
@@ -69,13 +75,33 @@ namespace {{native_namespace}} {
         {% endfor %}
 
         {% if type.any_member_requires_struct_defaulting %}
-            void {{CppType}}::ApplyTrivialFrontendDefaults() {
-                {% for member in type.members if member.requires_struct_defaulting %}
+            {{CppType}} {{CppType}}::WithTrivialFrontendDefaults() const {
+                {{CppType}} copy;
+                {% if type.extensible %}
+                    copy.nextInChain = nextInChain;
+                {% endif %}
+                {% if type.chained %}
+                    copy.nextInChain = nextInChain;
+                    copy.sType = sType;
+                {% endif %}
+                {% for member in type.members %}
                     {% set memberName = member.name.camelCase() %}
-                    if ({{memberName}} == {{namespace}}::{{as_cppType(member.type.name)}}::Undefined) {
-                        {{memberName}} = {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}};
-                    }
+                    {% if member.requires_struct_defaulting %}
+                        {% if member.type.category == "structure" %}
+                            copy.{{memberName}} = {{memberName}}.WithTrivialFrontendDefaults();
+                        {% elif member.type.category == "enum" %}
+                            {% set Enum = namespace + "::" + as_cppType(member.type.name) %}
+                            copy.{{memberName}} = ({{memberName}} == {{Enum}}::Undefined)
+                                ? {{Enum}}::{{as_cppEnum(Name(member.default_value))}}
+                                : {{memberName}};
+                        {% else %}
+                            {{assert(False, "other types do not currently support defaulting")}}
+                        {% endif %}
+                    {% else %}
+                        copy.{{memberName}} = {{memberName}};
+                    {% endif %}
                 {% endfor %}
+                return copy;
             }
         {% endif %}
         bool {{CppType}}::operator==(const {{as_cppType(type.name)}}& rhs) const {

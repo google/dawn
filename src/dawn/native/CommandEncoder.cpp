@@ -1576,8 +1576,7 @@ void CommandEncoder::InternalCopyBufferToBufferWithAllocatedSize(BufferBase* sou
 void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
                                             const ImageCopyTexture* destinationOrig,
                                             const Extent3D* copySize) {
-    ImageCopyTexture destination = *destinationOrig;
-    destination.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
 
     mEncodingContext.TryEncode(
         this,
@@ -1666,8 +1665,7 @@ void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
 void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* sourceOrig,
                                             const ImageCopyBuffer* destination,
                                             const Extent3D* copySize) {
-    ImageCopyTexture source = *sourceOrig;
-    source.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture source = sourceOrig->WithTrivialFrontendDefaults();
 
     mEncodingContext.TryEncode(
         this,
@@ -1766,10 +1764,8 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* sourceOrig,
 void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* sourceOrig,
                                              const ImageCopyTexture* destinationOrig,
                                              const Extent3D* copySize) {
-    ImageCopyTexture source = *sourceOrig;
-    source.ApplyTrivialFrontendDefaults();
-    ImageCopyTexture destination = *destinationOrig;
-    destination.ApplyTrivialFrontendDefaults();
+    ImageCopyTexture source = sourceOrig->WithTrivialFrontendDefaults();
+    ImageCopyTexture destination = destinationOrig->WithTrivialFrontendDefaults();
 
     mEncodingContext.TryEncode(
         this,

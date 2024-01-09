@@ -203,11 +203,6 @@ class RecordMember:
         self.default_value = default_value
         self.skip_serialize = skip_serialize
 
-        self.requires_struct_defaulting = False
-        if self.default_value not in [None, "undefined"] and self.annotation == "value" and \
-                self.type.category == "enum" and self.type.hasUndefined:
-            self.requires_struct_defaulting = True
-
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
         self.handle_type = handle_type
@@ -215,6 +210,19 @@ class RecordMember:
     def set_id_type(self, id_type):
         assert self.type.dict_name == "ObjectId"
         self.id_type = id_type
+
+    @property
+    def requires_struct_defaulting(self):
+        if self.annotation != "value":
+            return False
+
+        if self.type.category == "structure":
+            return self.type.any_member_requires_struct_defaulting
+        elif self.type.category == "enum":
+            return (self.type.hasUndefined
+                    and self.default_value not in [None, "undefined"])
+        else:
+            return False
 
 
 Method = namedtuple(
