@@ -36,6 +36,24 @@
 
 
 {{- /* ------------------------------------------------------------------ */ -}}
+{{-                         define "EnumFirst"                               -}}
+{{- /* Prints the name of the first enum entry                            */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+  kUndefined
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                         define "EnumLast"                                -}}
+{{- /* Prints the name of the last enum entry                             */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{- $enum := $ -}}
+{{- $item := index $enum.Entries (Sum -1 (len $enum.Entries)) -}}
+  k{{PascalCase $item.Name}}
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
 {{-                         define "DeclareEnum"                             -}}
 {{- /* Declares the 'enum class' for the provided sem.Enum argument.      */ -}}
 {{- /* The argument can also be a key-value pair with the following keys: */ -}}

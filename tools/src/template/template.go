@@ -101,6 +101,7 @@ func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 		"TrimSuffix": strings.TrimSuffix,
 		"Replace":    replace,
 		"Index":      index,
+		"Sum":        sum,
 		"Error":      func(err any) string { panic(err) },
 	}
 
@@ -209,6 +210,15 @@ func is(object any, ty string) bool {
 		val = val.Elem()
 	}
 	return ty == val.Type().Name()
+}
+
+// sum returns the sum of provided values
+func sum(numbers ...int) int {
+	n := 0
+	for _, i := range numbers {
+		n += i
+	}
+	return n
 }
 
 // iterate returns a slice of length 'n', with each element equal to its index.
