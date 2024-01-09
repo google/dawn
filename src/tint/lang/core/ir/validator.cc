@@ -903,9 +903,13 @@ void Validator::CheckStore(const Store* s) {
 
     if (auto* from = s->From()) {
         if (auto* to = s->To()) {
-            if (from->Type() != to->Type()->UnwrapPtr()) {
-                AddError(s, Store::kFromOperandOffset,
-                         "value type does not match pointer element type");
+            auto* mv = to->Type()->As<core::type::MemoryView>();
+            if (!mv) {
+                AddError(s, Store::kFromOperandOffset, "store target operand is not a memory view");
+                return;
+            }
+            if (from->Type() != mv->StoreType()) {
+                AddError(s, Store::kFromOperandOffset, "value type does not match store type");
             }
         }
     }

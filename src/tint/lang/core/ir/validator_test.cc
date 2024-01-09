@@ -2933,6 +2933,37 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* let = b.Let("l", 1_i);
+        b.Append(mod.instructions.Create<ir::Store>(let->Result(0), b.Constant(42_u)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:4:15 error: store target operand is not a memory view
+    store %l, 42u
+              ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %l:i32 = let 1i
+    store %l, 42u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -2945,7 +2976,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.str(),
-              R"(:4:15 error: value type does not match pointer element type
+              R"(:4:15 error: value type does not match store type
     store %2, 42u
               ^^^
 
