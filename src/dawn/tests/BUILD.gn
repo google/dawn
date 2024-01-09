@@ -276,12 +276,15 @@ dawn_test("dawn_unittests") {
     ":gmock_and_gtest",
     ":mock_webgpu_gen",
     ":native_mocks_sources",
+    ":partition_alloc_support",
     ":platform_mocks_sources",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
+    "${dawn_root}/src/dawn/partition_alloc:buildflags",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
   ]
@@ -337,6 +340,7 @@ dawn_test("dawn_unittests") {
     "unittests/PerThreadProcTests.cpp",
     "unittests/PlacementAllocatedTests.cpp",
     "unittests/RangeTests.cpp",
+    "unittests/RawPtrTests.cpp",
     "unittests/RefBaseTests.cpp",
     "unittests/RefCountedTests.cpp",
     "unittests/ResultTests.cpp",
@@ -455,6 +459,28 @@ dawn_test("dawn_unittests") {
 }
 
 ###############################################################################
+# Dawn PartitionAlloc support for tests
+###############################################################################
+source_set("partition_alloc_support") {
+  testonly = true
+
+  deps = [
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/partition_alloc",
+  ]
+
+  public = [ "PartitionAllocSupport.h" ]
+  sources = [ "PartitionAllocSupport.cpp" ]
+
+  # When embedded by Chrome, partition_alloc and the dangling pointer detector
+  # are already initialized. Dawn shouldn't attempt to initialize them again. We
+  # use `dawn_standalone` to avoid double initialization of the library.
+  if (dawn_standalone) {
+    defines = [ "DAWN_STANDALONE" ]
+  }
+}
+
+###############################################################################
 # Dawn test infrastructure targets
 ###############################################################################
 
@@ -463,6 +489,7 @@ source_set("test_infra_sources") {
   testonly = true
 
   deps = [
+    ":partition_alloc_support",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",

@@ -25,23 +25,46 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
-#define SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
+#include <memory>
+#include "build/build_config.h"
+#include "gtest/gtest.h"
+#include "partition_alloc/partition_alloc_buildflags.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
-// `raw_ptr<T>` is a non-owning smart pointer that has improved memory-safety
-// over raw pointers. See the documentation for details:
-// https://source.chromium.org/chromium/chromium/src/+/main:base/memory/raw_ptr.md
-//
-// Here, dawn provides a "no-op" implementation, because partition_alloc
-// dependendency is missing.
-//
-// TODO(arthursonzogni): https://crbug.com/1464560, Complete the "no-op"
-// implementation.
+namespace dawn {
+namespace {
 
-constexpr int DanglingUntriaged = 0;
-constexpr int DisableDanglingPtrDetection = 0;
+// Check Dawn is configured to crash when a raw_ptr becomes dangling.
+TEST(RawPtrTests, DanglingPointerCauseCrash) {
+    std::unique_ptr<bool> owner = std::make_unique<bool>(true);
+    raw_ptr<bool> ptr = owner.get();
+    (void)ptr;  // Unused
 
-template <typename T, int Traits = 0>
-using raw_ptr = T*;
+#if BUILDFLAG(USE_ALLOCATOR_SHIM)
+    ASSERT_DEATH_IF_SUPPORTED(
+        {
+            owner.reset();  // DanglingRawPtrDetectedFn handler => no-op.
+            ptr = nullptr;  // DanglingRawPtrReleasedFn handler => crash.
+        },
+        "DanglingPointerDetector: A pointer was dangling!");
+#endif
+}
 
-#endif  // SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
+// The flag `DisableDanglingPtrDetection` must allow a raw_ptr to dangle.
+TEST(RawPtrTests, DisableDanglingPtrDetection) {
+    std::unique_ptr<bool> owner = std::make_unique<bool>(true);
+    raw_ptr<bool, DisableDanglingPtrDetection> ptr = owner.get();
+    (void)ptr;  // Unused
+    owner.reset();
+}
+
+// The flag `DanglingUntriaged` must allow a raw_ptr to dangle.
+TEST(RawPtrTests, DanglingUntriaged) {
+    std::unique_ptr<bool> owner = std::make_unique<bool>(true);
+    raw_ptr<bool, DanglingUntriaged> ptr = owner.get();
+    (void)ptr;  // Unused
+    owner.reset();
+}
+
+}  // anonymous namespace
+}  // namespace dawn

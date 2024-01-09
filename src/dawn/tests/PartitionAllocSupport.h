@@ -25,23 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
-#define SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
+#ifndef SRC_DAWN_TESTS_PARTITIONALLOCSUPPORT_H_
+#define SRC_DAWN_TESTS_PARTITIONALLOCSUPPORT_H_
 
-// `raw_ptr<T>` is a non-owning smart pointer that has improved memory-safety
-// over raw pointers. See the documentation for details:
-// https://source.chromium.org/chromium/chromium/src/+/main:base/memory/raw_ptr.md
-//
-// Here, dawn provides a "no-op" implementation, because partition_alloc
-// dependendency is missing.
-//
-// TODO(arthursonzogni): https://crbug.com/1464560, Complete the "no-op"
-// implementation.
+namespace dawn {
 
-constexpr int DanglingUntriaged = 0;
-constexpr int DisableDanglingPtrDetection = 0;
+// Enable using PartitionAlloc's allocator.
+void InitializePartitionAllocForTesting();
 
-template <typename T, int Traits = 0>
-using raw_ptr = T*;
+// Install handlers causing a crash when a raw_ptr<T> becomes dangling.
+void InitializeDanglingPointerDetectorForTesting();
 
-#endif  // SRC_DAWN_PARTITION_ALLOC_PARTITION_ALLOC_POINTERS_RAW_PTR_H_
+}  // namespace dawn
+
+#endif  // SRC_DAWN_TESTS_PARTITIONALLOCSUPPORT_H_

@@ -21,14 +21,19 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# This is the default build configuration when building PartitionAlloc
-# as a standalone library.
-use_partition_alloc_as_malloc_default = false
-use_allocator_shim_default = false
-enable_backup_ref_ptr_support_default = false
+_compiler_supported = is_clang || !is_win
+_build_type_supported = !is_win || (!is_component_build && !is_debug)
+_platform_supported =
+    is_android || is_apple || is_chromeos || is_fuchsia || is_linux || is_win
+
+_supported = _compiler_supported && _build_type_supported && _platform_supported
+
+use_partition_alloc_as_malloc_default = _supported
+use_allocator_shim_default = _supported
+enable_backup_ref_ptr_support_default = _supported
 put_ref_count_in_previous_slot_default = true
 enable_backup_ref_ptr_slow_checks_default = false
-enable_dangling_raw_ptr_checks_default = false
+enable_dangling_raw_ptr_checks_default = _supported
 
 # This is the default build configuration for pointers/raw_ptr*.
 raw_ptr_zero_on_construct_default = true
