@@ -230,7 +230,8 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
                 break;
             }
 
-            case BindingInfoType::Texture: {
+            case BindingInfoType::Texture:
+            case BindingInfoType::StorageTexture: {
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
                 break;
@@ -238,7 +239,6 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 
             case BindingInfoType::ExternalTexture:
                 DAWN_UNREACHABLE();
-            case BindingInfoType::StorageTexture:
             case BindingInfoType::Sampler:
                 break;
         }
