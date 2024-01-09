@@ -1796,9 +1796,6 @@ TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
 // Test writing to texture memory in compute pass on one device, then sampling it using another
 // device.
 TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
-    // TODO(crbug.com/dawn/1745): Diagnose and fix on Apple GPUs.
-    DAWN_SUPPRESS_TEST_IF(IsApple());
-
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :

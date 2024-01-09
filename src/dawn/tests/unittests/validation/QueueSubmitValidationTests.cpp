@@ -376,5 +376,45 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {
     }
 }
 
+// Test that storage textures in compute pass bindgroups are checked in
+// Queue::Submit validation. Regression test for crbug.com/1516756.
+TEST_F(QueueSubmitValidationTest, SubmitWithDestroyedComputeStorageTexture) {
+    wgpu::Queue queue = device.GetQueue();
+
+    wgpu::BindGroupLayout testBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                  wgpu::TextureFormat::RGBA8Unorm}});
+
+    wgpu::ComputePipelineDescriptor cpDesc;
+    cpDesc.layout = utils::MakePipelineLayout(device, {testBGL});
+    cpDesc.compute.entryPoint = "main";
+    cpDesc.compute.module =
+        utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
+
+    wgpu::TextureDescriptor texDesc;
+    texDesc.size = {1, 1, 1};
+    texDesc.usage = wgpu::TextureUsage::StorageBinding;
+    texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    for (bool destroy : {true, false}) {
+        wgpu::Texture texture = device.CreateTexture(&texDesc);
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, testBGL, {{0, texture.CreateView()}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bg);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        if (destroy) {
+            texture.Destroy();
+            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        } else {
+            queue.Submit(1, &commands);
+        }
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
