@@ -398,6 +398,56 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValue) {
 )");
 }
 
+TEST_F(SpirvParserTest, FunctionCall_ReturnValueChain) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+    %fn_type = OpTypeFunction %bool
+  %main_type = OpTypeFunction %void
+
+        %bar = OpFunction %bool None %fn_type
+  %bar_start = OpLabel
+               OpReturnValue %true
+               OpFunctionEnd
+
+        %foo = OpFunction %bool None %fn_type
+  %foo_start = OpLabel
+       %call = OpFunctionCall %bool %foo
+               OpReturnValue %call
+               OpFunctionEnd
+
+       %main = OpFunction %void None %main_type
+ %main_start = OpLabel
+          %1 = OpFunctionCall %bool %bar
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%1 = func():bool -> %b1 {
+  %b1 = block {
+    ret true
+  }
+}
+%2 = func():bool -> %b2 {
+  %b2 = block {
+    %3:bool = call %2
+    ret %3
+  }
+}
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
+  %b3 = block {
+    %5:bool = call %1
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, FunctionCall_ParamAndReturnValue) {
     EXPECT_IR(R"(
                OpCapability Shader

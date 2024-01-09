@@ -76,7 +76,10 @@ class Parser {
             return Failure("failed to build the internal representation of the module");
         }
 
-        EmitModuleScopeVariables();
+        {
+            TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
+            EmitModuleScopeVariables();
+        }
 
         EmitFunctions();
 
@@ -316,11 +319,27 @@ class Parser {
         return nullptr;
     }
 
+    /// Register an IR value for a SPIR-V result ID.
+    /// @param result_id the SPIR-V result ID
+    /// @param value the IR value
+    void AddValue(uint32_t result_id, core::ir::Value* value) { values_.Add(result_id, value); }
+
+    /// Emit an instruction to the current block.
+    /// @param inst the instruction to emit
+    /// @param result_id an optional SPIR-V result ID to register the instruction result for
+    void Emit(core::ir::Instruction* inst, uint32_t result_id = 0) {
+        current_block_->Append(inst);
+        if (result_id != 0) {
+            TINT_ASSERT_OR_RETURN(inst->Results().Length() == 1u);
+            AddValue(result_id, inst->Result(0));
+        }
+    }
+
     /// Emit the module-scope variables.
     void EmitModuleScopeVariables() {
         for (auto& inst : spirv_context_->module()->types_values()) {
             if (inst.opcode() == spv::Op::OpVariable) {
-                ir_.root_block->Append(EmitVar(inst));
+                EmitVar(inst);
             }
         }
     }
@@ -394,19 +413,20 @@ class Parser {
     /// @param dst the Tint IR block to append to
     /// @param src the SPIR-V block to emit
     void EmitBlock(core::ir::Block* dst, const spvtools::opt::BasicBlock& src) {
+        TINT_SCOPED_ASSIGNMENT(current_block_, dst);
         for (auto& inst : src) {
             switch (inst.opcode()) {
                 case spv::Op::OpFunctionCall:
-                    dst->Append(EmitFunctionCall(inst));
+                    EmitFunctionCall(inst);
                     break;
                 case spv::Op::OpReturn:
-                    dst->Append(b_.Return(current_function_));
+                    Emit(b_.Return(current_function_));
                     break;
                 case spv::Op::OpReturnValue:
-                    dst->Append(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
+                    Emit(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
                     break;
                 case spv::Op::OpVariable:
-                    dst->Append(EmitVar(inst));
+                    EmitVar(inst);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -416,24 +436,22 @@ class Parser {
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
-    /// @returns the Tint IR instruction
-    core::ir::UserCall* EmitFunctionCall(const spvtools::opt::Instruction& inst) {
+    void EmitFunctionCall(const spvtools::opt::Instruction& inst) {
         // TODO(crbug.com/tint/1907): Capture result.
         Vector<core::ir::Value*, 4> args;
         for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
             args.Push(Value(inst.GetSingleWordOperand(i)));
         }
-        return b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args));
+        Emit(b_.Call(Function(inst.GetSingleWordInOperand(0)), std::move(args)), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpVariable
-    /// @returns the Tint IR instruction
-    core::ir::Var* EmitVar(const spvtools::opt::Instruction& inst) {
+    void EmitVar(const spvtools::opt::Instruction& inst) {
         auto* var = b_.Var(Type(inst.type_id())->As<core::type::Pointer>());
         if (inst.NumOperands() > 3) {
             var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
         }
-        return var;
+        Emit(var, inst.result_id());
     }
 
   private:
@@ -446,6 +464,8 @@ class Parser {
 
     /// The Tint IR function that is currently being emitted.
     core::ir::Function* current_function_ = nullptr;
+    /// The Tint IR block that is currently being emitted.
+    core::ir::Block* current_block_ = nullptr;
     /// A map from a SPIR-V type declaration result ID to the corresponding Tint type object.
     Hashmap<const spvtools::opt::analysis::Type*, const core::type::Type*, 16> types_;
     /// A map from a SPIR-V function definition result ID to the corresponding Tint function object.
