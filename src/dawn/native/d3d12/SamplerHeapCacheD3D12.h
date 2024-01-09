@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 
-#include <unordered_set>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
@@ -111,9 +111,9 @@ class SamplerHeapCache {
   private:
     Device* mDevice;
 
-    using Cache = std::unordered_set<SamplerHeapCacheEntry*,
-                                     SamplerHeapCacheEntry::HashFunc,
-                                     SamplerHeapCacheEntry::EqualityFunc>;
+    using Cache = absl::flat_hash_set<SamplerHeapCacheEntry*,
+                                      SamplerHeapCacheEntry::HashFunc,
+                                      SamplerHeapCacheEntry::EqualityFunc>;
 
     Cache mCache;
 };

@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
 #define SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
 
-#include <set>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/native/SubresourceStorage.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -92,9 +92,9 @@ struct ComputePassResourceUsage {
     std::vector<SyncScopeResourceUsage> dispatchUsages;
 
     // All the resources referenced by this compute pass for validation in Queue::Submit.
-    std::set<BufferBase*> referencedBuffers;
-    std::set<TextureBase*> referencedTextures;
-    std::set<ExternalTextureBase*> referencedExternalTextures;
+    absl::flat_hash_set<BufferBase*> referencedBuffers;
+    absl::flat_hash_set<TextureBase*> referencedTextures;
+    absl::flat_hash_set<ExternalTextureBase*> referencedExternalTextures;
 };
 
 // Contains all the resource usage data for a render pass.
@@ -118,9 +118,9 @@ struct CommandBufferResourceUsage {
     ComputePassUsages computePasses;
 
     // Resources used in commands that aren't in a pass.
-    std::set<BufferBase*> topLevelBuffers;
-    std::set<TextureBase*> topLevelTextures;
-    std::set<QuerySetBase*> usedQuerySets;
+    absl::flat_hash_set<BufferBase*> topLevelBuffers;
+    absl::flat_hash_set<TextureBase*> topLevelTextures;
+    absl::flat_hash_set<QuerySetBase*> usedQuerySets;
 };
 
 }  // namespace dawn::native

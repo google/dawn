@@ -28,9 +28,9 @@
 #include "dawn/native/Pipeline.h"
 
 #include <algorithm>
-#include <unordered_set>
 #include <utility>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
@@ -97,7 +97,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();
     // Keep an initialized constants sets to handle duplicate initialization cases
-    std::unordered_set<std::string> stageInitializedConstantIdentifiers;
+    absl::flat_hash_set<std::string> stageInitializedConstantIdentifiers;
     for (uint32_t i = 0; i < constantCount; i++) {
         DAWN_INVALID_IF(metadata.overrides.count(constants[i].key) == 0,
                         "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
@@ -142,8 +142,8 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
                 DAWN_UNREACHABLE();
         }
 
-        if (stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
-            if (metadata.uninitializedOverrides.count(constants[i].key) > 0) {
+        if (!stageInitializedConstantIdentifiers.contains(constants[i].key)) {
+            if (metadata.uninitializedOverrides.contains(constants[i].key)) {
                 numUninitializedConstants--;
             }
             stageInitializedConstantIdentifiers.insert(constants[i].key);
@@ -159,7 +159,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         std::string uninitializedConstantsArray;
         bool isFirst = true;
         for (std::string identifier : metadata.uninitializedOverrides) {
-            if (stageInitializedConstantIdentifiers.count(identifier) > 0) {
+            if (stageInitializedConstantIdentifiers.contains(identifier)) {
                 continue;
             }
 

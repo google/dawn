@@ -27,9 +27,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 
-#include <set>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
@@ -64,7 +64,7 @@ class CommandRecordingContext {
     ComPtr<ID3D12GraphicsCommandList4> mD3d12CommandList4;
     bool mIsOpen = false;
     bool mNeedsSubmit = false;
-    std::set<Texture*> mSharedTextures;
+    absl::flat_hash_set<Texture*> mSharedTextures;
     std::vector<Heap*> mHeapsPendingUsage;
 
     std::vector<Ref<Buffer>> mTempBuffers;

@@ -175,7 +175,7 @@ InstanceBase::~InstanceBase() = default;
 
 void InstanceBase::DeleteThis() {
     // Flush all remaining callback tasks on all devices and on the instance.
-    std::set<DeviceBase*> devices;
+    absl::flat_hash_set<DeviceBase*> devices;
     do {
         devices.clear();
         mDevicesList.Use([&](auto deviceList) { devices.swap(*deviceList); });
@@ -435,7 +435,7 @@ bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
         return false;
     }
     std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (warningMessages.insert(message).second) {
+    if (mWarningMessages.insert(message).second) {
         dawn::WarningLog() << message;
     }
     return true;
@@ -643,7 +643,7 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
 }
 
 bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLFeatureName feature) const {
-    return mWGSLFeatures.count(feature) != 0;
+    return mWGSLFeatures.contains(feature);
 }
 
 size_t InstanceBase::APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const {

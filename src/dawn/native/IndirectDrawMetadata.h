@@ -30,10 +30,10 @@
 
 #include <cstdint>
 #include <map>
-#include <set>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/native/Buffer.h"
@@ -145,7 +145,7 @@ class IndirectDrawMetadata : public NonCopyable {
 
   private:
     IndexedIndirectBufferValidationInfoMap mIndexedIndirectBufferValidationInfo;
-    std::set<RenderBundleBase*> mAddedBundles;
+    absl::flat_hash_set<RenderBundleBase*> mAddedBundles;
 
     uint64_t mMaxBatchOffsetRange;
     uint32_t mMaxDrawCallsPerBatch;

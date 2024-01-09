@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDENCODER_H_
 #define SRC_DAWN_NATIVE_COMMANDENCODER_H_
 
-#include <set>
 #include <string>
 
 #include "dawn/native/dawn_platform.h"
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/native/EncodingContext.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ObjectBase.h"
@@ -41,8 +41,6 @@
 namespace dawn::native {
 
 enum class UsageValidationMode;
-
-bool HasDeprecatedColor(const RenderPassColorAttachment& attachment);
 
 Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format& format);
 
@@ -148,9 +146,9 @@ class CommandEncoder final : public ApiObjectBase {
     MaybeError ValidateFinish() const;
 
     EncodingContext mEncodingContext;
-    std::set<BufferBase*> mTopLevelBuffers;
-    std::set<TextureBase*> mTopLevelTextures;
-    std::set<QuerySetBase*> mUsedQuerySets;
+    absl::flat_hash_set<BufferBase*> mTopLevelBuffers;
+    absl::flat_hash_set<TextureBase*> mTopLevelTextures;
+    absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
 
     uint64_t mDebugGroupStackSize = 0;
 

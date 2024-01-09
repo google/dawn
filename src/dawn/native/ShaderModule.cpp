@@ -911,8 +911,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                   const tint::Program* program,
                                   OwnedCompilationMessages* compilationMessages,
-                                  EntryPointMetadataTable* entryPointMetadataTable,
-                                  WGSLExtensionSet* enabledWGSLExtensions) {
+                                  EntryPointMetadataTable* entryPointMetadataTable) {
     DAWN_ASSERT(program->IsValid());
 
     tint::inspector::Inspector inspector(*program);
@@ -1358,7 +1357,7 @@ MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult
     mTintSource = std::move(parseResult->tintSource);
 
     DAWN_TRY(ReflectShaderUsingTint(GetDevice(), mTintProgram.get(), compilationMessages,
-                                    &mEntryPoints, &mEnabledWGSLExtensions));
+                                    &mEntryPoints));
 
     for (auto stage : IterateStages(kAllStages)) {
         mEntryPointCounts[stage] = 0;

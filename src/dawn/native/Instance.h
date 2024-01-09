@@ -31,11 +31,11 @@
 #include <array>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
@@ -203,7 +203,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
     void ConsumeError(std::unique_ptr<ErrorData> error);
 
-    std::unordered_set<std::string> warningMessages;
+    absl::flat_hash_set<std::string> mWarningMessages;
 
     std::vector<std::string> mRuntimeSearchPaths;
 
@@ -222,7 +222,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     TogglesState mToggles;
     TogglesInfo mTogglesInfo;
 
-    std::unordered_set<wgpu::WGSLFeatureName> mWGSLFeatures;
+    absl::flat_hash_set<wgpu::WGSLFeatureName> mWGSLFeatures;
+    // TODO(dawn:1513): Use absl::flat_hash_set after it is supported in Tint.
     std::unordered_set<tint::wgsl::LanguageFeature> mTintLanguageFeatures;
 
 #if defined(DAWN_USE_X11)
@@ -235,7 +236,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     Ref<CallbackTaskManager> mCallbackTaskManager;
     EventManager mEventManager;
 
-    MutexProtected<std::set<DeviceBase*>> mDevicesList;
+    MutexProtected<absl::flat_hash_set<DeviceBase*>> mDevicesList;
 };
 
 }  // namespace dawn::native
