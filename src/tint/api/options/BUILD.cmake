@@ -52,6 +52,5 @@ tint_target_add_dependencies(tint_api_options lib
   tint_utils_macros
   tint_utils_math
   tint_utils_reflection
-  tint_utils_text
   tint_utils_traits
 )

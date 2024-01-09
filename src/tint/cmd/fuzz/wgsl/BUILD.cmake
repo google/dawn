@@ -73,6 +73,12 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_utils_traits
 )
 
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
+    tint_lang_hlsl_writer_fuzz
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
 if(TINT_BUILD_IR_BINARY)
   tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
     tint_lang_core_ir_binary_fuzz

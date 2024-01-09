@@ -51,7 +51,6 @@ cc_library(
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/reflection",
-    "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ],
   copts = COPTS,

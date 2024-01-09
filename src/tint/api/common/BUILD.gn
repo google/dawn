@@ -48,7 +48,6 @@ libtint_source_set("common") {
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/reflection",
-    "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]
 }
