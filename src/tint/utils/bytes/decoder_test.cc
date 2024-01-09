@@ -154,6 +154,24 @@ TEST(BytesDecoderTest, UnorderedMap) {
     EXPECT_NE(Decode<M>(reader), Success);
 }
 
+TEST(BytesDecoderTest, Vector) {
+    using M = std::vector<uint8_t>;
+    auto data = Data(0x00, 0x10,  //
+                     0x00, 0x30,  //
+                     0x00, 0x50,  //
+                     0x00, 0x70,  //
+                     0x01);
+    auto reader = BufferReader{Slice{data}};
+    auto got = Decode<M>(reader);
+    EXPECT_THAT(got.Get(), testing::ContainerEq(M{
+                               0x10u,
+                               0x30u,
+                               0x50u,
+                               0x70u,
+                           }));
+    EXPECT_NE(Decode<M>(reader), Success);
+}
+
 TEST(BytesDecoderTest, Optional) {
     auto data = Data(0x00,  //
                      0x01, 0x42);

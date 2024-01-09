@@ -35,6 +35,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "src/tint/utils/bytes/reader.h"
 #include "src/tint/utils/reflection/reflection.h"
@@ -148,6 +149,34 @@ struct Decoder<std::unordered_map<K, V>, void> {
                 return val.Failure();
             }
             out.emplace(std::move(key.Get()), std::move(val.Get()));
+        }
+
+        return out;
+    }
+};
+
+/// Decoder specialization for std::vector
+template <typename V>
+struct Decoder<std::vector<V>, void> {
+    /// Decode decodes the vector from @p reader.
+    /// @param reader the reader to decode from
+    /// @returns the decoded vector, or an error if the stream is too short.
+    static Result<std::vector<V>> Decode(Reader& reader) {
+        std::vector<V> out;
+
+        while (true) {
+            auto stop = bytes::Decode<bool>(reader);
+            if (stop != Success) {
+                return stop.Failure();
+            }
+            if (stop.Get()) {
+                break;
+            }
+            auto val = bytes::Decode<V>(reader);
+            if (val != Success) {
+                return val.Failure();
+            }
+            out.emplace_back(std::move(val.Get()));
         }
 
         return out;
