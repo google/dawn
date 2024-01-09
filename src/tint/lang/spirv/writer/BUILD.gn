@@ -205,7 +205,7 @@ if (tint_build_benchmarks) {
 }
 if (tint_build_spv_writer) {
   tint_fuzz_source_set("fuzz") {
-    sources = [ "writer_fuzz.cc" ]
+    sources = [ "writer_ir_fuzz.cc" ]
     deps = [
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
@@ -215,6 +215,7 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/helpers",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
@@ -251,7 +252,10 @@ if (tint_build_spv_writer) {
     }
 
     if (tint_build_wgsl_reader) {
-      sources += [ "ast_writer_fuzz.cc" ]
+      sources += [
+        "ast_writer_fuzz.cc",
+        "writer_ast_fuzz.cc",
+      ]
       deps += [ "${tint_src_dir}/cmd/fuzz/wgsl:fuzz" ]
     }
   }

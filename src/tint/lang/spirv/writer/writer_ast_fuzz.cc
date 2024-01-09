@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/writer.h"
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
-#include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/spirv/validate/validate.h"
-#include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/spirv/writer/helpers/ast_generate_bindings.h"
+#include "src/tint/lang/spirv/writer/writer.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 
 namespace tint::spirv::writer {
 namespace {
 
-void IRPrinterFuzzer(core::ir::Module& module, Options options) {
-    options.bindings = GenerateBindings(module);
-    auto output = Generate(module, options);
-    if (output != Success) {
+void ASTFuzzer(const tint::Program& program, Options options) {
+    if (program.AST().HasOverrides()) {
         return;
     }
-    auto& spirv = output->spirv;
-    if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
-        res != Success) {
-        TINT_ICE() << "Output of SPIR-V writer failed to validate with SPIR-V Tools\n"
-                   << res.Failure();
-    }
+
+    options.bindings = GenerateBindings(program);
+
+    [[maybe_unused]] auto res = tint::spirv::writer::Generate(program, options);
 }
 
 }  // namespace
 }  // namespace tint::spirv::writer
 
-TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRPrinterFuzzer);
+TINT_WGSL_PROGRAM_FUZZER(tint::spirv::writer::ASTFuzzer);

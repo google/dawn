@@ -28,8 +28,6 @@
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 
 #include <unordered_map>
-#include <utility>
-#include <vector>
 
 #include "src/tint/lang/spirv/writer/ast_raise/clamp_frag_depth.h"
 #include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"

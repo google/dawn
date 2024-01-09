@@ -232,7 +232,7 @@ if(TINT_BUILD_SPV_WRITER)
 # Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer_fuzz fuzz
-  lang/spirv/writer/writer_fuzz.cc
+  lang/spirv/writer/writer_ir_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
@@ -244,6 +244,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_features
   tint_lang_wgsl_helpers
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
@@ -283,6 +284,7 @@ endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_sources(tint_lang_spirv_writer_fuzz fuzz
     "lang/spirv/writer/ast_writer_fuzz.cc"
+    "lang/spirv/writer/writer_ast_fuzz.cc"
   )
   tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
     tint_cmd_fuzz_wgsl_fuzz
