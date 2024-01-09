@@ -39,6 +39,7 @@
 
 #include <cstdint>
 
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint::core {
@@ -75,5 +76,12 @@ constexpr std::string_view kAccessStrings[] = {
 };
 
 }  // namespace tint::core
+
+namespace tint {
+
+/// Access reflection information
+TINT_REFLECT_ENUM_RANGE(core::Access, kUndefined, kWrite);
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_CORE_ACCESS_H_

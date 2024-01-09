@@ -78,6 +78,7 @@ cc_library(
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
+    "//src/tint/utils/reflection",
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
@@ -143,6 +144,8 @@ cc_library(
   ],
   deps = [
     "//src/tint/lang/core",
+    "//src/tint/utils/macros",
+    "//src/tint/utils/reflection",
     "//src/tint/utils/traits",
     "@benchmark",
   ],

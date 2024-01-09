@@ -20,6 +20,7 @@ See:
 
 #include <cstdint>
 
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint::core {
@@ -28,5 +29,12 @@ namespace tint::core {
 {{ Eval "DeclareEnum" $enum}}
 
 }  // namespace tint::core
+
+namespace tint {
+
+/// Access reflection information
+TINT_REFLECT_ENUM_RANGE(core::{{ Eval "EnumName" $enum }}, {{Eval "EnumFirst" $enum }}, {{Eval "EnumLast" $enum}});
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_CORE_ACCESS_H_

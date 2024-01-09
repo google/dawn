@@ -81,6 +81,7 @@ libtint_source_set("core") {
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/reflection",
     "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/text",
@@ -142,6 +143,8 @@ if (tint_build_benchmarks) {
     deps = [
       "${tint_src_dir}:google_benchmark",
       "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/traits",
     ]
   }

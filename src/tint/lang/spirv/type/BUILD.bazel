@@ -56,6 +56,7 @@ cc_library(
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
+    "//src/tint/utils/reflection",
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
