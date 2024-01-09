@@ -165,8 +165,14 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
         TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                uint64_t(pendingSerial));
-        DAWN_ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
-        this->mCompletedSerial.store(uint64_t(pendingSerial), std::memory_order_release);
+
+        // Do an atomic_max on mCompletedSerial since it might have been increased outside the
+        // CommandBufferMTL completed handlers if the device has been lost, or if they handlers fire
+        // in an unordered way.
+        uint64_t currentCompleted = mCompletedSerial.load();
+        while (uint64_t(pendingSerial) > currentCompleted &&
+               !mCompletedSerial.compare_exchange_weak(currentCompleted, uint64_t(pendingSerial))) {
+        }
 
         this->UpdateWaitingEvents(pendingSerial);
     }];
