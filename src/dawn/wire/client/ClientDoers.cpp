@@ -88,7 +88,9 @@ bool Client::DoDevicePopErrorScopeCallback(Device* device,
     return device->OnPopErrorScopeCallback(requestSerial, errorType, message);
 }
 
+// TODO(dawn:2061) May be able to move this to Buffer.cpp once we move all mapping logic.
 bool Client::DoBufferMapAsyncCallback(Buffer* buffer,
+                                      ObjectHandle eventManager,
                                       WGPUFuture future,
                                       uint32_t status,
                                       uint64_t readDataUpdateInfoLength,
@@ -98,16 +100,6 @@ bool Client::DoBufferMapAsyncCallback(Buffer* buffer,
         return true;
     }
     return buffer->OnMapAsyncCallback(future, status, readDataUpdateInfoLength, readDataUpdateInfo);
-}
-
-bool Client::DoQueueWorkDoneCallback(Queue* queue,
-                                     WGPUFuture future,
-                                     WGPUQueueWorkDoneStatus status) {
-    // The queue might have been deleted or recreated so this isn't an error.
-    if (queue == nullptr) {
-        return true;
-    }
-    return queue->OnWorkDoneCallback(future, status);
 }
 
 bool Client::DoDeviceCreateComputePipelineAsyncCallback(Device* device,

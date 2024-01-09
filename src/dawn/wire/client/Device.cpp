@@ -36,8 +36,10 @@
 
 namespace dawn::wire::client {
 
-Device::Device(const ObjectBaseParams& params, const WGPUDeviceDescriptor* descriptor)
-    : ObjectBase(params), mIsAlive(std::make_shared<bool>()) {
+Device::Device(const ObjectBaseParams& params,
+               const ObjectHandle& eventManagerHandle,
+               const WGPUDeviceDescriptor* descriptor)
+    : ObjectWithEventsBase(params, eventManagerHandle), mIsAlive(std::make_shared<bool>()) {
     if (descriptor && descriptor->deviceLostCallback) {
         mDeviceLostCallback = descriptor->deviceLostCallback;
         mDeviceLostUserdata = descriptor->deviceLostUserdata;
@@ -232,7 +234,7 @@ WGPUQueue Device::GetQueue() {
     if (mQueue == nullptr) {
         // Get the primary queue for this device.
         Client* client = GetClient();
-        mQueue = client->Make<Queue>();
+        mQueue = client->Make<Queue>(GetEventManagerHandle());
 
         DeviceGetQueueCmd cmd;
         cmd.self = ToAPI(this);

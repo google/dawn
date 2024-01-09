@@ -236,7 +236,11 @@ wgpu::Device CreateCppDawnDevice() {
             procs = dawn::wire::client::GetProcs();
             s2cBuf->SetHandler(wireClient);
 
-            auto deviceReservation = wireClient->ReserveDevice();
+            auto instanceReservation = wireClient->ReserveInstance();
+            wireServer->InjectInstance(instance->Get(), instanceReservation.id,
+                                       instanceReservation.generation);
+
+            auto deviceReservation = wireClient->ReserveDevice(instanceReservation.instance);
             wireServer->InjectDevice(backendDevice, deviceReservation.id,
                                      deviceReservation.generation);
             cDevice = deviceReservation.device;

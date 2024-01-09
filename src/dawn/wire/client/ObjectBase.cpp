@@ -28,6 +28,7 @@
 #include "dawn/wire/client/ObjectBase.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
 
@@ -62,6 +63,18 @@ bool ObjectBase::Release() {
     DAWN_ASSERT(mRefcount != 0);
     mRefcount--;
     return mRefcount == 0;
+}
+
+ObjectWithEventsBase::ObjectWithEventsBase(const ObjectBaseParams& params,
+                                           const ObjectHandle& eventManagerHandle)
+    : ObjectBase(params), mEventManagerHandle(eventManagerHandle) {}
+
+const ObjectHandle& ObjectWithEventsBase::GetEventManagerHandle() const {
+    return mEventManagerHandle;
+}
+
+EventManager& ObjectWithEventsBase::GetEventManager() const {
+    return GetClient()->GetEventManager(mEventManagerHandle);
 }
 
 }  // namespace dawn::wire::client

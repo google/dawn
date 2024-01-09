@@ -55,18 +55,9 @@ class WireAdapterTests : public WireTest {
     void SetUp() override {
         WireTest::SetUp();
 
-        auto reservation = GetWireClient()->ReserveInstance();
-        instance = wgpu::Instance::Acquire(reservation.instance);
-
-        WGPUInstance apiInstance = api.GetNewInstance();
-        EXPECT_CALL(api, InstanceReference(apiInstance));
-        EXPECT_TRUE(
-            GetWireServer()->InjectInstance(apiInstance, reservation.id, reservation.generation));
-
-        wgpu::RequestAdapterOptions options = {};
+        WGPURequestAdapterOptions options = {};
         MockCallback<WGPURequestAdapterCallback> cb;
-        auto* userdata = cb.MakeUserdata(this);
-        instance.RequestAdapter(&options, cb.Callback(), userdata);
+        wgpuInstanceRequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
 
         // Expect the server to receive the message. Then, mock a fake reply.
         apiAdapter = api.GetNewAdapter();
@@ -111,12 +102,10 @@ class WireAdapterTests : public WireTest {
 
     void TearDown() override {
         adapter = nullptr;
-        instance = nullptr;
         WireTest::TearDown();
     }
 
     WGPUAdapter apiAdapter;
-    wgpu::Instance instance;
     wgpu::Adapter adapter;
 };
 

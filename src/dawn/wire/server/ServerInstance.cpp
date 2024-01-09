@@ -34,6 +34,7 @@
 namespace dawn::wire::server {
 
 WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
+                                            ObjectHandle eventManager,
                                             WGPUFuture future,
                                             ObjectHandle adapterHandle,
                                             const WGPURequestAdapterOptions* options) {
@@ -42,6 +43,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
     userdata->instance = instance.AsHandle();
+    userdata->eventManager = eventManager;
     userdata->future = future;
     userdata->adapterObjectId = adapter.id;
 
@@ -56,7 +58,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
                                       WGPUAdapter adapter,
                                       const char* message) {
     ReturnInstanceRequestAdapterCallbackCmd cmd = {};
-    cmd.instance = data->instance;
+    cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;

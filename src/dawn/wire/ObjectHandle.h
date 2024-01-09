@@ -28,7 +28,10 @@
 #ifndef DAWN_WIRE_OBJECTHANDLE_H_
 #define DAWN_WIRE_OBJECTHANDLE_H_
 
+#include <cstddef>
 #include <cstdint>
+
+#include "dawn/common/HashUtils.h"
 
 namespace dawn::wire {
 
@@ -59,9 +62,20 @@ struct ObjectHandle {
     ObjectHandle& AssignFrom(const ObjectHandle& rhs);
     ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs);
 
+    bool operator==(const ObjectHandle& other) const;
+
     bool IsValid() const;
 };
 
 }  // namespace dawn::wire
+
+template <>
+struct std::hash<dawn::wire::ObjectHandle> {
+    size_t operator()(const dawn::wire::ObjectHandle& value) const {
+        size_t hash = dawn::Hash(value.id);
+        dawn::HashCombine(&hash, value.generation);
+        return hash;
+    }
+};
 
 #endif  // DAWN_WIRE_OBJECTHANDLE_H_

@@ -29,6 +29,7 @@
 #define SRC_DAWN_WIRE_CLIENT_CLIENT_H_
 
 #include <memory>
+#include <unordered_map>
 #include <utility>
 
 #include "dawn/common/LinkedList.h"
@@ -88,7 +89,7 @@ class Client : public ClientBase {
     ReservedTexture ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor);
     ReservedSwapChain ReserveSwapChain(WGPUDevice device,
                                        const WGPUSwapChainDescriptor* descriptor);
-    ReservedDevice ReserveDevice();
+    ReservedDevice ReserveDevice(WGPUInstance instance);
     ReservedInstance ReserveInstance(const WGPUInstanceDescriptor* descriptor);
 
     void ReclaimTextureReservation(const ReservedTexture& reservation);
@@ -106,7 +107,7 @@ class Client : public ClientBase {
         mSerializer.SerializeCommand(cmd, *this, std::forward<Extensions>(es)...);
     }
 
-    EventManager* GetEventManager();
+    EventManager& GetEventManager(const ObjectHandle& instance);
 
     void Disconnect();
     bool IsDisconnected() const;
@@ -122,8 +123,14 @@ class Client : public ClientBase {
     MemoryTransferService* mMemoryTransferService = nullptr;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     PerObjectType<LinkedList<ObjectBase>> mObjects;
-    // TODO(crbug.com/dawn/2061) Eventually we want an EventManager per instance not per client.
-    std::unique_ptr<EventManager> mEventManager = nullptr;
+    // Map of instance object handles to a corresponding event manager. Note that for now because we
+    // do not have an internal refcount on the instances, i.e. we don't know when the last object
+    // associated with a particular instance is destroyed, this map is not cleaned up until the
+    // client is destroyed. This should only be a problem for users that are creating many
+    // instances. We also cannot currently store the EventManger on the Instance because
+    // spontaneous mode callbacks outlive the instance. We also can't reuse the ObjectStore for the
+    // EventManagers because we need to track old instance handles even after they are reclaimed.
+    std::unordered_map<ObjectHandle, std::unique_ptr<EventManager>> mEventManagers;
     bool mDisconnected = false;
 };
 
