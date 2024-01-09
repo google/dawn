@@ -48,6 +48,8 @@ enum class SingleShaderStage;
 
 namespace dawn::native::metal {
 
+MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
+
 NSRef<NSString> MakeDebugName(DeviceBase* device, const char* prefix, std::string label = "");
 
 // Templating for setting the label on MTL objects because not all MTL objects are of the same base
