@@ -69,6 +69,8 @@ struct BuiltinPolyfillConfig {
     bool saturate = false;
     /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
     bool texture_sample_base_clamp_to_edge_2d_f32 = false;
+    /// Should `dot4U8Packed()` and `dot4I8Packed()` be polyfilled?
+    bool dot_4x8_packed = false;
     /// Should `pack4xI8()` and `pack4xU8()` be polyfilled?
     bool pack_unpack_4x8 = false;
 };

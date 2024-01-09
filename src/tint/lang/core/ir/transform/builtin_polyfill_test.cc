@@ -1622,5 +1622,85 @@ TEST_F(IR_BuiltinPolyfillTest, Unpack4xU8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Dot4I8Packed) {
+    Build(core::BuiltinFn::kDot4I8Packed, ty.i32(), Vector{ty.u32(), ty.u32()});
+
+    auto* src = R"(
+%foo = func(%arg:u32, %arg_1:u32):i32 -> %b1 {  # %arg_1: 'arg'
+  %b1 = block {
+    %result:i32 = dot4I8Packed %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:u32, %arg_1:u32):i32 -> %b1 {  # %arg_1: 'arg'
+  %b1 = block {
+    %4:vec4<u32> = construct 24u, 16u, 8u, 0u
+    %5:vec4<u32> = construct %arg
+    %6:vec4<u32> = shl %5, %4
+    %7:vec4<i32> = bitcast %6
+    %8:vec4<u32> = construct 24u
+    %9:vec4<i32> = shr %7, %8
+    %10:vec4<u32> = construct 24u, 16u, 8u, 0u
+    %11:vec4<u32> = construct %arg_1
+    %12:vec4<u32> = shl %11, %10
+    %13:vec4<i32> = bitcast %12
+    %14:vec4<u32> = construct 24u
+    %15:vec4<i32> = shr %13, %14
+    %result:i32 = dot %9, %15
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.dot_4x8_packed = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Dot4U8Packed) {
+    Build(core::BuiltinFn::kDot4U8Packed, ty.u32(), Vector{ty.u32(), ty.u32()});
+
+    auto* src = R"(
+%foo = func(%arg:u32, %arg_1:u32):u32 -> %b1 {  # %arg_1: 'arg'
+  %b1 = block {
+    %result:u32 = dot4U8Packed %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:u32, %arg_1:u32):u32 -> %b1 {  # %arg_1: 'arg'
+  %b1 = block {
+    %4:vec4<u32> = construct 0u, 8u, 16u, 24u
+    %5:vec4<u32> = construct %arg
+    %6:vec4<u32> = shr %5, %4
+    %7:vec4<u32> = construct 255u
+    %8:vec4<u32> = and %6, %7
+    %9:vec4<u32> = construct 0u, 8u, 16u, 24u
+    %10:vec4<u32> = construct %arg_1
+    %11:vec4<u32> = shr %10, %9
+    %12:vec4<u32> = construct 255u
+    %13:vec4<u32> = and %11, %12
+    %result:u32 = dot %8, %13
+    ret %result
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    config.dot_4x8_packed = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

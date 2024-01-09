@@ -119,6 +119,13 @@ struct State {
                             }
                         }
                         break;
+                    case core::BuiltinFn::kDot4U8Packed:
+                    case core::BuiltinFn::kDot4I8Packed: {
+                        if (config.dot_4x8_packed) {
+                            worklist.Push(builtin);
+                        }
+                        break;
+                    }
                     case core::BuiltinFn::kPack4XI8:
                     case core::BuiltinFn::kPack4XU8:
                     case core::BuiltinFn::kPack4XI8Clamp:
@@ -166,6 +173,12 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleBaseClampToEdge:
                     replacement = TextureSampleBaseClampToEdge_2d_f32(builtin);
+                    break;
+                case core::BuiltinFn::kDot4I8Packed:
+                    replacement = Dot4I8Packed(builtin);
+                    break;
+                case core::BuiltinFn::kDot4U8Packed:
+                    replacement = Dot4U8Packed(builtin);
                     break;
                 case core::BuiltinFn::kPack4XI8:
                     replacement = Pack4xI8(builtin);
@@ -601,6 +614,44 @@ struct State {
         return result;
     }
 
+    /// Polyfill a `dot4I8Packed()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Dot4I8Packed(ir::CoreBuiltinCall* call) {
+        // Replace `dot4I8Packed(%x,%y)` with:
+        //   %unpacked_x = unpack4xI8(%x);
+        //   %unpacked_y = unpack4xI8(%y);
+        //   %result = dot(%unpacked_x, %unpacked_y);
+        auto* x = call->Args()[0];
+        auto* y = call->Args()[1];
+        auto* unpacked_x = Unpack4xI8OnValue(call, x);
+        auto* unpacked_y = Unpack4xI8OnValue(call, y);
+        ir::Value* result = nullptr;
+        b.InsertBefore(call, [&] {
+            result = b.Call(ty.i32(), core::BuiltinFn::kDot, unpacked_x, unpacked_y)->Result(0);
+        });
+        return result;
+    }
+
+    /// Polyfill a `dot4U8Packed()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Dot4U8Packed(ir::CoreBuiltinCall* call) {
+        // Replace `dot4U8Packed(%x,%y)` with:
+        //   %unpacked_x = unpack4xU8(%x);
+        //   %unpacked_y = unpack4xU8(%y);
+        //   %result = dot(%unpacked_x, %unpacked_y);
+        auto* x = call->Args()[0];
+        auto* y = call->Args()[1];
+        auto* unpacked_x = Unpack4xU8OnValue(call, x);
+        auto* unpacked_y = Unpack4xU8OnValue(call, y);
+        ir::Value* result = nullptr;
+        b.InsertBefore(call, [&] {
+            result = b.Call(ty.u32(), core::BuiltinFn::kDot, unpacked_x, unpacked_y)->Result(0);
+        });
+        return result;
+    }
+
     /// Polyfill a `pack4xI8()` builtin call
     /// @param call the builtin call instruction
     /// @returns the replacement value
@@ -713,17 +764,16 @@ struct State {
         return result;
     }
 
-    /// Polyfill a `unpack4xI8()` builtin call
-    /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Unpack4xI8(ir::CoreBuiltinCall* call) {
+    /// Emit code for `unpack4xI8` on u32 value `x`, before the given call.
+    /// @param call the instruction that should follow the emitted code
+    /// @param x the u32 value to be unpacked
+    ir::Value* Unpack4xI8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xI8(%x)` with:
         //   %n       = vec4u(24, 16, 8, 0);
-        //   %x_splat = vec4u(x); // splat the scalar to a vector
+        //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4i = bitcast<vec4i>(%x_splat << n);
         //   %result  = %x_vec4i >> vec4u(24);
         ir::Value* result = nullptr;
-        auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4i = ty.vec4<i32>();
             auto* vec4u = ty.vec4<u32>();
@@ -738,17 +788,23 @@ struct State {
         return result;
     }
 
-    /// Polyfill a `unpack4xU8()` builtin call
+    /// Polyfill a `unpack4xI8()` builtin call
     /// @param call the builtin call instruction
     /// @returns the replacement value
-    ir::Value* Unpack4xU8(ir::CoreBuiltinCall* call) {
+    ir::Value* Unpack4xI8(ir::CoreBuiltinCall* call) {
+        return Unpack4xI8OnValue(call, call->Args()[0]);
+    }
+
+    /// Emit code for `unpack4xU8` on u32 value `x`, before the given call.
+    /// @param call the instruction that should follow the emitted code
+    /// @param x the u32 value to be unpacked
+    ir::Value* Unpack4xU8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xU8(%x)` with:
         //   %n       = vec4u(0, 8, 16, 24);
-        //   %x_splat = vec4u(x); // splat the scalar to a vector
+        //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4u = %x_splat >> n;
         //   %result  = %x_vec4u & vec4u(0xff);
         ir::Value* result = nullptr;
-        auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
 
@@ -759,6 +815,13 @@ struct State {
             result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))))->Result(0);
         });
         return result;
+    }
+
+    /// Polyfill a `unpack4xU8()` builtin call
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* Unpack4xU8(ir::CoreBuiltinCall* call) {
+        return Unpack4xU8OnValue(call, call->Args()[0]);
     }
 };
 
