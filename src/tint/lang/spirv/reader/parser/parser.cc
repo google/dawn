@@ -416,14 +416,25 @@ class Parser {
         TINT_SCOPED_ASSIGNMENT(current_block_, dst);
         for (auto& inst : src) {
             switch (inst.opcode()) {
+                case spv::Op::OpAccessChain:
+                case spv::Op::OpInBoundsAccessChain:
+                    EmitAccess(inst);
+                    break;
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
+                    break;
+                case spv::Op::OpLoad:
+                    Emit(b_.Load(Value(inst.GetSingleWordOperand(2))), inst.result_id());
                     break;
                 case spv::Op::OpReturn:
                     Emit(b_.Return(current_function_));
                     break;
                 case spv::Op::OpReturnValue:
                     Emit(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
+                    break;
+                case spv::Op::OpStore:
+                    Emit(b_.Store(Value(inst.GetSingleWordOperand(0)),
+                                  Value(inst.GetSingleWordOperand(1))));
                     break;
                 case spv::Op::OpVariable:
                     EmitVar(inst);
@@ -433,6 +444,17 @@ class Parser {
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    /// @param inst the SPIR-V instruction for OpAccessChain
+    void EmitAccess(const spvtools::opt::Instruction& inst) {
+        Vector<core::ir::Value*, 4> indices;
+        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
+            indices.Push(Value(inst.GetSingleWordOperand(i)));
+        }
+        auto* base = Value(inst.GetSingleWordOperand(2));
+        auto* access = b_.Access(Type(inst.type_id()), base, std::move(indices));
+        Emit(access, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
