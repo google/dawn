@@ -36,7 +36,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 
-namespace tint::wgsl::writer {
+namespace tint::wgsl::writer::raise {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -56,7 +56,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
         }
 
         // Run the transforms.
-        auto result = RenameConflicts(&mod);
+        auto result = RenameConflicts(mod);
         EXPECT_EQ(result, Success);
 
         // Validate the output IR.
@@ -1102,4 +1102,4 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
 }
 
 }  // namespace
-}  // namespace tint::wgsl::writer
+}  // namespace tint::wgsl::writer::raise

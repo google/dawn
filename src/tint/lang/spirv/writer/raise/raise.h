@@ -39,7 +39,7 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::spirv::writer::raise {
+namespace tint::spirv::writer {
 
 /// Raise a core IR module to the SPIR-V dialect of the IR.
 /// @param module the core IR module to raise to SPIR-V dialect
@@ -47,6 +47,6 @@ namespace tint::spirv::writer::raise {
 /// @returns success or failure
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
 
-}  // namespace tint::spirv::writer::raise
+}  // namespace tint::spirv::writer
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_RAISE_H_

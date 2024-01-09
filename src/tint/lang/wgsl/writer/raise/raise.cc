@@ -229,7 +229,8 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
             }
         }
     }
-    if (auto result = RenameConflicts(&mod); result != Success) {
+
+    if (auto result = raise::RenameConflicts(mod); result != Success) {
         return result.Failure();
     }
 

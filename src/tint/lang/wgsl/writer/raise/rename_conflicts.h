@@ -38,15 +38,15 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::wgsl::writer {
+namespace tint::wgsl::writer::raise {
 
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from
 /// resolving to the correct declaration, and those with identical identifiers declared in the same
 /// scope.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> RenameConflicts(core::ir::Module* module);
+Result<SuccessType> RenameConflicts(core::ir::Module& module);
 
-}  // namespace tint::wgsl::writer
+}  // namespace tint::wgsl::writer::raise
 
 #endif  // SRC_TINT_LANG_WGSL_WRITER_RAISE_RENAME_CONFLICTS_H_

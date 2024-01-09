@@ -39,7 +39,7 @@ namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
 
-namespace tint::msl::writer::raise {
+namespace tint::msl::writer {
 
 /// Raise a core IR module to the MSL dialect of the IR.
 /// @param module the core IR module to raise to MSL dialect
@@ -47,6 +47,6 @@ namespace tint::msl::writer::raise {
 /// @returns success or failure
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
 
-}  // namespace tint::msl::writer::raise
+}  // namespace tint::msl::writer
 
 #endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_RAISE_H_

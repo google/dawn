@@ -54,7 +54,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect to SPIR-V-dialect.
-    if (auto res = raise::Raise(ir, options); res != Success) {
+    if (auto res = Raise(ir, options); res != Success) {
         return std::move(res.Failure());
     }
 

@@ -35,13 +35,13 @@ namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
 
-namespace tint::glsl::raise {
+namespace tint::glsl::writer {
 
 /// Raise a core IR module to the MSL dialect of the IR.
 /// @param mod the core IR module to raise to MSL dialect
 /// @returns success or failure
 Result<SuccessType> Raise(core::ir::Module& mod);
 
-}  // namespace tint::glsl::raise
+}  // namespace tint::glsl::writer
 
 #endif  // SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_

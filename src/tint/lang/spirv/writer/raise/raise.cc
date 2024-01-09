@@ -54,7 +54,7 @@
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
-namespace tint::spirv::writer::raise {
+namespace tint::spirv::writer {
 
 Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
@@ -122,7 +122,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     if (options.pass_matrix_by_pointer) {
         // PassMatrixByPointer must come after PreservePadding+DirectVariableAccess.
-        RUN_TRANSFORM(PassMatrixByPointer, module);
+        RUN_TRANSFORM(raise::PassMatrixByPointer, module);
     }
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
@@ -138,16 +138,16 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
-    RUN_TRANSFORM(BuiltinPolyfill, module);
-    RUN_TRANSFORM(ExpandImplicitSplats, module);
-    RUN_TRANSFORM(HandleMatrixArithmetic, module);
-    RUN_TRANSFORM(MergeReturn, module);
-    RUN_TRANSFORM(ShaderIO, module,
-                  ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size});
+    RUN_TRANSFORM(raise::BuiltinPolyfill, module);
+    RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
+    RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
+    RUN_TRANSFORM(raise::MergeReturn, module);
+    RUN_TRANSFORM(raise::ShaderIO, module,
+                  raise::ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size});
     RUN_TRANSFORM(core::ir::transform::Std140, module);
-    RUN_TRANSFORM(VarForDynamicIndex, module);
+    RUN_TRANSFORM(raise::VarForDynamicIndex, module);
 
     return Success;
 }
 
-}  // namespace tint::spirv::writer::raise
+}  // namespace tint::spirv::writer

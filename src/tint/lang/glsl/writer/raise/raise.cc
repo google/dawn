@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
-namespace tint::glsl::raise {
+namespace tint::glsl::writer {
 
 Result<SuccessType> Raise(core::ir::Module&) {
     // #define RUN_TRANSFORM(name)
@@ -41,4 +41,4 @@ Result<SuccessType> Raise(core::ir::Module&) {
     return Success;
 }
 
-}  // namespace tint::glsl::raise
+}  // namespace tint::glsl::writer

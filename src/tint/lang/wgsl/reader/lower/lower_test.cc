@@ -33,7 +33,7 @@
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
 
-namespace tint::wgsl::reader::lower {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -124,4 +124,4 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
 }
 
 }  // namespace
-}  // namespace tint::wgsl::reader::lower
+}  // namespace tint::wgsl::reader
