@@ -74,6 +74,8 @@ libtint_source_set("ir") {
     "control_instruction.h",
     "convert.cc",
     "convert.h",
+    "core_binary.cc",
+    "core_binary.h",
     "core_builtin_call.cc",
     "core_builtin_call.h",
     "core_unary.cc",
@@ -171,7 +173,6 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "access_test.cc",
-      "binary_test.cc",
       "bitcast_test.cc",
       "block_param_test.cc",
       "block_test.cc",
@@ -180,6 +181,7 @@ if (tint_build_unittests) {
       "construct_test.cc",
       "continue_test.cc",
       "convert_test.cc",
+      "core_binary_test.cc",
       "core_builtin_call_test.cc",
       "core_unary_test.cc",
       "discard_test.cc",

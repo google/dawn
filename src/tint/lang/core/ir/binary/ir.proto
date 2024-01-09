@@ -435,6 +435,8 @@ enum BinaryOp {
     greater_than_equal = 13;
     shift_left = 14;
     shift_right = 15;
+    logical_and = 16;
+    logical_or = 17;
 }
 
 enum TextureDimension {

@@ -48,13 +48,13 @@ void Run(core::ir::Module& ir) {
     core::ir::Builder b{ir};
 
     // Find the instructions that need to be modified.
-    Vector<core::ir::Binary*, 4> binary_worklist;
+    Vector<core::ir::CoreBinary*, 4> binary_worklist;
     Vector<core::ir::Convert*, 4> convert_worklist;
     for (auto* inst : ir.instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
         }
-        if (auto* binary = inst->As<core::ir::Binary>()) {
+        if (auto* binary = inst->As<core::ir::CoreBinary>()) {
             TINT_ASSERT(binary->Operands().Length() == 2);
             if (binary->LHS()->Type()->Is<core::type::Matrix>() ||
                 binary->RHS()->Type()->Is<core::type::Matrix>()) {
@@ -101,13 +101,13 @@ void Run(core::ir::Module& ir) {
         };
 
         switch (binary->Op()) {
-            case core::ir::BinaryOp::kAdd:
-                column_wise(core::ir::BinaryOp::kAdd);
+            case core::BinaryOp::kAdd:
+                column_wise(core::BinaryOp::kAdd);
                 break;
-            case core::ir::BinaryOp::kSubtract:
-                column_wise(core::ir::BinaryOp::kSubtract);
+            case core::BinaryOp::kSubtract:
+                column_wise(core::BinaryOp::kSubtract);
                 break;
-            case core::ir::BinaryOp::kMultiply:
+            case core::BinaryOp::kMultiply:
                 // Select the SPIR-V intrinsic that corresponds to the operation being performed.
                 if (lhs_ty->Is<core::type::Matrix>()) {
                     if (rhs_ty->Is<core::type::Scalar>()) {

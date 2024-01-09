@@ -671,9 +671,9 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vec3U32) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, Divide_Scalar_Vector) {
-    Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.i32(), ty.vec2<i32>());
+    Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.i32(), ty.vec4<i32>());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:vec2<i32>):vec4<i32> -> %b1 {
+%foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> -> %b1 {
   %b1 = block {
     %result:vec4<i32> = div %lhs, %rhs
     ret %result
@@ -681,7 +681,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Scalar_Vector) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:i32, %rhs:vec2<i32>):vec4<i32> -> %b1 {
+%foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> -> %b1 {
   %b1 = block {
     %4:vec4<i32> = construct %lhs
     %result:vec4<i32> = call %tint_div_v4i32, %4, %rhs
@@ -711,9 +711,9 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Scalar_Vector) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, Divide_Vector_Scalar) {
-    Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.vec2<i32>(), ty.i32());
+    Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.vec4<i32>(), ty.i32());
     auto* src = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:i32):vec4<i32> -> %b1 {
+%foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> -> %b1 {
   %b1 = block {
     %result:vec4<i32> = div %lhs, %rhs
     ret %result
@@ -721,7 +721,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vector_Scalar) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:i32):vec4<i32> -> %b1 {
+%foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> -> %b1 {
   %b1 = block {
     %4:vec4<i32> = construct %rhs
     %result:vec4<i32> = call %tint_div_v4i32, %lhs, %4
@@ -751,9 +751,9 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vector_Scalar) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, Modulo_Scalar_Vector) {
-    Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.i32(), ty.vec2<i32>());
+    Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.i32(), ty.vec4<i32>());
     auto* src = R"(
-%foo = func(%lhs:i32, %rhs:vec2<i32>):vec4<i32> -> %b1 {
+%foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> -> %b1 {
   %b1 = block {
     %result:vec4<i32> = mod %lhs, %rhs
     ret %result
@@ -761,7 +761,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Scalar_Vector) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:i32, %rhs:vec2<i32>):vec4<i32> -> %b1 {
+%foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> -> %b1 {
   %b1 = block {
     %4:vec4<i32> = construct %lhs
     %result:vec4<i32> = call %tint_mod_v4i32, %4, %rhs
@@ -793,9 +793,9 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Scalar_Vector) {
 }
 
 TEST_F(IR_BinaryPolyfillTest, Modulo_Vector_Scalar) {
-    Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.vec2<i32>(), ty.i32());
+    Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.vec4<i32>(), ty.i32());
     auto* src = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:i32):vec4<i32> -> %b1 {
+%foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> -> %b1 {
   %b1 = block {
     %result:vec4<i32> = mod %lhs, %rhs
     ret %result
@@ -803,7 +803,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vector_Scalar) {
 }
 )";
     auto* expect = R"(
-%foo = func(%lhs:vec2<i32>, %rhs:i32):vec4<i32> -> %b1 {
+%foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> -> %b1 {
   %b1 = block {
     %4:vec4<i32> = construct %rhs
     %result:vec4<i32> = call %tint_mod_v4i32, %lhs, %4

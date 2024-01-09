@@ -35,13 +35,13 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
@@ -350,8 +350,8 @@ class Printer : public tint::TextGenerator {
                 [&](core::ir::LoadVectorElement*) { /* inlined */ },  //
                 [&](core::ir::Swizzle*) { /* inlined */ },            //
                 [&](core::ir::Bitcast*) { /* inlined */ },            //
+                [&](core::ir::CoreBinary*) { /* inlined */ },         //
                 [&](core::ir::CoreUnary*) { /* inlined */ },          //
-                [&](core::ir::Binary*) { /* inlined */ },             //
                 [&](core::ir::Load*) { /* inlined */ },               //
                 [&](core::ir::Construct*) { /* inlined */ },          //
                 [&](core::ir::Access*) { /* inlined */ },             //
@@ -366,8 +366,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),                                                          //
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },                  //
-                    [&](const core::ir::Binary* b) { EmitBinary(out, b); },                    //
                     [&](const core::ir::Convert* b) { EmitConvert(out, b); },                  //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
                     [&](const core::ir::Load* l) { EmitValue(out, l->From()); },               //
@@ -407,8 +407,8 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a binary instruction
     /// @param b the binary instruction
-    void EmitBinary(StringStream& out, const core::ir::Binary* b) {
-        if (b->Op() == core::ir::BinaryOp::kEqual) {
+    void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
+        if (b->Op() == core::BinaryOp::kEqual) {
             auto* rhs = b->RHS()->As<core::ir::Constant>();
             if (rhs && rhs->Type()->Is<core::type::Bool>() &&
                 rhs->Value()->ValueAs<bool>() == false) {
@@ -422,38 +422,42 @@ class Printer : public tint::TextGenerator {
 
         auto kind = [&] {
             switch (b->Op()) {
-                case core::ir::BinaryOp::kAdd:
+                case core::BinaryOp::kAdd:
                     return "+";
-                case core::ir::BinaryOp::kSubtract:
+                case core::BinaryOp::kSubtract:
                     return "-";
-                case core::ir::BinaryOp::kMultiply:
+                case core::BinaryOp::kMultiply:
                     return "*";
-                case core::ir::BinaryOp::kDivide:
+                case core::BinaryOp::kDivide:
                     return "/";
-                case core::ir::BinaryOp::kModulo:
+                case core::BinaryOp::kModulo:
                     return "%";
-                case core::ir::BinaryOp::kAnd:
+                case core::BinaryOp::kAnd:
                     return "&";
-                case core::ir::BinaryOp::kOr:
+                case core::BinaryOp::kOr:
                     return "|";
-                case core::ir::BinaryOp::kXor:
+                case core::BinaryOp::kXor:
                     return "^";
-                case core::ir::BinaryOp::kEqual:
+                case core::BinaryOp::kEqual:
                     return "==";
-                case core::ir::BinaryOp::kNotEqual:
+                case core::BinaryOp::kNotEqual:
                     return "!=";
-                case core::ir::BinaryOp::kLessThan:
+                case core::BinaryOp::kLessThan:
                     return "<";
-                case core::ir::BinaryOp::kGreaterThan:
+                case core::BinaryOp::kGreaterThan:
                     return ">";
-                case core::ir::BinaryOp::kLessThanEqual:
+                case core::BinaryOp::kLessThanEqual:
                     return "<=";
-                case core::ir::BinaryOp::kGreaterThanEqual:
+                case core::BinaryOp::kGreaterThanEqual:
                     return ">=";
-                case core::ir::BinaryOp::kShiftLeft:
+                case core::BinaryOp::kShiftLeft:
                     return "<<";
-                case core::ir::BinaryOp::kShiftRight:
+                case core::BinaryOp::kShiftRight:
                     return ">>";
+                case core::BinaryOp::kLogicalAnd:
+                    return "&&";
+                case core::BinaryOp::kLogicalOr:
+                    return "||";
             }
             return "<error>";
         };

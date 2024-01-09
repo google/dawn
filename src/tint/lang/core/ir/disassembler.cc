@@ -852,6 +852,12 @@ void Disassembler::EmitBinary(const Binary* b) {
         case BinaryOp::kShiftRight:
             out_ << "shr";
             break;
+        case BinaryOp::kLogicalAnd:
+            out_ << "logical-and";
+            break;
+        case BinaryOp::kLogicalOr:
+            out_ << "logical-or";
+            break;
     }
     out_ << " ";
     EmitOperandList(b);

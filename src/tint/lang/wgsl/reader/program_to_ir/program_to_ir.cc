@@ -950,7 +950,7 @@ class Impl {
                 if (!rhs) {
                     return;
                 }
-                core::ir::Binary* inst = impl.BinaryOp(ty, lhs, rhs, b->op);
+                auto* inst = impl.BinaryOp(ty, lhs, rhs, b->op);
                 if (!inst) {
                     return;
                 }
@@ -1288,10 +1288,10 @@ class Impl {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    core::ir::Binary* BinaryOp(const core::type::Type* ty,
-                               core::ir::Value* lhs,
-                               core::ir::Value* rhs,
-                               core::BinaryOp op) {
+    core::ir::CoreBinary* BinaryOp(const core::type::Type* ty,
+                                   core::ir::Value* lhs,
+                                   core::ir::Value* rhs,
+                                   core::BinaryOp op) {
         switch (op) {
             case core::BinaryOp::kAnd:
                 return builder_.And(ty, lhs, rhs);

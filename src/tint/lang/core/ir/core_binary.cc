@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 
+#include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Binary);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::CoreBinary);
 
 namespace tint::core::ir {
 
-Binary::Binary() = default;
+CoreBinary::CoreBinary() = default;
 
-Binary::Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs) : op_(op) {
-    AddOperand(Binary::kLhsOperandOffset, lhs);
-    AddOperand(Binary::kRhsOperandOffset, rhs);
-    AddResult(result);
+CoreBinary::CoreBinary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs)
+    : Base(result, op, lhs, rhs) {}
+
+CoreBinary::~CoreBinary() = default;
+
+CoreBinary* CoreBinary::Clone(CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result(0));
+    auto* lhs = ctx.Remap(LHS());
+    auto* rhs = ctx.Remap(RHS());
+    return ctx.ir.instructions.Create<CoreBinary>(new_result, Op(), lhs, rhs);
 }
 
-Binary::~Binary() = default;
+const core::intrinsic::TableData& CoreBinary::TableData() const {
+    return core::intrinsic::Dialect::kData;
+}
 
 }  // namespace tint::core::ir

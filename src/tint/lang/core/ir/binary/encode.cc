@@ -35,12 +35,12 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/discard.h"
@@ -198,12 +198,13 @@ struct Encoder {
         tint::Switch(
             inst_in,  //
             [&](const ir::Access* i) { InstructionAccess(*inst_out.mutable_access(), i); },
-            [&](const ir::Binary* i) { InstructionBinary(*inst_out.mutable_binary(), i); },
             [&](const ir::Bitcast* i) { InstructionBitcast(*inst_out.mutable_bitcast(), i); },
             [&](const ir::BreakIf* i) { InstructionBreakIf(*inst_out.mutable_break_if(), i); },
+            [&](const ir::CoreBinary* i) { InstructionBinary(*inst_out.mutable_binary(), i); },
             [&](const ir::CoreBuiltinCall* i) {
                 InstructionBuiltinCall(*inst_out.mutable_builtin_call(), i);
             },
+            [&](const ir::CoreUnary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::Construct* i) { InstructionConstruct(*inst_out.mutable_construct(), i); },
             [&](const ir::Continue* i) { InstructionContinue(*inst_out.mutable_continue_(), i); },
             [&](const ir::Convert* i) { InstructionConvert(*inst_out.mutable_convert(), i); },
@@ -230,7 +231,6 @@ struct Encoder {
             },
             [&](const ir::Switch* i) { InstructionSwitch(*inst_out.mutable_switch_(), i); },
             [&](const ir::Swizzle* i) { InstructionSwizzle(*inst_out.mutable_swizzle(), i); },
-            [&](const ir::CoreUnary* i) { InstructionUnary(*inst_out.mutable_unary(), i); },
             [&](const ir::UserCall* i) { InstructionUserCall(*inst_out.mutable_user_call(), i); },
             [&](const ir::Var* i) { InstructionVar(*inst_out.mutable_var(), i); },
             [&](const ir::Unreachable* i) {
@@ -247,7 +247,7 @@ struct Encoder {
 
     void InstructionAccess(pb::InstructionAccess&, const ir::Access*) {}
 
-    void InstructionBinary(pb::InstructionBinary& binary_out, const ir::Binary* binary_in) {
+    void InstructionBinary(pb::InstructionBinary& binary_out, const ir::CoreBinary* binary_in) {
         binary_out.set_op(BinaryOp(binary_in->Op()));
     }
 
@@ -692,40 +692,44 @@ struct Encoder {
         return pb::UnaryOp::complement;
     }
 
-    pb::BinaryOp BinaryOp(core::ir::BinaryOp in) {
+    pb::BinaryOp BinaryOp(core::BinaryOp in) {
         switch (in) {
-            case core::ir::BinaryOp::kAdd:
+            case core::BinaryOp::kAdd:
                 return pb::BinaryOp::add_;
-            case core::ir::BinaryOp::kSubtract:
+            case core::BinaryOp::kSubtract:
                 return pb::BinaryOp::subtract;
-            case core::ir::BinaryOp::kMultiply:
+            case core::BinaryOp::kMultiply:
                 return pb::BinaryOp::multiply;
-            case core::ir::BinaryOp::kDivide:
+            case core::BinaryOp::kDivide:
                 return pb::BinaryOp::divide;
-            case core::ir::BinaryOp::kModulo:
+            case core::BinaryOp::kModulo:
                 return pb::BinaryOp::modulo;
-            case core::ir::BinaryOp::kAnd:
+            case core::BinaryOp::kAnd:
                 return pb::BinaryOp::and_;
-            case core::ir::BinaryOp::kOr:
+            case core::BinaryOp::kOr:
                 return pb::BinaryOp::or_;
-            case core::ir::BinaryOp::kXor:
+            case core::BinaryOp::kXor:
                 return pb::BinaryOp::xor_;
-            case core::ir::BinaryOp::kEqual:
+            case core::BinaryOp::kEqual:
                 return pb::BinaryOp::equal;
-            case core::ir::BinaryOp::kNotEqual:
+            case core::BinaryOp::kNotEqual:
                 return pb::BinaryOp::not_equal;
-            case core::ir::BinaryOp::kLessThan:
+            case core::BinaryOp::kLessThan:
                 return pb::BinaryOp::less_than;
-            case core::ir::BinaryOp::kGreaterThan:
+            case core::BinaryOp::kGreaterThan:
                 return pb::BinaryOp::greater_than;
-            case core::ir::BinaryOp::kLessThanEqual:
+            case core::BinaryOp::kLessThanEqual:
                 return pb::BinaryOp::less_than_equal;
-            case core::ir::BinaryOp::kGreaterThanEqual:
+            case core::BinaryOp::kGreaterThanEqual:
                 return pb::BinaryOp::greater_than_equal;
-            case core::ir::BinaryOp::kShiftLeft:
+            case core::BinaryOp::kShiftLeft:
                 return pb::BinaryOp::shift_left;
-            case core::ir::BinaryOp::kShiftRight:
+            case core::BinaryOp::kShiftRight:
                 return pb::BinaryOp::shift_right;
+            case core::BinaryOp::kLogicalAnd:
+                return pb::BinaryOp::logical_and;
+            case core::BinaryOp::kLogicalOr:
+                return pb::BinaryOp::logical_or;
         }
 
         TINT_ICE() << "invalid BinaryOp: " << in;

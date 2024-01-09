@@ -667,6 +667,33 @@ void Validator::CheckAccess(const Access* a) {
 
 void Validator::CheckBinary(const Binary* b) {
     CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset);
+    if (b->LHS() && b->RHS()) {
+        auto symbols = SymbolTable::Wrap(mod_.symbols);
+        auto type_mgr = type::Manager::Wrap(mod_.Types());
+        intrinsic::Context context{
+            b->TableData(),
+            type_mgr,
+            symbols,
+        };
+
+        auto overload =
+            core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
+                                          core::EvaluationStage::kRuntime, /* is_compound */ false);
+        if (overload != Success) {
+            AddError(b, InstError(b, overload.Failure()));
+            return;
+        }
+
+        if (auto* result = b->Result(0)) {
+            if (overload->return_type != result->Type()) {
+                StringStream err;
+                err << "binary instruction result type (" << result->Type()->FriendlyName()
+                    << ") does not match overload result type ("
+                    << overload->return_type->FriendlyName() << ")";
+                AddError(b, InstError(b, err.str()));
+            }
+        }
+    }
 }
 
 void Validator::CheckUnary(const Unary* u) {

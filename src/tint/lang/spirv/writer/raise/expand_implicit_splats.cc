@@ -46,7 +46,7 @@ void Run(core::ir::Module& ir) {
 
     // Find the instructions that use implicit splats and either modify them in place or record them
     // to be replaced in a second pass.
-    Vector<core::ir::Binary*, 4> binary_worklist;
+    Vector<core::ir::CoreBinary*, 4> binary_worklist;
     Vector<core::ir::CoreBuiltinCall*, 4> builtin_worklist;
     for (auto* inst : ir.instructions.Objects()) {
         if (!inst->Alive()) {
@@ -63,7 +63,7 @@ void Run(core::ir::Module& ir) {
                     construct->AppendArg(construct->Args()[0]);
                 }
             }
-        } else if (auto* binary = inst->As<core::ir::Binary>()) {
+        } else if (auto* binary = inst->As<core::ir::CoreBinary>()) {
             // A binary instruction that mixes vector and scalar operands needs to have the scalar
             // operand replaced with an explicit vector constructor.
             if (binary->Result(0)->Type()->Is<core::type::Vector>()) {
@@ -101,7 +101,7 @@ void Run(core::ir::Module& ir) {
     // Replace scalar operands to binary instructions that produce vectors.
     for (auto* binary : binary_worklist) {
         auto* result_ty = binary->Result(0)->Type();
-        if (result_ty->is_float_vector() && binary->Op() == core::ir::BinaryOp::kMultiply) {
+        if (result_ty->is_float_vector() && binary->Op() == core::BinaryOp::kMultiply) {
             // Use OpVectorTimesScalar for floating point multiply.
             auto* vts =
                 b.Call<spirv::ir::BuiltinCall>(result_ty, spirv::BuiltinFn::kVectorTimesScalar);
@@ -121,9 +121,9 @@ void Run(core::ir::Module& ir) {
         } else {
             // Expand the scalar argument into an explicitly constructed vector.
             if (binary->LHS()->Type()->Is<core::type::Scalar>()) {
-                expand_operand(binary, core::ir::Binary::kLhsOperandOffset);
+                expand_operand(binary, core::ir::CoreBinary::kLhsOperandOffset);
             } else if (binary->RHS()->Type()->Is<core::type::Scalar>()) {
-                expand_operand(binary, core::ir::Binary::kRhsOperandOffset);
+                expand_operand(binary, core::ir::CoreBinary::kRhsOperandOffset);
             }
         }
     }

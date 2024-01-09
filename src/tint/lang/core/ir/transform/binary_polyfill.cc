@@ -66,12 +66,12 @@ struct State {
     /// Process the module.
     void Process() {
         // Find the binary instructions that need to be polyfilled.
-        Vector<ir::Binary*, 64> worklist;
+        Vector<ir::CoreBinary*, 64> worklist;
         for (auto* inst : ir.instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
-            if (auto* binary = inst->As<ir::Binary>()) {
+            if (auto* binary = inst->As<ir::CoreBinary>()) {
                 switch (binary->Op()) {
                     case BinaryOp::kDivide:
                     case BinaryOp::kModulo:
@@ -149,7 +149,7 @@ struct State {
     /// divide-by-zero and signed integer overflow.
     /// @param binary the binary instruction
     /// @returns the replacement value
-    ir::Value* IntDivMod(ir::Binary* binary) {
+    ir::Value* IntDivMod(ir::CoreBinary* binary) {
         auto* result_ty = binary->Result(0)->Type();
         bool is_div = binary->Op() == BinaryOp::kDivide;
         bool is_signed = result_ty->is_signed_integer_scalar_or_vector();
@@ -232,13 +232,13 @@ struct State {
     /// Mask the RHS of a shift instruction to ensure it is modulo the bitwidth of the LHS.
     /// @param binary the binary instruction
     /// @returns the replacement value
-    ir::Value* MaskShiftAmount(ir::Binary* binary) {
+    ir::Value* MaskShiftAmount(ir::CoreBinary* binary) {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto* mask = b.Constant(u32(lhs->Type()->DeepestElement()->Size() * 8 - 1));
         auto* masked = b.And(rhs->Type(), rhs, MatchWidth(mask, rhs->Type()));
         masked->InsertBefore(binary);
-        binary->SetOperand(ir::Binary::kRhsOperandOffset, masked->Result(0));
+        binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked->Result(0));
         return binary->Result(0);
     }
 };

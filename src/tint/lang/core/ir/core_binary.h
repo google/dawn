@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef SRC_TINT_LANG_CORE_IR_CORE_BINARY_H_
+#define SRC_TINT_LANG_CORE_IR_CORE_BINARY_H_
+
 #include "src/tint/lang/core/ir/binary.h"
-
-#include "src/tint/lang/core/ir/clone_context.h"
-#include "src/tint/lang/core/ir/module.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Binary);
 
 namespace tint::core::ir {
 
-Binary::Binary() = default;
+/// A core-dialect binary-op instruction in the IR.
+class CoreBinary final : public Castable<CoreBinary, Binary> {
+  public:
+    /// The offset in Operands() for the value
+    static constexpr size_t kValueOperandOffset = 0;
 
-Binary::Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs) : op_(op) {
-    AddOperand(Binary::kLhsOperandOffset, lhs);
-    AddOperand(Binary::kRhsOperandOffset, rhs);
-    AddResult(result);
-}
+    /// Constructor (no results, no operands)
+    CoreBinary();
 
-Binary::~Binary() = default;
+    /// Constructor
+    /// @param result the result value
+    /// @param op the Binary operator
+    /// @param lhs the lhs of the instruction
+    /// @param rhs the rhs of the instruction
+    CoreBinary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
+    ~CoreBinary() override;
+
+    /// @copydoc Instruction::Clone()
+    CoreBinary* Clone(CloneContext& ctx) override;
+
+    /// @returns the table data to validate this builtin
+    const core::intrinsic::TableData& TableData() const override;
+};
 
 }  // namespace tint::core::ir
+
+#endif  // SRC_TINT_LANG_CORE_IR_CORE_BINARY_H_

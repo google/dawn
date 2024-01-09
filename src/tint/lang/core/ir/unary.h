@@ -40,7 +40,7 @@ struct TableData;
 
 namespace tint::core::ir {
 
-/// A unary instruction in the IR.
+/// The abstract base class for dialect-specific unary-op instructions in the IR.
 class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
