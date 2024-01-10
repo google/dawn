@@ -41,10 +41,9 @@ namespace dawn::wire::client {
 WGPUBool ClientGetInstanceFeatures(WGPUInstanceFeatures* features);
 WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor);
 
-class Instance final : public ObjectWithEventsBase {
+class Instance final : public ObjectBase {
   public:
-    explicit Instance(const ObjectBaseParams& params);
-    ~Instance() override;
+    using ObjectBase::ObjectBase;
 
     WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
@@ -53,6 +52,13 @@ class Instance final : public ObjectWithEventsBase {
                         void* userdata);
     WGPUFuture RequestAdapterF(const WGPURequestAdapterOptions* options,
                                const WGPURequestAdapterCallbackInfo& callbackInfo);
+    bool OnRequestAdapterCallback(WGPUFuture future,
+                                  WGPURequestAdapterStatus status,
+                                  const char* message,
+                                  const WGPUAdapterProperties* properties,
+                                  const WGPUSupportedLimits* limits,
+                                  uint32_t featuresCount,
+                                  const WGPUFeatureName* features);
 
     void ProcessEvents();
     WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);

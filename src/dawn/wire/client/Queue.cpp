@@ -69,10 +69,8 @@ class WorkDoneEvent : public TrackedEvent {
 
 Queue::~Queue() = default;
 
-bool Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
-                                     WGPUFuture future,
-                                     WGPUQueueWorkDoneStatus status) {
-    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status) ==
+bool Queue::OnWorkDoneCallback(WGPUFuture future, WGPUQueueWorkDoneStatus status) {
+    return GetClient()->GetEventManager()->SetFutureReady<WorkDoneEvent>(future.id, status) ==
            WireResult::Success;
 }
 
@@ -91,14 +89,13 @@ WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& call
 
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<WorkDoneEvent>(callbackInfo));
+        client->GetEventManager()->TrackEvent(std::make_unique<WorkDoneEvent>(callbackInfo));
     if (!tracked) {
         return {futureIDInternal};
     }
 
     QueueOnSubmittedWorkDoneCmd cmd;
     cmd.queueId = GetWireId();
-    cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
 
     client->SerializeCommand(cmd);

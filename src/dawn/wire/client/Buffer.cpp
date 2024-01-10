@@ -159,7 +159,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential error buffer creation
     // as server expects allocating ids to be monotonically increasing
-    Buffer* buffer = wireClient->Make<Buffer>(device->GetEventManagerHandle(), descriptor);
+    Buffer* buffer = wireClient->Make<Buffer>(descriptor);
     buffer->mDestructWriteHandleOnUnmap = false;
 
     if (descriptor->mappedAtCreation) {
@@ -205,10 +205,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     return ToAPI(buffer);
 }
 
-Buffer::Buffer(const ObjectBaseParams& params,
-               const ObjectHandle& eventManagerHandle,
-               const WGPUBufferDescriptor* descriptor)
-    : ObjectWithEventsBase(params, eventManagerHandle),
+Buffer::Buffer(const ObjectBaseParams& params, const WGPUBufferDescriptor* descriptor)
+    : ObjectBase(params),
       mMapStateData(AcquireRef(new MapStateData{})),
       mSize(descriptor->size),
       mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)) {}
@@ -220,8 +218,8 @@ Buffer::~Buffer() {
 
 bool Buffer::SetFutureStatus(WGPUBufferMapAsyncStatus status) {
     DAWN_ASSERT(mMapStateData->pendingRequest);
-    return GetEventManager().SetFutureReady<MapAsyncEvent>(mMapStateData->pendingRequest->futureID,
-                                                           status) == WireResult::Success;
+    return GetClient()->GetEventManager()->SetFutureReady<MapAsyncEvent>(
+               mMapStateData->pendingRequest->futureID, status) == WireResult::Success;
 }
 
 void Buffer::SetFutureStatusAndClearPending(WGPUBufferMapAsyncStatus status) {
@@ -233,7 +231,7 @@ void Buffer::SetFutureStatusAndClearPending(WGPUBufferMapAsyncStatus status) {
 
     FutureID futureID = mMapStateData->pendingRequest->futureID;
     mMapStateData->pendingRequest = std::nullopt;
-    DAWN_UNUSED(GetEventManager().SetFutureReady<MapAsyncEvent>(futureID, status));
+    DAWN_UNUSED(GetClient()->GetEventManager()->SetFutureReady<MapAsyncEvent>(futureID, status));
     return;
 }
 
@@ -256,14 +254,14 @@ WGPUFuture Buffer::MapAsyncF(WGPUMapModeFlags mode,
     DAWN_ASSERT(GetRefcount() != 0);
 
     Client* client = GetClient();
-    auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<MapAsyncEvent>(callbackInfo, mMapStateData));
+    auto [futureIDInternal, tracked] = client->GetEventManager()->TrackEvent(
+        std::make_unique<MapAsyncEvent>(callbackInfo, mMapStateData));
     if (!tracked) {
         return {futureIDInternal};
     }
 
     if (mMapStateData->pendingRequest) {
-        DAWN_UNUSED(GetEventManager().SetFutureReady<MapAsyncEvent>(
+        DAWN_UNUSED(client->GetEventManager()->SetFutureReady<MapAsyncEvent>(
             futureIDInternal, WGPUBufferMapAsyncStatus_MappingAlreadyPending));
         return {futureIDInternal};
     }
@@ -286,7 +284,6 @@ WGPUFuture Buffer::MapAsyncF(WGPUMapModeFlags mode,
     // Serialize the command to send to the server.
     BufferMapAsyncCmd cmd;
     cmd.bufferId = GetWireId();
-    cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
     cmd.mode = mode;
     cmd.offset = offset;

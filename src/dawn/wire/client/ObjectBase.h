@@ -32,7 +32,6 @@
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/wire/ObjectHandle.h"
-#include "dawn/wire/client/EventManager.h"
 
 namespace dawn::wire::client {
 
@@ -72,23 +71,6 @@ class ObjectBase : public LinkNode<ObjectBase> {
     Client* const mClient;
     const ObjectHandle mHandle;
     uint32_t mRefcount;
-};
-
-// Compositable functionality for objects on the client side that need to have access to the event
-// manager.
-class ObjectWithEventsBase : public ObjectBase {
-  public:
-    // Note that the ObjectHandle associated with an EventManager is the same handle associated to
-    // the Instance that "owns" the EventManager.
-    ObjectWithEventsBase(const ObjectBaseParams& params, const ObjectHandle& eventManager);
-
-    const ObjectHandle& GetEventManagerHandle() const;
-    EventManager& GetEventManager() const;
-
-  private:
-    // The EventManager is owned by the client and long-lived. When the client is destroyed all
-    // objects are also freed.
-    ObjectHandle mEventManagerHandle;
 };
 
 }  // namespace dawn::wire::client

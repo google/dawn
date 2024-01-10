@@ -105,7 +105,6 @@ struct MapUserdata : CallbackUserdata {
 
     ObjectHandle buffer;
     WGPUBuffer bufferObj;
-    ObjectHandle eventManager;
     WGPUFuture future;
     uint64_t offset;
     uint64_t size;
@@ -130,7 +129,6 @@ struct QueueWorkDoneUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle queue;
-    ObjectHandle eventManager;
     WGPUFuture future;
 };
 
@@ -146,7 +144,6 @@ struct RequestAdapterUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle instance;
-    ObjectHandle eventManager;
     WGPUFuture future;
     ObjectId adapterObjectId;
 };

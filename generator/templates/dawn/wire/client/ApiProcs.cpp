@@ -36,18 +36,6 @@
 
 namespace dawn::wire::client {
 
-    // Template function for constexpr branching when creating new objects.
-    template <typename Parent, typename Child, typename... Args>
-    Child* Create(Parent p, Args... args) {
-        if constexpr (std::is_constructible_v<Child, const ObjectBaseParams&, decltype(args)...>) {
-            return p->GetClient()->template Make<Child>(args...);
-        } else if constexpr (std::is_constructible_v<Child, const ObjectBaseParams&, const ObjectHandle&, decltype(args)...>) {
-            return p->GetClient()->template Make<Child>(p->GetEventManagerHandle(), args...);
-        } else {
-            return p->GetClient()->template Make<Child>();
-        }
-    }
-
     //* Outputs an rvalue that's the number of elements a pointer member points to.
     {% macro member_length(member, accessor) -%}
         {%- if member.length == "constant" -%}
@@ -85,11 +73,22 @@ namespace dawn::wire::client {
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
                         {% set ReturnObj = method.return_type.name.CamelCase() %}
-                        {{ReturnObj}}* returnObject = Create<{{as_wireType(type)}}, {{ReturnObj}}>(self
+
+                        {{ReturnObj}}* returnObject;
+                        if constexpr (std::is_constructible_v<
+                            {{- ReturnObj}}, const ObjectBaseParams&
                             {%- for arg in method.arguments -%}
-                                    , {{as_varName(arg.name)}}
+                                , decltype({{as_varName(arg.name)}})
                             {%- endfor -%}
-                        );
+                        >) {
+                            returnObject = self->GetClient()->Make<{{ReturnObj}}>(
+                                {%- for arg in method.arguments -%}
+                                    {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
+                                {%- endfor -%}
+                            );
+                        } else {
+                            returnObject = self->GetClient()->Make<{{ReturnObj}}>();
+                        }
                         cmd.result = returnObject->GetWireHandle();
                     {% endif %}
 

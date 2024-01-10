@@ -47,7 +47,7 @@ class WireInjectDeviceTests : public WireTest {
 // Test that reserving and injecting a device makes calls on the client object forward to the
 // server object correctly.
 TEST_F(WireInjectDeviceTests, CallAfterReserveInject) {
-    ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
@@ -73,8 +73,8 @@ TEST_F(WireInjectDeviceTests, CallAfterReserveInject) {
 
 // Test that reserve correctly returns different IDs each time.
 TEST_F(WireInjectDeviceTests, ReserveDifferentIDs) {
-    ReservedDevice reservation1 = GetWireClient()->ReserveDevice(instance);
-    ReservedDevice reservation2 = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
+    ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
 
     ASSERT_NE(reservation1.id, reservation2.id);
     ASSERT_NE(reservation1.device, reservation2.device);
@@ -82,7 +82,7 @@ TEST_F(WireInjectDeviceTests, ReserveDifferentIDs) {
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectDeviceTests, InjectExistingID) {
-    ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
@@ -106,7 +106,7 @@ TEST_F(WireInjectDeviceTests, InjectExistingID) {
 
 // Test that the server only borrows the device and does a single reference-release
 TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
-    ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
     // Injecting the device adds a reference
     WGPUDevice serverDevice = api.GetNewDevice();
@@ -133,7 +133,7 @@ TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
 // Test that it is an error to get the primary queue of a device before it has been
 // injected on the server.
 TEST_F(WireInjectDeviceTests, GetQueueBeforeInject) {
-    ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
     wgpuDeviceGetQueue(reservation.device);
     FlushClient(false);
@@ -142,7 +142,7 @@ TEST_F(WireInjectDeviceTests, GetQueueBeforeInject) {
 // Test that it is valid to get the primary queue of a device after it has been
 // injected on the server.
 TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
-    ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
@@ -169,8 +169,8 @@ TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
 // Test that the list of live devices can be reflected using GetDevice.
 TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     // Reserve two devices.
-    ReservedDevice reservation1 = GetWireClient()->ReserveDevice(instance);
-    ReservedDevice reservation2 = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
+    ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
 
     // Inject both devices.
 
@@ -217,7 +217,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
 // objects instead.
 TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     // Reserve one device, inject it, and get the primary queue.
-    ReservedDevice reservation1 = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice1 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice1));
@@ -236,7 +236,7 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     FlushClient();
 
     // Reserve a second device, and inject it.
-    ReservedDevice reservation2 = GetWireClient()->ReserveDevice(instance);
+    ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice2 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice2));
@@ -267,17 +267,17 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
 TEST_F(WireInjectDeviceTests, ReclaimDeviceReservation) {
     // Test that doing a reservation and full release is an error.
     {
-        ReservedDevice reservation = GetWireClient()->ReserveDevice(instance);
+        ReservedDevice reservation = GetWireClient()->ReserveDevice();
         wgpuDeviceRelease(reservation.device);
         FlushClient(false);
     }
 
     // Test that doing a reservation and then reclaiming it recycles the ID.
     {
-        ReservedDevice reservation1 = GetWireClient()->ReserveDevice(instance);
+        ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
         GetWireClient()->ReclaimDeviceReservation(reservation1);
 
-        ReservedDevice reservation2 = GetWireClient()->ReserveDevice(instance);
+        ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
 
         // The ID is the same, but the generation is still different.
         ASSERT_EQ(reservation1.id, reservation2.id);
