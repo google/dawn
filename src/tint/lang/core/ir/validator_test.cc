@@ -179,6 +179,117 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
+    auto* g = b.Function("g", ty.void_());
+    g->SetParams({b.FunctionParam<i32>(), b.FunctionParam<i32>()});
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(g, 42_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:8:20 error: call: function has 2 parameters, but call provides 1 arguments
+    %5:void = call %g, 42i
+                   ^^
+
+:7:3 note: In block
+  %b2 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%g = func(%2:i32, %3:i32):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%f = func():void -> %b2 {
+  %b2 = block {
+    %5:void = call %g, 42i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToFunctionTooManyArguments) {
+    auto* g = b.Function("g", ty.void_());
+    g->SetParams({b.FunctionParam<i32>(), b.FunctionParam<i32>()});
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(g, 1_i, 2_i, 3_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:8:20 error: call: function has 2 parameters, but call provides 3 arguments
+    %5:void = call %g, 1i, 2i, 3i
+                   ^^
+
+:7:3 note: In block
+  %b2 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%g = func(%2:i32, %3:i32):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%f = func():void -> %b2 {
+  %b2 = block {
+    %5:void = call %g, 1i, 2i, 3i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
+    auto* g = b.Function("g", ty.void_());
+    g->SetParams({b.FunctionParam<i32>(), b.FunctionParam<i32>(), b.FunctionParam<i32>()});
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(g, 1_i, 2_f, 3_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:8:28 error: call: function parameter 1 is of type i32, but argument is of type f32
+    %6:void = call %g, 1i, 2.0f, 3i
+                           ^^^^
+
+:7:3 note: In block
+  %b2 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%g = func(%2:i32, %3:i32, %4:i32):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%f = func():void -> %b2 {
+  %b2 = block {
+    %6:void = call %g, 1i, 2.0f, 3i
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 

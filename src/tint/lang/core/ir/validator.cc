@@ -594,6 +594,24 @@ void Validator::CheckUserCall(const UserCall* call) {
         AddError(call, UserCall::kFunctionOperandOffset,
                  InstError(call, "call target is not part of the module"));
     }
+    auto args = call->Args();
+    auto params = call->Target()->Params();
+    if (args.Length() != params.Length()) {
+        StringStream err;
+        err << "function has " << params.Length() << " parameters, but call provides "
+            << args.Length() << " arguments";
+        AddError(call, UserCall::kFunctionOperandOffset, InstError(call, err.str()));
+        return;
+    }
+
+    for (size_t i = 0; i < args.Length(); i++) {
+        if (args[i]->Type() != params[i]->Type()) {
+            StringStream err;
+            err << "function parameter " << i << " is of type " << params[i]->Type()->FriendlyName()
+                << ", but argument is of type " << args[i]->Type()->FriendlyName();
+            AddError(call, UserCall::kArgsOperandOffset + i, InstError(call, err.str()));
+        }
+    }
 }
 
 void Validator::CheckAccess(const Access* a) {

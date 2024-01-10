@@ -1297,6 +1297,15 @@ class Builder {
         return FunctionParam(name, type);
     }
 
+    /// Creates a new `FunctionParam`
+    /// @tparam TYPE the parameter type
+    /// @returns the value
+    template <typename TYPE>
+    ir::FunctionParam* FunctionParam() {
+        auto* type = ir.Types().Get<TYPE>();
+        return FunctionParam(type);
+    }
+
     /// Creates a new `Access`
     /// @param type the return type
     /// @param object the object being accessed
