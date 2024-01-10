@@ -28,6 +28,7 @@
 #include <array>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
@@ -926,6 +927,21 @@ TEST_F(TextureViewValidationTest, AspectMustExist) {
         viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
         ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
     }
+}
+
+// Test that CreateErrorView creates an invalid texture view but doesn't produce an error.
+TEST_F(TextureViewValidationTest, CreateErrorView) {
+    wgpu::Texture texture = Create2DArrayTexture(device, 1);
+    wgpu::TextureViewDescriptor descriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
+
+    // Creating the error texture view doesn't produce an error.
+    wgpu::TextureView view = texture.CreateErrorView(&descriptor);
+
+    // Using the error texture view will throw an error.
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 }
 
 class D32S8TextureViewValidationTests : public ValidationTest {

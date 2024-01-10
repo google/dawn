@@ -139,6 +139,7 @@ class TextureBase : public ApiObjectBase {
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
+    TextureViewBase* CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     ApiObjectList* GetViewTrackingList();
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
@@ -147,6 +148,7 @@ class TextureBase : public ApiObjectBase {
 
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
+    TextureViewBase* APICreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     void APIDestroy();
     uint32_t APIGetWidth() const;
     uint32_t APIGetHeight() const;

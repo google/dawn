@@ -3403,6 +3403,14 @@
                 ]
             },
             {
+                "name": "create error view",
+                "returns": "texture view",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*", "optional": true}
+                ]
+            },
+            {
                 "name": "set label",
                 "returns": "void",
                 "args": [

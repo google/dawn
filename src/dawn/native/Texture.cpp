@@ -1109,6 +1109,10 @@ ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
     return GetDevice()->CreateTextureView(this, descriptor);
 }
 
+TextureViewBase* TextureBase::CreateErrorView(const TextureViewDescriptor* descriptor) {
+    return TextureViewBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+}
+
 ApiObjectList* TextureBase::GetViewTrackingList() {
     return &mTextureViews;
 }
@@ -1119,9 +1123,13 @@ TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descrip
     Ref<TextureViewBase> result;
     if (device->ConsumedError(CreateView(descriptor), &result, "calling %s.CreateView(%s).", this,
                               descriptor)) {
-        return TextureViewBase::MakeError(device, descriptor ? descriptor->label : nullptr);
+        return CreateErrorView(descriptor);
     }
     return result.Detach();
+}
+
+TextureViewBase* TextureBase::APICreateErrorView(const TextureViewDescriptor* descriptor) {
+    return CreateErrorView(descriptor);
 }
 
 bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
