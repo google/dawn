@@ -167,12 +167,12 @@ deps = {
   },
 
   'third_party/vulkan_memory_allocator': {
-    'url': '{chromium_git}/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator@e87036508bb156f9986ea959323de1869e328f58',
+    'url': '{chromium_git}/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator@52dc220fb326e6ae132b7f262133b37b0dc334a3',
     'condition': 'dawn_standalone',
   },
 
   'third_party/angle': {
-    'url': '{chromium_git}/angle/angle@8fd035f17e9bb42fd047b46e4c8f7ccfc233ae9b',
+    'url': '{chromium_git}/angle/angle@c815735ad983a715d545f3ee8cc7fce885e8fbae',
     'condition': 'dawn_standalone',
   },
 
