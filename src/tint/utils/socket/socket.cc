@@ -320,7 +320,8 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
 
             timeval tv;
             tv.tv_sec = timeout_us / 1000000;
-            tv.tv_usec = static_cast<int>(timeout_us - (tv.tv_sec * 1000000));
+            using USEC = decltype(tv.tv_usec);
+            tv.tv_usec = static_cast<USEC>(timeout_us) - (static_cast<USEC>(tv.tv_sec) * 1000000);
             res = select(static_cast<int>(socket + 1), nullptr, &fdset, nullptr, &tv);
             if (res > 0 && !Errored(socket) && SetBlocking(socket, true)) {
                 out = impl;
