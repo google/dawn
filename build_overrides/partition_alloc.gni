@@ -20,13 +20,22 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import("//build/config/sanitizers/sanitizers.gni")
 
+# MSVC's cl.exe compiler is not supported.
 _compiler_supported = is_clang || !is_win
+
+# Windows: debug CRT is not compatible with the allocator shim.
 _build_type_supported = !is_win || (!is_component_build && !is_debug)
+
 _platform_supported =
     is_android || is_apple || is_chromeos || is_fuchsia || is_linux || is_win
 
-_supported = _compiler_supported && _build_type_supported && _platform_supported
+# Sanitizers replace the allocator, don't replace it ourselves with partition_alloc.
+_is_using_sanitizers = is_asan || is_hwasan || is_lsan || is_tsan || is_msan
+
+_supported = _compiler_supported && _build_type_supported &&
+             _platform_supported && !_is_using_sanitizers
 
 use_partition_alloc_as_malloc_default = _supported
 use_allocator_shim_default = _supported
