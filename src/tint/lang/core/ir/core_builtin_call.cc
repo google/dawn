@@ -44,7 +44,6 @@ CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
                                  VectorRef<Value*> arguments)
     : Base(result, arguments), func_(func) {
     TINT_ASSERT(func != core::BuiltinFn::kNone);
-    TINT_ASSERT(func != core::BuiltinFn::kTintMaterialize);
 }
 
 CoreBuiltinCall::~CoreBuiltinCall() = default;

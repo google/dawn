@@ -75,16 +75,6 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
         "");
 }
 
-TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Call(mod.Types().f32(), core::BuiltinFn::kTintMaterialize);
-        },
-        "");
-}
-
 TEST_F(IR_CoreBuiltinCallTest, Clone) {
     auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, 1_u, 2_u);
 
