@@ -35,7 +35,11 @@ if (defined(dawn_partition_alloc_dir)) {
 
   source_set("raw_ptr") {
     public_configs = [ ":public_includes" ]
-    public = [ "partition_alloc/pointers/raw_ptr.h" ]
+    public = [
+      "partition_alloc/pointers/raw_ptr.h",
+      "partition_alloc/pointers/raw_ptr_exclusion.h",
+      "partition_alloc/pointers/raw_ref.h",
+    ]
   }
 
   source_set("buildflags") {

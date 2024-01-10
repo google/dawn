@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_TOBACKEND_H_
 
 #include "dawn/native/Forward.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -163,6 +164,11 @@ const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>& ToBackendBas
 template <typename BackendTraits, typename T>
 typename ToBackendTraits<T, BackendTraits>::BackendType* ToBackendBase(T* common) {
     return reinterpret_cast<typename ToBackendTraits<T, BackendTraits>::BackendType*>(common);
+}
+
+template <typename BackendTraits, typename T>
+typename ToBackendTraits<T, BackendTraits>::BackendType* ToBackendBase(raw_ptr<T> common) {
+    return reinterpret_cast<typename ToBackendTraits<T, BackendTraits>::BackendType*>(common.get());
 }
 
 template <typename BackendTraits, typename T>
