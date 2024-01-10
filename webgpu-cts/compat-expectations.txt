@@ -162,8 +162,19 @@ crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,refract:f32_
 crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
 crbug.com/dawn/2077 webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Failure ]
 
-# Video test failing due to mismatched interstage variables
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+# Video tests with dstColorSpace="display-p3" failing
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 
 # Mapping (only fails in Telemetry, not in browser standalone)
 crbug.com/dawn/2259 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
