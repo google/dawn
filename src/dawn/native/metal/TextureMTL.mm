@@ -221,13 +221,6 @@ bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
 #undef SRGB_PAIR
 }
 
-#if DAWN_PLATFORM_IS(MACOS)
-MTLStorageMode kIOSurfaceStorageMode = MTLStorageModeManaged;
-#elif DAWN_PLATFORM_IS(IOS)
-MTLStorageMode kIOSurfaceStorageMode = MTLStorageModePrivate;
-#else
-#error "Unsupported Apple platform."
-#endif
 }  // namespace
 
 NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
@@ -406,7 +399,7 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
     // texture view explicitly.
     if (!GetFormat().IsMultiPlanar()) {
         NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
-        [*mtlDesc setStorageMode:kIOSurfaceStorageMode];
+        [*mtlDesc setStorageMode:IOSurfaceStorageMode()];
 
         mMtlUsage = [*mtlDesc usage];
         mMtlFormat = [*mtlDesc pixelFormat];
@@ -422,32 +415,13 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
         const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
         mMtlPlaneTextures->resize(numPlanes);
         for (size_t plane = 0; plane < numPlanes; ++plane) {
-            Aspect aspect = GetPlaneAspect(GetFormat(), plane);
-            const auto& aspectInfo = GetFormat().GetAspectInfo(aspect);
-
-            NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-            MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
-
-            mtlDesc.sampleCount = GetSampleCount();
-            mtlDesc.usage = mMtlUsage;
-            mtlDesc.pixelFormat = MetalPixelFormat(device, aspectInfo.format);
-            mtlDesc.mipmapLevelCount = GetNumMipLevels();
-            mtlDesc.storageMode = kIOSurfaceStorageMode;
-
-            mtlDesc.width = IOSurfaceGetWidthOfPlane(GetIOSurface(), plane);
-            mtlDesc.height = IOSurfaceGetHeightOfPlane(GetIOSurface(), plane);
-
             // Multiplanar texture is validated to only have single layer, single mipLevel
             // and 2d textures (depth == 1)
             DAWN_ASSERT(GetArrayLayers() == 1 && GetDimension() == wgpu::TextureDimension::e2D &&
                         GetNumMipLevels() == 1);
-            mtlDesc.arrayLength = 1;
-            mtlDesc.depth = 1;
 
-            mMtlPlaneTextures[plane] =
-                AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
-                                                                     iosurface:GetIOSurface()
-                                                                         plane:plane]);
+            mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
+                mMtlUsage, GetFormat(), plane, device, GetSampleCount(), GetIOSurface()));
             if (mMtlPlaneTextures[plane] == nil) {
                 return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
             }
