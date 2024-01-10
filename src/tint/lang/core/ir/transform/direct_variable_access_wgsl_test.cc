@@ -36,6 +36,7 @@
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
+#include "src/tint/lang/wgsl/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::core::ir::transform {
@@ -62,12 +63,12 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
         wgsl::reader::Options parser_options;
         parser_options.allowed_features = wgsl::AllowedFeatures::Everything();
         Source::File file{"test", in};
-        auto program = wgsl::reader::Parse(&file, parser_options);
-        if (!program.IsValid()) {
-            return "wgsl::reader::Parse() failed: \n" + program.Diagnostics().str();
+        auto program_in = wgsl::reader::Parse(&file, parser_options);
+        if (!program_in.IsValid()) {
+            return "wgsl::reader::Parse() failed: \n" + program_in.Diagnostics().str();
         }
 
-        auto module = wgsl::reader::ProgramToIR(program);
+        auto module = wgsl::reader::ProgramToIR(program_in);
         if (module != Success) {
             return "ProgramToIR() failed:\n" + module.Failure().reason.str();
         }
@@ -77,19 +78,27 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
             return "DirectVariableAccess failed:\n" + res.Failure().reason.str();
         }
 
+        auto pre_raise = ir::Disassemble(module.Get());
+
+        if (auto raise = wgsl::writer::Raise(module.Get()); raise != Success) {
+            return "wgsl::writer::Raise failed:\n" + res.Failure().reason.str();
+        }
+
         wgsl::writer::ProgramOptions program_options;
         program_options.allowed_features.extensions.insert(
             wgsl::Extension::kChromiumExperimentalFullPtrParameters);
-        auto transformed = wgsl::writer::IRToProgram(module.Get(), program_options);
-        if (!transformed.IsValid()) {
-            return "wgsl::writer::IRToProgram() failed: \n" + transformed.Diagnostics().str() +
-                   "\n\nIR:\n" + ir::Disassemble(module.Get()) +  //
-                   "\n\nAST:\n" + Program::printer(transformed);
+        auto program_out = wgsl::writer::IRToProgram(module.Get(), program_options);
+        if (!program_out.IsValid()) {
+            return "wgsl::writer::IRToProgram() failed: \n" + program_out.Diagnostics().str() +
+                   "\n\nIR (pre):\n" + pre_raise +                       //
+                   "\n\nIR (post):\n" + ir::Disassemble(module.Get()) +  //
+                   "\n\nAST:\n" + Program::printer(program_out);
         }
 
-        auto output = wgsl::writer::Generate(transformed, wgsl::writer::Options{});
+        auto output = wgsl::writer::Generate(program_out, wgsl::writer::Options{});
         if (output != Success) {
-            return "wgsl::writer::Generate() failed: \n" + output.Failure().reason.str();
+            return "wgsl::writer::IRToProgram() failed: \n" + output.Failure().reason.str() +
+                   "\n\nIR:\n" + ir::Disassemble(module.Get());
         }
 
         return "\n" + output->wgsl;
