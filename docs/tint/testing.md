@@ -8,7 +8,7 @@ Tint has multiple levels of testing:
   `_test.cc`
 * End-to-end tests. These test the whole compiler flow, translating source
   shaders to output shaders in various languages, and optionally checking
-  the text of diagnostics.  See [Tint end-to-end tests](end-to-end-testing.md).
+  the text of diagnostics.  See [Tint end-to-end tests](end-to-end-tests.md).
 * WebGPU Conformance Test Suite (CTS). The WebGPU CTS has both validation and
   execution tests, in the `webgpu:shader` hierarchy.
   See https://github.com/gpuweb/cts
