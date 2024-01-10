@@ -3724,15 +3724,15 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
-            {"value": 1, "name": "readonly and readwrite storage textures"},
-            {"value": 2, "name": "packed 4x8 integer dot product"},
-            {"value": 3, "name": "unrestricted pointer parameters"},
-            {"value": 4, "name": "pointer composite access"},
-            {"value": 1000, "name": "chromium testing unimplemented", "tags": ["dawn"]},
-            {"value": 1001, "name": "chromium testing unsafe experimental", "tags": ["dawn"]},
-            {"value": 1002, "name": "chromium testing experimental", "tags": ["dawn"]},
-            {"value": 1003, "name": "chromium testing shipped with killswitch", "tags": ["dawn"]},
-            {"value": 1004, "name": "chromium testing shipped", "tags": ["dawn"]}
+            {"value": 1, "name": "readonly and readwrite storage textures",  "jsrepr": "'readonly_and_readwrite_storage_textures'"},
+            {"value": 2, "name": "packed 4x8 integer dot product", "jsrepr": "'packed_4x8_integer_dot_product'"},
+            {"value": 3, "name": "unrestricted pointer parameters", "jsrepr": "'unrestricted_pointer_parameters'"},
+            {"value": 4, "name": "pointer composite access", "jsrepr": "'pointer_composite_access'"},
+            {"value": 1000, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
+            {"value": 1001, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},
+            {"value": 1002, "name": "chromium testing experimental", "jsrepr": "'chromium_testing_experimental'", "tags": ["dawn"]},
+            {"value": 1003, "name": "chromium testing shipped with killswitch", "jsrepr": "'chromium_testing_shipped_with_killswitch'", "tags": ["dawn"]},
+            {"value": 1004, "name": "chromium testing shipped", "jsrepr": "'chromium_testing_shipped'", "tags": ["dawn"]}
         ]
     },
     "whole size" : {
