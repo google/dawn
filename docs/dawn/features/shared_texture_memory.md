@@ -43,6 +43,13 @@ wgpu::TextureDescriptor textureDesc = {
 wgpu::Texture texture = memory.CreateTexture(&textureDesc);
 ```
 
+Note: There are restrictions on the configuration that can be requested for
+textures created from SharedTextureMemory objects:
+- they must be single-sampled
+- they must be 2D
+- they must have a single mip level
+- they must have an array layer count of 1
+
 Textures created from shared texture memory are not valid to use inside a queue operation until access to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`. For example:
 
 ```c++
