@@ -27,6 +27,20 @@
 
 #include "src/dawn/node/binding/GPUAdapterInfo.h"
 
+#include <iomanip>
+#include <sstream>
+
+namespace {
+
+std::string FormatDevice(uint32_t deviceId) {
+    std::ostringstream device;
+    device << "0x" << std::setfill('0') << std::uppercase << std::internal << std::hex
+           << std::setw(4) << deviceId;
+    return device.str();
+}
+
+}  // namespace
+
 namespace wgpu::binding {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,8 +50,8 @@ namespace wgpu::binding {
 GPUAdapterInfo::GPUAdapterInfo(WGPUAdapterProperties properties)
     : vendor_(properties.vendorName),
       architecture_(properties.architecture),
-      device_(properties.name),
-      description_(properties.driverDescription) {}
+      device_(FormatDevice(properties.deviceID)),
+      description_(properties.name) {}
 
 std::string GPUAdapterInfo::getVendor(Napi::Env) {
     return vendor_;
