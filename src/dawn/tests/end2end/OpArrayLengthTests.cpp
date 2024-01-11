@@ -139,7 +139,6 @@ TEST_P(OpArrayLengthTest, Compute) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
-    pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
         struct ResultBuffer {
             data : array<u32, 3>

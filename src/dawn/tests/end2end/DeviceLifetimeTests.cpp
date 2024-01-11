@@ -349,7 +349,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &desc,
@@ -370,7 +369,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     struct Userdata {
         wgpu::Device device;
@@ -407,7 +405,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     // Create a pipeline ahead of time so it's in the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
@@ -438,7 +435,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     // Create a pipeline ahead of time so it's in the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
@@ -480,7 +476,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &desc,
@@ -505,7 +500,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
-    desc.compute.entryPoint = "main";
 
     struct Userdata {
         wgpu::Device device;

@@ -227,7 +227,6 @@ TEST_F(QueueSubmitValidationTest, SubmitInCreateComputePipelineAsyncCallback) {
     descriptor.compute.module = utils::CreateShaderModule(device, R"(
             @compute @workgroup_size(1) fn main() {
             })");
-    descriptor.compute.entryPoint = "main";
     device.CreateComputePipelineAsync(&descriptor, callback, &callbackData);
 
     WaitForAllOperations(device);
@@ -248,7 +247,6 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeBuffer) {
     // BindGroup 2. This is to provide coverage of for loops in validation code.
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, testBGL});
-    cpDesc.compute.entryPoint = "main";
     cpDesc.compute.module =
         utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
@@ -316,7 +314,6 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {
 
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, testBGL});
-    cpDesc.compute.entryPoint = "main";
     cpDesc.compute.module =
         utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
@@ -387,7 +384,6 @@ TEST_F(QueueSubmitValidationTest, SubmitWithDestroyedComputeStorageTexture) {
 
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.layout = utils::MakePipelineLayout(device, {testBGL});
-    cpDesc.compute.entryPoint = "main";
     cpDesc.compute.module =
         utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);

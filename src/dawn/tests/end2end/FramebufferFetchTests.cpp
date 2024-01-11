@@ -56,7 +56,6 @@ class FramebufferFetchTests : public DawnTest {
                 return vec4f(0, 0, 0, 1);
             }
         )");
-        desc->vertex.entryPoint = "vs";
         desc->primitive.topology = wgpu::PrimitiveTopology::PointList;
     }
 

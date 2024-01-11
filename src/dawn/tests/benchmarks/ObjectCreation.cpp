@@ -160,7 +160,6 @@ BENCHMARK_DEFINE_F(ObjectCreation, SameComputePipeline)
     computeDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() { _ = 0u; }
     )");
-    computeDesc.compute.entryPoint = "main";
     computeDesc.layout = utils::MakePipelineLayout(device, {});
 
     std::vector<wgpu::ComputePipeline> computePipelines;
@@ -183,7 +182,6 @@ BENCHMARK_DEFINE_F(ObjectCreation, UniqueComputePipeline)
         override x: u32 = 0u;
         @compute @workgroup_size(1) fn main() { _ = x; }
     )");
-    computeDesc.compute.entryPoint = "main";
     computeDesc.compute.constantCount = 1;
     computeDesc.compute.constants = &constant;
     computeDesc.layout = utils::MakePipelineLayout(device, {});

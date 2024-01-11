@@ -218,7 +218,6 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
 
     ComputePipelineDescriptor desc = {};
     desc.compute.module = csModule.Get();
-    desc.compute.entryPoint = "main";
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), Initialize)
@@ -239,7 +238,6 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
 
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
-    desc.vertex.entryPoint = "main";
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
@@ -261,7 +259,6 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
 
     ComputePipelineDescriptor desc = {};
     desc.compute.module = csModule.Get();
-    desc.compute.entryPoint = "main";
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), Initialize)
@@ -286,7 +283,6 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
 
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
-    desc.vertex.entryPoint = "main";
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
@@ -314,7 +310,6 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
 
     ComputePipelineDescriptor desc = {};
     desc.compute.module = csModule.Get();
-    desc.compute.entryPoint = "main";
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), Initialize)
@@ -340,7 +335,6 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
 
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
-    desc.vertex.entryPoint = "main";
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
@@ -367,7 +361,6 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
 
     ComputePipelineDescriptor desc = {};
     desc.compute.module = csModule.Get();
-    desc.compute.entryPoint = "main";
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*computePipelineMock.Get(), Initialize)
@@ -394,7 +387,6 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
 
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
-    desc.vertex.entryPoint = "main";
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), Initialize)

@@ -56,7 +56,6 @@ TEST_F(ComputePipelineValidationTest, Success) {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
     device.CreateComputePipeline(&csDesc);
 }
 
@@ -77,7 +76,6 @@ TEST_F(ComputePipelineValidationTest, UnexpectedDawnComputePipelineFullSubgroups
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
 
     wgpu::DawnComputePipelineFullSubgroups subgroupOptions;
     subgroupOptions.requiresFullSubgroups = false;
@@ -126,7 +124,6 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
 
     wgpu::DawnComputePipelineFullSubgroups subgroupOptions;
     subgroupOptions.requiresFullSubgroups = false;
@@ -146,7 +143,6 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
 
     wgpu::DawnComputePipelineFullSubgroups subgroupOptions;
     subgroupOptions.requiresFullSubgroups = true;
@@ -166,7 +162,6 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
 
     wgpu::DawnComputePipelineFullSubgroups subgroupOptions;
     subgroupOptions.requiresFullSubgroups = true;
@@ -192,7 +187,6 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
     csDesc.compute.constants = constants.data();
     csDesc.compute.constantCount = constants.size();
 
@@ -220,7 +214,6 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = computeModule;
-    csDesc.compute.entryPoint = "main";
     csDesc.compute.constants = constants.data();
     csDesc.compute.constantCount = constants.size();
 
@@ -249,7 +242,6 @@ class ComputeDispatchValidationTest : public ValidationTest {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pl;
         csDesc.compute.module = computeModule;
-        csDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 

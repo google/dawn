@@ -376,9 +376,7 @@ wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsClearCommandBuffer(
 
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = module;
-    pipelineDesc.vertex.entryPoint = "vert_main";
     pipelineDesc.cFragment.module = module;
-    pipelineDesc.cFragment.entryPoint = "frag_main";
     pipelineDesc.cTargets[0].format = texture.GetFormat();
 
     wgpu::RenderPipeline pipeline = deviceObj.CreateRenderPipeline(&pipelineDesc);
@@ -424,7 +422,6 @@ wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsComputeCommandBuffer
     )";
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.compute.module = utils::CreateShaderModule(deviceObj, shader.c_str());
-    pipelineDesc.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = deviceObj.CreateComputePipeline(&pipelineDesc);
 
@@ -472,9 +469,7 @@ SharedTextureMemoryTests::MakeCheckBySamplingCommandBuffer(wgpu::Device& deviceO
 
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = module;
-    pipelineDesc.vertex.entryPoint = "vert_main";
     pipelineDesc.cFragment.module = module;
-    pipelineDesc.cFragment.entryPoint = "frag_main";
     pipelineDesc.cTargets[0].format = colorTarget.GetFormat();
 
     wgpu::RenderPipeline pipeline = deviceObj.CreateRenderPipeline(&pipelineDesc);

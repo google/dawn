@@ -130,13 +130,11 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     WGPURenderPipelineDescriptor pipelineDescriptor = {};
 
     pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
     pipelineDescriptor.vertex.bufferCount = 0;
     pipelineDescriptor.vertex.buffers = nullptr;
 
     WGPUFragmentState fragment = {};
     fragment.module = vsModule;
-    fragment.entryPoint = "main";
     fragment.targetCount = 1;
     fragment.targets = &colorTargetState;
     pipelineDescriptor.fragment = &fragment;

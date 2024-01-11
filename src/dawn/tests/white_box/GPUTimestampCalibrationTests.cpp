@@ -138,7 +138,6 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
 
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.compute.module = module;
-        descriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&descriptor);
     }

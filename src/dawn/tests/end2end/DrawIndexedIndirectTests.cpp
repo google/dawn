@@ -735,7 +735,6 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
 
     wgpu::ComputePipelineDescriptor computeDesc;
     computeDesc.compute.module = paramWriterModule;
-    computeDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&computeDesc);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

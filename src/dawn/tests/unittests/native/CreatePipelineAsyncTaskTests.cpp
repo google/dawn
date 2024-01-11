@@ -60,7 +60,6 @@ class CreatePipelineAsyncTaskTests : public DawnMockTest {};
 TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateRenderPipelineAsync) {
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
-    desc.vertex.entryPoint = "main";
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -88,7 +87,6 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateRender
 TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateRenderPipelineAsync) {
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
-    desc.vertex.entryPoint = "main";
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -116,7 +114,6 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateRenderPi
 TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc = {};
     desc.compute.module = utils::CreateShaderModule(device, kComputeShader.data());
-    desc.compute.entryPoint = "main";
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -144,7 +141,6 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateComput
 TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc = {};
     desc.compute.module = utils::CreateShaderModule(device, kComputeShader.data());
-    desc.compute.entryPoint = "main";
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -172,7 +168,6 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateComputeP
 TEST_F(CreatePipelineAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped) {
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
-    desc.vertex.entryPoint = "main";
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 

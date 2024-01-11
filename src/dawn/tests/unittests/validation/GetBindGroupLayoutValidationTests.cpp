@@ -319,7 +319,6 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.compute.module = csModule;
-    descriptor.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
 
@@ -1184,7 +1183,6 @@ TEST_F(GetBindGroupLayoutTests, FullOfEmptyBGLs) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
-    pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         }

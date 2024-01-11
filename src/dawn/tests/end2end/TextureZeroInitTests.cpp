@@ -1182,7 +1182,6 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
         }
     )";
     computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, cs);
-    computePipelineDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);
 

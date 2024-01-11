@@ -124,7 +124,6 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncSuccess) {
 
     WGPUComputePipelineDescriptor descriptor{};
     descriptor.compute.module = csModule;
-    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -153,7 +152,6 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncError) {
 
     WGPUComputePipelineDescriptor descriptor{};
     descriptor.compute.module = csModule;
-    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -184,11 +182,9 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncSuccess) {
 
     WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
 
     WGPUFragmentState fragment = {};
     fragment.module = vsModule;
-    fragment.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
 
     wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
@@ -217,11 +213,9 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncError) {
 
     WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
 
     WGPUFragmentState fragment = {};
     fragment.module = vsModule;
-    fragment.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
 
     wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
@@ -253,11 +247,9 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncThenDisconnect) {
 
     WGPUFragmentState fragment = {};
     fragment.module = vsModule;
-    fragment.entryPoint = "main";
 
     WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
 
     wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
@@ -286,7 +278,6 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncThenDisconnect) {
 
     WGPUComputePipelineDescriptor descriptor{};
     descriptor.compute.module = csModule;
-    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -314,11 +305,9 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncAfterDisconnect) {
 
     WGPUFragmentState fragment = {};
     fragment.module = vsModule;
-    fragment.entryPoint = "main";
 
     WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
 
     FlushClient();
@@ -342,7 +331,6 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncAfterDisconnect) {
 
     WGPUComputePipelineDescriptor descriptor{};
     descriptor.compute.module = csModule;
-    descriptor.compute.entryPoint = "main";
 
     FlushClient();
 
@@ -364,11 +352,9 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
 
     WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = module;
-    pipelineDescriptor.vertex.entryPoint = "main";
 
     WGPUFragmentState fragment = {};
     fragment.module = module;
-    fragment.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
 
     wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
@@ -459,7 +445,6 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
 
     WGPUComputePipelineDescriptor computeDesc = {};
     computeDesc.compute.module = sm;
-    computeDesc.compute.entryPoint = "main";
 
     WGPUComputePipeline pipeline = nullptr;
     wgpuDeviceCreateComputePipelineAsync(

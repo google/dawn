@@ -144,7 +144,6 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
         descriptor.bindGroupLayouts = layouts.data();
         csDesc.layout = device.CreatePipelineLayout(&descriptor);
         csDesc.compute.module = csModule;
-        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

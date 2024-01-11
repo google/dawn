@@ -226,7 +226,6 @@ TEST_P(BufferHostMappedPointerTests, Storage) {
             }
         }
     )");
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                      {

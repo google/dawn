@@ -635,7 +635,6 @@ class TimestampQueryTests : public QueryTests {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = module;
-        csDesc.compute.entryPoint = "main";
         computePipeline = device.CreateComputePipeline(&csDesc);
     }
 

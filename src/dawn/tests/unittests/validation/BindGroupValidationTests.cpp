@@ -1833,7 +1833,6 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pipelineLayout;
         csDesc.compute.module = csModule;
-        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }
@@ -2357,7 +2356,6 @@ TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
-    pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         }
@@ -2648,7 +2646,6 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pipelineLayout;
         csDesc.compute.module = csModule;
-        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

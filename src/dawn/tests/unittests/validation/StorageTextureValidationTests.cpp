@@ -232,7 +232,6 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.compute.module = csModule;
-        descriptor.compute.entryPoint = "main";
 
         device.CreateComputePipeline(&descriptor);
     }
@@ -391,7 +390,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDecla
         // Set common fields of compute pipeline descriptor.
         wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
         defaultComputePipelineDescriptor.compute.module = csModule;
-        defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
         for (utils::BindingLayoutEntryInitializationHelper bindingLayoutEntry :
              kSupportedBindingTypes) {
@@ -495,7 +493,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
             // Set common fields of compute pipeline descriptor.
             wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
             defaultComputePipelineDescriptor.compute.module = csModule;
-            defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
             utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {
@@ -551,7 +548,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
             // Set common fields of compute pipeline descriptor.
             wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
             defaultComputePipelineDescriptor.compute.module = csModule;
-            defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
             // Set common fields of bind group layout binding.
             utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {
@@ -940,7 +936,6 @@ TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureFormatInSh
             std::string computeShader = CreateComputeShaderWithStorageTexture(access, format);
             wgpu::ComputePipelineDescriptor computeDesc;
             computeDesc.compute.module = utils::CreateShaderModule(device, computeShader.c_str());
-            computeDesc.compute.entryPoint = "main";
 
             switch (access) {
                 case wgpu::StorageTextureAccess::ReadOnly:
@@ -979,7 +974,6 @@ TEST_F(ReadWriteStorageTextureValidationTests, StorageTextureAccessInPipeline) {
             wgpu::ComputePipelineDescriptor computePipelineDescriptor;
             computePipelineDescriptor.compute.module =
                 utils::CreateShaderModule(device, computeShader.c_str());
-            computePipelineDescriptor.compute.entryPoint = "main";
             computePipelineDescriptor.layout =
                 utils::MakePipelineLayout(device, {{bindGroupLayout}});
             if (accessInShader == accessInBindGroupLayout ||
@@ -1133,7 +1127,6 @@ TEST_F(ReadWriteStorageTextureResourceUsageTrackingTests, StorageTextureInComput
             pipelineDescriptor.layout = utils::MakePipelineLayout(
                 device, {{bindGroupLayouts[bindingType1], bindGroupLayouts[bindingType2]}});
             pipelineDescriptor.compute.module = csModule;
-            pipelineDescriptor.compute.entryPoint = "main";
             wgpu::ComputePipeline computePipeline =
                 device.CreateComputePipeline(&pipelineDescriptor);
 

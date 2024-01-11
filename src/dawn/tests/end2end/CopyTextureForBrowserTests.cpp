@@ -371,7 +371,6 @@ class CopyTextureForBrowserTests : public Parent {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = csModule;
-        csDesc.compute.entryPoint = "main";
 
         return this->device.CreateComputePipeline(&csDesc);
     }

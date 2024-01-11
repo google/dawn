@@ -72,9 +72,7 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
     {
         utils::ComboRenderPipelineDescriptor desc;
         desc.vertex.module = module;
-        desc.vertex.entryPoint = "vertex_main";
         desc.cFragment.module = module;
-        desc.cFragment.entryPoint = "fragment_main";
         EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
     }
     EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
@@ -83,9 +81,7 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
     {
         utils::ComboRenderPipelineDescriptor desc;
         desc.vertex.module = module;
-        desc.vertex.entryPoint = "vertex_main";
         desc.cFragment.module = module;
-        desc.cFragment.entryPoint = "fragment_main";
         EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
     }
     EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
@@ -109,9 +105,7 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     {
         utils::ComboRenderPipelineDescriptor desc;
         desc.vertex.module = module;
-        desc.vertex.entryPoint = "vertex_main";
         desc.cFragment.module = module;
-        desc.cFragment.entryPoint = "fragment_main";
         EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
     }
     EXPECT_EQ(mMockCache.GetNumEntries(), 2u);
@@ -120,9 +114,7 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     {
         utils::ComboRenderPipelineDescriptor desc;
         desc.vertex.module = module;
-        desc.vertex.entryPoint = "vertex_main";
         desc.cFragment.module = module;
-        desc.cFragment.entryPoint = "fragment_main";
         EXPECT_CACHE_HIT(mMockCache, 2u, device.CreateRenderPipeline(&desc));
     }
     EXPECT_EQ(mMockCache.GetNumEntries(), 2u);
@@ -141,9 +133,7 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     {
         utils::ComboRenderPipelineDescriptor desc;
         desc.vertex.module = newModule;
-        desc.vertex.entryPoint = "vertex_main";
         desc.cFragment.module = newModule;
-        desc.cFragment.entryPoint = "fragment_main";
         EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
     }
     EXPECT_EQ(mMockCache.GetNumEntries(), 4u);

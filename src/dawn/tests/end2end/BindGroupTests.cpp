@@ -159,7 +159,6 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = module;
-    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
 
     wgpu::BufferDescriptor bufferDesc;
@@ -1144,7 +1143,6 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         @compute @workgroup_size(1) fn main() {
             outputBuffer = vec3u(buffer0.value, buffer2.value, buffer3.value);
         })");
-    pipelineDescriptor.compute.entryPoint = "main";
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
@@ -1226,7 +1224,6 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         @compute @workgroup_size(1) fn main() {
             outputBuffer.value = vec2u(buffer0.value, buffer1.value);
         })");
-        pipelineDescriptor.compute.entryPoint = "main";
         pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
@@ -1444,7 +1441,6 @@ TEST_P(BindGroupTests, EmptyLayout) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-    pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         })");

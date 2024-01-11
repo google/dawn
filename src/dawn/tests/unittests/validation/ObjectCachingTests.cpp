@@ -172,7 +172,6 @@ TEST_F(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
     wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.compute.entryPoint = "main";
     desc.layout = layout;
 
     desc.compute.module = module;
@@ -200,7 +199,6 @@ TEST_F(ObjectCachingTest, ComputePipelineDeduplicationOnOverrides) {
     wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.compute.entryPoint = "main";
     desc.layout = layout;
     desc.compute.module = module;
 
@@ -243,7 +241,6 @@ TEST_F(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     EXPECT_EQ(pl.Get(), samePl.Get());
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.compute.entryPoint = "main";
     desc.compute.module = utils::CreateShaderModule(device, R"(
             var<workgroup> i : u32;
             @compute @workgroup_size(1) fn main() {
@@ -386,9 +383,7 @@ TEST_F(ObjectCachingTest, RenderPipelineDeduplicationOnOverrides) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertexMain";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragmentMain";
     desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     std::vector<wgpu::ConstantEntry> constants{{nullptr, "a", 0.5}};

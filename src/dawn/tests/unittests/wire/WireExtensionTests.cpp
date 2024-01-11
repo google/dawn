@@ -57,7 +57,6 @@ TEST_F(WireExtensionTests, ChainedStruct) {
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
     wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
@@ -95,7 +94,6 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
     wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
@@ -156,7 +154,6 @@ TEST_F(WireExtensionTests, InvalidSType) {
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
     wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
@@ -184,7 +181,6 @@ TEST_F(WireExtensionTests, UnknownSType) {
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
     wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
@@ -218,7 +214,6 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
     wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);

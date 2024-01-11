@@ -592,7 +592,6 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
     static_assert(kMaxBindingsPerBindGroup == 1000);
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.compute.entryPoint = "main";
 
     // kMaxBindingsPerBindGroup-1 is valid.
     desc.compute.module = utils::CreateShaderModule(device, R"(

@@ -126,9 +126,7 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithDifferentPerTargetBlendStat
     utils::ComboRenderPipelineDescriptor testDescriptor;
     testDescriptor.layout = {};
     testDescriptor.vertex.module = module;
-    testDescriptor.vertex.entryPoint = "vs";
     testDescriptor.cFragment.module = module;
-    testDescriptor.cFragment.entryPoint = "fs";
     testDescriptor.cFragment.targetCount = 3;
     testDescriptor.cTargets[1].format = wgpu::TextureFormat::Undefined;
 
@@ -210,7 +208,6 @@ TEST_F(CompatValidationTest, CanNotUseFragmentShaderWithSampleMask) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = moduleSampleMaskOutput;
-        descriptor.vertex.entryPoint = "vs";
         descriptor.cFragment.module = moduleSampleMaskOutput;
         descriptor.cFragment.entryPoint = "fsWithoutSampleMaskUsage";
         descriptor.multisample.count = 4;
@@ -223,7 +220,6 @@ TEST_F(CompatValidationTest, CanNotUseFragmentShaderWithSampleMask) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = moduleSampleMaskOutput;
-        descriptor.vertex.entryPoint = "vs";
         descriptor.cFragment.module = moduleSampleMaskOutput;
         descriptor.cFragment.entryPoint = "fsWithSampleMaskUsage";
         descriptor.multisample.count = 4;
@@ -277,7 +273,6 @@ TEST_F(CompatValidationTest, CanNotUseShaderWithUnsupportedInterpolateTypeOrSamp
         for (auto entryPoint : entryPoints) {
             utils::ComboRenderPipelineDescriptor descriptor;
             descriptor.vertex.module = moduleInterpolationLinear;
-            descriptor.vertex.entryPoint = "vs";
             descriptor.cFragment.module = moduleInterpolationLinear;
             descriptor.cFragment.entryPoint = entryPoint;
 
@@ -383,9 +378,7 @@ void TestMultipleTextureViewValidationInRenderPass(
 
     utils::ComboRenderPipelineDescriptor pDesc;
     pDesc.vertex.module = module;
-    pDesc.vertex.entryPoint = "vs";
     pDesc.cFragment.module = module;
-    pDesc.cFragment.entryPoint = "fs";
     pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
 
@@ -634,7 +627,6 @@ void TestMultipleTextureViewValidationInComputePass(
 
     wgpu::ComputePipelineDescriptor pDesc;
     pDesc.compute.module = module;
-    pDesc.compute.entryPoint = "cs";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
 
     fn(device, texture, pipeline,
@@ -1336,9 +1328,7 @@ class CompatMaxVertexAttributesTest : public CompatValidationTest {
 
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = {};
-        descriptor.vertex.entryPoint = "vs";
         descriptor.vertex.bufferCount = 1;
-        descriptor.cFragment.entryPoint = "fs";
         descriptor.cBuffers[0].arrayStride = 16;
         descriptor.cBuffers[0].attributeCount = numAttributes;
 

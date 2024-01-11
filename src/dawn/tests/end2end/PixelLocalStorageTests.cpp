@@ -367,7 +367,6 @@ class PixelLocalStorageTests : public DawnTest {
             utils::ComboRenderPipelineDescriptor desc;
             desc.layout = MakeTestLayout(spec);
             desc.vertex.module = module;
-            desc.vertex.entryPoint = "vs";
             desc.cFragment.module = module;
             desc.cFragment.entryPoint = "accumulator";
             desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -387,7 +386,6 @@ class PixelLocalStorageTests : public DawnTest {
             utils::ComboRenderPipelineDescriptor desc;
             desc.layout = MakeTestLayout(spec, bgl);
             desc.vertex.module = module;
-            desc.vertex.entryPoint = "vs";
             desc.cFragment.module = module;
             desc.cFragment.entryPoint = "readbackToStorageBuffer";
             desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -406,7 +404,6 @@ class PixelLocalStorageTests : public DawnTest {
             utils::ComboRenderPipelineDescriptor desc;
             desc.layout = MakeTestLayout(spec);
             desc.vertex.module = module;
-            desc.vertex.entryPoint = "vs";
             desc.cFragment.module = module;
             desc.cFragment.entryPoint = "copyToColorAttachment";
             desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -686,7 +683,6 @@ TEST_P(PixelLocalStorageTests, ImplicitPLSAndLargerRenderAttachmentsInOneCommand
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     {
         pipelineDescriptor.vertex.module = wgslModule;
-        pipelineDescriptor.vertex.entryPoint = "vsMain";
         pipelineDescriptor.cFragment.module = wgslModule;
         pipelineDescriptor.cFragment.entryPoint = "accumulate";
         pipelineDescriptor.cFragment.targetCount = 1;

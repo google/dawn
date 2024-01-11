@@ -1607,7 +1607,6 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteThenGPUWriteStorageBufferThenMapRea
             @compute @workgroup_size(1) fn main() {
                 ssbo.value += 1u;
             })");
-        csDesc.compute.entryPoint = "main";
 
         pipeline = device.CreateComputePipeline(&csDesc);
     }

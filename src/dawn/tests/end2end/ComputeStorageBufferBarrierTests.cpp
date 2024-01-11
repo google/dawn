@@ -63,7 +63,6 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::BindGroup bindGroup =
@@ -114,7 +113,6 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -180,7 +178,6 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -249,7 +246,6 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -317,7 +313,6 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -357,7 +352,6 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 //  3 - Use the indirect buffer in a Dispatch while also reading its data.
 TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
-    step2PipelineDesc.compute.entryPoint = "main";
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct Buf {
             data : array<u32, 3>
@@ -371,7 +365,6 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     wgpu::ComputePipeline step2Pipeline = device.CreateComputePipeline(&step2PipelineDesc);
 
     wgpu::ComputePipelineDescriptor step3PipelineDesc;
-    step3PipelineDesc.compute.entryPoint = "main";
     step3PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct Buf {
             data : array<u32, 3>

@@ -65,7 +65,6 @@ class GpuMemorySyncTests : public DawnTest {
 
         wgpu::ComputePipelineDescriptor cpDesc;
         cpDesc.compute.module = csModule;
-        cpDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
@@ -260,7 +259,6 @@ class StorageToUniformSyncTests : public DawnTest {
 
         wgpu::ComputePipelineDescriptor cpDesc;
         cpDesc.compute.module = csModule;
-        cpDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
@@ -466,7 +464,6 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = csModule;
-    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
     wgpu::Buffer vertexBuffer = CreateZeroedBuffer(
         kVertexBufferStride * 4,
@@ -581,7 +578,6 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = csModule;
-    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
     struct Data {
         float pos[4][4];

@@ -128,7 +128,6 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, computeShader);
-    csDesc.compute.entryPoint = "CSMain";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -181,10 +180,8 @@ fn FSMain() -> @location(0) vec4<f16> {
         utils::ComboRenderPipelineDescriptor descriptor;
 
         descriptor.vertex.module = shaderModule;
-        descriptor.vertex.entryPoint = "VSMain";
 
         descriptor.cFragment.module = shaderModule;
-        descriptor.cFragment.entryPoint = "FSMain";
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
 
@@ -267,10 +264,8 @@ fn FSMain(fsInput: FSInput) -> @location(0) vec4f {
         utils::ComboRenderPipelineDescriptor descriptor;
 
         descriptor.vertex.module = shaderModule;
-        descriptor.vertex.entryPoint = "VSMain";
 
         descriptor.cFragment.module = shaderModule;
-        descriptor.cFragment.entryPoint = "FSMain";
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
 
@@ -385,7 +380,6 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
         utils::ComboRenderPipelineDescriptor descriptor;
 
         descriptor.vertex.module = shaderModule;
-        descriptor.vertex.entryPoint = "VSMain";
         descriptor.vertex.bufferCount = 2;
         // Interprete the vertex buffer data as Float32x2 and Float32x4, and the result should be
         // converted to vec2<f16> and vec4<f16>
@@ -405,7 +399,6 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
         descriptor.cBuffers[1].attributes = &descriptor.cAttributes[1];
 
         descriptor.cFragment.module = shaderModule;
-        descriptor.cFragment.entryPoint = "FSMain";
         descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
         descriptor.cTargets[0].format = kFormat;
 

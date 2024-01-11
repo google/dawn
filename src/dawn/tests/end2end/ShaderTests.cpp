@@ -321,9 +321,7 @@ fn fragmentMain(input : VertexOut) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     rpDesc.vertex.bufferCount = 1;
     rpDesc.cBuffers[0].attributeCount = 2;
     rpDesc.cBuffers[0].arrayStride = 28;
@@ -362,9 +360,7 @@ fn fragmentMain(input : ShaderIO) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -406,9 +402,7 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -446,9 +440,7 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -486,9 +478,7 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -525,9 +515,7 @@ fn fragmentMain(input : FragmentIn) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -559,9 +547,7 @@ fn fragmentMain() -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -595,9 +581,7 @@ fn fragmentMain(@builtin(position) position : vec4<f32>) -> @location(0) vec4f {
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
-    rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
-    rpDesc.cFragment.entryPoint = "fragmentMain";
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
@@ -631,9 +615,7 @@ struct S1 { data : array<vec4u, 20> }
 
     utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = module;
-    rpDesc.vertex.entryPoint = "vsMain";
     rpDesc.cFragment.module = module;
-    rpDesc.cFragment.entryPoint = "fsMain";
     rpDesc.vertex.bufferCount = 1;
     rpDesc.cBuffers[0].attributeCount = 1;
     rpDesc.cBuffers[0].arrayStride = 16;
@@ -1143,9 +1125,7 @@ TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -1199,7 +1179,6 @@ TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
             result = values[index];
         }
     )");
-    cDesc.compute.entryPoint = "little_bobby_tables";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cDesc);
 
     // Test 4-byte buffer that will receive the result.
@@ -1869,9 +1848,7 @@ TEST_P(ShaderTests, StorageAcrossStages) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -1903,9 +1880,7 @@ TEST_P(ShaderTests, StorageAcrossStagesStruct) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -1943,9 +1918,7 @@ TEST_P(ShaderTests, StorageAcrossStagesSeparateModules) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = vsModule;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = fsModule;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -1970,9 +1943,7 @@ TEST_P(ShaderTests, StorageAcrossStagesSeparateModuleMismatch) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -1999,9 +1970,7 @@ TEST_P(ShaderTests, StorageAcrossStagesSameBindingPointCollide) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2028,9 +1997,7 @@ TEST_P(ShaderTests, StorageAcrossStagesSameBindingPointCollideMixedStructDef) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2059,9 +2026,7 @@ TEST_P(ShaderTests, UniformAcrossStages) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2093,9 +2058,7 @@ TEST_P(ShaderTests, UniformAcrossStagesStruct) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2125,9 +2088,7 @@ TEST_P(ShaderTests, UniformAcrossStagesSeparateModule) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = vsModule;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = fsModule;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2152,9 +2113,7 @@ TEST_P(ShaderTests, UniformAcrossStagesSeparateModuleMismatch) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2181,9 +2140,7 @@ TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollide) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }
@@ -2210,9 +2167,7 @@ TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollideMixedStructDef) {
 
     utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
-    desc.vertex.entryPoint = "vertex";
     desc.cFragment.module = module;
-    desc.cFragment.entryPoint = "fragment";
 
     device.CreateRenderPipeline(&desc);
 }

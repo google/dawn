@@ -247,7 +247,6 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
 
         wgpu::ComputePipelineDescriptor pipelineDesc = {};
         pipelineDesc.compute.module = module;
-        pipelineDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
         wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -293,7 +292,6 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
 
         wgpu::ComputePipelineDescriptor pipelineDesc = {};
         pipelineDesc.compute.module = module;
-        pipelineDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
         wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),

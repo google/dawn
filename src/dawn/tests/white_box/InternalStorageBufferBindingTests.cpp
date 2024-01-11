@@ -86,7 +86,6 @@ class InternalStorageBufferBindingTests : public DawnTest {
         wgpu::ComputePipelineDescriptor pipelineDesc = {};
         pipelineDesc.layout = layout;
         pipelineDesc.compute.module = module;
-        pipelineDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDesc);
     }

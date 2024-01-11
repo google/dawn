@@ -111,7 +111,6 @@ TEST_P(PipelineLayoutTests, ComputeAndRenderSamePipelineLayout) {
         wgpu::ComputePipelineDescriptor desc = {};
         desc.layout = pl;
         desc.compute.module = shaderModule;
-        desc.compute.entryPoint = "computeMain";
         computePipeline = device.CreateComputePipeline(&desc);
     }
     wgpu::RenderPipeline renderPipeline;
@@ -119,12 +118,10 @@ TEST_P(PipelineLayoutTests, ComputeAndRenderSamePipelineLayout) {
         wgpu::RenderPipelineDescriptor desc = {};
         desc.layout = pl;
         desc.vertex.module = shaderModule;
-        desc.vertex.entryPoint = "vertexMain";
 
         wgpu::FragmentState fragment = {};
         desc.fragment = &fragment;
         fragment.module = shaderModule;
-        fragment.entryPoint = "fragmentMain";
         fragment.targetCount = 1;
 
         wgpu::ColorTargetState colorTargetState = {};

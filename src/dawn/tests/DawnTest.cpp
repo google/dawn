@@ -1397,7 +1397,6 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::Texture textu
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.compute.module = csModule;
-    pipelineDescriptor.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 

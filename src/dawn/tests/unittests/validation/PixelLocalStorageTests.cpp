@@ -349,13 +349,11 @@ class PixelLocalStorageTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor desc;
         desc.layout = MakePipelineLayout(spec);
         desc.cFragment.module = utils::CreateShaderModule(device, fsStream.str().c_str());
-        desc.cFragment.entryPoint = "fs";
         desc.vertex.module = utils::CreateShaderModule(device, R"(
             @vertex fn vs() -> @builtin(position) vec4f {
                 return vec4f();
             }
         )");
-        desc.vertex.entryPoint = "vs";
         desc.cTargets[0].format = kColorAttachmentFormat;
         return device.CreateRenderPipeline(&desc);
     }
@@ -389,9 +387,7 @@ class PixelLocalStorageTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor desc;
         desc.layout = layout;
         desc.cFragment.module = fsModule;
-        desc.cFragment.entryPoint = "fs";
         desc.vertex.module = vsModule;
-        desc.vertex.entryPoint = "vs";
         desc.cTargets[0].format = kColorAttachmentFormat;
         desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
@@ -1118,9 +1114,7 @@ TEST_F(PixelLocalStorageTest, RenderPipelineOnlyStorageAttachment) {
     utils::ComboRenderPipelineDescriptor pDesc;
     pDesc.layout = pl;
     pDesc.vertex.module = module;
-    pDesc.vertex.entryPoint = "vs";
     pDesc.cFragment.module = module;
-    pDesc.cFragment.entryPoint = "fs";
     pDesc.cFragment.targetCount = 0;
 
     // Success case: a render pipeline with just a storage attachment is valid.

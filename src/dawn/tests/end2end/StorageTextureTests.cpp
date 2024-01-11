@@ -466,7 +466,6 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         wgpu::ComputePipelineDescriptor computeDescriptor;
         computeDescriptor.layout = nullptr;
         computeDescriptor.compute.module = csModule;
-        computeDescriptor.compute.entryPoint = "main";
         return device.CreateComputePipeline(&computeDescriptor);
     }
 
@@ -828,7 +827,6 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
-    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is
@@ -1308,7 +1306,6 @@ fn main(
     wgpu::ComputePipelineDescriptor computeDescriptor;
     computeDescriptor.layout = utils::MakePipelineLayout(device, {bindGroupLayout});
     computeDescriptor.compute.module = utils::CreateShaderModule(device, sstream.str().c_str());
-    computeDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&computeDescriptor);
 
     wgpu::BindGroup bindGroup =

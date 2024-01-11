@@ -145,7 +145,6 @@ TEST_P(ExperimentalSubgroupsTests, ComputePipelineRequiringFullSubgroupsWithLite
         for (bool requiresFullSubgroups : {false, true}) {
             wgpu::ComputePipelineDescriptor csDesc;
             csDesc.compute.module = shaderModule;
-            csDesc.compute.entryPoint = "main";
 
             wgpu::DawnComputePipelineFullSubgroups fullSubgroupsOption;
             fullSubgroupsOption.requiresFullSubgroups = requiresFullSubgroups;
@@ -183,7 +182,6 @@ TEST_P(ExperimentalSubgroupsTests, ComputePipelineRequiringFullSubgroupsWithOver
 
             wgpu::ComputePipelineDescriptor csDesc;
             csDesc.compute.module = shaderModule;
-            csDesc.compute.entryPoint = "main";
             csDesc.compute.constants = constants.data();
             csDesc.compute.constantCount = constants.size();
 

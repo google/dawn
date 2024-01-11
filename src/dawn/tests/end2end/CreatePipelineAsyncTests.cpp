@@ -153,7 +153,6 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         @compute @workgroup_size(1) fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -382,7 +381,6 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipeli
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         })");
-    csDesc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -446,7 +444,6 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateComputePipeli
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         @compute @workgroup_size(1) fn main() {
         })");
-    csDesc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -516,7 +513,6 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
         @compute @workgroup_size(1) fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.compute.entryPoint = "main";
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {
@@ -575,7 +571,6 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwiceAtSameTime) {
         @compute @workgroup_size(1) fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.compute.entryPoint = "main";
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {

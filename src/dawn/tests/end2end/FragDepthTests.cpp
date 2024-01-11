@@ -54,10 +54,8 @@ TEST_P(FragDepthTests, FragDepthIsClampedToViewport) {
     // Create the pipeline that uses frag_depth to output the depth.
     utils::ComboRenderPipelineDescriptor pDesc;
     pDesc.vertex.module = module;
-    pDesc.vertex.entryPoint = "vs";
     pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pDesc.cFragment.module = module;
-    pDesc.cFragment.entryPoint = "fs";
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);
@@ -118,7 +116,6 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     // Create the pipeline and bindgroup for the pipeline layout with a uniform buffer.
     utils::ComboRenderPipelineDescriptor upDesc;
     upDesc.vertex.module = module;
-    upDesc.vertex.entryPoint = "vs";
     upDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     upDesc.cFragment.module = module;
     upDesc.cFragment.entryPoint = "fsUniform";
@@ -137,7 +134,6 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     // Create the pipeline and bindgroup for the pipeline layout with a uniform buffer.
     utils::ComboRenderPipelineDescriptor spDesc;
     spDesc.vertex.module = module;
-    spDesc.vertex.entryPoint = "vs";
     spDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     spDesc.cFragment.module = module;
     spDesc.cFragment.entryPoint = "fsStorage";
@@ -205,10 +201,8 @@ TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
     // Create the pipeline and bindgroup for the pipeline layout with a uniform buffer.
     utils::ComboRenderPipelineDescriptor pDesc;
     pDesc.vertex.module = module;
-    pDesc.vertex.entryPoint = "vs";
     pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pDesc.cFragment.module = module;
-    pDesc.cFragment.entryPoint = "fs";
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);

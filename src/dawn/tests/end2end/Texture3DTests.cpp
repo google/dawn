@@ -157,7 +157,6 @@ TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
             _ = t;
         }
     )");
-    pDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
 
     wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, v}});

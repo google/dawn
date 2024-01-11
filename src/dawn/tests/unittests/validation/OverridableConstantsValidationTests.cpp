@@ -138,7 +138,6 @@ override c12: f16 = 0.0h;            // default override
     void TestCreatePipeline(const std::vector<wgpu::ConstantEntry>& constants) {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = computeModule;
-        csDesc.compute.entryPoint = "main";
         csDesc.compute.constants = constants.data();
         csDesc.compute.constantCount = constants.size();
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);

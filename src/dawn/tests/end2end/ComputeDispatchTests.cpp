@@ -63,7 +63,6 @@ class ComputeDispatchTests : public DawnTest {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = module;
-        csDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
 
         // Test the use of the compute pipelines without using @num_workgroups
@@ -375,7 +374,6 @@ class ComputeMultipleDispatchesTests : public DawnTestWithParams<Params> {
         wgpu::ComputePipelineDescriptor csDesc;
         //
         csDesc.compute.module = module;
-        csDesc.compute.entryPoint = "main";
         csDesc.layout = pipelineLayout;
         pipeline = device.CreateComputePipeline(&csDesc);
 
@@ -400,7 +398,6 @@ class ComputeMultipleDispatchesTests : public DawnTestWithParams<Params> {
                 }
             })");
         csDesc.compute.module = moduleWithoutNumWorkgroups;
-        csDesc.compute.entryPoint = "main";
         csDesc.layout = pipelineLayout;
         pipelineWithoutNumWorkgroups = device.CreateComputePipeline(&csDesc);
     }

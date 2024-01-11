@@ -268,7 +268,6 @@ TEST_P(MultithreadTests, CreateComputePipelineAsyncInParallel) {
     utils::RunInParallel(static_cast<uint32_t>(pipelines.size()), [&](uint32_t index) {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = utils::CreateShaderModule(device, shaderSources[index].c_str());
-        csDesc.compute.entryPoint = "main";
 
         struct Task {
             wgpu::ComputePipeline computePipeline;
@@ -467,7 +466,6 @@ TEST_P(MultithreadCachingTests, RefAndReleaseCachedComputePipelinesInParallel) {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = csModule;
-    csDesc.compute.entryPoint = "main";
     csDesc.layout = pipelineLayout;
 
     utils::RunInParallel(100, [&, this](uint32_t) {
@@ -636,7 +634,6 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
             })");
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = module;
-    csDesc.compute.entryPoint = "main";
     auto pipeline = device.CreateComputePipeline(&csDesc);
 
     wgpu::Buffer dstBuffer =

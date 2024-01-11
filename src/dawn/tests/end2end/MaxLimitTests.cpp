@@ -89,7 +89,6 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
     )";
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
-    csDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer
@@ -241,7 +240,6 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
-        csDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -394,9 +392,7 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     pipelineDesc.layout = utils::MakePipelineLayout(device, {bgl});
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pipelineDesc.vertex.module = shaderModule;
-    pipelineDesc.vertex.entryPoint = "vert_main";
     pipelineDesc.cFragment.module = shaderModule;
-    pipelineDesc.cFragment.entryPoint = "frag_main";
     pipelineDesc.cTargets[0].format = renderTargetDesc.format;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
@@ -521,9 +517,7 @@ TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
     pipelineDesc.layout = utils::MakePipelineLayout(device, {bgl});
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pipelineDesc.vertex.module = shaderModule;
-    pipelineDesc.vertex.entryPoint = "vert_main";
     pipelineDesc.cFragment.module = shaderModule;
-    pipelineDesc.cFragment.entryPoint = "frag_main";
     pipelineDesc.cTargets[0].format = renderTargetDesc.format;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
@@ -670,7 +664,6 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
         interface.str() + "@compute @workgroup_size(1) fn main() {\n" + body.str() + "}\n";
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
-    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
 
     wgpu::BindGroupDescriptor bgDesc = {};
@@ -757,10 +750,8 @@ TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
         @vertex fn main() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.0, 1.0);
         })");
-    pipelineDesc.vertex.entryPoint = "main";
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pipelineDesc.cFragment.module = CreateShader();
-    pipelineDesc.cFragment.entryPoint = "main";
     pipelineDesc.cTargets.fill(kColorTargetState);
     pipelineDesc.cFragment.targetCount = attachmentCount;
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDesc);
@@ -1072,9 +1063,7 @@ class MaxInterStageLimitTests : public MaxLimitTests {
         wgpu::ShaderModule shaderModule = GetShaderModuleForTest(spec);
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = shaderModule;
-        descriptor.vertex.entryPoint = "vs_main";
         descriptor.cFragment.module = shaderModule;
-        descriptor.cFragment.entryPoint = "fs_main";
         descriptor.vertex.bufferCount = 0;
         descriptor.cBuffers[0].attributeCount = 0;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;

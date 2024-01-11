@@ -64,7 +64,6 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
 
         wgpu::ComputePipelineDescriptor pipelineDesc = {};
         pipelineDesc.compute.module = shaderModule;
-        pipelineDesc.compute.entryPoint = "main";
 
         StrictMock<MockCallback<WGPUCreateComputePipelineAsyncCallback>> creationCallback;
         EXPECT_CALL(creationCallback,
@@ -84,7 +83,6 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
 
         wgpu::ComputePipelineDescriptor pipelineDesc = {};
         pipelineDesc.compute.module = shaderModule;
-        pipelineDesc.compute.entryPoint = "main";
 
         StrictMock<MockCallback<WGPUCreateComputePipelineAsyncCallback>> creationCallback;
         EXPECT_CALL(creationCallback,

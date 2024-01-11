@@ -594,7 +594,6 @@ TEST_F(LabelTest, ComputePipeline) {
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.layout = pl;
     descriptor.compute.module = computeModule;
-    descriptor.compute.entryPoint = "main";
 
     // The label should be empty if one was not set.
     {

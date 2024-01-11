@@ -211,7 +211,6 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = csModule;
-        csDesc.compute.entryPoint = "main";
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {
@@ -599,7 +598,6 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
         wgpu::ComputePipelineDescriptor pipelineDesc;
         pipelineDesc.layout = layout;
         pipelineDesc.compute.module = utils::CreateShaderModule(device, shader.str().c_str());
-        pipelineDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&pipelineDesc);
     }
 

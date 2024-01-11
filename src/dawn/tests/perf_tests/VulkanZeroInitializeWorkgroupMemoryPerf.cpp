@@ -93,7 +93,6 @@ void VulkanZeroInitializeWorkgroupMemoryExtensionTest::SetUp() {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = utils::MakePipelineLayout(device, {bindGroupLayout});
     csDesc.compute.module = utils::CreateShaderModule(device, ostream.str().c_str());
-    csDesc.compute.entryPoint = "main";
     mPipeline = device.CreateComputePipeline(&csDesc);
 
     std::array<float, kWorkgroupArraySize * kNumIterations> data;

@@ -77,7 +77,6 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         @compute @workgroup_size(1, 1, 1)
         fn main() {
         })");
-    csDesc.compute.entryPoint = "main";
 
     wgpu::PipelineLayout pl0 = utils::MakePipelineLayout(device, {staticLayout, dynamicLayout});
     csDesc.layout = pl0;
@@ -307,7 +306,6 @@ TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
         @compute @workgroup_size(1, 1, 1)
         fn main() {
         })");
-    csDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set the pipeline.

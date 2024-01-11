@@ -175,7 +175,6 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.compute.module = utils::CreateShaderModule(device, shaderSource.str());
-    pipelineDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -247,7 +246,6 @@ fn f_nested(tex: texture_2d_array<f32>, d: u32) -> u32 {
     dstBuf[4] = f_nested(tex1, 100u);
 }
     )");
-    pipelineDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -350,7 +348,6 @@ TEST_P(TextureShaderBuiltinTests, OnePipelineMultipleDispatches) {
     {
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.compute.module = utils::CreateShaderModule(device, shader);
-        pipelineDescriptor.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&pipelineDescriptor);
     }
 

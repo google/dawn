@@ -1139,9 +1139,7 @@ TEST_P(TextureView1DTest, Sampling) {
     )");
     utils::ComboRenderPipelineDescriptor pDesc;
     pDesc.vertex.module = module;
-    pDesc.vertex.entryPoint = "vs";
     pDesc.cFragment.module = module;
-    pDesc.cFragment.entryPoint = "fs";
     pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
 

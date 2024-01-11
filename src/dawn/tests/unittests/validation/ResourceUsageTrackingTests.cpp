@@ -86,7 +86,6 @@ class ResourceUsageTrackingTest : public ValidationTest {
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = utils::MakePipelineLayout(device, std::move(bgls));
         pipelineDescriptor.compute.module = csModule;
-        pipelineDescriptor.compute.entryPoint = "main";
         return device.CreateComputePipeline(&pipelineDescriptor);
     }
 

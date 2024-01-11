@@ -47,7 +47,6 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = module;
-    csDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer
@@ -172,7 +171,6 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
             }
         }
     )");
-    csDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer

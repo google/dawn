@@ -191,7 +191,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.compute.module = csModule;
-        pipelineDescriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDescriptor);
     }
@@ -257,7 +256,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.compute.module = csModule;
-        pipelineDescriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDescriptor);
     }
@@ -676,7 +674,6 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     // The first pipeline will write to the depth texture.
     utils::ComboRenderPipelineDescriptor pDesc1;
     pDesc1.vertex.module = module;
-    pDesc1.vertex.entryPoint = "vs";
     pDesc1.cFragment.module = module;
     pDesc1.cFragment.entryPoint = "fs1";
     pDesc1.cTargets[0].format = wgpu::TextureFormat::R32Float;
@@ -688,7 +685,6 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     // The second pipeline checks the depth texture and outputs 1 to a texel on success.
     utils::ComboRenderPipelineDescriptor pDesc2;
     pDesc2.vertex.module = module;
-    pDesc2.vertex.entryPoint = "vs";
     pDesc2.cFragment.module = module;
     pDesc2.cFragment.entryPoint = "fs2";
     pDesc2.cTargets[0].format = wgpu::TextureFormat::R32Float;
