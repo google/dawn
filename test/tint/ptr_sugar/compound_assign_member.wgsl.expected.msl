@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void deref() {
+  int3 a = 0;
+  a[0] = as_type<int>((as_type<uint>(a[0]) + as_type<uint>(42)));
+}
+
+void no_deref() {
+  int3 a = 0;
+  a[0] = as_type<int>((as_type<uint>(a[0]) + as_type<uint>(42)));
+}
+
+kernel void tint_symbol() {
+  deref();
+  no_deref();
+  return;
+}
+

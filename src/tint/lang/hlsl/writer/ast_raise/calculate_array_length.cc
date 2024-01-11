@@ -178,6 +178,12 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                                       "&struct_var.array_member";
                         break;
                     }
+                    if (TINT_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
+                        TINT_ICE()
+                            << "storage buffer variable should not be a pointer. These should have "
+                               "been removed by the SimplifyPointers transform";
+                        break;
+                    }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
                     auto* storage_buffer_type =
                         storage_buffer_sem->Type()->As<core::type::Reference>();

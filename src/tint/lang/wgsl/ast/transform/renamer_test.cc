@@ -274,6 +274,51 @@ fn tint_symbol() {
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+TEST_F(RenamerTest, PreserveBuiltinTypes_ViaPointerDot) {
+    auto* src = R"(
+@compute @workgroup_size(1)
+fn entry() {
+  var m = modf(1.0);
+  let p1 = &m;
+  var f = frexp(1.0);
+  let p2 = &f;
+
+  var a = p1.whole;
+  var b = p1.fract;
+  var c = p2.fract;
+  var d = p2.exp;
+}
+)";
+
+    auto* expect = R"(
+@compute @workgroup_size(1)
+fn tint_symbol() {
+  var tint_symbol_1 = modf(1.0);
+  let tint_symbol_2 = &(tint_symbol_1);
+  var tint_symbol_3 = frexp(1.0);
+  let tint_symbol_4 = &(tint_symbol_3);
+  var tint_symbol_5 = tint_symbol_2.whole;
+  var tint_symbol_6 = tint_symbol_2.fract;
+  var tint_symbol_7 = tint_symbol_4.fract;
+  var tint_symbol_8 = tint_symbol_4.exp;
+}
+)";
+
+    auto got = Run<Renamer>(src);
+
+    EXPECT_EQ(expect, str(got));
+
+    auto* data = got.data.Get<Renamer::Data>();
+
+    ASSERT_NE(data, nullptr);
+    Renamer::Remappings expected_remappings = {
+        {"entry", "tint_symbol"}, {"m", "tint_symbol_1"},  {"p1", "tint_symbol_2"},
+        {"f", "tint_symbol_3"},   {"p2", "tint_symbol_4"}, {"a", "tint_symbol_5"},
+        {"b", "tint_symbol_6"},   {"c", "tint_symbol_7"},  {"d", "tint_symbol_8"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
 TEST_F(RenamerTest, PreserveCoreDiagnosticRuleName) {
     auto* src = R"(
 diagnostic(off, chromium.unreachable_code);

@@ -27,15 +27,14 @@
 
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 
-#include <memory>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include <unordered_set>
+#include "src/tint/utils/containers/hashset.h"
 
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
+#include "src/tint/lang/wgsl/sem/accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -69,6 +68,9 @@ struct SimplifyPointers::State {
     ProgramBuilder b;
     /// The clone context
     program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
+    /// Set of accessor expression objects that are pointers, used to handle
+    /// pointer-index/dot sugar syntax.
+    Hashset<const Expression*, 4> is_accessor_object_pointer;
 
     /// Constructor
     /// @param program the source program
@@ -110,9 +112,14 @@ struct SimplifyPointers::State {
     /// indirection ops into a PointerOp.
     /// @param in the expression to walk
     /// @returns the reduced PointerOp
-    PointerOp Reduce(const Expression* in) const {
+    PointerOp Reduce(const Expression* in) {
         PointerOp op{0, in};
         while (true) {
+            if (is_accessor_object_pointer.Contains(op.expr)) {
+                // Object is an implicitly dereferenced pointer (i.e. syntax sugar).
+                op.indirections++;
+            }
+
             if (auto* unary = op.expr->As<UnaryOpExpression>()) {
                 switch (unary->op) {
                     case core::UnaryOp::kIndirection:
@@ -225,6 +232,14 @@ struct SimplifyPointers::State {
                         // Transform can be skipped if no address-of operator is used, as there
                         // will be no pointers that can be inlined.
                         needs_transform = true;
+                    }
+                },
+                [&](const AccessorExpression* accessor) {
+                    if (auto* a = ctx.src->Sem().Get<sem::ValueExpression>(accessor->object)) {
+                        if (a->Type()->Is<core::type::Pointer>()) {
+                            // Object is an implicitly dereferenced pointer (i.e. syntax sugar).
+                            is_accessor_object_pointer.Add(accessor->object);
+                        }
                     }
                 });
         }

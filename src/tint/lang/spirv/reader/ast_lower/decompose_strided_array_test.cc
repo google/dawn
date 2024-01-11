@@ -100,7 +100,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateDefaultStridedArray) {
     //
     // @compute @workgroup_size(1)
     // fn f() {
-    //   let a : @stride(4) array<f32, 4u> = a;
+    //   let a : @stride(4) array<f32, 4u> = arr;
     //   let b : f32 = arr[1];
     // }
 
@@ -118,6 +118,52 @@ TEST_F(DecomposeStridedArrayTest, PrivateDefaultStridedArray) {
                             }),
                             b.Expr("arr"))),
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("arr", 1_i))),
+           },
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
+    auto* expect = R"(
+var<private> arr : array<f32, 4u>;
+
+@compute @workgroup_size(1i)
+fn f() {
+  let a : array<f32, 4u> = arr;
+  let b : f32 = arr[1i];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(DecomposeStridedArrayTest, PrivateDefaultStridedArray_ViaPointerIndex) {
+    // var<private> arr : @stride(4) array<f32, 4u>
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let a : @stride(4) array<f32, 4u> = arr;
+    //   let p = &arr;
+    //   let b : f32 = p[1];
+    // }
+
+    ProgramBuilder b;
+    b.GlobalVar("arr",
+                b.ty.array<f32, 4u>(Vector{
+                    b.Stride(4),
+                }),
+                core::AddressSpace::kPrivate);
+    b.Func("f", tint::Empty, b.ty.void_(),
+           Vector{
+               b.Decl(b.Let("a",
+                            b.ty.array<f32, 4u>(Vector{
+                                b.Stride(4),
+                            }),
+                            b.Expr("arr"))),
+               b.Decl(b.Let("p", b.AddressOf(b.Expr("arr")))),
+               b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("p", 1_i))),
            },
            Vector{
                b.Stage(ast::PipelineStage::kCompute),

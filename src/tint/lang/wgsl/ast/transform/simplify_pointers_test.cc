@@ -144,6 +144,92 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SimplifyPointersTest, PointerDerefIndex) {
+    auto* src = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let p = &a;
+  let v = (*p)[1];
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let v = a[1];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, PointerIndex) {
+    auto* src = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let p = &a;
+  let v = p[1];
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let v = a[1];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, SimpleChain) {
+    auto* src = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let ap : ptr<function, array<f32, 2>> = &a;
+  let vp : ptr<function, f32> = &(*ap)[1];
+  let v : f32 = *vp;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let v : f32 = a[1];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, SimpleChain_ViaPointerIndex) {
+    auto* src = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let ap : ptr<function, array<f32, 2>> = &a;
+  let vp : ptr<function, f32> = &ap[1];
+  let v : f32 = *vp;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<f32, 2>;
+  let v : f32 = a[1];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SimplifyPointersTest, ComplexChain) {
     auto* src = R"(
 fn f() {
@@ -151,6 +237,29 @@ fn f() {
   let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
   let mp : ptr<function, mat4x4<f32>> = &(*ap)[3];
   let vp : ptr<function, vec4<f32>> = &(*mp)[2];
+  let v : vec4<f32> = *vp;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<mat4x4<f32>, 4>;
+  let v : vec4<f32> = a[3][2];
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, ComplexChain_ViaPointerIndex) {
+    auto* src = R"(
+fn f() {
+  var a : array<mat4x4<f32>, 4>;
+  let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
+  let mp : ptr<function, mat4x4<f32>> = &ap[3];
+  let vp : ptr<function, vec4<f32>> = &mp[2];
   let v : vec4<f32> = *vp;
 }
 )";

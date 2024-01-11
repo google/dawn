@@ -2725,6 +2725,107 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteSideEffectsToDeclTest, IndexAccessor_2D_LeftSE_ViaPointerIndex) {
+    auto* src = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &b;
+  var c = 1;
+  var r = p[a(0)][c];
+}
+)";
+
+    auto* expect = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &(b);
+  var c = 1;
+  let tint_symbol : i32 = a(0);
+  var r = p[tint_symbol][c];
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, IndexAccessor_2D_RightSE_ViaPointerIndex) {
+    auto* src = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &b;
+  var c = 1;
+  let tint_symbol = c;
+  let tint_symbol_1 = a(0);
+  var r = p[tint_symbol][tint_symbol_1];
+}
+)";
+
+    auto* expect = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &(b);
+  var c = 1;
+  let tint_symbol = c;
+  let tint_symbol_1 = a(0);
+  var r = p[tint_symbol][tint_symbol_1];
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, IndexAccessor_2D_BothSE_ViaPointerIndex) {
+    auto* src = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &b;
+  var r = p[a(0)][a(1)];
+}
+)";
+
+    auto* expect = R"(
+fn a(i : i32) -> i32 {
+  return 1;
+}
+
+fn f() {
+  var b = array<array<i32, 10>, 10>();
+  let p = &(b);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  var r = p[tint_symbol][tint_symbol_1];
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteSideEffectsToDeclTest, Assignment_ToPhony) {
     auto* src = R"(
 fn a(i : i32) -> i32 {
@@ -3633,6 +3734,43 @@ fn modify_vec(p : ptr<function, vec4<i32>>) -> i32 {
 fn f() {
   var v = vec4<i32>();
   let tint_symbol : i32 = v.x;
+  let tint_symbol_1 : i32 = modify_vec(&(v));
+  let l = (tint_symbol + tint_symbol_1);
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, BinaryMemberAccessorPlusSE_ViaPointerDot) {
+    // bclayton@'s example:
+    // https://dawn-review.googlesource.com/c/tint/+/78620/6..8/src/transform/promote_side_effects_to_decl.cc#b490
+    auto* src = R"(
+fn modify_vec(p : ptr<function, vec4<i32>>) -> i32 {
+  (*p).x = 42;
+  return 0;
+}
+
+fn f() {
+  var v = vec4<i32>();
+  let p = &v;
+  let l = p.x + modify_vec(&v);
+  // l should be 0, not 42
+}
+)";
+
+    auto* expect = R"(
+fn modify_vec(p : ptr<function, vec4<i32>>) -> i32 {
+  (*(p)).x = 42;
+  return 0;
+}
+
+fn f() {
+  var v = vec4<i32>();
+  let p = &(v);
+  let tint_symbol : i32 = p.x;
   let tint_symbol_1 : i32 = modify_vec(&(v));
   let l = (tint_symbol + tint_symbol_1);
 }

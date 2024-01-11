@@ -866,12 +866,14 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
     }
 
     // If the source is a reference, we access chain into it.
-    // In the future, pointers may support access-chaining.
-    // See https://github.com/gpuweb/gpuweb/pull/1580
     if (info->source_type->Is<core::type::Reference>()) {
         info->access_chain_indices.push_back(idx_id);
         info->source_type = builder_.Sem().Get(expr)->UnwrapLoad()->Type();
         return true;
+    } else if (TINT_UNLIKELY(info->source_type->Is<core::type::Pointer>())) {
+        TINT_ICE() << "lhs of index accesor expression should not be a pointer. These should have "
+                      "been removed by the SimplifyPointers transform";
+        return false;
     }
 
     auto result_type_id = GenerateTypeIfNeeded(TypeOf(expr));

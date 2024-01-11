@@ -551,7 +551,7 @@ struct Std140::State {
                     expr = a->Object();
 
                     // Is the object a std140 decomposed matrix?
-                    if (auto* mat = expr->Type()->UnwrapRef()->As<core::type::Matrix>()) {
+                    if (auto* mat = expr->Type()->UnwrapPtrOrRef()->As<core::type::Matrix>()) {
                         if (std140_mats.Contains(mat)) {
                             // Record this on the access.
                             access.std140_mat_idx = access.indices.Length();

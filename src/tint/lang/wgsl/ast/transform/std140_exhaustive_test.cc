@@ -2458,6 +2458,217 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_P(Std140Test_Matrix, ArrayStructArrayStructMatUniform_LoadsViaImplicitDerefPtrs) {
+    auto matrix = GetParam();
+
+    std::string src = R"(
+enable f16;
+
+struct Inner {
+  @size(64)
+  m : ${mat},
+}
+
+struct Outer {
+  a : array<Inner, 4>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<Outer, 4>;
+
+fn f() {
+  let I = 1;
+  let J = 2;
+  let K = 0;
+  let p_a = &(a);
+  let p_a_3 = &(p_a[3]);
+  let p_a_I = &(p_a[I]);
+  let p_a_3_a = &((*(p_a_3)).a);
+  let p_a_I_a = &((*(p_a_I)).a);
+  let p_a_3_a_2 = &(p_a_3_a[2]);
+  let p_a_3_a_I = &(p_a_3_a[I]);
+  let p_a_I_a_2 = &(p_a_I_a[2]);
+  let p_a_I_a_J = &(p_a_I_a[J]);
+  let p_a_3_a_2_m = &((*(p_a_3_a_2)).m);
+  let p_a_3_a_I_m = &((*(p_a_3_a_I)).m);
+  let p_a_I_a_2_m = &((*(p_a_I_a_2)).m);
+  let p_a_I_a_J_m = &((*(p_a_I_a_J)).m);
+  let p_a_3_a_2_m_1 = &(p_a_3_a_2_m[1]);
+  let p_a_I_a_J_m_K = &(p_a_I_a_J_m[K]);
+  let l_a : array<Outer, 4> = *(p_a);
+  let l_a_3 : Outer = *(p_a_3);
+  let l_a_I : Outer = *(p_a_I);
+  let l_a_3_a : array<Inner, 4> = *(p_a_3_a);
+  let l_a_I_a : array<Inner, 4> = *(p_a_I_a);
+  let l_a_3_a_2 : Inner = *(p_a_3_a_2);
+  let l_a_3_a_I : Inner = *(p_a_3_a_I);
+  let l_a_I_a_2 : Inner = *(p_a_I_a_2);
+  let l_a_I_a_J : Inner = *(p_a_I_a_J);
+  let l_a_3_a_2_m : ${mat} = *(p_a_3_a_2_m);
+  let l_a_3_a_I_m : ${mat} = *(p_a_3_a_I_m);
+  let l_a_I_a_2_m : ${mat} = *(p_a_I_a_2_m);
+  let l_a_I_a_J_m : ${mat} = *(p_a_I_a_J_m);
+  let l_a_3_a_2_m_1 : ${col_vector_type} = *(p_a_3_a_2_m_1);
+  let l_a_I_a_J_m_K : ${col_vector_type} = *(p_a_I_a_J_m_K);
+  let l_a_2_a_0_m_1_0 : ${elem_type} = p_a_3_a_2_m_1[0];
+  let l_a_I_a_J_m_K_I : ${elem_type} = p_a_I_a_J_m_K[I];
+}
+)";
+    src = matrix.ReplaceFieldsInString(src);
+
+    std::string expect;
+    if (matrix.NotStd140Compatible()) {
+        expect = R"(
+enable f16;
+
+struct Inner {
+  @size(64)
+  m : ${mat},
+}
+
+struct Inner_std140 {
+${col_vectors}
+}
+
+struct Outer {
+  a : array<Inner, 4>,
+}
+
+struct Outer_std140 {
+  a : array<Inner_std140, 4u>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<Outer_std140, 4u>;
+
+fn conv_Inner(val : Inner_std140) -> Inner {
+  return Inner(${mat}(${col_vectors_inline_conv_Inner}));
+}
+
+fn conv_arr4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
+  var arr : array<Inner, 4u>;
+  for(var i : u32; (i < 4u); i = (i + 1)) {
+    arr[i] = conv_Inner(val[i]);
+  }
+  return arr;
+}
+
+fn conv_Outer(val : Outer_std140) -> Outer {
+  return Outer(conv_arr4_Inner(val.a));
+}
+
+fn conv_arr4_Outer(val : array<Outer_std140, 4u>) -> array<Outer, 4u> {
+  var arr : array<Outer, 4u>;
+  for(var i : u32; (i < 4u); i = (i + 1)) {
+    arr[i] = conv_Outer(val[i]);
+  }
+  return arr;
+}
+
+fn load_a_3_a_2_m() -> ${mat} {
+  let s = &(a[3u].a[2u]);
+  return ${mat}(${col_vectors_inline_load_matrix});
+}
+
+fn load_a_3_a_p0_m(p0 : u32) -> ${mat} {
+  let s = &(a[3u].a[p0]);
+  return ${mat}(${col_vectors_inline_load_matrix});
+}
+
+fn load_a_p0_a_2_m(p0 : u32) -> ${mat} {
+  let s = &(a[p0].a[2u]);
+  return ${mat}(${col_vectors_inline_load_matrix});
+}
+
+fn load_a_p0_a_p1_m(p0 : u32, p1 : u32) -> ${mat} {
+  let s = &(a[p0].a[p1]);
+  return ${mat}(${col_vectors_inline_load_matrix});
+}
+
+fn load_a_p0_a_p1_m_p2(p0 : u32, p1 : u32, p2 : u32) -> ${col_vector_type} {
+  switch(p2) {
+${col_table_load_column}
+    default: {
+      return ${col_vector_type}();
+    }
+  }
+}
+
+fn load_a_p0_a_p1_m_p2_p3(p0 : u32, p1 : u32, p2 : u32, p3 : u32) -> ${elem_type} {
+  switch(p2) {
+${col_table_load_element}
+    default: {
+      return ${elem_type}();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let J = 2;
+  let K = 0;
+  let p_a = conv_arr4_Outer(a);
+  let p_a_3 = conv_Outer(a[3u]);
+  let p_a_I = conv_Outer(a[I]);
+  let p_a_3_a = conv_arr4_Inner(a[3u].a);
+  let p_a_I_a = conv_arr4_Inner(a[I].a);
+  let p_a_3_a_2 = conv_Inner(a[3u].a[2u]);
+  let p_a_3_a_I = conv_Inner(a[3u].a[I]);
+  let p_a_I_a_2 = conv_Inner(a[I].a[2u]);
+  let p_a_I_a_J = conv_Inner(a[I].a[J]);
+  let p_a_3_a_2_m = load_a_3_a_2_m();
+  let p_a_3_a_I_m = load_a_3_a_p0_m(u32(I));
+  let p_a_I_a_2_m = load_a_p0_a_2_m(u32(I));
+  let p_a_I_a_J_m = load_a_p0_a_p1_m(u32(I), u32(J));
+  let p_a_3_a_2_m_1 = a[3u].a[2u].m_1;
+  let p_a_I_a_J_m_K = load_a_p0_a_p1_m_p2(u32(I), u32(J), u32(K));
+  let l_a : array<Outer, 4> = conv_arr4_Outer(a);
+  let l_a_3 : Outer = conv_Outer(a[3u]);
+  let l_a_I : Outer = conv_Outer(a[I]);
+  let l_a_3_a : array<Inner, 4> = conv_arr4_Inner(a[3u].a);
+  let l_a_I_a : array<Inner, 4> = conv_arr4_Inner(a[I].a);
+  let l_a_3_a_2 : Inner = conv_Inner(a[3u].a[2u]);
+  let l_a_3_a_I : Inner = conv_Inner(a[3u].a[I]);
+  let l_a_I_a_2 : Inner = conv_Inner(a[I].a[2u]);
+  let l_a_I_a_J : Inner = conv_Inner(a[I].a[J]);
+  let l_a_3_a_2_m : ${mat} = load_a_3_a_2_m();
+  let l_a_3_a_I_m : ${mat} = load_a_3_a_p0_m(u32(I));
+  let l_a_I_a_2_m : ${mat} = load_a_p0_a_2_m(u32(I));
+  let l_a_I_a_J_m : ${mat} = load_a_p0_a_p1_m(u32(I), u32(J));
+  let l_a_3_a_2_m_1 : ${col_vector_type} = a[3u].a[2u].m_1;
+  let l_a_I_a_J_m_K : ${col_vector_type} = load_a_p0_a_p1_m_p2(u32(I), u32(J), u32(K));
+  let l_a_2_a_0_m_1_0 : ${elem_type} = a[3u].a[2u].m_1[0u];
+  let l_a_I_a_J_m_K_I : ${elem_type} = load_a_p0_a_p1_m_p2_p3(u32(I), u32(J), u32(K), u32(I));
+}
+)";
+        std::string col_tableLoadColumn = matrix.JoinTemplatedStringForEachMatrixColumn(  //
+            R"(    case ${col_id_for_tmpl}u: {
+      return a[p0].a[p1].m_${col_id_for_tmpl};
+    })",
+            "\n");
+        std::string col_tableLoadElement = matrix.JoinTemplatedStringForEachMatrixColumn(  //
+            R"(    case ${col_id_for_tmpl}u: {
+      return a[p0].a[p1].m_${col_id_for_tmpl}[p3];
+    })",
+            "\n");
+        uint32_t last_size =
+            64 - static_cast<uint32_t>(matrix.ColumnVectorAlign() * (matrix.columns - 1));
+        expect = matrix.ReplaceFieldsInString(
+            expect,
+            {{"${col_vectors}", matrix.ExpendedColumnVectorsWithLastSize(2, "m_", last_size)},
+             {"${col_vectors_inline_conv_Inner}",
+              matrix.ExpendedColumnVectorsInline("val.m_", ", ")},
+             {"${col_vectors_inline_load_matrix}",
+              matrix.ExpendedColumnVectorsInline("(*(s)).m_", ", ")},
+             {"${col_table_load_column}", col_tableLoadColumn},
+             {"${col_table_load_element}", col_tableLoadElement}});
+    } else {
+        expect = src;
+    }
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_P(Std140Test_Matrix, ArrayStructMatUniform_CopyArray_UniformToStorage) {
     auto matrix = GetParam();
 

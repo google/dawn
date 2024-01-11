@@ -1298,7 +1298,7 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
                 if (sem->Is<sem::Swizzle>()) {
                     preserved_identifiers.Add(accessor->member);
                 } else if (auto* str_expr = src.Sem().GetVal(accessor->object)) {
-                    if (auto* ty = str_expr->Type()->UnwrapRef()->As<core::type::Struct>()) {
+                    if (auto* ty = str_expr->Type()->UnwrapPtrOrRef()->As<core::type::Struct>()) {
                         if (!ty->Is<sem::Struct>()) {  // Builtin structure
                             preserved_identifiers.Add(accessor->member);
                         }

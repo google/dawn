@@ -162,6 +162,11 @@ struct ArrayLengthFromUniform::State {
             // array_length = ----------------------------------------
             //                             array_stride
             const Expression* total_size = total_storage_buffer_size;
+            if (TINT_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
+                TINT_ICE() << "storage buffer variable should not be a pointer. These should have "
+                              "been removed by the SimplifyPointers transform";
+                return;
+            }
             auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
             const core::type::Array* array_type = nullptr;
             if (auto* str = storage_buffer_type->As<core::type::Struct>()) {

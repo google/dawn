@@ -1098,12 +1098,12 @@ class Impl {
                     return std::nullopt;
                 }
 
-                auto* ref = access->Object()->Type()->As<core::type::Reference>();
-                if (!ref) {
+                auto* memory_view = access->Object()->Type()->As<core::type::MemoryView>();
+                if (!memory_view) {
                     return std::nullopt;
                 }
 
-                if (!ref->StoreType()->Is<core::type::Vector>()) {
+                if (!memory_view->StoreType()->Is<core::type::Vector>()) {
                     return std::nullopt;
                 }
                 return tint::Switch(

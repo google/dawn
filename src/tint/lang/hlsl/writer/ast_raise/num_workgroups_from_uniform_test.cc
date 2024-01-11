@@ -111,6 +111,124 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(NumWorkgroupsFromUniformTest, Basic_VarCopy) {
+    auto* src = R"(
+@compute @workgroup_size(1)
+fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let groups_x = a.x;
+  let groups_y = a.y;
+  let groups_z = a.z;
+}
+)";
+
+    auto* expect = R"(
+struct tint_symbol_2 {
+  num_workgroups : vec3<u32>,
+}
+
+@group(0) @binding(30) var<uniform> tint_symbol_3 : tint_symbol_2;
+
+fn main_inner(num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let groups_x = a.x;
+  let groups_y = a.y;
+  let groups_z = a.z;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  main_inner(tint_symbol_3.num_workgroups);
+}
+)";
+
+    ast::transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(NumWorkgroupsFromUniformTest, Basic_VarCopy_ViaPointerDerefDot) {
+    auto* src = R"(
+@compute @workgroup_size(1)
+fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let p = &a;
+  let groups_x = (*p).x;
+  let groups_y = (*p).y;
+  let groups_z = (*p).z;
+}
+)";
+
+    auto* expect = R"(
+struct tint_symbol_2 {
+  num_workgroups : vec3<u32>,
+}
+
+@group(0) @binding(30) var<uniform> tint_symbol_3 : tint_symbol_2;
+
+fn main_inner(num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let p = &(a);
+  let groups_x = (*(p)).x;
+  let groups_y = (*(p)).y;
+  let groups_z = (*(p)).z;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  main_inner(tint_symbol_3.num_workgroups);
+}
+)";
+
+    ast::transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(NumWorkgroupsFromUniformTest, Basic_VarCopy_ViaPointerDot) {
+    auto* src = R"(
+@compute @workgroup_size(1)
+fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let p = &a;
+  let groups_x = p.x;
+  let groups_y = p.y;
+  let groups_z = p.z;
+}
+)";
+
+    auto* expect = R"(
+struct tint_symbol_2 {
+  num_workgroups : vec3<u32>,
+}
+
+@group(0) @binding(30) var<uniform> tint_symbol_3 : tint_symbol_2;
+
+fn main_inner(num_wgs : vec3<u32>) {
+  var a = num_wgs;
+  let p = &(a);
+  let groups_x = p.x;
+  let groups_y = p.y;
+  let groups_z = p.z;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  main_inner(tint_symbol_3.num_workgroups);
+}
+)";
+
+    ast::transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(NumWorkgroupsFromUniformTest, StructOnlyMember) {
     auto* src = R"(
 struct Builtins {

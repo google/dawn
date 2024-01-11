@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %deref "deref"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %no_deref "no_deref"
+               OpName %a_0 "a"
+               OpName %b_0 "b"
+               OpName %main "main"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+%_ptr_Function_mat2v3float = OpTypePointer Function %mat2v3float
+         %10 = OpConstantNull %mat2v3float
+        %int = OpTypeInt 32 1
+         %12 = OpConstantNull %int
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %17 = OpConstantNull %v3float
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+         %22 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+      %deref = OpFunction %void None %1
+          %4 = OpLabel
+          %a = OpVariable %_ptr_Function_mat2v3float Function %10
+          %b = OpVariable %_ptr_Function_v3float Function %17
+         %14 = OpAccessChain %_ptr_Function_v3float %a %12
+         %15 = OpLoad %v3float %14
+               OpStore %b %15
+         %18 = OpAccessChain %_ptr_Function_v3float %a %12
+               OpStore %18 %22
+               OpReturn
+               OpFunctionEnd
+   %no_deref = OpFunction %void None %1
+         %24 = OpLabel
+        %a_0 = OpVariable %_ptr_Function_mat2v3float Function %10
+        %b_0 = OpVariable %_ptr_Function_v3float Function %17
+         %26 = OpAccessChain %_ptr_Function_v3float %a_0 %12
+         %27 = OpLoad %v3float %26
+               OpStore %b_0 %27
+         %29 = OpAccessChain %_ptr_Function_v3float %a_0 %12
+               OpStore %29 %22
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %1
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %deref
+         %33 = OpFunctionCall %void %no_deref
+               OpReturn
+               OpFunctionEnd

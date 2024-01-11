@@ -41,7 +41,7 @@ namespace {
 
 using ResolverIndexAccessorTest = ResolverTest;
 
-TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_F32) {
+TEST_F(ResolverIndexAccessorTest, Matrix_F32) {
     GlobalVar("my_var", ty.mat2x3<f32>(), core::AddressSpace::kPrivate);
     auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 1_f));
     WrapInFunction(acc);
@@ -82,7 +82,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
     GlobalConst("my_const", ty.mat2x3<f32>(), Call<mat2x3<f32>>());
     auto* idx = Var("idx", ty.i32(), Call<i32>());
-    auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
+    auto* acc = IndexAccessor("my_const", idx);
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
@@ -97,7 +97,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
 TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
     GlobalConst("my_const", ty.mat4x4<f32>(), Call<mat4x4<f32>>());
     auto* idx = Var("idx", ty.u32(), Expr(3_u));
-    auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
+    auto* acc = IndexAccessor("my_const", idx);
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
@@ -106,9 +106,10 @@ TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
     GlobalConst("my_const", ty.mat4x4<f32>(), Call<mat4x4<f32>>());
-    auto* idx = Var("idy", ty.u32(), Expr(2_u));
-    auto* acc = IndexAccessor(IndexAccessor("my_const", Expr(Source{{12, 34}}, idx)), 1_i);
-    WrapInFunction(Decl(idx), acc);
+    auto* idx = Var("idx", ty.u32(), Expr(3_u));
+    auto* idy = Var("idy", ty.u32(), Expr(2_u));
+    auto* acc = IndexAccessor(IndexAccessor("my_const", idx), idy);
+    WrapInFunction(Decl(idx), Decl(idy), acc);
 
     EXPECT_TRUE(r()->Resolve());
     EXPECT_EQ(r()->error(), "");
@@ -175,16 +176,16 @@ TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Ref) {
 TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
     GlobalConst("my_const", ty.vec3<f32>(), Call<vec3<f32>>());
     auto* idx = Var("idx", ty.i32(), Expr(2_i));
-    auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
+    auto* acc = IndexAccessor("my_const", idx);
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector) {
-    GlobalVar("my_var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
+    GlobalConst("my_const", ty.vec3<f32>(), Call<vec3<f32>>());
 
-    auto* acc = IndexAccessor("my_var", 2_i);
+    auto* acc = IndexAccessor("my_const", 2_i);
     WrapInFunction(acc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -346,6 +347,26 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncGoodParent) {
     EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
+TEST_F(ResolverIndexAccessorTest, Expr_ImplicitDeref_FuncGoodParent) {
+    // fn func(p: ptr<function, vec4<f32>>) -> f32 {
+    //     let idx: u32 = u32();
+    //     let x: f32 = p[idx];
+    //     return x;
+    // }
+    auto* p = Param("p", ty.ptr<function, vec4<f32>>());
+    auto* idx = Let("idx", ty.u32(), Call<u32>());
+    auto* acc = IndexAccessor(Source{{12, 34}}, p, idx);
+    auto* x = Var("x", ty.f32(), acc);
+    Func("func", Vector{p}, ty.f32(), Vector{Decl(idx), Decl(x), Return(x)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto idx_sem = Sem().Get(acc)->UnwrapLoad()->As<sem::IndexAccessorExpression>();
+    ASSERT_NE(idx_sem, nullptr);
+    EXPECT_EQ(idx_sem->Index()->Declaration(), acc->index);
+    EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
+}
+
 TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncBadParent) {
     // fn func(p: ptr<function, vec4<f32>>) -> f32 {
     //     let idx: u32 = u32();
@@ -360,11 +381,10 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncBadParent) {
     Func("func", Vector{p}, ty.f32(), Vector{Decl(idx), Decl(x), Return(x)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot index type 'ptr<function, vec4<f32>, read_write>'");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot dereference expression of type 'f32'");
 }
 
-TEST_F(ResolverIndexAccessorTest, Exr_Deref_BadParent) {
+TEST_F(ResolverIndexAccessorTest, Expr_Deref_BadParent) {
     // var param: vec4<f32>
     // let x: f32 = *(&param)[0];
     auto* param = Var("param", ty.vec4<f32>());
@@ -376,8 +396,7 @@ TEST_F(ResolverIndexAccessorTest, Exr_Deref_BadParent) {
     WrapInFunction(param, idx, x);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot index type 'ptr<function, vec4<f32>, read_write>'");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot dereference expression of type 'f32'");
 }
 
 }  // namespace

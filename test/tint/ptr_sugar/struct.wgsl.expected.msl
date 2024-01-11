@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int x;
+};
+
+void deref() {
+  S a = {};
+  int b = a.x;
+  a.x = 42;
+}
+
+void no_deref() {
+  S a = {};
+  int b = a.x;
+  a.x = 42;
+}
+
+kernel void tint_symbol() {
+  deref();
+  no_deref();
+  return;
+}
+

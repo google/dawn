@@ -93,6 +93,7 @@ enum extension {
 enum language_feature {
   readonly_and_readwrite_storage_textures
   packed_4x8_integer_dot_product
+  pointer_composite_access
 
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented

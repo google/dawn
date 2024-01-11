@@ -32,6 +32,7 @@
     X(kUndefined, Undefined)                                                       \
     X(kReadonlyAndReadwriteStorageTextures, ReadonlyAndReadwriteStorageTextures)   \
     X(kPacked4X8IntegerDotProduct, Packed4x8IntegerDotProduct)                     \
+    X(kPointerCompositeAccess, PointerCompositeAccess)                             \
     X(kChromiumTestingUnimplemented, ChromiumTestingUnimplemented)                 \
     X(kChromiumTestingUnsafeExperimental, ChromiumTestingUnsafeExperimental)       \
     X(kChromiumTestingExperimental, ChromiumTestingExperimental)                   \

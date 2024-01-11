@@ -291,6 +291,60 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PackedVec3Test, Vec3_ReadComponent_IndexAccessor_ViaDerefPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage> v : vec3<f32>;
+
+fn f() {
+  let p = &v;
+  let x = (*p)[1];
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_relaxed_uniform_layout;
+
+@group(0) @binding(0) var<storage> v : __packed_vec3<f32>;
+
+fn f() {
+  let p = &(v);
+  let x = (*(p))[1];
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PackedVec3>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PackedVec3Test, Vec3_ReadComponent_IndexAccessor_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage> v : vec3<f32>;
+
+fn f() {
+  let p = &v;
+  let x = p[1];
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_relaxed_uniform_layout;
+
+@group(0) @binding(0) var<storage> v : __packed_vec3<f32>;
+
+fn f() {
+  let p = &(v);
+  let x = p[1];
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PackedVec3>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PackedVec3Test, Vec3_WriteVector_ValueRHS) {
     auto* src = R"(
 @group(0) @binding(0) var<storage, read_write> v : vec3<f32>;
@@ -360,6 +414,60 @@ enable chromium_internal_relaxed_uniform_layout;
 
 fn f() {
   v.y = 1.22999999999999998224;
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PackedVec3>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PackedVec3Test, Vec3_WriteComponent_MemberAccessor_ViaDerefPointerDot) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> v : vec3<f32>;
+
+fn f() {
+  let p = &v;
+  (*p).y = 1.23;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_relaxed_uniform_layout;
+
+@group(0) @binding(0) var<storage, read_write> v : __packed_vec3<f32>;
+
+fn f() {
+  let p = &(v);
+  (*(p)).y = 1.22999999999999998224;
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PackedVec3>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PackedVec3Test, Vec3_WriteComponent_MemberAccessor_ViaPointerDot) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> v : vec3<f32>;
+
+fn f() {
+  let p = &v;
+  p.y = 1.23;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_relaxed_uniform_layout;
+
+@group(0) @binding(0) var<storage, read_write> v : __packed_vec3<f32>;
+
+fn f() {
+  let p = &(v);
+  p.y = 1.22999999999999998224;
 }
 )";
 

@@ -652,7 +652,7 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
                                     break;
                                 default: {
                                     auto* vec = TypeOf(lhs_row_access->object)
-                                                    ->UnwrapRef()
+                                                    ->UnwrapPtrOrRef()
                                                     ->As<core::type::Vector>();
                                     TINT_UNREACHABLE() << "invalid vector size " << vec->Width();
                                     break;
@@ -908,10 +908,24 @@ bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
 
 bool ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
     if (auto* lhs_access = stmt->lhs->As<ast::IndexAccessorExpression>()) {
+        auto validate_obj_not_pointer = [&](const core::type::Type* object_ty) {
+            if (TINT_UNLIKELY(object_ty->Is<core::type::Pointer>())) {
+                TINT_ICE() << "lhs of index accessor should not be a pointer. These should have "
+                              "been removed by transforms such as SimplifyPointers, "
+                              "DecomposeMemoryAccess, and DirectVariableAccess";
+                return false;
+            }
+            return true;
+        };
+
         // BUG(crbug.com/tint/1333): work around assignment of scalar to matrices
         // with at least one dynamic index
         if (auto* lhs_sub_access = lhs_access->object->As<ast::IndexAccessorExpression>()) {
-            if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<core::type::Matrix>()) {
+            const auto* lhs_sub_access_type = TypeOf(lhs_sub_access->object);
+            if (!validate_obj_not_pointer(lhs_sub_access_type)) {
+                return false;
+            }
+            if (auto* mat = lhs_sub_access_type->UnwrapRef()->As<core::type::Matrix>()) {
                 auto* rhs_row_idx_sem = builder_.Sem().GetVal(lhs_access->index);
                 auto* rhs_col_idx_sem = builder_.Sem().GetVal(lhs_sub_access->index);
                 if (!rhs_row_idx_sem->ConstantValue() || !rhs_col_idx_sem->ConstantValue()) {
@@ -921,8 +935,11 @@ bool ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
         }
         // BUG(crbug.com/tint/1333): work around assignment of vector to matrices
         // with dynamic indices
-        const auto* lhs_access_type = TypeOf(lhs_access->object)->UnwrapRef();
-        if (auto* mat = lhs_access_type->As<core::type::Matrix>()) {
+        const auto* lhs_access_type = TypeOf(lhs_access->object);
+        if (!validate_obj_not_pointer(lhs_access_type)) {
+            return false;
+        }
+        if (auto* mat = lhs_access_type->UnwrapRef()->As<core::type::Matrix>()) {
             auto* lhs_index_sem = builder_.Sem().GetVal(lhs_access->index);
             if (!lhs_index_sem->ConstantValue()) {
                 return EmitDynamicMatrixVectorAssignment(stmt, mat);
@@ -930,7 +947,7 @@ bool ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
         }
         // BUG(crbug.com/tint/534): work around assignment to vectors with dynamic
         // indices
-        if (auto* vec = lhs_access_type->As<core::type::Vector>()) {
+        if (auto* vec = lhs_access_type->UnwrapRef()->As<core::type::Vector>()) {
             auto* rhs_sem = builder_.Sem().GetVal(lhs_access->index);
             if (!rhs_sem->ConstantValue()) {
                 return EmitDynamicVectorAssignment(stmt, vec);

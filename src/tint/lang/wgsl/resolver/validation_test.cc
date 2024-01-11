@@ -383,12 +383,10 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
     WrapInFunction(Decl(param), Decl(ret));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: invalid member accessor expression. Expected vector or struct, got "
-              "'ptr<function, vec4<f32>, read_write>'");
+    EXPECT_EQ(r()->error(), "error: cannot dereference expression of type 'f32'");
 }
 
-TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
+TEST_F(ResolverValidationTest, Expr_MemberAccessor_FuncGoodParent) {
     // fn func(p: ptr<function, vec4<f32>>) -> f32 {
     //     let x: f32 = (*p).z;
     //     return x;
@@ -405,7 +403,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
+TEST_F(ResolverValidationTest, Expr_MemberAccessor_FuncBadParent) {
     // fn func(p: ptr<function, vec4<f32>>) -> f32 {
     //     let x: f32 = *p.z;
     //     return x;
@@ -421,9 +419,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: invalid member accessor expression. Expected vector or struct, got "
-              "'ptr<function, vec4<f32>, read_write>'");
+    EXPECT_EQ(r()->error(), "error: cannot dereference expression of type 'f32'");
 }
 
 TEST_F(ResolverValidationTest,
@@ -1274,24 +1270,6 @@ TEST_F(ResolverTest, U32_Overflow) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:24 error: value 4294967296 cannot be represented as 'u32')");
-}
-
-//    var a: array<i32,2>;
-//    *&a[0] = 1;
-TEST_F(ResolverTest, PointerIndexing_Fail) {
-    // var a: array<i32,2>;
-    // let p = &a;
-    // *p[0] = 0;
-
-    auto* a = Var("a", ty.array<i32, 2>());
-    auto* p = AddressOf("a");
-    auto* idx = Assign(Deref(IndexAccessor(p, 0_u)), 0_u);
-
-    WrapInFunction(a, idx);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(error: cannot index type 'ptr<function, array<i32, 2>, read_write>')");
 }
 
 }  // namespace

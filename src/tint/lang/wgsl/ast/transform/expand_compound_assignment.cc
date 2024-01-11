@@ -85,8 +85,10 @@ struct ExpandCompoundAssignment::State {
 
         // Helper function to create a variable that is a pointer to `expr`.
         auto hoist_pointer_to = [&](const Expression* expr) {
+            // Lhs may already be a pointer, in which case we don't take it's address
+            bool is_pointer = ctx.src->Sem().GetVal(expr)->Type()->Is<core::type::Pointer>();
             auto name = b.Sym();
-            auto* ptr = b.AddressOf(ctx.Clone(expr));
+            auto* ptr = is_pointer ? ctx.Clone(expr) : b.AddressOf(ctx.Clone(expr));
             auto* decl = b.Decl(b.Let(name, ptr));
             hoist_to_decl_before.InsertBefore(ctx.src->Sem().Get(stmt), decl);
             return name;
@@ -103,7 +105,7 @@ struct ExpandCompoundAssignment::State {
         // Helper function that returns `true` if the type of `expr` is a vector.
         auto is_vec = [&](const Expression* expr) {
             if (auto* val_expr = ctx.src->Sem().GetVal(expr)) {
-                return val_expr->Type()->UnwrapRef()->Is<core::type::Vector>();
+                return val_expr->Type()->UnwrapPtrOrRef()->Is<core::type::Vector>();
             }
             return false;
         };
@@ -116,9 +118,11 @@ struct ExpandCompoundAssignment::State {
         auto* member_accessor = lhs->As<MemberAccessorExpression>();
         if (lhs->Is<IdentifierExpression>() ||
             (member_accessor && member_accessor->object->Is<IdentifierExpression>())) {
-            // This is the simple case with no side effects, so we can just use the
-            // original LHS expression directly.
-            // Before:
+            // TODO(crbug.com/tint/2115): This branch should also handle (recursive) deref'd
+            // identifiers (e.g. (*p).bar += rhs)).
+
+            // This is the simple case with no side effects, so we can just use
+            // the original LHS expression directly. Before:
             //     foo.bar += rhs;
             // After:
             //     foo.bar = foo.bar + rhs;

@@ -149,6 +149,47 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CalculateArrayLengthTest, BasicInStruct_ViaPointerDot) {
+    auto* src = R"(
+struct SB {
+  x : i32,
+  arr : array<i32>,
+};
+
+@group(0) @binding(0) var<storage, read> sb : SB;
+
+@compute @workgroup_size(1)
+fn main() {
+  let p = &sb;
+  var len : u32 = arrayLength(&p.arr);
+}
+)";
+
+    auto* expect = R"(
+@internal(intrinsic_buffer_size)
+fn tint_symbol(@internal(disable_validation__function_parameter) buffer : ptr<storage, SB, read>, result : ptr<function, u32>)
+
+struct SB {
+  x : i32,
+  arr : array<i32>,
+}
+
+@group(0) @binding(0) var<storage, read> sb : SB;
+
+@compute @workgroup_size(1)
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(&(sb), &(tint_symbol_1));
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+  var len : u32 = tint_symbol_2;
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CalculateArrayLengthTest, ArrayOfStruct) {
     auto* src = R"(
 struct S {

@@ -31,6 +31,7 @@
 #include <limits>
 #include <utility>
 
+#include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -194,7 +195,7 @@ struct Robustness::State {
                 if (auto pred = predicates.Get(expr)) {
                     // Expression is predicated
                     auto* sem_expr = sem.GetVal(expr);
-                    if (!sem_expr->Type()->IsAnyOf<core::type::Reference, core::type::Pointer>()) {
+                    if (!sem_expr->Type()->Is<core::type::MemoryView>()) {
                         auto pred_load = b.Symbols().New("predicated_expr");
                         auto ty = CreateASTTypeFor(ctx, sem_expr->Type());
                         hoist.InsertBefore(sem_expr->Stmt(), b.Decl(b.Var(pred_load, ty)));
@@ -236,7 +237,7 @@ struct Robustness::State {
     const Expression* DynamicLimitFor(const sem::IndexAccessorExpression* expr) {
         auto* obj_type = expr->Object()->Type();
         return Switch(
-            obj_type->UnwrapRef(),  //
+            obj_type->UnwrapPtrOrRef(),  //
             [&](const core::type::Vector* vec) -> const Expression* {
                 if (expr->Index()->ConstantValue() || expr->Index()->Is<sem::Swizzle>()) {
                     // Index and size is constant.
@@ -708,7 +709,7 @@ struct Robustness::State {
 
     /// @returns true if expr is an IndexAccessorExpression whose object is a runtime-sized array.
     bool IsIndexAccessingRuntimeSizedArray(const sem::IndexAccessorExpression* expr) {
-        auto* array_type = expr->Object()->Type()->UnwrapRef()->As<core::type::Array>();
+        auto* array_type = expr->Object()->Type()->UnwrapPtrOrRef()->As<core::type::Array>();
         return array_type != nullptr && array_type->Count()->Is<core::type::RuntimeArrayCount>();
     }
 

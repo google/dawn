@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void deref() {
+  int3 a = 0;
+  int b = a[0];
+  a[0] = 42;
+}
+
+void no_deref() {
+  int3 a = 0;
+  int b = a[0];
+  a[0] = 42;
+}
+
+kernel void tint_symbol() {
+  deref();
+  no_deref();
+  return;
+}
+

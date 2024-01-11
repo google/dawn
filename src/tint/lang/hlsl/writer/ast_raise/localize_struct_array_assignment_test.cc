@@ -699,6 +699,67 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg_PointerDot) {
+    auto* src = R"(
+struct Uniforms {
+  i : u32,
+};
+struct InnerS {
+  v : i32,
+};
+struct OuterS {
+  a1 : array<InnerS, 8>,
+};
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+fn f(p : ptr<function, OuterS>) {
+  var v : InnerS;
+  p.a1[uniforms.i] = v;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  var s1 : OuterS;
+  f(&s1);
+}
+)";
+
+    auto* expect = R"(
+struct Uniforms {
+  i : u32,
+}
+
+struct InnerS {
+  v : i32,
+}
+
+struct OuterS {
+  a1 : array<InnerS, 8>,
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+fn f(p : ptr<function, OuterS>) {
+  var v : InnerS;
+  {
+    let tint_symbol = &((*(p)).a1);
+    var tint_symbol_1 = *(tint_symbol);
+    tint_symbol_1[uniforms.i] = v;
+    *(tint_symbol) = tint_symbol_1;
+  }
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  var s1 : OuterS;
+  f(&(s1));
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg_OutOfOrder) {
     auto* src = R"(
 @compute @workgroup_size(1)
@@ -855,6 +916,92 @@ fn main() {
 
     // Transform does nothing here as we're not actually assigning to the array in
     // the struct.
+    EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
+}
+
+TEST_F(LocalizeStructArrayAssignmentTest, ArrayStructArray) {
+    auto* src = R"(
+struct Uniforms {
+  i : u32,
+};
+
+struct InnerS {
+  v : i32,
+};
+
+struct OuterS {
+  a1 : array<InnerS, 8>,
+};
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@compute @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : array<OuterS, 2>;
+  s1[uniforms.i].a1[uniforms.i] = v;
+}
+)";
+
+    // Transform does nothing as the struct-of-array is in an array, which FXC has no problem with.
+    EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
+}
+
+TEST_F(LocalizeStructArrayAssignmentTest, ArrayStructArray_ViaPointerDerefIndex) {
+    auto* src = R"(
+struct Uniforms {
+  i : u32,
+};
+
+struct InnerS {
+  v : i32,
+};
+
+struct OuterS {
+  a1 : array<InnerS, 8>,
+};
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@compute @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : array<OuterS, 2>;
+  let p = &s1;
+  (*p)[uniforms.i].a1[uniforms.i] = v;
+}
+)";
+
+    // Transform does nothing as the struct-of-array is in an array, which FXC has no problem with.
+    EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
+}
+
+TEST_F(LocalizeStructArrayAssignmentTest, ArrayStructArray_ViaPointerIndex) {
+    auto* src = R"(
+struct Uniforms {
+  i : u32,
+};
+
+struct InnerS {
+  v : i32,
+};
+
+struct OuterS {
+  a1 : array<InnerS, 8>,
+};
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@compute @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : array<OuterS, 2>;
+  let p = &s1;
+  p[uniforms.i].a1[uniforms.i] = v;
+}
+)";
+
+    // Transform does nothing as the struct-of-array is in an array, which FXC has no problem with.
     EXPECT_FALSE(ShouldRun<LocalizeStructArrayAssignment>(src));
 }
 

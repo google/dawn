@@ -200,6 +200,54 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(AtomicsTest, ArrayOfU32_ViaDerefPointerIndex) {
+    auto* src = R"(
+var<workgroup> wg : array<u32, 4>;
+
+fn f() {
+  let p = &wg;
+  stub_atomicStore_u32((*p)[1], 1u);
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : array<atomic<u32>, 4u>;
+
+fn f() {
+  let p = &(wg);
+  atomicStore(&((*(p))[1]), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, ArrayOfU32_ViaPointerIndex) {
+    auto* src = R"(
+var<workgroup> wg : array<u32, 4>;
+
+fn f() {
+  let p = &wg;
+  stub_atomicStore_u32(p[1], 1u);
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : array<atomic<u32>, 4u>;
+
+fn f() {
+  let p = &(wg);
+  atomicStore(&(p[1]), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(AtomicsTest, ArraysOfU32) {
     auto* src = R"(
 var<workgroup> wg : array<array<array<u32, 1>, 2>, 3>;
@@ -286,6 +334,78 @@ var<workgroup> wg : S_atomic;
 
 fn f() {
   atomicStore(&(wg.a), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, FlatStructSingleAtomic_ViaDerefPointerDot) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  let p = &wg;
+  stub_atomicStore_u32((*p).a, 1u);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  let p = &(wg);
+  atomicStore(&((*(p)).a), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, FlatStructSingleAtomic_ViaPointerDot) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  let p = &wg;
+  stub_atomicStore_u32(p.a, 1u);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  let p = &(wg);
+  atomicStore(&(p.a), 1u);
 }
 )";
 
@@ -447,6 +567,90 @@ struct S {
 
 fn f() {
   atomicStore(&(arr[4].b), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, ArrayOfStruct_ViaDerefPointerIndex) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S>;
+
+fn f() {
+  let p = &arr;
+  stub_atomicStore_i32((*p)[4].b, 1i);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : u32,
+  b : atomic<i32>,
+  c : u32,
+}
+
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S_atomic>;
+
+fn f() {
+  let p = &(arr);
+  atomicStore(&((*(p))[4].b), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, ArrayOfStruct_ViaPointerIndex) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S>;
+
+fn f() {
+  let p = &arr;
+  stub_atomicStore_i32(p[4].b, 1i);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : u32,
+  b : atomic<i32>,
+  c : u32,
+}
+
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S_atomic>;
+
+fn f() {
+  let p = &(arr);
+  atomicStore(&(p[4].b), 1i);
 }
 )";
 

@@ -64,6 +64,7 @@ static constexpr Case kValidCases[] = {
     {"chromium_testing_unimplemented", LanguageFeature::kChromiumTestingUnimplemented},
     {"chromium_testing_unsafe_experimental", LanguageFeature::kChromiumTestingUnsafeExperimental},
     {"packed_4x8_integer_dot_product", LanguageFeature::kPacked4X8IntegerDotProduct},
+    {"pointer_composite_access", LanguageFeature::kPointerCompositeAccess},
     {"readonly_and_readwrite_storage_textures",
      LanguageFeature::kReadonlyAndReadwriteStorageTextures},
 };
@@ -87,9 +88,12 @@ static constexpr Case kInvalidCases[] = {
     {"packed_4x8_integer_Eot_product", LanguageFeature::kUndefined},
     {"paked_4x8_integePP_dTTt_product", LanguageFeature::kUndefined},
     {"packed_4x8_integxxrdot_pddoduct", LanguageFeature::kUndefined},
-    {"readon44y_and_readwrite_storage_textures", LanguageFeature::kUndefined},
-    {"readonly_and_readwrite_storageVVSSextures", LanguageFeature::kUndefined},
-    {"rRadonly_an_rea22write_storRge_textures", LanguageFeature::kUndefined},
+    {"44ointer_composite_access", LanguageFeature::kUndefined},
+    {"VVSSinter_composite_access", LanguageFeature::kUndefined},
+    {"poinR2er_compRsite_acess", LanguageFeature::kUndefined},
+    {"readonlF_and_readwrite_st9rage_textues", LanguageFeature::kUndefined},
+    {"readonly_and_radwrite_storage_textures", LanguageFeature::kUndefined},
+    {"readonly_and_readwrite_sOOrage_tVxRRures", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<Case>;

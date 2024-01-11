@@ -26,8 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
-
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
+#include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 
 namespace tint::hlsl::writer {
 namespace {
@@ -3194,6 +3194,81 @@ fn main() {
 )";
 
     auto got = Run<DecomposeMemoryAccess>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain_ViaPointerDot) {
+    auto* src = R"(
+// sizeof(S1) == 32
+// alignof(S1) == 16
+struct S1 {
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
+};
+
+// sizeof(S2) == 116
+// alignof(S2) == 16
+struct S2 {
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
+};
+
+struct SB {
+  @size(128)
+  a : i32,
+  b : array<S2>,
+};
+
+@group(0) @binding(0) var<storage, read_write> sb : SB;
+
+@compute @workgroup_size(1)
+fn main() {
+  let p = &sb;
+  var x : f32 = (*p).b[4].b[1].b.z;
+}
+)";
+
+    // sb.b[4].b[1].b.z
+    //    ^  ^ ^  ^ ^ ^
+    //    |  | |  | | |
+    //  128  | |688 | 712
+    //       | |    |
+    //     640 656  704
+
+    auto* expect = R"(
+struct S1 {
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
+}
+
+struct S2 {
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
+}
+
+struct SB {
+  @size(128)
+  a : i32,
+  b : array<S2>,
+}
+
+@group(0) @binding(0) var<storage, read_write> sb : SB;
+
+@internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
+fn sb_load(offset : u32) -> f32
+
+@compute @workgroup_size(1)
+fn main() {
+  var x : f32 = sb_load(712u);
+}
+)";
+
+    auto got = Run<ast::transform::SimplifyPointers, DecomposeMemoryAccess>(src);
 
     EXPECT_EQ(expect, str(got));
 }

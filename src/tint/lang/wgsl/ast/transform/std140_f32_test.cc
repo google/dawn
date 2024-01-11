@@ -693,6 +693,360 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(Std140Test_F32, MatUniform_LoadColumn_ConstIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let p = &a;
+  let l = p[1];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn f() {
+  let p = conv_mat3x2_f32(a);
+  let l = a.col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32, MatUniform_LoadColumn_VariableIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let I = 1;
+  let p = &a;
+  let l = p[I];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn load_a_p0(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a.col0;
+    }
+    case 1u: {
+      return a.col1;
+    }
+    case 2u: {
+      return a.col2;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let p = conv_mat3x2_f32(a);
+  let l = load_a_p0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32, MatUniform_LoadColumnSwizzle_ConstIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let p = &a;
+  let l = p[1].yx;
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn f() {
+  let p = conv_mat3x2_f32(a);
+  let l = a.col1.yx;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32, MatUniform_LoadColumnSwizzle_VariableIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let I = 1;
+  let p = &a;
+  let l = p[I].yx;
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn load_a_p0_yx(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a.col0.yx;
+    }
+    case 1u: {
+      return a.col1.yx;
+    }
+    case 2u: {
+      return a.col2.yx;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let p = conv_mat3x2_f32(a);
+  let l = load_a_p0_yx(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32,
+       MatUniform_LoadScalar_ConstColumnIndex_ConstRowIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let p = &a;
+  let l = p[1][0];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn f() {
+  let p = conv_mat3x2_f32(a);
+  let l = a.col1[0u];
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32,
+       MatUniform_LoadScalar_VariableColumnIndex_ConstRowIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let I = 0;
+  let p = &a;
+  let l = p[I][0];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn load_a_p0_0(p0 : u32) -> f32 {
+  switch(p0) {
+    case 0u: {
+      return a.col0[0u];
+    }
+    case 1u: {
+      return a.col1[0u];
+    }
+    case 2u: {
+      return a.col2[0u];
+    }
+    default: {
+      return f32();
+    }
+  }
+}
+
+fn f() {
+  let I = 0;
+  let p = conv_mat3x2_f32(a);
+  let l = load_a_p0_0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32,
+       MatUniform_LoadScalar_ConstColumnIndex_VariableRowIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let I = 0;
+  let p = &a;
+  let l = p[1][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn f() {
+  let I = 0;
+  let p = conv_mat3x2_f32(a);
+  let l = a.col1[I];
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32,
+       MatUniform_LoadScalar_VariableColumnIndex_VariableRowIndex_Mat3x2F32_ViaPointerIndex) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat3x2<f32>;
+
+fn f() {
+  let I = 0;
+  let p = &a;
+  let l = p[I][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat3x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat3x2_f32;
+
+fn conv_mat3x2_f32(val : mat3x2_f32) -> mat3x2<f32> {
+  return mat3x2<f32>(val.col0, val.col1, val.col2);
+}
+
+fn load_a_p0_p1(p0 : u32, p1 : u32) -> f32 {
+  switch(p0) {
+    case 0u: {
+      return a.col0[p1];
+    }
+    case 1u: {
+      return a.col1[p1];
+    }
+    case 2u: {
+      return a.col2[p1];
+    }
+    default: {
+      return f32();
+    }
+  }
+}
+
+fn f() {
+  let I = 0;
+  let p = conv_mat3x2_f32(a);
+  let l = load_a_p0_p1(u32(I), u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(Std140Test_F32, StructMatUniform_NameCollision_Mat3x2F32) {
     auto* src = R"(
 struct S {
@@ -832,6 +1186,48 @@ struct S_std140 {
 @group(0) @binding(0) var<uniform> s : S_std140;
 
 fn f() {
+  let l = s.m_1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test_F32, StructMatUniform_LoadColumn_ConstIndex_Mat3x2F32_ViaPointerDot) {
+    auto* src = R"(
+struct S {
+  m : mat3x2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let p = &s;
+  let l = p.m[1];
+}
+)";
+
+    auto* expect = R"(
+struct S {
+  m : mat3x2<f32>,
+}
+
+struct S_std140 {
+  m_0 : vec2<f32>,
+  m_1 : vec2<f32>,
+  m_2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_S(val : S_std140) -> S {
+  return S(mat3x2<f32>(val.m_0, val.m_1, val.m_2));
+}
+
+fn f() {
+  let p = conv_S(s);
   let l = s.m_1;
 }
 )";

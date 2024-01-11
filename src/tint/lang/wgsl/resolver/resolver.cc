@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -1979,17 +1980,30 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     if (!obj) {
         return nullptr;
     }
-    auto* obj_raw_ty = obj->Type();
-    auto* obj_ty = obj_raw_ty->UnwrapRef();
+    auto* object_ty = obj->Type();
+    auto* const memory_view = object_ty->As<core::type::MemoryView>();
+    const core::type::Type* storage_ty = object_ty->UnwrapRef();
+    if (memory_view) {
+        if (memory_view->Is<core::type::Pointer>() &&
+            !allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess)) {
+            AddError(
+                "pointer composite access requires the pointer_composite_access language feature, "
+                "which is not allowed in the current environment",
+                expr->source);
+            return nullptr;
+        }
+        storage_ty = memory_view->StoreType();
+    }
+
     auto* ty = Switch(
-        obj_ty,  //
+        storage_ty,  //
         [&](const sem::Array* arr) { return arr->ElemType(); },
         [&](const core::type::Vector* vec) { return vec->type(); },
         [&](const core::type::Matrix* mat) {
             return b.create<core::type::Vector>(mat->type(), mat->rows());
         },
         [&](Default) {
-            AddError("cannot index type '" + sem_.TypeNameOf(obj_ty) + "'", expr->source);
+            AddError("cannot index type '" + sem_.TypeNameOf(storage_ty) + "'", expr->source);
             return nullptr;
         });
     if (ty == nullptr) {
@@ -2003,9 +2017,10 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
         return nullptr;
     }
 
-    // If we're extracting from a reference, we return a reference.
-    if (auto* ref = obj_raw_ty->As<core::type::Reference>()) {
-        ty = b.create<core::type::Reference>(ref->AddressSpace(), ty, ref->Access());
+    // If we're extracting from a memory view, we return a reference.
+    if (memory_view) {
+        ty =
+            b.create<core::type::Reference>(memory_view->AddressSpace(), ty, memory_view->Access());
     }
 
     const core::constant::Value* val = nullptr;
@@ -3398,7 +3413,20 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
     }
 
     auto* object_ty = object->Type();
-    auto* storage_ty = object_ty->UnwrapRef();
+
+    auto* const memory_view = object_ty->As<core::type::MemoryView>();
+    const core::type::Type* storage_ty = object_ty->UnwrapRef();
+    if (memory_view) {
+        if (memory_view->Is<core::type::Pointer>() &&
+            !allowed_features_.features.count(wgsl::LanguageFeature::kPointerCompositeAccess)) {
+            AddError(
+                "pointer composite access requires the pointer_composite_access language feature, "
+                "which is not allowed in the current environment",
+                expr->source);
+            return nullptr;
+        }
+        storage_ty = memory_view->StoreType();
+    }
 
     auto* root_ident = object->RootIdentifier();
 
@@ -3429,9 +3457,10 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
             ty = member->Type();
 
-            // If we're extracting from a reference, we return a reference.
-            if (auto* ref = object_ty->As<core::type::Reference>()) {
-                ty = b.create<core::type::Reference>(ref->AddressSpace(), ty, ref->Access());
+            // If we're extracting from a memory view, we return a reference.
+            if (memory_view) {
+                ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
+                                                     memory_view->Access());
             }
 
             const core::constant::Value* val = nullptr;
@@ -3497,9 +3526,10 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             if (size == 1) {
                 // A single element swizzle is just the type of the vector.
                 ty = vec->type();
-                // If we're extracting from a reference, we return a reference.
-                if (auto* ref = object_ty->As<core::type::Reference>()) {
-                    ty = b.create<core::type::Reference>(ref->AddressSpace(), ty, ref->Access());
+                // If we're extracting from a memory view, we return a reference.
+                if (memory_view) {
+                    ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
+                                                         memory_view->Access());
                 }
             } else {
                 // The vector will have a number of components equal to the length of
