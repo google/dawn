@@ -82,10 +82,11 @@ class Texture final : public TextureBase {
     NSRef<MTLTextureDescriptor> CreateMetalTextureDescriptor() const;
 
     MaybeError InitializeAsInternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor);
-    MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
-                                       const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-                                       IOSurfaceRef ioSurface,
-                                       std::vector<MTLSharedEventAndSignalValue> waitEvents);
+    MaybeError InitializeFromSharedTextureMemoryIOSurface(
+        const ExternalImageDescriptor* descriptor,
+        const UnpackedPtr<TextureDescriptor>& textureDescriptor,
+        IOSurfaceRef ioSurface,
+        std::vector<MTLSharedEventAndSignalValue> waitEvents);
     void InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descriptor,
                               NSPRef<id<MTLTexture>> wrapped);
 

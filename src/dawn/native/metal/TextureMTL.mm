@@ -295,26 +295,7 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
-
-    if (texture->GetFormat().IsMultiPlanar()) {
-        // Metal doesn't allow creating multiplanar texture directly. So we create an IOSurface
-        // internally and wrap it.
-        ExternalImageDescriptorIOSurface ioSurfaceImageDesc;
-        ioSurfaceImageDesc.isInitialized = false;
-
-        DAWN_ASSERT(descriptor->dimension == wgpu::TextureDimension::e2D &&
-                    descriptor->mipLevelCount == 1 && descriptor->size.depthOrArrayLayers == 1);
-
-        IOSurfaceRef iosurface = CreateMultiPlanarIOSurface(
-            descriptor->format, descriptor->size.width, descriptor->size.height);
-
-        DAWN_INVALID_IF(iosurface == nullptr,
-                        "Failed to create IOSurface for multiplanar texture.");
-        DAWN_TRY(texture->InitializeFromIOSurface(&ioSurfaceImageDesc, descriptor, iosurface, {}));
-
-    } else {
-        DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
-    }
+    DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
 
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         DAWN_TRY(texture->ClearTexture(device->GetPendingCommandContext(),
@@ -338,8 +319,8 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
 
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
-    DAWN_TRY(texture->InitializeFromIOSurface(&ioSurfaceImageDesc, descriptor,
-                                              memory->GetIOSurface(), {}));
+    DAWN_TRY(texture->InitializeFromSharedTextureMemoryIOSurface(&ioSurfaceImageDesc, descriptor,
+                                                                 memory->GetIOSurface(), {}));
     texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
@@ -356,16 +337,47 @@ Ref<Texture> Texture::CreateWrapping(Device* device,
 MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(GetDevice());
 
-    NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
-    mMtlUsage = [*mtlDesc usage];
-    mMtlFormat = [*mtlDesc pixelFormat];
-    mMtlPlaneTextures->resize(1);
-    mMtlPlaneTextures[0] =
-        AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
+    if (!GetFormat().IsMultiPlanar()) {
+        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
+        mMtlUsage = [*mtlDesc usage];
+        mMtlFormat = [*mtlDesc pixelFormat];
+        mMtlPlaneTextures->resize(1);
+        mMtlPlaneTextures[0] =
+            AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
 
-    if (mMtlPlaneTextures[0] == nil) {
-        return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate texture.");
+        if (mMtlPlaneTextures[0] == nil) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate texture.");
+        }
+    } else {
+        // Metal doesn't allow creating multiplanar texture directly. So we create an IOSurface
+        // internally and wrap it.
+        DAWN_ASSERT(descriptor->dimension == wgpu::TextureDimension::e2D &&
+                    descriptor->mipLevelCount == 1 && descriptor->size.depthOrArrayLayers == 1);
+
+        mIOSurface = CreateMultiPlanarIOSurface(descriptor->format, descriptor->size.width,
+                                                descriptor->size.height);
+
+        DAWN_INVALID_IF(mIOSurface == nullptr,
+                        "Failed to create IOSurface for multiplanar texture.");
+        DAWN_INVALID_IF(
+            GetInternalUsage() & wgpu::TextureUsage::TransientAttachment,
+            "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
+            GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
+
+        mMtlUsage = MetalTextureUsage(GetFormat(), GetInternalUsage());
+        // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
+        mMtlFormat = MTLPixelFormatInvalid;
+        const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
+        mMtlPlaneTextures->resize(numPlanes);
+        for (size_t plane = 0; plane < numPlanes; ++plane) {
+            mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
+                mMtlUsage, GetFormat(), plane, device, GetSampleCount(), GetIOSurface()));
+            if (mMtlPlaneTextures[plane] == nil) {
+                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+            }
+        }
     }
+
     SetLabelImpl();
 
     return {};
@@ -381,10 +393,11 @@ void Texture::InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descrip
     SetLabelImpl();
 }
 
-MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
-                                            const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-                                            IOSurfaceRef ioSurface,
-                                            std::vector<MTLSharedEventAndSignalValue> waitEvents) {
+MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
+    const ExternalImageDescriptor* descriptor,
+    const UnpackedPtr<TextureDescriptor>& textureDescriptor,
+    IOSurfaceRef ioSurface,
+    std::vector<MTLSharedEventAndSignalValue> waitEvents) {
     DAWN_INVALID_IF(
         GetInternalUsage() & wgpu::TextureUsage::TransientAttachment,
         "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
@@ -835,8 +848,9 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     if (!needsNewView) {
         mMtlTextureView = mtlTexture;
     } else if (texture->GetFormat().IsMultiPlanar()) {
-        // For multiplanar texture, plane view is already created in InitializeFromIOSurface().
-        // The view is only nullptr if aspect is invalid.
+        // For multiplanar texture, plane view is already created in
+        // InitializeFromInternalMultiPlanarTexture(). The view is only nullptr if aspect is
+        // invalid.
         DAWN_ASSERT(mtlTexture != nullptr);
         mMtlTextureView = mtlTexture;
     } else {
