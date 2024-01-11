@@ -12,6 +12,7 @@
 #define SRC_DAWN_COMMON_LINKEDLIST_H_
 
 #include "dawn/common/Assert.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -171,8 +172,8 @@ class LinkNode {
 
   private:
     friend class LinkedList<T>;
-    LinkNode<T>* previous_;
-    LinkNode<T>* next_;
+    raw_ptr<LinkNode<T>> previous_;
+    raw_ptr<LinkNode<T>> next_;
 };
 
 template <typename T>
@@ -233,8 +234,8 @@ class LinkedListIterator {
     LinkNode<T>* operator*() const { return current_; }
 
   private:
-    LinkNode<T>* current_;
-    LinkNode<T>* next_;
+    raw_ptr<LinkNode<T>> current_;
+    raw_ptr<LinkNode<T>> next_;
 };
 
 template <typename T>

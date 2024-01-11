@@ -37,6 +37,7 @@
 #include <type_traits>
 
 #include "dawn/common/Assert.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -103,6 +104,11 @@ DAWN_FORCE_INLINE T* AlignPtr(T* ptr, size_t alignment) {
     DAWN_ASSERT(alignment != 0);
     return reinterpret_cast<T*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
                                 ~(alignment - 1));
+}
+
+template <typename T, partition_alloc::internal::RawPtrTraits Traits>
+DAWN_FORCE_INLINE T* AlignPtr(raw_ptr<T, Traits> ptr, size_t alignment) {
+    return AlignPtr(ptr.get(), alignment);
 }
 
 template <typename T>

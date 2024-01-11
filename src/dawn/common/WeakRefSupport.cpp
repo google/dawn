@@ -38,7 +38,7 @@ Ref<RefCounted> WeakRefData::TryGetRef() {
     if (!mValue || !mValue->mRefCount.TryIncrement()) {
         return nullptr;
     }
-    return AcquireRef(mValue);
+    return AcquireRef(mValue.get());
 }
 
 RefCounted* WeakRefData::UnsafeGet() const {

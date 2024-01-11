@@ -31,6 +31,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "partition_alloc/pointers/raw_ptr.h"
+
 namespace dawn {
 
 // An iterator over a range that gives both the index and the value. It can be used like so:
@@ -59,17 +61,17 @@ class EnumerateRange final {
 
       private:
         Index mIndex;
-        Value* mValue;
+        raw_ptr<Value, AllowPtrArithmetic> mValue;
     };
 
-    Iterator begin() const { return Iterator(Index{}, mBegin); }
+    Iterator begin() const { return Iterator(Index{}, mBegin.get()); }
     // Note that iterator comparison only uses mIndex, so we can save the computation of mValue for
     // the end() iterator.
     Iterator end() const { return Iterator(mSize, nullptr); }
 
   private:
     Index mSize;
-    Value* mBegin;
+    raw_ptr<Value> mBegin;
 };
 
 template <typename T,

@@ -34,6 +34,7 @@
 
 #include "dawn/common/Numeric.h"
 #include "dawn/common/PlacementAllocated.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -98,10 +99,16 @@ class SlabAllocatorImpl {
 
         void Splice();
 
-        char* allocation;
-        IndexLinkNode* freeList;
-        Slab* prev;
-        Slab* next;
+        // TODO(crbug.com/dawn/2341): Both pointer are dangling in
+        // `dawn_perf_tests`, and `this` is not released before the end of the
+        // test. A side effect from one test to the next might cause difficult
+        // to reproduce flakes. Test:
+        // DrawCallPerf.Run/Vulkan_llvmpipe__LLVM_16_0_6__256_bits__MultipleVertexBuffers
+        raw_ptr<char, LeakedDanglingUntriaged> allocation;
+        raw_ptr<IndexLinkNode, LeakedDanglingUntriaged> freeList;
+
+        raw_ptr<Slab, DanglingUntriaged> prev;
+        raw_ptr<Slab, DanglingUntriaged> next;
         Index blocksInUse;
     };
 

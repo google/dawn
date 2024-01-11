@@ -348,6 +348,7 @@ using partition_alloc::internal::raw_ptr;
 using partition_alloc::internal::RawPtrTraits;
 constexpr RawPtrTraits DisableDanglingPtrDetection = 0;
 constexpr RawPtrTraits DanglingUntriaged = 0;
+constexpr RawPtrTraits LeakedDanglingUntriaged = 0;
 constexpr RawPtrTraits AllowPtrArithmetic = 0;
 
 namespace std {

@@ -33,6 +33,7 @@
 
 #include "dawn/common/Mutex.h"
 #include "dawn/common/Ref.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -73,8 +74,8 @@ class Guard {
     using ReturnType = typename UnwrapRef<T>::type;
 
     // It's the programmer's burden to not save the pointer/reference and reuse it without the lock.
-    ReturnType* operator->() { return Traits::GetObj(mObj); }
-    ReturnType& operator*() { return *Traits::GetObj(mObj); }
+    ReturnType* operator->() { return Traits::GetObj(mObj.get()); }
+    ReturnType& operator*() { return *Traits::GetObj(mObj.get()); }
     const ReturnType* operator->() const { return Traits::GetObj(mObj); }
     const ReturnType& operator*() const { return *Traits::GetObj(mObj); }
 
@@ -85,7 +86,7 @@ class Guard {
     Guard(T* obj, typename Traits::MutexType& mutex) : mLock(Traits::GetMutex(mutex)), mObj(obj) {}
 
     typename Traits::LockType mLock;
-    T* const mObj;
+    const raw_ptr<T> mObj;
 };
 
 }  // namespace detail

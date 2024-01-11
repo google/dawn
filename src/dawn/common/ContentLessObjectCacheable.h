@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_CONTENTLESSOBJECTCACHEABLE_H_
 
 #include "dawn/common/WeakRefSupport.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -68,7 +69,7 @@ class ContentLessObjectCacheable : public detail::ContentLessObjectCacheableBase
 
     // Pointer to the owning cache if we were inserted at any point. This is set via the
     // Insert/Erase functions on the cache.
-    ContentLessObjectCache<RefCountedT>* mCache = nullptr;
+    raw_ptr<ContentLessObjectCache<RefCountedT>> mCache = nullptr;
 };
 
 }  // namespace dawn

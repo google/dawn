@@ -40,6 +40,7 @@
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
 #include "dawn/common/WeakRef.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -55,7 +56,7 @@ namespace detail {
 template <typename RefCountedT>
 struct ForErase {
     explicit ForErase(RefCountedT* value) : mValue(value) {}
-    RefCountedT* mValue;
+    raw_ptr<RefCountedT> mValue;
 };
 
 // All cached WeakRefs must have an immutable hash value determined at insertion. This ensures that
@@ -165,7 +166,7 @@ struct ContentLessObjectCacheKeyFuncs {
             return result;
         }
 
-        ContentLessObjectCache<RefCountedT>* mCache = nullptr;
+        raw_ptr<ContentLessObjectCache<RefCountedT>> mCache = nullptr;
     };
 };
 
@@ -284,7 +285,7 @@ class ContentLessObjectCache {
     // deadlocks on the mutex. Since the default max_load_factor of most std::unordered_set
     // implementations should be 1.0 (roughly 1 element per bucket), a StackVector of length 4
     // should be enough space in most cases. See dawn:1993 for more details.
-    StackVector<Ref<RefCountedT>, 4>* mTemporaryRefs = nullptr;
+    raw_ptr<StackVector<Ref<RefCountedT>, 4>> mTemporaryRefs = nullptr;
 };
 
 }  // namespace dawn

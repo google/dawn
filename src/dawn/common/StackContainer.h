@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "dawn/common/Compiler.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 
@@ -113,7 +114,7 @@ class StackAllocator : public std::allocator<T> {
     }
 
   private:
-    Source* source_;
+    raw_ptr<Source> source_;
 };
 
 // A wrapper around STL containers that maintains a stack-sized buffer that the
