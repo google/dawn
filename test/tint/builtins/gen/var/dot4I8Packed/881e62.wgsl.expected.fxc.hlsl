@@ -1,8 +1,7 @@
-SKIP: FAILED
-
-int tint_dot4I8Packed(uint param_0, uint param_1) {
-  int accumulator = 0;
-  return dot4add_i8packed(param_0, param_1, accumulator);
+int tint_dot4_i8_packed(uint a, uint b) {
+  const int4 a_i8 = (asint((uint4((a).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
+  const int4 b_i8 = (asint((uint4((b).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
+  return dot(a_i8, b_i8);
 }
 
 RWByteAddressBuffer prevent_dce : register(u0, space2);
@@ -10,7 +9,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  int res = tint_dot4I8Packed(arg_0, arg_1);
+  int res = tint_dot4_i8_packed(arg_0, arg_1);
   prevent_dce.Store(0u, asuint(res));
 }
 

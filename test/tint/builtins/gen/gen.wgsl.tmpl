@@ -41,6 +41,9 @@ See:
 {{-   $permutation := printf "%v_%v" $builtin $overload.Hash -}}
 {{-   $args        := Map -}}
 
+{{- /* Generate the optional flag on HLSL shader model */ -}}
+{{- template "HLSLShaderModel" $overload -}}
+
 {{- /* Generate enable directives */ -}}
 {{- template "EnableDirectives" $overload -}}
 
@@ -188,6 +191,22 @@ fn compute_main() {
 {{ end -}}
 
 {{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "HLSLShaderModel"                          -}}
+{{- /* Emits the optional HLSL shader model for a given overload          */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $permutation  := . -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
+
+{{- /* Check and emit dot4I8Packed and dot4U8Packed */ -}}
+{{-   if  or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
+// flags: --hlsl_shader_model 64
+{{    end -}}
+
+{{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                        define "EnableDirectives"                         -}}

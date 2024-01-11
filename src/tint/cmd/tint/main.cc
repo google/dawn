@@ -142,6 +142,10 @@ enum class Format : uint8_t {
     kGlsl,
 };
 
+constexpr uint32_t kMinShaderModelForDXC = 60u;
+constexpr uint32_t kMinShaderModelForFloat16 = 62u;
+constexpr uint32_t kMaxSupportedShaderModelForDXC = 64u;
+
 struct Options {
     bool verbose = false;
 
@@ -176,6 +180,7 @@ struct Options {
     tint::Hashmap<std::string, double, 8> overrides;
     std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
     tint::PixelLocalOptions pixel_local_options;
+    uint32_t hlsl_shader_model = kMinShaderModelForDXC;
 
     bool dump_ir = false;
     bool use_ir = false;
@@ -385,9 +390,7 @@ R32Sint, R32Uint, R32Float.
 )");
 
     auto& pixel_local_group_index = options.Add<ValueOption<uint32_t>>(
-        "pixel_local_group_index",
-        R"(The bind group index of the pixel local attachments (default 0).
-)",
+        "pixel_local_group_index", "The bind group index of the pixel local attachments.",
         Default{0});
 
     auto& skip_hash = options.Add<StringOption>(
@@ -407,6 +410,16 @@ of the hash codes in the comma separated list of hashes)");
             }
         }
     });
+
+    std::stringstream hlslShaderModelStream;
+    hlslShaderModelStream << R"(
+An integer value to set the HLSL shader model for the generated HLSL
+shader, which will only be used with option `--dxc`. Now only integers
+in the range [)" << kMinShaderModelForDXC
+                          << ", " << kMaxSupportedShaderModelForDXC
+                          << "] are accepted. The integer \"6x\" represents shader model 6.x.";
+    auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
+        "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
 
     auto& overrides = options.Add<StringOption>(
         "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
@@ -531,6 +544,16 @@ Options:
             }
             opts->pixel_local_options.attachment_formats.emplace(member_index.Get(), texel_format);
         }
+    }
+
+    if (hlsl_shader_model.value.has_value()) {
+        uint32_t shader_model = *hlsl_shader_model.value;
+        if (shader_model < kMinShaderModelForDXC || shader_model > kMaxSupportedShaderModelForDXC) {
+            std::cerr << "Invalid HLSL shader model "
+                      << ": " << shader_model << std::endl;
+            return false;
+        }
+        opts->hlsl_shader_model = shader_model;
     }
 
     auto files = result.Get();
@@ -859,6 +882,11 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
 /// @returns true on success
 bool GenerateHlsl(const tint::Program& program, const Options& options) {
 #if TINT_BUILD_HLSL_WRITER
+    // If --fxc or --dxc was passed, then we must explicitly find and validate with that respective
+    // compiler.
+    const bool must_validate_dxc = !options.dxc_path.empty();
+    const bool must_validate_fxc = !options.fxc_path.empty();
+
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::hlsl::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
@@ -867,6 +895,13 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         tint::cmd::GenerateExternalTextureBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
     gen_options.pixel_local_options = options.pixel_local_options;
+    if (must_validate_dxc) {
+        constexpr uint32_t kMinShaderModelForDP4aInHLSL = 64u;
+        gen_options.polyfill_dot_4x8_packed =
+            options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
+    } else {
+        gen_options.polyfill_dot_4x8_packed = true;
+    }
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
@@ -883,10 +918,6 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         PrintHash(hash);
     }
 
-    // If --fxc or --dxc was passed, then we must explicitly find and validate with that respective
-    // compiler.
-    const bool must_validate_dxc = !options.dxc_path.empty();
-    const bool must_validate_fxc = !options.fxc_path.empty();
     if ((options.validate || must_validate_dxc || must_validate_fxc) &&
         (options.skip_hash.count(hash) == 0)) {
         tint::hlsl::validate::Result dxc_res;
@@ -897,17 +928,20 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
             if (dxc.Found()) {
                 dxc_found = true;
 
+                uint32_t hlsl_shader_model = options.hlsl_shader_model;
                 auto enable_list = program.AST().Enables();
                 bool dxc_require_16bit_types = false;
                 for (auto* enable : enable_list) {
                     if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
                         dxc_require_16bit_types = true;
+                        hlsl_shader_model = std::max(hlsl_shader_model, kMinShaderModelForFloat16);
                         break;
                     }
                 }
 
                 dxc_res = tint::hlsl::validate::ValidateUsingDXC(
-                    dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types);
+                    dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types,
+                    hlsl_shader_model);
             } else if (must_validate_dxc) {
                 // DXC was explicitly requested. Error if it could not be found.
                 dxc_res.failed = true;

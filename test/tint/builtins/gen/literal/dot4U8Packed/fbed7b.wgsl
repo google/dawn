@@ -35,6 +35,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// flags: --hlsl_shader_model 64
+
 // fn dot4U8Packed(u32, u32) -> u32
 fn dot4U8Packed_fbed7b() {
   var res: u32 = dot4U8Packed(1u, 1u);

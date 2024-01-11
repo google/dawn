@@ -59,11 +59,14 @@ struct Result {
 /// @param dxc_path path to DXC
 /// @param source the generated HLSL source
 /// @param entry_points the list of entry points to validate
+/// @param require_16bit_types set to `true` to require the support of float16 in DXC
+/// @param hlsl_shader_model the shader model of the HLSL source
 /// @return the result of the compile
 Result ValidateUsingDXC(const std::string& dxc_path,
                         const std::string& source,
                         const EntryPointList& entry_points,
-                        bool require_16bit_types);
+                        bool require_16bit_types,
+                        uint32_t hlsl_shader_model);
 
 #ifdef _WIN32
 /// Hlsl attempts to compile the shader with FXC, verifying that the shader

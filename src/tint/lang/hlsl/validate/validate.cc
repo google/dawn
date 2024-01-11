@@ -47,7 +47,8 @@ namespace tint::hlsl::validate {
 Result ValidateUsingDXC(const std::string& dxc_path,
                         const std::string& source,
                         const EntryPointList& entry_points,
-                        bool require_16bit_types) {
+                        bool require_16bit_types,
+                        uint32_t hlsl_shader_model) {
     Result result;
 
     auto dxc = tint::Command(dxc_path);
@@ -58,7 +59,19 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     }
 
     // Native 16-bit types, e.g. float16_t, require SM6.2. Otherwise we use SM6.0.
-    const char* shader_model_version = require_16bit_types ? "6_2" : "6_0";
+    if (hlsl_shader_model < 60 || hlsl_shader_model > 66) {
+        result.output = "Invalid HLSL shader model " + std::to_string(hlsl_shader_model);
+        result.failed = true;
+        return result;
+    }
+    if (require_16bit_types && hlsl_shader_model < 62) {
+        result.output = "The HLSL shader model " + std::to_string(hlsl_shader_model) +
+                        " is not enough for float16_t.";
+        result.failed = true;
+        return result;
+    }
+    std::string shader_model_version =
+        std::to_string(hlsl_shader_model / 10) + "_" + std::to_string(hlsl_shader_model % 10);
 
     tint::TmpFile file;
     file << source;
@@ -85,14 +98,14 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         // Match Dawn's compile flags
         // See dawn\src\dawn_native\d3d12\RenderPipelineD3D12.cpp
         // and dawn_native\d3d\ShaderUtils.cpp (GetDXCArguments)
-        auto res = dxc(
-            "-T " + std::string(stage_prefix) + "_" + std::string(shader_model_version),  // Profile
-            "-HV 2018",                                        // Use HLSL 2018
-            "-E " + ep.first,                                  // Entry point
-            "/Zpr",                                            // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
-            "/Gis",                                            // D3DCOMPILE_IEEE_STRICTNESS
-            require_16bit_types ? "-enable-16bit-types" : "",  // Enable 16-bit if required
-            file.Path());
+        auto res =
+            dxc("-T " + std::string(stage_prefix) + "_" + shader_model_version,  // Profile
+                "-HV 2018",                                                      // Use HLSL 2018
+                "-E " + ep.first,                                                // Entry point
+                "/Zpr",  // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
+                "/Gis",  // D3DCOMPILE_IEEE_STRICTNESS
+                require_16bit_types ? "-enable-16bit-types" : "",  // Enable 16-bit if required
+                file.Path());
         if (!res.out.empty()) {
             if (!result.output.empty()) {
                 result.output += "\n";

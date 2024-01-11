@@ -29,12 +29,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -907,22 +907,31 @@ func invoke(exe string, args ...string) (ok bool, output string) {
 	return true, str
 }
 
-var reFlags = regexp.MustCompile(`^ *(?:\/\/|;) *flags:(.*) *\n`)
+var reFlags = regexp.MustCompile(`^ *(?:\/\/|;) *flags:(.*)`)
 
 // parseFlags looks for a `// flags:` header at the start of the file with the
 // given path, returning each of the space delimited tokens that follow for the
 // line
 func parseFlags(path string) []string {
-	content, err := ioutil.ReadFile(path)
+	inputFile, err := os.Open(path)
 	if err != nil {
 		return nil
 	}
-	header := strings.SplitN(string(content), "\n", 1)[0]
-	m := reFlags.FindStringSubmatch(header)
-	if len(m) != 2 {
-		return nil
+	defer inputFile.Close()
+
+	scanner := bufio.NewScanner(inputFile)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		content := scanner.Text()
+		m := reFlags.FindStringSubmatch(content)
+		if len(m) == 2 {
+			return strings.Split(m[1], " ")
+		}
+		if len(content) > 0 && !strings.HasPrefix(content, "//") {
+			break
+		}
 	}
-	return strings.Split(m[1], " ")
+	return nil
 }
 
 func printDuration(d time.Duration) string {
