@@ -340,7 +340,6 @@ dawn_test("dawn_unittests") {
     "unittests/PerThreadProcTests.cpp",
     "unittests/PlacementAllocatedTests.cpp",
     "unittests/RangeTests.cpp",
-    "unittests/RawPtrTests.cpp",
     "unittests/RefBaseTests.cpp",
     "unittests/RefCountedTests.cpp",
     "unittests/ResultTests.cpp",
@@ -440,6 +439,13 @@ dawn_test("dawn_unittests") {
     "unittests/wire/WireTest.cpp",
     "unittests/wire/WireTest.h",
   ]
+
+  # `dawn_unittests` are known to run for both Dawn standalone and Chrome. This
+  # file is testing specifically the Dawn's standalone configuration of
+  # partition_alloc.
+  if (dawn_standalone) {
+    sources += [ "unittests/RawPtrTests.cpp" ]
+  }
 
   if (is_win) {
     sources += [ "unittests/WindowsUtilsTests.cpp" ]
