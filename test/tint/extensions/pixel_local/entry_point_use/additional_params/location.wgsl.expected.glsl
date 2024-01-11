@@ -16,7 +16,7 @@ fn f(@location(0) a : vec4f, @interpolate(flat) @location(1) b : vec4f) {
   P.a += (u32(a.x) + u32(b.y));
 }
 
-Failed to generate: extensions/pixel_local/entry_point_use/additional_params/location.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
+Failed to generate: <dawn>/test/tint/extensions/pixel_local/entry_point_use/additional_params/location.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

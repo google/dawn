@@ -1,6 +1,8 @@
 SKIP: FAILED
 
 
+enable chromium_disable_uniformity_analysis;
+
 struct QuicksortObject {
   numbers : array<i32, 10u>,
 }
@@ -1493,5 +1495,6 @@ fn main(@builtin(position) gl_FragCoord_param : vec4f) -> main_out {
   main_1();
   return main_out(x_GLF_color);
 }
+
 
 error: function-scope 'var' must have a constructible type

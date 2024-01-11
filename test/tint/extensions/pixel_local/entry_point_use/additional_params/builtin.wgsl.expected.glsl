@@ -16,7 +16,7 @@ fn f(@builtin(position) pos : vec4f) {
   P.a += u32(pos.x);
 }
 
-Failed to generate: extensions/pixel_local/entry_point_use/additional_params/builtin.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
+Failed to generate: <dawn>/test/tint/extensions/pixel_local/entry_point_use/additional_params/builtin.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

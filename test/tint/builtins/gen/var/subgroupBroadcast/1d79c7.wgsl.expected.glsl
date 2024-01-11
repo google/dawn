@@ -17,7 +17,7 @@ fn compute_main() {
   subgroupBroadcast_1d79c7();
 }
 
-Failed to generate: builtins/gen/var/subgroupBroadcast/1d79c7.wgsl:25:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
+Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupBroadcast/1d79c7.wgsl:38:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
 enable chromium_experimental_subgroups;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

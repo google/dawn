@@ -10,7 +10,7 @@ fn tint_symbol_1(@builtin(subgroup_invocation_id) subgroup_invocation_id : u32, 
   tint_symbol[subgroup_invocation_id] = subgroup_size;
 }
 
-Failed to generate: shader_io/compute_subgroup_builtins.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
+Failed to generate: <dawn>/test/tint/types/functions/shader_io/compute_subgroup_builtins.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
 enable chromium_experimental_subgroups;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

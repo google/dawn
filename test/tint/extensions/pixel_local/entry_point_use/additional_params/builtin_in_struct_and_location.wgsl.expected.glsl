@@ -21,7 +21,7 @@ fn f(tint_symbol : In, @location(0) uv : vec4f) {
   P.a += (u32(tint_symbol.pos.x) + u32(uv.x));
 }
 
-Failed to generate: extensions/pixel_local/entry_point_use/additional_params/builtin_in_struct_and_location.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
+Failed to generate: <dawn>/test/tint/extensions/pixel_local/entry_point_use/additional_params/builtin_in_struct_and_location.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

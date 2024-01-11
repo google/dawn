@@ -31,7 +31,7 @@ fn f() -> @location(0) vec4f {
   return vec4f(2);
 }
 
-Failed to generate: extensions/pixel_local/indirect_use/one_output/multiple_attachments.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
+Failed to generate: <dawn>/test/tint/extensions/pixel_local/indirect_use/one_output/multiple_attachments.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

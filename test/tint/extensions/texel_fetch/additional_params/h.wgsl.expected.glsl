@@ -18,7 +18,7 @@ fn f(@invariant @builtin(position) pos : vec4f, fbf : FBF) {
 fn g(a : f32, b : f32, c : i32) {
 }
 
-Failed to generate: extensions/texel_fetch/additional_params/h.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
+Failed to generate: <dawn>/test/tint/extensions/texel_fetch/additional_params/h.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
 enable chromium_experimental_framebuffer_fetch;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

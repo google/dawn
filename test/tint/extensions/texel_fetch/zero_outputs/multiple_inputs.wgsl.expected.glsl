@@ -11,7 +11,7 @@ fn f(@color(1) fbf_1 : vec4f, @color(3) fbf_3 : vec4f) {
 fn g(a : f32, b : f32) {
 }
 
-Failed to generate: extensions/texel_fetch/zero_outputs/multiple_inputs.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
+Failed to generate: <dawn>/test/tint/extensions/texel_fetch/zero_outputs/multiple_inputs.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
 enable chromium_experimental_framebuffer_fetch;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

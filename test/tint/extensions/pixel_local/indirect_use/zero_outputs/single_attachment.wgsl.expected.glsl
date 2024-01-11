@@ -28,7 +28,7 @@ fn f() {
   f2();
 }
 
-Failed to generate: extensions/pixel_local/indirect_use/zero_outputs/single_attachment.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
+Failed to generate: <dawn>/test/tint/extensions/pixel_local/indirect_use/zero_outputs/single_attachment.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

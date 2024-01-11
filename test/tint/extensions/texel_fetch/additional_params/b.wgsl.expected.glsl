@@ -11,7 +11,7 @@ fn f(@builtin(position) pos : vec4f, @location(0) uv : vec4f, @color(0) fbf : ve
   g(pos.x, uv.x, fbf.x);
 }
 
-Failed to generate: extensions/texel_fetch/additional_params/b.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
+Failed to generate: <dawn>/test/tint/extensions/texel_fetch/additional_params/b.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
 enable chromium_experimental_framebuffer_fetch;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

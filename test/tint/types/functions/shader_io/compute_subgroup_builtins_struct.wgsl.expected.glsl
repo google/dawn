@@ -17,7 +17,7 @@ fn tint_symbol_1(inputs : ComputeInputs) {
   tint_symbol[inputs.subgroup_invocation_id] = inputs.subgroup_size;
 }
 
-Failed to generate: shader_io/compute_subgroup_builtins_struct.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
+Failed to generate: <dawn>/test/tint/types/functions/shader_io/compute_subgroup_builtins_struct.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_subgroups'
 enable chromium_experimental_subgroups;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

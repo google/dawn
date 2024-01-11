@@ -16,7 +16,7 @@ fn f(tint_symbol : In, @color(2) fbf : vec4f) {
   g(tint_symbol.pos.x, fbf.g);
 }
 
-Failed to generate: extensions/texel_fetch/additional_params/f.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
+Failed to generate: <dawn>/test/tint/extensions/texel_fetch/additional_params/f.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
 enable chromium_experimental_framebuffer_fetch;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
