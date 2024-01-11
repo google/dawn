@@ -1,3 +1,4 @@
+// flags: --hlsl_shader_model 62
 enable chromium_experimental_full_ptr_parameters, f16;
 
 @fragment

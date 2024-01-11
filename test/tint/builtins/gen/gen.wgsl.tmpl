@@ -198,11 +198,17 @@ fn compute_main() {
 {{- /* Emits the optional HLSL shader model for a given overload          */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
 {{- /* Check and emit dot4I8Packed and dot4U8Packed */ -}}
 {{-   if  or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
 // flags: --hlsl_shader_model 64
+
+{{- /* Check and emit f16 */ -}}
+{{-   else if OverloadUsesF16 $overload}}
+// flags: --hlsl_shader_model 62
+
 {{    end -}}
 
 {{- end -}}

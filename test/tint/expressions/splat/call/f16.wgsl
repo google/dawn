@@ -1,3 +1,4 @@
+// flags:  --hlsl_shader_model 62
 enable f16;
 fn get_f16() -> f16 { return 1.0h; }
 

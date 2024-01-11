@@ -143,7 +143,6 @@ enum class Format : uint8_t {
 };
 
 constexpr uint32_t kMinShaderModelForDXC = 60u;
-constexpr uint32_t kMinShaderModelForFloat16 = 62u;
 constexpr uint32_t kMaxSupportedShaderModelForDXC = 64u;
 
 struct Options {
@@ -934,7 +933,6 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
                 for (auto* enable : enable_list) {
                     if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
                         dxc_require_16bit_types = true;
-                        hlsl_shader_model = std::max(hlsl_shader_model, kMinShaderModelForFloat16);
                         break;
                     }
                 }

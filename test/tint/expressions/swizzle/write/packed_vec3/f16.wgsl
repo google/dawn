@@ -1,3 +1,4 @@
+// flags:  --hlsl_shader_model 62
 enable f16;
 struct S {
     v: vec3<f16>,

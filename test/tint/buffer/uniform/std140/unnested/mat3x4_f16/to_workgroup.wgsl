@@ -1,3 +1,4 @@
+// flags:  --hlsl_shader_model 62
 enable f16;
 
 @group(0) @binding(0) var<uniform> u : mat3x4<f16>;

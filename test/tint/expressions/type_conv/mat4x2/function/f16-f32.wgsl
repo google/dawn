@@ -1,3 +1,4 @@
+// flags:  --hlsl_shader_model 62
 enable f16;
 var<private> t : f16;
 fn m() -> mat4x2<f16> {

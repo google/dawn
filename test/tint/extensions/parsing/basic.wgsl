@@ -1,4 +1,5 @@
 // Enable a void internal extension
+// flags:  --hlsl_shader_model 62
 enable f16;
 
 @fragment

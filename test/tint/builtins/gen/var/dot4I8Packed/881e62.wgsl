@@ -36,7 +36,6 @@
 
 
 // flags: --hlsl_shader_model 64
-
 // fn dot4I8Packed(u32, u32) -> i32
 fn dot4I8Packed_881e62() {
   var arg_0 = 1u;

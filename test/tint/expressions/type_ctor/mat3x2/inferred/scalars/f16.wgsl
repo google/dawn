@@ -1,3 +1,4 @@
+// flags:  --hlsl_shader_model 62
 enable f16;
 var<private> m = mat3x2(0.0h, 1.0h,
                         2.0h, 3.0h,
