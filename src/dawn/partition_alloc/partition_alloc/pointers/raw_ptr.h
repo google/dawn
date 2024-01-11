@@ -40,8 +40,6 @@
 #include <functional>
 #include <type_traits>
 #include <utility>
-#include "build/build_config.h"
-#include "build/buildflag.h"
 #include "dawn/common/Compiler.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 

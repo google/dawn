@@ -28,9 +28,8 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
-#include "partition_alloc/partition_alloc_buildflags.h"
 
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
+#if defined(DAWN_ENABLE_PARTITION_ALLOC)
 #include "partition_alloc/dangling_raw_ptr_checks.h"
 // TODO(https://crbug.com/1505382): Enforce those warning inside PartitionAlloc.
 #pragma GCC diagnostic push
@@ -44,13 +43,13 @@
 namespace dawn {
 
 void InitializePartitionAllocForTesting() {
-#if BUILDFLAG(USE_ALLOCATOR_SHIM) && defined(DAWN_STANDALONE)
+#if defined(DAWN_ENABLE_PARTITION_ALLOC)
     allocator_shim::ConfigurePartitionsForTesting();
 #endif
 }
 
 void InitializeDanglingPointerDetectorForTesting() {
-#if BUILDFLAG(USE_ALLOCATOR_SHIM) && defined(DAWN_STANDALONE)
+#if defined(DAWN_ENABLE_PARTITION_ALLOC)
     // TODO(arthursonzogni): It would have been nice to record StackTraces from the two handlers:
     // - partition_alloc::SetDanglingRawPtrDetectedFn(ptr)
     // - partition_alloc::SetDanglingRawPtrReleasedFn(ptr)

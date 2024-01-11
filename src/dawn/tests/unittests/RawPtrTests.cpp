@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
-#include "build/build_config.h"
 #include "gtest/gtest.h"
 #include "partition_alloc/partition_alloc_buildflags.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -40,14 +39,12 @@ TEST(RawPtrTests, DanglingPointerCauseCrash) {
     raw_ptr<bool> ptr = owner.get();
     (void)ptr;  // Unused
 
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
     ASSERT_DEATH_IF_SUPPORTED(
         {
             owner.reset();  // DanglingRawPtrDetectedFn handler => no-op.
             ptr = nullptr;  // DanglingRawPtrReleasedFn handler => crash.
         },
         "DanglingPointerDetector: A pointer was dangling!");
-#endif
 }
 
 // The flag `DisableDanglingPtrDetection` must allow a raw_ptr to dangle.
