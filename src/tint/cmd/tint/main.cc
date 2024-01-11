@@ -142,8 +142,10 @@ enum class Format : uint8_t {
     kGlsl,
 };
 
+#if TINT_BUILD_HLSL_WRITER
 constexpr uint32_t kMinShaderModelForDXC = 60u;
 constexpr uint32_t kMaxSupportedShaderModelForDXC = 64u;
+#endif  // TINT_BUILD_HLSL_WRITER
 
 struct Options {
     bool verbose = false;
@@ -169,17 +171,26 @@ struct Options {
 
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
-#endif
+#endif  // TINT_BUILD_SPV_READER
 
     tint::Vector<std::string, 4> transforms;
 
+#if TINT_BUILD_HLSL_WRITER
     std::string fxc_path;
     std::string dxc_path;
+#endif  // TINT_BULD_HLSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
     std::string xcrun_path;
+#endif  // TINT_BULD_MSL_WRITER
+
     tint::Hashmap<std::string, double, 8> overrides;
-    std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
     tint::PixelLocalOptions pixel_local_options;
+
+#if TINT_BUILD_HLSL_WRITER
+    std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
     uint32_t hlsl_shader_model = kMinShaderModelForDXC;
+#endif  // TINT_BUILD_HLSL_WRITER
 
     bool dump_ir = false;
     bool use_ir = false;
@@ -266,6 +277,7 @@ If not provided, will be inferred from output filename extension:
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
 
+#if TINT_BUILD_HLSL_WRITER
     auto& fxc_path =
         options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
 When specified, automatically enables HLSL validation with FXC)",
@@ -277,7 +289,9 @@ When specified, automatically enables HLSL validation with FXC)",
 When specified, automatically enables HLSL validation with DXC)",
                                   Parameter{"path"});
     TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
+#endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_MSL_WRITER
     auto& xcrun =
         options.Add<StringOption>("xcrun", R"(Path to xcrun executable, used to validate MSL output.
 When specified, automatically enables MSL validation)",
@@ -288,6 +302,7 @@ When specified, automatically enables MSL validation)",
             opts->validate = true;
         }
     });
+#endif  // TINT_BUILD_MSL_WRITER
 
     auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
                                             Default{false});
@@ -362,12 +377,14 @@ Available transforms:
         }
     });
 
+#if TINT_BUILD_HLSL_WRITER
     auto& hlsl_rc_bp = options.Add<StringOption>("hlsl-root-constant-binding-point",
                                                  R"(Binding point for root constant.
 Specify the binding point for generated uniform buffer
 used for num_workgroups in HLSL. If not specified, then
 default to binding 0 of the largest used group plus 1,
 or group 0 if no resource bound)");
+#endif  // TINT_BUILD_HLSL_WRITER
 
     auto& pixel_local_attachments =
         options.Add<StringOption>("pixel_local_attachments",
@@ -410,6 +427,7 @@ of the hash codes in the comma separated list of hashes)");
         }
     });
 
+#if TINT_BUILD_HLSL_WRITER
     std::stringstream hlslShaderModelStream;
     hlslShaderModelStream << R"(
 An integer value to set the HLSL shader model for the generated HLSL
@@ -419,6 +437,7 @@ in the range [)" << kMinShaderModelForDXC
                           << "] are accepted. The integer \"6x\" represents shader model 6.x.";
     auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
         "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
+#endif  // TINT_BUILD_HLSL_WRITER
 
     auto& overrides = options.Add<StringOption>(
         "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
@@ -460,6 +479,7 @@ Options:
         }
     }
 
+#if TINT_BUILD_HLSL_WRITER
     if (hlsl_rc_bp.value.has_value()) {
         auto binding_points = tint::Split(*hlsl_rc_bp.value, ",");
         if (binding_points.Length() != 2) {
@@ -481,6 +501,7 @@ Options:
         }
         opts->hlsl_root_constant_binding_point = tint::BindingPoint{group.Get(), binding.Get()};
     }
+#endif  // TINT_BUILD_HLSL_WRITER
 
     if (pixel_local_attachments.value.has_value()) {
         auto bindings = tint::Split(*pixel_local_attachments.value, ",");
@@ -545,6 +566,7 @@ Options:
         }
     }
 
+#if TINT_BUILD_HLSL_WRITER
     if (hlsl_shader_model.value.has_value()) {
         uint32_t shader_model = *hlsl_shader_model.value;
         if (shader_model < kMinShaderModelForDXC || shader_model > kMaxSupportedShaderModelForDXC) {
@@ -554,6 +576,7 @@ Options:
         }
         opts->hlsl_shader_model = shader_model;
     }
+#endif  // TINT_BUILD_HLSL_WRITER
 
     auto files = result.Get();
     if (files.Length() > 1) {
