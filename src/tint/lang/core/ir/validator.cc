@@ -263,6 +263,10 @@ class Validator {
     /// @param l the exit loop to validate
     void CheckExitLoop(const ExitLoop* l);
 
+    /// Validates the given load
+    /// @param l the load to validate
+    void CheckLoad(const Load* l);
+
     /// Validates the given store
     /// @param s the store to validate
     void CheckStore(const Store* s);
@@ -521,7 +525,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Call* c) { CheckCall(c); },                              //
         [&](const If* if_) { CheckIf(if_); },                              //
         [&](const Let* let) { CheckLet(let); },                            //
-        [&](const Load*) {},                                               //
+        [&](const Load* load) { CheckLoad(load); },                        //
         [&](const LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
         [&](const Loop* l) { CheckLoop(l); },                              //
         [&](const Store* s) { CheckStore(s); },                            //
@@ -913,6 +917,21 @@ void Validator::CheckExitLoop(const ExitLoop* l) {
             break;
         }
         inst = inst->Block()->Parent();
+    }
+}
+
+void Validator::CheckLoad(const Load* l) {
+    CheckOperandNotNull(l, l->From(), Load::kFromOperandOffset);
+
+    if (auto* from = l->From()) {
+        auto* mv = from->Type()->As<core::type::MemoryView>();
+        if (!mv) {
+            AddError(l, Load::kFromOperandOffset, "load source operand is not a memory view");
+            return;
+        }
+        if (l->Result(0)->Type() != mv->StoreType()) {
+            AddError(l, Load::kFromOperandOffset, "result type does not match source store type");
+        }
     }
 }
 

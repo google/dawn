@@ -2986,6 +2986,96 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Load_NullFrom) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Append(mod.instructions.Create<ir::Load>(b.InstructionResult(ty.i32()), nullptr));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(), R"(:3:19 error: load: operand is undefined
+    %2:i32 = load undef
+                  ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = load undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* let = b.Let("l", 1_i);
+        b.Append(mod.instructions.Create<ir::Load>(b.InstructionResult(ty.f32()), let->Result(0)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:4:19 error: load source operand is not a memory view
+    %3:f32 = load %l
+                  ^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %l:i32 = let 1i
+    %3:f32 = load %l
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        b.Append(mod.instructions.Create<ir::Load>(b.InstructionResult(ty.f32()), var->Result(0)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:4:19 error: result type does not match source store type
+    %3:f32 = load %2
+                  ^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, i32, read_write> = var
+    %3:f32 = load %2
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Store_NullTo) {
     auto* f = b.Function("my_func", ty.void_());
 

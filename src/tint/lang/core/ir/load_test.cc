@@ -71,16 +71,6 @@ TEST_F(IR_LoadTest, Results) {
     EXPECT_EQ(inst->Result(0)->Instruction(), inst);
 }
 
-TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Load(b.Constant(1_i));
-        },
-        "");
-}
-
 TEST_F(IR_LoadTest, Clone) {
     auto* var = b.Var(ty.ptr<function, i32>());
     auto* inst = b.Load(var);

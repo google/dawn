@@ -44,7 +44,7 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     /// Constructor (no results, no operands)
     Load();
 
-    /// Constructor (infers type)
+    /// Constructor
     /// @param result the result value
     /// @param from the value being loaded from
     Load(InstructionResult* result, Value* from);
