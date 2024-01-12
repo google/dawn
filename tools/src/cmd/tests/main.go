@@ -196,6 +196,9 @@ func run() error {
 		}
 	}
 
+	// Remove any absFiles that should be ignored
+	absFiles = transform.Filter(absFiles, filePredicate)
+
 	// Glob the absFiles to test
 	for _, g := range globs {
 		globFiles, err := glob.Glob(g)
