@@ -953,7 +953,7 @@ TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %vec:ptr<push_constant, vec4<u32>, read_write> = var
+  %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
@@ -967,7 +967,7 @@ TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %vec:ptr<push_constant, vec4<u32>, read_write> = var
+  %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
@@ -1000,7 +1000,7 @@ TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %vec:ptr<push_constant, vec4<u32>, read_write> = var
+  %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):void -> %b2 {
@@ -1014,7 +1014,7 @@ TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %vec:ptr<push_constant, vec4<u32>, read_write> = var
+  %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):void -> %b2 {
@@ -1048,12 +1048,12 @@ TEST_P(IR_RobustnessTest, PushConstant_Access) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %arr:ptr<push_constant, array<u32, 4>, read_write> = var
+  %arr:ptr<push_constant, array<u32, 4>, read> = var
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
   %b2 = block {
-    %4:ptr<push_constant, u32, read_write> = access %arr, %idx
+    %4:ptr<push_constant, u32, read> = access %arr, %idx
     %5:u32 = load %4
     ret %5
   }
@@ -1063,13 +1063,13 @@ TEST_P(IR_RobustnessTest, PushConstant_Access) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %arr:ptr<push_constant, array<u32, 4>, read_write> = var
+  %arr:ptr<push_constant, array<u32, 4>, read> = var
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
   %b2 = block {
     %4:u32 = min %idx, 3u
-    %5:ptr<push_constant, u32, read_write> = access %arr, %4
+    %5:ptr<push_constant, u32, read> = access %arr, %4
     %6:u32 = load %5
     ret %6
   }
@@ -1245,7 +1245,7 @@ TEST_P(IR_RobustnessTest, Unifom_LoadVectorElement) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %vec:ptr<uniform, vec4<u32>, read_write> = var @binding_point(0, 0)
+  %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
@@ -1259,7 +1259,7 @@ TEST_P(IR_RobustnessTest, Unifom_LoadVectorElement) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %vec:ptr<uniform, vec4<u32>, read_write> = var @binding_point(0, 0)
+  %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
@@ -1293,7 +1293,7 @@ TEST_P(IR_RobustnessTest, Unifom_StoreVectorElement) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %vec:ptr<uniform, vec4<u32>, read_write> = var @binding_point(0, 0)
+  %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void -> %b2 {
@@ -1307,7 +1307,7 @@ TEST_P(IR_RobustnessTest, Unifom_StoreVectorElement) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %vec:ptr<uniform, vec4<u32>, read_write> = var @binding_point(0, 0)
+  %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void -> %b2 {
@@ -1326,7 +1326,7 @@ TEST_P(IR_RobustnessTest, Unifom_StoreVectorElement) {
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, Unifom_Access) {
+TEST_P(IR_RobustnessTest, Uniform_Access) {
     auto* arr = b.Var("arr", ty.ptr(uniform, ty.array<u32, 4>()));
     arr->SetBindingPoint(0, 0);
     mod.root_block->Append(arr);
@@ -1342,12 +1342,12 @@ TEST_P(IR_RobustnessTest, Unifom_Access) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %arr:ptr<uniform, array<u32, 4>, read_write> = var @binding_point(0, 0)
+  %arr:ptr<uniform, array<u32, 4>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
   %b2 = block {
-    %4:ptr<uniform, u32, read_write> = access %arr, %idx
+    %4:ptr<uniform, u32, read> = access %arr, %idx
     %5:u32 = load %4
     ret %5
   }
@@ -1357,13 +1357,13 @@ TEST_P(IR_RobustnessTest, Unifom_Access) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %arr:ptr<uniform, array<u32, 4>, read_write> = var @binding_point(0, 0)
+  %arr:ptr<uniform, array<u32, 4>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 -> %b2 {
   %b2 = block {
     %4:u32 = min %idx, 3u
-    %5:ptr<uniform, u32, read_write> = access %arr, %4
+    %5:ptr<uniform, u32, read> = access %arr, %4
     %6:u32 = load %5
     ret %6
   }

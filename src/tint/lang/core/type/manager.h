@@ -61,6 +61,29 @@ class Void;
 
 namespace tint::core::type {
 
+/// @param space the address space of the memory view
+/// @returns the default access control for a memory view with the given address space.
+static constexpr inline core::Access DefaultAccessFor(core::AddressSpace space) {
+    switch (space) {
+        case core::AddressSpace::kPushConstant:
+        case core::AddressSpace::kUniform:
+        case core::AddressSpace::kHandle:
+            return core::Access::kRead;
+
+        case core::AddressSpace::kUndefined:
+        case core::AddressSpace::kIn:
+        case core::AddressSpace::kOut:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kPixelLocal:
+        case core::AddressSpace::kPrivate:
+        case core::AddressSpace::kStorage:
+        case core::AddressSpace::kWorkgroup:
+            break;
+    }
+
+    return core::Access::kReadWrite;
+}
+
 /// The type manager holds all the pointers to the known types.
 class Manager final {
   public:
@@ -409,13 +432,13 @@ class Manager final {
     /// @returns the pointer type
     const core::type::Pointer* ptr(core::AddressSpace address_space,
                                    const core::type::Type* subtype,
-                                   core::Access access = core::Access::kReadWrite);
+                                   core::Access access = core::Access::kUndefined);
 
     /// @tparam SPACE the address space
     /// @tparam T the storage type
     /// @tparam ACCESS the access mode
     /// @returns the pointer type with the templated address space, storage type and access.
-    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = DefaultAccessFor(SPACE)>
     const core::type::Pointer* ptr() {
         return ptr(SPACE, Get<T>(), ACCESS);
     }
@@ -424,7 +447,7 @@ class Manager final {
     /// @tparam SPACE the address space
     /// @tparam ACCESS the access mode
     /// @returns the pointer type with the templated address space, storage type and access.
-    template <core::AddressSpace SPACE, core::Access ACCESS = core::Access::kReadWrite>
+    template <core::AddressSpace SPACE, core::Access ACCESS = DefaultAccessFor(SPACE)>
     const core::type::Pointer* ptr(const core::type::Type* subtype) {
         return ptr(SPACE, subtype, ACCESS);
     }

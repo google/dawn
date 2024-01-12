@@ -74,18 +74,18 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, MyStruct, read_write> = access %buffer
+    %3:ptr<uniform, MyStruct, read> = access %buffer
     %4:MyStruct = load %3
-    %5:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %5:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %6:array<mat3x3<f32>, 4> = load %5
-    %7:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %7:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %8:mat3x3<f32> = load %7
-    %9:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %9:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %10:vec3<f32> = load %9
     ret
   }
@@ -128,14 +128,14 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
-    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read> = access %4, 2u
     %6:vec3<f32> = load %5
     ret
   }
@@ -149,12 +149,12 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
     ret
   }
@@ -192,13 +192,13 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, MyStruct, read_write> = access %buffer
-    %4:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %3, 0u
+    %3:ptr<uniform, MyStruct, read> = access %buffer
+    %4:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %3, 0u
     %5:array<mat3x3<f32>, 4> = load %4
     ret
   }
@@ -212,12 +212,12 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
     ret
   }
@@ -256,14 +256,14 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %3
-    %5:ptr<uniform, mat3x3<f32>, read_write> = access %4, 1u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %3
+    %5:ptr<uniform, mat3x3<f32>, read> = access %4, 1u
     %6:mat3x3<f32> = load %5
     ret
   }
@@ -277,12 +277,12 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
     ret
   }
@@ -321,14 +321,14 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
-    %5:ptr<uniform, mat3x3<f32>, read_write> = access %4
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
+    %5:ptr<uniform, mat3x3<f32>, read> = access %4
     %6:mat3x3<f32> = load %5
     ret
   }
@@ -342,12 +342,12 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
     ret
   }
@@ -400,20 +400,20 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
-    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read> = access %4, 2u
     %6:vec3<f32> = load %5
-    %7:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
-    %8:ptr<uniform, vec3<f32>, read_write> = access %7, 0u
+    %7:ptr<uniform, mat3x3<f32>, read> = access %3, 2u
+    %8:ptr<uniform, vec3<f32>, read> = access %7, 0u
     %9:vec3<f32> = load %8
-    %10:ptr<uniform, mat3x3<f32>, read_write> = access %3, 3u
-    %11:ptr<uniform, vec3<f32>, read_write> = access %10, 1u
+    %10:ptr<uniform, mat3x3<f32>, read> = access %3, 3u
+    %11:ptr<uniform, vec3<f32>, read> = access %10, 1u
     %12:vec3<f32> = load %11
     ret
   }
@@ -427,16 +427,16 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
-    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 2u, 0u
+    %5:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 2u, 0u
     %6:vec3<f32> = load %5
-    %7:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 3u, 1u
+    %7:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 3u, 1u
     %8:vec3<f32> = load %7
     ret
   }
@@ -487,18 +487,18 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
-    %5:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
+    %5:ptr<uniform, vec3<f32>, read> = access %4, 2u
     %6:vec3<f32> = load %5
-    %7:ptr<uniform, vec3<f32>, read_write> = access %4, 0u
+    %7:ptr<uniform, vec3<f32>, read> = access %4, 0u
     %8:vec3<f32> = load %7
-    %9:ptr<uniform, vec3<f32>, read_write> = access %4, 1u
+    %9:ptr<uniform, vec3<f32>, read> = access %4, 1u
     %10:vec3<f32> = load %9
     ret
   }
@@ -512,16 +512,16 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
-    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 0u
+    %5:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 0u
     %6:vec3<f32> = load %5
-    %7:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 1u
+    %7:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 1u
     %8:vec3<f32> = load %7
     ret
   }
@@ -562,15 +562,15 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
-    %5:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
-    %6:ptr<uniform, vec3<f32>, read_write> = access %5, 2u
+    %5:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
+    %6:ptr<uniform, vec3<f32>, read> = access %5, 2u
     %7:vec3<f32> = load %6
     ret
   }
@@ -584,14 +584,14 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
-    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %5:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %6:vec3<f32> = load %5
     ret
   }
@@ -632,15 +632,15 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
-    %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
+    %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
     %5:mat3x3<f32> = load %4
-    %6:ptr<uniform, vec3<f32>, read_write> = access %4, 2u
+    %6:ptr<uniform, vec3<f32>, read> = access %4, 2u
     %7:vec3<f32> = load %6
     ret
   }
@@ -654,14 +654,14 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+    %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
-    %5:ptr<uniform, vec3<f32>, read_write> = access %buffer, 0u, 1u, 2u
+    %5:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %6:vec3<f32> = load %5
     ret
   }
@@ -735,20 +735,20 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     if true [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
-        %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 1u
+        %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
         %5:mat3x3<f32> = load %4
         exit_if  # if_1
       }
       %b4 = block {  # false
-        %6:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
+        %6:ptr<uniform, mat3x3<f32>, read> = access %3, 2u
         %7:mat3x3<f32> = load %6
         exit_if  # if_1
       }
@@ -765,19 +765,19 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
     if true [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
-        %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 1u
+        %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
         %4:mat3x3<f32> = load %3
         exit_if  # if_1
       }
       %b4 = block {  # false
-        %5:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 2u
+        %5:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 2u
         %6:mat3x3<f32> = load %5
         exit_if  # if_1
       }
@@ -826,20 +826,20 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %3:ptr<uniform, array<mat3x3<f32>, 4>, read_write> = access %buffer, 0u
+    %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
-        %4:ptr<uniform, mat3x3<f32>, read_write> = access %3, 2u
+        %4:ptr<uniform, mat3x3<f32>, read> = access %3, 2u
         %5:mat3x3<f32> = load %4
         continue %b4
       }
       %b4 = block {  # continuing
-        %6:ptr<uniform, mat3x3<f32>, read_write> = access %3, 3u
+        %6:ptr<uniform, mat3x3<f32>, read> = access %3, 3u
         %7:mat3x3<f32> = load %6
         break_if true %b3
       }
@@ -856,19 +856,19 @@ MyStruct = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %buffer:ptr<uniform, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
 %foo = func():void -> %b2 {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
-        %3:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 2u
+        %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 2u
         %4:mat3x3<f32> = load %3
         continue %b4
       }
       %b4 = block {  # continuing
-        %5:ptr<uniform, mat3x3<f32>, read_write> = access %buffer, 0u, 3u
+        %5:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 3u
         %6:mat3x3<f32> = load %5
         break_if true %b3
       }

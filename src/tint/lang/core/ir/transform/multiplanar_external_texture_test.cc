@@ -69,7 +69,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, DeclWithNoUses) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void -> %b2 {
@@ -101,9 +101,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():void -> %b2 {
@@ -134,7 +134,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, LoadWithNoUses) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void -> %b2 {
@@ -167,9 +167,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():void -> %b2 {
@@ -205,7 +205,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureDimensions) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> -> %b2 {
@@ -239,9 +239,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():vec2<u32> -> %b2 {
@@ -280,7 +280,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> -> %b2 {
@@ -314,9 +314,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> -> %b2 {
@@ -424,7 +424,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
@@ -458,9 +458,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
@@ -571,7 +571,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {
@@ -605,9 +605,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {
@@ -744,7 +744,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {  # %texture_1: 'texture'
@@ -784,9 +784,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
@@ -939,7 +939,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {  # %texture_1: 'texture'
@@ -987,9 +987,9 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> -> %b2 {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
@@ -1140,9 +1140,9 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleTextures) {
 
     auto* src = R"(
 %b1 = block {  # root
-  %texture_a:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_external, read_write> = var @binding_point(2, 2)
-  %texture_c:ptr<handle, texture_external, read_write> = var @binding_point(3, 2)
+  %texture_a:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_external, read> = var @binding_point(2, 2)
+  %texture_c:ptr<handle, texture_external, read> = var @binding_point(3, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void -> %b2 {
@@ -1180,15 +1180,15 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %b1 = block {  # root
-  %texture_a_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
-  %texture_a_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
-  %texture_a_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
-  %texture_b_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(2, 2)
-  %texture_b_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(2, 3)
-  %texture_b_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(2, 4)
-  %texture_c_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(3, 2)
-  %texture_c_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(3, 3)
-  %texture_c_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(3, 4)
+  %texture_a_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %texture_a_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
+  %texture_a_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_b_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 2)
+  %texture_b_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 3)
+  %texture_b_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(2, 4)
+  %texture_c_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
+  %texture_c_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 3)
+  %texture_c_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(3, 4)
 }
 
 %foo = func(%coords:vec2<u32>):void -> %b2 {

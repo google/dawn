@@ -1254,7 +1254,7 @@ FragDepthClampArgs = struct @align(4), @block {
 %b1 = block {  # root
   %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
   %foo_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read_write> = var
+  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read> = var
 }
 
 %foo_inner = func():Outputs -> %b2 {
@@ -1367,7 +1367,7 @@ FragDepthClampArgs = struct @align(4), @block {
 %b1 = block {  # root
   %ep1_loc0_Output:ptr<__out, f32, write> = var @location(0)
   %ep1_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
-  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read_write> = var
+  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read> = var
   %ep2_loc0_Output:ptr<__out, f32, write> = var @location(0)
   %ep2_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
   %ep3_loc0_Output:ptr<__out, f32, write> = var @location(0)

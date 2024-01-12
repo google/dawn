@@ -170,7 +170,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 %b1 = block {  # root
-  %1:ptr<uniform, tint_symbol_1, read_write> = var @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {

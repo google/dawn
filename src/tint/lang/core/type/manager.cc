@@ -191,8 +191,10 @@ const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty,
 
 const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
                                         const core::type::Type* subtype,
-                                        core::Access access /* = core::Access::kReadWrite */) {
-    return Get<core::type::Pointer>(address_space, subtype, access);
+                                        core::Access access /* = core::Access::kUndefined */) {
+    return Get<core::type::Pointer>(
+        address_space, subtype,
+        access == core::Access::kUndefined ? DefaultAccessFor(address_space) : access);
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {

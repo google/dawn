@@ -304,7 +304,7 @@ void foo() {
 TEST_F(MslPrinterTest, DISABLED_EmitType_Pointer_Const) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<function, f32, read>());
+        b.Var("a", ty.ptr<function, f32>());
         b.Return(func);
     });
 

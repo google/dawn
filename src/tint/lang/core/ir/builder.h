@@ -1098,7 +1098,7 @@ class Builder {
     /// @param init the var initializer
     /// @returns the instruction
     template <core::AddressSpace SPACE = core::AddressSpace::kFunction,
-              core::Access ACCESS = core::Access::kReadWrite,
+              core::Access ACCESS = core::type::DefaultAccessFor(SPACE),
               typename VALUE = void>
     ir::Var* Var(std::string_view name, VALUE&& init) {
         auto* val = Value(std::forward<VALUE>(init));
@@ -1117,7 +1117,9 @@ class Builder {
     /// @tparam T the storage pointer's element type
     /// @tparam ACCESS the var's access mode
     /// @returns the instruction
-    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    template <core::AddressSpace SPACE,
+              typename T,
+              core::Access ACCESS = core::type::DefaultAccessFor(SPACE)>
     ir::Var* Var() {
         return Var(ir.Types().ptr<SPACE, T, ACCESS>());
     }
@@ -1128,7 +1130,9 @@ class Builder {
     /// @tparam ACCESS the var's access mode
     /// @param name the var name
     /// @returns the instruction
-    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    template <core::AddressSpace SPACE,
+              typename T,
+              core::Access ACCESS = core::type::DefaultAccessFor(SPACE)>
     ir::Var* Var(std::string_view name) {
         return Var(name, ir.Types().ptr<SPACE, T, ACCESS>());
     }
