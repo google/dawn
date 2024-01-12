@@ -31,8 +31,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 
@@ -73,7 +73,7 @@ class AsyncTaskManager {
     void HandleTaskCompletion(WaitableTask* task);
 
     std::mutex mPendingTasksMutex;
-    std::unordered_map<WaitableTask*, Ref<WaitableTask>> mPendingTasks;
+    absl::flat_hash_map<WaitableTask*, Ref<WaitableTask>> mPendingTasks;
     dawn::platform::WorkerTaskPool* mWorkerTaskPool;
 };
 

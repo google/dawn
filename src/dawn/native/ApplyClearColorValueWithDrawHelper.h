@@ -29,7 +29,8 @@
 #define SRC_DAWN_NATIVE_APPLYCLEARVALUEWITHDRAWHELPER_H_
 
 #include <bitset>
-#include <unordered_map>
+
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
@@ -54,10 +55,10 @@ struct KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc {
                     const KeyOfApplyClearColorValueWithDrawPipelines key2) const;
 };
 using ApplyClearColorValueWithDrawPipelinesCache =
-    std::unordered_map<KeyOfApplyClearColorValueWithDrawPipelines,
-                       Ref<RenderPipelineBase>,
-                       KeyOfApplyClearColorValueWithDrawPipelinesHashFunc,
-                       KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc>;
+    absl::flat_hash_map<KeyOfApplyClearColorValueWithDrawPipelines,
+                        Ref<RenderPipelineBase>,
+                        KeyOfApplyClearColorValueWithDrawPipelinesHashFunc,
+                        KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc>;
 
 bool ShouldApplyClearBigIntegerColorValueWithDraw(const DeviceBase* device,
                                                   const RenderPassDescriptor* renderPassDescriptor);

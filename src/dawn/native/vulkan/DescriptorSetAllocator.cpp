@@ -42,13 +42,13 @@ static constexpr uint32_t kMaxDescriptorsPerPool = 512;
 // static
 Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(
     BindGroupLayout* layout,
-    std::map<VkDescriptorType, uint32_t> descriptorCountPerType) {
+    absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType) {
     return AcquireRef(new DescriptorSetAllocator(layout, descriptorCountPerType));
 }
 
 DescriptorSetAllocator::DescriptorSetAllocator(
     BindGroupLayout* layout,
-    std::map<VkDescriptorType, uint32_t> descriptorCountPerType)
+    absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType)
     : ObjectBase(layout->GetDevice()), mLayout(layout) {
     DAWN_ASSERT(layout != nullptr);
 

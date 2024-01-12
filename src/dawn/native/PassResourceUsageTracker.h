@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_PASSRESOURCEUSAGETRACKER_H_
 #define SRC_DAWN_NATIVE_PASSRESOURCEUSAGETRACKER_H_
 
-#include <map>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/native/PassResourceUsage.h"
 
 #include "absl/container/flat_hash_set.h"
@@ -44,7 +44,7 @@ class ExternalTextureBase;
 class QuerySetBase;
 class TextureBase;
 
-using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
+using QueryAvailabilityMap = absl::flat_hash_map<QuerySetBase*, std::vector<bool>>;
 
 // Helper class to build SyncScopeResourceUsages
 class SyncScopeUsageTracker {
@@ -75,8 +75,8 @@ class SyncScopeUsageTracker {
     SyncScopeResourceUsage AcquireSyncScopeUsage();
 
   private:
-    std::map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
-    std::map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
+    absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
+    absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
     absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
 };
 

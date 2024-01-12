@@ -32,7 +32,6 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "dawn/common/HashUtils.h"
@@ -68,7 +67,7 @@ class ShaderModule final : public ShaderModuleBase {
         VkShaderModule module;
         const uint32_t* spirv;
         size_t wordCount;
-        const char* remappedEntryPoint;
+        std::string remappedEntryPoint;
     };
 
     static ResultOrError<Ref<ShaderModule>> Create(

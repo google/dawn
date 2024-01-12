@@ -27,9 +27,9 @@
 
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 
-#include <map>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
@@ -136,12 +136,12 @@ MaybeError BindGroupLayout::Initialize() {
                             "CreateDescriptorSetLayout"));
 
     // Compute the size of descriptor pools used for this layout.
-    std::map<VkDescriptorType, uint32_t> descriptorCountPerType;
+    absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
     for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
         VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
-        // map::operator[] will return 0 if the key doesn't exist.
+        // absl:flat_hash_map::operator[] will return 0 if the key doesn't exist.
         descriptorCountPerType[vulkanType]++;
     }
 

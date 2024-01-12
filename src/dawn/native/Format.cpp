@@ -28,7 +28,6 @@
 #include "dawn/native/Format.h"
 
 #include <bitset>
-#include <unordered_map>
 #include <utility>
 
 #include "dawn/common/TypedInteger.h"

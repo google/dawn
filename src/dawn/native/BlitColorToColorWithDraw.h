@@ -28,8 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_BLITCOLORTOCOLORWITHDRAW_H_
 #define SRC_DAWN_NATIVE_BLITCOLORTOCOLORWITHDRAW_H_
 
-#include <unordered_map>
-
+#include "absl/container/flat_hash_map.h"
 #include "dawn/native/Error.h"
 
 namespace dawn::native {
@@ -55,10 +54,10 @@ struct BlitColorToColorWithDrawPipelineKey {
 };
 
 using BlitColorToColorWithDrawPipelinesCache =
-    std::unordered_map<BlitColorToColorWithDrawPipelineKey,
-                       Ref<RenderPipelineBase>,
-                       BlitColorToColorWithDrawPipelineKey::HashFunc,
-                       BlitColorToColorWithDrawPipelineKey::EqualityFunc>;
+    absl::flat_hash_map<BlitColorToColorWithDrawPipelineKey,
+                        Ref<RenderPipelineBase>,
+                        BlitColorToColorWithDrawPipelineKey::HashFunc,
+                        BlitColorToColorWithDrawPipelineKey::EqualityFunc>;
 
 // In a MSAA render to single sampled render pass, a color attachment will be used as resolve
 // target internally and an implicit MSAA texture will be used as the actual color attachment.

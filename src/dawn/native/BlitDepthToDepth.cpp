@@ -99,7 +99,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateDepthBlitPipeline(DeviceBase* 
     Ref<RenderPipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
 
-    store->depthBlitPipelines[format] = pipeline;
+    store->depthBlitPipelines.emplace(format, pipeline);
     return pipeline;
 }
 

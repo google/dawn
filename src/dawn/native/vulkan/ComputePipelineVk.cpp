@@ -85,7 +85,7 @@ MaybeError ComputePipeline::Initialize() {
                 : std::nullopt));
 
     createInfo.stage.module = moduleAndSpirv.module;
-    createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint;
+    createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint.c_str();
 
     if (IsFullSubgroupsRequired()) {
         // Workgroup size validation is handled in ValidateComputeStageWorkgroupSize when compiling

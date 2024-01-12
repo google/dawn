@@ -227,7 +227,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
 
     InternalPipelineStore::BlitR8ToStencilPipelines pipelines{std::move(clearPipeline),
                                                               std::move(setStencilPipelines)};
-    store->blitR8ToStencilPipelines[format] = pipelines;
+    store->blitR8ToStencilPipelines.emplace(format, pipelines);
     return pipelines;
 }
 

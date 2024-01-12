@@ -30,7 +30,6 @@
 
 #include <bitset>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "dawn/common/ityp_bitset.h"

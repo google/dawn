@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_
 #define SRC_DAWN_NATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_
 
-#include <map>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
@@ -49,7 +49,7 @@ class DescriptorSetAllocator : public ObjectBase {
   public:
     static Ref<DescriptorSetAllocator> Create(
         BindGroupLayout* layout,
-        std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
+        absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType);
 
     ResultOrError<DescriptorSetAllocation> Allocate();
     void Deallocate(DescriptorSetAllocation* allocationInfo);
@@ -57,7 +57,7 @@ class DescriptorSetAllocator : public ObjectBase {
 
   private:
     DescriptorSetAllocator(BindGroupLayout* layout,
-                           std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
+                           absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType);
     ~DescriptorSetAllocator() override;
 
     MaybeError AllocateDescriptorPool();

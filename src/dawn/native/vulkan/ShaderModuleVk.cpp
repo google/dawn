@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Serializable.h"
@@ -147,9 +148,9 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
 
     Device* mDevice;
     std::mutex mMutex;
-    std::unordered_map<TransformedShaderModuleCacheKey,
-                       Entry,
-                       TransformedShaderModuleCacheKeyHashFunc>
+    absl::flat_hash_map<TransformedShaderModuleCacheKey,
+                        Entry,
+                        TransformedShaderModuleCacheKeyHashFunc>
         mTransformedShaderModuleCache;
 };
 

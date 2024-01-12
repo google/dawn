@@ -580,8 +580,8 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
 
     Ref<ComputePipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateComputePipeline(&computePipelineDescriptor));
-    store->blitTextureToBufferComputePipelines.insert(
-        {std::make_pair(format.format, viewDimension), pipeline});
+    store->blitTextureToBufferComputePipelines.emplace(std::make_pair(format.format, viewDimension),
+                                                       pipeline);
     return pipeline;
 }
 

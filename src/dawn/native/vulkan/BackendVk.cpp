@@ -528,7 +528,7 @@ MaybeError VulkanInstance::RegisterDebugUtils() {
 
 void VulkanInstance::StartListeningForDeviceMessages(Device* device) {
     std::lock_guard<std::mutex> lock(mMessageListenerDevicesMutex);
-    mMessageListenerDevices.insert({device->GetDebugPrefix(), device});
+    mMessageListenerDevices.emplace(device->GetDebugPrefix(), device);
 }
 void VulkanInstance::StopListeningForDeviceMessages(Device* device) {
     std::lock_guard<std::mutex> lock(mMessageListenerDevicesMutex);

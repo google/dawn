@@ -60,14 +60,11 @@ void AsyncTaskManager::PostTask(AsyncTask asyncTask) {
 
 void AsyncTaskManager::HandleTaskCompletion(WaitableTask* task) {
     std::lock_guard<std::mutex> lock(mPendingTasksMutex);
-    auto iter = mPendingTasks.find(task);
-    if (iter != mPendingTasks.end()) {
-        mPendingTasks.erase(iter);
-    }
+    mPendingTasks.erase(task);
 }
 
 void AsyncTaskManager::WaitAllPendingTasks() {
-    std::unordered_map<WaitableTask*, Ref<WaitableTask>> allPendingTasks;
+    absl::flat_hash_map<WaitableTask*, Ref<WaitableTask>> allPendingTasks;
 
     {
         std::lock_guard<std::mutex> lock(mPendingTasksMutex);

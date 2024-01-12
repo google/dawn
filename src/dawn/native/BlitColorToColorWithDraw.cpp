@@ -155,7 +155,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     Ref<RenderPipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
 
-    store->msaaRenderToSingleSampledColorBlitPipelines[pipelineKey] = pipeline;
+    store->msaaRenderToSingleSampledColorBlitPipelines.emplace(pipelineKey, pipeline);
     return pipeline;
 }
 

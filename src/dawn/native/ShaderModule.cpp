@@ -926,8 +926,8 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                 ReflectEntryPointUsingTint(device, &inspector, entryPoint),
                                 "processing entry point \"%s\".", entryPoint.name);
 
-        DAWN_ASSERT(entryPointMetadataTable->count(entryPoint.name) == 0);
-        (*entryPointMetadataTable)[entryPoint.name] = std::move(metadata);
+        DAWN_ASSERT(!entryPointMetadataTable->contains(entryPoint.name));
+        entryPointMetadataTable->emplace(entryPoint.name, std::move(metadata));
     }
     return {};
 }
@@ -1266,7 +1266,7 @@ ObjectType ShaderModuleBase::GetType() const {
 }
 
 bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint) const {
-    return mEntryPoints.count(entryPoint) > 0;
+    return mEntryPoints.contains(entryPoint);
 }
 
 ShaderModuleEntryPoint ShaderModuleBase::ReifyEntryPointName(const char* entryPointName,

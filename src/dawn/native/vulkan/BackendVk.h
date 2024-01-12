@@ -30,11 +30,11 @@
 
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "dawn/native/BackendConnection.h"
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/DynamicLib.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
@@ -96,7 +96,7 @@ class VulkanInstance : public RefCounted {
 
     // Devices keep the VulkanInstance alive, so as long as devices remove themselves from this
     // map on destruction the pointers it contains should remain valid.
-    std::unordered_map<std::string, Device*> mMessageListenerDevices;
+    absl::flat_hash_map<std::string, Device*> mMessageListenerDevices;
     std::mutex mMessageListenerDevicesMutex;
 };
 

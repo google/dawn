@@ -30,10 +30,10 @@
 #include <limits>
 #include <optional>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/StackContainer.h"
@@ -349,8 +349,8 @@ MaybeError CommandBufferStateTracker::ValidateCanDrawIndexed() {
 }
 
 MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTexture() {
-    // TODO(dawn:1855): Look into optimizations as unordered_map does many allocations
-    std::unordered_map<const TextureBase*, VectorOfTextureViews> textureToViews;
+    // TODO(dawn:1855): Look into optimizations as flat_hash_map does many allocations
+    absl::flat_hash_map<const TextureBase*, VectorOfTextureViews> textureToViews;
 
     for (BindGroupIndex groupIndex :
          IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {

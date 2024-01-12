@@ -32,9 +32,9 @@
 #include <cstdint>
 #include <mutex>
 #include <optional>
-#include <unordered_map>
 #include <variant>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
@@ -88,7 +88,7 @@ class EventManager final : NonMovable {
 
     // Freed once the user has dropped their last ref to the Instance, so can't call WaitAny or
     // ProcessEvents anymore. This breaks reference cycles.
-    using EventMap = std::unordered_map<FutureID, Ref<TrackedEvent>>;
+    using EventMap = absl::flat_hash_map<FutureID, Ref<TrackedEvent>>;
     std::optional<MutexProtected<EventMap>> mEvents;
 };
 

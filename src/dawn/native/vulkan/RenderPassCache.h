@@ -31,8 +31,8 @@
 #include <array>
 #include <bitset>
 #include <mutex>
-#include <unordered_map>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -100,13 +100,13 @@ class RenderPassCache {
     // Does the actual VkRenderPass creation on a cache miss.
     ResultOrError<VkRenderPass> CreateRenderPassForQuery(const RenderPassCacheQuery& query) const;
 
-    // Implements the functors necessary for to use RenderPassCacheQueries as unordered_map
+    // Implements the functors necessary for to use RenderPassCacheQueries as absl::flat_hash_map
     // keys.
     struct CacheFuncs {
         size_t operator()(const RenderPassCacheQuery& query) const;
         bool operator()(const RenderPassCacheQuery& a, const RenderPassCacheQuery& b) const;
     };
-    using Cache = std::unordered_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
+    using Cache = absl::flat_hash_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
 
     Device* mDevice = nullptr;
 
