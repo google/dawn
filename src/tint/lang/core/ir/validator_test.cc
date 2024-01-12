@@ -428,8 +428,9 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
-              R"(:3:55 error: access: index out of bounds for type ptr<array<f32, 2>>
+    EXPECT_EQ(
+        res.Failure().reason.str(),
+        R"(:3:55 error: access: index out of bounds for type ptr<private, array<f32, 2>, read_write>
     %3:ptr<private, f32, read_write> = access %2, 1u, 3u
                                                       ^^
 
@@ -493,7 +494,8 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Ptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:51 error: access: type ptr<f32> cannot be indexed
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:3:51 error: access: type ptr<private, f32, read_write> cannot be indexed
     %3:ptr<private, f32, read_write> = access %2, 1u
                                                   ^^
 
@@ -571,8 +573,9 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Ptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
-              R"(:8:25 error: access: type ptr<MyStruct> cannot be dynamically indexed
+    EXPECT_EQ(
+        res.Failure().reason.str(),
+        R"(:8:25 error: access: type ptr<private, MyStruct, read_write> cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
 
@@ -640,7 +643,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Ptr) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.str(),
-        R"(:3:40 error: access: result of access chain is type ptr<f32> but instruction type is ptr<i32>
+        R"(:3:40 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is ptr<private, i32, read_write>
     %3:ptr<private, i32, read_write> = access %2, 1u, 1u
                                        ^^^^^^
 
@@ -672,7 +675,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Value) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.str(),
-        R"(:3:14 error: access: result of access chain is type ptr<f32> but instruction type is f32
+        R"(:3:14 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is f32
     %3:f32 = access %2, 1u, 1u
              ^^^^^^
 
@@ -746,6 +749,70 @@ note: # Disassembly
 %my_func = func(%2:ptr<private, mat3x2<f32>, read_write>):void -> %b1 {
   %b1 = block {
     %3:f32 = access %2, 1u, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_AddressSpace) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<storage, array<f32, 2>, read>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<uniform, f32, read>(), obj, 1_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.str(),
+        R"(:3:34 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<uniform, f32, read>
+    %3:ptr<uniform, f32, read> = access %2, 1u
+                                 ^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<storage, array<f32, 2>, read>):void -> %b1 {
+  %b1 = block {
+    %3:ptr<uniform, f32, read> = access %2, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_Access) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<storage, array<f32, 2>, read>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<storage, f32, read_write>(), obj, 1_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.str(),
+        R"(:3:40 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<storage, f32, read_write>
+    %3:ptr<storage, f32, read_write> = access %2, 1u
+                                       ^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<storage, array<f32, 2>, read>):void -> %b1 {
+  %b1 = block {
+    %3:ptr<storage, f32, read_write> = access %2, 1u
     ret
   }
 }

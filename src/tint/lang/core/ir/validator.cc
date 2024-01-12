@@ -619,10 +619,19 @@ void Validator::CheckUserCall(const UserCall* call) {
 }
 
 void Validator::CheckAccess(const Access* a) {
-    bool is_ptr = a->Object()->Type()->Is<core::type::Pointer>();
-    auto* ty = a->Object()->Type()->UnwrapPtr();
+    auto* obj_ptr = a->Object()->Type()->As<core::type::Pointer>();
+    auto* el_ty = a->Object()->Type()->UnwrapPtr();
 
-    auto current = [&] { return is_ptr ? "ptr<" + ty->FriendlyName() + ">" : ty->FriendlyName(); };
+    auto current = [&] {
+        if (obj_ptr) {
+            StringStream ss;
+            ss << "ptr<" << obj_ptr->AddressSpace() << ", " << el_ty->FriendlyName() << ", "
+               << obj_ptr->Access() << ">";
+            return ss.str();
+        } else {
+            return el_ty->FriendlyName();
+        }
+    };
 
     for (size_t i = 0; i < a->Indices().Length(); i++) {
         auto err = [&](std::string msg) {
@@ -636,7 +645,7 @@ void Validator::CheckAccess(const Access* a) {
             return;
         }
 
-        if (is_ptr && ty->Is<core::type::Vector>()) {
+        if (obj_ptr && el_ty->Is<core::type::Vector>()) {
             err("cannot obtain address of vector element");
             return;
         }
@@ -654,10 +663,10 @@ void Validator::CheckAccess(const Access* a) {
             }
 
             auto idx = value->ValueAs<uint32_t>();
-            auto* el = ty->Element(idx);
+            auto* el = el_ty->Element(idx);
             if (TINT_UNLIKELY(!el)) {
                 // Is index in bounds?
-                if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
+                if (auto el_count = el_ty->Elements().count; el_count != 0 && idx >= el_count) {
                     err("index out of bounds for type " + current());
                     note("acceptable range: [0.." + std::to_string(el_count - 1) + "]");
                     return;
@@ -665,25 +674,28 @@ void Validator::CheckAccess(const Access* a) {
                 err("type " + current() + " cannot be indexed");
                 return;
             }
-            ty = el;
+            el_ty = el;
         } else {
-            auto* el = ty->Elements().type;
+            auto* el = el_ty->Elements().type;
             if (TINT_UNLIKELY(!el)) {
                 err("type " + current() + " cannot be dynamically indexed");
                 return;
             }
-            ty = el;
+            el_ty = el;
         }
     }
 
-    auto* want_ty = a->Result(0)->Type()->UnwrapPtr();
-    bool want_ptr = a->Result(0)->Type()->Is<core::type::Pointer>();
-    if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
-        std::string want =
-            want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();
+    auto* want = a->Result(0)->Type();
+    auto* want_ptr = want->As<type::Pointer>();
+    bool ok = el_ty == want->UnwrapPtr() && (obj_ptr == nullptr) == (want_ptr == nullptr);
+    if (ok && obj_ptr) {
+        ok = obj_ptr->AddressSpace() == want_ptr->AddressSpace() &&
+             obj_ptr->Access() == want_ptr->Access();
+    }
+
+    if (TINT_UNLIKELY(!ok)) {
         AddError(a, InstError(a, "result of access chain is type " + current() +
-                                     " but instruction type is " + want));
-        return;
+                                     " but instruction type is " + want->FriendlyName()));
     }
 }
 
