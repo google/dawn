@@ -51,6 +51,7 @@ target_sources(dawn_utils PRIVATE
 )
 target_link_libraries(dawn_utils
     PUBLIC dawncpp_headers
+           partition_alloc
     PRIVATE dawn_internal_config
             dawn_common
             dawn_native

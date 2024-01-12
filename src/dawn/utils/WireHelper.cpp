@@ -42,6 +42,7 @@
 #include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::utils {
 
@@ -85,7 +86,7 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
   private:
     std::string mDir;
-    dawn::wire::CommandHandler* mHandler;
+    raw_ptr<dawn::wire::CommandHandler> mHandler;
     std::ofstream mFile;
 };
 

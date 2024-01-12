@@ -169,6 +169,7 @@
 #include <string>
 
 #include "dawn/platform/tracing/EventTracer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 // Records a pair of begin and end events called "name" for the current
 // scope, with 0, 1 or 2 associated arguments. If the category is not
@@ -937,7 +938,7 @@ static inline tracing::TraceEventHandle addTraceEvent(Platform* platform,
 class TraceEndOnScopeClose {
   public:
     // Note: members of m_data intentionally left uninitialized. See initialize.
-    TraceEndOnScopeClose() : m_pdata(0) {}
+    TraceEndOnScopeClose() = default;
     ~TraceEndOnScopeClose() {
         if (m_pdata) {
             addEventIfEnabled();
@@ -968,11 +969,11 @@ class TraceEndOnScopeClose {
     // members of this class instead, compiler warnings occur about potential
     // uninitialized accesses.
     struct Data {
-        Platform* platform;
+        raw_ptr<Platform> platform;
         const unsigned char* categoryEnabled;
         const char* name;
     };
-    Data* m_pdata;
+    raw_ptr<Data> m_pdata = nullptr;
     Data m_data;
 };
 

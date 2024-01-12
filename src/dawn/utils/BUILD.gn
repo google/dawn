@@ -97,5 +97,8 @@ static_library("utils") {
     sources += [ "PosixTimer.cpp" ]
   }
 
-  public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
+  public_deps = [
+    "${dawn_root}/include/dawn:cpp_headers",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+  ]
 }
