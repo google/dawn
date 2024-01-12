@@ -1412,97 +1412,116 @@ class UniformityGraph {
     /// Process an LValue expression.
     /// @param cf the input control flow node
     /// @param expr the expression to process
-    /// @returns a pair of (control flow node, variable node)
+    /// @param is_dereferencing `true` if we are dereferencing a pointer
+    /// @param is_partial_reference `true` if we are referencing a subset of a variable
+    /// @returns a tuple of (control flow node, variable node, root identifier)
     LValue ProcessLValueExpression(Node* cf,
                                    const ast::Expression* expr,
+                                   bool is_dereferencing = false,
                                    bool is_partial_reference = false) {
         return Switch(
             expr,
 
             [&](const ast::IdentifierExpression* i) {
                 auto* sem = sem_.GetVal(i)->UnwrapLoad()->As<sem::VariableUser>();
-                if (sem->Variable()->Is<sem::GlobalVariable>()) {
-                    return LValue{cf, current_function_->may_be_non_uniform, nullptr};
-                } else if (auto* local = sem->Variable()->As<sem::LocalVariable>()) {
-                    // Create a new value node for this variable.
-                    auto* value = CreateNode({NameFor(i), "_lvalue"});
+                auto result = Switch(
+                    sem->Variable(),
+                    [&](const sem::GlobalVariable*) {
+                        // Pointers cannot be stored in module-scope variables, so we should never
+                        // be dereferencing here.
+                        TINT_ASSERT(!is_dereferencing);
 
-                    // If i is part of an expression that is a partial reference to a variable (e.g.
-                    // index or member access), we link back to the variable's previous value. If
-                    // the previous value was non-uniform, a partial assignment will not make it
-                    // uniform.
-                    auto* old_value = current_function_->variables.Get(local);
-                    if (is_partial_reference && old_value) {
-                        value->AddEdge(old_value);
-                    }
+                        return LValue{cf, current_function_->may_be_non_uniform, nullptr};
+                    },
+                    [&](const sem::LocalVariable* local) {
+                        Node* value = nullptr;
+                        const sem::Variable* root_ident = local;
+                        if (is_dereferencing) {
+                            // If we are dereferencing then we must have a pointer, and the only
+                            // declaration that can hold a pointer is a `let`.
+                            TINT_ASSERT(local->Declaration()->Is<ast::Let>() &&
+                                        local->Type()->Is<core::type::Pointer>());
 
-                    return LValue{cf, value, local};
-                } else {
-                    TINT_ICE() << "unknown lvalue identifier expression type: "
-                               << std::string(sem->Variable()->TypeInfo().name);
-                    return LValue{};
+                            // Determine the root identifier for the contents of the pointer.
+                            root_ident = local->Initializer()->RootIdentifier();
+
+                            // Create a new value node for the contents of the pointer.
+                            value = CreateNode({NameFor(root_ident), "_contents"});
+
+                            // The uniformity of the value depends on the pointer itself.
+                            value->AddEdge(current_function_->variables.Get(local));
+                        } else {
+                            // Create a new value node for this variable.
+                            value = CreateNode({NameFor(i), "_lvalue"});
+                        }
+
+                        return LValue{cf, value, root_ident};
+                    },
+                    [&](const sem::Parameter* param) {
+                        // Parameters can only be LValues when we are dereferencing a pointer.
+                        TINT_ASSERT(is_dereferencing && param->Type()->Is<core::type::Pointer>());
+
+                        // Create a new value node for the contents of the pointer.
+                        auto* value = CreateNode({NameFor(i), "_contents"});
+
+                        // The uniformity of the value depends on the pointer itself.
+                        value->AddEdge(current_function_->parameters[param->Index()].value);
+
+                        return LValue{cf, value, param};
+                    },
+                    [&](Default) {
+                        TINT_ICE() << "unknown lvalue identifier expression type: "
+                                   << std::string(sem->Variable()->TypeInfo().name);
+                        return LValue{};
+                    });
+
+                // If the identifier is part of an expression that is a partial reference to a
+                // variable (e.g. index or member access), we link back to the variable's previous
+                // value. If the previous value was non-uniform, a partial assignment will not make
+                // it uniform.
+                auto* old_value = current_function_->variables.Get(result.root_identifier);
+                if (is_partial_reference && old_value) {
+                    result.new_val->AddEdge(old_value);
                 }
+
+                return result;
             },
 
             [&](const ast::IndexAccessorExpression* i) {
-                auto* sem_object = sem_.GetVal(i->object);
+                // If the source object is a pointer, there is an implicit dereference due to the
+                // pointer_composite_access language feature.
+                is_dereferencing =
+                    is_dereferencing || sem_.GetVal(i->object)->Type()->Is<core::type::Pointer>();
 
-                LValue object_result;
-                if (sem_object->Type()->Is<core::type::Pointer>()) {
-                    // Sugared pointer access, treat as indirection
-                    auto* root_ident = sem_object->RootIdentifier();
-                    auto* deref = CreateNode({NameFor(root_ident), "_deref"});
-                    if (auto* old_value = current_function_->variables.Get(root_ident)) {
-                        // We're dereferecing a partial pointer, so link back to the variable's
-                        // previous value.
-                        deref->AddEdge(old_value);
-                    }
-                    object_result = LValue{cf, deref, root_ident};
-                } else {
-                    object_result =
-                        ProcessLValueExpression(cf, i->object, /*is_partial_reference*/ true);
-                }
-                auto [cf1, l1, root_ident] = object_result;
+                auto [cf1, l1, root_ident] =
+                    ProcessLValueExpression(cf, i->object, is_dereferencing,
+                                            /*is_partial_reference*/ true);
                 auto [cf2, v2] = ProcessExpression(cf1, i->index);
                 l1->AddEdge(v2);
                 return LValue{cf2, l1, root_ident};
             },
 
             [&](const ast::MemberAccessorExpression* m) {
-                auto* sem_object = sem_.GetVal(m->object);
-                if (sem_object->Type()->Is<core::type::Pointer>()) {
-                    // Sugared pointer access, treat as indirection
-                    auto* root_ident = sem_object->RootIdentifier();
-                    auto* deref = CreateNode({NameFor(root_ident), "_deref"});
-                    if (auto* old_value = current_function_->variables.Get(root_ident)) {
-                        // We're dereferecing a partial pointer, so link back to the variable's
-                        // previous value.
-                        deref->AddEdge(old_value);
-                    }
-                    return LValue{cf, deref, root_ident};
-                }
+                // If the source object is a pointer, there is an implicit dereference due to the
+                // pointer_composite_access language feature.
+                is_dereferencing =
+                    is_dereferencing || sem_.GetVal(m->object)->Type()->Is<core::type::Pointer>();
 
-                return ProcessLValueExpression(cf, m->object, /*is_partial_reference*/ true);
+                return ProcessLValueExpression(cf, m->object, is_dereferencing,
+                                               /*is_partial_reference*/ true);
             },
 
             [&](const ast::UnaryOpExpression* u) {
                 if (u->op == core::UnaryOp::kIndirection) {
-                    // Cut the analysis short, since we only need to know the originating variable
-                    // that is being written to.
-                    auto* root_ident = sem_.Get(u)->RootIdentifier();
-                    auto* deref = CreateNode({NameFor(root_ident), "_deref"});
-
-                    if (auto* old_value = current_function_->variables.Get(root_ident)) {
-                        // If dereferencing a partial reference or partial pointer, we link back to
-                        // the variable's previous value. If the previous value was non-uniform, a
-                        // partial assignment will not make it uniform.
-                        if (is_partial_reference || IsDerefOfPartialPointer(u)) {
-                            deref->AddEdge(old_value);
-                        }
-                    }
-                    return LValue{cf, deref, root_ident};
+                    return ProcessLValueExpression(
+                        cf, u->expr,
+                        /* is_dereferencing */ true,
+                        /* is_partial_reference */ is_partial_reference ||
+                            IsDerefOfPartialPointer(u));
                 }
-                return ProcessLValueExpression(cf, u->expr, is_partial_reference);
+                return ProcessLValueExpression(cf, u->expr,
+                                               /* is_dereferencing */ false,
+                                               /* is_partial_reference */ is_partial_reference);
             },
 
             TINT_ICE_ON_NO_MATCH);

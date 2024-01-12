@@ -7503,6 +7503,222 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, ArrayElement_AssignUniformToElementWithNonUniformIndex) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo() {
+  var arr : array<i32, 4>;
+  arr[non_uniform] = 0;
+  if (arr[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (arr[0] == 0) {
+  ^^
+
+test:6:7 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  arr[non_uniform] = 0;
+      ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaPointer) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo() {
+  var arr : array<i32, 4>;
+  *&(arr[non_uniform]) = 0;
+  if (arr[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (arr[0] == 0) {
+  ^^
+
+test:6:10 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  *&(arr[non_uniform]) = 0;
+         ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaPointer_ImplicitDeref) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo() {
+  var arr : array<i32, 4>;
+  (&arr)[non_uniform] = 0;
+  if (arr[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if (arr[0] == 0) {
+  ^^
+
+test:6:10 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  (&arr)[non_uniform] = 0;
+         ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaStoredPointer) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo() {
+  var arr : array<i32, 4>;
+  let p = &(arr[non_uniform]);
+  *p = 0;
+  if (arr[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:9:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (arr[0] == 0) {
+  ^^
+
+test:6:17 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  let p = &(arr[non_uniform]);
+                ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaPointerParameter) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo(param : ptr<function, array<i32, 4>>) {
+  let p = &((*param)[non_uniform]);
+  *p = 0;
+  if ((*param)[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if ((*param)[0] == 0) {
+  ^^
+
+test:5:22 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  let p = &((*param)[non_uniform]);
+                     ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaPointerParameter_ImplicitDeref) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo(param : ptr<function, array<i32, 4>>) {
+  let p = &(param[non_uniform]);
+  *p = 0;
+  if ((*param)[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on possibly non-uniform value
+  if ((*param)[0] == 0) {
+  ^^
+
+test:5:19 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  let p = &(param[non_uniform]);
+                  ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       ArrayElement_AssignUniformToElementWithNonUniformIndex_ViaPartialPointerParameter) {
+    std::string src = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+var<private> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) {
+  *p = 0;
+}
+
+fn foo() {
+  var arr : array<i32, 4>;
+  let p = &(arr[non_uniform]);
+  bar(p);
+  if (arr[0] == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:14:3 note: control flow depends on possibly non-uniform value
+  if (arr[0] == 0) {
+  ^^
+
+test:12:17 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  let p = &(arr[non_uniform]);
+                ^^^^^^^^^^^
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Miscellaneous statement and expression tests.
 ////////////////////////////////////////////////////////////////////////////////
@@ -7882,6 +8098,170 @@ test:19:22 note: possibly non-uniform value passed via pointer here
 test:19:9 note: contents of pointer may become non-uniform after calling 'a'
   arr[a(&i)] = arr[b(&i)];
         ^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHSContainsViolation) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn bar(cond : i32) -> i32 {
+  if (cond == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var arr : array<i32, 4>;
+  arr[bar(non_uniform)] = 0;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (cond == 0) {
+  ^^
+
+test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
+  if (cond == 0) {
+      ^^^^
+
+test:13:11 note: possibly non-uniform value passed here
+  arr[bar(non_uniform)] = 0;
+          ^^^^^^^^^^^
+
+test:13:11 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  arr[bar(non_uniform)] = 0;
+          ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHSContainsViolation_ViaExplicitDeref) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn bar(cond : i32) -> i32 {
+  if (cond == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var arr : array<i32, 4>;
+  *&(arr[bar(non_uniform)]) = 0;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (cond == 0) {
+  ^^
+
+test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
+  if (cond == 0) {
+      ^^^^
+
+test:13:14 note: possibly non-uniform value passed here
+  *&(arr[bar(non_uniform)]) = 0;
+             ^^^^^^^^^^^
+
+test:13:14 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  *&(arr[bar(non_uniform)]) = 0;
+             ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHSContainsViolation_ViaPointerArrayIndex) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn bar(cond : i32) -> i32 {
+  if (cond == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var arr : array<i32, 4>;
+  (&arr)[bar(non_uniform)] = 0;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (cond == 0) {
+  ^^
+
+test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
+  if (cond == 0) {
+      ^^^^
+
+test:13:14 note: possibly non-uniform value passed here
+  (&arr)[bar(non_uniform)] = 0;
+             ^^^^^^^^^^^
+
+test:13:14 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  (&arr)[bar(non_uniform)] = 0;
+             ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AssignmentEval_LHSContainsViolation_ViaPointerMemberAccessor) {
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn bar(cond : i32) -> i32 {
+  if (cond == 0) {
+    workgroupBarrier();
+  }
+  return 0;
+}
+
+fn foo() {
+  var arr : array<vec4i, 4>;
+  (&(arr[bar(non_uniform)])).y = 0;
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (cond == 0) {
+  ^^
+
+test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
+  if (cond == 0) {
+      ^^^^
+
+test:13:14 note: possibly non-uniform value passed here
+  (&(arr[bar(non_uniform)])).y = 0;
+             ^^^^^^^^^^^
+
+test:13:14 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  (&(arr[bar(non_uniform)])).y = 0;
+             ^^^^^^^^^^^
 )");
 }
 
