@@ -405,17 +405,36 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
 
     Device* device = ToBackend(GetDevice());
 
-    // Uses WGPUTexture which wraps multiplanar ioSurface needs to create
-    // texture view explicitly.
+    // NOTE: The texture is guaranteed to be 2D/single-sampled/array length of
+    // 1/single mipmap level per SharedTextureMemory semantics and validation.
     if (!GetFormat().IsMultiPlanar()) {
-        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
-        [*mtlDesc setStorageMode:IOSurfaceStorageMode()];
+        // Create the descriptor for the Metal texture.
+        NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
+        MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
-        mMtlUsage = [*mtlDesc usage];
-        mMtlFormat = [*mtlDesc pixelFormat];
+        mtlDesc.storageMode = IOSurfaceStorageMode();
+        mtlDesc.width = GetBaseSize().width;
+        mtlDesc.height = GetBaseSize().height;
+        // NOTE: MetalTextureDescriptor defaults to the values mentioned above
+        // for the given parameters, so none of these need to be set explicitly.
+
+        // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
+        // between linear space and sRGB. For example, creating bgra8Unorm texture view on
+        // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
+        mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage());
+        mtlDesc.pixelFormat = MetalPixelFormat(GetDevice(), GetFormat().format);
+        if (GetDevice()->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
+            GetFormat().format == wgpu::TextureFormat::Stencil8) {
+            // If we used a combined depth stencil format instead of stencil8, we need
+            // MTLTextureUsagePixelFormatView to reinterpet as stencil8.
+            mtlDesc.usage |= MTLTextureUsagePixelFormatView;
+        }
+
+        mMtlUsage = mtlDesc.usage;
+        mMtlFormat = mtlDesc.pixelFormat;
         mMtlPlaneTextures->resize(1);
         mMtlPlaneTextures[0] =
-            AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()
+            AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                                  iosurface:ioSurface
                                                                      plane:0]);
     } else {
@@ -425,13 +444,8 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
         const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
         mMtlPlaneTextures->resize(numPlanes);
         for (size_t plane = 0; plane < numPlanes; ++plane) {
-            // Multiplanar texture is validated to only have single layer, single mipLevel
-            // and 2d textures (depth == 1)
-            DAWN_ASSERT(GetArrayLayers() == 1 && GetDimension() == wgpu::TextureDimension::e2D &&
-                        GetNumMipLevels() == 1);
-
             mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
-                mMtlUsage, GetFormat(), plane, device, GetSampleCount(), GetIOSurface()));
+                mMtlUsage, GetFormat(), plane, device, /*sampleCount=*/1, GetIOSurface()));
             if (mMtlPlaneTextures[plane] == nil) {
                 return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
             }
