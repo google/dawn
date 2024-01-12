@@ -91,25 +91,21 @@ class SlabAllocatorImpl {
 
     struct Slab : PlacementAllocated {
         // A slab is placement-allocated into an aligned pointer from a separate allocation.
-        // Ownership of the allocation is transferred to the slab on creation.
         // | ---------- allocation --------- |
         // | pad | Slab | data ------------> |
+        Slab();
         Slab(char allocation[], IndexLinkNode* head);
         Slab(Slab&& rhs);
 
+        // Extract the Slab from the linked list.
         void Splice();
 
-        // TODO(crbug.com/dawn/2341): Both pointer are dangling in
-        // `dawn_perf_tests`, and `this` is not released before the end of the
-        // test. A side effect from one test to the next might cause difficult
-        // to reproduce flakes. Test:
-        // DrawCallPerf.Run/Vulkan_llvmpipe__LLVM_16_0_6__256_bits__MultipleVertexBuffers
-        raw_ptr<char, LeakedDanglingUntriaged> allocation;
-        raw_ptr<IndexLinkNode, LeakedDanglingUntriaged> freeList;
+        raw_ptr<char> allocation = nullptr;
+        raw_ptr<IndexLinkNode> freeList = nullptr;
 
-        raw_ptr<Slab, DanglingUntriaged> prev;
-        raw_ptr<Slab, DanglingUntriaged> next;
-        Index blocksInUse;
+        raw_ptr<Slab> prev = nullptr;
+        raw_ptr<Slab> next = nullptr;
+        Index blocksInUse = 0;
     };
 
     SlabAllocatorImpl(Index blocksPerSlab, uint32_t objectSize, uint32_t objectAlignment);
