@@ -122,20 +122,6 @@
 // Prevents unused variable/expression warnings on FUNC.
 #define DAWN_UNUSED_FUNC(FUNC) static_assert(sizeof(&FUNC) == sizeof(void (*)()))
 
-// DAWN_NOINLINE
-//
-// Annotate a function indicating it should not be inlined. Use like:
-// DAWN_NOINLINE void DoStuff() { ... }
-#if defined(__clang__) && DAWN_HAS_ATTRIBUTE(noinline)
-#define DAWN_NOINLINE [[clang::noinline]]
-#elif defined(__GNUC__) && DAWN_HAS_ATTRIBUTE(noinline)
-#define DAWN_NOINLINE __attribute__((noinline))
-#elif defined(_MSC_VER)
-#define DAWN_NOINLINE __declspec(noinline)
-#else
-#define DAWN_NOINLINE
-#endif
-
 // DAWN_FORCE_INLINE
 //
 // Annotate a function indicating it should really never be inline, even in debug mode.

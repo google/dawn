@@ -908,7 +908,7 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
         [&](id<MTLRenderCommandEncoder>, BeginRenderPassCmd*) -> MaybeError { return {}; });
 }
 
-DAWN_NOINLINE bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
+bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
     API_AVAILABLE(macos(11.0), ios(14.0)) {
     bool isBlitBoundarySupported =
         [device supportsCounterSampling:MTLCounterSamplingPointAtBlitBoundary];
@@ -920,7 +920,7 @@ DAWN_NOINLINE bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
     return isBlitBoundarySupported && isDispatchBoundarySupported && isDrawBoundarySupported;
 }
 
-DAWN_NOINLINE bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
+bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
     API_AVAILABLE(macos(11.0), ios(14.0)) {
     return [device supportsCounterSampling:MTLCounterSamplingPointAtStageBoundary];
 }
