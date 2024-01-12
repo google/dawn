@@ -152,6 +152,8 @@ SanitizedResult Sanitize(const Program& in,
         data.Add<ast::transform::SingleEntryPoint::Config>(entry_point);
     }
 
+    data.Add<ast::transform::AddBlockAttribute::Config>(true);
+
     manager.Add<ast::transform::PreservePadding>();  // Must come before DirectVariableAccess
 
     manager.Add<ast::transform::Unshadow>();  // Must come before DirectVariableAccess
@@ -1897,9 +1899,7 @@ void ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                     EmitIOVariable(sem);
                     return;
                 case core::AddressSpace::kPushConstant:
-                    diagnostics_.add_error(
-                        diag::System::Writer,
-                        "unhandled address space " + tint::ToString(sem->AddressSpace()));
+                    EmitPushConstant(sem);
                     return;
                 default: {
                     TINT_ICE() << "unhandled address space " << sem->AddressSpace();
@@ -2089,6 +2089,17 @@ void ASTPrinter::EmitIOVariable(const sem::GlobalVariable* var) {
         out << " = ";
         EmitExpression(out, initializer);
     }
+    out << ";";
+}
+
+void ASTPrinter::EmitPushConstant(const sem::GlobalVariable* var) {
+    auto* decl = var->Declaration();
+
+    auto out = Line();
+
+    auto name = decl->name->symbol.Name();
+    auto* type = var->Type()->UnwrapRef();
+    EmitTypeAndName(out, type, var->AddressSpace(), var->Access(), name);
     out << ";";
 }
 
@@ -2642,6 +2653,7 @@ void ASTPrinter::EmitType(StringStream& out,
             break;
         }
         case core::AddressSpace::kUniform:
+        case core::AddressSpace::kPushConstant:
         case core::AddressSpace::kHandle: {
             out << "uniform ";
             break;

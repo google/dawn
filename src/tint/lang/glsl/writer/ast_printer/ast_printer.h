@@ -310,6 +310,10 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param var the global variable
     void EmitIOVariable(const sem::GlobalVariable* var);
 
+    /// Handles emitting a global variable with the push_constant address space
+    /// @param var the global variable
+    void EmitPushConstant(const sem::GlobalVariable* var);
+
     /// Handles emitting interpolation qualifiers
     /// @param out the output of the expression stream
     /// @param attrs the attributes

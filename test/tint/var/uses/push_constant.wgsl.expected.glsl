@@ -1,128 +1,55 @@
-SKIP: FAILED
+#version 310 es
 
-
-enable chromium_experimental_push_constant;
-
-var<push_constant> a : i32;
-
-var<push_constant> b : i32;
-
-var<push_constant> c : i32;
-
-fn uses_a() {
-  let foo = a;
+uniform int a;
+void uses_a() {
+  int foo = a;
 }
 
-fn uses_uses_a() {
+void main1() {
   uses_a();
 }
 
-fn uses_b() {
-  let foo = b;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  main1();
+  return;
+}
+#version 310 es
+
+uniform int a;
+void uses_a() {
+  int foo = a;
 }
 
-@compute @workgroup_size(1)
-fn main1() {
+void uses_uses_a() {
   uses_a();
 }
 
-@compute @workgroup_size(1)
-fn main2() {
+void main2() {
   uses_uses_a();
 }
 
-@compute @workgroup_size(1)
-fn main3() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  main2();
+  return;
+}
+#version 310 es
+
+uniform int b;
+void uses_b() {
+  int foo = b;
+}
+
+void main3() {
   uses_b();
 }
 
-@compute @workgroup_size(1)
-fn main4() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  main3();
+  return;
 }
-
-Failed to generate: error: unhandled address space push_constant
-
-enable chromium_experimental_push_constant;
-
-var<push_constant> a : i32;
-
-var<push_constant> b : i32;
-
-var<push_constant> c : i32;
-
-fn uses_a() {
-  let foo = a;
-}
-
-fn uses_uses_a() {
-  uses_a();
-}
-
-fn uses_b() {
-  let foo = b;
-}
-
-@compute @workgroup_size(1)
-fn main1() {
-  uses_a();
-}
-
-@compute @workgroup_size(1)
-fn main2() {
-  uses_uses_a();
-}
-
-@compute @workgroup_size(1)
-fn main3() {
-  uses_b();
-}
-
-@compute @workgroup_size(1)
-fn main4() {
-}
-
-Failed to generate: error: unhandled address space push_constant
-
-enable chromium_experimental_push_constant;
-
-var<push_constant> a : i32;
-
-var<push_constant> b : i32;
-
-var<push_constant> c : i32;
-
-fn uses_a() {
-  let foo = a;
-}
-
-fn uses_uses_a() {
-  uses_a();
-}
-
-fn uses_b() {
-  let foo = b;
-}
-
-@compute @workgroup_size(1)
-fn main1() {
-  uses_a();
-}
-
-@compute @workgroup_size(1)
-fn main2() {
-  uses_uses_a();
-}
-
-@compute @workgroup_size(1)
-fn main3() {
-  uses_b();
-}
-
-@compute @workgroup_size(1)
-fn main4() {
-}
-
-Failed to generate: error: unhandled address space push_constant
 #version 310 es
 
 void main4() {
