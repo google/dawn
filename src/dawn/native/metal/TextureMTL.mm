@@ -314,13 +314,13 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     SharedTextureMemory* memory,
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    ExternalImageDescriptorIOSurface ioSurfaceImageDesc;
-    ioSurfaceImageDesc.isInitialized = false;  // Initialized state is set on memory.BeginAccess.
+    // Note: Initialized state is set on memory.BeginAccess, so we leave
+    // subresources as uninitialized at this point.
 
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
-    DAWN_TRY(texture->InitializeFromSharedTextureMemoryIOSurface(&ioSurfaceImageDesc, descriptor,
-                                                                 memory->GetIOSurface(), {}));
+    DAWN_TRY(
+        texture->InitializeFromSharedTextureMemoryIOSurface(descriptor, memory->GetIOSurface()));
     texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
@@ -394,17 +394,14 @@ void Texture::InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descrip
 }
 
 MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
-    const ExternalImageDescriptor* descriptor,
     const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-    IOSurfaceRef ioSurface,
-    std::vector<MTLSharedEventAndSignalValue> waitEvents) {
+    IOSurfaceRef ioSurface) {
     DAWN_INVALID_IF(
         GetInternalUsage() & wgpu::TextureUsage::TransientAttachment,
         "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
         GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
 
     mIOSurface = ioSurface;
-    mWaitEvents = std::move(waitEvents);
 
     Device* device = ToBackend(GetDevice());
 
@@ -442,7 +439,6 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
     }
 
     SetLabelImpl();
-    SetIsSubresourceContentInitialized(descriptor->isInitialized, GetAllSubresources());
 
     return {};
 }
