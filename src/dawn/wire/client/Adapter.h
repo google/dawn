@@ -39,9 +39,9 @@
 
 namespace dawn::wire::client {
 
-class Adapter final : public ObjectBase {
+class Adapter final : public ObjectWithEventsBase {
   public:
-    using ObjectBase::ObjectBase;
+    using ObjectWithEventsBase::ObjectWithEventsBase;
     ~Adapter() override;
 
     void CancelCallbacksForDisconnect() override;

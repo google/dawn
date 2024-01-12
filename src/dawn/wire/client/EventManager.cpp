@@ -65,14 +65,27 @@ void TrackedEvent::Complete(FutureID futureID, EventCompletionType type) {
 
 // EventManager
 
-EventManager::EventManager(Client* client) : mClient(client) {}
+EventManager::~EventManager() {
+    TransitionTo(State::ClientDropped);
+}
 
 std::pair<FutureID, bool> EventManager::TrackEvent(std::unique_ptr<TrackedEvent> event) {
     FutureID futureID = mNextFutureID++;
 
-    if (mClient->IsDisconnected()) {
-        event->Complete(futureID, EventCompletionType::Shutdown);
-        return {futureID, false};
+    switch (mState) {
+        case State::InstanceDropped: {
+            if (event->GetCallbackMode() != WGPUCallbackMode_AllowSpontaneous) {
+                event->Complete(futureID, EventCompletionType::Shutdown);
+                return {futureID, false};
+            }
+            break;
+        }
+        case State::ClientDropped: {
+            event->Complete(futureID, EventCompletionType::Shutdown);
+            return {futureID, false};
+        }
+        case State::Nominal:
+            break;
     }
 
     mTrackedEvents.Use([&](auto trackedEvents) {
@@ -83,22 +96,46 @@ std::pair<FutureID, bool> EventManager::TrackEvent(std::unique_ptr<TrackedEvent>
     return {futureID, true};
 }
 
-void EventManager::ShutDown() {
-    // Call any outstanding callbacks before destruction.
+void EventManager::TransitionTo(EventManager::State state) {
+    // If the client is disconnected, this becomes a no-op.
+    if (mState == State::ClientDropped) {
+        return;
+    }
+
+    // Only forward state transitions are allowed.
+    DAWN_ASSERT(state > mState);
+    mState = state;
+
     while (true) {
         std::map<FutureID, std::unique_ptr<TrackedEvent>> events;
-        mTrackedEvents.Use([&](auto trackedEvents) { events = std::move(*trackedEvents); });
-
+        switch (state) {
+            case State::InstanceDropped: {
+                mTrackedEvents.Use([&](auto trackedEvents) {
+                    for (auto it = trackedEvents->begin(); it != trackedEvents->end();) {
+                        auto& event = it->second;
+                        if (event->GetCallbackMode() != WGPUCallbackMode_AllowSpontaneous) {
+                            events.emplace(it->first, std::move(event));
+                            it = trackedEvents->erase(it);
+                        }
+                    }
+                });
+                break;
+            }
+            case State::ClientDropped: {
+                mTrackedEvents.Use([&](auto trackedEvents) { events = std::move(*trackedEvents); });
+                break;
+            }
+            case State::Nominal:
+                // We always start in the nominal state so we should never be transitioning to it.
+                DAWN_UNREACHABLE();
+        }
         if (events.empty()) {
             break;
         }
-
-        // Ordering guaranteed because we are using a sorted map.
         for (auto& [futureID, event] : events) {
             event->Complete(futureID, EventCompletionType::Shutdown);
         }
     }
-    mIsShutdown = true;
 }
 
 void EventManager::ProcessPollEvents() {

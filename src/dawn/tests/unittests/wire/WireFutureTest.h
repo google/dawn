@@ -96,20 +96,6 @@ class WireFutureTestWithParams : public WireTest, public testing::WithParamInter
   protected:
     using testing::WithParamInterface<Params>::GetParam;
 
-    void SetUp() override {
-        WireTest::SetUp();
-
-        auto reservation = GetWireClient()->ReserveInstance();
-        instance = reservation.instance;
-
-        apiInstance = api.GetNewInstance();
-        EXPECT_CALL(api, InstanceReference(apiInstance));
-        EXPECT_TRUE(
-            GetWireServer()->InjectInstance(apiInstance, reservation.id, reservation.generation));
-    }
-
-    void TearDown() override { WireTest::TearDown(); }
-
     // Calls the actual API that the test suite is exercising given the callback mode. This should
     // be used in favor of directly calling the API because the Async mode actually calls a
     // different entry point.
@@ -202,9 +188,6 @@ class WireFutureTestWithParams : public WireTest, public testing::WithParamInter
             wgpuInstanceProcessEvents(instance);
         }
     }
-
-    WGPUInstance instance;
-    WGPUInstance apiInstance;
 
   private:
     AsyncFT mAsyncF = AsyncF;

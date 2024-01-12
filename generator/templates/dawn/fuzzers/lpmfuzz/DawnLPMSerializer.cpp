@@ -69,7 +69,10 @@ namespace dawn::wire {
     {% elif member.type.name.get() == "ObjectId" %}
         {{ convert_objectid(member, in, out, access) }}
     {% elif member.type.name.get() == "ObjectHandle" %}
-        {{ convert_objecthandle(member, in, out, in_access) }}
+        //* Only convert the handle if it maps to an object. Otherwise don't serialize it at all.
+        {% if member.handle_type %}
+            {{ convert_objecthandle(member, in, out, in_access) }}
+        {% endif %}
     {% else %}
         {{out}} = {{in}}({{in_access}});
     {% endif %}

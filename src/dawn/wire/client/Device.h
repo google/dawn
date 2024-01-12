@@ -43,9 +43,11 @@ namespace dawn::wire::client {
 class Client;
 class Queue;
 
-class Device final : public ObjectBase {
+class Device final : public ObjectWithEventsBase {
   public:
-    explicit Device(const ObjectBaseParams& params, const WGPUDeviceDescriptor* descriptor);
+    explicit Device(const ObjectBaseParams& params,
+                    const ObjectHandle& eventManagerHandle,
+                    const WGPUDeviceDescriptor* descriptor);
     ~Device() override;
 
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);

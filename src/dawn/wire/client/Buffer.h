@@ -64,11 +64,13 @@ struct MapStateData : public RefCounted {
     MapState mapState = MapState::Unmapped;
 };
 
-class Buffer final : public ObjectBase {
+class Buffer final : public ObjectWithEventsBase {
   public:
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
 
-    Buffer(const ObjectBaseParams& params, const WGPUBufferDescriptor* descriptor);
+    Buffer(const ObjectBaseParams& params,
+           const ObjectHandle& eventManagerHandle,
+           const WGPUBufferDescriptor* descriptor);
     ~Buffer() override;
 
     bool OnMapAsyncCallback(WGPUFuture future,

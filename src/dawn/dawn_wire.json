@@ -33,6 +33,7 @@
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "uint64_t"},
@@ -76,6 +77,7 @@
         ],
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" }
         ],
         "queue write buffer": [
@@ -99,6 +101,7 @@
         ],
         "instance request adapter": [
             { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
             { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true }
@@ -112,7 +115,8 @@
     },
     "return commands": {
         "buffer map async callback": [
-            { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
+            { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer", "_comment": "TODO(dawn:2061) Remove this field once mapping is updated." },
+            { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "uint32_t" },
             { "name": "read data update info length", "type": "uint64_t" },
@@ -152,8 +156,8 @@
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "queue work done callback": [
-            { "name": "queue", "type": "ObjectHandle", "handle_type": "queue" },
-	    { "name": "future", "type": "future" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "queue work done status" }
         ],
         "shader module get compilation info callback": [
@@ -163,7 +167,7 @@
             { "name": "info", "type": "compilation info", "annotation": "const*", "optional": true }
         ],
         "instance request adapter callback": [
-            { "name": "instance", "type": "ObjectHandle", "handle_type": "instance" },
+            { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request adapter status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },

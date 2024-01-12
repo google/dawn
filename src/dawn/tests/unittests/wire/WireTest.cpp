@@ -53,7 +53,6 @@ dawn::wire::server::MemoryTransferService* WireTest::GetServerMemoryTransferServ
 void WireTest::SetUp() {
     DawnProcTable mockProcs;
     api.GetProcTable(&mockProcs);
-    WGPUDevice mockDevice = api.GetNewDevice();
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, _, _)).Times(Exactly(1));
@@ -81,12 +80,18 @@ void WireTest::SetUp() {
 
     dawnProcSetProcs(&dawn::wire::client::GetProcs());
 
-    auto deviceReservation = mWireClient->ReserveDevice();
-    EXPECT_CALL(api, DeviceReference(mockDevice));
-    mWireServer->InjectDevice(mockDevice, deviceReservation.id, deviceReservation.generation);
+    auto instanceReservation = GetWireClient()->ReserveInstance();
+    instance = instanceReservation.instance;
+    apiInstance = api.GetNewInstance();
+    EXPECT_CALL(api, InstanceReference(apiInstance));
+    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, instanceReservation.id,
+                                                instanceReservation.generation));
 
+    auto deviceReservation = mWireClient->ReserveDevice(instance);
     device = deviceReservation.device;
-    apiDevice = mockDevice;
+    apiDevice = api.GetNewDevice();
+    EXPECT_CALL(api, DeviceReference(apiDevice));
+    mWireServer->InjectDevice(apiDevice, deviceReservation.id, deviceReservation.generation);
 
     // The GetQueue is done on WireClient startup so we expect it now.
     queue = wgpuDeviceGetQueue(device);
@@ -145,6 +150,7 @@ dawn::wire::WireClient* WireTest::GetWireClient() {
 void WireTest::DeleteServer() {
     EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
+    EXPECT_CALL(api, InstanceRelease(apiInstance)).Times(1);
 
     if (mWireServer) {
         // These are called on server destruction to clear the callbacks. They must not be

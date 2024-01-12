@@ -65,6 +65,7 @@ WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
 }
 
 WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
+                                    ObjectHandle eventManager,
                                     WGPUFuture future,
                                     WGPUMapModeFlags mode,
                                     uint64_t offset64,
@@ -73,6 +74,7 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     // client will require in the return command.
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
     userdata->buffer = buffer.AsHandle();
+    userdata->eventManager = eventManager;
     userdata->bufferObj = buffer->handle;
     userdata->future = future;
     userdata->mode = mode;
@@ -223,7 +225,9 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
     bool isSuccess = status == WGPUBufferMapAsyncStatus_Success;
 
     ReturnBufferMapAsyncCallbackCmd cmd;
+    // TODO(dawn:2061) Should be able to remove buffer once mapping is updated.
     cmd.buffer = data->buffer;
+    cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
     cmd.readDataUpdateInfoLength = 0;

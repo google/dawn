@@ -36,12 +36,10 @@
 
 namespace dawn::wire::client {
 
-class Queue final : public ObjectBase {
+class Queue final : public ObjectWithEventsBase {
   public:
-    using ObjectBase::ObjectBase;
+    using ObjectWithEventsBase::ObjectWithEventsBase;
     ~Queue() override;
-
-    bool OnWorkDoneCallback(WGPUFuture future, WGPUQueueWorkDoneStatus status);
 
     // Dawn API
     void OnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata);
