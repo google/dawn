@@ -144,7 +144,7 @@ enum class Format : uint8_t {
 
 #if TINT_BUILD_HLSL_WRITER
 constexpr uint32_t kMinShaderModelForDXC = 60u;
-constexpr uint32_t kMaxSupportedShaderModelForDXC = 64u;
+constexpr uint32_t kMaxSupportedShaderModelForDXC = 66u;
 #endif  // TINT_BUILD_HLSL_WRITER
 
 struct Options {
@@ -919,10 +919,14 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     gen_options.pixel_local_options = options.pixel_local_options;
     if (must_validate_dxc) {
         constexpr uint32_t kMinShaderModelForDP4aInHLSL = 64u;
+        constexpr uint32_t kMinShaderModelForPackUnPack4x8InHLSL = 66u;
         gen_options.polyfill_dot_4x8_packed =
             options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
+        gen_options.polyfill_pack_unpack_4x8 =
+            options.hlsl_shader_model < kMinShaderModelForPackUnPack4x8InHLSL;
     } else {
         gen_options.polyfill_dot_4x8_packed = true;
+        gen_options.polyfill_pack_unpack_4x8 = true;
     }
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {

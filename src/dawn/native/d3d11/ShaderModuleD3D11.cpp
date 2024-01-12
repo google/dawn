@@ -212,6 +212,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     // D3D11 doesn't support shader model 6+ features
     req.hlsl.tintOptions.polyfill_dot_4x8_packed = true;
+    req.hlsl.tintOptions.polyfill_pack_unpack_4x8 = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
     MaybeError compileError = [&]() -> MaybeError {

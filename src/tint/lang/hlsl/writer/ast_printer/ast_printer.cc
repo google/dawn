@@ -256,8 +256,11 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.workgroup_uniform_load = true;
         polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
-        // TODO(tint:1497): Support HLSL SM6.6 pack/unpack intrinsics
-        polyfills.pack_unpack_4x8 = true;
+        polyfills.pack_unpack_4x8 = options.polyfill_pack_unpack_4x8;
+        // Currently Pack4xU8Clamp() must be polyfilled because on latest DXC pack_clamp_u8()
+        // receives an int32_t4 as its input.
+        // See https://github.com/microsoft/DirectXShaderCompiler/issues/5091 for more details.
+        polyfills.pack_4xu8_clamp = true;
         data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<ast::transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
     }
@@ -2542,6 +2545,56 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
 bool ASTPrinter::EmitPacked4x8IntegerDotProductBuiltinCall(StringStream& out,
                                                            const ast::CallExpression* expr,
                                                            const sem::BuiltinFn* builtin) {
+    switch (builtin->Fn()) {
+        case wgsl::BuiltinFn::kDot4I8Packed:
+        case wgsl::BuiltinFn::kDot4U8Packed:
+            break;
+        case wgsl::BuiltinFn::kPack4XI8: {
+            out << "uint(pack_s8(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+        case wgsl::BuiltinFn::kPack4XU8: {
+            out << "uint(pack_u8(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+        case wgsl::BuiltinFn::kPack4XI8Clamp: {
+            out << "uint(pack_clamp_s8(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+        case wgsl::BuiltinFn::kUnpack4XI8: {
+            out << "unpack_s8s32(int8_t4_packed(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+        case wgsl::BuiltinFn::kUnpack4XU8: {
+            out << "unpack_u8u32(uint8_t4_packed(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+        case wgsl::BuiltinFn::kPack4XU8Clamp:
+        default:
+            TINT_UNIMPLEMENTED() << builtin->Fn();
+            return false;
+    }
+
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             std::string functionName;

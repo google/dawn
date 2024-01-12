@@ -132,8 +132,9 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     }
 
     D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {
-        {D3D_SHADER_MODEL_6_4}, {D3D_SHADER_MODEL_6_3}, {D3D_SHADER_MODEL_6_2},
-        {D3D_SHADER_MODEL_6_1}, {D3D_SHADER_MODEL_6_0}, {D3D_SHADER_MODEL_5_1}};
+        {D3D_SHADER_MODEL_6_6}, {D3D_SHADER_MODEL_6_5}, {D3D_SHADER_MODEL_6_4},
+        {D3D_SHADER_MODEL_6_3}, {D3D_SHADER_MODEL_6_2}, {D3D_SHADER_MODEL_6_1},
+        {D3D_SHADER_MODEL_6_0}, {D3D_SHADER_MODEL_5_1}};
     uint32_t driverShaderModel = 0;
     for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
         if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
@@ -170,6 +171,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureOptions4.Native16BitShaderOpsSupported;
 
     info.supportsPacked4x8IntegerDotProduct = driverShaderModel >= D3D_SHADER_MODEL_6_4;
+    info.supportsPackUnpack4x8Intrinsics = driverShaderModel >= D3D_SHADER_MODEL_6_6;
 
     // Device support wave intrinsics if shader model >= SM6.0 and capabilities flag WaveOps is set.
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics

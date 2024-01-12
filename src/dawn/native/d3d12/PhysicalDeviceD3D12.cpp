@@ -575,6 +575,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         deviceToggles->ForceSet(Toggle::PolyFillPacked4x8DotProduct, true);
     }
 
+    if (!GetDeviceInfo().supportsPackUnpack4x8Intrinsics ||
+        !deviceToggles->IsEnabled(Toggle::UseDXC) ||
+        !GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 6, 1, 6)) {
+        deviceToggles->ForceSet(Toggle::D3D12PolyFillPackUnpack4x8, true);
+    }
+
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 

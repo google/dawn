@@ -1549,7 +1549,7 @@ TEST_F(IR_BuiltinPolyfillTest, Pack4xU8Clamp) {
 )";
 
     BuiltinPolyfillConfig config;
-    config.pack_unpack_4x8 = true;
+    config.pack_4xu8_clamp = true;
     Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());

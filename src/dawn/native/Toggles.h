@@ -123,6 +123,7 @@ enum class Toggle {
     UseTintIR,
     D3DDisableIEEEStrictness,
     PolyFillPacked4x8DotProduct,
+    D3D12PolyFillPackUnpack4x8,
     ExposeWGSLTestingFeatures,
     ExposeWGSLExperimentalFeatures,
     DisablePolyfillsOnIntegerDivisonAndModulo,

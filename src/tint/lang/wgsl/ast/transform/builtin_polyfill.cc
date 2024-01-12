@@ -1525,7 +1525,7 @@ struct BuiltinPolyfill::State {
                     }
 
                     case wgsl::BuiltinFn::kPack4XU8Clamp: {
-                        if (cfg.builtins.pack_unpack_4x8) {
+                        if (cfg.builtins.pack_4xu8_clamp) {
                             return builtin_polyfills.GetOrCreate(builtin,
                                                                  [&] { return Pack4xU8Clamp(); });
                         }

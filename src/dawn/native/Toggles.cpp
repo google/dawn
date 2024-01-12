@@ -490,6 +490,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"polyfill_packed_4x8_dot_product",
       "Always use the polyfill version of dot4I8Packed() and dot4U8Packed().",
       "https://crbug.com/tint/1497", ToggleStage::Device}},
+    {Toggle::D3D12PolyFillPackUnpack4x8,
+     {"d3d12_polyfill_pack_unpack_4x8",
+      "Always use the polyfill version of pack4xI8(), pack4xU8(), pack4xI8Clamp(), unpack4xI8() "
+      "and unpack4xU8() on D3D12 backends. Note that these functions are always polyfilled on all "
+      "other backends right now.",
+      "https://crbug.com/tint/1497", ToggleStage::Device}},
     {Toggle::ExposeWGSLTestingFeatures,
      {"expose_wgsl_testing_features",
       "Make the Instance expose the ChromiumTesting* features for testing of "

@@ -4061,6 +4061,7 @@ DataMap polyfillPacked4x8IntegerDotProduct() {
     BuiltinPolyfill::Builtins builtins;
     builtins.dot_4x8_packed = true;
     builtins.pack_unpack_4x8 = true;
+    builtins.pack_4xu8_clamp = true;
     DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;

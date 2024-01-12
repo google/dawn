@@ -129,10 +129,15 @@ struct State {
                     case core::BuiltinFn::kPack4XI8:
                     case core::BuiltinFn::kPack4XU8:
                     case core::BuiltinFn::kPack4XI8Clamp:
-                    case core::BuiltinFn::kPack4XU8Clamp:
                     case core::BuiltinFn::kUnpack4XI8:
                     case core::BuiltinFn::kUnpack4XU8: {
                         if (config.pack_unpack_4x8) {
+                            worklist.Push(builtin);
+                        }
+                        break;
+                    }
+                    case core::BuiltinFn::kPack4XU8Clamp: {
+                        if (config.pack_4xu8_clamp) {
                             worklist.Push(builtin);
                         }
                         break;

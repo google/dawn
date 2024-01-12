@@ -145,6 +145,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         polyfills.workgroup_uniform_load = true;
         polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
         polyfills.pack_unpack_4x8 = true;
+        polyfills.pack_4xu8_clamp = true;
         data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<ast::transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
     }
