@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-01-10 07:53:45AM
+# Last rolled: 2024-01-12 06:51:51AM
 
 # Flaky on all platforms
 # KEEP
@@ -121,11 +121,7 @@ crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_z
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
 # precision issues
-crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=-0.125 [ Failure ]
 crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
-crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.1 [ Failure ]
-crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus-stencil8";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.1 [ Failure ]
 
 # Writes to frag_depth are not clamped to viewport min/max depth
 crbug.com/dawn/2185 webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
@@ -164,17 +160,17 @@ crbug.com/dawn/2077 webgpu:shader,execution,expression,unary,af_assignment:f32:i
 
 # Video tests with dstColorSpace="display-p3" failing
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp8-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2196 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 
 # Mapping (only fails in Telemetry, not in browser standalone)
 crbug.com/dawn/2259 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
@@ -577,7 +573,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
@@ -599,6 +594,7 @@ crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_s
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp="_undef_";async=true [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=false [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=true [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,shader_module:sample_index:entryPoint="fsWithSampleIndexUsage" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
