@@ -598,6 +598,12 @@ void Validator::CheckUserCall(const UserCall* call) {
         AddError(call, UserCall::kFunctionOperandOffset,
                  InstError(call, "call target is not part of the module"));
     }
+
+    if (call->Target()->Stage() != Function::PipelineStage::kUndefined) {
+        AddError(call, UserCall::kFunctionOperandOffset,
+                 InstError(call, "call target must not have a pipeline stage"));
+    }
+
     auto args = call->Args();
     auto params = call->Target()->Params();
     if (args.Length() != params.Length()) {

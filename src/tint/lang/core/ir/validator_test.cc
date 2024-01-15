@@ -179,6 +179,42 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
+    auto* f = b.Function("f", ty.void_());
+    auto* g = b.Function("g", ty.void_(), Function::PipelineStage::kCompute);
+
+    b.Append(f->Block(), [&] {
+        b.Call(g);
+        b.Return(f);
+    });
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.str(),
+              R"(:3:20 error: call: call target must not have a pipeline stage
+    %2:void = call %g
+                   ^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%f = func():void -> %b1 {
+  %b1 = block {
+    %2:void = call %g
+    ret
+  }
+}
+%g = @compute func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
     auto* g = b.Function("g", ty.void_());
     g->SetParams({b.FunctionParam<i32>(), b.FunctionParam<i32>()});
