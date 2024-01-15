@@ -586,20 +586,20 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
     std::array<RotationExpectation, 8> expectations = {
         {{wgpu::ExternalTextureRotation::Rotate0Degrees, false, utils::RGBA8::kGreen,
           utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kBlue},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, false, utils::RGBA8::kBlack,
-          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, false, utils::RGBA8::kRed,
+          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kBlack},
          {wgpu::ExternalTextureRotation::Rotate180Degrees, false, utils::RGBA8::kBlue,
           utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kGreen},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kRed,
-          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kBlack,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
          {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kRed,
           utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kGreen,
-          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kBlue,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen},
          {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kBlack,
           utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kBlue,
-          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kGreen,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue}}};
 
     for (const RotationExpectation& exp : expectations) {
         // Pipeline Creation
@@ -770,20 +770,20 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
     std::array<RotationExpectation, 8> expectations = {
         {{wgpu::ExternalTextureRotation::Rotate0Degrees, false, utils::RGBA8::kGreen,
           utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kBlue},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, false, utils::RGBA8::kBlack,
-          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, false, utils::RGBA8::kRed,
+          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kBlack},
          {wgpu::ExternalTextureRotation::Rotate180Degrees, false, utils::RGBA8::kBlue,
           utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kGreen},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kRed,
-          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kBlack,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
          {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kRed,
           utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kGreen,
-          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kBlue,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen},
          {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kBlack,
           utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kBlue,
-          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kGreen,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue}}};
 
     for (const RotationExpectation& exp : expectations) {
         // Pipeline Creation
@@ -933,10 +933,10 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
         {{kWidth / 4, kHeight / 4},
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate90Degrees,
-         utils::RGBA8::kWhite,
-         utils::RGBA8::kBlue,
+         utils::RGBA8::kRed,
          utils::RGBA8::kGreen,
-         utils::RGBA8::kRed},
+         utils::RGBA8::kBlue,
+         utils::RGBA8::kWhite},
         {{kWidth / 4, kHeight / 4},
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate180Degrees,
@@ -947,10 +947,10 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
         {{kWidth / 4, kHeight / 4},
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate270Degrees,
-         utils::RGBA8::kRed,
-         utils::RGBA8::kGreen,
+         utils::RGBA8::kWhite,
          utils::RGBA8::kBlue,
-         utils::RGBA8::kWhite},
+         utils::RGBA8::kGreen,
+         utils::RGBA8::kRed},
     }};
 
     for (const CropExpectation& exp : expectations) {
@@ -1123,10 +1123,10 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
          {{kWidth / 4, kHeight / 4},
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate90Degrees,
-          utils::RGBA8::kWhite,
-          utils::RGBA8::kBlue,
+          utils::RGBA8::kRed,
           utils::RGBA8::kGreen,
-          utils::RGBA8::kRed},
+          utils::RGBA8::kBlue,
+          utils::RGBA8::kWhite},
          {{kWidth / 4, kHeight / 4},
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate180Degrees,
@@ -1137,10 +1137,10 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
          {{kWidth / 4, kHeight / 4},
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate270Degrees,
-          utils::RGBA8::kRed,
-          utils::RGBA8::kGreen,
+          utils::RGBA8::kWhite,
           utils::RGBA8::kBlue,
-          utils::RGBA8::kWhite}}};
+          utils::RGBA8::kGreen,
+          utils::RGBA8::kRed}}};
 
     for (const CropExpectation& exp : expectations) {
         // Pipeline Creation

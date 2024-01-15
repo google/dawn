@@ -1544,6 +1544,7 @@
     "external texture rotation":{
         "category": "enum",
         "tags": ["dawn"],
+        "_comment": "ANGLEs are clockwise rotation degrees and not trigonometric.",
         "values": [
             {"value": 0, "name": "rotate 0 degrees"},
             {"value": 1, "name": "rotate 90 degrees"},
