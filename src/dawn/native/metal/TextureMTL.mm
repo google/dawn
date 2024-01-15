@@ -48,6 +48,16 @@ namespace dawn::native::metal {
 
 namespace {
 
+// NOTE: When creating MTLTextures from IOSurfaces vended by
+// SharedTextureMemory, we pass all Metal texture usages. This will facilitate an
+// upcoming change to have SharedTextureMemory cache MTLTextures. See
+// discussion in https://bugs.chromium.org/p/dawn/issues/detail?id=2152#c14 and
+// following comments for both (a) why this is necessary and (b) why it is not
+// harmful to performance.
+const MTLTextureUsage kMetalTextureUsageForSharedTextureMemoryIOSurface =
+    MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead | MTLTextureUsagePixelFormatView |
+    MTLTextureUsageRenderTarget;
+
 MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage) {
     MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
@@ -421,14 +431,8 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
         // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
         // between linear space and sRGB. For example, creating bgra8Unorm texture view on
         // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
-        mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage());
+        mtlDesc.usage = kMetalTextureUsageForSharedTextureMemoryIOSurface;
         mtlDesc.pixelFormat = MetalPixelFormat(GetDevice(), GetFormat().format);
-        if (GetDevice()->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
-            GetFormat().format == wgpu::TextureFormat::Stencil8) {
-            // If we used a combined depth stencil format instead of stencil8, we need
-            // MTLTextureUsagePixelFormatView to reinterpet as stencil8.
-            mtlDesc.usage |= MTLTextureUsagePixelFormatView;
-        }
 
         mMtlUsage = mtlDesc.usage;
         mMtlFormat = mtlDesc.pixelFormat;
@@ -438,7 +442,7 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
                                                                  iosurface:ioSurface
                                                                      plane:0]);
     } else {
-        mMtlUsage = MetalTextureUsage(GetFormat(), GetInternalUsage());
+        mMtlUsage = kMetalTextureUsageForSharedTextureMemoryIOSurface;
         // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
         mMtlFormat = MTLPixelFormatInvalid;
         const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
