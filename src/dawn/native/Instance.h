@@ -132,15 +132,12 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // validation is actually enabled or not when a physical device is created. Sometimes it is
     // enabled externally via command line or environment variables.
     bool IsBackendValidationEnabled() const;
-    void SetBackendValidationLevel(BackendValidationLevel level);
     BackendValidationLevel GetBackendValidationLevel() const;
 
-    void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
     bool IsBeginCaptureOnStartupEnabled() const;
 
     // TODO(crbug.com/dawn/1495): Move this to a Toggle, perhaps on RequestAdapterOptions
     // after Toggle refactor is complete.
-    void EnableAdapterBlocklist(bool enable);
     bool IsAdapterBlocklistEnabled() const;
 
     // Testing only API that is NOT thread-safe.

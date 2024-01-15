@@ -193,24 +193,6 @@ const FeatureInfo* Instance::GetFeatureInfo(WGPUFeatureName feature) {
     return mImpl->GetFeatureInfo(static_cast<wgpu::FeatureName>(feature));
 }
 
-void Instance::EnableBackendValidation(bool enableBackendValidation) {
-    if (enableBackendValidation) {
-        mImpl->SetBackendValidationLevel(BackendValidationLevel::Full);
-    }
-}
-
-void Instance::SetBackendValidationLevel(BackendValidationLevel level) {
-    mImpl->SetBackendValidationLevel(level);
-}
-
-void Instance::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
-    mImpl->EnableBeginCaptureOnStartup(beginCaptureOnStartup);
-}
-
-void Instance::EnableAdapterBlocklist(bool enable) {
-    mImpl->EnableAdapterBlocklist(enable);
-}
-
 uint64_t Instance::GetDeviceCountForTesting() const {
     return mImpl->GetDeviceCountForTesting();
 }

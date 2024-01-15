@@ -445,24 +445,12 @@ bool InstanceBase::IsBackendValidationEnabled() const {
     return mBackendValidationLevel != BackendValidationLevel::Disabled;
 }
 
-void InstanceBase::SetBackendValidationLevel(BackendValidationLevel level) {
-    mBackendValidationLevel = level;
-}
-
 BackendValidationLevel InstanceBase::GetBackendValidationLevel() const {
     return mBackendValidationLevel;
 }
 
-void InstanceBase::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
-    mBeginCaptureOnStartup = beginCaptureOnStartup;
-}
-
 bool InstanceBase::IsBeginCaptureOnStartupEnabled() const {
     return mBeginCaptureOnStartup;
-}
-
-void InstanceBase::EnableAdapterBlocklist(bool enable) {
-    mEnableAdapterBlocklist = enable;
 }
 
 bool InstanceBase::IsAdapterBlocklistEnabled() const {
