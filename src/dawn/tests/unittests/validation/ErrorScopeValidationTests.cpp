@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
+#include <vector>
 
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
@@ -64,6 +65,14 @@ class ErrorScopeValidationTest : public ValidationTest {
         device.Tick();
     }
 
+    // Generate new void* pointer for use as `userdata` in callback. The pointer
+    // is valid for the whole duration of the test. This avoids dangling
+    // pointers checks to trigger.
+    void* CreateUserData() {
+        mUserData.push_back(std::make_unique<bool>());
+        return reinterpret_cast<void*>(mUserData.back().get());
+    }
+
   private:
     void SetUp() override {
         ValidationTest::SetUp();
@@ -78,14 +87,18 @@ class ErrorScopeValidationTest : public ValidationTest {
         mockDevicePopErrorScopeCallback = nullptr;
         mockQueueWorkDoneCallback = nullptr;
     }
+
+    std::vector<std::unique_ptr<bool>> mUserData;
 };
 
 // Test the simple success case.
 TEST_F(ErrorScopeValidationTest, Success) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
     FlushWireAndTick();
 }
 
@@ -97,8 +110,10 @@ TEST_F(ErrorScopeValidationTest, CatchesError) {
     desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
     device.CreateBuffer(&desc);
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
     FlushWireAndTick();
 }
 
@@ -112,14 +127,17 @@ TEST_F(ErrorScopeValidationTest, ErrorBubbles) {
     device.CreateBuffer(&desc);
 
     // OutOfMemory does not match Validation error.
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata_1 = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_1))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
     FlushWireAndTick();
 
     // Parent validation error scope captures the error.
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this + 1))
+    void* userdata_2 = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata_2))
         .Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
     FlushWireAndTick();
 }
 
@@ -133,14 +151,17 @@ TEST_F(ErrorScopeValidationTest, HandledErrorsStopBubbling) {
     device.CreateBuffer(&desc);
 
     // Inner scope catches the error.
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata_1 = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata_1))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
     FlushWireAndTick();
 
     // Parent scope does not see the error.
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this + 1))
+    void* userdata_2 = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_2))
         .Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
     FlushWireAndTick();
 }
 
@@ -152,8 +173,10 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
     desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&desc));
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
     FlushWireAndTick();
 }
 
@@ -161,23 +184,26 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
 TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
     // No error scopes to pop.
     {
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this))
+        void* userdata = CreateUserData();
+        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata))
             .Times(1);
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
         FlushWireAndTick();
     }
     // Too many pops
     {
         device.PushErrorScope(wgpu::ErrorFilter::Validation);
 
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this + 1))
+        void* userdata_1 = CreateUserData();
+        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_1))
             .Times(1);
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
         FlushWireAndTick();
 
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this + 2))
+        void* userdata_2 = CreateUserData();
+        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata_2))
             .Times(1);
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 2);
+        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
         FlushWireAndTick();
     }
 }
@@ -190,22 +216,25 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
+    void* userdata_1 = CreateUserData();
     queue.Submit(0, nullptr);
-    queue.OnSubmittedWorkDone(ToMockQueueWorkDone, this);
+    queue.OnSubmittedWorkDone(ToMockQueueWorkDone, userdata_1);
 
     Sequence seq;
 
     MockCallback<WGPUErrorCallback> errorScopeCallback2;
-    EXPECT_CALL(errorScopeCallback2, Call(WGPUErrorType_NoError, _, this + 1)).InSequence(seq);
+    void* userdata_2 = CreateUserData();
+    EXPECT_CALL(errorScopeCallback2, Call(WGPUErrorType_NoError, _, userdata_2)).InSequence(seq);
     device.PopErrorScope(errorScopeCallback2.Callback(),
-                         errorScopeCallback2.MakeUserdata(this + 1));
+                         errorScopeCallback2.MakeUserdata(userdata_2));
 
     MockCallback<WGPUErrorCallback> errorScopeCallback1;
-    EXPECT_CALL(errorScopeCallback1, Call(WGPUErrorType_NoError, _, this + 2)).InSequence(seq);
+    void* userdata_3 = CreateUserData();
+    EXPECT_CALL(errorScopeCallback1, Call(WGPUErrorType_NoError, _, userdata_3)).InSequence(seq);
     device.PopErrorScope(errorScopeCallback1.Callback(),
-                         errorScopeCallback1.MakeUserdata(this + 2));
+                         errorScopeCallback1.MakeUserdata(userdata_3));
 
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this))
+    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, userdata_1))
         .InSequence(seq);
     WaitForAllOperations(device);
 }
@@ -222,16 +251,18 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
     }
 
     if (UsesWire()) {
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+        void* userdata = CreateUserData();
+        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
 
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this))
+        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata))
             .Times(1);
         ExpectDeviceDestruction();
         device = nullptr;
     } else {
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this))
+        void* userdata = CreateUserData();
+        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
             .Times(1);
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
         ExpectDeviceDestruction();
         device = nullptr;
     }
@@ -244,8 +275,10 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforePop) {
     device.Destroy();
     FlushWireAndTick();
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_DeviceLost, _, this)).Times(1);
-    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    void* userdata = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_DeviceLost, _, userdata))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
     FlushWireAndTick();
 }
 
