@@ -1232,10 +1232,18 @@ class UniformityGraph {
                     node->AddEdge(cf);
 
                     auto* current_value = current_function_->variables.Get(param);
-                    if (param->Type()->Is<core::type::Pointer>()) {
+                    if (auto* ptr = param->Type()->As<core::type::Pointer>()) {
                         if (load_rule) {
-                            // We are loading from the pointer, so add an edge to its contents.
-                            node->AddEdge(current_value);
+                            if (ptr->AddressSpace() == core::AddressSpace::kFunction ||
+                                ptr->Access() == core::Access::kRead) {
+                                // We are loading from a pointer to a function-scope variable or an
+                                // immutable module-scope variable, so add an edge to its contents.
+                                node->AddEdge(current_value);
+                            } else {
+                                // We are loading from a pointer to a mutable module-scope variable,
+                                // which always has non-uniform contents.
+                                node->AddEdge(current_function_->may_be_non_uniform);
+                            }
                         } else {
                             // This is a pointer parameter that we are not loading from, so add an
                             // edge to the pointer value itself.
