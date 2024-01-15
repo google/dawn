@@ -33,7 +33,7 @@ namespace {
 TEST_F(WGSLParserTest, MathExpression_Parses_Multiplicative) {
     auto p = parser("a * b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -54,7 +54,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Multiplicative) {
 TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_MultiplicativeStart) {
     auto p = parser("a * b + c");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -89,7 +89,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_MultiplicativeStart) {
 TEST_F(WGSLParserTest, MathExpression_Parses_Additive) {
     auto p = parser("a + b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -110,7 +110,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Additive) {
 TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_AdditiveStart) {
     auto p = parser("a + b * c");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -145,7 +145,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_AdditiveStart) {
 TEST_F(WGSLParserTest, MathExpression_NoMatch_ReturnLHS) {
     auto p = parser("a if");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -155,7 +155,7 @@ TEST_F(WGSLParserTest, MathExpression_NoMatch_ReturnLHS) {
 TEST_F(WGSLParserTest, MathExpression_InvalidRHS) {
     auto p = parser("a * if");
     auto lhs = p->unary_expression();
-    auto e = p->expect_math_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_math_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
     ASSERT_EQ(e.value, nullptr);

@@ -33,15 +33,15 @@ namespace {
 TEST_F(WGSLParserTest, AdditiveExpression_Parses_Plus) {
     auto p = parser("a + b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 6u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -59,7 +59,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_Plus) {
 TEST_F(WGSLParserTest, AdditiveExpression_Parses_Minus) {
     auto p = parser("a - b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -80,7 +80,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_Minus) {
 TEST_F(WGSLParserTest, AdditiveExpression_Parses_MinusMinus) {
     auto p = parser("a--b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -105,7 +105,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MinusMinus) {
 TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps) {
     auto p = parser("a - b + c - d");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -151,7 +151,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps) {
 TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication) {
     auto p = parser("a - b * c - d");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -197,7 +197,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
 TEST_F(WGSLParserTest, AdditiveExpression_InvalidRHS) {
     auto p = parser("a + if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
@@ -207,7 +207,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_InvalidRHS) {
 TEST_F(WGSLParserTest, AdditiveExpression_NoMatch_ReturnsLHS) {
     auto p = parser("a true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_additive_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_additive_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);

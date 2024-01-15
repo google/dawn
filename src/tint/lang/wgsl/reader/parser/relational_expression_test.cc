@@ -33,15 +33,15 @@ namespace {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThan) {
     auto p = parser("a < true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 9u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -58,15 +58,15 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThan) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThan) {
     auto p = parser("a > true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 9u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -83,15 +83,15 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThan) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThanEqual) {
     auto p = parser("a <= true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -108,15 +108,15 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThanEqual) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThanEqual) {
     auto p = parser("a >= true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -133,15 +133,15 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThanEqual) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_Equal) {
     auto p = parser("a == true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -158,15 +158,15 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_Equal) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_NotEqual) {
     auto p = parser("a != true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -183,7 +183,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_NotEqual) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_InvalidRHS) {
     auto p = parser("true < if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(e.value, nullptr);
     EXPECT_EQ(p->error(), "1:8: unable to parse right side of < expression");
@@ -192,7 +192,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_InvalidRHS) {
 TEST_F(WGSLParserTest, RelationalExpression_PostUnary_NoMatch_ReturnsLHS) {
     auto p = parser("a true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -247,9 +247,9 @@ TEST_F(WGSLParserTest, RelationalExpression_Parses_Equal) {
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -272,9 +272,9 @@ TEST_F(WGSLParserTest, RelationalExpression_Parses_NotEqual) {
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();

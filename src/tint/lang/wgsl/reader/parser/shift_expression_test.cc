@@ -33,15 +33,15 @@ namespace {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftLeft) {
     auto p = parser("a << true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -58,15 +58,15 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftLeft) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftRight) {
     auto p = parser("a >> true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 5u);
+    EXPECT_EQ(e->source.range.end.column, 10u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -83,7 +83,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftRight) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Additive) {
     auto p = parser("a + b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -104,7 +104,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Additive) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Multiplicative) {
     auto p = parser("a * b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -125,7 +125,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Multiplicative) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidSpaceLeft) {
     auto p = parser("a < < true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     ASSERT_NE(e.value, nullptr);
     EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
@@ -134,7 +134,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidSpaceLeft) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidSpaceRight) {
     auto p = parser("a > > true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     ASSERT_NE(e.value, nullptr);
     EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
@@ -143,7 +143,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidSpaceRight) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidRHS) {
     auto p = parser("a << if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(e.value, nullptr);
@@ -153,7 +153,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_InvalidRHS) {
 TEST_F(WGSLParserTest, ShiftExpression_PostUnary_NoOr_ReturnsLHS) {
     auto p = parser("a true");
     auto lhs = p->unary_expression();
-    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);

@@ -33,7 +33,7 @@ namespace {
 TEST_F(WGSLParserTest, BitwiseExpr_NoOp) {
     auto p = parser("a true");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -43,16 +43,16 @@ TEST_F(WGSLParserTest, BitwiseExpr_NoOp) {
 TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses) {
     auto p = parser("a | true");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 9u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -69,7 +69,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses) {
 TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses_Multiple) {
     auto p = parser("a | true | b");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -103,7 +103,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses_Multiple) {
 TEST_F(WGSLParserTest, BitwiseExpr_Or_InvalidRHS) {
     auto p = parser("true | if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -114,16 +114,16 @@ TEST_F(WGSLParserTest, BitwiseExpr_Or_InvalidRHS) {
 TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses) {
     auto p = parser("a ^ true");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 9u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -140,7 +140,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses) {
 TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses_Multiple) {
     auto p = parser("a ^ true ^ b");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -173,7 +173,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses_Multiple) {
 TEST_F(WGSLParserTest, BitwiseExpr_Xor_InvalidRHS) {
     auto p = parser("true ^ if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -184,16 +184,16 @@ TEST_F(WGSLParserTest, BitwiseExpr_Xor_InvalidRHS) {
 TEST_F(WGSLParserTest, BitwiseExpr_And_Parses) {
     auto p = parser("a & true");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
     EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
     EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 4u);
+    EXPECT_EQ(e->source.range.end.column, 9u);
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
@@ -210,7 +210,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses) {
 TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_Multiple) {
     auto p = parser("a & true & b");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -243,7 +243,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_Multiple) {
 TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_AndAnd) {
     auto p = parser("a & true &&b");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     // bitwise_expression_post_unary_expression returns before parsing '&&'
 
     EXPECT_TRUE(e.matched);
@@ -264,7 +264,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_AndAnd) {
 TEST_F(WGSLParserTest, BitwiseExpr_And_InvalidRHS) {
     auto p = parser("true & if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    auto e = p->bitwise_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

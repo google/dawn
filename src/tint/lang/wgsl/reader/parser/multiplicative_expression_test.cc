@@ -33,7 +33,7 @@ namespace {
 TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Multiply) {
     auto p = parser("a * b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -54,7 +54,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Multiply) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Multiply_UnaryIndirect) {
     auto p = parser("a **b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -79,7 +79,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Multiply_UnaryIndirect) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Divide) {
     auto p = parser("a / b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -100,7 +100,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Divide) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Modulo) {
     auto p = parser("a % b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -121,7 +121,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Modulo) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Grouping) {
     auto p = parser("a * b / c % d * e");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
@@ -178,7 +178,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Grouping) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_InvalidRHS) {
     auto p = parser("a * if (a) {}");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
@@ -188,7 +188,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_InvalidRHS) {
 TEST_F(WGSLParserTest, MultiplicativeExpression_NoMatch_ReturnsLHS) {
     auto p = parser("a + b");
     auto lhs = p->unary_expression();
-    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value);
+    auto e = p->expect_multiplicative_expression_post_unary_expression(lhs.value, lhs->source);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
