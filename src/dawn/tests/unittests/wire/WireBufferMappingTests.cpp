@@ -758,9 +758,9 @@ TEST_P(WireBufferMappingTests, GetMapState) {
     WGPUMapMode mapMode = GetMapMode();
     SetupBuffer(mapMode);
 
+    uint32_t bufferContent = 31337;
     // Server-side success case
     {
-        uint32_t bufferContent = 31337;
         EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, mapMode, 0, kBufferSize, _, _))
             .WillOnce(InvokeWithoutArgs([&] {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
