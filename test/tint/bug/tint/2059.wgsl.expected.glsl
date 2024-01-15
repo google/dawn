@@ -67,9 +67,9 @@ void assign_and_preserve_padding_buffer2_m_X(uint dest[1], mat3 value) {
 }
 
 void assign_and_preserve_padding_buffer7_X_m_X(uint dest[2], mat3 value) {
-  buffer7.inner[dest[0]].m[dest[0]][0] = value[0u];
-  buffer7.inner[dest[0]].m[dest[0]][1] = value[1u];
-  buffer7.inner[dest[0]].m[dest[0]][2] = value[2u];
+  buffer7.inner[dest[0]].m[dest[1]][0] = value[0u];
+  buffer7.inner[dest[0]].m[dest[1]][1] = value[1u];
+  buffer7.inner[dest[0]].m[dest[1]][2] = value[2u];
 }
 
 void assign_and_preserve_padding_buffer1_m(mat3 value) {

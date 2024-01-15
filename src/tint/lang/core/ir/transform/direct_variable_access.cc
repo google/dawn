@@ -380,7 +380,7 @@ struct State {
                 return variant_fn;
             });
 
-            // Repoint the target of the call to the variant.
+            // Re-point the target of the call to the variant.
             call->SetTarget(new_target);
         });
     }

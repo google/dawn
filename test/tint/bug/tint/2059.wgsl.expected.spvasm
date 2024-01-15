@@ -286,17 +286,17 @@
     %value_2 = OpFunctionParameter %mat3v3float
          %89 = OpLabel
          %90 = OpCompositeExtract %uint %dest_1 0
-         %91 = OpCompositeExtract %uint %dest_1 0
+         %91 = OpCompositeExtract %uint %dest_1 1
          %92 = OpAccessChain %_ptr_StorageBuffer_v3float %buffer7 %uint_0 %90 %uint_0 %91 %44
          %93 = OpCompositeExtract %v3float %value_2 0
                OpStore %92 %93
          %94 = OpCompositeExtract %uint %dest_1 0
-         %95 = OpCompositeExtract %uint %dest_1 0
+         %95 = OpCompositeExtract %uint %dest_1 1
          %96 = OpAccessChain %_ptr_StorageBuffer_v3float %buffer7 %uint_0 %94 %uint_0 %95 %int_1
          %97 = OpCompositeExtract %v3float %value_2 1
                OpStore %96 %97
          %98 = OpCompositeExtract %uint %dest_1 0
-         %99 = OpCompositeExtract %uint %dest_1 0
+         %99 = OpCompositeExtract %uint %dest_1 1
         %100 = OpAccessChain %_ptr_StorageBuffer_v3float %buffer7 %uint_0 %98 %uint_0 %99 %int_2
         %101 = OpCompositeExtract %v3float %value_2 2
                OpStore %100 %101

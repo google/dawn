@@ -84,16 +84,13 @@ bool operator!=(const AccessRoot& a, const AccessRoot& b) {
 /// DynamicIndex is used by DirectVariableAccess::State::AccessOp to indicate an array, matrix or
 /// vector index.
 struct DynamicIndex {
-    /// The index of the expression in DirectVariableAccess::State::AccessChain::dynamic_indices
-    size_t slot = 0;
-
     /// @return a hash code for this object
-    size_t HashCode() const { return Hash(slot); }
+    size_t HashCode() const { return 42 /* empty struct: any number will do */; }
 };
 
 /// Inequality operator for DynamicIndex
-bool operator!=(const DynamicIndex& a, const DynamicIndex& b) {
-    return a.slot != b.slot;
+bool operator!=(const DynamicIndex&, const DynamicIndex&) {
+    return false;  // empty struct: two DynamicIndex objects are always equal
 }
 
 /// AccessOp describes a single access in an access chain.
@@ -484,7 +481,7 @@ struct DirectVariableAccess::State {
                 // Store the index expression into AccessChain::dynamic_indices, append a
                 // DynamicIndex to the chain, and move the chain to the index accessor expression.
                 if (auto* chain = take_chain(a->Object())) {
-                    chain->ops.Push(DynamicIndex{chain->dynamic_indices.Length()});
+                    chain->ops.Push(DynamicIndex{});
                     chain->dynamic_indices.Push(a->Index());
                 }
             },
@@ -1025,20 +1022,23 @@ struct DirectVariableAccess::State {
             // Chain starts with a pointer parameter.
             // Replace this with the variant's incoming shape. This will bring the expression up to
             // the incoming pointer.
+            size_t next_dyn_idx_from_indices = 0;
             auto indices =
                 clone_state->current_variant->ptr_param_symbols.Find(root_param)->indices;
             for (auto param_access : incoming_shape->ops) {
-                chain_expr = BuildAccessExpr(chain_expr, param_access, [&](size_t i) {
-                    return b.IndexAccessor(indices, AInt(i));
+                chain_expr = BuildAccessExpr(chain_expr, param_access, [&] {
+                    return b.IndexAccessor(indices, AInt(next_dyn_idx_from_indices++));
                 });
             }
 
             // Now build the expression chain within the function.
 
             // For each access in the chain (excluding the pointer parameter)...
+            size_t next_dyn_idx_from_chain = 0;
             for (auto& op : chain->ops) {
-                chain_expr = BuildAccessExpr(chain_expr, op, [&](size_t i) {
-                    return BuildDynamicIndex(chain->dynamic_indices[i], false);
+                chain_expr = BuildAccessExpr(chain_expr, op, [&] {
+                    return BuildDynamicIndex(chain->dynamic_indices[next_dyn_idx_from_chain++],
+                                             false);
                 });
             }
 
@@ -1131,13 +1131,13 @@ struct DirectVariableAccess::State {
     /// The returned expression will always be of a reference type.
     /// @param expr the input expression
     /// @param access the access to perform on the current expression
-    /// @param dynamic_index a function that obtains the i'th dynamic index
+    /// @param dynamic_index a function that obtains the next dynamic index
     const Expression* BuildAccessExpr(const Expression* expr,
                                       const AccessOp& access,
-                                      std::function<const Expression*(size_t)> dynamic_index) {
-        if (auto* dyn_idx = std::get_if<DynamicIndex>(&access)) {
+                                      std::function<const Expression*()> dynamic_index) {
+        if (std::holds_alternative<DynamicIndex>(access)) {
             /// The access uses a dynamic (runtime-expression) index.
-            auto* idx = dynamic_index(dyn_idx->slot);
+            auto* idx = dynamic_index();
             return b.IndexAccessor(expr, idx);
         }
 
