@@ -64,6 +64,16 @@
 #define DAWN_HAS_ATTRIBUTE(x) 0
 #endif
 
+// DAWN_HAS_CPP_ATTRIBUTE
+//
+// A wrapper around `__has_cpp_attribute`. This test whether its operand is recognized by the
+// compiler.
+#if defined(__has_cpp_attribute)
+#define DAWN_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#else
+#define DAWN_HAS_CPP_ATTRIBUTE(x) 0
+#endif
+
 // DAWN_BUILTIN_UNREACHABLE()
 //
 // Hints the compiler that a code path is unreachable.
@@ -125,10 +135,10 @@
 // DAWN_FORCE_INLINE
 //
 // Annotate a function indicating it should really never be inline, even in debug mode.
-#if DAWN_COMPILER_IS(CLANG) && defined(NDEBUG) && DAWN_HAS_ATTRIBUTE(always_inline)
+#if DAWN_COMPILER_IS(CLANG) && defined(NDEBUG) && DAWN_HAS_CPP_ATTRIBUTE(clang::always_inline)
 #define DAWN_FORCE_INLINE [[clang::always_inline]] inline
 #elif DAWN_COMPILER_IS(GCC) && defined(NDEBUG) && DAWN_HAS_ATTRIBUTE(always_inline)
-#define DAWN_FORCE_INLINE inline __attribute__((__always_inline__))
+#define DAWN_FORCE_INLINE inline __attribute__((always_inline))
 #elif DAWN_COMPILER_IS(MSVC) && defined(NDEBUG)
 #define DAWN_FORCE_INLINE __forceinline
 #else
