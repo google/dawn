@@ -329,8 +329,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
 
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
-    DAWN_TRY(
-        texture->InitializeFromSharedTextureMemoryIOSurface(descriptor, memory->GetIOSurface()));
+    DAWN_TRY(texture->InitializeFromSharedTextureMemory(memory, descriptor));
     texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
@@ -403,15 +402,15 @@ void Texture::InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descrip
     SetLabelImpl();
 }
 
-MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
-    const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-    IOSurfaceRef ioSurface) {
+MaybeError Texture::InitializeFromSharedTextureMemory(
+    SharedTextureMemory* memory,
+    const UnpackedPtr<TextureDescriptor>& textureDescriptor) {
     DAWN_INVALID_IF(
         GetInternalUsage() & wgpu::TextureUsage::TransientAttachment,
         "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
         GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
 
-    mIOSurface = ioSurface;
+    mIOSurface = memory->GetIOSurface();
 
     Device* device = ToBackend(GetDevice());
 
@@ -439,7 +438,7 @@ MaybeError Texture::InitializeFromSharedTextureMemoryIOSurface(
         mMtlPlaneTextures->resize(1);
         mMtlPlaneTextures[0] =
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
-                                                                 iosurface:ioSurface
+                                                                 iosurface:mIOSurface.Get()
                                                                      plane:0]);
     } else {
         mMtlUsage = kMetalTextureUsageForSharedTextureMemoryIOSurface;

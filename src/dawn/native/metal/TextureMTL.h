@@ -82,9 +82,9 @@ class Texture final : public TextureBase {
     NSRef<MTLTextureDescriptor> CreateMetalTextureDescriptor() const;
 
     MaybeError InitializeAsInternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor);
-    MaybeError InitializeFromSharedTextureMemoryIOSurface(
-        const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-        IOSurfaceRef ioSurface);
+    MaybeError InitializeFromSharedTextureMemory(
+        SharedTextureMemory* memory,
+        const UnpackedPtr<TextureDescriptor>& textureDescriptor);
     void InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descriptor,
                               NSPRef<id<MTLTexture>> wrapped);
 
