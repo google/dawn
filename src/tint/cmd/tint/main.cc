@@ -1046,15 +1046,18 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
     std::cerr << "GLSL writer not enabled in tint build" << std::endl;
     return false;
 #else
-    auto generate = [&](const tint::Program& prg, const std::string entry_point_name) -> bool {
+    auto generate = [&](const tint::Program& prg, const std::string entry_point_name,
+                        [[maybe_unused]] tint::ast::PipelineStage stage) -> bool {
         tint::glsl::writer::Options gen_options;
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.external_texture_options.bindings_map =
             tint::cmd::GenerateExternalTextureBindings(prg);
+
         tint::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
         constexpr uint32_t kMaxBindGroups = 4u;
         textureBuiltinsFromUniform.ubo_binding = {kMaxBindGroups, 0u};
         gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
+
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
         if (result != tint::Success) {
             tint::cmd::PrintWGSL(std::cerr, prg);
@@ -1076,10 +1079,13 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
             std::cerr << "GLSL validator not enabled in tint build" << std::endl;
             return false;
 #else
-            auto val = tint::glsl::validate::Validate(result->glsl, result->entry_points);
-            if (val != tint::Success) {
-                std::cerr << val.Failure();
-                return false;
+            // If there is no entry point name there is nothing to validate
+            if (entry_point_name != "") {
+                auto val = tint::glsl::validate::Validate(result->glsl, stage);
+                if (val != tint::Success) {
+                    std::cerr << val.Failure();
+                    return false;
+                }
             }
 #endif
         }
@@ -1091,12 +1097,24 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
     if (inspector.GetEntryPoints().empty()) {
         // Pass empty string here so that the GLSL generator will generate
         // code for all functions, reachable or not.
-        return generate(program, "");
+        return generate(program, "", tint::ast::PipelineStage::kCompute);
     }
 
     bool success = true;
     for (auto& entry_point : inspector.GetEntryPoints()) {
-        success &= generate(program, entry_point.name);
+        tint::ast::PipelineStage stage = tint::ast::PipelineStage::kCompute;
+        switch (entry_point.stage) {
+            case tint::inspector::PipelineStage::kCompute:
+                stage = tint::ast::PipelineStage::kCompute;
+                break;
+            case tint::inspector::PipelineStage::kVertex:
+                stage = tint::ast::PipelineStage::kVertex;
+                break;
+            case tint::inspector::PipelineStage::kFragment:
+                stage = tint::ast::PipelineStage::kFragment;
+                break;
+        }
+        success &= generate(program, entry_point.name, stage);
     }
     return success;
 #endif  // TINT_BUILD_GLSL_WRITER

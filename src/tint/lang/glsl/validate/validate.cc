@@ -54,25 +54,25 @@ EShLanguage PipelineStageToEshLanguage(tint::ast::PipelineStage stage) {
 
 }  // namespace
 
-Result<SuccessType> Validate(const std::string& source, const EntryPointList& entry_points) {
+Result<SuccessType> Validate(const std::string& source, tint::ast::PipelineStage stage) {
     TINT_STATIC_INIT(glslang::InitializeProcess());
 
-    for (auto entry_pt : entry_points) {
-        EShLanguage lang = PipelineStageToEshLanguage(entry_pt.second);
-        glslang::TShader shader(lang);
-        const char* strings[1] = {source.c_str()};
-        int lengths[1] = {static_cast<int>(source.length())};
-        shader.setStringsWithLengths(strings, lengths, 1);
-        shader.setEntryPoint("main");
-        bool result =
-            shader.parse(GetDefaultResources(), 310, EEsProfile, false, false, EShMsgDefault);
-        if (!result) {
-            StringStream err;
-            err << "Error parsing GLSL shader:\n"
-                << shader.getInfoLog() << "\n"
-                << shader.getInfoDebugLog() << "\n";
-            return Failure{err.str()};
-        }
+    const char* strings[1] = {source.c_str()};
+    int lengths[1] = {static_cast<int>(source.length())};
+
+    EShLanguage lang = PipelineStageToEshLanguage(stage);
+    glslang::TShader shader(lang);
+    shader.setStringsWithLengths(strings, lengths, 1);
+    shader.setEntryPoint("main");
+
+    bool result = shader.parse(GetDefaultResources(), 310, EEsProfile, false, false, EShMsgDefault);
+
+    if (!result) {
+        StringStream err;
+        err << "Error parsing GLSL shader:\n"
+            << shader.getInfoLog() << "\n"
+            << shader.getInfoDebugLog() << "\n";
+        return Failure{err.str()};
     }
 
     return Success;

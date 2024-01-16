@@ -51,9 +51,6 @@ struct Output {
     /// The generated GLSL.
     std::string glsl = "";
 
-    /// The list of entry points in the generated GLSL.
-    std::vector<std::pair<std::string, ast::PipelineStage>> entry_points;
-
     /// True if the shader needs a UBO.
     bool needs_internal_uniform_buffer = false;
 

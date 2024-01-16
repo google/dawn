@@ -29,8 +29,6 @@
 #define SRC_TINT_LANG_GLSL_VALIDATE_VALIDATE_H_
 
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/utils/result/result.h"
@@ -42,13 +40,11 @@ class Program;
 
 namespace tint::glsl::validate {
 
-using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
-
 /// Validate checks that the GLSL source passes validation.
 /// @param source the GLSL source
-/// @param entry_points the list of entry points to validate
+/// @param stage the pipeline stage
 /// @return the result
-Result<SuccessType> Validate(const std::string& source, const EntryPointList& entry_points);
+Result<SuccessType> Validate(const std::string& source, tint::ast::PipelineStage stage);
 
 }  // namespace tint::glsl::validate
 
