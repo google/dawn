@@ -304,6 +304,10 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
         "Either depthBiasSlopeScale (%f) or depthBiasClamp (%f) is NaN.",
         descriptor->depthBiasSlopeScale, descriptor->depthBiasClamp);
 
+    DAWN_INVALID_IF(device->IsCompatibilityMode() && descriptor->depthBiasClamp != 0.0f,
+                    "depthBiasClamp (%f) is not zero as required in compatibility mode.",
+                    descriptor->depthBiasClamp);
+
     DAWN_INVALID_IF(
         format->HasDepth() && descriptor->depthCompare == wgpu::CompareFunction::Undefined &&
             (descriptor->depthWriteEnabled ||
