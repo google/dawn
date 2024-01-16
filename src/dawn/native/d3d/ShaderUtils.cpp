@@ -79,8 +79,15 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                 break;
         }
     }
+    if (compileFlags & D3DCOMPILE_SKIP_OPTIMIZATION) {
+        arguments.push_back(L"/Od");
+    }
     if (compileFlags & D3DCOMPILE_DEBUG) {
         arguments.push_back(L"/Zi");
+        // Unlike FXC, DXC does not embed debug info into the shader object by default, as it's
+        // preferable to save it to pdb files to keep shader objects small. Embed it for now, and we
+        // can consider exposing an option for users to supply a path to dump pdbs to in the future.
+        arguments.push_back(L"/Qembed_debug");
     }
     if (compileFlags & D3DCOMPILE_PACK_MATRIX_ROW_MAJOR) {
         arguments.push_back(L"/Zpr");
