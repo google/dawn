@@ -862,6 +862,9 @@ class MaxInterStageLimitTests : public MaxLimitTests {
     };
 
     void DoTest(const MaxInterStageLimitTestsSpec& spec) {
+        // Compat mode does not support sample index.
+        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() && spec.hasSampleIndex);
+
         wgpu::RenderPipeline pipeline = CreateRenderPipeline(spec);
         EXPECT_NE(nullptr, pipeline.Get());
     }

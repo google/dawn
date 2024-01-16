@@ -630,6 +630,9 @@ TEST_P(ShaderTests, SampleIndex) {
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
+    // Compat mode does not support sample_index
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @vertex
 fn main(@location(0) pos : vec4f) -> @builtin(position) vec4f {
