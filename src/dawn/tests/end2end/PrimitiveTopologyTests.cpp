@@ -31,6 +31,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -186,7 +187,7 @@ class PrimitiveTopologyTest : public DawnTest {
     }
 
     struct LocationSpec {
-        const TestLocation* locations;
+        raw_ptr<const TestLocation, AllowPtrArithmetic> locations;
         size_t count;
         bool include;
     };

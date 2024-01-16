@@ -510,7 +510,10 @@ source_set("test_infra_sources") {
     "${dawn_root}/src/dawn/wire",
   ]
 
-  public_deps = [ ":gmock_and_gtest" ]
+  public_deps = [
+    ":gmock_and_gtest",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
+  ]
 
   if (dawn_supports_glfw_for_windowing) {
     public_deps += [ "${dawn_root}/src/dawn/glfw" ]
@@ -543,6 +546,7 @@ source_set("platform_mocks_sources") {
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/platform",
   ]
+  public_deps = [ "${dawn_root}/src/dawn/partition_alloc:raw_ptr" ]
 
   sources = [
     "mocks/platform/CachingInterfaceMock.cpp",
@@ -560,6 +564,7 @@ source_set("end2end_tests_sources") {
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:headers",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
@@ -730,6 +735,7 @@ source_set("white_box_tests_sources") {
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
 
     # Statically linked and with sources because the end2end white_box tests use Dawn internals.
     "${dawn_root}/src/dawn/native:sources",
@@ -858,6 +864,7 @@ dawn_test("dawn_perf_tests") {
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",

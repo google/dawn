@@ -34,6 +34,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -116,7 +117,7 @@ class GLTextureTestBase : public DawnTest {
     }
 
   protected:
-    native::opengl::Device* mSecondDeviceGL;
+    raw_ptr<native::opengl::Device> mSecondDeviceGL;
     wgpu::Device mSecondDevice;
 };
 

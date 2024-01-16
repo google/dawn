@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/tests/DawnTest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/Math.h"
 #include "dawn/common/vulkan_platform.h"
@@ -47,7 +48,7 @@ class VulkanErrorInjectorTests : public DawnTest {
     }
 
   protected:
-    native::vulkan::Device* mDeviceVk;
+    raw_ptr<native::vulkan::Device> mDeviceVk;
 };
 
 TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {

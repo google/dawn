@@ -53,6 +53,7 @@
 #include "dawn/webgpu_cpp_print.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
@@ -646,7 +647,7 @@ class DawnTestBase {
         wgpu::Device device;
         wgpu::Buffer buffer;
         uint64_t bufferSize;
-        const void* mappedData = nullptr;
+        raw_ptr<const void> mappedData = nullptr;
     };
     std::vector<ReadbackSlot> mReadbackSlots;
 

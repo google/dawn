@@ -37,8 +37,20 @@
 
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/tests/white_box/VulkanImageWrappingTests_DmaBuf.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
+
+namespace {
+
+struct GbmDeviceDeleter {
+    void operator()(gbm_device* ptr) { gbm_device_destroy(ptr); }
+};
+struct GbmBoDeleter {
+    void operator()(gbm_bo* ptr) { gbm_bo_destroy(ptr); }
+};
+
+}  // namespace
 
 class ExternalSemaphoreDmaBuf : public VulkanImageWrappingTestBackend::ExternalSemaphore {
   public:
@@ -71,15 +83,12 @@ class ExternalTextureDmaBuf : public VulkanImageWrappingTestBackend::ExternalTex
         if (mFd != -1) {
             close(mFd);
         }
-        if (mGbmBo != nullptr) {
-            gbm_bo_destroy(mGbmBo);
-        }
     }
 
     int Dup() const { return dup(mFd); }
 
   private:
-    gbm_bo* mGbmBo = nullptr;
+    std::unique_ptr<gbm_bo, GbmBoDeleter> mGbmBo;
     int mFd = -1;
 
   public:
@@ -92,13 +101,6 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
     explicit VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {
         mDeviceVk = native::vulkan::ToBackend(native::FromAPI(device.Get()));
         CreateGbmDevice();
-    }
-
-    ~VulkanImageWrappingTestBackendDmaBuf() override {
-        if (mGbmDevice != nullptr) {
-            gbm_device_destroy(mGbmDevice);
-            mGbmDevice = nullptr;
-        }
     }
 
     bool SupportsTestParams(const TestParams& params) const override {
@@ -196,7 +198,7 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         }
 
         // Might be failed to create GBM device and mGbmDevice is nullptr.
-        mGbmDevice = gbm_create_device(renderNodeFd);
+        mGbmDevice.reset(gbm_create_device(renderNodeFd));
     }
 
   private:
@@ -205,13 +207,13 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         if (linear) {
             flags |= GBM_BO_USE_LINEAR;
         }
-        gbm_bo* gbmBo = gbm_bo_create(mGbmDevice, width, height, GBM_FORMAT_XBGR8888, flags);
+        gbm_bo* gbmBo = gbm_bo_create(mGbmDevice.get(), width, height, GBM_FORMAT_XBGR8888, flags);
         EXPECT_NE(gbmBo, nullptr) << "Failed to create GBM buffer object";
         return gbmBo;
     }
 
-    gbm_device* mGbmDevice = nullptr;
-    native::vulkan::Device* mDeviceVk;
+    std::unique_ptr<gbm_device, GbmDeviceDeleter> mGbmDevice;
+    raw_ptr<native::vulkan::Device> mDeviceVk;
 };
 
 std::unique_ptr<VulkanImageWrappingTestBackend> CreateDMABufBackend(const wgpu::Device& device) {

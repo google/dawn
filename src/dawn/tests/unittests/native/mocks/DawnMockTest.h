@@ -29,6 +29,7 @@
 
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 #include "dawn/webgpu_cpp.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -38,7 +39,8 @@ class DawnMockTest : public ::testing::Test {
     ~DawnMockTest() override;
 
   protected:
-    ::testing::NiceMock<DeviceMock>* mDeviceMock;
+    // TODO(https://crbug.com/dawn/2346): Investigate `DanglingUntriaged` pointers in dawn/test.
+    raw_ptr<::testing::NiceMock<DeviceMock>, DanglingUntriaged> mDeviceMock;
     wgpu::Device device;
 };
 

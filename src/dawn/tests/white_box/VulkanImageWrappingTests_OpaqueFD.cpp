@@ -37,6 +37,7 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/tests/white_box/VulkanImageWrappingTests_OpaqueFD.h"
 #include "gtest/gtest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 
@@ -88,7 +89,7 @@ class ExternalTextureOpaqueFD : public VulkanImageWrappingTestBackend::ExternalT
     int Dup() const { return dup(mFd); }
 
   private:
-    native::vulkan::Device* mDevice;
+    raw_ptr<native::vulkan::Device> mDevice;
     int mFd = -1;
     VkDeviceMemory mAllocation = VK_NULL_HANDLE;
     VkImage mHandle = VK_NULL_HANDLE;
@@ -289,7 +290,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
                                int* memoryFd) {}
 
     wgpu::Device mDevice;
-    native::vulkan::Device* mDeviceVk;
+    raw_ptr<native::vulkan::Device> mDeviceVk;
 };
 
 std::unique_ptr<VulkanImageWrappingTestBackend> CreateOpaqueFDBackend(const wgpu::Device& device) {

@@ -34,6 +34,7 @@
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 void InitDawnPerfTestEnvironment(int argc, char** argv);
 
@@ -118,7 +119,7 @@ class DawnPerfTestBase {
 
     virtual void Step() = 0;
 
-    DawnTestBase* mTest;
+    raw_ptr<DawnTestBase> mTest;
     bool mRunning = false;
     const unsigned int mIterationsPerStep;
     const unsigned int mMaxStepsInFlight;

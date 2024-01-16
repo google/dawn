@@ -12,6 +12,7 @@
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
 #include "gtest/gtest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -23,7 +24,7 @@ class Placeholder : public RefCounted {
   private:
     ~Placeholder() override { --*mAlive; }
 
-    int* const mAlive;
+    const raw_ptr<int> mAlive;
 };
 
 TEST(StackContainer, Vector) {

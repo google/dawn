@@ -56,6 +56,10 @@
 namespace dawn {
 namespace {
 
+struct GLFWindowDestroyer {
+    void operator()(GLFWwindow* ptr) { glfwDestroyWindow(ptr); }
+};
+
 // Test for wgpu::Surface creation that only need an instance (no devices) and don't need all the
 // complexity of DawnTest.
 class WindowSurfaceInstanceTests : public testing::Test {
@@ -71,12 +75,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
         mInstance = wgpu::CreateInstance();
     }
 
-    void TearDown() override {
-        if (mWindow != nullptr) {
-            glfwDestroyWindow(mWindow);
-            mWindow = nullptr;
-        }
-    }
+    void TearDown() override { mWindow.reset(); }
 
     void AssertSurfaceCreation(const wgpu::SurfaceDescriptor* descriptor, bool succeeds) {
         wgpu::Surface surface = mInstance.CreateSurface(descriptor);
@@ -86,13 +85,14 @@ class WindowSurfaceInstanceTests : public testing::Test {
     GLFWwindow* CreateWindow() {
         // Set GLFW_NO_API to avoid GLFW bringing up a GL context that we won't use.
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        mWindow = glfwCreateWindow(400, 400, "WindowSurfaceInstanceTests window", nullptr, nullptr);
-        return mWindow;
+        mWindow.reset(
+            glfwCreateWindow(400, 400, "WindowSurfaceInstanceTests window", nullptr, nullptr));
+        return mWindow.get();
     }
 
   private:
     wgpu::Instance mInstance;
-    GLFWwindow* mWindow = nullptr;
+    std::unique_ptr<GLFWwindow, GLFWindowDestroyer> mWindow = nullptr;
 };
 
 // Test that a valid chained descriptor works (and that GLFWUtils creates a valid chained

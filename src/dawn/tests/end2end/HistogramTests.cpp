@@ -29,6 +29,7 @@
 
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/tests/DawnTest.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -76,7 +77,7 @@ class HistogramTests : public DawnTest {
         return p;
     }
 
-    NiceMock<DawnHistogramMockPlatform>* mMockPlatform;
+    raw_ptr<NiceMock<DawnHistogramMockPlatform>> mMockPlatform;
 };
 
 TEST_P(HistogramTests, Times) {

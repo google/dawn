@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <memory>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -38,6 +39,10 @@
 
 namespace dawn {
 namespace {
+
+struct GLFWindowDestroyer {
+    void operator()(GLFWwindow* ptr) { glfwDestroyWindow(ptr); }
+};
 
 class SwapChainTests : public DawnTest {
   public:
@@ -57,13 +62,14 @@ class SwapChainTests : public DawnTest {
 
         // Set GLFW_NO_API to avoid GLFW bringing up a GL context that we won't use.
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        window = glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr);
+        window.reset(
+            glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr));
 
         int width;
         int height;
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(window.get(), &width, &height);
 
-        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window);
+        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window.get());
         ASSERT_NE(surface, nullptr);
 
         baseDescriptor.width = width;
@@ -76,9 +82,7 @@ class SwapChainTests : public DawnTest {
     void TearDown() override {
         // Destroy the surface before the window as required by webgpu-native.
         surface = wgpu::Surface();
-        if (window != nullptr) {
-            glfwDestroyWindow(window);
-        }
+        window.reset();
         DawnTest::TearDown();
     }
 
@@ -96,7 +100,7 @@ class SwapChainTests : public DawnTest {
     }
 
   protected:
-    GLFWwindow* window = nullptr;
+    std::unique_ptr<GLFWwindow, GLFWindowDestroyer> window = nullptr;
     wgpu::Surface surface;
 
     wgpu::SwapChainDescriptor baseDescriptor;
@@ -203,7 +207,7 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
 
     for (int i = 0; i < 10; i++) {
-        glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
+        glfwSetWindowSize(window.get(), 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
 
         ClearTexture(swapchain.GetCurrentTexture(), {0.05f * i, 0.0f, 0.0f, 1.0f});
@@ -216,12 +220,12 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
     // TODO(crbug.com/dawn/1205) Currently failing on new NVIDIA GTX 1660s on Linux/Vulkan.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
     for (int i = 0; i < 10; i++) {
-        glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
+        glfwSetWindowSize(window.get(), 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
 
         int width;
         int height;
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(window.get(), &width, &height);
 
         wgpu::SwapChainDescriptor desc = baseDescriptor;
         desc.width = width;

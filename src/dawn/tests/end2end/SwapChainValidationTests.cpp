@@ -25,18 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/DawnTest.h"
+#include <memory>
 
+#include "GLFW/glfw3.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "webgpu/webgpu_glfw.h"
 
-#include "GLFW/glfw3.h"
-
 namespace dawn {
 namespace {
+
+struct GLFWindowDestroyer {
+    void operator()(GLFWwindow* ptr) { glfwDestroyWindow(ptr); }
+};
 
 class SwapChainValidationTests : public DawnTest {
   public:
@@ -52,9 +56,10 @@ class SwapChainValidationTests : public DawnTest {
 
         // Set GLFW_NO_API to avoid GLFW bringing up a GL context that we won't use.
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        window = glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr);
+        window.reset(
+            glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr));
 
-        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window);
+        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window.get());
         ASSERT_NE(surface, nullptr);
 
         goodDescriptor.width = 1;
@@ -70,14 +75,12 @@ class SwapChainValidationTests : public DawnTest {
     void TearDown() override {
         // Destroy the surface before the window as required by webgpu-native.
         surface = wgpu::Surface();
-        if (window != nullptr) {
-            glfwDestroyWindow(window);
-        }
+        window.reset();
         DawnTest::TearDown();
     }
 
   protected:
-    GLFWwindow* window = nullptr;
+    std::unique_ptr<GLFWwindow, GLFWindowDestroyer> window = nullptr;
     wgpu::Surface surface;
     wgpu::SwapChainDescriptor goodDescriptor;
     wgpu::SwapChainDescriptor badDescriptor;

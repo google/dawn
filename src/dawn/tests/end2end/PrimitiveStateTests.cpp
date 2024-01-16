@@ -31,6 +31,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -93,7 +94,7 @@ class DepthClippingTest : public DawnTest {
     }
 
     struct TestSpec {
-        wgpu::PrimitiveDepthClipControl* depthClipControl;
+        raw_ptr<wgpu::PrimitiveDepthClipControl> depthClipControl;
         utils::RGBA8 color;
         float depth;
     };

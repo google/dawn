@@ -32,6 +32,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
@@ -216,7 +217,7 @@ class VertexStateTest : public DawnTest {
 
     struct DrawVertexBuffer {
         uint32_t location;
-        wgpu::Buffer* buffer;
+        raw_ptr<wgpu::Buffer> buffer;
     };
     void DoTestDraw(const wgpu::RenderPipeline& pipeline,
                     unsigned int triangles,

@@ -58,6 +58,7 @@
 #include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #include "dawn/native/OpenGLBackend.h"
@@ -67,7 +68,7 @@ namespace dawn {
 namespace {
 
 struct MapReadUserdata {
-    DawnTestBase* test;
+    raw_ptr<DawnTestBase> test;
     size_t slot;
 };
 
