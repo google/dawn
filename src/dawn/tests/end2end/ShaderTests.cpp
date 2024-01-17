@@ -46,7 +46,7 @@ class ShaderTests : public DawnTest {
     }
     wgpu::ComputePipeline CreateComputePipeline(
         const std::string& shader,
-        const char* entryPoint,
+        const char* entryPoint = nullptr,
         const std::vector<wgpu::ConstantEntry>* constants = nullptr) {
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
@@ -2225,6 +2225,44 @@ TEST_P(ShaderTests, FragmentPositionW) {
                                renderPass.color, 48, 48);
     EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(30, 0, 255, 255), utils::RGBA8(33, 0, 255, 255),
                                renderPass.color, 32, 16);
+}
+
+TEST_P(ShaderTests, PrivateVarInitWithStruct) {
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(R"(
+@binding(0) @group(0) var<storage, read_write> output : i32;
+
+struct S {
+  i : i32,
+}
+
+var<private> P = S(42);
+
+@compute @workgroup_size(1)
+fn main() {
+  output = P.i;
+}
+)");
+
+    wgpu::Buffer output = CreateBuffer(1);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(42, output, 0);
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

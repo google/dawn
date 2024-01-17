@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 void textureBarrier_3d0f7e() {
   DeviceMemoryBarrierWithGroupSync();
 }

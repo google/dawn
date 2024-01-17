@@ -416,6 +416,8 @@ bool ASTPrinter::Generate() {
         }
         last_kind = kind;
 
+        global_insertion_point_ = current_buffer_->lines.size();
+
         bool ok = Switch(
             decl,
             [&](const ast::Variable* global) {  //
@@ -3847,14 +3849,20 @@ bool ASTPrinter::EmitConstant(StringStream& out,
                 }
             } else {
                 // HLSL requires structure initializers to be assigned directly to a variable.
+                // For these constants use 'static const' at global-scope. 'const' at global scope
+                // creates a variable who's initializer is ignored, and the value is expected to be
+                // provided in a cbuffer. 'static const' is a true value-embedded-in-the-shader-code
+                // constant. We also emit these for function-local constant expressions for
+                // consistency and to ensure that these are not computed at execution time.
                 auto name = UniqueIdentifier("c");
                 {
-                    auto decl = Line();
-                    decl << "const " << StructName(s) << " " << name << " = ";
+                    StringStream decl;
+                    decl << "static const " << StructName(s) << " " << name << " = ";
                     if (!emit_member_values(decl)) {
                         return false;
                     }
                     decl << ";";
+                    current_buffer_->Insert(decl.str(), global_insertion_point_++, 0);
                 }
                 out << name;
             }

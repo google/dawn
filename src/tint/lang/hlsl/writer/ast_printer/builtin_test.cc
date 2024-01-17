@@ -588,10 +588,10 @@ TEST_F(HlslASTPrinterTest_Builtin, NonInitializer_Modf_Vector_f32) {
   float3 fract;
   float3 whole;
 };
+static const modf_result_vec3_f32 c = {(0.5f).xxx, float3(4.0f, 5.0f, 6.0f)};
 [numthreads(1, 1, 1)]
 void test_function() {
   modf_result_vec3_f32 v = {(0.5f).xxx, float3(1.0f, 2.0f, 3.0f)};
-  const modf_result_vec3_f32 c = {(0.5f).xxx, float3(4.0f, 5.0f, 6.0f)};
   v = c;
   return;
 }
@@ -802,10 +802,10 @@ TEST_F(HlslASTPrinterTest_Builtin, NonInitializer_Frexp_Vector_f32) {
   float3 fract;
   int3 exp;
 };
+static const frexp_result_vec3_f32 c = {float3(0.5625f, 0.6875f, 0.8125f), (3).xxx};
 [numthreads(1, 1, 1)]
 void test_function() {
   frexp_result_vec3_f32 v = {float3(0.75f, 0.625f, 0.875f), int3(1, 2, 2)};
-  const frexp_result_vec3_f32 c = {float3(0.5625f, 0.6875f, 0.8125f), (3).xxx};
   v = c;
   return;
 }
