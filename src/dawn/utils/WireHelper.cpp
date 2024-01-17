@@ -86,7 +86,10 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
   private:
     std::string mDir;
-    raw_ptr<dawn::wire::CommandHandler> mHandler;
+    // TODO(https://crbug.com/2345): Investigate `DanglingUntriaged` in DawnWire. To reproduce:
+    // dawn_unittests --use-wire --wire-trace-dir={} \
+    //   --gtest_filter=CountUTF16CodeUnitsFromUTF8StringTest.ValidUnicodeString
+    raw_ptr<dawn::wire::CommandHandler, DanglingUntriaged> mHandler;
     std::ofstream mFile;
 };
 
