@@ -61,6 +61,13 @@ MaybeError ComputePipeline::Initialize() {
         compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     }
 
+    if (device->IsToggleEnabled(Toggle::UseDXC) &&
+        ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) == 0)) {
+        // DXC's default opt level is /O3, unlike FXC's /O1. Set explicitly, otherwise there's no
+        // way to tell if we want /O1 as D3DCOMPILE_OPTIMIZATION_LEVEL1 is defined to 0.
+        compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+    }
+
     // Tint does matrix multiplication expecting row major matrices
     compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 

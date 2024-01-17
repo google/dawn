@@ -78,8 +78,13 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
                 arguments.push_back(L"/O3");
                 break;
         }
+    } else {
+        // D3DCOMPILE_OPTIMIZATION_LEVEL1 is defined to 0
+        arguments.push_back(L"/O1");
     }
     if (compileFlags & D3DCOMPILE_SKIP_OPTIMIZATION) {
+        // DXC will use the last optimization flag passed in (/O[n] and /Od), so we make sure
+        // to pass /Od last.
         arguments.push_back(L"/Od");
     }
     if (compileFlags & D3DCOMPILE_DEBUG) {
@@ -104,6 +109,22 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
     if (compileFlags & D3DCOMPILE_RESOURCES_MAY_ALIAS) {
         arguments.push_back(L"/res_may_alias");
     }
+
+#define ASSERT_UNHANDLED(f) DAWN_ASSERT((compileFlags & f) == 0)
+    ASSERT_UNHANDLED(D3DCOMPILE_SKIP_VALIDATION);
+    ASSERT_UNHANDLED(D3DCOMPILE_PARTIAL_PRECISION);
+    ASSERT_UNHANDLED(D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT);
+    ASSERT_UNHANDLED(D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT);
+    ASSERT_UNHANDLED(D3DCOMPILE_NO_PRESHADER);
+    ASSERT_UNHANDLED(D3DCOMPILE_ENABLE_STRICTNESS);
+    ASSERT_UNHANDLED(D3DCOMPILE_RESERVED16);
+    ASSERT_UNHANDLED(D3DCOMPILE_RESERVED17);
+    ASSERT_UNHANDLED(D3DCOMPILE_WARNINGS_ARE_ERRORS);
+    ASSERT_UNHANDLED(D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES);
+    ASSERT_UNHANDLED(D3DCOMPILE_ALL_RESOURCES_BOUND);
+    ASSERT_UNHANDLED(D3DCOMPILE_DEBUG_NAME_FOR_SOURCE);
+    ASSERT_UNHANDLED(D3DCOMPILE_DEBUG_NAME_FOR_BINARY);
+#undef ASSERT_UNHANDLED
 
     if (r.hasShaderF16Feature) {
         // enable-16bit-types are only allowed in -HV 2018 (default)
