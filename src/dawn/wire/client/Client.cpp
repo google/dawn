@@ -138,8 +138,8 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
     }
 
     // Reserve an EventManager for the given instance and make the association in the map.
-    mEventManagers[ObjectHandle(instance->GetWireId(), instance->GetWireGeneration())] =
-        std::make_unique<EventManager>();
+    mEventManagers.emplace(ObjectHandle(instance->GetWireId(), instance->GetWireGeneration()),
+                           std::make_unique<EventManager>());
 
     ReservedInstance result;
     result.instance = ToAPI(instance);

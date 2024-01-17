@@ -108,7 +108,7 @@ target_sources(dawn_wire PRIVATE
 )
 target_link_libraries(dawn_wire
     PUBLIC dawn_headers
-    PRIVATE dawn_common dawn_internal_config
+    PRIVATE dawn_common dawn_internal_config absl_flat_hash_map absl_flat_hash_set
 )
 
 install_if_enabled(dawn_wire)

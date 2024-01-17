@@ -29,9 +29,9 @@
 #define SRC_DAWN_WIRE_CLIENT_CLIENT_H_
 
 #include <memory>
-#include <unordered_map>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/webgpu.h"
@@ -130,7 +130,7 @@ class Client : public ClientBase {
     // instances. We also cannot currently store the EventManger on the Instance because
     // spontaneous mode callbacks outlive the instance. We also can't reuse the ObjectStore for the
     // EventManagers because we need to track old instance handles even after they are reclaimed.
-    std::unordered_map<ObjectHandle, std::unique_ptr<EventManager>> mEventManagers;
+    absl::flat_hash_map<ObjectHandle, std::unique_ptr<EventManager>> mEventManagers;
     bool mDisconnected = false;
 };
 

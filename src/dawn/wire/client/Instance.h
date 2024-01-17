@@ -28,8 +28,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 #define SRC_DAWN_WIRE_CLIENT_INSTANCE_H_
 
-#include <unordered_set>
-
+#include "absl/container/flat_hash_set.h"
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
@@ -66,7 +65,7 @@ class Instance final : public ObjectWithEventsBase {
     void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                             const WGPUDawnWGSLBlocklist* wgslBlocklist);
 
-    std::unordered_set<WGPUWGSLFeatureName> mWGSLFeatures;
+    absl::flat_hash_set<WGPUWGSLFeatureName> mWGSLFeatures;
 };
 
 }  // namespace dawn::wire::client

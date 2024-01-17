@@ -314,7 +314,7 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
 }
 
 bool Instance::HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const {
-    return mWGSLFeatures.count(feature) != 0;
+    return mWGSLFeatures.contains(feature);
 }
 
 size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const {

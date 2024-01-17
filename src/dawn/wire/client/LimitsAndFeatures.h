@@ -28,8 +28,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 #define SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 
-#include <unordered_set>
-
+#include "absl/container/flat_hash_set.h"
 #include "dawn/webgpu.h"
 
 namespace dawn::wire::client {
@@ -49,7 +48,7 @@ class LimitsAndFeatures {
   private:
     WGPUSupportedLimits mLimits;
     WGPUDawnExperimentalSubgroupLimits mExperimentalSubgroupLimits;
-    std::unordered_set<WGPUFeatureName> mFeatures;
+    absl::flat_hash_set<WGPUFeatureName> mFeatures;
 };
 
 }  // namespace dawn::wire::client

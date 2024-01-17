@@ -31,10 +31,10 @@
 #include <algorithm>
 #include <map>
 #include <memory>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"
 
@@ -263,7 +263,7 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
         KnownObjectsBase<WGPUDevice>::Free(id);
     }
 
-    bool IsKnown(WGPUDevice device) const { return mKnownSet.count(device) != 0; }
+    bool IsKnown(WGPUDevice device) const { return mKnownSet.contains(device); }
 
   private:
     void AddToKnownSet(Known<WGPUDevice> device) {
@@ -271,7 +271,7 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
             mKnownSet.insert(device->handle);
         }
     }
-    std::unordered_set<WGPUDevice> mKnownSet;
+    absl::flat_hash_set<WGPUDevice> mKnownSet;
 };
 
 }  // namespace dawn::wire::server

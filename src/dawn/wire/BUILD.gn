@@ -61,6 +61,20 @@ dawn_json_generator("gen") {
   ]
 }
 
+group("abseil") {
+  # When build_with_chromium=true we need to include "//third_party/abseil-cpp:absl" while
+  # it's beneficial to be more specific with standalone Dawn, especially when it comes to
+  # including it as a dependency in other projects (such as Skia).
+  if (build_with_chromium) {
+    public_deps = [ "$dawn_abseil_dir:absl" ]
+  } else {
+    public_deps = [
+      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
+      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
+    ]
+  }
+}
+
 dawn_component("wire") {
   DEFINE_PREFIX = "DAWN_WIRE"
 
@@ -134,5 +148,8 @@ dawn_component("wire") {
   ]
 
   # Make headers publicly visible
-  public_deps = [ ":headers" ]
+  public_deps = [
+    ":abseil",
+    ":headers",
+  ]
 }
