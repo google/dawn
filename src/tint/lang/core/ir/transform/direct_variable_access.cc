@@ -260,10 +260,12 @@ struct State {
     /// transforming. These functions will be replaced with variants based on the access shapes.
     void GatherFnsThatNeedForking() {
         for (auto& fn : ir.functions) {
-            for (auto* param : fn->Params()) {
-                if (ParamNeedsTransforming(param)) {
-                    need_forking.Add(fn, fn_info_allocator.Create());
-                    break;
+            if (fn->Alive()) {
+                for (auto* param : fn->Params()) {
+                    if (ParamNeedsTransforming(param)) {
+                        need_forking.Add(fn, fn_info_allocator.Create());
+                        break;
+                    }
                 }
             }
         }
@@ -361,15 +363,9 @@ struct State {
                 auto* variant_fn = CloneContext{ir}.Clone(target);
                 (*target_info)->ordered_variants.Push(variant_fn);
 
-                // Build a unique name for the variant.
-                if (auto fn_name = ir.NameOf(variant_fn); fn_name.IsValid()) {
-                    StringStream variant_name;
-                    variant_name << fn_name.NameView();
-                    auto params = signature.Keys().Sort();
-                    for (auto param_idx : params) {
-                        variant_name << "_" << AccessShapeName(*signature.Get(param_idx));
-                    }
-                    ir.SetName(variant_fn, variant_name.str());
+                // Copy the original name for the variant
+                if (auto fn_name = ir.NameOf(fn)) {
+                    ir.SetName(fn, fn_name);
                 }
 
                 // Create an entry for the variant, and add it to the queue of variants that need to
@@ -585,37 +581,6 @@ struct State {
                 ir.functions.Push(fn);
             }
         }
-    }
-
-    /// @returns a string describing the given AccessShape, used to suffix the generated function
-    /// variants.
-    std::string AccessShapeName(const AccessShape& shape) {
-        StringStream ss;
-
-        if (auto* global = std::get_if<RootModuleScopeVar>(&shape.root)) {
-            ss << ir.NameOf(global->var).NameView();
-        } else {
-            ss << "P";
-        }
-
-        for (auto& op : shape.ops) {
-            ss << "_";
-
-            if (std::holds_alternative<IndexAccess>(op)) {
-                /// The op uses an index taken from an array parameter.
-                ss << "X";
-                continue;
-            }
-
-            if (auto* access = std::get_if<MemberAccess>(&op); TINT_LIKELY(access)) {
-                ss << access->member->Name().NameView();
-                continue;
-            }
-
-            TINT_ICE() << "unhandled variant for access chain";
-            break;
-        }
-        return ss.str();
     }
 
     /// @return true if @p param is a pointer parameter that requires transforming, based on the
