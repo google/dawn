@@ -79,11 +79,12 @@
 # Last rolled: 2024-01-15 09:38:52AM
 
 ################################################################################
-# copyToTexture failures on Linux
+# SharedImage interop failures on Linux
 # Skipped instead of just Crash because of the number of failures
 # KEEP
 ################################################################################
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
+crbug.com/1518248 [ linux ] webgpu:web_platform,copyToTexture,canvas:* [ Skip ]
 
 ################################################################################
 # web_platform crashes on SwiftShader
@@ -822,7 +823,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_pl
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="r16sint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba16float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b ventura webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
