@@ -760,6 +760,20 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_WithCapability) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<private_, vec3<f32>>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<private_, f32>(), obj, 1_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, EnumSet<Capability>{Capability::kAllowVectorElementPointer});
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
@@ -789,6 +803,20 @@ note: # Disassembly
   }
 }
 )");
+}
+
+TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr_WithCapability) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<private_, f32>(), obj, 1_u, 1_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, EnumSet<Capability>{Capability::kAllowVectorElementPointer});
+    ASSERT_EQ(res, Success);
 }
 
 TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_AddressSpace) {

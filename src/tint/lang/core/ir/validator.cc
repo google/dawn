@@ -90,7 +90,8 @@ class Validator {
   public:
     /// Create a core validator
     /// @param mod the module to be validated
-    explicit Validator(const Module& mod);
+    /// @param capabilities the optional capabilities that are allowed
+    explicit Validator(const Module& mod, EnumSet<Capability> capabilities);
 
     /// Destructor
     ~Validator();
@@ -286,6 +287,7 @@ class Validator {
 
   private:
     const Module& mod_;
+    EnumSet<Capability> capabilities_;
     std::shared_ptr<Source::File> disassembly_file;
     diag::List diagnostics_;
     Disassembler dis_{mod_};
@@ -297,7 +299,8 @@ class Validator {
     void DisassembleIfNeeded();
 };
 
-Validator::Validator(const Module& mod) : mod_(mod) {}
+Validator::Validator(const Module& mod, EnumSet<Capability> capabilities)
+    : mod_(mod), capabilities_(capabilities) {}
 
 Validator::~Validator() = default;
 
@@ -651,9 +654,11 @@ void Validator::CheckAccess(const Access* a) {
             return;
         }
 
-        if (obj_ptr && el_ty->Is<core::type::Vector>()) {
-            err("cannot obtain address of vector element");
-            return;
+        if (!capabilities_.Contains(Capability::kAllowVectorElementPointer)) {
+            if (obj_ptr && el_ty->Is<core::type::Vector>()) {
+                err("cannot obtain address of vector element");
+                return;
+            }
         }
 
         if (auto* const_index = index->As<ir::Constant>()) {
@@ -1024,13 +1029,14 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 }  // namespace
 
-Result<SuccessType> Validate(const Module& mod) {
-    Validator v(mod);
+Result<SuccessType> Validate(const Module& mod, EnumSet<Capability> capabilities) {
+    Validator v(mod, capabilities);
     return v.Run();
 }
 
 Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
-                                            [[maybe_unused]] const char* msg) {
+                                            [[maybe_unused]] const char* msg,
+                                            [[maybe_unused]] EnumSet<Capability> capabilities) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
     std::cout << "=========================================================" << std::endl;
     std::cout << "== IR dump before " << msg << ":" << std::endl;
@@ -1039,7 +1045,7 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
 #endif
 
 #ifndef NDEBUG
-    auto result = Validate(ir);
+    auto result = Validate(ir, capabilities);
     if (result != Success) {
         return result.Failure();
     }

@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -39,16 +40,26 @@ class Module;
 
 namespace tint::core::ir {
 
+/// Enumerator of optional IR capabilities.
+enum class Capability {
+    /// Allows access instructions to create pointers to vector elements.
+    kAllowVectorElementPointer,
+};
+
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
+/// @param capabilities the optional capabilities that are allowed
 /// @returns success or failure
-Result<SuccessType> Validate(const Module& mod);
+Result<SuccessType> Validate(const Module& mod, EnumSet<Capability> capabilities = {});
 
 /// Validates the module @p ir and dumps its contents if required by the build configuration.
 /// @param ir the module to transform
 /// @param msg the msg to accompany the output
+/// @param capabilities the optional capabilities that are allowed
 /// @returns success or failure
-Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir, const char* msg);
+Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir,
+                                            const char* msg,
+                                            EnumSet<Capability> capabilities = {});
 
 }  // namespace tint::core::ir
 
