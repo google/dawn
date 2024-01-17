@@ -133,7 +133,7 @@ MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
     if (endOfPassWriteIndex != wgpu::kQuerySetIndexUndefined) {
         DAWN_INVALID_IF(endOfPassWriteIndex >= querySet->GetQueryCount(),
                         "endOfPassWriteIndex (%u) exceeds the number of queries (%u) in %s.",
-                        beginningOfPassWriteIndex, querySet->GetQueryCount(), querySet);
+                        endOfPassWriteIndex, querySet->GetQueryCount(), querySet);
     }
 
     DAWN_INVALID_IF(beginningOfPassWriteIndex == wgpu::kQuerySetIndexUndefined &&
