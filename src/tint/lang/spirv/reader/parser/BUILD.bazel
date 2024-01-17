@@ -108,6 +108,7 @@ cc_library(
     "@gtest",
   ] + select({
     ":tint_build_spv_reader": [
+      "//src/tint/lang/spirv/reader/common:test",
       "//src/tint/lang/spirv/reader/parser",
     ],
     "//conditions:default": [],

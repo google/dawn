@@ -34,10 +34,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "spirv-tools/libspirv.hpp"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/spirv/reader/common/helper_test.h"
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 
 namespace tint::spirv::reader {
@@ -56,23 +56,6 @@ namespace tint::spirv::reader {
 template <typename BASE>
 class SpirvParserTestHelperBase : public BASE {
   protected:
-    /// Assemble a textual SPIR-V module into a SPIR-V binary.
-    /// @param spirv_asm the textual SPIR-V assembly
-    /// @returns the SPIR-V binary data, or an error string
-    static Result<std::vector<uint32_t>, std::string> Assemble(std::string spirv_asm) {
-        StringStream err;
-        std::vector<uint32_t> binary;
-        spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
-        tools.SetMessageConsumer(
-            [&err](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
-                err << "SPIR-V assembly failed:" << pos.line << ":" << pos.column << ": " << msg;
-            });
-        if (!tools.Assemble(spirv_asm, &binary, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
-            return err.str();
-        }
-        return binary;
-    }
-
     /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
     /// @param spirv_asm the SPIR-V assembly to parse
     /// @returns the disassembled Tint IR or an error
@@ -89,8 +72,11 @@ class SpirvParserTestHelperBase : public BASE {
             return parsed.Failure();
         }
 
-        // Validate the IR module.
-        auto validated = core::ir::Validate(parsed.Get());
+        // Validate the IR module against the capabilities supported by the SPIR-V dialect.
+        auto validated =
+            core::ir::Validate(parsed.Get(), EnumSet<core::ir::Capability>{
+                                                 core::ir::Capability::kAllowVectorElementPointer,
+                                             });
         if (validated != Success) {
             return validated.Failure();
         }

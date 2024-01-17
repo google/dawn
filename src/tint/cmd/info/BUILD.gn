@@ -47,7 +47,6 @@ tint_executable("info") {
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/spirv/reader/common",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
@@ -70,6 +69,10 @@ tint_executable("info") {
     "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]
+
+  if (tint_build_spv_reader) {
+    deps += [ "${tint_src_dir}/lang/spirv/reader/common" ]
+  }
 
   if (tint_build_spv_reader || tint_build_spv_writer) {
     deps += [

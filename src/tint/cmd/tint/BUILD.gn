@@ -51,7 +51,6 @@ tint_executable("tint") {
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/hlsl/writer/common",
-    "${tint_src_dir}/lang/spirv/reader/common",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/ast/transform",
@@ -105,6 +104,10 @@ tint_executable("tint") {
       "${tint_src_dir}/lang/msl/writer/common",
       "${tint_src_dir}/lang/msl/writer/helpers",
     ]
+  }
+
+  if (tint_build_spv_reader) {
+    deps += [ "${tint_src_dir}/lang/spirv/reader/common" ]
   }
 
   if (tint_build_spv_reader || tint_build_spv_writer) {

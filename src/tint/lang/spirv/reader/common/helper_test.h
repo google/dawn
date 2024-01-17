@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/reader/reader.h"
+#ifndef SRC_TINT_LANG_SPIRV_READER_COMMON_HELPER_TEST_H_
+#define SRC_TINT_LANG_SPIRV_READER_COMMON_HELPER_TEST_H_
 
-#include <utility>
+#include <string>
+#include <vector>
 
-#include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/spirv/reader/ast_parser/parse.h"
-#include "src/tint/lang/spirv/reader/lower/lower.h"
-#include "src/tint/lang/spirv/reader/parser/parser.h"
+#include "spirv-tools/libspirv.hpp"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::reader {
 
-Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
-    // Parse the input SPIR-V to the SPIR-V dialect of the IR.
-    auto mod = Parse(Slice(input.data(), input.size()));
-    if (mod != Success) {
-        return mod.Failure();
+/// Assemble a textual SPIR-V module into a SPIR-V binary.
+/// @param spirv_asm the textual SPIR-V assembly
+/// @returns the SPIR-V binary data, or an error string
+inline Result<std::vector<uint32_t>, std::string> Assemble(std::string spirv_asm) {
+    StringStream err;
+    std::vector<uint32_t> binary;
+    spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
+    tools.SetMessageConsumer(
+        [&err](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
+            err << "SPIR-V assembly failed:" << pos.line << ":" << pos.column << ": " << msg;
+        });
+    if (!tools.Assemble(spirv_asm, &binary, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
+        return err.str();
     }
-
-    // Lower the module to the core dialect of the IR.
-    if (auto res = Lower(mod.Get()); res != Success) {
-        return std::move(res.Failure());
-    }
-
-    return mod;
-}
-
-Program Read(const std::vector<uint32_t>& input, const Options& options) {
-    return ast_parser::Parse(input, options);
+    return binary;
 }
 
 }  // namespace tint::spirv::reader
+
+#endif  // SRC_TINT_LANG_SPIRV_READER_COMMON_HELPER_TEST_H_

@@ -60,4 +60,48 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
+cc_library(
+  name = "test",
+  alwayslink = True,
+  srcs = [
+    "helper_test.h",
+  ],
+  deps = [
+    "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
+    "//src/tint/utils/ice",
+    "//src/tint/utils/macros",
+    "//src/tint/utils/math",
+    "//src/tint/utils/memory",
+    "//src/tint/utils/result",
+    "//src/tint/utils/rtti",
+    "//src/tint/utils/text",
+    "//src/tint/utils/traits",
+  ] + select({
+    ":tint_build_spv_reader_or_tint_build_spv_writer": [
+      "@spirv_tools",
+    ],
+    "//conditions:default": [],
+  }),
+  copts = COPTS,
+  visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_spv_reader",
+  actual = "//src/tint:tint_build_spv_reader_true",
+)
+
+alias(
+  name = "tint_build_spv_writer",
+  actual = "//src/tint:tint_build_spv_writer_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_spv_reader_or_tint_build_spv_writer",
+    match_any = [
+        "tint_build_spv_reader",
+        "tint_build_spv_writer",
+    ],
+)
 

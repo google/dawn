@@ -120,6 +120,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_reader_parser_test test
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
+    tint_lang_spirv_reader_common_test
     tint_lang_spirv_reader_parser
   )
 endif(TINT_BUILD_SPV_READER)

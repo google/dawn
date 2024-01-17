@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/reader/reader.h"
-
-#include <utility>
-
-#include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/spirv/reader/ast_parser/parse.h"
 #include "src/tint/lang/spirv/reader/lower/lower.h"
-#include "src/tint/lang/spirv/reader/parser/parser.h"
+
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
 
 namespace tint::spirv::reader {
 
-Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
-    // Parse the input SPIR-V to the SPIR-V dialect of the IR.
-    auto mod = Parse(Slice(input.data(), input.size()));
-    if (mod != Success) {
-        return mod.Failure();
+Result<SuccessType> Lower(core::ir::Module& mod) {
+#define RUN_TRANSFORM(name, ...)         \
+    do {                                 \
+        auto result = name(__VA_ARGS__); \
+        if (result != Success) {         \
+            return result;               \
+        }                                \
+    } while (false)
+
+    RUN_TRANSFORM(lower::VectorElementPointer, mod);
+
+    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "end of lowering from SPIR-V");
+        res != Success) {
+        return res.Failure();
     }
 
-    // Lower the module to the core dialect of the IR.
-    if (auto res = Lower(mod.Get()); res != Success) {
-        return std::move(res.Failure());
-    }
-
-    return mod;
-}
-
-Program Read(const std::vector<uint32_t>& input, const Options& options) {
-    return ast_parser::Parse(input, options);
+    return Success;
 }
 
 }  // namespace tint::spirv::reader

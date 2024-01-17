@@ -58,6 +58,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/msl/ir:unittests",
       "${tint_src_dir}/lang/spirv/ir:unittests",
+      "${tint_src_dir}/lang/spirv/reader/lower:unittests",
       "${tint_src_dir}/lang/wgsl:unittests",
       "${tint_src_dir}/lang/wgsl/ast:unittests",
       "${tint_src_dir}/lang/wgsl/helpers:unittests",
@@ -128,7 +129,11 @@ if (tint_build_unittests) {
     }
 
     if (tint_build_spv_reader) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/parser:unittests" ]
+      deps += [
+        "${tint_src_dir}/lang/spirv/reader:unittests",
+        "${tint_src_dir}/lang/spirv/reader/common:unittests",
+        "${tint_src_dir}/lang/spirv/reader/parser:unittests",
+      ]
     }
 
     if (tint_build_spv_reader && tint_build_wgsl_reader &&

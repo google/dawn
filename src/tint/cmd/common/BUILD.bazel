@@ -53,7 +53,6 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/spirv/reader/common",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/common",
@@ -78,6 +77,7 @@ cc_library(
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader",
+      "//src/tint/lang/spirv/reader/common",
     ],
     "//conditions:default": [],
   }) + select({

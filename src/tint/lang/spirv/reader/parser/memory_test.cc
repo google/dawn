@@ -83,8 +83,7 @@ TEST_F(SpirvParserTest, Load_Vector) {
 )");
 }
 
-// TODO(jrprice): We need to handle pointer-to-vector component somewhere.
-TEST_F(SpirvParserTest, DISABLED_Load_VectorComponent) {
+TEST_F(SpirvParserTest, Load_VectorComponent) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -350,8 +349,7 @@ TEST_F(SpirvParserTest, Store_Vector) {
 )");
 }
 
-// TODO(jrprice): We need to handle pointer-to-vector component somewhere.
-TEST_F(SpirvParserTest, DISABLED_Store_VectorComponent) {
+TEST_F(SpirvParserTest, Store_VectorComponent) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -359,7 +357,7 @@ TEST_F(SpirvParserTest, DISABLED_Store_VectorComponent) {
                OpExecutionMode %main LocalSize 1 1 1
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
-     %u32_42 = OpConstantInt %u32 42
+     %u32_42 = OpConstant %u32 42
       %vec4u = OpTypeVector %u32 4
     %u32_ptr = OpTypePointer Function %u32
   %vec4u_ptr = OpTypePointer Function %vec4u

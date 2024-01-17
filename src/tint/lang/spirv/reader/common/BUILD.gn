@@ -38,22 +38,53 @@ import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-libtint_source_set("common") {
-  sources = [
-    "common.cc",
-    "options.h",
-  ]
-  deps = [
-    "${tint_src_dir}/lang/wgsl",
-    "${tint_src_dir}/lang/wgsl/common",
-    "${tint_src_dir}/lang/wgsl/features",
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/reflection",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/traits",
-  ]
+if (tint_build_unittests || tint_build_benchmarks) {
+  import("//testing/test.gni")
+}
+if (tint_build_spv_reader) {
+  libtint_source_set("common") {
+    sources = [
+      "common.cc",
+      "options.h",
+    ]
+    deps = [
+      "${tint_src_dir}/lang/wgsl",
+      "${tint_src_dir}/lang/wgsl/common",
+      "${tint_src_dir}/lang/wgsl/features",
+      "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/traits",
+    ]
+  }
+}
+if (tint_build_unittests) {
+  if (tint_build_spv_reader) {
+    tint_unittests_source_set("unittests") {
+      sources = [ "helper_test.h" ]
+      deps = [
+        "${tint_src_dir}/utils/containers",
+        "${tint_src_dir}/utils/diagnostic",
+        "${tint_src_dir}/utils/ice",
+        "${tint_src_dir}/utils/macros",
+        "${tint_src_dir}/utils/math",
+        "${tint_src_dir}/utils/memory",
+        "${tint_src_dir}/utils/result",
+        "${tint_src_dir}/utils/rtti",
+        "${tint_src_dir}/utils/text",
+        "${tint_src_dir}/utils/traits",
+      ]
+
+      if (tint_build_spv_reader || tint_build_spv_writer) {
+        deps += [
+          "${tint_spirv_tools_dir}:spvtools_headers",
+          "${tint_spirv_tools_dir}:spvtools_val",
+        ]
+      }
+    }
+  }
 }

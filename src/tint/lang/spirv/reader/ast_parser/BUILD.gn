@@ -70,7 +70,6 @@ if (tint_build_spv_reader) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/spirv/reader/common",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/ast/transform",
@@ -95,7 +94,10 @@ if (tint_build_spv_reader) {
     ]
 
     if (tint_build_spv_reader) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/ast_lower" ]
+      deps += [
+        "${tint_src_dir}/lang/spirv/reader/ast_lower",
+        "${tint_src_dir}/lang/spirv/reader/common",
+      ]
     }
 
     if (tint_build_spv_reader || tint_build_spv_writer) {
@@ -154,7 +156,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/type",
-        "${tint_src_dir}/lang/spirv/reader/common",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/common",
@@ -178,7 +179,10 @@ if (tint_build_unittests) {
       ]
 
       if (tint_build_spv_reader) {
-        deps += [ "${tint_src_dir}/lang/spirv/reader/ast_parser" ]
+        deps += [
+          "${tint_src_dir}/lang/spirv/reader/ast_parser",
+          "${tint_src_dir}/lang/spirv/reader/common",
+        ]
       }
 
       if (tint_build_spv_reader || tint_build_spv_writer) {

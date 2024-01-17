@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/reader/reader.h"
-
-#include <utility>
+#ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_LOWER_H_
+#define SRC_TINT_LANG_SPIRV_READER_LOWER_LOWER_H_
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/spirv/reader/ast_parser/parse.h"
-#include "src/tint/lang/spirv/reader/lower/lower.h"
-#include "src/tint/lang/spirv/reader/parser/parser.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::reader {
 
-Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input) {
-    // Parse the input SPIR-V to the SPIR-V dialect of the IR.
-    auto mod = Parse(Slice(input.data(), input.size()));
-    if (mod != Success) {
-        return mod.Failure();
-    }
-
-    // Lower the module to the core dialect of the IR.
-    if (auto res = Lower(mod.Get()); res != Success) {
-        return std::move(res.Failure());
-    }
-
-    return mod;
-}
-
-Program Read(const std::vector<uint32_t>& input, const Options& options) {
-    return ast_parser::Parse(input, options);
-}
+/// Lower converts a SPIR-V-dialect IR module to a core-dialect IR module
+/// @param  mod the IR module
+/// @return the result of the operation
+Result<SuccessType> Lower(core::ir::Module& mod);
 
 }  // namespace tint::spirv::reader
+
+#endif  // SRC_TINT_LANG_SPIRV_READER_LOWER_LOWER_H_

@@ -56,7 +56,6 @@ libtint_source_set("common") {
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/spirv/reader/common",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/common",
@@ -81,7 +80,10 @@ libtint_source_set("common") {
   ]
 
   if (tint_build_spv_reader) {
-    deps += [ "${tint_src_dir}/lang/spirv/reader" ]
+    deps += [
+      "${tint_src_dir}/lang/spirv/reader",
+      "${tint_src_dir}/lang/spirv/reader/common",
+    ]
   }
 
   if (tint_build_spv_reader || tint_build_spv_writer) {
