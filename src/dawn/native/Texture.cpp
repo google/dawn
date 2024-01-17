@@ -959,6 +959,11 @@ void TextureBase::SetHasAccess(bool hasAccess) {
     mState.hasAccess = hasAccess;
 }
 
+bool TextureBase::HasAccess() const {
+    DAWN_ASSERT(!IsError());
+    return mState.hasAccess;
+}
+
 uint32_t TextureBase::GetSubresourceIndex(uint32_t mipLevel,
                                           uint32_t arraySlice,
                                           Aspect aspect) const {
@@ -1026,6 +1031,10 @@ MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
 bool TextureBase::IsMultisampledTexture() const {
     DAWN_ASSERT(!IsError());
     return mSampleCount > 1;
+}
+
+bool TextureBase::IsReadOnly() const {
+    return IsSubset(mUsage, kReadOnlyTextureUsages);
 }
 
 bool TextureBase::CoversFullSubresource(uint32_t mipLevel,

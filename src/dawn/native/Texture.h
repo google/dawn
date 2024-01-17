@@ -111,6 +111,7 @@ class TextureBase : public ApiObjectBase {
 
     bool IsDestroyed() const;
     void SetHasAccess(bool hasAccess);
+    bool HasAccess() const;
     uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice, Aspect aspect) const;
     bool IsSubresourceContentInitialized(const SubresourceRange& range) const;
     void SetIsSubresourceContentInitialized(bool isInitialized, const SubresourceRange& range);
@@ -118,6 +119,7 @@ class TextureBase : public ApiObjectBase {
     MaybeError ValidateCanUseInSubmitNow() const;
 
     bool IsMultisampledTexture() const;
+    bool IsReadOnly() const;
 
     // Returns true if the size covers the whole subresource.
     bool CoversFullSubresource(uint32_t mipLevel, Aspect aspect, const Extent3D& size) const;

@@ -1750,6 +1750,7 @@
         "extensible": "in",
         "tags": ["dawn", "native"],
         "members": [
+            {"name": "concurrent read", "type": "bool"},
             {"name": "initialized", "type": "bool"},
             {"name": "fence count", "type": "size_t"},
             {"name": "fences", "type": "shared fence", "annotation": "const*", "length": "fence count"},
