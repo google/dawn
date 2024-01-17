@@ -61,15 +61,7 @@ struct BuiltinPolyfill::State {
     /// Constructor
     /// @param program the source program
     /// @param config the transform config
-    State(const Program& program, const Config& config) : src(program), cfg(config) {
-        has_full_ptr_params = false;
-        for (auto* enable : src.AST().Enables()) {
-            if (enable->HasExtension(wgsl::Extension::kChromiumExperimentalFullPtrParameters)) {
-                has_full_ptr_params = true;
-                break;
-            }
-        }
-    }
+    State(const Program& program, const Config& config) : src(program), cfg(config) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -171,8 +163,6 @@ struct BuiltinPolyfill::State {
     Hashmap<const sem::BuiltinFn*, Symbol, 8> builtin_polyfills;
     /// Polyfill f32 conversion to i32 or u32 (or vectors of)
     Hashmap<const core::type::Type*, Symbol, 2> f32_conv_polyfills;
-    // Tracks whether the chromium_experimental_full_ptr_parameters extension has been enabled.
-    bool has_full_ptr_params = false;
     /// True if the transform has made changes (i.e. the program needs cloning)
     bool made_changes = false;
 
@@ -823,10 +813,6 @@ struct BuiltinPolyfill::State {
     /// @param type the type being loaded
     /// @return the polyfill function name
     Symbol workgroupUniformLoad(const core::type::Type* type) {
-        if (!has_full_ptr_params) {
-            b.Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
-            has_full_ptr_params = true;
-        }
         auto name = b.Symbols().New("tint_workgroupUniformLoad");
         b.Func(name,
                tint::Vector{

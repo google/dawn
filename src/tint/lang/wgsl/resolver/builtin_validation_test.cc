@@ -568,7 +568,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Dot4I8Packed_FeatureDis
                          Vector{Expr(1_u), Expr(2_u)})),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'dot4I8Packed' requires the "
@@ -597,7 +597,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Dot4U8Packed_FeatureDis
                          Vector{Expr(1_u), Expr(2_u)})),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'dot4U8Packed' requires the "
@@ -624,7 +624,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xI8_FeatureDisallo
              Return(Call(Source{Source::Location{12, 34}}, "pack4xI8", Call<vec4<i32>>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xI8' requires the "
@@ -651,7 +651,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xU8_FeatureDisallo
              Return(Call(Source{Source::Location{12, 34}}, "pack4xU8", Call<vec4<u32>>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xU8' requires the "
@@ -678,7 +678,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xI8Clamp_FeatureDi
              Return(Call(Source{Source::Location{12, 34}}, "pack4xI8Clamp", Call<vec4<i32>>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xI8Clamp' requires the "
@@ -705,7 +705,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xU8Clamp_FeatureDi
              Return(Call(Source{Source::Location{12, 34}}, "pack4xU8Clamp", Call<vec4<u32>>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xU8Clamp' requires the "
@@ -732,7 +732,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Unpack4xI8_FeatureDisal
              Return(Call(Source{Source::Location{12, 34}}, "unpack4xI8", Call<u32>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'unpack4xI8' requires the "
@@ -759,7 +759,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Unpack4xU8_FeatureDisal
              Return(Call(Source{Source::Location{12, 34}}, "unpack4xU8", Call<u32>())),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'unpack4xU8' requires the "
@@ -988,7 +988,7 @@ TEST_F(ResolverBuiltinValidationTest, TextureBarrier_FeatureDisallowed) {
              CallStmt(Call(Source{Source::Location{12, 34}}, "textureBarrier")),
          });
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'textureBarrier' requires the "

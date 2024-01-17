@@ -59,7 +59,9 @@ static constexpr DirectVariableAccessOptions kTransformFunction = {
 
 class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
   public:
-    std::string Run(std::string in, const DirectVariableAccessOptions& options = {}) {
+    std::string Run(std::string in,
+                    const DirectVariableAccessOptions& transform_options = {},
+                    const wgsl::writer::ProgramOptions program_options = {}) {
         wgsl::reader::Options parser_options;
         parser_options.allowed_features = wgsl::AllowedFeatures::Everything();
         Source::File file{"test", in};
@@ -73,7 +75,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
             return "ProgramToIR() failed:\n" + module.Failure().reason.str();
         }
 
-        auto res = DirectVariableAccess(module.Get(), options);
+        auto res = DirectVariableAccess(module.Get(), transform_options);
         if (res != Success) {
             return "DirectVariableAccess failed:\n" + res.Failure().reason.str();
         }
@@ -84,9 +86,6 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
             return "wgsl::writer::Raise failed:\n" + res.Failure().reason.str();
         }
 
-        wgsl::writer::ProgramOptions program_options;
-        program_options.allowed_features.extensions.insert(
-            wgsl::Extension::kChromiumExperimentalFullPtrParameters);
         auto program_out = wgsl::writer::IRToProgram(module.Get(), program_options);
         if (!program_out.IsValid()) {
             return "wgsl::writer::IRToProgram() failed: \n" + program_out.Diagnostics().str() +
@@ -116,8 +115,6 @@ using IR_DirectVariableAccessWgslTest_RemoveUncalled = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_RemoveUncalled, PtrUniform) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<private> keep_me : i32 = 42i;
 
 fn u(pre : i32, p : ptr<uniform, i32>, post : i32) -> i32 {
@@ -137,8 +134,6 @@ var<private> keep_me : i32 = 42i;
 
 TEST_F(IR_DirectVariableAccessWgslTest_RemoveUncalled, PtrStorage) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<private> keep_me : i32 = 42i;
 
 fn s(pre : i32, p : ptr<storage, i32>, post : i32) -> i32 {
@@ -157,8 +152,6 @@ var<private> keep_me : i32 = 42i;
 
 TEST_F(IR_DirectVariableAccessWgslTest_RemoveUncalled, PtrWorkgroup) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<private> keep_me : i32 = 42i;
 
 fn w(pre : i32, p : ptr<workgroup, i32>, post : i32) -> i32 {
@@ -255,8 +248,6 @@ using IR_DirectVariableAccessWgslTest_PtrChains = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, ConstantIndices) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<array<vec4<i32>, 8>, 8>, 8>;
 
 fn a(pre : i32, p : ptr<uniform, vec4<i32>>, post : i32) -> vec4<i32> {
@@ -312,8 +303,6 @@ fn d() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, DynamicIndices) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<array<vec4<i32>, 8>, 8>, 8>;
 
 var<private> i : i32;
@@ -401,8 +390,6 @@ fn d() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, DynamicIndicesForLoopInit) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<vec4<i32>, 8>, 8>;
 
 var<private> i : i32;
@@ -479,8 +466,6 @@ fn d() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, DynamicIndicesForLoopCond) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<vec4<i32>, 8>, 8>;
 
 var<private> i : i32;
@@ -563,8 +548,6 @@ fn d() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, DynamicIndicesForLoopCont) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<vec4<i32>, 8>, 8>;
 
 var<private> i : i32;
@@ -647,8 +630,6 @@ fn d() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PtrChains, DynamicIndicesWhileCond) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<array<vec4<i32>, 8>, 8>;
 
 var<private> i : i32;
@@ -739,8 +720,6 @@ using IR_DirectVariableAccessWgslTest_UniformAS = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_UniformAS, Param_ptr_i32_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : i32;
 
 fn a(pre : i32, p : ptr<uniform, i32>, post : i32) -> i32 {
@@ -771,8 +750,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_UniformAS, Param_ptr_vec4i32_Via_array_DynamicRead) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> U : array<vec4<i32>, 8>;
 
 fn a(pre : i32, p : ptr<uniform, vec4<i32>>, post : i32) -> vec4<i32> {
@@ -805,8 +782,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_UniformAS, CallChaining) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct Inner {
   mat : mat3x4<f32>,
 };
@@ -946,8 +921,6 @@ using IR_DirectVariableAccessWgslTest_StorageAS = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_StorageAS, Param_ptr_i32_Via_struct_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };
@@ -986,8 +959,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_StorageAS, Param_ptr_arr_i32_Via_struct_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   arr : array<i32, 4>,
 };
@@ -1026,8 +997,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_StorageAS, Param_ptr_vec4i32_Via_array_DynamicWrite) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage, read_write> S : array<vec4<i32>, 8>;
 
 fn a(pre : i32, p : ptr<storage, vec4<i32>, read_write>, post : i32) {
@@ -1060,8 +1029,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_StorageAS, CallChaining) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct Inner {
   mat : mat3x4<f32>,
 };
@@ -1201,8 +1168,6 @@ using IR_DirectVariableAccessWgslTest_WorkgroupAS = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_StaticRead) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> W : array<vec4<i32>, 8>;
 
 fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) -> vec4<i32> {
@@ -1233,8 +1198,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_StaticWrite) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> W : array<vec4<i32>, 8>;
 
 fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) {
@@ -1265,8 +1228,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_WorkgroupAS, CallChaining) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct Inner {
   mat : mat3x4<f32>,
 };
@@ -1406,8 +1367,6 @@ using IR_DirectVariableAccessWgslTest_PrivateAS = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_Param_ptr_i32_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
   return *(p);
 }
@@ -1438,8 +1397,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_Param_ptr_i32_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<private, i32>, post : i32) {
   *(p) = 42;
 }
@@ -1470,8 +1427,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_Param_ptr_i32_Via_struct_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };
@@ -1510,8 +1465,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Disabled_Param_ptr_i32_Via_struct_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 }
@@ -1529,15 +1482,16 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_Param_ptr_arr_i32_Via_struct_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   arr : array<i32, 4>,
 };
@@ -1576,8 +1530,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Disabled_Param_ptr_arr_i32_Via_struct_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   arr : array<i32, 4u>,
 }
@@ -1595,15 +1547,16 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_Param_ptr_i32_mixed) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };
@@ -1660,8 +1613,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Disabled_Param_ptr_i32_mixed) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<private> Pi : i32;
 
 struct str {
@@ -1685,15 +1636,16 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Enabled_CallChaining) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct Inner {
   mat : mat3x4<f32>,
 };
@@ -1824,8 +1776,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_PrivateAS, Disabled_CallChaining) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct Inner {
   mat : mat3x4<f32>,
 }
@@ -1877,7 +1827,10 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
@@ -1909,8 +1862,6 @@ fn f() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_Param_ptr_i32_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
   return *(p);
 }
@@ -1939,8 +1890,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_Param_ptr_i32_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<function, i32>, post : i32) {
   *(p) = 42;
 }
@@ -1969,8 +1918,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_Param_ptr_i32_Via_struct_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };
@@ -2007,8 +1954,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_Param_ptr_arr_i32_Via_struct_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   arr : array<i32, 4>,
 };
@@ -2045,8 +1990,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_Param_ptr_i32_mixed) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };
@@ -2100,8 +2043,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Disabled_Param_ptr_i32_Via_struct_read) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
   return *(p);
 }
@@ -2118,15 +2059,16 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Disabled_Param_ptr_arr_i32_Via_struct_write) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn a(pre : i32, p : ptr<function, array<i32, 4u>>, post : i32) {
   *(p) = array<i32, 4u>();
 }
@@ -2143,7 +2085,10 @@ fn b() {
 
     auto* expect = src;
 
-    auto got = Run(src);
+    wgsl::writer::ProgramOptions program_options;
+    program_options.allowed_features.features.emplace(
+        wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    auto got = Run(src, /* transform_options */ {}, program_options);
 
     EXPECT_EQ(expect, got);
 }
@@ -2159,8 +2104,6 @@ using IR_DirectVariableAccessWgslTest_BuiltinFn = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_BuiltinFn, ArrayLength) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage> S : array<f32>;
 
 fn len(p : ptr<storage, array<f32>>) -> u32 {
@@ -2191,8 +2134,6 @@ fn f() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_BuiltinFn, WorkgroupUniformLoad) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> W : f32;
 
 fn load(p : ptr<workgroup, f32>) -> f32 {
@@ -2232,8 +2173,6 @@ using IR_DirectVariableAccessWgslTest_Complex = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_Complex, Param_ptr_mixed_vec4i32_ViaMultiple) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : vec4<i32>,
 };
@@ -2418,8 +2357,6 @@ fn b() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_Complex, Indexing) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage> S : array<array<array<array<i32, 9>, 9>, 9>, 50>;
 
 fn a(i : i32) -> i32 { return i; }
@@ -2459,8 +2396,6 @@ fn c() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_Complex, IndexingInPtrCall) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage> S : array<array<array<array<i32, 9>, 9>, 9>, 50>;
 
 fn a(pre : i32, i : ptr<storage, i32>, post : i32) -> i32 {
@@ -2504,8 +2439,6 @@ fn c() {
 
 TEST_F(IR_DirectVariableAccessWgslTest_Complex, IndexingDualPointers) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage> S : array<array<array<i32, 9>, 9>, 50>;
 @group(0) @binding(0) var<uniform> U : array<array<array<vec4<i32>, 9>, 9>, 50>;
 

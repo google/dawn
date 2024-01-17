@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   arr : array<vec4<i32>, 4>,
 };

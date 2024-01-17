@@ -16,7 +16,7 @@
                OpMemberName %OuterS 0 "a1"
                OpName %InnerS "InnerS"
                OpMemberName %InnerS 0 "v"
-               OpName %f "f"
+               OpName %f_F "f_F"
                OpName %p "p"
                OpName %v "v"
                OpName %main "main"
@@ -49,7 +49,7 @@
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
          %27 = OpTypeFunction %void
          %31 = OpConstantNull %OuterS
-          %f = OpFunction %void None %6
+        %f_F = OpFunction %void None %6
           %p = OpFunctionParameter %_ptr_Function_OuterS
          %16 = OpLabel
           %v = OpVariable %_ptr_Function_InnerS Function %19
@@ -63,6 +63,6 @@
        %main = OpFunction %void None %27
          %29 = OpLabel
          %s1 = OpVariable %_ptr_Function_OuterS Function %31
-         %32 = OpFunctionCall %void %f %s1
+         %32 = OpFunctionCall %void %f_F %s1
                OpReturn
                OpFunctionEnd

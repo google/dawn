@@ -195,10 +195,8 @@ struct DirectVariableAccess::State {
     /// The main function for the transform.
     /// @returns the ApplyResult
     ApplyResult Run() {
-        if (!ctx.src->Sem().Module()->Extensions().Contains(
-                wgsl::Extension::kChromiumExperimentalFullPtrParameters)) {
-            // If the 'chromium_experimental_full_ptr_parameters' extension is not enabled, then
-            // there's nothing for this transform to do.
+        // If there are no functions with pointer parameters, then this transform can be skipped.
+        if (!AnyPointerParameters()) {
             return SkipTransform;
         }
 
@@ -408,6 +406,18 @@ struct DirectVariableAccess::State {
     /// The clone state.
     /// Only valid during the lifetime of the program::CloneContext::Clone().
     CloneState* clone_state = nullptr;
+
+    /// @returns true if any user functions have parameters of a pointer type.
+    bool AnyPointerParameters() const {
+        for (auto* fn : ctx.src->AST().Functions()) {
+            for (auto* param : fn->params) {
+                if (sem.Get(param)->Type()->Is<core::type::Pointer>()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     /// AppendAccessChain creates or extends an existing AccessChain for the given expression,
     /// modifying the #access_chains map.

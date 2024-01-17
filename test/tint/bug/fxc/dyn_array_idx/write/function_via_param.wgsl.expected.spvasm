@@ -19,7 +19,7 @@
                OpName %result "result"
                OpName %S "S"
                OpMemberName %S 0 "data"
-               OpName %x "x"
+               OpName %x_F "x_F"
                OpName %p "p"
                OpName %f "f"
                OpName %s "s"
@@ -60,7 +60,7 @@
          %32 = OpConstantNull %S
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
       %int_3 = OpConstant %int 3
-          %x = OpFunction %void None %10
+        %x_F = OpFunction %void None %10
           %p = OpFunctionParameter %_ptr_Function_S
          %19 = OpLabel
          %23 = OpAccessChain %_ptr_Uniform_int %ubo %uint_0 %uint_0
@@ -72,7 +72,7 @@
           %f = OpFunction %void None %28
          %30 = OpLabel
           %s = OpVariable %_ptr_Function_S Function %32
-         %33 = OpFunctionCall %void %x %s
+         %33 = OpFunctionCall %void %x_F %s
          %36 = OpAccessChain %_ptr_StorageBuffer_int %result %uint_0 %uint_0
          %38 = OpAccessChain %_ptr_Function_int %s %uint_0 %int_3
          %39 = OpLoad %int %38

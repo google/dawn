@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 struct str {
   i : i32,
 };

@@ -1217,7 +1217,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_FeatureDisallowed) {
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
-    auto resolver = Resolver(this, {});
+    auto resolver = Resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: read-only storage textures require the "
@@ -1246,7 +1246,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_FeatureDisallowed) {
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
-    auto resolver = Resolver(this, {});
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: read-write storage textures require the "

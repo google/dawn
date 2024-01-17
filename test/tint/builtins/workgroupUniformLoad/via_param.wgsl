@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> v : array<i32, 4>;
 
 fn foo(p : ptr<workgroup, i32>) -> i32 {

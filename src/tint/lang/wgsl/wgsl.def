@@ -72,9 +72,6 @@ enum extension {
   chromium_disable_uniformity_analysis
   // A Chromium-specific extension for push constants
   chromium_experimental_push_constant
-  // A Chromium-specific extension that enables passing of uniform, storage and workgroup
-  // address-spaced pointers as parameters, as well as pointers into sub-objects.
-  chromium_experimental_full_ptr_parameters
   // A Chromium-specific extension that adds basic subgroup functionality.
   chromium_experimental_subgroups
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
@@ -91,9 +88,10 @@ enum extension {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
 enum language_feature {
-  readonly_and_readwrite_storage_textures
   packed_4x8_integer_dot_product
   pointer_composite_access
+  readonly_and_readwrite_storage_textures
+  unrestricted_pointer_parameters
 
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented

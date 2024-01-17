@@ -3774,8 +3774,6 @@ fn f() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn tint_workgroupUniformLoad(p : ptr<workgroup, i32>) -> i32 {
   workgroupBarrier();
   let result = *(p);
@@ -3815,8 +3813,6 @@ fn f() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn tint_workgroupUniformLoad(p : ptr<workgroup, Outer>) -> Outer {
   workgroupBarrier();
   let result = *(p);
@@ -3848,8 +3844,6 @@ fn f() {
 
 TEST_F(BuiltinPolyfillTest, WorkgroupUniformLoad_AvoidDuplicateEnables) {
     auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> a : i32;
 var<workgroup> b : u32;
 var<workgroup> c : f32;
@@ -3862,8 +3856,6 @@ fn f() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn tint_workgroupUniformLoad(p : ptr<workgroup, i32>) -> i32 {
   workgroupBarrier();
   let result = *(p);
@@ -3915,8 +3907,6 @@ fn f() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 fn tint_workgroupUniformLoad_v() -> i32 {
   workgroupBarrier();
   let result = v;

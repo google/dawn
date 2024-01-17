@@ -33,9 +33,10 @@ namespace tint::wgsl {
 
 FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
     switch (f) {
-        case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
         case LanguageFeature::kPacked4X8IntegerDotProduct:
         case LanguageFeature::kPointerCompositeAccess:
+        case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
+        case LanguageFeature::kUnrestrictedPointerParameters:
             return FeatureStatus::kExperimental;
         case LanguageFeature::kUndefined:
             return FeatureStatus::kUnknown;

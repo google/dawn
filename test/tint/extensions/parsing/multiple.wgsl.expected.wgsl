@@ -1,4 +1,4 @@
-enable chromium_experimental_full_ptr_parameters, f16;
+enable chromium_disable_uniformity_analysis, f16;
 
 @fragment
 fn main() -> @location(0) vec4<f32> {

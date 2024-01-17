@@ -17,18 +17,18 @@
                OpName %v "v"
                OpName %accept_value "accept_value"
                OpName %val "val"
-               OpName %accept_ptr_deref_call_func "accept_ptr_deref_call_func"
+               OpName %accept_ptr_deref_call_func_F "accept_ptr_deref_call_func_F"
                OpName %val_0 "val"
-               OpName %accept_ptr_deref_pass_through "accept_ptr_deref_pass_through"
+               OpName %accept_ptr_deref_pass_through_F "accept_ptr_deref_pass_through_F"
                OpName %val_1 "val"
                OpName %S "S"
                OpMemberName %S 0 "a"
                OpMemberName %S 1 "b"
-               OpName %accept_ptr_to_struct_and_access "accept_ptr_to_struct_and_access"
+               OpName %accept_ptr_to_struct_and_access_F "accept_ptr_to_struct_and_access_F"
                OpName %val_2 "val"
-               OpName %accept_ptr_to_struct_access_pass_ptr "accept_ptr_to_struct_access_pass_ptr"
+               OpName %accept_ptr_to_struct_access_pass_ptr_F "accept_ptr_to_struct_access_pass_ptr_F"
                OpName %val_3 "val"
-               OpName %accept_ptr_vec_access_elements "accept_ptr_vec_access_elements"
+               OpName %accept_ptr_vec_access_elements_F "accept_ptr_vec_access_elements_F"
                OpName %v1 "v1"
                OpName %call_builtin_with_mod_scope_ptr "call_builtin_with_mod_scope_ptr"
                OpName %main_inner "main_inner"
@@ -98,7 +98,7 @@
          %28 = OpLabel
                OpReturnValue %val
                OpFunctionEnd
-%accept_ptr_deref_call_func = OpFunction %int None %29
+%accept_ptr_deref_call_func_F = OpFunction %int None %29
       %val_0 = OpFunctionParameter %_ptr_Function_int
          %33 = OpLabel
          %35 = OpLoad %int %val_0
@@ -107,15 +107,15 @@
          %39 = OpIAdd %int %35 %36
                OpReturnValue %39
                OpFunctionEnd
-%accept_ptr_deref_pass_through = OpFunction %int None %29
+%accept_ptr_deref_pass_through_F = OpFunction %int None %29
       %val_1 = OpFunctionParameter %_ptr_Function_int
          %42 = OpLabel
          %44 = OpLoad %int %val_1
-         %45 = OpFunctionCall %int %accept_ptr_deref_call_func %val_1
+         %45 = OpFunctionCall %int %accept_ptr_deref_call_func_F %val_1
          %46 = OpIAdd %int %44 %45
                OpReturnValue %46
                OpFunctionEnd
-%accept_ptr_to_struct_and_access = OpFunction %int None %47
+%accept_ptr_to_struct_and_access_F = OpFunction %int None %47
       %val_2 = OpFunctionParameter %_ptr_Function_S
          %52 = OpLabel
          %55 = OpAccessChain %_ptr_Function_int %val_2 %uint_0
@@ -125,7 +125,7 @@
          %61 = OpIAdd %int %56 %60
                OpReturnValue %61
                OpFunctionEnd
-%accept_ptr_to_struct_access_pass_ptr = OpFunction %int None %47
+%accept_ptr_to_struct_access_pass_ptr_F = OpFunction %int None %47
       %val_3 = OpFunctionParameter %_ptr_Function_S
          %64 = OpLabel
          %66 = OpAccessChain %_ptr_Function_int %val_3 %uint_0
@@ -134,7 +134,7 @@
          %70 = OpLoad %int %69
                OpReturnValue %70
                OpFunctionEnd
-%accept_ptr_vec_access_elements = OpFunction %int None %71
+%accept_ptr_vec_access_elements_F = OpFunction %int None %71
          %v1 = OpFunctionParameter %_ptr_Function_v3float
          %76 = OpLabel
          %79 = OpAccessChain %_ptr_Function_float %v1 %uint_0
@@ -165,11 +165,11 @@
                OpStore %v2 %108
                OpStore %v4 %110
         %112 = OpAtomicLoad %int %g1 %uint_2 %uint_0
-        %114 = OpFunctionCall %int %accept_ptr_deref_pass_through %v1_0
-        %116 = OpFunctionCall %int %accept_ptr_to_struct_and_access %v2
-        %118 = OpFunctionCall %int %accept_ptr_to_struct_and_access %v2
-        %120 = OpFunctionCall %int %accept_ptr_vec_access_elements %v4
-        %122 = OpFunctionCall %int %accept_ptr_to_struct_access_pass_ptr %v2
+        %114 = OpFunctionCall %int %accept_ptr_deref_pass_through_F %v1_0
+        %116 = OpFunctionCall %int %accept_ptr_to_struct_and_access_F %v2
+        %118 = OpFunctionCall %int %accept_ptr_to_struct_and_access_F %v2
+        %120 = OpFunctionCall %int %accept_ptr_vec_access_elements_F %v4
+        %122 = OpFunctionCall %int %accept_ptr_to_struct_access_pass_ptr_F %v2
         %124 = OpFunctionCall %int %call_builtin_with_mod_scope_ptr
         %126 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_0
         %127 = OpIAdd %int %114 %116

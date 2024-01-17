@@ -62,32 +62,25 @@ struct PreservePadding::State {
         // Gather a list of assignments that need to be transformed.
         std::unordered_set<const AssignmentStatement*> assignments_to_transform;
         for (auto* node : ctx.src->ASTNodes().Objects()) {
-            Switch(
-                node,  //
-                [&](const AssignmentStatement* assign) {
-                    auto* ty = sem.GetVal(assign->lhs)->Type();
-                    if (assign->lhs->Is<PhonyExpression>()) {
-                        // Ignore phony assignment.
-                        return;
-                    }
-                    if (ty->As<core::type::Reference>()->AddressSpace() !=
-                        core::AddressSpace::kStorage) {
-                        // We only care about assignments that write to variables in the storage
-                        // address space, as nothing else is host-visible.
-                        return;
-                    }
-                    if (HasPadding(ty->UnwrapRef())) {
-                        // The assigned type has padding bytes, so we need to decompose the writes.
-                        assignments_to_transform.insert(assign);
-                    }
-                },
-                [&](const Enable* enable) {
-                    // Check if the full pointer parameters extension is already enabled.
-                    if (enable->HasExtension(
-                            wgsl::Extension::kChromiumExperimentalFullPtrParameters)) {
-                        ext_enabled = true;
-                    }
-                });
+            Switch(node,  //
+                   [&](const AssignmentStatement* assign) {
+                       auto* ty = sem.GetVal(assign->lhs)->Type();
+                       if (assign->lhs->Is<PhonyExpression>()) {
+                           // Ignore phony assignment.
+                           return;
+                       }
+                       if (ty->As<core::type::Reference>()->AddressSpace() !=
+                           core::AddressSpace::kStorage) {
+                           // We only care about assignments that write to variables in the storage
+                           // address space, as nothing else is host-visible.
+                           return;
+                       }
+                       if (HasPadding(ty->UnwrapRef())) {
+                           // The assigned type has padding bytes, so we need to decompose the
+                           // writes.
+                           assignments_to_transform.insert(assign);
+                       }
+                   });
         }
         if (assignments_to_transform.empty()) {
             return SkipTransform;
@@ -127,13 +120,9 @@ struct PreservePadding::State {
         //   }
         // It will be called by passing a pointer to the original LHS:
         //   assign_helper_T(&lhs, rhs);
-        //
-        // Since this requires passing pointers to the storage address space, this will also enable
-        // the chromium_experimental_full_ptr_parameters extension.
         const char* kDestParamName = "dest";
         const char* kValueParamName = "value";
         auto call_helper = [&](auto&& body) {
-            EnableExtension();
             auto helper = helpers.GetOrCreate(ty, [&] {
                 auto helper_name = b.Symbols().New("assign_and_preserve_padding");
                 tint::Vector<const Parameter*, 2> params = {
@@ -227,14 +216,6 @@ struct PreservePadding::State {
             [&](Default) { return false; });
     }
 
-    /// Enable the full pointer parameters extension, if we have not already done so.
-    void EnableExtension() {
-        if (!ext_enabled) {
-            b.Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
-            ext_enabled = true;
-        }
-    }
-
   private:
     /// The program builder
     ProgramBuilder b;
@@ -244,8 +225,6 @@ struct PreservePadding::State {
     const sem::Info& sem = ctx.src->Sem();
     /// Alias to the symbols in ctx.src
     const SymbolTable& sym = ctx.src->Symbols();
-    /// Flag to track whether we have already enabled the full pointer parameters extension.
-    bool ext_enabled = false;
     /// Map of semantic types to their assignment helper functions.
     Hashmap<const core::type::Type*, Symbol, 8> helpers;
 };

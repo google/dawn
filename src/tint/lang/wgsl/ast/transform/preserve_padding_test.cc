@@ -119,8 +119,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : u32,
   b : u32,
@@ -175,8 +173,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : u32,
   b : u32,
@@ -227,8 +223,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : u32,
   b : vec4<u32>,
@@ -267,8 +261,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   @size(16)
   a : u32,
@@ -307,8 +299,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   @size(16)
   a : u32,
@@ -362,8 +352,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S1 {
   a1 : u32,
   b1 : vec3<u32>,
@@ -424,8 +412,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage, read_write> v : array<vec3<u32>, 4>;
 
 fn assign_and_preserve_padding(dest : ptr<storage, array<vec3<u32>, 4u>, read_write>, value : array<vec3<u32>, 4u>) {
@@ -458,8 +444,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 alias Array = array<array<vec3<u32>, 4>, 3>;
 
 @group(0) @binding(0) var<storage, read_write> v : Array;
@@ -503,8 +487,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : u32,
   b : array<vec3<u32>, 4>,
@@ -551,8 +533,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage, read_write> m : mat3x3<f32>;
 
 fn assign_and_preserve_padding(dest : ptr<storage, mat3x3<f32>, read_write>, value : mat3x3<f32>) {
@@ -588,8 +568,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : u32,
   m : mat3x3<f32>,
@@ -631,8 +609,6 @@ fn foo() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage, read_write> arr_m : array<mat3x3<f32>, 4>;
 
 fn assign_and_preserve_padding_1(dest : ptr<storage, mat3x3<f32>, read_write>, value : mat3x3<f32>) {
@@ -670,47 +646,6 @@ fn foo() {
 )";
 
     auto* expect = src;
-
-    auto got = Run<PreservePadding>(src);
-
-    EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(PreservePaddingTest, AvoidDuplicateEnables) {
-    auto* src = R"(
-enable chromium_experimental_full_ptr_parameters;
-
-struct S {
-  @size(16) a : u32,
-}
-
-@group(0) @binding(0) var<storage, read_write> v : S;
-
-@compute @workgroup_size(1)
-fn foo() {
-  v = S();
-}
-)";
-
-    auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
-struct S {
-  @size(16)
-  a : u32,
-}
-
-@group(0) @binding(0) var<storage, read_write> v : S;
-
-fn assign_and_preserve_padding(dest : ptr<storage, S, read_write>, value : S) {
-  (*(dest)).a = value.a;
-}
-
-@compute @workgroup_size(1)
-fn foo() {
-  assign_and_preserve_padding(&(v), S());
-}
-)";
 
     auto got = Run<PreservePadding>(src);
 

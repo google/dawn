@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<storage> S : i32;
 
 fn func(pointer : ptr<storage, i32>) -> i32 {

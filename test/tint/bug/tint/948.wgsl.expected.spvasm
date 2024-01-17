@@ -45,7 +45,7 @@
                OpName %stageUnits_1 "stageUnits_1"
                OpName %vPosition "vPosition"
                OpName %vUV "vUV"
-               OpName %getFrameData_f1_ "getFrameData_f1_"
+               OpName %getFrameData_f1__F "getFrameData_f1__F"
                OpName %frameID "frameID"
                OpName %fX "fX"
                OpName %main_1 "main_1"
@@ -203,7 +203,7 @@
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
    %main_out = OpTypeStruct %v4float
         %347 = OpTypeFunction %main_out %v2float %v2float %v2float %v2float %v3float %v2float
-%getFrameData_f1_ = OpFunction %mat4v4float None %50
+%getFrameData_f1__F = OpFunction %mat4v4float None %50
     %frameID = OpFunctionParameter %_ptr_Function_float
          %54 = OpLabel
          %fX = OpVariable %_ptr_Function_float Function %38
@@ -407,7 +407,7 @@
         %238 = OpLoad %float %frameID_1
         %239 = OpFAdd %float %238 %float_0_5
                OpStore %param %239
-        %240 = OpFunctionCall %mat4v4float %getFrameData_f1_ %param
+        %240 = OpFunctionCall %mat4v4float %getFrameData_f1__F %param
                OpStore %frameData %240
         %242 = OpAccessChain %_ptr_Function_v4float %frameData %116
         %243 = OpLoad %v4float %242

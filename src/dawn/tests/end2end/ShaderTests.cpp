@@ -38,12 +38,19 @@ namespace {
 
 class ShaderTests : public DawnTest {
   public:
-    wgpu::Buffer CreateBuffer(const uint32_t count) {
-        std::vector<uint32_t> data(count, 0);
+    wgpu::Buffer CreateBuffer(const std::vector<uint32_t>& data,
+                              wgpu::BufferUsage usage = wgpu::BufferUsage::Storage |
+                                                        wgpu::BufferUsage::CopySrc) {
         uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
-        return utils::CreateBufferFromData(device, data.data(), bufferSize,
-                                           wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+        return utils::CreateBufferFromData(device, data.data(), bufferSize, usage);
     }
+
+    wgpu::Buffer CreateBuffer(const uint32_t count,
+                              wgpu::BufferUsage usage = wgpu::BufferUsage::Storage |
+                                                        wgpu::BufferUsage::CopySrc) {
+        return CreateBuffer(std::vector<uint32_t>(count, 0), usage);
+    }
+
     wgpu::ComputePipeline CreateComputePipeline(
         const std::string& shader,
         const char* entryPoint = nullptr,
@@ -2263,6 +2270,94 @@ fn main() {
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_EQ(42, output, 0);
+}
+
+TEST_P(ShaderTests, UnrestrictedPointerParameters) {
+    // TODO(crbug.com/dawn/2350): Investigate, fix.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11());
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(R"(
+@binding(0) @group(0) var<uniform> input : array<vec4i, 4>;
+@binding(1) @group(0) var<storage, read_write> output : array<vec4i, 4>;
+
+fn sum(f : ptr<function, i32>,
+       w : ptr<workgroup, atomic<i32>>,
+       p : ptr<private, i32>,
+       u : ptr<uniform, vec4i>) -> vec4i {
+
+  return vec4(*f + atomicLoad(w) + *p) + *u;
+}
+
+struct S {
+  i : i32,
+}
+
+var<private> P0 = S(0);
+var<private> P1 = S(10);
+var<private> P2 = 20;
+var<private> P3 = 30;
+
+struct T {
+  i : atomic<i32>,
+}
+
+var<workgroup> W0 : T;
+var<workgroup> W1 : atomic<i32>;
+var<workgroup> W2 : T;
+var<workgroup> W3 : atomic<i32>;
+
+@compute @workgroup_size(1)
+fn main() {
+  atomicStore(&W0.i, 0);
+  atomicStore(&W1,   100);
+  atomicStore(&W2.i, 200);
+  atomicStore(&W3,   300);
+
+  var F = array(0, 1000, 2000, 3000);
+
+  output[0] = sum(&F[2], &W3,   &P1.i, &input[0]); // vec4(2310) + vec4(1, 2, 3, 4)
+  output[1] = sum(&F[1], &W2.i, &P0.i, &input[1]); // vec4(1200) + vec4(4, 3, 2, 1)
+  output[2] = sum(&F[3], &W0.i, &P3,   &input[2]); // vec4(3030) + vec4(2, 4, 1, 3)
+  output[3] = sum(&F[2], &W1,   &P2,   &input[3]); // vec4(2120) + vec4(4, 1, 2, 3)
+}
+)");
+
+    wgpu::Buffer input = CreateBuffer(
+        std::vector<uint32_t>{
+            1, 2, 3, 4,  // [0]
+            4, 3, 2, 1,  // [1]
+            2, 4, 1, 3,  // [2]
+            4, 1, 2, 3,  // [3]
+        },
+        wgpu::BufferUsage::Uniform);
+
+    std::vector<uint32_t> expected{
+        2311, 2312, 2313, 2314,  // [0]
+        1204, 1203, 1202, 1201,  // [1]
+        3032, 3034, 3031, 3033,  // [2]
+        2124, 2121, 2122, 2123,  // [3]
+    };
+
+    wgpu::Buffer output = CreateBuffer(expected.size());
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, input}, {1, output}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), output, 0, expected.size());
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

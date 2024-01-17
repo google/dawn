@@ -8,7 +8,7 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %P "P"
-               OpName %func "func"
+               OpName %func_F "func_F"
                OpName %pointer "pointer"
                OpName %main "main"
       %float = OpTypeFloat 32
@@ -19,7 +19,7 @@
           %6 = OpTypeFunction %v4float %_ptr_Private_v4float
        %void = OpTypeVoid
          %12 = OpTypeFunction %void
-       %func = OpFunction %v4float None %6
+     %func_F = OpFunction %v4float None %6
     %pointer = OpFunctionParameter %_ptr_Private_v4float
           %9 = OpLabel
          %11 = OpLoad %v4float %pointer
@@ -27,6 +27,6 @@
                OpFunctionEnd
        %main = OpFunction %void None %12
          %15 = OpLabel
-         %16 = OpFunctionCall %v4float %func %P
+         %16 = OpFunctionCall %v4float %func_F %P
                OpReturn
                OpFunctionEnd

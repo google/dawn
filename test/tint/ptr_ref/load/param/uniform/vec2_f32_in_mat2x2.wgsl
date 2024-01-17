@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> S : mat2x2<f32>;
 
 fn func(pointer : ptr<uniform, vec2<f32>>) -> vec2<f32> {

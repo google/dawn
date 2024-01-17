@@ -1047,7 +1047,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
 
 enum class Expectation {
     kAlwaysPass,
-    kPassWithFullPtrParameterExtension,
+    kPassWithUnrestrictedPointerParameters,
     kAlwaysFail,
     kInvalid,
 };
@@ -1059,7 +1059,11 @@ struct TestParams {
 struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
 using ResolverFunctionParameterValidationTest = TestWithParams;
-TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
+TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedPointerParameters) {
+    auto features = wgsl::AllowedFeatures::Everything();
+    features.features.erase(wgsl::LanguageFeature::kUnrestrictedPointerParameters);
+    Resolver r(this, features);
+
     auto& param = GetParam();
     Structure("S", Vector{Member("a", ty.i32())});
     auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty("S"));
@@ -1071,29 +1075,27 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     }
 
     if (param.expectation == Expectation::kAlwaysPass) {
-        ASSERT_TRUE(r()->Resolve()) << r()->error();
+        ASSERT_TRUE(r.Resolve()) << r.error();
     } else {
         StringStream ss;
         ss << param.address_space;
-        EXPECT_FALSE(r()->Resolve());
+        EXPECT_FALSE(r.Resolve());
         if (param.expectation == Expectation::kInvalid) {
             std::string err = R"(12:34 error: unresolved address space '${addr_space}'
 12:34 note: Possible values: 'function', 'pixel_local', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')";
             err = tint::ReplaceAll(err, "${addr_space}", tint::ToString(param.address_space));
-            EXPECT_EQ(r()->error(), err);
+            EXPECT_EQ(r.error(), err);
         } else {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: function parameter of pointer type cannot be in '" +
-                          tint::ToString(param.address_space) + "' address space");
+            EXPECT_EQ(r.error(), "12:34 error: function parameter of pointer type cannot be in '" +
+                                     tint::ToString(param.address_space) + "' address space");
         }
     }
 }
-TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithFullPtrParameterExtension) {
+TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithUnrestrictedPointerParameters) {
     auto& param = GetParam();
     Structure("S", Vector{Member("a", ty.i32())});
     auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty("S"));
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
-    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
     if (param.address_space == core::AddressSpace::kPixelLocal) {
@@ -1101,7 +1103,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithFullPtrParameter
     }
 
     if (param.expectation == Expectation::kAlwaysPass ||
-        param.expectation == Expectation::kPassWithFullPtrParameterExtension) {
+        param.expectation == Expectation::kPassWithUnrestrictedPointerParameters) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
@@ -1120,17 +1122,19 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithFullPtrParameter
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverFunctionParameterValidationTest,
-    testing::Values(
-        TestParams{core::AddressSpace::kUndefined, Expectation::kInvalid},
-        TestParams{core::AddressSpace::kIn, Expectation::kAlwaysFail},
-        TestParams{core::AddressSpace::kOut, Expectation::kAlwaysFail},
-        TestParams{core::AddressSpace::kUniform, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{core::AddressSpace::kWorkgroup, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{core::AddressSpace::kHandle, Expectation::kInvalid},
-        TestParams{core::AddressSpace::kStorage, Expectation::kPassWithFullPtrParameterExtension},
-        TestParams{core::AddressSpace::kPixelLocal, Expectation::kAlwaysFail},
-        TestParams{core::AddressSpace::kPrivate, Expectation::kAlwaysPass},
-        TestParams{core::AddressSpace::kFunction, Expectation::kAlwaysPass}));
+    testing::Values(TestParams{core::AddressSpace::kUndefined, Expectation::kInvalid},
+                    TestParams{core::AddressSpace::kIn, Expectation::kAlwaysFail},
+                    TestParams{core::AddressSpace::kOut, Expectation::kAlwaysFail},
+                    TestParams{core::AddressSpace::kUniform,
+                               Expectation::kPassWithUnrestrictedPointerParameters},
+                    TestParams{core::AddressSpace::kWorkgroup,
+                               Expectation::kPassWithUnrestrictedPointerParameters},
+                    TestParams{core::AddressSpace::kHandle, Expectation::kInvalid},
+                    TestParams{core::AddressSpace::kStorage,
+                               Expectation::kPassWithUnrestrictedPointerParameters},
+                    TestParams{core::AddressSpace::kPixelLocal, Expectation::kAlwaysFail},
+                    TestParams{core::AddressSpace::kPrivate, Expectation::kAlwaysPass},
+                    TestParams{core::AddressSpace::kFunction, Expectation::kAlwaysPass}));
 
 }  // namespace
 }  // namespace tint::resolver

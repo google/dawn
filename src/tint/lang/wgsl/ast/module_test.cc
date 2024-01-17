@@ -147,7 +147,7 @@ TEST_F(ModuleTest, CloneOrder) {
 TEST_F(ModuleTest, Directives) {
     auto* enable_1 = Enable(wgsl::Extension::kF16);
     auto* diagnostic_1 = DiagnosticDirective(wgsl::DiagnosticSeverity::kWarning, "foo");
-    auto* enable_2 = Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+    auto* enable_2 = Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     auto* diagnostic_2 = DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "bar");
 
     Program program(std::move(*this));

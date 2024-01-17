@@ -10,7 +10,7 @@
                OpName %out_block "out_block"
                OpMemberName %out_block 0 "inner"
                OpName %out "out"
-               OpName %bar "bar"
+               OpName %bar_F "bar_F"
                OpName %p "p"
                OpName %foo "foo"
                OpName %param "param"
@@ -33,7 +33,7 @@
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-        %bar = OpFunction %void None %5
+      %bar_F = OpFunction %void None %5
           %p = OpFunctionParameter %_ptr_Function_float
          %10 = OpLabel
          %14 = OpFOrdGreaterThanEqual %bool %float_1 %13
@@ -51,7 +51,7 @@
         %foo = OpFunction %void None %22
          %24 = OpLabel
       %param = OpVariable %_ptr_Function_float Function %13
-         %26 = OpFunctionCall %void %bar %param
+         %26 = OpFunctionCall %void %bar_F %param
          %31 = OpAccessChain %_ptr_StorageBuffer_float %out %uint_0
          %32 = OpLoad %float %param
                OpStore %31 %32

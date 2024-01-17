@@ -309,7 +309,6 @@ TEST_P(ResolverExpressionKindTest, Test) {
             GlobalVar("v", ty("texture_storage_2d", "rgba8unorm", expr), Group(0_u), Binding(0_u));
             break;
         case Use::kAddressSpace:
-            Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
             Func(Symbols().New(), Vector{Param("p", ty("ptr", expr, ty.f32()))}, ty.void_(),
                  tint::Empty);
             break;

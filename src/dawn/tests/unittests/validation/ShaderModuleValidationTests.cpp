@@ -802,7 +802,6 @@ constexpr struct WGSLExtensionInfo kExtensions[] = {
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
-    {"chromium_experimental_full_ptr_parameters", true, nullptr},
     {"chromium_experimental_push_constant", true, nullptr},
     {"chromium_internal_relaxed_uniform_layout", true, nullptr},
     */

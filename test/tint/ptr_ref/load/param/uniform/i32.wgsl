@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 @group(0) @binding(0) var<uniform> S : i32;
 
 fn func(pointer : ptr<uniform, i32>) -> i32 {

@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 var<workgroup> S : mat2x2<f32>;
 
 fn func(pointer : ptr<workgroup, vec2<f32>>) {

@@ -266,7 +266,6 @@ bool ASTPrinter::Generate() {
             "GLSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
-                wgsl::Extension::kChromiumExperimentalFullPtrParameters,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kF16,

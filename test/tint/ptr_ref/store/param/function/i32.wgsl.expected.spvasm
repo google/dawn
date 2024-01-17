@@ -7,7 +7,7 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %func "func"
+               OpName %func_F "func_F"
                OpName %pointer "pointer"
                OpName %main "main"
                OpName %F "F"
@@ -18,7 +18,7 @@
      %int_42 = OpConstant %int 42
          %10 = OpTypeFunction %void
          %14 = OpConstantNull %int
-       %func = OpFunction %void None %1
+     %func_F = OpFunction %void None %1
     %pointer = OpFunctionParameter %_ptr_Function_int
           %7 = OpLabel
                OpStore %pointer %int_42
@@ -27,6 +27,6 @@
        %main = OpFunction %void None %10
          %12 = OpLabel
           %F = OpVariable %_ptr_Function_int Function %14
-         %15 = OpFunctionCall %void %func %F
+         %15 = OpFunctionCall %void %func_F %F
                OpReturn
                OpFunctionEnd

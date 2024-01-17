@@ -1,5 +1,3 @@
-enable chromium_experimental_full_ptr_parameters;
-
 fn func(pointer : ptr<function, vec4<f32>>) -> vec4<f32> {
   return *pointer;
 }

@@ -62,8 +62,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -93,8 +91,6 @@ var<private> p : f32;
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -143,8 +139,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -214,8 +208,6 @@ var<workgroup> w : f32;
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -266,8 +258,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   a : f32,
   b : f32,
@@ -299,8 +289,6 @@ var<private> a : f32 = 1.0;
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   a : f32,
   b : f32,
@@ -335,8 +323,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -372,8 +358,6 @@ var<private> p : f32;
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
 }
@@ -1232,8 +1216,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct tint_private_vars_struct {
   p : f32,
   p_with_init : f32,
@@ -1278,8 +1260,6 @@ fn main() {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : f32,
   b : f32,
@@ -1339,8 +1319,6 @@ var<private> d : S;
 )";
 
     auto* expect = R"(
-enable chromium_experimental_full_ptr_parameters;
-
 struct S {
   a : f32,
   b : f32,

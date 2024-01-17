@@ -8,7 +8,7 @@
                OpEntryPoint Fragment %f "f"
                OpExecutionMode %f OriginUpperLeft
                OpName %v "v"
-               OpName %x "x"
+               OpName %x_F "x_F"
                OpName %p "p"
                OpName %g "g"
                OpName %f "f"
@@ -19,7 +19,7 @@
        %void = OpTypeVoid
           %5 = OpTypeFunction %void %_ptr_Private_float
          %11 = OpTypeFunction %void
-          %x = OpFunction %void None %5
+        %x_F = OpFunction %void None %5
           %p = OpFunctionParameter %_ptr_Private_float
           %9 = OpLabel
                OpStore %p %4
@@ -27,7 +27,7 @@
                OpFunctionEnd
           %g = OpFunction %void None %11
          %13 = OpLabel
-         %14 = OpFunctionCall %void %x %v
+         %14 = OpFunctionCall %void %x_F %v
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %11

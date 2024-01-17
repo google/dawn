@@ -34,8 +34,7 @@ namespace tint::ast::transform {
 
 /// DirectVariableAccess is a transform that allows usage of pointer parameters in the 'storage',
 /// 'uniform' and 'workgroup' address space, and passing of pointers to sub-objects. These pointers
-/// are only allowed by the resolver when the `chromium_experimental_full_ptr_parameters` extension
-/// is enabled.
+/// are allowed with the `unrestricted_pointer_parameters` WGSL feature.
 ///
 /// DirectVariableAccess works by creating specializations of functions that have pointer
 /// parameters, one specialization for each pointer argument's unique access chain 'shape' from a

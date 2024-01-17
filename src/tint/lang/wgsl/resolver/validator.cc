@@ -845,8 +845,8 @@ bool Validator::Parameter(const sem::Variable* var) const {
                 case core::AddressSpace::kStorage:
                 case core::AddressSpace::kUniform:
                 case core::AddressSpace::kWorkgroup:
-                    ok = enabled_extensions_.Contains(
-                        wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+                    ok = allowed_features_.features.count(
+                             wgsl::LanguageFeature::kUnrestrictedPointerParameters) != 0;
                     break;
                 default:
                     break;
@@ -1912,8 +1912,8 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         }
 
         if (param_type->Is<core::type::Pointer>() &&
-            !enabled_extensions_.Contains(
-                wgsl::Extension::kChromiumExperimentalFullPtrParameters)) {
+            !allowed_features_.features.count(
+                wgsl::LanguageFeature::kUnrestrictedPointerParameters)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
             // Each argument of pointer type to a user-defined function must have the same memory
             // view as its root identifier.

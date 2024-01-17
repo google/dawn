@@ -10,7 +10,7 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %VSOut "VSOut"
                OpMemberName %VSOut 0 "pos"
-               OpName %foo "foo"
+               OpName %foo_F "foo_F"
                OpName %out "out"
                OpName %pos "pos"
                OpName %main_inner "main_inner"
@@ -42,7 +42,7 @@
          %28 = OpTypeFunction %VSOut
          %32 = OpConstantNull %VSOut
          %36 = OpTypeFunction %void
-        %foo = OpFunction %void None %9
+      %foo_F = OpFunction %void None %9
         %out = OpFunctionParameter %_ptr_Function_VSOut
          %15 = OpLabel
         %pos = OpVariable %_ptr_Function_v4float Function %5
@@ -55,7 +55,7 @@
  %main_inner = OpFunction %VSOut None %28
          %30 = OpLabel
       %out_0 = OpVariable %_ptr_Function_VSOut Function %32
-         %33 = OpFunctionCall %void %foo %out_0
+         %33 = OpFunctionCall %void %foo_F %out_0
          %35 = OpLoad %VSOut %out_0
                OpReturnValue %35
                OpFunctionEnd

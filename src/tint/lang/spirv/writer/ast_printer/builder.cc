@@ -277,7 +277,6 @@ bool Builder::Build() {
             "SPIR-V", builder_.AST(), builder_.Diagnostics(),
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
-                wgsl::Extension::kChromiumExperimentalFullPtrParameters,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kF16,
