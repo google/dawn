@@ -1166,5 +1166,144 @@ DAWN_INSTANTIATE_TEST(MaxInterStageLimitTests,
                       OpenGLESBackend(),
                       VulkanBackend());
 
+// Verifies the limit maxVertexAttributes work correctly on the creation of render pipelines.
+class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
+  public:
+    struct TestSpec {
+        bool hasVertexIndex;
+        bool hasInstanceIndex;
+    };
+
+    void DoTest(const TestSpec& spec) {
+        wgpu::RenderPipeline pipeline = CreateRenderPipeline(spec);
+        EXPECT_NE(nullptr, pipeline.Get());
+    }
+
+  private:
+    wgpu::RenderPipeline CreateRenderPipeline(const TestSpec& spec) {
+        wgpu::Limits baseLimits = GetAdapterLimits().limits;
+        uint32_t maxVertexAttributes = baseLimits.maxVertexAttributes;
+
+        // In compatibility mode @builtin(vertex_index) and @builtin(instance_index) each use an
+        // attribute.
+        if (IsCompatibilityMode()) {
+            if (spec.hasVertexIndex) {
+                --maxVertexAttributes;
+            }
+            if (spec.hasInstanceIndex) {
+                --maxVertexAttributes;
+            }
+        }
+
+        utils::ComboVertexState vertexState;
+        GetVertexStateForTest(maxVertexAttributes, &vertexState);
+
+        wgpu::ShaderModule shaderModule = GetShaderModuleForTest(maxVertexAttributes, spec);
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = shaderModule;
+        descriptor.vertex.bufferCount = vertexState.vertexBufferCount;
+        descriptor.vertex.buffers = &vertexState.cVertexBuffers[0];
+        descriptor.cFragment.module = shaderModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        return device.CreateRenderPipeline(&descriptor);
+    }
+
+    void GetVertexStateForTest(uint32_t maxVertexAttributes, utils::ComboVertexState* vertexState) {
+        vertexState->cAttributes.resize(maxVertexAttributes);
+        vertexState->vertexBufferCount = 1;
+        vertexState->cVertexBuffers.resize(1);
+        vertexState->cVertexBuffers[0].arrayStride = sizeof(float) * 4 * maxVertexAttributes;
+        vertexState->cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+        vertexState->cVertexBuffers[0].attributeCount = maxVertexAttributes;
+        vertexState->cVertexBuffers[0].attributes = vertexState->cAttributes.data();
+        for (uint32_t i = 0; i < maxVertexAttributes; ++i) {
+            vertexState->cAttributes[i].format = wgpu::VertexFormat::Float32x4;
+            vertexState->cAttributes[i].offset = sizeof(float) * 4 * i;
+            vertexState->cAttributes[i].shaderLocation = i;
+        }
+    }
+
+    wgpu::ShaderModule GetShaderModuleForTest(uint32_t maxVertexAttributes, const TestSpec& spec) {
+        std::ostringstream sstream;
+        sstream << "struct VertexIn {" << std::endl;
+        for (uint32_t i = 0; i < maxVertexAttributes; ++i) {
+            sstream << "    @location(" << i << ") input" << i << " : vec4f," << std::endl;
+        }
+        if (spec.hasVertexIndex) {
+            sstream << "    @builtin(vertex_index) VertexIndex : u32," << std::endl;
+        }
+        if (spec.hasInstanceIndex) {
+            sstream << "    @builtin(instance_index) InstanceIndex : u32," << std::endl;
+        }
+        sstream << R"(
+            }
+            @vertex fn vs_main(input : VertexIn) -> @builtin(position) vec4f {
+                return )";
+        for (uint32_t i = 0; i < maxVertexAttributes; ++i) {
+            if (i > 0) {
+                sstream << " + ";
+            }
+            sstream << "input.input" << i;
+        }
+        if (spec.hasVertexIndex) {
+            sstream << " + vec4f(f32(input.VertexIndex))";
+        }
+        if (spec.hasInstanceIndex) {
+            sstream << " + vec4f(f32(input.InstanceIndex))";
+        }
+        sstream << ";}" << std::endl;
+
+        sstream << R"(
+            @fragment
+            fn fs_main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        })";
+
+        return utils::CreateShaderModule(device, sstream.str());
+    }
+};
+
+// Tests that maxVertexAttributes work for the creation of the render pipelines with no built-in
+// input variables.
+TEST_P(MaxVertexAttributesPipelineCreationTests, NoBuiltinInputs) {
+    TestSpec spec = {};
+    DoTest(spec);
+}
+
+// Tests that maxVertexAttributes work for the creation of the render pipelines with
+// @builtin(vertex_index).
+TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex) {
+    TestSpec spec = {};
+    spec.hasVertexIndex = true;
+    DoTest(spec);
+}
+
+// Tests that maxVertexAttributes work for the creation of the render pipelines with
+// @builtin(instance_index).
+TEST_P(MaxVertexAttributesPipelineCreationTests, InstanceIndex) {
+    TestSpec spec = {};
+    spec.hasInstanceIndex = true;
+    DoTest(spec);
+}
+
+// Tests that maxVertexAttributes work for the creation of the render pipelines with
+// @builtin(vertex_index) and @builtin(instance_index).
+TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex_InstanceIndex) {
+    TestSpec spec = {};
+    spec.hasVertexIndex = true;
+    spec.hasInstanceIndex = true;
+    DoTest(spec);
+}
+
+DAWN_INSTANTIATE_TEST(MaxVertexAttributesPipelineCreationTests,
+                      D3D11Backend(),
+                      D3D12Backend({}, {"use_dxc"}),
+                      D3D12Backend({"use_dxc"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
 }  // anonymous namespace
 }  // namespace dawn
