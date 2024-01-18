@@ -423,6 +423,9 @@ class Parser {
                 case spv::Op::OpCompositeConstruct:
                     EmitConstruct(inst);
                     break;
+                case spv::Op::OpCompositeExtract:
+                    EmitCompositeExtract(inst);
+                    break;
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
                     break;
@@ -457,6 +460,17 @@ class Parser {
         }
         auto* base = Value(inst.GetSingleWordOperand(2));
         auto* access = b_.Access(Type(inst.type_id()), base, std::move(indices));
+        Emit(access, inst.result_id());
+    }
+
+    /// @param inst the SPIR-V instruction for OpCompositeExtract
+    void EmitCompositeExtract(const spvtools::opt::Instruction& inst) {
+        Vector<core::ir::Value*, 4> indices;
+        for (uint32_t i = 3; i < inst.NumOperandWords(); i++) {
+            indices.Push(b_.Constant(u32(inst.GetSingleWordOperand(i))));
+        }
+        auto* object = Value(inst.GetSingleWordOperand(2));
+        auto* access = b_.Access(Type(inst.type_id()), object, std::move(indices));
         Emit(access, inst.result_id());
     }
 

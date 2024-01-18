@@ -240,5 +240,220 @@ tint_symbol_3 = struct @align(16) {
 )");
 }
 
+TEST_F(SpirvParserTest, CompositeExtract_Vector) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %vec4u = OpTypeVector %u32 4
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %u32 %vec4u
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %u32 None %fn_type
+        %vec = OpFunctionParameter %vec4u
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %u32 %vec 2
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+%2 = func(%3:vec4<u32>):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = access %3, 2u
+    ret %4
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeExtract_MatrixColumn) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %vec3f = OpTypeVector %f32 3
+     %mat4x3 = OpTypeMatrix %vec3f 4
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %vec3f %mat4x3
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %vec3f None %fn_type
+        %mat = OpFunctionParameter %mat4x3
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %vec3f %mat 2
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+%2 = func(%3:mat4x3<f32>):vec3<f32> -> %b2 {
+  %b2 = block {
+    %4:vec3<f32> = access %3, 2u
+    ret %4
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeExtract_MatrixElement) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %vec3f = OpTypeVector %f32 3
+     %mat4x3 = OpTypeMatrix %vec3f 4
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %f32 %mat4x3
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %f32 None %fn_type
+        %mat = OpFunctionParameter %mat4x3
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %f32 %mat 2 1
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+%2 = func(%3:mat4x3<f32>):f32 -> %b2 {
+  %b2 = block {
+    %4:f32 = access %3, 2u, 1u
+    ret %4
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeExtract_Array) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %u32_4 = OpConstant %u32 4
+     %arr_ty = OpTypeArray %u32 %u32_4
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %u32 %arr_ty
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %u32 None %fn_type
+        %arr = OpFunctionParameter %arr_ty
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %u32 %arr 2
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+%2 = func(%3:array<u32, 4>):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = access %3, 2u
+    ret %4
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeExtract_ArrayOfVec) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+      %vec3u = OpTypeVector %u32 3
+      %u32_4 = OpConstant %u32 4
+     %arr_ty = OpTypeArray %vec3u %u32_4
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %u32 %arr_ty
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %u32 None %fn_type
+        %arr = OpFunctionParameter %arr_ty
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %u32 %arr 1 2
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+%2 = func(%3:array<vec3<u32>, 4>):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = access %3, 1u, 2u
+    ret %4
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, CompositeExtract_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+     %str_ty = OpTypeStruct %u32 %u32
+    %ep_type = OpTypeFunction %void
+    %fn_type = OpTypeFunction %u32 %str_ty
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+        %foo = OpFunction %u32 None %fn_type
+        %str = OpFunctionParameter %str_ty
+  %foo_start = OpLabel
+    %extract = OpCompositeExtract %u32 %str 1
+               OpReturnValue %extract
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+  tint_symbol_1:u32 @offset(4)
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%2 = func(%3:tint_symbol_2):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = access %3, 1u
+    ret %4
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
