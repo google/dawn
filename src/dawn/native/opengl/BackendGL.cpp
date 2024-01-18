@@ -27,6 +27,8 @@
 
 #include "dawn/native/opengl/BackendGL.h"
 
+#include <string>
+
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/OpenGLBackend.h"
@@ -67,9 +69,10 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 #else
         const char* eglLib = "libEGL.so";
 #endif
-        if (!mLibEGL.Valid() && !mLibEGL.Open(eglLib)) {
+        std::string err;
+        if (!mLibEGL.Valid() && !mLibEGL.Open(eglLib, &err)) {
             GetInstance()->ConsumedErrorAndWarnOnce(
-                DAWN_VALIDATION_ERROR("Failed to load %s", eglLib));
+                DAWN_VALIDATION_ERROR("Failed to load %s: %s", eglLib, err.c_str()));
             return {};
         }
 
