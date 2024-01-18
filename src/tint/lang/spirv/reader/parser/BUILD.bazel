@@ -79,6 +79,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "composite_test.cc",
     "constant_test.cc",
     "function_test.cc",
     "helper_test.h",

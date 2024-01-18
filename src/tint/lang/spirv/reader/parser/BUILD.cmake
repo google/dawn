@@ -85,6 +85,7 @@ if(TINT_BUILD_SPV_READER)
 # Condition: TINT_BUILD_SPV_READER
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_parser_test test
+  lang/spirv/reader/parser/composite_test.cc
   lang/spirv/reader/parser/constant_test.cc
   lang/spirv/reader/parser/function_test.cc
   lang/spirv/reader/parser/helper_test.h
