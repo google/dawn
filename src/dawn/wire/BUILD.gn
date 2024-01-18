@@ -30,7 +30,7 @@ import("../../../scripts/dawn_overrides_with_defaults.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 
-# Public dawn wire headers so they can be publically visible for dependencies of
+# Public dawn wire headers so they can be publicly visible for dependencies of
 # dawn/wire
 source_set("headers") {
   public_deps = [ "${dawn_root}/include/dawn:headers" ]
@@ -151,5 +151,6 @@ dawn_component("wire") {
   public_deps = [
     ":abseil",
     ":headers",
+    "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
   ]
 }

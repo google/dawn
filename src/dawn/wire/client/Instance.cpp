@@ -35,6 +35,7 @@
 #include "dawn/common/WGSLFeatureMapping.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "tint/lang/wgsl/features/language_feature.h"
 #include "tint/lang/wgsl/features/status.h"
 
@@ -80,7 +81,7 @@ class RequestAdapterEvent : public TrackedEvent {
         if (mStatus != WGPURequestAdapterStatus_Success && mAdapter != nullptr) {
             // If there was an error, we may need to reclaim the adapter allocation, otherwise the
             // adapter is returned to the user who owns it.
-            mAdapter->GetClient()->Free(mAdapter);
+            mAdapter->GetClient()->Free(mAdapter.get());
             mAdapter = nullptr;
         }
         if (mCallback) {
@@ -89,7 +90,8 @@ class RequestAdapterEvent : public TrackedEvent {
     }
 
     WGPURequestAdapterCallback mCallback;
-    void* mUserdata;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -100,7 +102,8 @@ class RequestAdapterEvent : public TrackedEvent {
     // throughout the duration of a RequestAdapterEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the adapter to the user who then takes ownership as the Event goes away.
-    Adapter* mAdapter = nullptr;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<Adapter, DanglingUntriaged> mAdapter = nullptr;
 };
 
 WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {

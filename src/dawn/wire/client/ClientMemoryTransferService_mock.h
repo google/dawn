@@ -32,6 +32,7 @@
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/Client.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 
@@ -51,7 +52,7 @@ class MockMemoryTransferService : public MemoryTransferService {
                                    size_t size) override;
 
       private:
-        MockMemoryTransferService* mService;
+        raw_ptr<MockMemoryTransferService> mService;
     };
 
     class MockWriteHandle : public WriteHandle {
@@ -66,7 +67,7 @@ class MockMemoryTransferService : public MemoryTransferService {
         void SerializeDataUpdate(void* serializePointer, size_t offset, size_t size) override;
 
       private:
-        MockMemoryTransferService* mService;
+        raw_ptr<MockMemoryTransferService> mService;
     };
 
     MockMemoryTransferService();

@@ -33,6 +33,7 @@
 
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/server/ServerBase_autogen.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::server {
 
@@ -64,7 +65,7 @@ class MemoryTransferService;
 //
 // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
 struct CallbackUserdata {
-    Server* const server;
+    const raw_ptr<Server> server;
     std::weak_ptr<bool> const serverIsAlive;
 
     CallbackUserdata() = delete;
@@ -243,7 +244,7 @@ class Server : public ServerBase {
     ChunkedCommandSerializer mSerializer;
     DawnProcTable mProcs;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
-    MemoryTransferService* mMemoryTransferService = nullptr;
+    raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;
 
     std::shared_ptr<bool> mIsAlive;
 };

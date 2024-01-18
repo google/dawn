@@ -40,6 +40,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire {
 
@@ -143,7 +144,7 @@ class ChunkedCommandSerializer {
 
     void SerializeChunkedCommand(const char* allocatedBuffer, size_t remainingSize);
 
-    CommandSerializer* mSerializer;
+    raw_ptr<CommandSerializer> mSerializer;
     size_t mMaxAllocationSize;
 };
 

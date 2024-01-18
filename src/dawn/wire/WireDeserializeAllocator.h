@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "dawn/wire/WireCmd_autogen.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire {
 // A really really simple implementation of the DeserializeAllocator. It's main feature
@@ -47,7 +48,8 @@ class WireDeserializeAllocator : public DeserializeAllocator {
 
   private:
     size_t mRemainingSize = 0;
-    char* mCurrentBuffer = nullptr;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<char, AllowPtrArithmetic | DanglingUntriaged> mCurrentBuffer = nullptr;
     char mStaticBuffer[2048];
     std::vector<char*> mAllocations;
 };

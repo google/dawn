@@ -33,6 +33,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/wire/WireResult.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire {
 
@@ -73,7 +74,7 @@ class BufferConsumer {
     WireResult Peek(T** data);
 
   private:
-    BufferT* mBuffer;
+    raw_ptr<BufferT, AllowPtrArithmetic> mBuffer;
     size_t mSize;
 };
 

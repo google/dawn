@@ -29,6 +29,7 @@
 #define SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 
 #include "dawn/webgpu.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/wire/ObjectHandle.h"
@@ -39,7 +40,7 @@ namespace dawn::wire::client {
 class Client;
 
 struct ObjectBaseParams {
-    Client* client;
+    raw_ptr<Client> client;
     ObjectHandle handle;
 };
 
@@ -69,7 +70,7 @@ class ObjectBase : public LinkNode<ObjectBase> {
     uint32_t GetRefcount() const { return mRefcount; }
 
   private:
-    Client* const mClient;
+    const raw_ptr<Client> mClient;
     const ObjectHandle mHandle;
     uint32_t mRefcount;
 };

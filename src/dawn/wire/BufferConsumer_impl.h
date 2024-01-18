@@ -42,7 +42,7 @@ WireResult BufferConsumer<BufferT>::Peek(T** data) {
         return WireResult::FatalError;
     }
 
-    *data = reinterpret_cast<T*>(mBuffer);
+    *data = reinterpret_cast<T*>(mBuffer.get());
     return WireResult::Success;
 }
 
@@ -54,7 +54,7 @@ WireResult BufferConsumer<BufferT>::Next(T** data) {
         return WireResult::FatalError;
     }
 
-    *data = reinterpret_cast<T*>(mBuffer);
+    *data = reinterpret_cast<T*>(mBuffer.get());
     mBuffer += kSize;
     mSize -= kSize;
     return WireResult::Success;
@@ -71,7 +71,7 @@ WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
         return WireResult::FatalError;
     }
 
-    *data = reinterpret_cast<T*>(mBuffer);
+    *data = reinterpret_cast<T*>(mBuffer.get());
     mBuffer += *size;
     mSize -= *size;
     return WireResult::Success;

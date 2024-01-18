@@ -107,8 +107,14 @@ target_sources(dawn_wire PRIVATE
     "server/ServerShaderModule.cpp"
 )
 target_link_libraries(dawn_wire
-    PUBLIC dawn_headers
-    PRIVATE dawn_common dawn_internal_config absl_flat_hash_map absl_flat_hash_set
+    PUBLIC
+      dawn_headers
+    PRIVATE
+      absl_flat_hash_map
+      absl_flat_hash_set
+      dawn_common
+      dawn_internal_config
+      partition_alloc
 )
 
 install_if_enabled(dawn_wire)

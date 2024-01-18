@@ -32,6 +32,7 @@
 
 #include "dawn/wire/WireServer.h"
 #include "dawn/wire/server/Server.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::server {
 
@@ -49,7 +50,7 @@ class MockMemoryTransferService : public MemoryTransferService {
                                  void* serializePointer) override;
 
       private:
-        MockMemoryTransferService* mService;
+        raw_ptr<MockMemoryTransferService> mService;
     };
 
     class MockWriteHandle : public WriteHandle {
@@ -65,7 +66,7 @@ class MockMemoryTransferService : public MemoryTransferService {
         const uint32_t* GetData() const;
 
       private:
-        MockMemoryTransferService* mService;
+        raw_ptr<MockMemoryTransferService> mService;
     };
 
     MockMemoryTransferService();

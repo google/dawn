@@ -37,6 +37,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::server {
 
@@ -75,7 +76,7 @@ struct ObjectData<WGPUBuffer> : public ObjectDataBase<WGPUBuffer> {
 };
 
 struct DeviceInfo {
-    Server* server;
+    raw_ptr<Server> server;
     ObjectHandle self;
 };
 
@@ -90,7 +91,7 @@ struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
 template <typename T>
 struct Known {
     ObjectId id;
-    ObjectData<T>* data;
+    raw_ptr<ObjectData<T>> data;
 
     const ObjectData<T>* operator->() const {
         DAWN_ASSERT(data != nullptr);

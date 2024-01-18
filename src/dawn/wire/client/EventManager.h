@@ -39,6 +39,7 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireResult.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 

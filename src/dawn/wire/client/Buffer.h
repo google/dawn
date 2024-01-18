@@ -37,6 +37,7 @@
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 
@@ -124,7 +125,8 @@ class Buffer final : public ObjectWithEventsBase {
     std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
     bool mDestructWriteHandleOnUnmap = false;
 
-    void* mMappedData = nullptr;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mMappedData = nullptr;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
 };
