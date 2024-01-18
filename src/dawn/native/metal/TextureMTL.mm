@@ -35,6 +35,7 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/QueueMTL.h"
@@ -466,7 +467,7 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
         SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents();
         if (contents != nullptr) {
             contents->AcquirePendingFences(&fences);
-            contents->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+            contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());
         }
 
         if (!mWaitEvents.empty() || !fences->empty()) {
@@ -756,9 +757,10 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
-                                               blockInfo.byteSize));
+            DAWN_TRY_ASSIGN(
+                uploadHandle,
+                uploader->Allocate(bufferSize, device->GetQueue()->GetPendingCommandSerial(),
+                                   blockInfo.byteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             id<MTLBuffer> uploadBuffer = ToBackend(uploadHandle.stagingBuffer)->GetMTLBuffer();

@@ -122,12 +122,12 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext());
 
     TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
-                       "serial", uint64_t(GetDevice()->GetPendingCommandSerial()));
+                       "serial", uint64_t(GetPendingCommandSerial()));
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext));
     }
     TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
-                     "serial", uint64_t(GetDevice()->GetPendingCommandSerial()));
+                     "serial", uint64_t(GetPendingCommandSerial()));
 
     return SubmitPendingCommands();
 }

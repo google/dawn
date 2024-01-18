@@ -202,7 +202,7 @@ MaybeError ShaderVisibleDescriptorAllocator::AllocateAndSwitchShaderVisibleHeap(
             // longer used by GPU. This maintains a heap buffer to avoid frequently re-creating
             // heaps for heavy users.
             // TODO(dawn:256): Consider periodically triming to avoid OOM.
-            mPool.push_back({mDevice->GetPendingCommandSerial(), std::move(mHeap)});
+            mPool.push_back({mDevice->GetQueue()->GetPendingCommandSerial(), std::move(mHeap)});
             if (mPool.front().heapSerial <= mDevice->GetQueue()->GetCompletedCommandSerial()) {
                 descriptorHeap = std::move(mPool.front().heap);
                 mPool.pop_front();

@@ -39,6 +39,7 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d11/BindGroupTrackerD3D11.h"
@@ -119,7 +120,7 @@ MaybeError SynchronizeTextureBeforeUse(
     }
 
     contents->AcquirePendingFences(&fences);
-    contents->SetLastUsageSerial(texture->GetDevice()->GetPendingCommandSerial());
+    contents->SetLastUsageSerial(texture->GetDevice()->GetQueue()->GetPendingCommandSerial());
 
     for (auto& fence : fences) {
         DAWN_TRY(CheckHRESULT(commandContext->GetD3D11DeviceContext4()->Wait(

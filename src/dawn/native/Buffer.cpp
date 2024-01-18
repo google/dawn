@@ -858,7 +858,7 @@ void BufferBase::SetIsDataInitialized() {
 }
 
 void BufferBase::MarkUsedInPendingCommands() {
-    ExecutionSerial serial = GetDevice()->GetPendingCommandSerial();
+    ExecutionSerial serial = GetDevice()->GetQueue()->GetPendingCommandSerial();
     DAWN_ASSERT(serial >= mLastUsageSerial);
     mLastUsageSerial = serial;
 }

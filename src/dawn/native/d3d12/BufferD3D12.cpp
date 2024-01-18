@@ -299,7 +299,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
     // There may be no heap if the allocation is an external one.
     Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
     if (heap) {
-        commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
+        commandContext->TrackHeapUsage(heap, GetDevice()->GetQueue()->GetPendingCommandSerial());
     }
 
     MarkUsedInPendingCommands();
@@ -350,7 +350,8 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
     // occur. When that buffer is used again, the previously recorded serial must be compared to
     // the last completed serial to determine if the buffer has implicity decayed to the common
     // state.
-    const ExecutionSerial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+    const ExecutionSerial pendingCommandSerial =
+        ToBackend(GetDevice())->GetQueue()->GetPendingCommandSerial();
     if (pendingCommandSerial > mLastUsedSerial) {
         lastState = D3D12_RESOURCE_STATE_COMMON;
         mLastUsedSerial = pendingCommandSerial;
@@ -611,8 +612,9 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
         // includes STORAGE.
         DynamicUploader* uploader = device->GetDynamicUploader();
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(size, device->GetPendingCommandSerial(),
-                                                         kCopyBufferToBufferOffsetAlignment));
+        DAWN_TRY_ASSIGN(uploadHandle,
+                        uploader->Allocate(size, device->GetQueue()->GetPendingCommandSerial(),
+                                           kCopyBufferToBufferOffsetAlignment));
 
         memset(uploadHandle.mappedBuffer, clearValue, size);
 

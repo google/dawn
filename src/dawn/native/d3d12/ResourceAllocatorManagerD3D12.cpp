@@ -31,6 +31,7 @@
 #include <limits>
 #include <utility>
 
+#include "dawn/native/Queue.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/HeapAllocatorD3D12.h"
@@ -457,7 +458,7 @@ void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocati
         return;
     }
 
-    mAllocationsToDelete.Enqueue(allocation, mDevice->GetPendingCommandSerial());
+    mAllocationsToDelete.Enqueue(allocation, mDevice->GetQueue()->GetPendingCommandSerial());
 
     // Directly allocated ResourceHeapAllocations are created with a heap object that must be
     // manually deleted upon deallocation. See ResourceAllocatorManager::CreateCommittedResource
@@ -466,7 +467,7 @@ void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocati
     // pending commands.
     if (allocation.GetInfo().mMethod == AllocationMethod::kDirect) {
         mHeapsToDelete.Enqueue(std::unique_ptr<ResourceHeapBase>(allocation.GetResourceHeap()),
-                               mDevice->GetPendingCommandSerial());
+                               mDevice->GetQueue()->GetPendingCommandSerial());
     }
 
     // Invalidate the allocation immediately in case one accidentally

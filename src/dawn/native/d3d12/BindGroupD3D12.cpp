@@ -31,6 +31,7 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/ExternalTexture.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -246,7 +247,8 @@ bool BindGroup::PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& 
     Device* device = ToBackend(GetDevice());
 
     D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor;
-    if (!viewAllocator->AllocateGPUDescriptors(descriptorCount, device->GetPendingCommandSerial(),
+    if (!viewAllocator->AllocateGPUDescriptors(descriptorCount,
+                                               device->GetQueue()->GetPendingCommandSerial(),
                                                &baseCPUDescriptor, &mGPUViewAllocation)) {
         return false;
     }

@@ -250,8 +250,9 @@ MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
     if (!mZeroBuffer->IsDataInitialized()) {
         DynamicUploader* uploader = GetDynamicUploader();
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(kZeroBufferSize, GetPendingCommandSerial(),
-                                                         kCopyBufferToBufferOffsetAlignment));
+        DAWN_TRY_ASSIGN(uploadHandle,
+                        uploader->Allocate(kZeroBufferSize, GetQueue()->GetPendingCommandSerial(),
+                                           kCopyBufferToBufferOffsetAlignment));
 
         memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
 
@@ -299,7 +300,7 @@ MaybeError Device::TickImpl() {
 }
 
 void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
-    mUsedComObjectRefs->Enqueue(std::move(object), GetPendingCommandSerial());
+    mUsedComObjectRefs->Enqueue(std::move(object), GetQueue()->GetPendingCommandSerial());
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

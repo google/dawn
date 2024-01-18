@@ -166,7 +166,7 @@ MaybeError Device::TickImpl() {
 }
 
 void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
-    mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
+    mUsedComObjectRefs.Enqueue(object, GetQueue()->GetPendingCommandSerial());
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

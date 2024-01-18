@@ -944,9 +944,10 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
 
                 UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                                  size, device->GetPendingCommandSerial(),
-                                                  kCopyBufferToBufferOffsetAlignment));
+                DAWN_TRY_ASSIGN(uploadHandle,
+                                device->GetDynamicUploader()->Allocate(
+                                    size, device->GetQueue()->GetPendingCommandSerial(),
+                                    kCopyBufferToBufferOffsetAlignment));
                 DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
                 memcpy(uploadHandle.mappedBuffer, data, size);
 

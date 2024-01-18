@@ -352,7 +352,8 @@ external_semaphore::Service* Device::GetExternalSemaphoreService() const {
 }
 
 void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
-    mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator, GetPendingCommandSerial());
+    mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator,
+                                                     GetQueue()->GetPendingCommandSerial());
 }
 
 ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {

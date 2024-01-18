@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "dawn/common/Math.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
@@ -150,7 +151,7 @@ ResultOrError<CPUDescriptorHeapAllocation>
 StagingDescriptorAllocator::AllocateTransientCPUDescriptors() {
     CPUDescriptorHeapAllocation allocation;
     DAWN_TRY_ASSIGN(allocation, AllocateCPUDescriptors());
-    mAllocationsToDelete.Enqueue(allocation, mDevice->GetPendingCommandSerial());
+    mAllocationsToDelete.Enqueue(allocation, mDevice->GetQueue()->GetPendingCommandSerial());
     return allocation;
 }
 

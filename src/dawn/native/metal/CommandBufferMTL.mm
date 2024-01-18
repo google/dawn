@@ -32,6 +32,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ExternalTexture.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/metal/BindGroupMTL.h"
 #include "dawn/native/metal/BufferMTL.h"
@@ -1247,9 +1248,10 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 Device* device = ToBackend(GetDevice());
 
                 UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                                  size, device->GetPendingCommandSerial(),
-                                                  kCopyBufferToBufferOffsetAlignment));
+                DAWN_TRY_ASSIGN(uploadHandle,
+                                device->GetDynamicUploader()->Allocate(
+                                    size, device->GetQueue()->GetPendingCommandSerial(),
+                                    kCopyBufferToBufferOffsetAlignment));
                 DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
                 memcpy(uploadHandle.mappedBuffer, data, size);
 

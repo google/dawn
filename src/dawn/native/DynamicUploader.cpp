@@ -32,6 +32,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Queue.h"
 
 namespace dawn::native {
 
@@ -41,7 +42,8 @@ DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
 }
 
 void DynamicUploader::ReleaseStagingBuffer(Ref<BufferBase> stagingBuffer) {
-    mReleasedStagingBuffers.Enqueue(std::move(stagingBuffer), mDevice->GetPendingCommandSerial());
+    mReleasedStagingBuffers.Enqueue(std::move(stagingBuffer),
+                                    mDevice->GetQueue()->GetPendingCommandSerial());
 }
 
 ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocationSize,

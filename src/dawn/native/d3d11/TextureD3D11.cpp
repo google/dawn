@@ -39,6 +39,7 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"
@@ -1108,7 +1109,7 @@ MaybeError Texture::CopyInternal(const ScopedCommandRecordingContext* commandCon
 
 ResultOrError<ExecutionSerial> Texture::EndAccess() {
     // TODO(dawn:1705): submit pending commands if deferred context is used.
-    return GetDevice()->GetLastSubmittedCommandSerial();
+    return GetDevice()->GetQueue()->GetLastSubmittedCommandSerial();
 }
 
 ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(

@@ -1577,9 +1577,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                               largestMipSize.depthOrArrayLayers;
         DynamicUploader* uploader = device->GetDynamicUploader();
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(
-            uploadHandle,
-            uploader->Allocate(bufferSize, device->GetPendingCommandSerial(), blockInfo.byteSize));
+        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(
+                                          bufferSize, device->GetQueue()->GetPendingCommandSerial(),
+                                          blockInfo.byteSize));
         memset(uploadHandle.mappedBuffer, uClearColor, bufferSize);
 
         std::vector<VkBufferImageCopy> regions;

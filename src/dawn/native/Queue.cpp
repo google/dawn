@@ -124,9 +124,10 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
     }
 
     UploadHandle uploadHandle;
-    DAWN_TRY_ASSIGN(uploadHandle,
-                    device->GetDynamicUploader()->Allocate(
-                        newDataSizeBytes, device->GetPendingCommandSerial(), offsetAlignment));
+    DAWN_TRY_ASSIGN(
+        uploadHandle,
+        device->GetDynamicUploader()->Allocate(
+            newDataSizeBytes, device->GetQueue()->GetPendingCommandSerial(), offsetAlignment));
     DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
 
     uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
@@ -298,7 +299,7 @@ void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void*
     TrackTaskAfterEventualFlush(std::move(task));
 
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::APIOnSubmittedWorkDone", "serial",
-                 uint64_t(GetDevice()->GetPendingCommandSerial()));
+                 uint64_t(GetPendingCommandSerial()));
 }
 
 Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
@@ -423,7 +424,7 @@ MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
 
     UploadHandle uploadHandle;
     DAWN_TRY_ASSIGN(uploadHandle,
-                    device->GetDynamicUploader()->Allocate(size, device->GetPendingCommandSerial(),
+                    device->GetDynamicUploader()->Allocate(size, GetPendingCommandSerial(),
                                                            kCopyBufferToBufferOffsetAlignment));
     DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
 

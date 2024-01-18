@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "dawn/native/Queue.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -124,7 +125,7 @@ void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo)
     // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
     // host execution of the command and the end of the draw/dispatch.
     Device* device = ToBackend(GetDevice());
-    const ExecutionSerial serial = device->GetPendingCommandSerial();
+    const ExecutionSerial serial = device->GetQueue()->GetPendingCommandSerial();
     mPendingDeallocations.Enqueue({allocationInfo->poolIndex, allocationInfo->setIndex}, serial);
 
     if (mLastDeallocationSerial != serial) {

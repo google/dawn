@@ -439,7 +439,7 @@ MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
     SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents();
     if (contents != nullptr) {
         contents->AcquirePendingFences(&fences);
-        contents->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+        contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());
     }
 
     for (const auto& fence : fences) {
@@ -483,7 +483,7 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
     if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
         // Track the underlying heap to ensure residency.
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
-        commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
+        commandContext->TrackHeapUsage(heap, GetDevice()->GetQueue()->GetPendingCommandSerial());
     }
 
     std::vector<D3D12_RESOURCE_BARRIER> barriers;
@@ -628,7 +628,7 @@ void Texture::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* comm
                                                    const SubresourceRange& range) {
     HandleTransitionSpecialCases(commandContext);
 
-    const ExecutionSerial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+    const ExecutionSerial pendingCommandSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     mSubresourceStateAndDecay.Update(range, [&](const SubresourceRange& updateRange,
                                                 StateAndDecay* state) {
@@ -643,12 +643,12 @@ void Texture::TrackUsageAndGetResourceBarrierForPass(
     if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
         // Track the underlying heap to ensure residency.
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
-        commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
+        commandContext->TrackHeapUsage(heap, GetDevice()->GetQueue()->GetPendingCommandSerial());
     }
 
     HandleTransitionSpecialCases(commandContext);
 
-    const ExecutionSerial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+    const ExecutionSerial pendingCommandSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     mSubresourceStateAndDecay.Merge(
         textureSyncInfos, [&](const SubresourceRange& mergeRange, StateAndDecay* state,
@@ -862,9 +862,10 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                                   largestMipSize.depthOrArrayLayers;
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
-                                               blockInfo.byteSize));
+            DAWN_TRY_ASSIGN(
+                uploadHandle,
+                uploader->Allocate(bufferSize, device->GetQueue()->GetPendingCommandSerial(),
+                                   blockInfo.byteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;

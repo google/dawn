@@ -37,6 +37,7 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
@@ -1149,9 +1150,10 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
 
                 UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                                  size, device->GetPendingCommandSerial(),
-                                                  kCopyBufferToBufferOffsetAlignment));
+                DAWN_TRY_ASSIGN(uploadHandle,
+                                device->GetDynamicUploader()->Allocate(
+                                    size, device->GetQueue()->GetPendingCommandSerial(),
+                                    kCopyBufferToBufferOffsetAlignment));
                 DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
                 memcpy(uploadHandle.mappedBuffer, data, size);
 

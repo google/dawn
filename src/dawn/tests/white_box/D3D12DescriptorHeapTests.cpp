@@ -1063,7 +1063,7 @@ TEST_P(D3D12DescriptorHeapTests, InvalidateAllocationAfterSerial) {
     GPUDescriptorHeapAllocation gpuHeapDescAllocation;
 
     D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor;
-    gpuAllocator->AllocateGPUDescriptors(1, mD3DDevice->GetPendingCommandSerial(),
+    gpuAllocator->AllocateGPUDescriptors(1, mD3DDevice->GetQueue()->GetPendingCommandSerial(),
                                          &baseCPUDescriptor, &gpuHeapDescAllocation);
 
     EXPECT_TRUE(gpuAllocator->IsAllocationStillValid(gpuHeapDescAllocation));

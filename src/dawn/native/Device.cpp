@@ -503,7 +503,7 @@ void DeviceBase::Destroy() {
 
     if (mState != State::BeingCreated) {
         // The GPU timeline is finished.
-        DAWN_ASSERT(mQueue->GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
+        DAWN_ASSERT(mQueue->GetCompletedCommandSerial() == mQueue->GetLastSubmittedCommandSerial());
 
         // Finish destroying all objects owned by the device and tick the queue-related tasks
         // since they should be complete. This must be done before DestroyImpl() it may
@@ -2120,14 +2120,6 @@ void DeviceBase::APISetLabel(const char* label) {
 }
 
 void DeviceBase::SetLabelImpl() {}
-
-ExecutionSerial DeviceBase::GetLastSubmittedCommandSerial() const {
-    return mQueue->GetLastSubmittedCommandSerial();
-}
-
-ExecutionSerial DeviceBase::GetPendingCommandSerial() const {
-    return mQueue->GetPendingCommandSerial();
-}
 
 bool DeviceBase::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
     ComputePipelineBase* computePipeline) const {

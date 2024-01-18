@@ -300,7 +300,6 @@ class DeviceBase : public RefCountedWithExternalCount {
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     wgpu::TextureUsage APIGetSupportedSurfaceUsage(Surface* surface);
-    size_t APIQueryMemoryHeapInfo(MemoryHeapInfo* info);
 
     InternalPipelineStore* GetInternalPipelineStore();
 
@@ -461,10 +460,6 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     // TODO(dawn:1413): remove this enum forwarding once no longer necessary.
     using SubmitMode = ExecutionQueueBase::SubmitMode;
-
-    // TODO(dawn:1413): Remove this proxy methods in favor of using the ExecutionQueue directly.
-    ExecutionSerial GetLastSubmittedCommandSerial() const;
-    ExecutionSerial GetPendingCommandSerial() const;
 
   protected:
     // Constructor used only for mocking and testing.
