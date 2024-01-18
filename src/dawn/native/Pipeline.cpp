@@ -69,8 +69,9 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
                 stage, module);
         } else if (entryPointCount > 1) {
             return DAWN_VALIDATION_ERROR(
-                "Multiple entry points for stage (%s) exist in the shader module %s.", stage,
-                module);
+                "The entry-point is defaulted but multiple entry points for stage (%s) exist in "
+                "the shader module %s.",
+                stage, module);
         }
     }
 
