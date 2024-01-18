@@ -35,7 +35,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// flags: --hlsl_shader_model 66
+// [hlsl-dxc] flags: --hlsl_shader_model 66
 // fn pack4xI8(vec4<i32>) -> u32
 fn pack4xI8_bfce01() {
   var arg_0 = vec4<i32>(1i);

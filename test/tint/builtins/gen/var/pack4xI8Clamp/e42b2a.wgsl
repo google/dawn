@@ -35,7 +35,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// flags: --hlsl_shader_model 66
+// [hlsl-dxc] flags: --hlsl_shader_model 66
 // fn pack4xI8Clamp(vec4<i32>) -> u32
 fn pack4xI8Clamp_e42b2a() {
   var arg_0 = vec4<i32>(1i);

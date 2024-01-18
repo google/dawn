@@ -35,7 +35,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// flags: --hlsl_shader_model 66
+// [hlsl-dxc] flags: --hlsl_shader_model 66
 // fn unpack4xU8(u32) -> vec4<u32>
 fn unpack4xU8_a5ea55() {
   var res: vec4<u32> = unpack4xU8(1u);

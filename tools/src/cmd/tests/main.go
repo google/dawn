@@ -46,6 +46,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/match"
@@ -67,6 +68,9 @@ const (
 	spvasm  = outputFormat("spvasm")
 	wgsl    = outputFormat("wgsl")
 )
+
+// allOutputFormats holds all the supported outputFormats
+var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslFXC, glsl}
 
 // The root directory of the dawn project
 var dawnRoot = fileutils.DawnRoot()
@@ -216,27 +220,14 @@ func run() error {
 	// Parse --format into a list of outputFormat
 	formats := []outputFormat{}
 	if formatList == "all" {
-		formats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslFXC, glsl}
+		formats = allOutputFormats
 	} else {
 		for _, f := range strings.Split(formatList, ",") {
-			switch strings.TrimSpace(f) {
-			case "wgsl":
-				formats = append(formats, wgsl)
-			case "spvasm":
-				formats = append(formats, spvasm)
-			case "msl":
-				formats = append(formats, msl)
-			case "hlsl":
-				formats = append(formats, hlslDXC, hlslFXC)
-			case "hlsl-dxc":
-				formats = append(formats, hlslDXC)
-			case "hlsl-fxc":
-				formats = append(formats, hlslFXC)
-			case "glsl":
-				formats = append(formats, glsl)
-			default:
-				return fmt.Errorf("unknown format '%s'", f)
+			parsed, err := parseOutputFormats(strings.TrimSpace(f))
+			if err != nil {
+				return err
 			}
+			formats = append(formats, parsed...)
 		}
 	}
 
@@ -333,14 +324,23 @@ func run() error {
 	// Issue the jobs...
 	go func() {
 		for i, file := range absFiles { // For each test file...
-			flags := parseFlags(file)
+			flags, err := parseFlags(file)
+			if err != nil {
+				fmt.Println(file+" error:", err)
+				continue
+			}
 			for _, format := range formats { // For each output format...
-				pendingJobs <- job{
+				j := job{
 					file:   file,
-					flags:  flags,
 					format: format,
 					result: results[i][format],
 				}
+				for _, f := range flags {
+					if f.formats.Contains(format) {
+						j.flags = append(j.flags, f.flags...)
+					}
+				}
+				pendingJobs <- j
 			}
 		}
 		close(pendingJobs)
@@ -910,31 +910,71 @@ func invoke(exe string, args ...string) (ok bool, output string) {
 	return true, str
 }
 
-var reFlags = regexp.MustCompile(`^ *(?:\/\/|;) *flags:(.*)`)
+var reFlags = regexp.MustCompile(`^\s*(?:\/\/|;)\s*(\[[\w-]+\])?\s*flags:(.*)`)
 
-// parseFlags looks for a `// flags:` header at the start of the file with the
-// given path, returning each of the space delimited tokens that follow for the
-// line
-func parseFlags(path string) []string {
+// cmdLineFlags are the flags that apply to the given formats, parsed by parseFlags
+type cmdLineFlags struct {
+	formats container.Set[outputFormat]
+	flags   []string
+}
+
+// parseFlags looks for a `// flags:` or `// [format] flags:` header at the start of the file with
+// the given path, returning each of the parsed flags
+func parseFlags(path string) ([]cmdLineFlags, error) {
 	inputFile, err := os.Open(path)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	defer inputFile.Close()
 
+	out := []cmdLineFlags{}
 	scanner := bufio.NewScanner(inputFile)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		content := scanner.Text()
 		m := reFlags.FindStringSubmatch(content)
-		if len(m) == 2 {
-			return strings.Split(m[1], " ")
+		if len(m) == 3 {
+			formats := allOutputFormats
+			if m[1] != "" {
+				fmts, err := parseOutputFormats(strings.Trim(m[1], "[]"))
+				if err != nil {
+					return nil, err
+				}
+				formats = fmts
+			}
+			out = append(out, cmdLineFlags{
+				formats: container.NewSet(formats...),
+				flags:   strings.Split(m[2], " "),
+			})
+			continue
 		}
 		if len(content) > 0 && !strings.HasPrefix(content, "//") {
 			break
 		}
 	}
-	return nil
+	return out, nil
+}
+
+// parseOutputFormats parses the outputFormat(s) from s.
+func parseOutputFormats(s string) ([]outputFormat, error) {
+	switch s {
+	case "wgsl":
+		return []outputFormat{wgsl}, nil
+	case "spvasm":
+		return []outputFormat{spvasm}, nil
+	case "msl":
+		return []outputFormat{msl}, nil
+	case "hlsl":
+		return []outputFormat{hlslDXC, hlslFXC}, nil
+	case "hlsl-dxc":
+		return []outputFormat{hlslDXC}, nil
+	case "hlsl-fxc":
+		return []outputFormat{hlslFXC}, nil
+	case "glsl":
+		return []outputFormat{glsl}, nil
+	default:
+		return nil, fmt.Errorf("unknown format '%s'", s)
+	}
 }
 
 func printDuration(d time.Duration) string {
