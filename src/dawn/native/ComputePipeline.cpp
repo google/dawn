@@ -97,7 +97,7 @@ bool ComputePipelineBase::IsFullSubgroupsRequired() const {
 }
 
 // static
-ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device, const char* label) {
+Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, const char* label) {
     class ErrorComputePipeline final : public ComputePipelineBase {
       public:
         explicit ErrorComputePipeline(DeviceBase* device, const char* label)
@@ -109,7 +109,7 @@ ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device, const ch
         }
     };
 
-    return new ErrorComputePipeline(device, label);
+    return AcquireRef(new ErrorComputePipeline(device, label));
 }
 
 ObjectType ComputePipelineBase::GetType() const {

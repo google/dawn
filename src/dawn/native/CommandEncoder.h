@@ -52,7 +52,7 @@ class CommandEncoder final : public ApiObjectBase {
   public:
     static Ref<CommandEncoder> Create(DeviceBase* device,
                                       const UnpackedPtr<CommandEncoderDescriptor>& descriptor);
-    static CommandEncoder* MakeError(DeviceBase* device, const char* label);
+    static Ref<CommandEncoder> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

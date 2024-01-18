@@ -65,7 +65,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
   public:
     ~QueueBase() override;
 
-    static QueueBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<QueueBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

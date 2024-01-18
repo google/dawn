@@ -48,7 +48,7 @@ class ComputePipelineBase : public PipelineBase,
                         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
     ~ComputePipelineBase() override;
 
-    static ComputePipelineBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<ComputePipelineBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

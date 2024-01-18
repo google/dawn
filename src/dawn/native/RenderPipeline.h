@@ -94,7 +94,7 @@ class RenderPipelineBase : public PipelineBase,
     RenderPipelineBase(DeviceBase* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipelineBase() override;
 
-    static RenderPipelineBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<RenderPipelineBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

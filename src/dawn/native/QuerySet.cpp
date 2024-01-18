@@ -109,8 +109,9 @@ void QuerySetBase::DestroyImpl() {
 }
 
 // static
-QuerySetBase* QuerySetBase::MakeError(DeviceBase* device, const QuerySetDescriptor* descriptor) {
-    return new ErrorQuerySet(device, descriptor);
+Ref<QuerySetBase> QuerySetBase::MakeError(DeviceBase* device,
+                                          const QuerySetDescriptor* descriptor) {
+    return AcquireRef(new ErrorQuerySet(device, descriptor));
 }
 
 ObjectType QuerySetBase::GetType() const {

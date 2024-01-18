@@ -51,8 +51,8 @@ ObjectType BindGroupLayoutBase::GetType() const {
 }
 
 // static
-BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
-    return new BindGroupLayoutBase(device, ObjectBase::kError, label);
+Ref<BindGroupLayoutBase> BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new BindGroupLayoutBase(device, ObjectBase::kError, label));
 }
 
 BindGroupLayoutInternalBase* BindGroupLayoutBase::GetInternalBindGroupLayout() const {

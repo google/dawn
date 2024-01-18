@@ -48,9 +48,9 @@ class ErrorSharedFence : public SharedFenceBase {
 }  // namespace
 
 // static
-SharedFenceBase* SharedFenceBase::MakeError(DeviceBase* device,
-                                            const SharedFenceDescriptor* descriptor) {
-    return new ErrorSharedFence(device, descriptor);
+Ref<SharedFenceBase> SharedFenceBase::MakeError(DeviceBase* device,
+                                                const SharedFenceDescriptor* descriptor) {
+    return AcquireRef(new ErrorSharedFence(device, descriptor));
 }
 
 SharedFenceBase::SharedFenceBase(DeviceBase* device,

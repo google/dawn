@@ -38,7 +38,8 @@ struct SharedFenceExportInfo;
 
 class SharedFenceBase : public ApiObjectBase {
   public:
-    static SharedFenceBase* MakeError(DeviceBase* device, const SharedFenceDescriptor* descriptor);
+    static Ref<SharedFenceBase> MakeError(DeviceBase* device,
+                                          const SharedFenceDescriptor* descriptor);
 
     ObjectType GetType() const override;
 

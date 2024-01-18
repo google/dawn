@@ -45,7 +45,7 @@ class SwapChainBase : public ApiObjectBase {
   public:
     SwapChainBase(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
 
-    static SwapChainBase* MakeError(DeviceBase* device, const SwapChainDescriptor* descriptor);
+    static Ref<SwapChainBase> MakeError(DeviceBase* device, const SwapChainDescriptor* descriptor);
     ObjectType GetType() const override;
 
     // This is called when the swapchain is detached when one of the following happens:

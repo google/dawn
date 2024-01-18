@@ -106,8 +106,8 @@ void SamplerBase::DestroyImpl() {
 }
 
 // static
-SamplerBase* SamplerBase::MakeError(DeviceBase* device, const char* label) {
-    return new SamplerBase(device, ObjectBase::kError, label);
+Ref<SamplerBase> SamplerBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new SamplerBase(device, ObjectBase::kError, label));
 }
 
 ObjectType SamplerBase::GetType() const {

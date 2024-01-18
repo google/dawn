@@ -57,7 +57,7 @@ struct BufferBinding {
 
 class BindGroupBase : public ApiObjectBase {
   public:
-    static BindGroupBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<BindGroupBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

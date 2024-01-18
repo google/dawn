@@ -68,7 +68,7 @@ class ExternalTextureBase : public ApiObjectBase {
     const Origin2D& GetVisibleOrigin() const;
 
     MaybeError ValidateCanUseInSubmitNow() const;
-    static ExternalTextureBase* MakeError(DeviceBase* device, const char* label = nullptr);
+    static Ref<ExternalTextureBase> MakeError(DeviceBase* device, const char* label = nullptr);
 
     void APIExpire();
     void APIDestroy();

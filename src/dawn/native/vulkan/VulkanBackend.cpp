@@ -28,6 +28,8 @@
 // VulkanBackend.cpp: contains the definition of symbols exported by VulkanBackend.h so that they
 // can be compiled twice: once export (shared library), once not exported (static library)
 
+#include <utility>
+
 // Include vulkan_platform.h before VulkanBackend.h includes vulkan.h so that we use our version
 // of the non-dispatchable handles.
 #include "dawn/common/vulkan_platform.h"
@@ -84,18 +86,18 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
         case ExternalImageType::AHardwareBuffer: {
             const ExternalImageDescriptorAHardwareBuffer* ahbDescriptor =
                 static_cast<const ExternalImageDescriptorAHardwareBuffer*>(descriptor);
-
-            return ToAPI(backendDevice->CreateTextureWrappingVulkanImage(
-                ahbDescriptor, ahbDescriptor->handle, ahbDescriptor->waitFDs));
+            Ref<TextureBase> texture = backendDevice->CreateTextureWrappingVulkanImage(
+                ahbDescriptor, ahbDescriptor->handle, ahbDescriptor->waitFDs);
+            return ToAPI(ReturnToAPI(std::move(texture)));
         }
 #elif DAWN_PLATFORM_IS(LINUX)
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
             const ExternalImageDescriptorFD* fdDescriptor =
                 static_cast<const ExternalImageDescriptorFD*>(descriptor);
-
-            return ToAPI(backendDevice->CreateTextureWrappingVulkanImage(
-                fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs));
+            Ref<TextureBase> texture = backendDevice->CreateTextureWrappingVulkanImage(
+                fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
+            return ToAPI(ReturnToAPI(std::move(texture)));
         }
 #endif  // DAWN_PLATFORM_IS(LINUX)
 

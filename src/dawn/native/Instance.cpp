@@ -140,7 +140,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
         dawn::ErrorLog() << result.AcquireError()->GetFormattedMessage();
         return nullptr;
     }
-    return result.AcquireSuccess().Detach();
+    return ReturnToAPI(result.AcquireSuccess());
 }
 
 // InstanceBase
@@ -255,7 +255,8 @@ void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
     if (adapters.empty()) {
         callback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters.", userdata);
     } else {
-        callback(WGPURequestAdapterStatus_Success, ToAPI(adapters[0].Detach()), nullptr, userdata);
+        callback(WGPURequestAdapterStatus_Success, ToAPI(ReturnToAPI(std::move(adapters[0]))),
+                 nullptr, userdata);
     }
 }
 
@@ -569,10 +570,10 @@ const AHBFunctions* InstanceBase::GetOrLoadAHBFunctions() {
 Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {
     UnpackedPtr<SurfaceDescriptor> unpacked;
     if (ConsumedError(ValidateSurfaceDescriptor(this, descriptor), &unpacked)) {
-        return Surface::MakeError(this);
+        return ReturnToAPI(Surface::MakeError(this));
     }
 
-    return new Surface(this, unpacked);
+    return ReturnToAPI(AcquireRef(new Surface(this, unpacked)));
 }
 
 const std::unordered_set<tint::wgsl::LanguageFeature>&

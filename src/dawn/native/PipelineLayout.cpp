@@ -152,8 +152,8 @@ void PipelineLayoutBase::DestroyImpl() {
 }
 
 // static
-PipelineLayoutBase* PipelineLayoutBase::MakeError(DeviceBase* device, const char* label) {
-    return new PipelineLayoutBase(device, ObjectBase::kError, label);
+Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new PipelineLayoutBase(device, ObjectBase::kError, label));
 }
 
 // static

@@ -150,6 +150,11 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     std::string mLabel;
 };
 
+template <class T>
+T* ReturnToAPI(Ref<T>&& object) {
+    return object.Detach();
+}
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_OBJECTBASE_H_

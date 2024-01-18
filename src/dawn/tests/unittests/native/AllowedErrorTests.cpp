@@ -104,8 +104,8 @@ TEST_F(AllowedErrorTests, QueueWriteBuffer) {
     BufferDescriptor desc = {};
     desc.size = 1;
     desc.usage = wgpu::BufferUsage::CopyDst;
-    BufferMock* bufferMock = new NiceMock<BufferMock>(mDeviceMock, &desc);
-    wgpu::Buffer buffer = wgpu::Buffer::Acquire(ToAPI(bufferMock));
+    Ref<BufferMock> bufferMock = AcquireRef(new NiceMock<BufferMock>(mDeviceMock, &desc));
+    wgpu::Buffer buffer = wgpu::Buffer::Acquire(ToAPI(ReturnToAPI(std::move(bufferMock))));
 
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteBufferImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
@@ -125,8 +125,8 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
     desc.size.height = 1;
     desc.usage = wgpu::TextureUsage::CopyDst;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
-    TextureMock* textureMock = new NiceMock<TextureMock>(mDeviceMock, &desc);
-    wgpu::Texture texture = wgpu::Texture::Acquire(ToAPI(textureMock));
+    Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &desc));
+    wgpu::Texture texture = wgpu::Texture::Acquire(ToAPI(ReturnToAPI(std::move(textureMock))));
 
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteTextureImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));

@@ -305,9 +305,9 @@ BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) 
     if (GetDevice()->ConsumedError(GetBindGroupLayout(groupIndexIn), &result,
                                    "Validating GetBindGroupLayout (%u) on %s", groupIndexIn,
                                    this)) {
-        return BindGroupLayoutBase::MakeError(GetDevice());
+        result = BindGroupLayoutBase::MakeError(GetDevice());
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 size_t PipelineBase::ComputeContentHash() {

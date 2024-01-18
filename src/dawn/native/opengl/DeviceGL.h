@@ -67,10 +67,10 @@ class Device final : public DeviceBase {
     const GLFormat& GetGLFormat(const Format& format);
 
     MaybeError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
-    TextureBase* CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
-                                               ::EGLImage image);
-    TextureBase* CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
-                                                GLuint texture);
+    Ref<TextureBase> CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
+                                                   ::EGLImage image);
+    Ref<TextureBase> CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
+                                                    GLuint texture);
 
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,

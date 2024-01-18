@@ -61,10 +61,10 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
 }  // namespace
 
 // static
-SharedTextureMemoryBase* SharedTextureMemoryBase::MakeError(
+Ref<SharedTextureMemoryBase> SharedTextureMemoryBase::MakeError(
     DeviceBase* device,
     const SharedTextureMemoryDescriptor* descriptor) {
-    return new ErrorSharedTextureMemory(device, descriptor);
+    return AcquireRef(new ErrorSharedTextureMemory(device, descriptor));
 }
 
 SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
@@ -151,9 +151,9 @@ TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* 
     if (GetDevice()->ConsumedError(CreateTexture(descriptor), &result,
                                    InternalErrorType::OutOfMemory, "calling %s.CreateTexture(%s).",
                                    this, descriptor)) {
-        return TextureBase::MakeError(GetDevice(), descriptor);
+        result = TextureBase::MakeError(GetDevice(), descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 Ref<SharedTextureMemoryContents> SharedTextureMemoryBase::CreateContents() {
@@ -346,7 +346,7 @@ MaybeError SharedTextureMemoryBase::EndAccess(TextureBase* texture,
         auto* fences = new SharedFenceBase*[fenceCount];
         uint64_t* signaledValues = new uint64_t[fenceCount];
         for (size_t i = 0; i < fenceCount; ++i) {
-            fences[i] = fenceList[i].object.Detach();
+            fences[i] = ReturnToAPI(std::move(fenceList[i].object));
             signaledValues[i] = fenceList[i].signaledValue;
         }
 

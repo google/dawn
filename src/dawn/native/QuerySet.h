@@ -42,7 +42,7 @@ MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescript
 
 class QuerySetBase : public ApiObjectBase {
   public:
-    static QuerySetBase* MakeError(DeviceBase* device, const QuerySetDescriptor* descriptor);
+    static Ref<QuerySetBase> MakeError(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
     ObjectType GetType() const override;
 

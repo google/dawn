@@ -58,7 +58,7 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
 // replaced.
 class Surface final : public ErrorMonad {
   public:
-    static Surface* MakeError(InstanceBase* instance);
+    static Ref<Surface> MakeError(InstanceBase* instance);
 
     Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& descriptor);
 

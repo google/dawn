@@ -52,7 +52,7 @@ class SamplerBase : public ApiObjectBase,
     SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
     ~SamplerBase() override;
 
-    static SamplerBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<SamplerBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 

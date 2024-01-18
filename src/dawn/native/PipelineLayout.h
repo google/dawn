@@ -76,7 +76,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     PipelineLayoutBase(DeviceBase* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
     ~PipelineLayoutBase() override;
 
-    static PipelineLayoutBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<PipelineLayoutBase> MakeError(DeviceBase* device, const char* label);
     static ResultOrError<Ref<PipelineLayoutBase>> CreateDefault(
         DeviceBase* device,
         std::vector<StageAndDescriptor> stages);

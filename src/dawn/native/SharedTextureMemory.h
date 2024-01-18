@@ -54,8 +54,8 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     using EndAccessState = SharedTextureMemoryEndAccessState;
     using PendingFenceList = StackVector<FenceAndSignalValue, 1>;
 
-    static SharedTextureMemoryBase* MakeError(DeviceBase* device,
-                                              const SharedTextureMemoryDescriptor* descriptor);
+    static Ref<SharedTextureMemoryBase> MakeError(DeviceBase* device,
+                                                  const SharedTextureMemoryDescriptor* descriptor);
 
     void Initialize();
 

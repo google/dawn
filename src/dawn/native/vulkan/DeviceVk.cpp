@@ -702,7 +702,7 @@ bool Device::SignalAndExportExternalTexture(
     }());
 }
 
-TextureBase* Device::CreateTextureWrappingVulkanImage(
+Ref<TextureBase> Device::CreateTextureWrappingVulkanImage(
     const ExternalImageDescriptorVk* descriptor,
     ExternalMemoryHandle memoryHandle,
     const std::vector<ExternalSemaphoreHandle>& waitHandles) {
@@ -738,7 +738,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
 
     // Cleanup in case of a failure, the image creation doesn't acquire the external objects
     // if a failure happems.
-    Texture* result = nullptr;
+    Ref<Texture> result;
     // TODO(crbug.com/1026480): Consolidate this into a single CreateFromExternal call.
     if (ConsumedError(Texture::CreateFromExternal(this, descriptor, textureDescriptor,
                                                   mExternalMemoryService.get()),
@@ -747,9 +747,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
                                           waitHandles, &allocation, &waitSemaphores)) ||
         ConsumedError(result->BindExternalMemory(descriptor, allocation, waitSemaphores))) {
         // Delete the Texture if it was created
-        if (result != nullptr) {
-            result->Release();
-        }
+        result = nullptr;
 
         // Clear image memory
         fn.FreeMemory(GetVkDevice(), allocation, nullptr);
@@ -758,7 +756,6 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
         for (VkSemaphore semaphore : waitSemaphores) {
             fn.DestroySemaphore(GetVkDevice(), semaphore, nullptr);
         }
-        return nullptr;
     }
 
     return result;

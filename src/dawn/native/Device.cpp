@@ -1076,35 +1076,37 @@ BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descrip
     Ref<BindGroupBase> result;
     if (ConsumedError(CreateBindGroup(descriptor), &result, "calling %s.CreateBindGroup(%s).", this,
                       descriptor)) {
-        return BindGroupBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        return ReturnToAPI(
+            BindGroupBase::MakeError(this, descriptor ? descriptor->label : nullptr));
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
     const BindGroupLayoutDescriptor* descriptor) {
     Ref<BindGroupLayoutBase> result;
     if (ConsumedError(CreateBindGroupLayout(descriptor), &result,
                       "calling %s.CreateBindGroupLayout(%s).", this, descriptor)) {
-        return BindGroupLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        return ReturnToAPI(
+            BindGroupLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr));
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
-    Ref<BufferBase> result = nullptr;
+    Ref<BufferBase> result;
     if (ConsumedError(CreateBuffer(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateBuffer(%s).", this, descriptor)) {
         DAWN_ASSERT(result == nullptr);
-        return BufferBase::MakeError(this, descriptor);
+        result = BufferBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 CommandEncoder* DeviceBase::APICreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
     Ref<CommandEncoder> result;
     if (ConsumedError(CreateCommandEncoder(descriptor), &result,
                       "calling %s.CreateCommandEncoder(%s).", this, descriptor)) {
-        return CommandEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = CommandEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 ComputePipelineBase* DeviceBase::APICreateComputePipeline(
     const ComputePipelineDescriptor* descriptor) {
@@ -1114,9 +1116,9 @@ ComputePipelineBase* DeviceBase::APICreateComputePipeline(
     Ref<ComputePipelineBase> result;
     if (ConsumedError(CreateComputePipeline(descriptor), &result, InternalErrorType::Internal,
                       "calling %s.CreateComputePipeline(%s).", this, descriptor)) {
-        return ComputePipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = ComputePipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
                                                WGPUCreateComputePipelineAsyncCallback callback,
@@ -1141,7 +1143,7 @@ void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* 
     if (cachedComputePipeline.Get() != nullptr) {
         mCallbackTaskManager->AddCallbackTask(
             std::bind(callback, WGPUCreatePipelineAsyncStatus_Success,
-                      ToAPI(cachedComputePipeline.Detach()), "", userdata));
+                      ToAPI(ReturnToAPI(std::move(cachedComputePipeline))), "", userdata));
     } else {
         // Otherwise we will create the pipeline object in InitializeComputePipelineAsyncImpl(),
         // where the pipeline object may be initialized asynchronously and the result will be
@@ -1155,25 +1157,25 @@ PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
     Ref<PipelineLayoutBase> result;
     if (ConsumedError(CreatePipelineLayout(descriptor), &result,
                       "calling %s.CreatePipelineLayout(%s).", this, descriptor)) {
-        return PipelineLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = PipelineLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor) {
     Ref<QuerySetBase> result;
     if (ConsumedError(CreateQuerySet(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateQuerySet(%s).", this, descriptor)) {
-        return QuerySetBase::MakeError(this, descriptor);
+        result = QuerySetBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
     Ref<SamplerBase> result;
     if (ConsumedError(CreateSampler(descriptor), &result, "calling %s.CreateSampler(%s).", this,
                       descriptor)) {
-        return SamplerBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = SamplerBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                               WGPUCreateRenderPipelineAsyncCallback callback,
@@ -1199,7 +1201,7 @@ void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* de
     if (cachedRenderPipeline != nullptr) {
         mCallbackTaskManager->AddCallbackTask(
             std::bind(callback, WGPUCreatePipelineAsyncStatus_Success,
-                      ToAPI(cachedRenderPipeline.Detach()), "", userdata));
+                      ToAPI(ReturnToAPI(std::move(cachedRenderPipeline))), "", userdata));
     } else {
         // Otherwise we will create the pipeline object in InitializeRenderPipelineAsyncImpl(),
         // where the pipeline object may be initialized asynchronously and the result will be
@@ -1214,9 +1216,9 @@ RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
     Ref<RenderBundleEncoder> result;
     if (ConsumedError(CreateRenderBundleEncoder(descriptor), &result,
                       "calling %s.CreateRenderBundleEncoder(%s).", this, descriptor)) {
-        return RenderBundleEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = RenderBundleEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
     const RenderPipelineDescriptor* descriptor) {
@@ -1226,9 +1228,9 @@ RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
     Ref<RenderPipelineBase> result;
     if (ConsumedError(CreateRenderPipeline(descriptor), &result, InternalErrorType::Internal,
                       "calling %s.CreateRenderPipeline(%s).", this, descriptor)) {
-        return RenderPipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+        result = RenderPipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
     TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APICreateShaderModule", "label",
@@ -1247,7 +1249,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     // is an error shader module.
     result->InjectCompilationMessages(std::move(compilationMessages));
 
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
                                                          const char* errorMessage) {
@@ -1262,24 +1264,24 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescr
         DAWN_VALIDATION_ERROR("Error in calling %s.CreateShaderModule(%s).", this, descriptor);
     ConsumeError(std::move(errorData));
 
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
                                               const SwapChainDescriptor* descriptor) {
     Ref<SwapChainBase> result;
     if (ConsumedError(CreateSwapChain(surface, descriptor), &result,
                       "calling %s.CreateSwapChain(%s).", this, descriptor)) {
-        return SwapChainBase::MakeError(this, descriptor);
+        result = SwapChainBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
     Ref<TextureBase> result;
     if (ConsumedError(CreateTexture(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateTexture(%s).", this, descriptor)) {
-        return TextureBase::MakeError(this, descriptor);
+        result = TextureBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 wgpu::TextureUsage DeviceBase::APIGetSupportedSurfaceUsage(Surface* surface) {
@@ -1309,15 +1311,15 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
     // the client side.
     BufferDescriptor fakeDescriptor = *desc;
     fakeDescriptor.size = 0;
-    return BufferBase::MakeError(this, &fakeDescriptor);
+    return ReturnToAPI(BufferBase::MakeError(this, &fakeDescriptor));
 }
 
 ExternalTextureBase* DeviceBase::APICreateErrorExternalTexture() {
-    return ExternalTextureBase::MakeError(this);
+    return ReturnToAPI(ExternalTextureBase::MakeError(this));
 }
 
 TextureBase* DeviceBase::APICreateErrorTexture(const TextureDescriptor* desc) {
-    return TextureBase::MakeError(this, desc);
+    return ReturnToAPI(TextureBase::MakeError(this, desc));
 }
 
 // Other Device API methods
@@ -1377,42 +1379,40 @@ MaybeError DeviceBase::Tick() {
 }
 
 AdapterBase* DeviceBase::APIGetAdapter() {
-    mAdapter->Reference();
+    mAdapter->APIReference();
     return mAdapter.Get();
 }
 
 QueueBase* DeviceBase::APIGetQueue() {
     // Backends gave the primary queue during initialization.
     DAWN_ASSERT(mQueue != nullptr);
-
-    // Returns a new reference to the queue.
-    mQueue->Reference();
-    return mQueue.Get();
+    auto queue = mQueue;
+    return ReturnToAPI(std::move(queue));
 }
 
 ExternalTextureBase* DeviceBase::APICreateExternalTexture(
     const ExternalTextureDescriptor* descriptor) {
-    Ref<ExternalTextureBase> result = nullptr;
+    Ref<ExternalTextureBase> result;
     if (ConsumedError(CreateExternalTextureImpl(descriptor), &result,
                       "calling %s.CreateExternalTexture(%s).", this, descriptor)) {
-        return ExternalTextureBase::MakeError(this);
+        result = ExternalTextureBase::MakeError(this);
     }
 
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 SharedTextureMemoryBase* DeviceBase::APIImportSharedTextureMemory(
     const SharedTextureMemoryDescriptor* descriptor) {
-    Ref<SharedTextureMemoryBase> result = nullptr;
+    Ref<SharedTextureMemoryBase> result;
     if (ConsumedError(
             [&]() -> ResultOrError<Ref<SharedTextureMemoryBase>> {
                 DAWN_TRY(ValidateIsAlive());
                 return ImportSharedTextureMemoryImpl(descriptor);
             }(),
             &result, "calling %s.ImportSharedTextureMemory(%s).", this, descriptor)) {
-        return SharedTextureMemoryBase::MakeError(this, descriptor);
+        result = SharedTextureMemoryBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemoryImpl(
@@ -1421,16 +1421,16 @@ ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemor
 }
 
 SharedFenceBase* DeviceBase::APIImportSharedFence(const SharedFenceDescriptor* descriptor) {
-    Ref<SharedFenceBase> result = nullptr;
+    Ref<SharedFenceBase> result;
     if (ConsumedError(
             [&]() -> ResultOrError<Ref<SharedFenceBase>> {
                 DAWN_TRY(ValidateIsAlive());
                 return ImportSharedFenceImpl(descriptor);
             }(),
             &result, "calling %s.ImportSharedFence(%s).", this, descriptor)) {
-        return SharedFenceBase::MakeError(this, descriptor);
+        result = SharedFenceBase::MakeError(this, descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
@@ -2020,8 +2020,9 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
         // If the device is no longer alive, errors should not be reported anymore.
         // Call the callback with an error pipeline.
         return mCallbackTaskManager->AddCallbackTask(
-            [callback, pipeline = ComputePipelineBase::MakeError(this, label), userdata]() {
-                callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline), "", userdata);
+            [callback, pipeline = ComputePipelineBase::MakeError(this, label), userdata]() mutable {
+                callback(WGPUCreatePipelineAsyncStatus_Success,
+                         ToAPI(ReturnToAPI(std::move(pipeline))), "", userdata);
             });
     }
 
@@ -2054,7 +2055,8 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
                         pipeline->GetDevice()->AddOrGetCachedComputePipeline(std::move(pipeline));
                 }
             }
-            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline.Detach()), "", userdata);
+            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
+                     "", userdata);
         });
 }
 
@@ -2066,8 +2068,9 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> e
         // If the device is no longer alive, errors should not be reported anymore.
         // Call the callback with an error pipeline.
         return mCallbackTaskManager->AddCallbackTask(
-            [callback, pipeline = RenderPipelineBase::MakeError(this, label), userdata]() {
-                callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline), "", userdata);
+            [callback, pipeline = RenderPipelineBase::MakeError(this, label), userdata]() mutable {
+                callback(WGPUCreatePipelineAsyncStatus_Success,
+                         ToAPI(ReturnToAPI(std::move(pipeline))), "", userdata);
             });
     }
 
@@ -2098,7 +2101,8 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipe
                 pipeline = pipeline->GetDevice()->AddOrGetCachedRenderPipeline(std::move(pipeline));
             }
         }
-        callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline.Detach()), "", userdata);
+        callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))), "",
+                 userdata);
     });
 }
 

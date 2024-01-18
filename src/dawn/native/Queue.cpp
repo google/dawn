@@ -259,8 +259,8 @@ QueueBase::~QueueBase() {
 void QueueBase::DestroyImpl() {}
 
 // static
-QueueBase* QueueBase::MakeError(DeviceBase* device, const char* label) {
-    return new ErrorQueue(device, label);
+Ref<QueueBase> QueueBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new ErrorQueue(device, label));
 }
 
 ObjectType QueueBase::GetType() const {

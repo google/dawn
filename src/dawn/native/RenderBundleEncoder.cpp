@@ -140,8 +140,8 @@ Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
 }
 
 // static
-RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device, const char* label) {
-    return new RenderBundleEncoder(device, ObjectBase::kError, label);
+Ref<RenderBundleEncoder> RenderBundleEncoder::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new RenderBundleEncoder(device, ObjectBase::kError, label));
 }
 
 ObjectType RenderBundleEncoder::GetType() const {
@@ -153,20 +153,18 @@ CommandIterator RenderBundleEncoder::AcquireCommands() {
 }
 
 RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
-    RenderBundleBase* result = nullptr;
+    Ref<RenderBundleBase> result;
 
     if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
                                    descriptor)) {
-        RenderBundleBase* errorRenderBundle =
-            RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
-        errorRenderBundle->SetEncoderLabel(this->GetLabel());
-        return errorRenderBundle;
+        result = RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+        result->SetEncoderLabel(this->GetLabel());
     }
 
-    return result;
+    return ReturnToAPI(std::move(result));
 }
 
-ResultOrError<RenderBundleBase*> RenderBundleEncoder::FinishImpl(
+ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::FinishImpl(
     const RenderBundleDescriptor* descriptor) {
     // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
     // internal state of the encoding context. Subsequent calls to encode commands will generate
@@ -180,9 +178,9 @@ ResultOrError<RenderBundleBase*> RenderBundleEncoder::FinishImpl(
         DAWN_TRY(ValidateFinish(usages));
     }
 
-    return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), IsDepthReadOnly(),
-                                IsStencilReadOnly(), std::move(usages),
-                                std::move(mIndirectDrawMetadata));
+    return AcquireRef(new RenderBundleBase(this, descriptor, AcquireAttachmentState(),
+                                           IsDepthReadOnly(), IsStencilReadOnly(),
+                                           std::move(usages), std::move(mIndirectDrawMetadata)));
 }
 
 MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {

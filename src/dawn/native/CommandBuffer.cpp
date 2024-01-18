@@ -53,8 +53,8 @@ CommandBufferBase::CommandBufferBase(DeviceBase* device,
     : ApiObjectBase(device, tag, label) {}
 
 // static
-CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device, const char* label) {
-    return new CommandBufferBase(device, ObjectBase::kError, label);
+Ref<CommandBufferBase> CommandBufferBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new CommandBufferBase(device, ObjectBase::kError, label));
 }
 
 ObjectType CommandBufferBase::GetType() const {

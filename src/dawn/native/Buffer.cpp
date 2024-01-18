@@ -368,8 +368,8 @@ void BufferBase::DestroyImpl() {
 }
 
 // static
-BufferBase* BufferBase::MakeError(DeviceBase* device, const BufferDescriptor* descriptor) {
-    return new ErrorBuffer(device, descriptor);
+Ref<BufferBase> BufferBase::MakeError(DeviceBase* device, const BufferDescriptor* descriptor) {
+    return AcquireRef(new ErrorBuffer(device, descriptor));
 }
 
 ObjectType BufferBase::GetType() const {

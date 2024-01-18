@@ -703,14 +703,14 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 }
 
 // static
-ResultOrError<Texture*> Texture::CreateFromExternal(
+ResultOrError<Ref<Texture>> Texture::CreateFromExternal(
     Device* device,
     const ExternalImageDescriptorVk* descriptor,
     const UnpackedPtr<TextureDescriptor>& textureDescriptor,
     external_memory::Service* externalMemoryService) {
     Ref<Texture> texture = AcquireRef(new Texture(device, textureDescriptor));
     DAWN_TRY(texture->InitializeFromExternal(descriptor, externalMemoryService));
-    return texture.Detach();
+    return texture;
 }
 
 // static

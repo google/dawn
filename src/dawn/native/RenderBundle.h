@@ -57,7 +57,7 @@ class RenderBundleBase final : public ApiObjectBase {
                      RenderPassResourceUsage resourceUsage,
                      IndirectDrawMetadata indirectDrawMetadata);
 
-    static RenderBundleBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<RenderBundleBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
     void FormatLabel(absl::FormatSink* s) const override;

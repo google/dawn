@@ -300,8 +300,8 @@ MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescript
     return {};
 }
 
-TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
-                                                   ::EGLImage image) {
+Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
+                                                       ::EGLImage image) {
     const OpenGLFunctions& gl = GetGL();
 
     UnpackedPtr<TextureDescriptor> textureDescriptor;
@@ -338,14 +338,14 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
 
     // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
     // in the passed-in TextureDescriptor.
-    auto result = new Texture(this, textureDescriptor, tex);
+    auto result = AcquireRef(new Texture(this, textureDescriptor, tex));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;
 }
 
-TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
-                                                    GLuint texture) {
+Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
+                                                        GLuint texture) {
     const OpenGLFunctions& gl = GetGL();
 
     UnpackedPtr<TextureDescriptor> textureDescriptor;
@@ -379,7 +379,7 @@ TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescripto
         return nullptr;
     }
 
-    auto result = new Texture(this, textureDescriptor, texture);
+    auto result = AcquireRef(new Texture(this, textureDescriptor, texture));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;

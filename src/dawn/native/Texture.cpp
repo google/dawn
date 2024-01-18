@@ -823,8 +823,8 @@ void TextureBase::DestroyImpl() {
 }
 
 // static
-TextureBase* TextureBase::MakeError(DeviceBase* device, const TextureDescriptor* descriptor) {
-    return new TextureBase(device, descriptor, ObjectBase::kError);
+Ref<TextureBase> TextureBase::MakeError(DeviceBase* device, const TextureDescriptor* descriptor) {
+    return AcquireRef(new TextureBase(device, descriptor, ObjectBase::kError));
 }
 
 ObjectType TextureBase::GetType() const {
@@ -1118,7 +1118,7 @@ ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
     return GetDevice()->CreateTextureView(this, descriptor);
 }
 
-TextureViewBase* TextureBase::CreateErrorView(const TextureViewDescriptor* descriptor) {
+Ref<TextureViewBase> TextureBase::CreateErrorView(const TextureViewDescriptor* descriptor) {
     return TextureViewBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
 }
 
@@ -1132,13 +1132,13 @@ TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descrip
     Ref<TextureViewBase> result;
     if (device->ConsumedError(CreateView(descriptor), &result, "calling %s.CreateView(%s).", this,
                               descriptor)) {
-        return CreateErrorView(descriptor);
+        result = CreateErrorView(descriptor);
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 TextureViewBase* TextureBase::APICreateErrorView(const TextureViewDescriptor* descriptor) {
-    return CreateErrorView(descriptor);
+    return ReturnToAPI(CreateErrorView(descriptor));
 }
 
 bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
@@ -1205,8 +1205,8 @@ TextureViewBase::~TextureViewBase() = default;
 void TextureViewBase::DestroyImpl() {}
 
 // static
-TextureViewBase* TextureViewBase::MakeError(DeviceBase* device, const char* label) {
-    return new TextureViewBase(device, ObjectBase::kError, label);
+Ref<TextureViewBase> TextureViewBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new TextureViewBase(device, ObjectBase::kError, label));
 }
 
 ObjectType TextureViewBase::GetType() const {

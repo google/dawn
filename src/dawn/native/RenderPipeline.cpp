@@ -996,7 +996,7 @@ void RenderPipelineBase::DestroyImpl() {
 }
 
 // static
-RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device, const char* label) {
+Ref<RenderPipelineBase> RenderPipelineBase::MakeError(DeviceBase* device, const char* label) {
     class ErrorRenderPipeline final : public RenderPipelineBase {
       public:
         explicit ErrorRenderPipeline(DeviceBase* device, const char* label)
@@ -1008,7 +1008,7 @@ RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device, const char
         }
     };
 
-    return new ErrorRenderPipeline(device, label);
+    return AcquireRef(new ErrorRenderPipeline(device, label));
 }
 
 ObjectType RenderPipelineBase::GetType() const {

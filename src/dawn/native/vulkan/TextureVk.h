@@ -71,7 +71,7 @@ class Texture final : public TextureBase {
     // Creates a texture and initializes it with a VkImage that references an external memory
     // object. Before the texture can be used, the VkDeviceMemory associated with the external
     // image must be bound via Texture::BindExternalMemory.
-    static ResultOrError<Texture*> CreateFromExternal(
+    static ResultOrError<Ref<Texture>> CreateFromExternal(
         Device* device,
         const ExternalImageDescriptorVk* descriptor,
         const UnpackedPtr<TextureDescriptor>& textureDescriptor,

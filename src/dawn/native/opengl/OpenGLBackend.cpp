@@ -30,6 +30,8 @@
 
 #include "dawn/native/OpenGLBackend.h"
 
+#include <utility>
+
 #include "dawn/native/opengl/DeviceGL.h"
 
 namespace dawn::native::opengl {
@@ -47,17 +49,17 @@ ExternalImageDescriptorGLTexture::ExternalImageDescriptorGLTexture()
 WGPUTexture WrapExternalEGLImage(WGPUDevice device,
                                  const ExternalImageDescriptorEGLImage* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
-    TextureBase* texture =
+    Ref<TextureBase> texture =
         backendDevice->CreateTextureWrappingEGLImage(descriptor, descriptor->image);
-    return ToAPI(texture);
+    return ToAPI(ReturnToAPI(std::move(texture)));
 }
 
 WGPUTexture WrapExternalGLTexture(WGPUDevice device,
                                   const ExternalImageDescriptorGLTexture* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
-    TextureBase* texture =
+    Ref<TextureBase> texture =
         backendDevice->CreateTextureWrappingGLTexture(descriptor, descriptor->texture);
-    return ToAPI(texture);
+    return ToAPI(ReturnToAPI(std::move(texture)));
 }
 
 }  // namespace dawn::native::opengl

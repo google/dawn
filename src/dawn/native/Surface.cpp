@@ -187,8 +187,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
 }
 
 // static
-Surface* Surface::MakeError(InstanceBase* instance) {
-    return new Surface(instance, ErrorMonad::kError);
+Ref<Surface> Surface::MakeError(InstanceBase* instance) {
+    return AcquireRef(new Surface(instance, ErrorMonad::kError));
 }
 
 Surface::Surface(InstanceBase* instance, ErrorTag tag) : ErrorMonad(tag), mInstance(instance) {}

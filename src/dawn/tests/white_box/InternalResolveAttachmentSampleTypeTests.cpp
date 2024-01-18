@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <utility>
 #include <vector>
 
 #include "dawn/native/BindGroupLayout.h"
@@ -76,7 +77,8 @@ class InternalResolveAttachmentSampleTypeTests : public DawnTest {
         Ref<native::BindGroupLayoutBase> bglRef =
             nativeDevice->CreateBindGroupLayout(&bglDesc, true).AcquireSuccess();
 
-        auto bindGroupLayout = wgpu::BindGroupLayout::Acquire(native::ToAPI(bglRef.Detach()));
+        auto bindGroupLayout =
+            wgpu::BindGroupLayout::Acquire(native::ToAPI(ReturnToAPI(std::move(bglRef))));
 
         // Create pipeline layout from the bind group layout.
         wgpu::PipelineLayoutDescriptor descriptor;

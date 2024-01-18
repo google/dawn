@@ -45,7 +45,7 @@ class BindGroupLayoutBase final : public ApiObjectBase {
                         Ref<BindGroupLayoutInternalBase> internal,
                         PipelineCompatibilityToken pipelineCompatibilityToken);
 
-    static BindGroupLayoutBase* MakeError(DeviceBase* device, const char* label = nullptr);
+    static Ref<BindGroupLayoutBase> MakeError(DeviceBase* device, const char* label = nullptr);
 
     ObjectType GetType() const override;
 

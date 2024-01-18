@@ -80,7 +80,7 @@ class TextureBase : public ApiObjectBase {
   public:
     enum class ClearValue { Zero, NonZero };
 
-    static TextureBase* MakeError(DeviceBase* device, const TextureDescriptor* descriptor);
+    static Ref<TextureBase> MakeError(DeviceBase* device, const TextureDescriptor* descriptor);
 
     ObjectType GetType() const override;
 
@@ -141,7 +141,7 @@ class TextureBase : public ApiObjectBase {
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
-    TextureViewBase* CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
+    Ref<TextureViewBase> CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     ApiObjectList* GetViewTrackingList();
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
@@ -209,7 +209,7 @@ class TextureViewBase : public ApiObjectBase {
     TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
     ~TextureViewBase() override;
 
-    static TextureViewBase* MakeError(DeviceBase* device, const char* label = nullptr);
+    static Ref<TextureViewBase> MakeError(DeviceBase* device, const char* label = nullptr);
 
     ObjectType GetType() const override;
     void FormatLabel(absl::FormatSink* s) const override;

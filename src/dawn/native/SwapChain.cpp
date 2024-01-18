@@ -27,6 +27,8 @@
 
 #include "dawn/native/SwapChain.h"
 
+#include <utility>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -145,8 +147,8 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
       mPresentMode(descriptor->presentMode) {}
 
 // static
-SwapChainBase* SwapChainBase::MakeError(DeviceBase* device, const SwapChainDescriptor* desc) {
-    return new ErrorSwapChain(device, desc);
+Ref<SwapChainBase> SwapChainBase::MakeError(DeviceBase* device, const SwapChainDescriptor* desc) {
+    return AcquireRef(new ErrorSwapChain(device, desc));
 }
 
 void SwapChainBase::DestroyImpl() {}
@@ -180,22 +182,20 @@ TextureBase* SwapChainBase::APIGetCurrentTexture() {
     if (GetDevice()->ConsumedError(GetCurrentTexture(), &result, "calling %s.GetCurrentTexture()",
                                    this)) {
         TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
-        TextureBase* errorTexture = TextureBase::MakeError(GetDevice(), &desc);
-        SetChildLabel(errorTexture);
-        return errorTexture;
+        result = TextureBase::MakeError(GetDevice(), &desc);
+        SetChildLabel(result.Get());
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 TextureViewBase* SwapChainBase::APIGetCurrentTextureView() {
     Ref<TextureViewBase> result;
     if (GetDevice()->ConsumedError(GetCurrentTextureView(), &result,
                                    "calling %s.GetCurrentTextureView()", this)) {
-        TextureViewBase* errorView = TextureViewBase::MakeError(GetDevice());
-        SetChildLabel(errorView);
-        return errorView;
+        result = TextureViewBase::MakeError(GetDevice());
+        SetChildLabel(result.Get());
     }
-    return result.Detach();
+    return ReturnToAPI(std::move(result));
 }
 
 ResultOrError<Ref<TextureBase>> SwapChainBase::GetCurrentTexture() {

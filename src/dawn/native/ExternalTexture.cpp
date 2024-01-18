@@ -393,8 +393,8 @@ void ExternalTextureBase::DestroyImpl() {
 }
 
 // static
-ExternalTextureBase* ExternalTextureBase::MakeError(DeviceBase* device, const char* label) {
-    return new ExternalTextureBase(device, ObjectBase::kError, label);
+Ref<ExternalTextureBase> ExternalTextureBase::MakeError(DeviceBase* device, const char* label) {
+    return AcquireRef(new ExternalTextureBase(device, ObjectBase::kError, label));
 }
 
 BufferBase* ExternalTextureBase::GetParamsBuffer() const {

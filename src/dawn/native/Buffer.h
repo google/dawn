@@ -76,7 +76,7 @@ class BufferBase : public ApiObjectBase {
         HostMappedPersistent,
         Destroyed,
     };
-    static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
+    static Ref<BufferBase> MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
     ObjectType GetType() const override;
 

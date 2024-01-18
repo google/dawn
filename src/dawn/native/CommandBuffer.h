@@ -49,7 +49,7 @@ class CommandBufferBase : public ApiObjectBase {
   public:
     CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-    static CommandBufferBase* MakeError(DeviceBase* device, const char* label);
+    static Ref<CommandBufferBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
     void FormatLabel(absl::FormatSink* s) const override;
