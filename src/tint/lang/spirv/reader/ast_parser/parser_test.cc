@@ -103,7 +103,7 @@ TEST_F(ParserTest, WorkgroupIdGuardingBarrier) {
 %_ptr_Input_vec3u = OpTypePointer Input %vec3u
      %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
-     %uint_8 = OpConstant %uint 8
+   %uint_264 = OpConstant %uint 264
        %wgid = OpVariable %_ptr_Input_vec3u Input
        %void = OpTypeVoid
        %bool = OpTypeBool
@@ -116,7 +116,7 @@ TEST_F(ParserTest, WorkgroupIdGuardingBarrier) {
                OpSelectionMerge %merge None
                OpBranchConditional %condition %true_branch %merge
 %true_branch = OpLabel
-               OpControlBarrier %uint_2 %uint_2 %uint_8
+               OpControlBarrier %uint_2 %uint_2 %uint_264
                OpBranch %merge
       %merge = OpLabel
                OpReturn
