@@ -68,6 +68,25 @@ class SpirvReaderTest : public testing::Test {
     }
 };
 
+TEST_F(SpirvReaderTest, UnsupportedExtension) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_NE(got, Success);
+    EXPECT_EQ(got.Failure().reason.str(),
+              "error: SPIR-V extension 'SPV_KHR_variable_pointers' is not supported");
+}
+
 TEST_F(SpirvReaderTest, Load_VectorComponent) {
     auto got = Run(R"(
                OpCapability Shader

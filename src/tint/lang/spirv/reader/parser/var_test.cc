@@ -142,6 +142,129 @@ TEST_F(SpirvParserTest, PrivateVar_Initializer) {
 )");
 }
 
+TEST_F(SpirvParserTest, StorageVar_ReadOnly) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %6 NonWritable
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %str = OpTypeStruct %uint
+%_ptr_StorageBuffer_str = OpTypePointer StorageBuffer %str
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_StorageBuffer_str StorageBuffer
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, StorageVar_ReadWrite) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %str = OpTypeStruct %uint
+%_ptr_StorageBuffer_str = OpTypePointer StorageBuffer %str
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_StorageBuffer_str StorageBuffer
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, StorageVar_ReadOnly_And_ReadWrite) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %6 NonWritable
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+               OpDecorate %7 DescriptorSet 1
+               OpDecorate %7 Binding 3
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+        %str = OpTypeStruct %uint
+%_ptr_StorageBuffer_str = OpTypePointer StorageBuffer %str
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_StorageBuffer_str StorageBuffer
+          %7 = OpVariable %_ptr_StorageBuffer_str StorageBuffer
+          %1 = OpFunction %void None %5
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
+  %2:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 3)
+}
+
+%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, UniformVar) {
     EXPECT_IR(R"(
                OpCapability Shader

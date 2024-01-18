@@ -76,6 +76,14 @@ class Parser {
             return Failure("failed to build the internal representation of the module");
         }
 
+        // Check for unsupported extensions.
+        for (const auto& ext : spirv_context_->extensions()) {
+            auto name = ext.GetOperand(0).AsString();
+            if (name != "SPV_KHR_storage_buffer_storage_class") {
+                return Failure("SPIR-V extension '" + name + "' is not supported");
+            }
+        }
+
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
             EmitModuleScopeVariables();
@@ -99,6 +107,8 @@ class Parser {
                 return core::AddressSpace::kFunction;
             case spv::StorageClass::Private:
                 return core::AddressSpace::kPrivate;
+            case spv::StorageClass::StorageBuffer:
+                return core::AddressSpace::kStorage;
             case spv::StorageClass::Uniform:
                 return core::AddressSpace::kUniform;
             default:
@@ -109,9 +119,11 @@ class Parser {
     }
 
     /// @param type a SPIR-V type object
+    /// @param access_mode an optional access mode (for pointers)
     /// @returns a Tint type object
-    const core::type::Type* Type(const spvtools::opt::analysis::Type* type) {
-        return types_.GetOrCreate(type, [&]() -> const core::type::Type* {
+    const core::type::Type* Type(const spvtools::opt::analysis::Type* type,
+                                 core::Access access_mode = core::Access::kUndefined) {
+        return types_.GetOrCreate(TypeKey{type, access_mode}, [&]() -> const core::type::Type* {
             switch (type->kind()) {
                 case spvtools::opt::analysis::Type::kVoid:
                     return ty_.void_();
@@ -156,7 +168,7 @@ class Parser {
                 case spvtools::opt::analysis::Type::kPointer: {
                     auto* ptr_ty = type->AsPointer();
                     return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
-                                   Type(ptr_ty->pointee_type()));
+                                   Type(ptr_ty->pointee_type()), access_mode);
                 }
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
@@ -166,9 +178,10 @@ class Parser {
     }
 
     /// @param id a SPIR-V result ID for a type declaration instruction
+    /// @param access_mode an optional access mode (for pointers)
     /// @returns a Tint type object
-    const core::type::Type* Type(uint32_t id) {
-        return Type(spirv_context_->get_type_mgr()->GetType(id));
+    const core::type::Type* Type(uint32_t id, core::Access access_mode = core::Access::kUndefined) {
+        return Type(spirv_context_->get_type_mgr()->GetType(id), access_mode);
     }
 
     /// @param arr_ty a SPIR-V array object
@@ -459,7 +472,14 @@ class Parser {
             indices.Push(Value(inst.GetSingleWordOperand(i)));
         }
         auto* base = Value(inst.GetSingleWordOperand(2));
-        auto* access = b_.Access(Type(inst.type_id()), base, std::move(indices));
+
+        // Propagate the access mode of the base object.
+        auto access_mode = core::Access::kUndefined;
+        if (auto* ptr = base->Type()->As<core::type::Pointer>()) {
+            access_mode = ptr->Access();
+        }
+
+        auto* access = b_.Access(Type(inst.type_id(), access_mode), base, std::move(indices));
         Emit(access, inst.result_id());
     }
 
@@ -496,19 +516,16 @@ class Parser {
 
     /// @param inst the SPIR-V instruction for OpVariable
     void EmitVar(const spvtools::opt::Instruction& inst) {
-        auto* var = b_.Var(Type(inst.type_id())->As<core::type::Pointer>());
-        if (inst.NumOperands() > 3) {
-            var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
-        }
-
         // Handle decorations.
         std::optional<uint32_t> group;
         std::optional<uint32_t> binding;
+        core::Access access_mode = core::Access::kUndefined;
         for (auto* deco :
              spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), false)) {
             auto d = deco->GetSingleWordOperand(1);
             switch (spv::Decoration(d)) {
                 case spv::Decoration::NonWritable:
+                    access_mode = core::Access::kRead;
                     break;
                 case spv::Decoration::DescriptorSet:
                     group = deco->GetSingleWordOperand(2);
@@ -521,6 +538,12 @@ class Parser {
                     break;
             }
         }
+
+        auto* var = b_.Var(Type(inst.type_id(), access_mode)->As<core::type::Pointer>());
+        if (inst.NumOperands() > 3) {
+            var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
+        }
+
         if (group || binding) {
             TINT_ASSERT(group && binding);
             var->SetBindingPoint(group.value(), binding.value());
@@ -530,6 +553,28 @@ class Parser {
     }
 
   private:
+    /// TypeKey describes a SPIR-V type with an access mode.
+    struct TypeKey {
+        /// The SPIR-V type object.
+        const spvtools::opt::analysis::Type* type;
+        /// The access mode.
+        core::Access access_mode;
+
+        // Equality operator for TypeKey.
+        bool operator==(const TypeKey& other) const {
+            return type == other.type && access_mode == other.access_mode;
+        }
+
+        /// Hasher provides a hash function for the TypeKey.
+        struct Hasher {
+            /// @param tk the TypeKey to create a hash for
+            /// @return the hash value
+            inline std::size_t operator()(const TypeKey& tk) const {
+                return HashCombine(Hash(tk.type), tk.access_mode);
+            }
+        };
+    };
+
     /// The generated IR module.
     core::ir::Module ir_;
     /// The Tint IR builder.
@@ -541,8 +586,8 @@ class Parser {
     core::ir::Function* current_function_ = nullptr;
     /// The Tint IR block that is currently being emitted.
     core::ir::Block* current_block_ = nullptr;
-    /// A map from a SPIR-V type declaration result ID to the corresponding Tint type object.
-    Hashmap<const spvtools::opt::analysis::Type*, const core::type::Type*, 16> types_;
+    /// A map from a SPIR-V type declaration to the corresponding Tint type object.
+    Hashmap<TypeKey, const core::type::Type*, 16, TypeKey::Hasher> types_;
     /// A map from a SPIR-V function definition result ID to the corresponding Tint function object.
     Hashmap<uint32_t, core::ir::Function*, 8> functions_;
     /// A map from a SPIR-V result ID to the corresponding Tint value object.
