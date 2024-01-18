@@ -2234,6 +2234,76 @@ TEST_P(ShaderTests, FragmentPositionW) {
                                renderPass.color, 32, 16);
 }
 
+// Regression test for crbug.com/dawn/2340. GLSL requires the main enty point to be named "main".
+// We need to make sure when the entry point is "main" or other GLSL reserved keyword,
+// the renaming is always properly handled for the GL backend no matter what
+// "disable_symbol_renaming" is.
+TEST_P(ShaderTests, EntryPointShaderKeywordsComputePipeline) {
+    {
+        // Entry point is "main".
+        std::string shader = R"(
+@compute @workgroup_size(1) fn main() {
+    _ = 1;
+})";
+
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
+    }
+    {
+        // Entry point is a GLSL reserved keyword other than "main".
+        std::string shader = R"(
+@compute @workgroup_size(1) fn mat2() {
+    _ = 1;
+})";
+
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "mat2");
+    }
+    {
+        // Entry point is not a GLSL reserved keyword.
+        std::string shader = R"(
+@compute @workgroup_size(1) fn foo1234() {
+    _ = 1;
+})";
+
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "foo1234");
+    }
+}
+
+// Regression test for crbug.com/dawn/2340. GLSL requires the main enty point to be named "main".
+// We need to make sure when the entry point is "main" or other GLSL reserved keyword,
+// the renaming is always properly handled for the GL backend no matter what
+// "disable_symbol_renaming" is.
+TEST_P(ShaderTests, EntryPointShaderKeywordsRenderPipeline) {
+    std::string shader = R"(
+// Entry point is "main".
+@vertex
+fn main() -> @builtin(position) vec4f {
+    return vec4f(0.0, 0.0, 0.0, 1.0);
+}
+// Entry point is a GLSL reserved keyword other than "main".
+@fragment
+fn mat2() -> @location(0) vec4f {
+    return vec4f(0.0, 0.0, 0.0, 1.0);
+}
+// Entry point is not a GLSL reserved keyword.
+@fragment
+fn foo1234() -> @location(0) vec4f {
+    return vec4f(1.0, 1.0, 1.0, 1.0);
+}
+)";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.cFragment.module = shaderModule;
+    {
+        rpDesc.cFragment.entryPoint = "mat2";
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+    }
+    {
+        rpDesc.cFragment.entryPoint = "foo1234";
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+    }
+}
+
 TEST_P(ShaderTests, PrivateVarInitWithStruct) {
     wgpu::ComputePipeline pipeline = CreateComputePipeline(R"(
 @binding(0) @group(0) var<storage, read_write> output : i32;
@@ -2367,6 +2437,8 @@ DAWN_INSTANTIATE_TEST(ShaderTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      OpenGLBackend({"disable_symbol_renaming"}),
+                      OpenGLESBackend({"disable_symbol_renaming"}),
                       VulkanBackend());
 
 }  // anonymous namespace

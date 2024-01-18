@@ -28,6 +28,7 @@
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
 #include <sstream>
+#include <unordered_map>
 #include <utility>
 
 #include "dawn/native/BindGroupLayoutInternal.h"
@@ -359,20 +360,20 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
                                                    transformInputs, &transformOutputs, nullptr));
 
-            // Get the entry point name after the renamer pass.
             // TODO(dawn:2180): refactor out.
+            // Get the entry point name after the renamer pass.
+            // In the case of the entry-point name being a reserved GLSL keyword
+            // (including `main`) the entry-point would have been renamed
+            // regardless of the `disableSymbolRenaming` flag. Always check the
+            // rename map, and if the name was changed, get the new one.
+            auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
+            DAWN_ASSERT(data != nullptr);
+            auto it = data->remappings.find(r.entryPointName.data());
             std::string remappedEntryPoint;
-            if (r.disableSymbolRenaming) {
-                remappedEntryPoint = r.entryPointName;
-            } else {
-                auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
-                DAWN_ASSERT(data != nullptr);
-
-                auto it = data->remappings.find(r.entryPointName.data());
-                DAWN_ASSERT(it != data->remappings.end());
+            if (it != data->remappings.end()) {
                 remappedEntryPoint = it->second;
-
-                // Names of inter stage variables need to match
+            } else {
+                remappedEntryPoint = r.entryPointName;
             }
             DAWN_ASSERT(remappedEntryPoint != "");
 
