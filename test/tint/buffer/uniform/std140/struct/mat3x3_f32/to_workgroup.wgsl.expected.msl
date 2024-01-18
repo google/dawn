@@ -38,11 +38,7 @@ struct S_tint_packed_vec3 {
 };
 
 float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
-  float3x3 result = float3x3(0.0f);
-  for(uint i = 0u; (i < 3u); i = (i + 1u)) {
-    __asm__("");
-    result[i] = float3(in[i].elements);
-  }
+  float3x3 result = float3x3(float3(in[0].elements), float3(in[1].elements), float3(in[2].elements));
   return result;
 }
 
@@ -55,11 +51,7 @@ S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
 }
 
 tint_array<S, 4> tint_unpack_vec3_in_composite_2(tint_array<S_tint_packed_vec3, 4> in) {
-  tint_array<S, 4> result = {};
-  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-    __asm__("");
-    result[i] = tint_unpack_vec3_in_composite_1(in[i]);
-  }
+  tint_array<S, 4> result = tint_array<S, 4>{tint_unpack_vec3_in_composite_1(in[0]), tint_unpack_vec3_in_composite_1(in[1]), tint_unpack_vec3_in_composite_1(in[2]), tint_unpack_vec3_in_composite_1(in[3])};
   return result;
 }
 

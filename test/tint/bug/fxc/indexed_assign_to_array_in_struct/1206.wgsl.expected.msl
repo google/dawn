@@ -33,11 +33,7 @@ struct Particles_tint_packed_vec3 {
 };
 
 tint_array<float3, 8> tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 8> in) {
-  tint_array<float3, 8> result = {};
-  for(uint i = 0u; (i < 8u); i = (i + 1u)) {
-    __asm__("");
-    result[i] = float3(in[i].elements);
-  }
+  tint_array<float3, 8> result = tint_array<float3, 8>{float3(in[0].elements), float3(in[1].elements), float3(in[2].elements), float3(in[3].elements), float3(in[4].elements), float3(in[5].elements), float3(in[6].elements), float3(in[7].elements)};
   return result;
 }
 

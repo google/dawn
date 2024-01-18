@@ -58,6 +58,10 @@ using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::msl::writer {
 
+// Arrays larger than this will be packed/unpacked with a for loop.
+// Arrays up to this size will be packed/unpacked with a sequence of statements.
+static constexpr uint32_t kMaxSeriallyUnpackedArraySize = 8;
+
 /// PIMPL state for the transform
 struct PackedVec3::State {
     /// Constructor
@@ -242,7 +246,6 @@ struct PackedVec3::State {
         const std::function<ast::Type()>& out_type) {
         // Allocate a variable to hold the return value of the function.
         tint::Vector<const ast::Statement*, 4> statements;
-        statements.Push(b.Decl(b.Var("result", out_type())));
 
         // Helper that generates a loop to copy and pack/unpack elements of an array to the result:
         //   for (var i = 0u; i < num_elements; i = i + 1) {
@@ -250,15 +253,28 @@ struct PackedVec3::State {
         //   }
         auto copy_array_elements = [&](uint32_t num_elements,
                                        const core::type::Type* element_type) {
-            // Generate an expression for packing or unpacking an element of the array.
-            auto* element = pack_or_unpack_element(b.IndexAccessor("in", "i"), element_type);
-            statements.Push(b.For(                   //
-                b.Decl(b.Var("i", b.ty.u32())),      //
-                b.LessThan("i", u32(num_elements)),  //
-                b.Assign("i", b.Add("i", 1_a)),      //
-                b.Block(tint::Vector{
-                    b.Assign(b.IndexAccessor("result", "i"), element),
-                })));
+            // Generate code for unpacking the array.
+            if (num_elements <= kMaxSeriallyUnpackedArraySize) {
+                // Generate a variable with an explicit initializer.
+                tint::Vector<const ast::Expression*, 8> elements;
+                for (uint32_t i = 0; i < num_elements; i++) {
+                    elements.Push(pack_or_unpack_element(
+                        b.IndexAccessor("in", b.Expr(core::AInt(i))), element_type));
+                }
+                statements.Push(b.Decl(b.Var("result", b.Call(out_type(), b.ExprList(elements)))));
+            } else {
+                statements.Push(b.Decl(b.Var("result", out_type())));
+                // Generate a for loop.
+                // Generate an expression for packing or unpacking an element of the array.
+                auto* element = pack_or_unpack_element(b.IndexAccessor("in", "i"), element_type);
+                statements.Push(b.For(                   //
+                    b.Decl(b.Var("i", b.ty.u32())),      //
+                    b.LessThan("i", u32(num_elements)),  //
+                    b.Assign("i", b.Add("i", 1_a)),      //
+                    b.Block(tint::Vector{
+                        b.Assign(b.IndexAccessor("result", "i"), element),
+                    })));
+            }
         };
 
         // Copy the elements of the value over to the result.
@@ -272,6 +288,7 @@ struct PackedVec3::State {
                 copy_array_elements(mat->columns(), mat->ColumnType());
             },
             [&](const core::type::Struct* str) {
+                statements.Push(b.Decl(b.Var("result", out_type())));
                 // Copy the struct members over one at a time, packing/unpacking as necessary.
                 for (auto* member : str->Members()) {
                     const ast::Expression* element =

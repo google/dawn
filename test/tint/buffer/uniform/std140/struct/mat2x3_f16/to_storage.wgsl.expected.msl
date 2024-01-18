@@ -29,11 +29,7 @@ struct S_tint_packed_vec3 {
 };
 
 half2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f16_array_element, 2> in) {
-  half2x3 result = half2x3(0.0h);
-  for(uint i = 0u; (i < 2u); i = (i + 1u)) {
-    __asm__("");
-    result[i] = half3(in[i].elements);
-  }
+  half2x3 result = half2x3(half3(in[0].elements), half3(in[1].elements));
   return result;
 }
 
@@ -52,11 +48,7 @@ S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
 }
 
 tint_array<S, 4> tint_unpack_vec3_in_composite_2(tint_array<S_tint_packed_vec3, 4> in) {
-  tint_array<S, 4> result = {};
-  for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-    __asm__("");
-    result[i] = tint_unpack_vec3_in_composite_1(in[i]);
-  }
+  tint_array<S, 4> result = tint_array<S, 4>{tint_unpack_vec3_in_composite_1(in[0]), tint_unpack_vec3_in_composite_1(in[1]), tint_unpack_vec3_in_composite_1(in[2]), tint_unpack_vec3_in_composite_1(in[3])};
   return result;
 }
 
