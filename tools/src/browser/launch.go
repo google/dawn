@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package common
+// Package browser provides a helper function for launching the browser
+package browser
 
-const (
-	// RollSubjectPrefix is the subject prefix for CTS roll changes
-	RollSubjectPrefix = "Roll third_party/webgpu-cts/ "
-
-	// DefaultCacheDir is the default directory for the results cache
-	DefaultCacheDir = "~/.cache/webgpu-cts-results"
-
-	// The dawn-relative path to the ts_sources.txt file
-	TsSourcesRelPath = "third_party/gn/webgpu-cts/ts_sources.txt"
-
-	// The dawn-relative path to the test_list.txt file
-	TestListRelPath = "third_party/gn/webgpu-cts/test_list.txt"
-
-	// The dawn-relative path to the resource_files.txt file
-	ResourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
+import (
+	"fmt"
+	"os/exec"
+	"runtime"
 )
+
+// Open launches a browser to open the given url
+func Open(url string) error {
+	switch runtime.GOOS {
+	case "linux":
+		return exec.Command("xdg-open", url).Start()
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		return exec.Command("open", url).Start()
+	default:
+		return fmt.Errorf("unsupported platform")
+	}
+}

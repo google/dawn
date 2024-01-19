@@ -92,7 +92,7 @@ func Run[Data any](ctx context.Context, data Data, cmds ...Command[Data]) error 
 			if isDefault {
 				name += " (default)"
 			}
-			fmt.Fprintln(tw, "  ", name, "\t-", cmd.Desc())
+			fmt.Fprintln(tw, "  ", name, "\t-", strings.Split(cmd.Desc(), "\n")[0])
 		}
 		fmt.Fprintln(tw)
 		fmt.Fprintln(tw, "Common flags:")

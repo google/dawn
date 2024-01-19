@@ -47,6 +47,7 @@ import (
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/results"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/roll"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/time"
+	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/treemap"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/update"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/validate"
 )

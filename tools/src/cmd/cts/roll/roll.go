@@ -70,14 +70,11 @@ func init() {
 }
 
 const (
-	depsRelPath          = "DEPS"
-	gitLinkPath          = "third_party/webgpu-cts"
-	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
-	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
-	resourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
-	webTestsPath         = "webgpu-cts/webtests"
-	refMain              = "refs/heads/main"
-	noExpectations       = `# Clear all expectations to obtain full list of results`
+	depsRelPath    = "DEPS"
+	gitLinkPath    = "third_party/webgpu-cts"
+	webTestsPath   = "webgpu-cts/webtests"
+	refMain        = "refs/heads/main"
+	noExpectations = `# Clear all expectations to obtain full list of results`
 )
 
 type rollerFlags struct {
@@ -298,7 +295,7 @@ func (r *roller) roll(ctx context.Context) error {
 
 	// Pull out the test list from the generated files
 	testlist := func() []query.Query {
-		lines := strings.Split(generatedFiles[testListRelPath], "\n")
+		lines := strings.Split(generatedFiles[common.TestListRelPath], "\n")
 		list := make([]query.Query, len(lines))
 		for i, line := range lines {
 			list[i] = query.Parse(line)
@@ -727,9 +724,9 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 
 	// Generate typescript sources list, test list, resources file list.
 	for relPath, generator := range map[string]func(context.Context) (string, error){
-		tsSourcesRelPath:     r.genTSDepList,
-		testListRelPath:      r.genTestList,
-		resourceFilesRelPath: r.genResourceFilesList,
+		common.TsSourcesRelPath:     r.genTSDepList,
+		common.TestListRelPath:      r.genTestList,
+		common.ResourceFilesRelPath: r.genResourceFilesList,
 	} {
 		relPath, generator := relPath, generator // Capture values, not iterators
 		wg.Add(1)
