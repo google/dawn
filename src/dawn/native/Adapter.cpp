@@ -290,7 +290,7 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
             Ref<DeviceBase> device = mDeviceOrError.AcquireSuccess();
             WGPURequestDeviceStatus status = device == nullptr ? WGPURequestDeviceStatus_Unknown
                                                                : WGPURequestDeviceStatus_Success;
-            mCallback(status, ToAPI(device.Detach()), nullptr, mUserdata);
+            mCallback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr, mUserdata);
         }
     };
 
