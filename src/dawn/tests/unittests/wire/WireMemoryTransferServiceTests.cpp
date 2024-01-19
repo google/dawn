@@ -526,7 +526,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeDataUpdateFailure
 
     // Failed deserialization is a fatal failure and the client synchronously receives a
     // DEVICE_LOST callback.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
 
     FlushServer(false);
 

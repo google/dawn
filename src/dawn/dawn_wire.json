@@ -116,10 +116,9 @@
     },
     "return commands": {
         "buffer map async callback": [
-            { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer", "_comment": "TODO(dawn:2061) Remove this field once mapping is updated." },
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
-            { "name": "status", "type": "uint32_t" },
+            { "name": "status", "type": "buffer map async status" },
             { "name": "read data update info length", "type": "uint64_t" },
             { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
