@@ -57,6 +57,7 @@ class IndirectDrawMetadata : public NonCopyable {
   public:
     struct IndirectDraw {
         uint64_t inputBufferOffset;
+        uint64_t numIndexBufferElements;
         // This is a pointer to the command that should be populated with the validated
         // indirect scratch buffer. It is only valid up until the encoded command buffer
         // is submitted.
@@ -111,7 +112,6 @@ class IndirectDrawMetadata : public NonCopyable {
     };
     struct IndexedIndirectConfig {
         BufferBase* inputIndirectBuffer;
-        uint64_t numIndexBufferElements;
         bool duplicateBaseVertexInstance;
         DrawType drawType;
 

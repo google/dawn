@@ -186,8 +186,8 @@ void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
             DAWN_UNREACHABLE();
     }
 
-    const IndexedIndirectConfig config = {indirectBuffer, numIndexBufferElements,
-                                          duplicateBaseVertexInstance, DrawType::Indexed};
+    const IndexedIndirectConfig config = {indirectBuffer, duplicateBaseVertexInstance,
+                                          DrawType::Indexed};
     auto it = mIndexedIndirectBufferValidationInfo.find(config);
     if (it == mIndexedIndirectBufferValidationInfo.end()) {
         auto result = mIndexedIndirectBufferValidationInfo.emplace(
@@ -197,6 +197,7 @@ void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
 
     IndirectDraw draw{};
     draw.inputBufferOffset = indirectOffset;
+    draw.numIndexBufferElements = numIndexBufferElements;
     draw.cmd = cmd;
     it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
 }
@@ -205,7 +206,7 @@ void IndirectDrawMetadata::AddIndirectDraw(BufferBase* indirectBuffer,
                                            uint64_t indirectOffset,
                                            bool duplicateBaseVertexInstance,
                                            DrawIndirectCmd* cmd) {
-    const IndexedIndirectConfig config = {indirectBuffer, 0, duplicateBaseVertexInstance,
+    const IndexedIndirectConfig config = {indirectBuffer, duplicateBaseVertexInstance,
                                           DrawType::NonIndexed};
     auto it = mIndexedIndirectBufferValidationInfo.find(config);
     if (it == mIndexedIndirectBufferValidationInfo.end()) {
@@ -216,22 +217,21 @@ void IndirectDrawMetadata::AddIndirectDraw(BufferBase* indirectBuffer,
 
     IndirectDraw draw{};
     draw.inputBufferOffset = indirectOffset;
+    draw.numIndexBufferElements = 0;
     draw.cmd = cmd;
     it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
 }
 
 bool IndirectDrawMetadata::IndexedIndirectConfig::operator<(
     const IndexedIndirectConfig& other) const {
-    return std::tie(inputIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
-                    drawType) < std::tie(other.inputIndirectBuffer, other.numIndexBufferElements,
-                                         other.duplicateBaseVertexInstance, other.drawType);
+    return std::tie(inputIndirectBuffer, duplicateBaseVertexInstance, drawType) <
+           std::tie(other.inputIndirectBuffer, other.duplicateBaseVertexInstance, other.drawType);
 }
 
 bool IndirectDrawMetadata::IndexedIndirectConfig::operator==(
     const IndexedIndirectConfig& other) const {
-    return std::tie(inputIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
-                    drawType) == std::tie(other.inputIndirectBuffer, other.numIndexBufferElements,
-                                          other.duplicateBaseVertexInstance, other.drawType);
+    return std::tie(inputIndirectBuffer, duplicateBaseVertexInstance, drawType) ==
+           std::tie(other.inputIndirectBuffer, other.duplicateBaseVertexInstance, other.drawType);
 }
 
 }  // namespace dawn::native
