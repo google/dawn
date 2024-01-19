@@ -61,6 +61,9 @@ void InitializeDanglingPointerDetectorForTesting() {
     // usually more difficult than finding where the associated memory was released.
     partition_alloc::SetDanglingRawPtrReleasedFn([](uintptr_t ptr) {
         ErrorLog() << "DanglingPointerDetector: A pointer was dangling!";
+        ErrorLog() << "                         Documentation: "
+                      "https://source.chromium.org/chromium/chromium/src/+/main:third_party/dawn/"
+                      "docs/dangling-pointer-detector.md";
         DAWN_CHECK(false);
     });
 #endif
