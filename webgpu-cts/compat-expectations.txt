@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-01-15 09:38:52AM
+# Last rolled: 2024-01-18 07:46:26AM
 
 # Flaky on all platforms
 # KEEP
@@ -272,9 +272,6 @@ crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:p
 crbug.com/dawn/2086 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-
-# These tests use 5 storage buffers; Compat only supports 4.
-crbug.com/dawn/2113 webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
 
 # readbackFromWebGPUCanvas: slight pixel differences with format="rgba16float"
 crbug.com/dawn/2218 [ nvidia-0x2184 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
@@ -479,10 +476,6 @@ crbug.com/dawn/2119 webgpu:api,operation,rendering,draw:arguments:first=3;count=
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
-# New Validation makes this test fail until CTS roll https://github.com/gpuweb/cts/pull/3259
-crbug.com/dawn/2338 webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.1 [ Failure ]
-crbug.com/dawn/2338 webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus-stencil8";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0.1 [ Failure ]
-
 # Intel failures (undiagnosed)
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="1d" [ Failure ]
@@ -578,6 +571,9 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 # New failures. Please triage:
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="compute";arrayLayers=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="compute";arrayLayers=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="compute";arrayLayers=2 [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="differentGroups" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="backward";bindGroupTest="sameGroup" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="shiftByHalf";bindGroupTest="differentGroups" [ Failure ]
@@ -598,7 +594,6 @@ crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_s
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp="_undef_";async=true [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=false [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=true [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,shader_module:sample_index:entryPoint="fsWithSampleIndexUsage" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
@@ -616,6 +611,26 @@ crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,i
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-180.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-180.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-180.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
@@ -632,3 +647,27 @@ crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:vide
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-90.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-90.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-rotate-90.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-vp9-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-hflip.mp4";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-hflip.mp4";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-vflip.mp4";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-vflip.mp4";dstColorSpace="srgb" [ Failure ]
