@@ -123,6 +123,13 @@ std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe() {
 
 // SystemEvent
 
+// static
+Ref<SystemEvent> SystemEvent::CreateSignaled() {
+    auto ev = AcquireRef(new SystemEvent());
+    ev->Signal();
+    return ev;
+}
+
 bool SystemEvent::IsSignaled() const {
     return mSignaled.load(std::memory_order_acquire);
 }

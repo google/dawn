@@ -33,15 +33,16 @@
 namespace dawn::wire::server {
 
 WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
-                                          uint64_t requestSerial,
+                                          ObjectHandle eventManager,
+                                          WGPUFuture future,
                                           ObjectHandle deviceHandle,
                                           const WGPUDeviceDescriptor* descriptor) {
     Known<WGPUDevice> device;
     WIRE_TRY(DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
-    userdata->adapter = adapter.AsHandle();
-    userdata->requestSerial = requestSerial;
+    userdata->eventManager = eventManager;
+    userdata->future = future;
     userdata->deviceObjectId = device.id;
 
     mProcs.adapterRequestDevice(adapter->handle, descriptor,
@@ -55,8 +56,8 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
                                      WGPUDevice device,
                                      const char* message) {
     ReturnAdapterRequestDeviceCallbackCmd cmd = {};
-    cmd.adapter = data->adapter;
-    cmd.requestSerial = data->requestSerial;
+    cmd.eventManager = data->eventManager;
+    cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
 

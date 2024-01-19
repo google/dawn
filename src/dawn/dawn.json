@@ -145,6 +145,16 @@
                 ]
             },
             {
+                "name": "request device f",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "options", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
+                    {"name": "callback info", "type": "request device callback info"}
+                ]
+            },
+            {
                 "name": "create device",
                 "tags": ["dawn"],
                 "returns": "device",
@@ -2890,6 +2900,15 @@
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void *"}
         ]
+    },
+    "request device callback info": {
+         "category": "structure",
+         "extensible": "in",
+         "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "request device callback"},
+            {"name": "userdata", "type": "void *"}
+         ]
     },
 
     "request device status": {

@@ -57,13 +57,8 @@ class Adapter final : public ObjectWithEventsBase {
     void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);
-
-    bool OnRequestDeviceCallback(uint64_t requestSerial,
-                                 WGPURequestDeviceStatus status,
-                                 const char* message,
-                                 const WGPUSupportedLimits* limits,
-                                 uint32_t featuresCount,
-                                 const WGPUFeatureName* features);
+    WGPUFuture RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
+                              const WGPURequestDeviceCallbackInfo& callbackInfo);
 
     // Unimplementable. Only availale in dawn_native.
     WGPUInstance GetInstance() const;

@@ -262,6 +262,49 @@ void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
     callback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr, userdata);
 }
 
+Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
+                                      const RequestDeviceCallbackInfo& callbackInfo) {
+    struct RequestDeviceEvent final : public EventManager::TrackedEvent {
+        WGPURequestDeviceCallback mCallback;
+        void* mUserdata;
+        ResultOrError<Ref<DeviceBase>> mDeviceOrError;
+
+        RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo,
+                           ResultOrError<Ref<DeviceBase>> deviceOrError)
+            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+              mCallback(callbackInfo.callback),
+              mUserdata(callbackInfo.userdata),
+              mDeviceOrError(std::move(deviceOrError)) {
+            CompleteIfSpontaneous();
+        }
+
+        ~RequestDeviceEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
+
+        void Complete(EventCompletionType completionType) override {
+            if (mDeviceOrError.IsError()) {
+                std::unique_ptr<ErrorData> errorData = mDeviceOrError.AcquireError();
+                mCallback(WGPURequestDeviceStatus_Error, nullptr,
+                          errorData->GetFormattedMessage().c_str(), mUserdata);
+                return;
+            }
+            Ref<DeviceBase> device = mDeviceOrError.AcquireSuccess();
+            WGPURequestDeviceStatus status = device == nullptr ? WGPURequestDeviceStatus_Unknown
+                                                               : WGPURequestDeviceStatus_Success;
+            mCallback(status, ToAPI(device.Detach()), nullptr, mUserdata);
+        }
+    };
+
+    constexpr DeviceDescriptor kDefaultDescriptor = {};
+    if (descriptor == nullptr) {
+        descriptor = &kDefaultDescriptor;
+    }
+
+    FutureID futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(
+        callbackInfo.mode,
+        AcquireRef(new RequestDeviceEvent(callbackInfo, CreateDevice(descriptor))));
+    return {futureID};
+}
+
 const TogglesState& AdapterBase::GetTogglesState() const {
     return mTogglesState;
 }

@@ -108,7 +108,8 @@
         ],
         "adapter request device": [
             { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
         ]
@@ -177,8 +178,8 @@
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ],
         "adapter request device callback": [
-            { "name": "adapter", "type": "ObjectHandle", "handle_type": "adapter" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "request device status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
             { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
@@ -203,6 +204,7 @@
             "AdapterHasFeature",
             "AdapterEnumerateFeatures",
             "AdapterRequestDevice",
+            "AdapterRequestDeviceF",
             "BufferMapAsync",
             "BufferMapAsyncF",
             "BufferGetConstMappedRange",

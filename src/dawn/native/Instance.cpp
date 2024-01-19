@@ -251,19 +251,50 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
 void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
                                      WGPURequestAdapterCallback callback,
                                      void* userdata) {
-    auto adapters = EnumerateAdapters(options);
-    if (adapters.empty()) {
-        callback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters.", userdata);
-    } else {
-        callback(WGPURequestAdapterStatus_Success, ToAPI(ReturnToAPI(std::move(adapters[0]))),
-                 nullptr, userdata);
-    }
+    APIRequestAdapterF(
+        options, RequestAdapterCallbackInfo{nullptr, wgpu::CallbackMode::AllowSpontaneous, callback,
+                                            userdata});
 }
 
 Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
                                         const RequestAdapterCallbackInfo& callbackInfo) {
-    // TODO(dawn:1987) Implement this.
-    DAWN_UNREACHABLE();
+    struct RequestAdapterEvent final : public EventManager::TrackedEvent {
+        WGPURequestAdapterCallback mCallback;
+        void* mUserdata;
+        Ref<AdapterBase> mAdapter;
+
+        RequestAdapterEvent(const RequestAdapterCallbackInfo& callbackInfo,
+                            Ref<AdapterBase> adapter)
+            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+              mCallback(callbackInfo.callback),
+              mUserdata(callbackInfo.userdata),
+              mAdapter(std::move(adapter)) {
+            CompleteIfSpontaneous();
+        }
+
+        ~RequestAdapterEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
+
+        void Complete(EventCompletionType completionType) override {
+            WGPUAdapter adapter = ToAPI(ReturnToAPI(std::move(mAdapter)));
+            if (adapter == nullptr) {
+                mCallback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters",
+                          mUserdata);
+            } else {
+                mCallback(WGPURequestAdapterStatus_Success, adapter, nullptr, mUserdata);
+            }
+        }
+    };
+
+    static constexpr RequestAdapterOptions kDefaultOptions = {};
+    if (options == nullptr) {
+        options = &kDefaultOptions;
+    }
+    auto adapters = EnumerateAdapters(options);
+
+    FutureID futureID = GetEventManager()->TrackEvent(
+        callbackInfo.mode, AcquireRef(new RequestAdapterEvent(
+                               callbackInfo, adapters.empty() ? nullptr : std::move(adapters[0]))));
+    return {futureID};
 }
 
 Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
