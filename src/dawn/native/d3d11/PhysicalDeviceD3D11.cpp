@@ -225,7 +225,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Slot values can be 0-15, inclusive:
     // https://docs.microsoft.com/en-ca/windows/win32/api/d3d11/ns-d3d11-d3d11_input_element_desc
     limits->v1.maxVertexBuffers = 16;
-    limits->v1.maxVertexAttributes = D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT;
+    // Both SV_VertexID and SV_InstanceID will consume vertex input slots.
+    limits->v1.maxVertexAttributes = D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT - 2;
 
     uint32_t maxUAVsAllStages = mFeatureLevel == D3D_FEATURE_LEVEL_11_1
                                     ? D3D11_1_UAV_SLOT_COUNT

@@ -283,8 +283,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.minStorageBufferOffsetAlignment = Get(gl, GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
     limits->v1.maxVertexBuffers = Get(gl, GL_MAX_VERTEX_ATTRIB_BINDINGS);
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
-    GLint maxVertexAttribs = Get(gl, GL_MAX_VERTEX_ATTRIBS);
-    limits->v1.maxVertexAttributes = limits->v1.maxVertexBuffers * maxVertexAttribs;
+    limits->v1.maxVertexAttributes = Get(gl, GL_MAX_VERTEX_ATTRIBS);
     limits->v1.maxVertexBufferArrayStride = Get(gl, GL_MAX_VERTEX_ATTRIB_STRIDE);
     limits->v1.maxInterStageShaderComponents = Get(gl, GL_MAX_VARYING_COMPONENTS);
     limits->v1.maxInterStageShaderVariables = Get(gl, GL_MAX_VARYING_VECTORS);

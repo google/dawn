@@ -217,7 +217,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Slot values can be 0-15, inclusive:
     // https://docs.microsoft.com/en-ca/windows/win32/api/d3d12/ns-d3d12-d3d12_input_element_desc
     limits->v1.maxVertexBuffers = 16;
-    limits->v1.maxVertexAttributes = D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT;
+    // Both SV_VertexID and SV_InstanceID will consume vertex input slots.
+    limits->v1.maxVertexAttributes = D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT - 2;
 
     // Note: WebGPU requires FL11.1+
     // https://docs.microsoft.com/en-us/windows/win32/direct3d12/hardware-support

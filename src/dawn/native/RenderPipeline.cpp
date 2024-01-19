@@ -101,11 +101,12 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
     DAWN_TRY(ValidateVertexFormat(attribute->format));
     const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
 
+    uint32_t maxVertexAttributes = device->GetLimits().v1.maxVertexAttributes;
     DAWN_INVALID_IF(
-        attribute->shaderLocation >= kMaxVertexAttributes,
+        attribute->shaderLocation >= maxVertexAttributes,
         "Attribute shader location (%u) exceeds the maximum number of vertex attributes "
         "(%u).",
-        attribute->shaderLocation, kMaxVertexAttributes);
+        attribute->shaderLocation, maxVertexAttributes);
 
     VertexAttributeLocation location(static_cast<uint8_t>(attribute->shaderLocation));
 
