@@ -114,7 +114,7 @@ class EventManager final : NonMovable {
         }
 
         std::unique_ptr<TrackedEvent> spontaneousEvent;
-        WireResult result = mTrackedEvents.Use([&](auto trackedEvents) {
+        WIRE_TRY(mTrackedEvents.Use([&](auto trackedEvents) {
             auto it = trackedEvents->find(futureID);
             if (it == trackedEvents->end()) {
                 // If the future is not found, it must've already been completed.
@@ -128,9 +128,8 @@ class EventManager final : NonMovable {
                 DAWN_ASSERT(trackedEvent->GetType() == Event::kType);
                 return WireResult::FatalError;
             }
-
-            WireResult result = static_cast<Event*>(trackedEvent.get())
-                                    ->ReadyHook(futureID, std::forward<ReadyArgs>(readyArgs)...);
+            static_cast<Event*>(trackedEvent.get())
+                ->ReadyHook(std::forward<ReadyArgs>(readyArgs)...);
             trackedEvent->SetReady();
 
             // If the event can be spontaneously completed, prepare to do so now.
@@ -138,14 +137,14 @@ class EventManager final : NonMovable {
                 spontaneousEvent = std::move(trackedEvent);
                 trackedEvents->erase(futureID);
             }
-            return result;
-        });
+            return WireResult::Success;
+        }));
 
         // Handle spontaneous completions.
         if (spontaneousEvent) {
             spontaneousEvent->Complete(futureID, EventCompletionType::Ready);
         }
-        return result;
+        return WireResult::Success;
     }
 
     void ProcessPollEvents();
