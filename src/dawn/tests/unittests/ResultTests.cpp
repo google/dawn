@@ -398,5 +398,58 @@ TEST(ResultGeneric, ReturningSuccess) {
     TestSuccess(&result, {1.0f});
 }
 
+class NonDefaultConstructible {
+  public:
+    explicit NonDefaultConstructible(float v) : v(v) {}
+    bool operator==(const NonDefaultConstructible& other) const { return v == other.v; }
+    float v;
+};
+
+// Test constructing an error Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, ConstructingError) {
+    Result<NonDefaultConstructible, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
+
+// Test moving an error Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, MovingError) {
+    Result<NonDefaultConstructible, int> result(std::make_unique<int>(placeholderError));
+    Result<NonDefaultConstructible, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
+
+// Test returning an error Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, ReturningError) {
+    auto CreateError = []() -> Result<NonDefaultConstructible, int> {
+        return {std::make_unique<int>(placeholderError)};
+    };
+
+    Result<NonDefaultConstructible, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
+
+// Test constructing a success Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, ConstructingSuccess) {
+    Result<NonDefaultConstructible, int> result(NonDefaultConstructible(1.0f));
+    TestSuccess(&result, NonDefaultConstructible(1.0f));
+}
+
+// Test moving a success Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, MovingSuccess) {
+    Result<NonDefaultConstructible, int> result(NonDefaultConstructible(1.0f));
+    Result<NonDefaultConstructible, int> movedResult(std::move(result));
+    TestSuccess(&movedResult, NonDefaultConstructible(1.0f));
+}
+
+// Test returning a success Result<T, E> for non-default-constructible T
+TEST(ResultNonDefaultConstructible, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<NonDefaultConstructible, int> {
+        return {NonDefaultConstructible(1.0f)};
+    };
+
+    Result<NonDefaultConstructible, int> result = CreateSuccess();
+    TestSuccess(&result, NonDefaultConstructible(1.0f));
+}
+
 }  // anonymous namespace
 }  // namespace dawn
