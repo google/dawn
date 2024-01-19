@@ -2,6 +2,8 @@
 
 using namespace metal;
 
+constant static volatile bool tint_preserve_loop = true;
+
 template<typename T, size_t N>
 struct tint_array {
     const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -19,8 +21,7 @@ int g() {
 }
 
 int f() {
-  while (true) {
-    __asm__("");
+  while (tint_preserve_loop) {
     g();
     break;
   }
@@ -29,8 +30,7 @@ int f() {
 }
 
 kernel void tint_symbol(device tint_array<uint, 1>* tint_symbol_1 [[buffer(0)]]) {
-  while (true) {
-    __asm__("");
+  while (tint_preserve_loop) {
     if (((*(tint_symbol_1))[0] == 0u)) {
       break;
     }

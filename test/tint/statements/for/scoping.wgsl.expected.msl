@@ -1,9 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 void f() {
-  for(int must_not_collide = 0; ; ) {
-    __asm__("");
+  for(int must_not_collide = 0; tint_preserve_loop; ) {
     break;
   }
   int must_not_collide = 0;

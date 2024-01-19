@@ -1,6 +1,9 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 struct tint_private_vars_struct {
   bool tint_discarded;
 };
@@ -22,8 +25,7 @@ struct tint_symbol_3 {
 
 int tint_symbol_inner(int3 x, thread tint_private_vars_struct* const tint_private_vars) {
   int y = x[0];
-  while (true) {
-    __asm__("");
+  while (tint_preserve_loop) {
     int const r = f(y, tint_private_vars);
     if ((r == 0)) {
       break;

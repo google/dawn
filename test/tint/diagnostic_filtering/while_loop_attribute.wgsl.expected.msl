@@ -13,14 +13,16 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 struct tint_symbol_2 {
   float x [[user(locn0)]];
 };
 
 void tint_symbol_inner(float x) {
   float4 v = float4(0.0f);
-  while(((x > 0.0f) && (dfdx(1.0f) > 0.0f))) {
-    __asm__("");
+  while((((x > 0.0f) && (dfdx(1.0f) > 0.0f))) == tint_preserve_loop) {
   }
 }
 

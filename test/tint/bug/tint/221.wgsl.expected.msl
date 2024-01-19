@@ -14,6 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 struct Buf {
   /* 0x0000 */ uint count;
   /* 0x0004 */ tint_array<uint, 50> data;
@@ -25,8 +27,7 @@ uint tint_mod(uint lhs, uint rhs) {
 
 kernel void tint_symbol(device Buf* tint_symbol_1 [[buffer(0)]]) {
   uint i = 0u;
-  while (true) {
-    __asm__("");
+  while (tint_preserve_loop) {
     if ((i >= (*(tint_symbol_1)).count)) {
       break;
     }

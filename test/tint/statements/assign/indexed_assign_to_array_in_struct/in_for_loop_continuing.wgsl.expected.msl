@@ -14,6 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 struct Uniforms {
   /* 0x0000 */ uint i;
 };
@@ -29,8 +31,7 @@ struct OuterS {
 kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
   InnerS v = {};
   OuterS s1 = {};
-  for(int i = 0; (i < 4); s1.a1[(*(tint_symbol_1)).i] = v) {
-    __asm__("");
+  for(int i = 0; ((i < 4)) == tint_preserve_loop; s1.a1[(*(tint_symbol_1)).i] = v) {
     i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
   }
   return;

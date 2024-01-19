@@ -14,6 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 struct tint_private_vars_struct {
   uint v;
 };
@@ -60,8 +62,7 @@ void tint_symbol_1(thread tint_private_vars_struct* const tint_private_vars, dev
     int const tint_symbol_2_save_1 = tint_symbol_7;
     int const tint_symbol_3 = idx3(tint_private_vars);
     (*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3]) + as_type<uint>(1)));
-    while (true) {
-      __asm__("");
+    while (tint_preserve_loop) {
       if (!(((*(tint_private_vars)).v < 10u))) {
         break;
       }

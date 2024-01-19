@@ -1,13 +1,15 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 void some_loop_body() {
 }
 
 void f() {
   int j = 0;
-  for(int i = 0; ((i < 5) && (j < 10)); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
-    __asm__("");
+  for(int i = 0; (((i < 5) && (j < 10))) == tint_preserve_loop; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
     some_loop_body();
     j = as_type<int>((as_type<uint>(i) * as_type<uint>(30)));
   }

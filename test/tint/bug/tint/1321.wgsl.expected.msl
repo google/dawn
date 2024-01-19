@@ -14,6 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 int foo() {
   return 1;
 }
@@ -23,8 +25,7 @@ fragment void tint_symbol() {
   {
     int const tint_symbol_1 = foo();
     int const a_save = tint_symbol_1;
-    while (true) {
-      __asm__("");
+    while (tint_preserve_loop) {
       {
         float const x = arr[a_save];
         break;

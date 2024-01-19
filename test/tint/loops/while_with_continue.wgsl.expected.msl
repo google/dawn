@@ -1,10 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 int f() {
   int i = 0;
-  while((i < 4)) {
-    __asm__("");
+  while(((i < 4)) == tint_preserve_loop) {
     i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
     continue;
   }

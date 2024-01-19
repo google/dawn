@@ -14,9 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<int, 246>* const tint_symbol_1) {
-  for(uint idx = local_invocation_index; (idx < 246u); idx = (idx + 1u)) {
-    __asm__("");
+  for(uint idx = local_invocation_index; ((idx < 246u)) == tint_preserve_loop; idx = (idx + 1u)) {
     uint const i = idx;
     (*(tint_symbol_1))[i] = 0;
   }

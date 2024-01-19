@@ -14,13 +14,14 @@ struct tint_array {
     T elements[N];
 };
 
+constant static volatile bool tint_preserve_loop = true;
+
 struct tint_symbol_5 {
   tint_array<half2x4, 4> w;
 };
 
 void f_inner(uint local_invocation_index, threadgroup tint_array<half2x4, 4>* const tint_symbol, const constant tint_array<half2x4, 4>* const tint_symbol_1) {
-  for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-    __asm__("");
+  for(uint idx = local_invocation_index; ((idx < 4u)) == tint_preserve_loop; idx = (idx + 1u)) {
     uint const i = idx;
     (*(tint_symbol))[i] = half2x4(half4(0.0h), half4(0.0h));
   }

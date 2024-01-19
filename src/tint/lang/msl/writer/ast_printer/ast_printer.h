@@ -378,9 +378,18 @@ class ASTPrinter : public tint::TextGenerator {
                               const ast::CallExpression* expr,
                               const sem::BuiltinFn* builtin);
 
-    /// Emits a code sequence that preserves a loop during
-    /// optimizations even if the loop is infinite.
-    void EmitLoopPreserver();
+    /// Lazily emits the global-scope declaration of the helper static volatile boolean variable
+    /// used to fool the MSL compiler into thinking loops might exit.
+    /// @return the name of the variable.
+    std::string_view LoopPreservingVar();
+
+    /// Emits a loop condition, but santized so that the MSL compiler can't infer that the loop
+    /// never exits.
+    void EmitLoopCondition(StringStream& out, const std::string& cond);
+
+    /// Emits the header of an unconditional loop, but use the loop-preserving condition to fool the
+    /// MSL compiler into thinking that the loop might exit.
+    void EmitUnconditionalLoopHeader();
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin
@@ -436,6 +445,9 @@ class ASTPrinter : public tint::TextGenerator {
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
     std::function<bool()> emit_continuing_;
+
+    // Name of the variable used to ensure the MSL compiler thinks a loop will terminate.
+    std::string loop_preserving_var_;
 
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type

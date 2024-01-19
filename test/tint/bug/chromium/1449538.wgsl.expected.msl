@@ -1,30 +1,25 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+constant static volatile bool tint_preserve_loop = true;
+
 void f() {
-  for(int i0520 = 0; false; ) {
-    __asm__("");
+  for(int i0520 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i62 = 0; false; ) {
-    __asm__("");
+  for(int i62 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i0520 = 0; false; ) {
-    __asm__("");
+  for(int i0520 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i62 = 0; false; ) {
-    __asm__("");
+  for(int i62 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i62 = 0; false; ) {
-    __asm__("");
+  for(int i62 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i60 = 0; false; ) {
-    __asm__("");
+  for(int i60 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i62 = 0; false; ) {
-    __asm__("");
+  for(int i62 = 0; (false) == tint_preserve_loop; ) {
   }
-  for(int i60 = 0; false; ) {
-    __asm__("");
+  for(int i60 = 0; (false) == tint_preserve_loop; ) {
   }
 }
 
