@@ -43,28 +43,6 @@ namespace dawn::wire::client {
 
 class Device;
 
-enum class MapRequestType { None, Read, Write };
-
-enum class MapState {
-    Unmapped,
-    MappedForRead,
-    MappedForWrite,
-    MappedAtCreation,
-};
-
-struct MapRequestData {
-    FutureID futureID = kNullFutureID;
-    size_t offset = 0;
-    size_t size = 0;
-    MapRequestType type = MapRequestType::None;
-};
-
-struct MapStateData : public RefCounted {
-    // Up to only one request can exist at a single time. Other requests are rejected.
-    std::optional<MapRequestData> pendingRequest = std::nullopt;
-    MapState mapState = MapState::Unmapped;
-};
-
 class Buffer final : public ObjectWithEventsBase {
   public:
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
@@ -74,10 +52,6 @@ class Buffer final : public ObjectWithEventsBase {
            const WGPUBufferDescriptor* descriptor);
     ~Buffer() override;
 
-    bool OnMapAsyncCallback(WGPUFuture future,
-                            uint32_t status,
-                            uint64_t readDataUpdateInfoLength,
-                            const uint8_t* readDataUpdateInfo);
     void MapAsync(WGPUMapModeFlags mode,
                   size_t offset,
                   size_t size,
@@ -100,9 +74,11 @@ class Buffer final : public ObjectWithEventsBase {
     WGPUBufferMapState GetMapState() const;
 
   private:
+    friend class Client;
+    class MapAsyncEvent;
+
     // Prepares the callbacks to be called and potentially calls them
-    bool SetFutureStatus(WGPUBufferMapAsyncStatus status);
-    void SetFutureStatusAndClearPending(WGPUBufferMapAsyncStatus status);
+    void SetFutureStatus(WGPUBufferMapAsyncStatus status);
 
     bool IsMappedForReading() const;
     bool IsMappedForWriting() const;
@@ -110,25 +86,39 @@ class Buffer final : public ObjectWithEventsBase {
 
     void FreeMappedData();
 
-    // The map state is a shared resource with the TrackedEvent so that it is updated only when the
-    // callback is actually called. This is important for WaitAny and ProcessEvents cases where the
-    // server may have responded, but due to an early Unmap or Destroy before the corresponding
-    // WaitAny or ProcessEvents call, we need to update the callback result.
-    Ref<MapStateData> mMapStateData;
+    const uint64_t mSize = 0;
+    const WGPUBufferUsage mUsage;
+    const bool mDestructWriteHandleOnUnmap;
 
-    uint64_t mSize = 0;
-    WGPUBufferUsage mUsage;
+    std::weak_ptr<bool> mIsDeviceAlive;
+
+    // Mapping members are mutable depending on the current map state.
+    enum class MapRequestType { Read, Write };
+    struct MapRequest {
+        FutureID futureID = kNullFutureID;
+        size_t offset = 0;
+        size_t size = 0;
+        // Because validation for request type is validated via the backend, we use an optional type
+        // here. This is nullopt when an invalid request type is passed to the wire.
+        std::optional<MapRequestType> type;
+    };
+    enum class MapState {
+        Unmapped,
+        MappedForRead,
+        MappedForWrite,
+        MappedAtCreation,
+    };
+    std::optional<MapRequest> mPendingMapRequest = std::nullopt;
+    MapState mMappedState = MapState::Unmapped;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mMappedData = nullptr;
+    size_t mMappedOffset = 0;
+    size_t mMappedSize = 0;
 
     // Only one mapped pointer can be active at a time
     // TODO(enga): Use a tagged pointer to save space.
     std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
     std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
-    bool mDestructWriteHandleOnUnmap = false;
-
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mMappedData = nullptr;
-    size_t mMapOffset = 0;
-    size_t mMapSize = 0;
 };
 
 }  // namespace dawn::wire::client

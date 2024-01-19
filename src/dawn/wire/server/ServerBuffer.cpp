@@ -225,8 +225,6 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
     bool isSuccess = status == WGPUBufferMapAsyncStatus_Success;
 
     ReturnBufferMapAsyncCallbackCmd cmd;
-    // TODO(dawn:2061) Should be able to remove buffer once mapping is updated.
-    cmd.buffer = data->buffer;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;

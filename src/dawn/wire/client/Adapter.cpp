@@ -48,11 +48,12 @@ class RequestDeviceEvent : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    void ReadyHook(WGPURequestDeviceStatus status,
-                   const char* message,
-                   const WGPUSupportedLimits* limits,
-                   uint32_t featuresCount,
-                   const WGPUFeatureName* features) {
+    WireResult ReadyHook(FutureID futureID,
+                         WGPURequestDeviceStatus status,
+                         const char* message,
+                         const WGPUSupportedLimits* limits,
+                         uint32_t featuresCount,
+                         const WGPUFeatureName* features) {
         DAWN_ASSERT(mDevice != nullptr);
         mStatus = status;
         if (message != nullptr) {
@@ -62,6 +63,7 @@ class RequestDeviceEvent : public TrackedEvent {
             mDevice->SetLimits(limits);
             mDevice->SetFeatures(features, featuresCount);
         }
+        return WireResult::Success;
     }
 
   private:

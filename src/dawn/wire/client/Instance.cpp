@@ -54,12 +54,13 @@ class RequestAdapterEvent : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    void ReadyHook(WGPURequestAdapterStatus status,
-                   const char* message,
-                   const WGPUAdapterProperties* properties,
-                   const WGPUSupportedLimits* limits,
-                   uint32_t featuresCount,
-                   const WGPUFeatureName* features) {
+    WireResult ReadyHook(FutureID futureID,
+                         WGPURequestAdapterStatus status,
+                         const char* message,
+                         const WGPUAdapterProperties* properties,
+                         const WGPUSupportedLimits* limits,
+                         uint32_t featuresCount,
+                         const WGPUFeatureName* features) {
         DAWN_ASSERT(mAdapter != nullptr);
         mStatus = status;
         if (message != nullptr) {
@@ -70,6 +71,7 @@ class RequestAdapterEvent : public TrackedEvent {
             mAdapter->SetLimits(limits);
             mAdapter->SetFeatures(features, featuresCount);
         }
+        return WireResult::Success;
     }
 
   private:
