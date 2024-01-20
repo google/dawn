@@ -65,13 +65,13 @@ namespace tint::core::type {
 /// @returns the default access control for a memory view with the given address space.
 static constexpr inline core::Access DefaultAccessFor(core::AddressSpace space) {
     switch (space) {
+        case core::AddressSpace::kIn:
         case core::AddressSpace::kPushConstant:
         case core::AddressSpace::kUniform:
         case core::AddressSpace::kHandle:
             return core::Access::kRead;
 
         case core::AddressSpace::kUndefined:
-        case core::AddressSpace::kIn:
         case core::AddressSpace::kOut:
         case core::AddressSpace::kFunction:
         case core::AddressSpace::kPixelLocal:

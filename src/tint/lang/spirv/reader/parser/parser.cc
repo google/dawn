@@ -103,6 +103,10 @@ class Parser {
     /// @returns the Tint address space for a SPIR-V storage class
     core::AddressSpace AddressSpace(spv::StorageClass sc) {
         switch (sc) {
+            case spv::StorageClass::Input:
+                return core::AddressSpace::kIn;
+            case spv::StorageClass::Output:
+                return core::AddressSpace::kOut;
             case spv::StorageClass::Function:
                 return core::AddressSpace::kFunction;
             case spv::StorageClass::Private:
@@ -115,6 +119,44 @@ class Parser {
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
                 return core::AddressSpace::kUndefined;
+        }
+    }
+
+    /// @param b a SPIR-V BuiltIn
+    /// @returns the Tint builtin value for a SPIR-V BuiltIn decoration
+    core::BuiltinValue Builtin(spv::BuiltIn b) {
+        switch (b) {
+            case spv::BuiltIn::FragCoord:
+                return core::BuiltinValue::kPosition;
+            case spv::BuiltIn::FragDepth:
+                return core::BuiltinValue::kFragDepth;
+            case spv::BuiltIn::FrontFacing:
+                return core::BuiltinValue::kFrontFacing;
+            case spv::BuiltIn::GlobalInvocationId:
+                return core::BuiltinValue::kGlobalInvocationId;
+            case spv::BuiltIn::InstanceIndex:
+                return core::BuiltinValue::kInstanceIndex;
+            case spv::BuiltIn::LocalInvocationId:
+                return core::BuiltinValue::kLocalInvocationId;
+            case spv::BuiltIn::LocalInvocationIndex:
+                return core::BuiltinValue::kLocalInvocationIndex;
+            case spv::BuiltIn::NumWorkgroups:
+                return core::BuiltinValue::kNumWorkgroups;
+            case spv::BuiltIn::PointSize:
+                return core::BuiltinValue::kPointSize;
+            case spv::BuiltIn::Position:
+                return core::BuiltinValue::kPosition;
+            case spv::BuiltIn::SampleId:
+                return core::BuiltinValue::kSampleIndex;
+            case spv::BuiltIn::SampleMask:
+                return core::BuiltinValue::kSampleMask;
+            case spv::BuiltIn::VertexIndex:
+                return core::BuiltinValue::kVertexIndex;
+            case spv::BuiltIn::WorkgroupId:
+                return core::BuiltinValue::kWorkgroupId;
+            default:
+                TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << static_cast<uint32_t>(b);
+                return core::BuiltinValue::kUndefined;
         }
     }
 
@@ -520,6 +562,7 @@ class Parser {
         std::optional<uint32_t> group;
         std::optional<uint32_t> binding;
         core::Access access_mode = core::Access::kUndefined;
+        core::ir::IOAttributes io_attributes;
         for (auto* deco :
              spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), false)) {
             auto d = deco->GetSingleWordOperand(1);
@@ -532,6 +575,9 @@ class Parser {
                     break;
                 case spv::Decoration::Binding:
                     binding = deco->GetSingleWordOperand(2);
+                    break;
+                case spv::Decoration::BuiltIn:
+                    io_attributes.builtin = Builtin(spv::BuiltIn(deco->GetSingleWordOperand(2)));
                     break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
@@ -548,6 +594,7 @@ class Parser {
             TINT_ASSERT(group && binding);
             var->SetBindingPoint(group.value(), binding.value());
         }
+        var->SetAttributes(std::move(io_attributes));
 
         Emit(var, inst.result_id());
     }

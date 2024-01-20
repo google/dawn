@@ -304,5 +304,161 @@ tint_symbol_1 = struct @align(4) {
 )");
 }
 
+struct BuiltinCase {
+    std::string spirv_type;
+    std::string spirv_builtin;
+    std::string ir;
+};
+std::string PrintBuiltinCase(testing::TestParamInfo<BuiltinCase> bc) {
+    return bc.param.spirv_builtin;
+}
+
+using BuiltinInputTest = SpirvParserTestWithParam<BuiltinCase>;
+
+TEST_P(BuiltinInputTest, Enum) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var BuiltIn )" +
+                  params.spirv_builtin + R"(
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %u32 = OpTypeInt 32 0
+      %vec3u = OpTypeVector %u32 3
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+      %u32_1 = OpConstant %u32 1
+  %arr_u32_1 = OpTypeArray %u32 %u32_1
+    %fn_type = OpTypeFunction %void
+
+ %_ptr_Input = OpTypePointer Input %)" +
+                  params.spirv_type + R"(
+        %var = OpVariable %_ptr_Input Input
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              params.ir);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    BuiltinInputTest,
+    testing::Values(
+        BuiltinCase{
+            "vec4f",
+            "FragCoord",
+            "%1:ptr<__in, vec4<f32>, read> = var @builtin(position)",
+        },
+        BuiltinCase{
+            "bool",
+            "FrontFacing",
+            "%1:ptr<__in, bool, read> = var @builtin(front_facing)",
+        },
+        BuiltinCase{
+            "vec3u",
+            "GlobalInvocationId",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(global_invocation_id)",
+        },
+        BuiltinCase{
+            "u32",
+            "InstanceIndex",
+            "%1:ptr<__in, u32, read> = var @builtin(instance_index)",
+        },
+        BuiltinCase{
+            "vec3u",
+            "LocalInvocationId",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(local_invocation_id)",
+        },
+        BuiltinCase{
+            "u32",
+            "LocalInvocationIndex",
+            "%1:ptr<__in, u32, read> = var @builtin(local_invocation_index)",
+        },
+        BuiltinCase{
+            "vec3u",
+            "NumWorkgroups",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)",
+        },
+        BuiltinCase{
+            "u32",
+            "SampleId",
+            "%1:ptr<__in, u32, read> = var @builtin(sample_index)",
+        },
+        BuiltinCase{
+            "arr_u32_1",
+            "SampleMask",
+            "%1:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)",
+        },
+        BuiltinCase{
+            "u32",
+            "VertexIndex",
+            "%1:ptr<__in, u32, read> = var @builtin(vertex_index)",
+        },
+        BuiltinCase{
+            "vec3u",
+            "WorkgroupId",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(workgroup_id)",
+        }),
+    PrintBuiltinCase);
+
+using BuiltinOutputTest = SpirvParserTestWithParam<BuiltinCase>;
+
+TEST_P(BuiltinOutputTest, Enum) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var BuiltIn )" +
+                  params.spirv_builtin + R"(
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+      %u32_1 = OpConstant %u32 1
+  %arr_u32_1 = OpTypeArray %u32 %u32_1
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %)" +
+                  params.spirv_type + R"(
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              params.ir);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    BuiltinOutputTest,
+    testing::Values(
+        BuiltinCase{
+            "f32",
+            "PointSize",
+            "%1:ptr<__out, f32, read_write> = var @builtin(__point_size)",
+        },
+        BuiltinCase{
+            "vec4f",
+            "Position",
+            "%1:ptr<__out, vec4<f32>, read_write> = var @builtin(position)",
+        },
+        BuiltinCase{
+            "arr_u32_1",
+            "SampleMask",
+            "%1:ptr<__out, array<u32, 1>, read_write> = var @builtin(sample_mask)",
+        }),
+    PrintBuiltinCase);
+
 }  // namespace
 }  // namespace tint::spirv::reader
