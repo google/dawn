@@ -93,6 +93,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_Norm16TextureFormats:
         case WGPUFeatureName_FramebufferFetch:
         case WGPUFeatureName_AdapterPropertiesMemoryHeaps:
+        case WGPUFeatureName_AdapterPropertiesD3D:
             return true;
     }
 

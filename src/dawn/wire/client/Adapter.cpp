@@ -151,6 +151,11 @@ void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
                     memoryHeapProperties->heapInfo + memoryHeapProperties->heapCount};
                 break;
             }
+            case WGPUSType_AdapterPropertiesD3D: {
+                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
+                mD3DProperties.shaderModel = d3dProperties->shaderModel;
+                break;
+            }
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -174,6 +179,11 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
                 // Write out the pointer and count to the heap properties out-struct.
                 memoryHeapProperties->heapCount = heapCount;
                 memoryHeapProperties->heapInfo = heapInfo;
+                break;
+            }
+            case WGPUSType_AdapterPropertiesD3D: {
+                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
+                d3dProperties->shaderModel = mD3DProperties.shaderModel;
                 break;
             }
             default:

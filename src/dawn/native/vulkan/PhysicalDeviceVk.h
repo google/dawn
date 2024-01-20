@@ -80,7 +80,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool CheckSemaphoreSupport(DeviceExt deviceExt,
                                VkExternalSemaphoreHandleTypeFlagBits handleType) const;
 
-    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
 
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;

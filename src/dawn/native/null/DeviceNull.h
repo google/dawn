@@ -211,7 +211,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                                     const UnpackedPtr<DeviceDescriptor>& descriptor,
                                                     const TogglesState& deviceToggles) override;
 
-    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
 };
 
 // Helper class so |BindGroup| can allocate memory for its binding data,

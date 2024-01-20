@@ -114,16 +114,21 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
         return;
     }
 
-    if (auto* memoryHeaps = unpacked.Get<AdapterPropertiesMemoryHeaps>()) {
-        if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
-            mPhysicalDevice->GetInstance()->ConsumedError(
-                DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
-        }
-        mPhysicalDevice->PopulateMemoryHeapInfo(memoryHeaps);
+    if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
+        instance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
+    }
+    if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
+        instance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
     }
     if (auto* powerPreferenceDesc = unpacked.Get<DawnAdapterPropertiesPowerPreference>()) {
         powerPreferenceDesc->powerPreference = mPowerPreference;
     }
+
+    mPhysicalDevice->PopulateBackendProperties(unpacked);
 
     properties->vendorID = mPhysicalDevice->GetVendorId();
     properties->deviceID = mPhysicalDevice->GetDeviceId();

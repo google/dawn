@@ -68,6 +68,7 @@ class Adapter final : public ObjectWithEventsBase {
     LimitsAndFeatures mLimitsAndFeatures;
     WGPUAdapterProperties mProperties;
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
+    WGPUAdapterPropertiesD3D mD3DProperties;
 
     struct RequestDeviceData {
         WGPURequestDeviceCallback callback = nullptr;

@@ -144,6 +144,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Norm16TextureFormats);
     EnableFeature(Feature::AdapterPropertiesMemoryHeaps);
+    EnableFeature(Feature::AdapterPropertiesD3D);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
@@ -724,39 +725,43 @@ MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
     return {};
 }
 
-void PhysicalDevice::PopulateMemoryHeapInfo(
-    AdapterPropertiesMemoryHeaps* memoryHeapProperties) const {
-    // https://microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html describes
-    // the properties of D3D12 Default/Upload/Readback heaps.
-    if (mDeviceInfo.isUMA) {
-        auto* heapInfo = new MemoryHeapInfo[1];
-        memoryHeapProperties->heapCount = 1;
-        memoryHeapProperties->heapInfo = heapInfo;
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const {
+    if (auto* memoryHeapProperties = properties.Get<AdapterPropertiesMemoryHeaps>()) {
+        // https://microsoft.github.io/DirectX-Specs/d3d/D3D12GPUUploadHeaps.html describes
+        // the properties of D3D12 Default/Upload/Readback heaps.
+        if (mDeviceInfo.isUMA) {
+            auto* heapInfo = new MemoryHeapInfo[1];
+            memoryHeapProperties->heapCount = 1;
+            memoryHeapProperties->heapInfo = heapInfo;
 
-        heapInfo[0].size =
-            std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
+            heapInfo[0].size =
+                std::max(mDeviceInfo.dedicatedVideoMemory, mDeviceInfo.sharedSystemMemory);
 
-        if (mDeviceInfo.isCacheCoherentUMA) {
-            heapInfo[0].properties =
-                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
-                wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
+            if (mDeviceInfo.isCacheCoherentUMA) {
+                heapInfo[0].properties =
+                    wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                    wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostCached;
+            } else {
+                heapInfo[0].properties =
+                    wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                    wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
+            }
         } else {
-            heapInfo[0].properties =
-                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+            auto* heapInfo = new MemoryHeapInfo[2];
+            memoryHeapProperties->heapCount = 2;
+            memoryHeapProperties->heapInfo = heapInfo;
+
+            heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
+            heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
+
+            heapInfo[1].size = mDeviceInfo.sharedSystemMemory;
+            heapInfo[1].properties =
+                wgpu::HeapProperty::HostVisible | wgpu::HeapProperty::HostCoherent |
                 wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
         }
-    } else {
-        auto* heapInfo = new MemoryHeapInfo[2];
-        memoryHeapProperties->heapCount = 2;
-        memoryHeapProperties->heapInfo = heapInfo;
-
-        heapInfo[0].size = mDeviceInfo.dedicatedVideoMemory;
-        heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal;
-
-        heapInfo[1].size = mDeviceInfo.sharedSystemMemory;
-        heapInfo[1].properties = wgpu::HeapProperty::HostVisible |
-                                 wgpu::HeapProperty::HostCoherent |
-                                 wgpu::HeapProperty::HostUncached | wgpu::HeapProperty::HostCached;
+    }
+    if (auto* d3dProperties = properties.Get<AdapterPropertiesD3D>()) {
+        d3dProperties->shaderModel = GetDeviceInfo().shaderModel;
     }
 }
 

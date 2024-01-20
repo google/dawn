@@ -1973,6 +1973,7 @@
             {"value": 1025, "name": "framebuffer fetch", "tags": ["dawn"]},
             {"value": 1026, "name": "buffer map extended usages", "tags": ["dawn"]},
             {"value": 1027, "name": "adapter properties memory heaps", "tags": ["dawn"]},
+            {"value": 1028, "name": "adapter properties D3D", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3383,9 +3384,10 @@
             {"value": 1017, "name": "buffer host mapped pointer", "tags": ["dawn"]},
             {"value": 1018, "name": "dawn experimental subgroup limits", "tags": ["dawn"]},
             {"value": 1019, "name": "adapter properties memory heaps", "tags": ["dawn"]},
-            {"value": 1020, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
-            {"value": 1021, "name": "dawn wire WGSL control", "tags": ["dawn"]},
-            {"value": 1022, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
+            {"value": 1020, "name": "adapter properties D3D", "tags": ["dawn"]},
+            {"value": 1021, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
+            {"value": 1022, "name": "dawn wire WGSL control", "tags": ["dawn"]},
+            {"value": 1023, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
@@ -3907,6 +3909,15 @@
         "members": [
             {"name": "heap count", "type": "size_t"},
             {"name": "heap info", "type": "memory heap info", "annotation": "const*", "length": "heap count"}
+        ]
+    },
+    "adapter properties D3D": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter properties"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "shader model", "type": "uint32_t"}
         ]
     },
     "dawn buffer descriptor error info from wire client": {

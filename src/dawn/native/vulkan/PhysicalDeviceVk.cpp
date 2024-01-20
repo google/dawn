@@ -815,31 +815,32 @@ uint32_t PhysicalDevice::GetDefaultComputeSubgroupSize() const {
     return mDefaultComputeSubgroupSize;
 }
 
-void PhysicalDevice::PopulateMemoryHeapInfo(
-    AdapterPropertiesMemoryHeaps* memoryHeapProperties) const {
-    size_t count = mDeviceInfo.memoryHeaps.size();
-    auto* heapInfo = new MemoryHeapInfo[count];
-    memoryHeapProperties->heapCount = count;
-    memoryHeapProperties->heapInfo = heapInfo;
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const {
+    if (auto* memoryHeapProperties = properties.Get<AdapterPropertiesMemoryHeaps>()) {
+        size_t count = mDeviceInfo.memoryHeaps.size();
+        auto* heapInfo = new MemoryHeapInfo[count];
+        memoryHeapProperties->heapCount = count;
+        memoryHeapProperties->heapInfo = heapInfo;
 
-    for (size_t i = 0; i < count; ++i) {
-        heapInfo[i].size = mDeviceInfo.memoryHeaps[i].size;
-        heapInfo[i].properties = {};
-        if (mDeviceInfo.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
-            heapInfo[i].properties |= wgpu::HeapProperty::DeviceLocal;
+        for (size_t i = 0; i < count; ++i) {
+            heapInfo[i].size = mDeviceInfo.memoryHeaps[i].size;
+            heapInfo[i].properties = {};
+            if (mDeviceInfo.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
+                heapInfo[i].properties |= wgpu::HeapProperty::DeviceLocal;
+            }
         }
-    }
-    for (const auto& memoryType : mDeviceInfo.memoryTypes) {
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-            heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostVisible;
-        }
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
-            heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCoherent;
-        }
-        if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) {
-            heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCached;
-        } else {
-            heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostUncached;
+        for (const auto& memoryType : mDeviceInfo.memoryTypes) {
+            if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostVisible;
+            }
+            if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCoherent;
+            }
+            if (memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) {
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostCached;
+            } else {
+                heapInfo[memoryType.heapIndex].properties |= wgpu::HeapProperty::HostUncached;
+            }
         }
     }
 }

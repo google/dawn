@@ -65,7 +65,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                                     const UnpackedPtr<DeviceDescriptor>& descriptor,
                                                     const TogglesState& deviceToggles) override;
 
-    void PopulateMemoryHeapInfo(AdapterPropertiesMemoryHeaps* memoryHeapProperties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
 
     OpenGLFunctions mFunctions;
     EGLDisplay mDisplay;

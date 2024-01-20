@@ -95,15 +95,19 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     return Device::Create(adapter, descriptor, deviceToggles);
 }
 
-void PhysicalDevice::PopulateMemoryHeapInfo(
-    AdapterPropertiesMemoryHeaps* memoryHeapProperties) const {
-    auto* heapInfo = new MemoryHeapInfo[1];
-    memoryHeapProperties->heapCount = 1;
-    memoryHeapProperties->heapInfo = heapInfo;
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const {
+    if (auto* memoryHeapProperties = properties.Get<AdapterPropertiesMemoryHeaps>()) {
+        auto* heapInfo = new MemoryHeapInfo[1];
+        memoryHeapProperties->heapCount = 1;
+        memoryHeapProperties->heapInfo = heapInfo;
 
-    heapInfo[0].size = 1024 * 1024 * 1024;
-    heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
-                             wgpu::HeapProperty::HostCached;
+        heapInfo[0].size = 1024 * 1024 * 1024;
+        heapInfo[0].properties = wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                                 wgpu::HeapProperty::HostCached;
+    }
+    if (auto* d3dProperties = properties.Get<AdapterPropertiesD3D>()) {
+        d3dProperties->shaderModel = 0;
+    }
 }
 
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

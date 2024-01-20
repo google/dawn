@@ -207,8 +207,8 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     });
 }
 
-// Test that RequestAdapter forwards the memory heap properties to the client.
-TEST_P(WireInstanceTests, RequestAdapterPassesMemoryHeapProperties) {
+// Test that RequestAdapter forwards all chained properties to the client.
+TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     WGPURequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
@@ -223,17 +223,22 @@ TEST_P(WireInstanceTests, RequestAdapterPassesMemoryHeapProperties) {
     fakeMemoryHeapProperties.heapCount = 3;
     fakeMemoryHeapProperties.heapInfo = fakeHeapInfo;
 
+    WGPUAdapterPropertiesD3D fakeD3DProperties = {};
+    fakeD3DProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
+    fakeD3DProperties.shaderModel = 61;
+
     std::initializer_list<WGPUFeatureName> fakeFeatures = {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
+        WGPUFeatureName_AdapterPropertiesD3D,
     };
 
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
         .WillOnce(InvokeWithoutArgs([&] {
-            EXPECT_CALL(api,
-                        AdapterHasFeature(apiAdapter, WGPUFeatureName_AdapterPropertiesMemoryHeaps))
-                .WillOnce(Return(true));
+            for (WGPUFeatureName feature : fakeFeatures) {
+                EXPECT_CALL(api, AdapterHasFeature(apiAdapter, feature)).WillOnce(Return(true));
+            }
 
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
@@ -242,10 +247,27 @@ TEST_P(WireInstanceTests, RequestAdapterPassesMemoryHeapProperties) {
                     properties->name = "fake adapter";
                     properties->driverDescription = "hello world";
 
-                    EXPECT_EQ(properties->nextInChain->sType,
-                              WGPUSType_AdapterPropertiesMemoryHeaps);
-                    *reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(properties->nextInChain) =
-                        fakeMemoryHeapProperties;
+                    WGPUChainedStructOut* chain = properties->nextInChain;
+                    while (chain != nullptr) {
+                        auto* next = chain->next;
+                        switch (chain->sType) {
+                            case WGPUSType_AdapterPropertiesMemoryHeaps:
+                                *reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(chain) =
+                                    fakeMemoryHeapProperties;
+                                break;
+                            case WGPUSType_AdapterPropertiesD3D:
+                                *reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain) =
+                                    fakeD3DProperties;
+                                break;
+                            default:
+                                FAIL() << "Unexpected chain";
+                        }
+                        // update next pointer back to the original since it would be overwritten
+                        // in the switch statement
+                        chain->next = next;
+
+                        chain = next;
+                    }
                 })));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
@@ -295,6 +317,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesMemoryHeapProperties) {
                     EXPECT_EQ(memoryHeapProperties.heapInfo[i].size,
                               fakeMemoryHeapProperties.heapInfo[i].size);
                 }
+
+                // Get the D3D properties.
+                WGPUAdapterPropertiesD3D d3dProperties = {};
+                d3dProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
+                properties.nextInChain = &d3dProperties.chain;
+                wgpuAdapterGetProperties(adapter, &properties);
+                // Expect them to match.
+                EXPECT_EQ(d3dProperties.shaderModel, fakeD3DProperties.shaderModel);
             })));
 
         FlushCallbacks();
