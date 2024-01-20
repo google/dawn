@@ -595,6 +595,14 @@ func TestParsePrint(t *testing.T) {
 				Tests: "d,e",
 				Cases: `f={"x": 1, "y": 2}`,
 			},
+		}, {
+			`a:b,c,d:e,f:g="h";i=[10,20,30];j=40`,
+			query.Query{
+				Suite: "a",
+				Files: "b,c,d",
+				Tests: "e,f",
+				Cases: `g="h";i=[10,20,30];j=40`,
+			},
 		},
 	} {
 		parsed := query.Parse(test.in)
