@@ -264,6 +264,15 @@ class Parser {
             uint32_t align = std::max<uint32_t>(member_ty->Align(), 1u);
             uint32_t offset = tint::RoundUp(align, current_size);
             core::type::StructMemberAttributes attributes;
+            auto interpolation = [&]() -> core::Interpolation& {
+                // Create the interpolation field with the default values on first call.
+                if (!attributes.interpolation.has_value()) {
+                    attributes.interpolation =
+                        core::Interpolation{core::InterpolationType::kPerspective,
+                                            core::InterpolationSampling::kCenter};
+                }
+                return attributes.interpolation.value();
+            };
 
             // Handle member decorations that affect layout or attributes.
             if (struct_ty->element_decorations().count(i)) {
@@ -272,6 +281,28 @@ class Parser {
                         case spv::Decoration::Offset:
                             offset = deco[1];
                             break;
+                        case spv::Decoration::BuiltIn:
+                            attributes.builtin = Builtin(spv::BuiltIn(deco[1]));
+                            break;
+                        case spv::Decoration::Invariant:
+                            attributes.invariant = true;
+                            break;
+                        case spv::Decoration::Location:
+                            attributes.location = deco[1];
+                            break;
+                        case spv::Decoration::NoPerspective:
+                            interpolation().type = core::InterpolationType::kLinear;
+                            break;
+                        case spv::Decoration::Flat:
+                            interpolation().type = core::InterpolationType::kFlat;
+                            break;
+                        case spv::Decoration::Centroid:
+                            interpolation().sampling = core::InterpolationSampling::kCentroid;
+                            break;
+                        case spv::Decoration::Sample:
+                            interpolation().sampling = core::InterpolationSampling::kSample;
+                            break;
+
                         default:
                             TINT_UNIMPLEMENTED() << "unhandled member decoration: " << deco[0];
                             break;

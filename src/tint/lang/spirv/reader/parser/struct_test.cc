@@ -229,4 +229,132 @@ tint_symbol_4 = struct @align(4) {
 )");
 }
 
+TEST_F(SpirvParserTest, Struct_Builtin) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberDecorate %str 0 BuiltIn Position
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+        %str = OpTypeStruct %vec4f
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %str
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Struct_Builtin_WithInvariant) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberDecorate %str 0 BuiltIn Position
+               OpMemberDecorate %str 0 Invariant
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+        %str = OpTypeStruct %vec4f
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %str
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @invariant, @builtin(position)
+}
+)");
+}
+
+struct LocationCase {
+    std::string spirv_decorations;
+    std::string ir;
+};
+
+using LocationStructTest = SpirvParserTestWithParam<LocationCase>;
+
+TEST_P(LocationStructTest, MemberDecorations) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+          )" + params.spirv_decorations +
+                  R"(
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+        %str = OpTypeStruct %vec4f
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Input = OpTypePointer Input %str
+        %var = OpVariable %_ptr_Input Input
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              params.ir);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    LocationStructTest,
+    testing::Values(
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 1 ",
+            "tint_symbol:vec4<f32> @offset(0), @location(1)",
+        },
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 2 "
+            "OpMemberDecorate %str 0 NoPerspective ",
+            "tint_symbol:vec4<f32> @offset(0), @location(2), @interpolate(linear, center)",
+        },
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 3 "
+            "OpMemberDecorate %str 0 Flat ",
+            "tint_symbol:vec4<f32> @offset(0), @location(3), @interpolate(flat, center)",
+        },
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 4 "
+            "OpMemberDecorate %str 0 Centroid ",
+            "tint_symbol:vec4<f32> @offset(0), @location(4), @interpolate(perspective, centroid)",
+        },
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 5 "
+            "OpMemberDecorate %str 0 Sample ",
+            "tint_symbol:vec4<f32> @offset(0), @location(5), @interpolate(perspective, sample)",
+        },
+        LocationCase{
+            "OpMemberDecorate %str 0 Location 6 "
+            "OpMemberDecorate %str 0 NoPerspective "
+            "OpMemberDecorate %str 0 Centroid ",
+            "tint_symbol:vec4<f32> @offset(0), @location(6), @interpolate(linear, centroid)",
+        }));
+
 }  // namespace tint::spirv::reader
