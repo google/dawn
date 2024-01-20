@@ -563,6 +563,14 @@ class Parser {
         std::optional<uint32_t> binding;
         core::Access access_mode = core::Access::kUndefined;
         core::ir::IOAttributes io_attributes;
+        auto interpolation = [&]() -> core::Interpolation& {
+            // Create the interpolation field with the default values on first call.
+            if (!io_attributes.interpolation.has_value()) {
+                io_attributes.interpolation = core::Interpolation{
+                    core::InterpolationType::kPerspective, core::InterpolationSampling::kCenter};
+            }
+            return io_attributes.interpolation.value();
+        };
         for (auto* deco :
              spirv_context_->get_decoration_mgr()->GetDecorationsFor(inst.result_id(), false)) {
             auto d = deco->GetSingleWordOperand(1);
@@ -578,6 +586,21 @@ class Parser {
                     break;
                 case spv::Decoration::BuiltIn:
                     io_attributes.builtin = Builtin(spv::BuiltIn(deco->GetSingleWordOperand(2)));
+                    break;
+                case spv::Decoration::Location:
+                    io_attributes.location = deco->GetSingleWordOperand(2);
+                    break;
+                case spv::Decoration::NoPerspective:
+                    interpolation().type = core::InterpolationType::kLinear;
+                    break;
+                case spv::Decoration::Flat:
+                    interpolation().type = core::InterpolationType::kFlat;
+                    break;
+                case spv::Decoration::Centroid:
+                    interpolation().sampling = core::InterpolationSampling::kCentroid;
+                    break;
+                case spv::Decoration::Sample:
+                    interpolation().sampling = core::InterpolationSampling::kSample;
                     break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;

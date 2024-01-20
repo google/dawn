@@ -460,5 +460,98 @@ INSTANTIATE_TEST_SUITE_P(
         }),
     PrintBuiltinCase);
 
+struct LocationCase {
+    std::string spirv_decorations;
+    std::string ir;
+};
+
+using LocationVarTest = SpirvParserTestWithParam<LocationCase>;
+
+TEST_P(LocationVarTest, Input) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+          )" + params.spirv_decorations +
+                  R"(
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Input = OpTypePointer Input %vec4f
+        %var = OpVariable %_ptr_Input Input
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              "%1:ptr<__in, vec4<f32>, read> = " + params.ir);
+}
+
+TEST_P(LocationVarTest, Output) {
+    auto params = GetParam();
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+          )" + params.spirv_decorations +
+                  R"(
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %vec4f
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              "%1:ptr<__out, vec4<f32>, read_write> = " + params.ir);
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvParser,
+                         LocationVarTest,
+                         testing::Values(
+                             LocationCase{
+                                 "OpDecorate %var Location 1 ",
+                                 "var @location(1)",
+                             },
+                             LocationCase{
+                                 "OpDecorate %var Location 2 "
+                                 "OpDecorate %var NoPerspective ",
+                                 "var @location(2) @interpolate(linear, center)",
+                             },
+                             LocationCase{
+                                 "OpDecorate %var Location 3 "
+                                 "OpDecorate %var Flat ",
+                                 "var @location(3) @interpolate(flat, center)",
+                             },
+                             LocationCase{
+                                 "OpDecorate %var Location 4 "
+                                 "OpDecorate %var Centroid ",
+                                 "var @location(4) @interpolate(perspective, centroid)",
+                             },
+                             LocationCase{
+                                 "OpDecorate %var Location 5 "
+                                 "OpDecorate %var Sample ",
+                                 "var @location(5) @interpolate(perspective, sample)",
+                             },
+                             LocationCase{
+                                 "OpDecorate %var Location 6 "
+                                 "OpDecorate %var NoPerspective "
+                                 "OpDecorate %var Centroid ",
+                                 "var @location(6) @interpolate(linear, centroid)",
+                             }));
+
 }  // namespace
 }  // namespace tint::spirv::reader
