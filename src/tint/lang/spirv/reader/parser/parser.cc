@@ -587,6 +587,9 @@ class Parser {
                 case spv::Decoration::BuiltIn:
                     io_attributes.builtin = Builtin(spv::BuiltIn(deco->GetSingleWordOperand(2)));
                     break;
+                case spv::Decoration::Invariant:
+                    io_attributes.invariant = true;
+                    break;
                 case spv::Decoration::Location:
                     io_attributes.location = deco->GetSingleWordOperand(2);
                     break;

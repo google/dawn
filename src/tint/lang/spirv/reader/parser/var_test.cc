@@ -460,6 +460,30 @@ INSTANTIATE_TEST_SUITE_P(
         }),
     PrintBuiltinCase);
 
+TEST_F(SpirvParserTest, Invariant_OnVariable) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var BuiltIn Position
+               OpDecorate %var Invariant
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+      %vec4f = OpTypeVector %f32 4
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %vec4f
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              "%1:ptr<__out, vec4<f32>, read_write> = var @invariant @builtin(position)");
+}
+
 struct LocationCase {
     std::string spirv_decorations;
     std::string ir;
