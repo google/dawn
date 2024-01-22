@@ -2,17 +2,18 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 int f() {
   int i = 0;
   int j = 0;
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
     if ((i > 4)) {
       return 1;
     }
-    while (tint_preserve_loop) {
+    TINT_ISOLATE_UB while(true) {
       j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
       if ((j > 4)) {
         return 2;

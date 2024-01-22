@@ -14,7 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct S {
   int before;
@@ -58,7 +59,7 @@ tint_array<S, 4> tint_unpack_vec3_in_composite_2(tint_array<S_tint_packed_vec3, 
 }
 
 void f_inner(uint local_invocation_index, threadgroup tint_array<S, 4>* const tint_symbol_1, const constant tint_array<S_tint_packed_vec3, 4>* const tint_symbol_2) {
-  for(uint idx = local_invocation_index; ((idx < 4u)) == tint_preserve_loop; idx = (idx + 1u)) {
+  TINT_ISOLATE_UB for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     uint const i = idx;
     S const tint_symbol = S{};
     (*(tint_symbol_1))[i] = tint_symbol;

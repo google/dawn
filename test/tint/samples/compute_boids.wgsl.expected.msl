@@ -14,7 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct tint_symbol_1 {
   float2 a_particlePos [[attribute(0)]];
@@ -87,7 +88,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   int cVelCount = 0;
   float2 pos = 0.0f;
   float2 vel = 0.0f;
-  for(uint i = 0u; ((i < 5u)) == tint_preserve_loop; i = (i + 1u)) {
+  TINT_ISOLATE_UB for(uint i = 0u; (i < 5u); i = (i + 1u)) {
     if ((i == index)) {
       continue;
     }

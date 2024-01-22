@@ -2,7 +2,8 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 int tint_workgroupUniformLoad(threadgroup int* const p) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -14,7 +15,7 @@ int tint_workgroupUniformLoad(threadgroup int* const p) {
 void foo(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbol_5) {
   {
     int i = 0;
-    while (tint_preserve_loop) {
+    TINT_ISOLATE_UB while(true) {
       int const tint_symbol = i;
       int const tint_symbol_1 = tint_workgroupUniformLoad(tint_symbol_4);
       if (!((tint_symbol < tint_symbol_1))) {

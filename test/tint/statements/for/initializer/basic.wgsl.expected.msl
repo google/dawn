@@ -2,10 +2,11 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 void f() {
-  for(int i = 0; (false) == tint_preserve_loop; ) {
+  TINT_ISOLATE_UB for(int i = 0; false; ) {
   }
 }
 

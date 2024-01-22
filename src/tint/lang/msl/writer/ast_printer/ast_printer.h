@@ -378,18 +378,10 @@ class ASTPrinter : public tint::TextGenerator {
                               const ast::CallExpression* expr,
                               const sem::BuiltinFn* builtin);
 
-    /// Lazily emits the global-scope declaration of the helper static volatile boolean variable
-    /// used to fool the MSL compiler into thinking loops might exit.
-    /// @return the name of the variable.
-    std::string_view LoopPreservingVar();
-
-    /// Emits a loop condition, but santized so that the MSL compiler can't infer that the loop
-    /// never exits.
-    void EmitLoopCondition(StringStream& out, const std::string& cond);
-
-    /// Emits the header of an unconditional loop, but use the loop-preserving condition to fool the
-    /// MSL compiler into thinking that the loop might exit.
-    void EmitUnconditionalLoopHeader();
+    /// Lazilly generates the TINT_ISOLATE_UB macro, used to prevent UB statements from affecting
+    /// later logic.
+    /// @return the unique name of the TINT_ISOLATE_UB macro.
+    std::string_view IsolateUB();
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin
@@ -446,8 +438,9 @@ class ASTPrinter : public tint::TextGenerator {
 
     std::function<bool()> emit_continuing_;
 
-    // Name of the variable used to ensure the MSL compiler thinks a loop will terminate.
-    std::string loop_preserving_var_;
+    /// The name of the macro used to prevent UB affecting later control flow.
+    /// Do not use this directly, instead call IsolateUB().
+    std::string isolate_ub_macro_name_;
 
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type

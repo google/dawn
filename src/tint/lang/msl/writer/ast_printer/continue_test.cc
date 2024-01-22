@@ -44,10 +44,11 @@ TEST_F(MslASTPrinterTest, Emit_Continue) {
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 kernel void test_function() {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     if (false) {
       break;
     }

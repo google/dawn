@@ -2,7 +2,8 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 template<typename T, size_t N>
 struct tint_array {
@@ -21,7 +22,7 @@ int g() {
 }
 
 int f() {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     g();
     break;
   }
@@ -30,7 +31,7 @@ int f() {
 }
 
 kernel void tint_symbol(device tint_array<uint, 1>* tint_symbol_1 [[buffer(0)]]) {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     if (((*(tint_symbol_1))[0] == 0u)) {
       break;
     }

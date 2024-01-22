@@ -14,7 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
@@ -106,7 +107,7 @@ void assign_and_preserve_padding_2(device tint_array<tint_packed_vec3_f32_array_
 }
 
 void assign_and_preserve_padding_3(device tint_array<tint_packed_vec3_f32_array_element, 2>* const dest, tint_array<float3, 2> value) {
-  for(uint i = 0u; ((i < 2u)) == tint_preserve_loop; i = (i + 1u)) {
+  TINT_ISOLATE_UB for(uint i = 0u; (i < 2u); i = (i + 1u)) {
     (*(dest))[i].elements = packed_float3(value[i]);
   }
 }

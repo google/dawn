@@ -2122,7 +2122,7 @@ bool ASTPrinter::EmitLoop(const ast::LoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    EmitUnconditionalLoopHeader();
+    Line() << IsolateUB() << " while(true) {";
     {
         ScopedIndent si(this);
         if (!EmitStatements(stmt->body->statements)) {
@@ -2192,7 +2192,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
         };
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-        EmitUnconditionalLoopHeader();
+        Line() << IsolateUB() << " while(true) {";
         IncrementIndent();
         TINT_DEFER({
             DecrementIndent();
@@ -2215,7 +2215,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
         // For-loop can be generated.
         {
             auto out = Line();
-            out << "for";
+            out << IsolateUB() << " for";
             {
                 ScopedParen sp(out);
 
@@ -2225,8 +2225,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
                     out << "; ";
                 }
 
-                EmitLoopCondition(out, cond_buf.str());
-                out << "; ";
+                out << cond_buf.str() << "; ";
 
                 if (!cont_buf.lines.empty()) {
                     out << tint::TrimSuffix(cont_buf.lines[0].content, ";");
@@ -2266,7 +2265,7 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     // as a regular while in MSL. Instead we need to generate a `while(true)` loop.
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
-        EmitUnconditionalLoopHeader();
+        Line() << IsolateUB() << " while(true) {";
         IncrementIndent();
         TINT_DEFER({
             DecrementIndent();
@@ -2280,15 +2279,7 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
         }
     } else {
         // While can be generated.
-        {
-            auto out = Line();
-            out << "while";
-            {
-                ScopedParen sp(out);
-                EmitLoopCondition(out, cond_buf.str());
-            }
-            out << " {";
-        }
+        Line() << IsolateUB() << " while(" << cond_buf.str() << ") {";
         if (!EmitStatementsWithIndent(stmt->body->statements)) {
             return false;
         }
@@ -3027,25 +3018,16 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
     return true;
 }
 
-std::string_view ASTPrinter::LoopPreservingVar() {
-    if (loop_preserving_var_.empty()) {
-        loop_preserving_var_ = UniqueIdentifier("tint_preserve_loop");
-        Line(&helpers_) << "constant static volatile bool " << loop_preserving_var_ << " = true;";
+std::string_view ASTPrinter::IsolateUB() {
+    if (isolate_ub_macro_name_.empty()) {
+        isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
+        auto volatile_true = UniqueIdentifier("tint_volatile_true");
+        Line(&helpers_) << "#define " << isolate_ub_macro_name_ << " \\";
+        Line(&helpers_) << "  if (volatile bool " << volatile_true << " = true; " << volatile_true
+                        << ")";
         Line(&helpers_);
     }
-    return loop_preserving_var_;
-}
-
-void ASTPrinter::EmitLoopCondition(StringStream& out, const std::string& cond) {
-    if (cond.empty()) {
-        out << LoopPreservingVar();
-    } else {
-        out << "(" << cond << ") == " << LoopPreservingVar();
-    }
-}
-
-void ASTPrinter::EmitUnconditionalLoopHeader() {
-    Line() << "while (" << LoopPreservingVar() << ") {";
+    return isolate_ub_macro_name_;
 }
 
 template <typename F>

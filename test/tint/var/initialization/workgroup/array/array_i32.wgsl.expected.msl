@@ -14,10 +14,11 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<tint_array<int, 3>, 2>* const tint_symbol_1) {
-  for(uint idx = local_invocation_index; ((idx < 6u)) == tint_preserve_loop; idx = (idx + 1u)) {
+  TINT_ISOLATE_UB for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
     uint const i = (idx / 3u);
     uint const i_1 = (idx % 3u);
     (*(tint_symbol_1))[i][i_1] = 0;

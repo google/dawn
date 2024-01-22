@@ -14,7 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct Uniforms {
   /* 0x0000 */ uint dimAOuter;
@@ -54,7 +55,7 @@ uint tint_div(uint lhs, uint rhs) {
 }
 
 void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_index, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_11, threadgroup tint_array<tint_array<float, 64>, 64>* const tint_symbol_12, const constant Uniforms* const tint_symbol_13, const device Matrix* const tint_symbol_14, const device Matrix* const tint_symbol_15, device Matrix* const tint_symbol_16) {
-  for(uint idx = local_invocation_index; ((idx < 4096u)) == tint_preserve_loop; idx = (idx + 256u)) {
+  TINT_ISOLATE_UB for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
     (*(tint_symbol_11))[i][i_1] = 0.0f;
@@ -69,16 +70,16 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   tint_array<float, 16> acc = {};
   float ACached = 0.0f;
   tint_array<float, 4> BCached = {};
-  for(uint index = 0u; ((index < 16u)) == tint_preserve_loop; index = (index + 1u)) {
+  TINT_ISOLATE_UB for(uint index = 0u; (index < 16u); index = (index + 1u)) {
     acc[index] = 0.0f;
   }
   uint const ColPerThreadA = 4u;
   uint const tileColA = (local_id[0] * ColPerThreadA);
   uint const RowPerThreadB = 4u;
   uint const tileRowB = (local_id[1] * RowPerThreadB);
-  for(uint t = 0u; ((t < numTiles)) == tint_preserve_loop; t = (t + 1u)) {
-    for(uint innerRow = 0u; ((innerRow < 4u)) == tint_preserve_loop; innerRow = (innerRow + 1u)) {
-      for(uint innerCol = 0u; ((innerCol < ColPerThreadA)) == tint_preserve_loop; innerCol = (innerCol + 1u)) {
+  TINT_ISOLATE_UB for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    TINT_ISOLATE_UB for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+      TINT_ISOLATE_UB for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRow + innerRow);
         uint const inputCol = (tileColA + innerCol);
         uint const tint_symbol_1 = inputRow;
@@ -86,8 +87,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
         (*(tint_symbol_11))[tint_symbol_1][tint_symbol_2] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), tint_symbol_13, tint_symbol_14);
       }
     }
-    for(uint innerRow = 0u; ((innerRow < RowPerThreadB)) == tint_preserve_loop; innerRow = (innerRow + 1u)) {
-      for(uint innerCol = 0u; ((innerCol < 4u)) == tint_preserve_loop; innerCol = (innerCol + 1u)) {
+    TINT_ISOLATE_UB for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+      TINT_ISOLATE_UB for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRowB + innerRow);
         uint const inputCol = (tileCol + innerCol);
         uint const tint_symbol_3 = innerCol;
@@ -96,13 +97,13 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
-    for(uint k = 0u; ((k < 64u)) == tint_preserve_loop; k = (k + 1u)) {
-      for(uint inner = 0u; ((inner < 4u)) == tint_preserve_loop; inner = (inner + 1u)) {
+    TINT_ISOLATE_UB for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+      TINT_ISOLATE_UB for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
         BCached[inner] = (*(tint_symbol_12))[k][(tileCol + inner)];
       }
-      for(uint innerRow = 0u; ((innerRow < 4u)) == tint_preserve_loop; innerRow = (innerRow + 1u)) {
+      TINT_ISOLATE_UB for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
         ACached = (*(tint_symbol_11))[(tileRow + innerRow)][k];
-        for(uint innerCol = 0u; ((innerCol < 4u)) == tint_preserve_loop; innerCol = (innerCol + 1u)) {
+        TINT_ISOLATE_UB for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
           uint const index = ((innerRow * 4u) + innerCol);
           acc[index] = (acc[index] + (ACached * BCached[innerCol]));
         }
@@ -110,8 +111,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
   }
-  for(uint innerRow = 0u; ((innerRow < 4u)) == tint_preserve_loop; innerRow = (innerRow + 1u)) {
-    for(uint innerCol = 0u; ((innerCol < 4u)) == tint_preserve_loop; innerCol = (innerCol + 1u)) {
+  TINT_ISOLATE_UB for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    TINT_ISOLATE_UB for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
       uint const index = ((innerRow * 4u) + innerCol);
       mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index], tint_symbol_13, tint_symbol_16);
     }

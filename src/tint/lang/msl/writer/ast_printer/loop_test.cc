@@ -51,10 +51,11 @@ TEST_F(MslASTPrinterTest, Emit_Loop) {
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 fragment void F() {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     break;
   }
   return;
@@ -79,13 +80,14 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing) {
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 void a_statement() {
 }
 
 fragment void F() {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     break;
     {
       a_statement();
@@ -113,13 +115,14 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf) {
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 void a_statement() {
 }
 
 fragment void F() {
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     break;
     {
       a_statement();
@@ -153,8 +156,8 @@ TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while (tint_preserve_loop) {
-  while (tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB while(true) {
     break;
     {
       a_statement();
@@ -191,7 +194,7 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithVarUsedInContinuing) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while (tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while(true) {
   float lhs = 2.5f;
   float other = 0.0f;
   break;
@@ -214,7 +217,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoop) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(for(; tint_preserve_loop; ) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB for(; ; ) {
   return;
 }
 )");
@@ -232,7 +235,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInit) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(for(int i = 0; tint_preserve_loop; ) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB for(int i = 0; ; ) {
   return;
 }
 )");
@@ -263,7 +266,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInit) {
     f(1);
     f(2);
   }
-  for(; tint_preserve_loop; ) {
+  TINT_ISOLATE_UB for(; ; ) {
     return;
   }
 }
@@ -282,7 +285,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCond) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(for(; (true) == tint_preserve_loop; ) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB for(; true; ) {
   return;
 }
 )");
@@ -301,9 +304,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCont) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(
-        gen.Result(),
-        R"(for(; tint_preserve_loop; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    EXPECT_EQ(gen.Result(),
+              R"(TINT_ISOLATE_UB for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   return;
 }
 )");
@@ -329,7 +331,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtCont) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while (tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while(true) {
   return;
   {
     f(1);
@@ -355,7 +357,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(
         gen.Result(),
-        R"(for(int i = 0; (true) == tint_preserve_loop; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+        R"(TINT_ISOLATE_UB for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   a_statement();
 }
 )");
@@ -387,7 +389,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     f(1);
     f(2);
   }
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     if (!(true)) { break; }
     return;
     {
@@ -410,7 +412,7 @@ TEST_F(MslASTPrinterTest, Emit_While) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while((true) == tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while(true) {
   return;
 }
 )");
@@ -427,7 +429,7 @@ TEST_F(MslASTPrinterTest, Emit_While_WithContinue) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while((true) == tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while(true) {
   continue;
 }
 )");
@@ -447,7 +449,7 @@ TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(while(((t && false)) == tint_preserve_loop) {
+    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB while((t && false)) {
   return;
 }
 )");

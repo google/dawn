@@ -2,7 +2,8 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct tint_private_vars_struct {
   bool tint_discarded;
@@ -28,7 +29,7 @@ int foo_inner(float in, float2 coord, thread tint_private_vars_struct* const tin
   int result = tint_ftoi(tint_symbol_4.sample(tint_symbol_5, coord)[0]);
   {
     int i = 0;
-    while (tint_preserve_loop) {
+    TINT_ISOLATE_UB while(true) {
       if (!((i < 10))) {
         break;
       }

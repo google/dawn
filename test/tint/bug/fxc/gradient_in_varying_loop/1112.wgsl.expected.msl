@@ -2,7 +2,8 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 struct tint_symbol_2 {
   float2 vUV [[user(locn0)]];
@@ -15,7 +16,7 @@ struct tint_symbol_3 {
 float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbol_4, sampler tint_symbol_5) {
   float3 const random = tint_symbol_4.sample(tint_symbol_5, vUV).rgb;
   int i = 0;
-  while (tint_preserve_loop) {
+  TINT_ISOLATE_UB while(true) {
     if ((i < 1)) {
     } else {
       break;

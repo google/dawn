@@ -14,7 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 uint4 tint_ftou(float4 v) {
   return select(uint4(4294967295u), select(uint4(v), uint4(0u), (v < float4(0.0f))), (v < float4(4294967040.0f)));
@@ -47,7 +48,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   bool success = true;
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = tint_ftou(dstColor);
-  for(uint i = 0u; ((i < (*(tint_symbol_3)).channelCount)) == tint_preserve_loop; i = (i + 1u)) {
+  TINT_ISOLATE_UB for(uint i = 0u; (i < (*(tint_symbol_3)).channelCount); i = (i + 1u)) {
     uint const tint_symbol_1 = i;
     srcColorBits[tint_symbol_1] = ConvertToFp16FloatValue(srcColor[i]);
     success = (success && (srcColorBits[i] == dstColorBits[i]));

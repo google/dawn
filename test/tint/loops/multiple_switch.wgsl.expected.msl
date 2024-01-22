@@ -2,11 +2,12 @@
 
 using namespace metal;
 
-constant static volatile bool tint_preserve_loop = true;
+#define TINT_ISOLATE_UB \
+  if (volatile bool tint_volatile_true = true; tint_volatile_true)
 
 kernel void tint_symbol() {
   int i = 0;
-  for(int i_1 = 0; ((i_1 < 2)) == tint_preserve_loop; i_1 = as_type<int>((as_type<uint>(i_1) + as_type<uint>(1)))) {
+  TINT_ISOLATE_UB for(int i_1 = 0; (i_1 < 2); i_1 = as_type<int>((as_type<uint>(i_1) + as_type<uint>(1)))) {
     switch(i_1) {
       case 0: {
         continue;
