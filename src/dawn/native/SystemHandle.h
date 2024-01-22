@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_SYSTEMHANDLE_H_
 #define SRC_DAWN_NATIVE_SYSTEMHANDLE_H_
 
+#include <utility>
+
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/Error.h"
@@ -66,7 +68,7 @@ class SystemHandle : public NonCopyable {
         SystemHandle dupHandle;
         DAWN_TRY_ASSIGN(dupHandle, tmpOwnedHandle.Duplicate());
         tmpOwnedHandle.Detach();
-        return dupHandle;
+        return ResultOrError<SystemHandle>{std::move(dupHandle)};
     }
 
     bool IsValid() const;
