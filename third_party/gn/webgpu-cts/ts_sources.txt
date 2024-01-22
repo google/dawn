@@ -480,6 +480,8 @@ src/webgpu/shader/execution/expression/call/builtin/distance.cache.ts
 src/webgpu/shader/execution/expression/call/builtin/distance.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/dot.cache.ts
 src/webgpu/shader/execution/expression/call/builtin/dot.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/dot4I8Packed.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/dot4U8Packed.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/dpdx.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/dpdxCoarse.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/dpdxFine.spec.ts
