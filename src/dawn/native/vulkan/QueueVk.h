@@ -50,8 +50,7 @@ class Queue final : public QueueBase {
 
     VkQueue GetVkQueue() const;
 
-    CommandRecordingContext* GetPendingRecordingContext(
-        DeviceBase::SubmitMode submitMode = DeviceBase::SubmitMode::Normal);
+    CommandRecordingContext* GetPendingRecordingContext(SubmitMode submitMode = SubmitMode::Normal);
     MaybeError SplitRecordingContext(CommandRecordingContext* recordingContext);
     MaybeError SubmitPendingCommands();
 

@@ -45,6 +45,7 @@
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "dawn/native/d3d11/QueueD3D11.h"
 #include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/SharedTextureMemoryD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
@@ -348,7 +349,8 @@ MaybeError Texture::InitializeAsInternalTexture() {
     // Staging texture is used internally, so we don't need to clear it.
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
         mKind == Kind::Normal) {
-        auto commandContext = device->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+        auto commandContext = ToBackend(device->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
         DAWN_TRY(Clear(&commandContext, GetAllSubresources(), TextureBase::ClearValue::NonZero));
     }
 
@@ -370,8 +372,8 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     ComPtr<ID3D11Resource> d3d11Texture;
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
 
-    Device* device = ToBackend(GetDevice());
-    auto commandContext = device->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = ToBackend(GetDevice()->GetQueue())
+                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     for (const auto& fence : waitFences) {
         DAWN_TRY(CheckHRESULT(
             commandContext.Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),

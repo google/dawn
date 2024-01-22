@@ -309,11 +309,11 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
     DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
 
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        DAWN_TRY(texture->ClearTexture(device->GetPendingCommandContext(),
+        DAWN_TRY(texture->ClearTexture(ToBackend(device->GetQueue())->GetPendingCommandContext(),
                                        texture->GetAllSubresources(),
                                        TextureBase::ClearValue::NonZero));
     } else if (texture->ShouldKeepInitialized()) {
-        DAWN_TRY(texture->ClearTexture(device->GetPendingCommandContext(),
+        DAWN_TRY(texture->ClearTexture(ToBackend(device->GetQueue())->GetPendingCommandContext(),
                                        texture->GetAllSubresources(),
                                        TextureBase::ClearValue::Zero));
     }

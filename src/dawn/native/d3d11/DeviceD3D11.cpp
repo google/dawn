@@ -148,15 +148,6 @@ ID3D11Device5* Device::GetD3D11Device5() const {
     return mD3d11Device5.Get();
 }
 
-ScopedCommandRecordingContext Device::GetScopedPendingCommandContext(SubmitMode submitMode) {
-    return ToBackend(GetQueue())->GetScopedPendingCommandContext(submitMode);
-}
-
-ScopedSwapStateCommandRecordingContext Device::GetScopedSwapStatePendingCommandContext(
-    SubmitMode submitMode) {
-    return ToBackend(GetQueue())->GetScopedSwapStatePendingCommandContext(submitMode);
-}
-
 MaybeError Device::TickImpl() {
     // Check for debug layer messages before executing the command context in case we encounter an
     // error during execution and early out as a result.
@@ -308,7 +299,8 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
     // D3D11 requires that buffers are unmapped before being used in a copy.
     DAWN_TRY(source->Unmap());
 
-    auto commandContext = GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext =
+        ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     return Buffer::Copy(&commandContext, ToBackend(source), sourceOffset, size,
                         ToBackend(destination), destinationOffset);
 }

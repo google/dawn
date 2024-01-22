@@ -568,7 +568,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
     DAWN_ASSERT(size != 0);
 
     CommandRecordingContext* recordingContext =
-        ToBackend(GetQueue())->GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
+        ToBackend(GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
 
     ToBackend(destination)
         ->EnsureDataInitializedAsDestination(recordingContext, destinationOffset, size);
@@ -601,7 +601,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     // does an implicit availability, visibility and domain operation.
 
     CommandRecordingContext* recordingContext =
-        ToBackend(GetQueue())->GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
+        ToBackend(GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
 
     VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, dst, copySizePixels);
     VkImageSubresourceLayers subresource = region.imageSubresource;

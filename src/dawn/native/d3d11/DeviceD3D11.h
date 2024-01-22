@@ -52,11 +52,6 @@ class Device final : public d3d::Device {
     ID3D11Device* GetD3D11Device() const;
     ID3D11Device5* GetD3D11Device5() const;
 
-    // TODO(dawn:1413): Remove these proxy method in favor of using the Queue directly.
-    ScopedCommandRecordingContext GetScopedPendingCommandContext(SubmitMode submitMode);
-    ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
-        SubmitMode submitMode);
-
     const DeviceInfo& GetDeviceInfo() const;
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);

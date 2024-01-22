@@ -223,12 +223,6 @@ MutexProtected<ResidencyManager>& Device::GetResidencyManager() const {
     return *mResidencyManager;
 }
 
-ResultOrError<CommandRecordingContext*> Device::GetPendingCommandContext(
-    Device::SubmitMode submitMode) {
-    // TODO(dawn:1413): Make callers of this method use the queue directly.
-    return ToBackend(GetQueue())->GetPendingCommandContext(submitMode);
-}
-
 MaybeError Device::CreateZeroBuffer() {
     BufferDescriptor zeroBufferDescriptor;
     zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -418,7 +412,9 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
     CommandRecordingContext* commandRecordingContext;
-    DAWN_TRY_ASSIGN(commandRecordingContext, GetPendingCommandContext(Device::SubmitMode::Passive));
+    DAWN_TRY_ASSIGN(
+        commandRecordingContext,
+        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive));
 
     Buffer* dstBuffer = ToBackend(destination);
 
@@ -454,7 +450,9 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     CommandRecordingContext* commandContext;
-    DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext(Device::SubmitMode::Passive));
+    DAWN_TRY_ASSIGN(
+        commandContext,
+        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive));
     Texture* texture = ToBackend(dst.texture.Get());
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);

@@ -85,9 +85,6 @@ class Device final : public d3d::Device {
 
     const PlatformFunctions* GetFunctions() const;
 
-    ResultOrError<CommandRecordingContext*> GetPendingCommandContext(
-        Device::SubmitMode submitMode = Device::SubmitMode::Normal);
-
     MaybeError ClearBufferToZero(CommandRecordingContext* commandContext,
                                  BufferBase* destination,
                                  uint64_t destinationOffset,

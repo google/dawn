@@ -228,9 +228,9 @@ MaybeError Queue::WaitForIdleForDestruction() {
     return {};
 }
 
-CommandRecordingContext* Queue::GetPendingRecordingContext(Device::SubmitMode submitMode) {
+CommandRecordingContext* Queue::GetPendingRecordingContext(SubmitMode submitMode) {
     DAWN_ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
-    mRecordingContext.needsSubmit |= (submitMode == DeviceBase::SubmitMode::Normal);
+    mRecordingContext.needsSubmit |= (submitMode == SubmitMode::Normal);
     mRecordingContext.used = true;
     return &mRecordingContext;
 }

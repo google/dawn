@@ -129,7 +129,8 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     // context.
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
     {
-        auto commandContext = GetScopedSwapStatePendingCommandContext(Device::SubmitMode::Normal);
+        auto commandContext =
+            GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(ToBackend(commands[i])->Execute(&commandContext));
         }
@@ -149,7 +150,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
         return {};
     }
 
-    auto commandContext = GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     return ToBackend(buffer)->Write(&commandContext, bufferOffset, data, size);
 }
 
@@ -162,8 +163,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
         return {};
     }
 
-    Device* device = ToBackend(GetDevice());
-    auto commandContext = device->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     TextureCopy textureCopy;
     textureCopy.texture = destination.texture;
     textureCopy.mipLevel = destination.mipLevel;

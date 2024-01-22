@@ -39,6 +39,7 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
+#include "dawn/native/d3d11/QueueD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -227,8 +228,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
                 DAWN_TRY(ClearInternal(commandContext, 1u));
             } else {
                 auto tmpCommandContext =
-                    ToBackend(GetDevice())
-                        ->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+                    ToBackend(GetDevice()->GetQueue())
+                        ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
                 DAWN_TRY(ClearInternal(&tmpCommandContext, 1u));
             }
         }
@@ -244,8 +245,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
 
                 } else {
                     auto tmpCommandContext =
-                        ToBackend(GetDevice())
-                            ->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+                        ToBackend(GetDevice()->GetQueue())
+                            ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
                     DAWN_TRY(ClearInternal(&tmpCommandContext, 0, clearOffset, clearSize));
                 }
             }
@@ -287,16 +288,16 @@ void Buffer::UnmapInternal(const ScopedCommandRecordingContext* commandContext) 
 
 MaybeError Buffer::MapAtCreationImpl() {
     DAWN_ASSERT(IsMappable(GetUsage()));
-    auto commandContext =
-        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = ToBackend(GetDevice()->GetQueue())
+                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     return MapInternal(&commandContext);
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
 
-    auto commandContext =
-        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = ToBackend(GetDevice()->GetQueue())
+                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
 
     // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
     DAWN_TRY(MapInternal(&commandContext));
@@ -309,8 +310,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
 void Buffer::UnmapImpl() {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
     DAWN_ASSERT(mMappedData);
-    auto commandContext =
-        ToBackend(GetDevice())->GetScopedPendingCommandContext(Device::SubmitMode::Normal);
+    auto commandContext = ToBackend(GetDevice()->GetQueue())
+                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
     UnmapInternal(&commandContext);
 }
 

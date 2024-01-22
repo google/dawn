@@ -324,7 +324,7 @@ MaybeError Texture::InitializeAsInternalTexture() {
     if (applyForceClearCopyableDepthStencilTextureOnCreationToggle ||
         device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         CommandRecordingContext* commandContext;
-        DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
+        DAWN_TRY_ASSIGN(commandContext, ToBackend(device->GetQueue())->GetPendingCommandContext());
         ClearValue clearValue =
             device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)
                 ? ClearValue::NonZero
