@@ -62,7 +62,7 @@ SlabAllocatorImpl::SentinelSlab::~SentinelSlab() {
         DAWN_ASSERT(slab->blocksInUse == 0);
         char* allocation = slab->allocation;
         slab->~Slab();  // Placement delete.
-        delete allocation;
+        delete[] allocation;
     }
 }
 
