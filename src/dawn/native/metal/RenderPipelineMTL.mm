@@ -366,7 +366,7 @@ RenderPipeline::RenderPipeline(DeviceBase* dev, const UnpackedPtr<RenderPipeline
 
 RenderPipeline::~RenderPipeline() = default;
 
-MaybeError RenderPipeline::Initialize() {
+MaybeError RenderPipeline::InitializeImpl() {
     mMtlPrimitiveTopology = MTLPrimitiveTopology(GetPrimitiveTopology());
     mMtlFrontFace = MTLFrontFace(GetFrontFace());
     mMtlCullMode = ToMTLCullMode(GetCullMode());

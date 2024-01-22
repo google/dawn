@@ -296,14 +296,14 @@ class ComputePipeline final : public ComputePipelineBase {
   public:
     using ComputePipelineBase::ComputePipelineBase;
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 };
 
 class RenderPipeline final : public RenderPipelineBase {
   public:
     using RenderPipelineBase::RenderPipelineBase;
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 };
 
 class ShaderModule final : public ShaderModuleBase {

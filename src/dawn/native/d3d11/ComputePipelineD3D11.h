@@ -48,7 +48,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
     void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
     bool UsesNumWorkgroups() const;
 

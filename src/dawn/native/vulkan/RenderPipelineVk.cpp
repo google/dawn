@@ -372,7 +372,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-MaybeError RenderPipeline::Initialize() {
+MaybeError RenderPipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     const PipelineLayout* layout = ToBackend(GetLayout());
 

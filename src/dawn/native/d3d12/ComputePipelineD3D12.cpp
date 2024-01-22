@@ -48,7 +48,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-MaybeError ComputePipeline::Initialize() {
+MaybeError ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 

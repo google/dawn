@@ -65,9 +65,8 @@ void CreateComputePipelineAsyncTask::Run() {
     MaybeError maybeError;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateComputePipelineUS");
-        maybeError = mComputePipeline->Initialize();
+        maybeError = mComputePipeline->Initialize(std::move(mScopedUseShaderPrograms));
     }
-    mScopedUseShaderPrograms = {};
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateComputePipelineSuccess",
                            maybeError.IsSuccess());
     if (maybeError.IsError()) {
@@ -124,9 +123,8 @@ void CreateRenderPipelineAsyncTask::Run() {
     MaybeError maybeError;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateRenderPipelineUS");
-        maybeError = mRenderPipeline->Initialize();
+        maybeError = mRenderPipeline->Initialize(std::move(mScopedUseShaderPrograms));
     }
-    mScopedUseShaderPrograms = {};
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateRenderPipelineSuccess",
                            maybeError.IsSuccess());
     if (maybeError.IsError()) {

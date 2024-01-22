@@ -103,7 +103,7 @@ Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, cons
         explicit ErrorComputePipeline(DeviceBase* device, const char* label)
             : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
-        MaybeError Initialize() override {
+        MaybeError InitializeImpl() override {
             DAWN_UNREACHABLE();
             return {};
         }

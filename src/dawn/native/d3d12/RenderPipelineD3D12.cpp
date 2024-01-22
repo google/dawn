@@ -333,7 +333,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-MaybeError RenderPipeline::Initialize() {
+MaybeError RenderPipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 

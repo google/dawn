@@ -64,7 +64,7 @@ class RenderPipeline final : public RenderPipelineBase {
 
     wgpu::ShaderStage GetStagesRequiringStorageBufferLength() const;
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
   private:
     using RenderPipelineBase::RenderPipelineBase;

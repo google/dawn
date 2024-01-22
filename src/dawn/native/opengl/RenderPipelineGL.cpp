@@ -255,7 +255,7 @@ RenderPipeline::RenderPipeline(Device* device,
       mVertexArrayObject(0),
       mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {}
 
-MaybeError RenderPipeline::Initialize() {
+MaybeError RenderPipeline::InitializeImpl() {
     DAWN_TRY(
         InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages()));
     CreateVAOForVertexState();

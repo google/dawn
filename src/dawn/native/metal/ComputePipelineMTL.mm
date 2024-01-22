@@ -52,7 +52,7 @@ ComputePipeline::ComputePipeline(DeviceBase* dev,
 
 ComputePipeline::~ComputePipeline() = default;
 
-MaybeError ComputePipeline::Initialize() {
+MaybeError ComputePipeline::InitializeImpl() {
     auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);

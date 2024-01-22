@@ -58,7 +58,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
   private:
     using ComputePipelineBase::ComputePipelineBase;
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
     NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
     MTLSize mLocalWorkgroupSize;

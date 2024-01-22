@@ -220,7 +220,7 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+    EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
@@ -240,7 +240,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
     desc.vertex.module = vsModule.Get();
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
@@ -261,7 +261,7 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+    EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
@@ -285,7 +285,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
     desc.vertex.module = vsModule.Get();
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
@@ -312,7 +312,7 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+    EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
@@ -337,7 +337,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
     desc.vertex.module = vsModule.Get();
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
@@ -363,7 +363,7 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+    EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
@@ -389,7 +389,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
     desc.vertex.module = vsModule.Get();
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));

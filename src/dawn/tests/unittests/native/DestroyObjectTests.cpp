@@ -346,7 +346,7 @@ TEST_F(DestroyObjectTests, ComputePipelineImplicit) {
 
     // Compute pipelines are initialized during their creation via the device.
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*computePipelineMock.Get(), Initialize).Times(1);
+    EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl).Times(1);
     EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
 
     {
@@ -571,7 +571,7 @@ TEST_F(DestroyObjectTests, RenderPipelineImplicit) {
 
     // Render pipelines are initialized during their creation via the device.
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), Initialize).Times(1);
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).Times(1);
     EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
 
     {
@@ -885,7 +885,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
-        EXPECT_CALL(*computePipelineMock.Get(), Initialize).Times(1);
+        EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl).Times(1);
         EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
             .WillOnce(Return(computePipelineMock));
         computePipeline = device.CreateComputePipeline(ToCppAPI(&desc));
@@ -927,7 +927,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
         renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-        EXPECT_CALL(*renderPipelineMock.Get(), Initialize).Times(1);
+        EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).Times(1);
         EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
             .WillOnce(Return(renderPipelineMock));
         renderPipeline = device.CreateRenderPipeline(ToCppAPI(&desc));

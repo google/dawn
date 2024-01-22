@@ -48,7 +48,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
     ID3D12PipelineState* GetPipelineState() const;
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
     // Dawn API
     void SetLabelImpl() override;

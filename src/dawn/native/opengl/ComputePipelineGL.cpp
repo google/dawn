@@ -45,7 +45,7 @@ void ComputePipeline::DestroyImpl() {
     DeleteProgram(ToBackend(GetDevice())->GetGL());
 }
 
-MaybeError ComputePipeline::Initialize() {
+MaybeError ComputePipeline::InitializeImpl() {
     DAWN_TRY(
         InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages()));
     return {};

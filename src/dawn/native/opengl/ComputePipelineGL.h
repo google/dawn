@@ -46,7 +46,7 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
 
     void ApplyNow();
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
   private:
     using ComputePipelineBase::ComputePipelineBase;

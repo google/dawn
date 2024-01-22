@@ -63,7 +63,7 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateRender
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*renderPipelineMock.Get(), Initialize)
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
             DAWN_MAKE_ERROR(InternalErrorType::Validation, "Initialization Error"))));
 
@@ -90,7 +90,7 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateRenderPi
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*renderPipelineMock.Get(), Initialize)
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
             DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
 
@@ -117,7 +117,7 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationValidationErrorInCreateComput
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*computePipelineMock.Get(), Initialize)
+    ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
             DAWN_MAKE_ERROR(InternalErrorType::Validation, "Initialization Error"))));
 
@@ -144,7 +144,7 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateComputeP
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
-    ON_CALL(*computePipelineMock.Get(), Initialize)
+    ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
             DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
 
@@ -172,7 +172,7 @@ TEST_F(CreatePipelineAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped)
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     // Simulate that Initialize() would take a long time to finish.
-    ON_CALL(*renderPipelineMock.Get(), Initialize).WillByDefault([]() -> MaybeError {
+    ON_CALL(*renderPipelineMock.Get(), InitializeImpl).WillByDefault([]() -> MaybeError {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         return {};
     });

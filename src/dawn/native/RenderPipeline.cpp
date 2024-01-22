@@ -1003,7 +1003,7 @@ Ref<RenderPipelineBase> RenderPipelineBase::MakeError(DeviceBase* device, const 
         explicit ErrorRenderPipeline(DeviceBase* device, const char* label)
             : RenderPipelineBase(device, ObjectBase::kError, label) {}
 
-        MaybeError Initialize() override {
+        MaybeError InitializeImpl() override {
             DAWN_UNREACHABLE();
             return {};
         }

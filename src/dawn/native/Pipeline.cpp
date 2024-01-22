@@ -364,4 +364,11 @@ PipelineBase::ScopedUseShaderPrograms PipelineBase::UseShaderPrograms() {
     return programs;
 }
 
+MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scopedUsePrograms) {
+    if (!scopedUsePrograms) {
+        scopedUsePrograms = UseShaderPrograms();
+    }
+    return InitializeImpl();
+}
+
 }  // namespace dawn::native

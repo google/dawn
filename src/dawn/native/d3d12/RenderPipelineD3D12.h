@@ -47,7 +47,7 @@ class RenderPipeline final : public RenderPipelineBase {
                                 void* userdata);
     RenderPipeline() = delete;
 
-    MaybeError Initialize() override;
+    MaybeError InitializeImpl() override;
 
     D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
     ID3D12PipelineState* GetPipelineState() const;

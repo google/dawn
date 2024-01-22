@@ -50,7 +50,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-MaybeError ComputePipeline::Initialize() {
+MaybeError ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     const PipelineLayout* layout = ToBackend(GetLayout());
 

@@ -234,7 +234,7 @@ RenderPipeline::RenderPipeline(Device* device,
     : RenderPipelineBase(device, descriptor),
       mD3DPrimitiveTopology(D3DPrimitiveTopology(GetPrimitiveTopology())) {}
 
-MaybeError RenderPipeline::Initialize() {
+MaybeError RenderPipeline::InitializeImpl() {
     DAWN_TRY(InitializeRasterizerState());
     DAWN_TRY(InitializeBlendState());
     DAWN_TRY(InitializeShaders());
