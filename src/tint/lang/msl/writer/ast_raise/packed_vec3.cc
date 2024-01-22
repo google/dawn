@@ -58,8 +58,8 @@ using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::msl::writer {
 
-// Arrays larger than this will be packed/unpacked with a for loop.
-// Arrays up to this size will be packed/unpacked with a sequence of statements.
+/// Arrays larger than this will be packed/unpacked with a for loop.
+/// Arrays up to this size will be packed/unpacked with a sequence of statements.
 static constexpr uint32_t kMaxSeriallyUnpackedArraySize = 8;
 
 /// PIMPL state for the transform
