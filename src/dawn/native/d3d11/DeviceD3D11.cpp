@@ -376,6 +376,9 @@ void Device::DestroyImpl() {
     //   other threads using the device since there are no other live refs.
     DAWN_ASSERT(GetState() == State::Disconnected);
 
+    mImplicitPixelLocalStorageAttachmentTextureViews = {};
+    mStagingBuffer = nullptr;
+
     Base::DestroyImpl();
 }
 
