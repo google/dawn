@@ -36,6 +36,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/webgpu.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -62,7 +63,7 @@ class CreateComputePipelineAsyncTask {
   private:
     Ref<ComputePipelineBase> mComputePipeline;
     WGPUCreateComputePipelineAsyncCallback mCallback;
-    void* mUserdata;
+    raw_ptr<void> mUserdata;
     // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
     PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };
@@ -83,7 +84,7 @@ class CreateRenderPipelineAsyncTask {
   private:
     Ref<RenderPipelineBase> mRenderPipeline;
     WGPUCreateRenderPipelineAsyncCallback mCallback;
-    void* mUserdata;
+    raw_ptr<void> mUserdata;
     // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
     PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };

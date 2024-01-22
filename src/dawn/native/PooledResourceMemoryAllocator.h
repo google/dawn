@@ -33,6 +33,7 @@
 
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/ResourceHeapAllocator.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -56,7 +57,7 @@ class PooledResourceMemoryAllocator : public ResourceHeapAllocator {
     uint64_t GetPoolSizeForTesting() const;
 
   private:
-    ResourceHeapAllocator* mHeapAllocator = nullptr;
+    raw_ptr<ResourceHeapAllocator> mHeapAllocator = nullptr;
 
     std::deque<std::unique_ptr<ResourceHeapBase>> mPool;
 };

@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_OPENGL_BUFFERGL_H_
 
 #include "dawn/native/Buffer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/opengl/opengl_platform.h"
 
@@ -65,7 +66,7 @@ class Buffer final : public BufferBase {
     void InitializeToZero();
 
     GLuint mBuffer = 0;
-    void* mMappedData = nullptr;
+    raw_ptr<void> mMappedData = nullptr;
 };
 
 }  // namespace dawn::native::opengl

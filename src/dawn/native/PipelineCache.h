@@ -32,6 +32,7 @@
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Error.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -66,7 +67,7 @@ class PipelineCacheBase : public RefCounted {
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,
     // the blob cache is guaranteed to be valid throughout the lifetime of the object.
-    BlobCache* mCache;
+    raw_ptr<BlobCache> mCache;
     CacheKey mKey;
     bool mInitialized = false;
     bool mCacheHit = false;

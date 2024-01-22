@@ -34,6 +34,7 @@
 #include "dawn/native/BuddyAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -71,7 +72,8 @@ class BuddyMemoryAllocator {
     uint64_t mMemoryBlockSize = 0;
 
     BuddyAllocator mBuddyBlockAllocator;
-    ResourceHeapAllocator* mHeapAllocator;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<ResourceHeapAllocator, DanglingUntriaged> mHeapAllocator;
 
     struct TrackedSubAllocations {
         size_t refcount = 0;

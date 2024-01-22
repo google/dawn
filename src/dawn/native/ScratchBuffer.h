@@ -32,6 +32,7 @@
 
 #include "dawn/common/Ref.h"
 #include "dawn/native/Buffer.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -58,7 +59,7 @@ class ScratchBuffer {
     BufferBase* GetBuffer() const;
 
   private:
-    DeviceBase* const mDevice;
+    const raw_ptr<DeviceBase> mDevice;
     const wgpu::BufferUsage mUsage;
     Ref<BufferBase> mBuffer;
 };

@@ -50,6 +50,7 @@
 #include "dawn/native/Texture.h"
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::null {
 
@@ -221,7 +222,8 @@ class BindGroupDataHolder {
     explicit BindGroupDataHolder(size_t size);
     ~BindGroupDataHolder();
 
-    void* mBindingDataAllocation;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mBindingDataAllocation;
 };
 
 // We don't have the complexity of placement-allocation of bind group data in

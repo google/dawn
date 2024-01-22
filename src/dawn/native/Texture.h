@@ -39,6 +39,7 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/Subresource.h"
+#include "partition_alloc/pointers/raw_ref.h"
 
 #include "dawn/native/dawn_platform.h"
 
@@ -186,7 +187,7 @@ class TextureBase : public ApiObjectBase {
     wgpu::TextureDimension mDimension;
     wgpu::TextureViewDimension
         mCompatibilityTextureBindingViewDimension;  // only used for compatibility mode
-    const Format& mFormat;
+    const raw_ref<const Format> mFormat;
     FormatSet mViewFormats;
     Extent3D mBaseSize;
     uint32_t mMipLevelCount;
@@ -239,7 +240,7 @@ class TextureViewBase : public ApiObjectBase {
 
     Ref<TextureBase> mTexture;
 
-    const Format& mFormat;
+    const raw_ref<const Format> mFormat;
     wgpu::TextureViewDimension mDimension;
     SubresourceRange mRange;
 };

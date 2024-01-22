@@ -31,6 +31,7 @@
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/IntegerTypes.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 
@@ -60,7 +61,7 @@ class FencedDeleter {
     void Tick(ExecutionSerial completedSerial);
 
   private:
-    Device* mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
     SerialQueue<ExecutionSerial, VkBuffer> mBuffersToDelete;
     SerialQueue<ExecutionSerial, VkDescriptorPool> mDescriptorPoolsToDelete;
     SerialQueue<ExecutionSerial, VkDeviceMemory> mMemoriesToDelete;

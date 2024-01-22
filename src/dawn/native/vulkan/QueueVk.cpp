@@ -42,6 +42,7 @@
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 
@@ -64,7 +65,7 @@ class ScopedSignalSemaphore : public NonCopyable {
     VkSemaphore* InitializeInto() { return &mSemaphore; }
 
   private:
-    Device* mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
     VkSemaphore mSemaphore = VK_NULL_HANDLE;
 };
 

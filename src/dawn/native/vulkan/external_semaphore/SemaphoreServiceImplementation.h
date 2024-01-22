@@ -30,6 +30,7 @@
 
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 class Device;
@@ -61,7 +62,7 @@ class ServiceImplementation {
     virtual void CloseHandle(ExternalSemaphoreHandle handle) = 0;
 
   protected:
-    Device* mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
 };
 
 }  // namespace dawn::native::vulkan::external_semaphore

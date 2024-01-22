@@ -72,6 +72,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -159,7 +160,7 @@ struct LoggingCallbackTask : CallbackTask {
     wgpu::LoggingCallback mCallback;
     WGPULoggingType mLoggingType;
     std::string mMessage;
-    void* mUserdata;
+    raw_ptr<void> mUserdata;
 };
 }  // anonymous namespace
 

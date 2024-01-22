@@ -40,6 +40,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 
@@ -108,7 +109,7 @@ class RenderPassCache {
     };
     using Cache = absl::flat_hash_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
 
-    Device* mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
 
     std::mutex mMutex;
     Cache mCache;

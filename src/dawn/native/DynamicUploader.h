@@ -36,6 +36,7 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/RingBufferAllocator.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 // DynamicUploader is the front-end implementation used to manage multiple ring buffers for upload
 // usage.
@@ -44,9 +45,9 @@ namespace dawn::native {
 class BufferBase;
 
 struct UploadHandle {
-    uint8_t* mappedBuffer = nullptr;
+    raw_ptr<uint8_t> mappedBuffer = nullptr;
     uint64_t startOffset = 0;
-    BufferBase* stagingBuffer = nullptr;
+    raw_ptr<BufferBase> stagingBuffer = nullptr;
 };
 
 class DynamicUploader {
@@ -82,7 +83,7 @@ class DynamicUploader {
 
     std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
     SerialQueue<ExecutionSerial, Ref<BufferBase>> mReleasedStagingBuffers;
-    DeviceBase* mDevice;
+    raw_ptr<DeviceBase> mDevice;
 };
 }  // namespace dawn::native
 

@@ -34,6 +34,8 @@
 #include <utility>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr.h"
+
 namespace dawn::native {
 
 // Blob represents a block of bytes. It may be constructed from
@@ -68,7 +70,8 @@ class Blob {
     // calling |deleter|. The deleter function is called at ~Blob() and during std::move.
     explicit Blob(uint8_t* data, size_t size, std::function<void()> deleter);
 
-    uint8_t* mData;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<uint8_t, DanglingUntriaged> mData;
     size_t mSize;
     std::function<void()> mDeleter;
 };

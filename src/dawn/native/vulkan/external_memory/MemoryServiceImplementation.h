@@ -33,6 +33,7 @@
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
 #include "dawn/native/vulkan/external_memory/MemoryImportParams.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 class Device;
@@ -83,7 +84,7 @@ class ServiceImplementation {
     bool RequiresDedicatedAllocation(const ExternalImageDescriptorVk* descriptor,
                                      VkImage image) const;
 
-    Device* mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
 };
 
 }  // namespace dawn::native::vulkan::external_memory

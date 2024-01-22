@@ -49,6 +49,7 @@
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::opengl {
 
@@ -224,13 +225,13 @@ class VertexStateBufferBindingTracker {
 
   private:
     bool mIndexBufferDirty = false;
-    Buffer* mIndexBuffer = nullptr;
+    raw_ptr<Buffer> mIndexBuffer = nullptr;
 
     VertexBufferMask mDirtyVertexBuffers;
     PerVertexBuffer<Buffer*> mVertexBuffers;
     PerVertexBuffer<uint64_t> mVertexBufferOffsets;
 
-    RenderPipelineBase* mLastPipeline = nullptr;
+    raw_ptr<RenderPipelineBase> mLastPipeline = nullptr;
 };
 
 class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
@@ -477,7 +478,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         ResetInternalUniformDataDirtyRange();
     }
 
-    PipelineGL* mPipeline = nullptr;
+    raw_ptr<PipelineGL> mPipeline = nullptr;
 
     // The data used for mPipeline's internal uniform buffer from current bind group.
     // Expecting no more than 4 texture bindings called as textureNumLevels/textureNumSamples

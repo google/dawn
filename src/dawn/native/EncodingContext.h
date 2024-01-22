@@ -40,6 +40,7 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PassResourceUsageTracker.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -174,17 +175,17 @@ class EncodingContext {
     bool IsFinished() const;
     void MoveToIterator();
 
-    DeviceBase* mDevice;
+    raw_ptr<DeviceBase> mDevice;
 
     // There can only be two levels of encoders. Top-level and render/compute pass.
     // The top level encoder is the encoder the EncodingContext is created with.
     // It doubles as flag to check if encoding has been Finished.
-    const ApiObjectBase* mTopLevelEncoder;
+    raw_ptr<const ApiObjectBase> mTopLevelEncoder;
     // The current encoder must be the same as the encoder provided to TryEncode,
     // otherwise an error is produced. It may be nullptr if the EncodingContext is an error.
     // The current encoder changes with Enter/ExitPass which should be called by
     // CommandEncoder::Begin/EndPass.
-    const ApiObjectBase* mCurrentEncoder;
+    raw_ptr<const ApiObjectBase> mCurrentEncoder;
 
     RenderPassUsages mRenderPassUsages;
     bool mWereRenderPassUsagesAcquired = false;

@@ -40,6 +40,7 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/dawn_platform.h"
 
@@ -60,7 +61,7 @@ struct ProgrammableStage {
     std::string entryPoint;
 
     // The metadata lives as long as module, that's ref-ed in the same structure.
-    const EntryPointMetadata* metadata = nullptr;
+    raw_ptr<const EntryPointMetadata> metadata = nullptr;
 
     PipelineConstantEntries constants;
 };

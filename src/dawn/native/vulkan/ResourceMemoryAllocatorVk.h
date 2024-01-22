@@ -37,6 +37,7 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PooledResourceMemoryAllocator.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::vulkan {
 
@@ -69,7 +70,7 @@ class ResourceMemoryAllocator {
     int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
   private:
-    Device* mDevice;
+    raw_ptr<Device> mDevice;
 
     class SingleTypeAllocator;
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;

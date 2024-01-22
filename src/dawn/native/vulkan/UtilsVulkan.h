@@ -34,6 +34,7 @@
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 struct ProgrammableStage;
@@ -102,7 +103,7 @@ struct PNextChainBuilder {
     }
 
   private:
-    VkBaseOutStructure* mCurrent;
+    raw_ptr<VkBaseOutStructure> mCurrent;
 };
 
 VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op);

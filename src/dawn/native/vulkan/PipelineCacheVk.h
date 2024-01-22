@@ -30,6 +30,7 @@
 
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PipelineCache.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/vulkan_platform.h"
 
@@ -53,7 +54,7 @@ class PipelineCache final : public PipelineCacheBase {
     void Initialize();
     MaybeError SerializeToBlobImpl(Blob* blob) override;
 
-    DeviceBase* mDevice;
+    raw_ptr<DeviceBase> mDevice;
     VkPipelineCache mHandle = VK_NULL_HANDLE;
 };
 

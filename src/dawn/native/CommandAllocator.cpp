@@ -91,7 +91,7 @@ bool CommandIterator::NextCommandIdInNewBlock(uint32_t* commandId) {
         *commandId = detail::kEndOfBlock;
         return false;
     }
-    mCurrentPtr = AlignPtr(mBlocks[mCurrentBlock].block, alignof(uint32_t));
+    mCurrentPtr = AlignPtr(mBlocks[mCurrentBlock].block.get(), alignof(uint32_t));
     return NextCommandId(commandId);
 }
 
@@ -106,7 +106,7 @@ void CommandIterator::Reset() {
         mBlocks[0].size = sizeof(mEndOfBlock);
         mBlocks[0].block = mCurrentPtr;
     } else {
-        mCurrentPtr = AlignPtr(mBlocks[0].block, alignof(uint32_t));
+        mCurrentPtr = AlignPtr(mBlocks[0].block.get(), alignof(uint32_t));
     }
 }
 
@@ -185,8 +185,8 @@ bool CommandAllocator::IsEmpty() const {
 CommandBlocks&& CommandAllocator::AcquireBlocks() {
     DAWN_ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
     DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-    DAWN_ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
-    *reinterpret_cast<uint32_t*>(mCurrentPtr) = detail::kEndOfBlock;
+    DAWN_ASSERT(mCurrentPtr.get() + sizeof(uint32_t) <= mEndPtr);
+    *reinterpret_cast<uint32_t*>(mCurrentPtr.get()) = detail::kEndOfBlock;
 
     mCurrentPtr = nullptr;
     mEndPtr = nullptr;
@@ -198,7 +198,7 @@ uint8_t* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
                                               size_t commandAlignment) {
     // When there is not enough space, we signal the kEndOfBlock, so that the iterator knows
     // to move to the next one. kEndOfBlock on the last block means the end of the commands.
-    uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
+    uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr.get());
     *idAlloc = detail::kEndOfBlock;
 
     // We'll request a block that can contain at least the command ID, the command and an

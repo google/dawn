@@ -35,6 +35,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Toggles.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -61,7 +62,7 @@ class BackendConnection : NonMovable {
     virtual size_t GetPhysicalDeviceCountForTesting() const = 0;
 
   private:
-    InstanceBase* mInstance = nullptr;
+    raw_ptr<InstanceBase> mInstance = nullptr;
     wgpu::BackendType mType;
 };
 

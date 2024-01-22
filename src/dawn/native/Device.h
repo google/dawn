@@ -50,6 +50,7 @@
 #include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/UsageValidationMode.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform.h"
@@ -558,13 +559,16 @@ class DeviceBase : public RefCountedWithExternalCount {
                                                     const Extent3D& copySizePixels) = 0;
 
     wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;
-    void* mUncapturedErrorUserdata = nullptr;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mUncapturedErrorUserdata = nullptr;
 
     wgpu::LoggingCallback mLoggingCallback = nullptr;
-    void* mLoggingUserdata = nullptr;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mLoggingUserdata = nullptr;
 
     wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
-    void* mDeviceLostUserdata = nullptr;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mDeviceLostUserdata = nullptr;
 
     std::unique_ptr<ErrorScopeStack> mErrorScopeStack;
 
@@ -634,7 +638,7 @@ class IgnoreLazyClearCountScope : public NonMovable {
     // Disable heap allocation
     void* operator new(size_t) = delete;
 
-    DeviceBase* mDevice;
+    raw_ptr<DeviceBase> mDevice;
     size_t mLazyClearCountForTesting;
 };
 

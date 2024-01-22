@@ -55,6 +55,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn/webgpu.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -174,7 +175,8 @@ struct SubmittedWorkDone : TrackTaskCallback {
     void HandleShutDownImpl() override { HandleDeviceLossImpl(); }
 
     WGPUQueueWorkDoneCallback mCallback = nullptr;
-    void* mUserdata;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
 };
 
 class ErrorQueue : public QueueBase {
@@ -198,7 +200,8 @@ class ErrorQueue : public QueueBase {
 struct WorkDoneEvent final : public EventManager::TrackedEvent {
     std::optional<wgpu::QueueWorkDoneStatus> mEarlyStatus;
     WGPUQueueWorkDoneCallback mCallback;
-    void* mUserdata;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
 
     // Create an event backed by the given queue execution serial.
     WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,

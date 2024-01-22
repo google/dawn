@@ -63,7 +63,7 @@ struct StageAndDescriptor {
     raw_ptr<ShaderModuleBase> module;
     std::string entryPoint;
     size_t constantCount = 0u;
-    ConstantEntry const* constants = nullptr;
+    raw_ptr<const ConstantEntry, AllowPtrArithmetic> constants = nullptr;
 };
 
 class PipelineLayoutBase : public ApiObjectBase,

@@ -35,6 +35,7 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/dawn_platform.h"
 
@@ -73,7 +74,8 @@ class ProgrammableEncoder : public ApiObjectBase {
                         ErrorTag errorTag,
                         const char* label);
 
-    EncodingContext* mEncodingContext = nullptr;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<EncodingContext, DanglingUntriaged> mEncodingContext = nullptr;
 
     uint64_t mDebugGroupStackSize = 0;
 

@@ -33,6 +33,8 @@
 #include <limits>
 #include <vector>
 
+#include "partition_alloc/pointers/raw_ptr.h"
+
 namespace dawn::native {
 
 // Buddy allocator uses the buddy memory allocation technique to satisfy an allocation request.
@@ -78,8 +80,10 @@ class BuddyAllocator {
 
         // Pointer to this block's buddy, iff parent is split.
         // Used to quickly merge buddy blocks upon de-allocate.
-        BuddyBlock* pBuddy = nullptr;
-        BuddyBlock* pParent = nullptr;
+        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+        raw_ptr<BuddyBlock, DanglingUntriaged> pBuddy = nullptr;
+        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+        raw_ptr<BuddyBlock, DanglingUntriaged> pParent = nullptr;
 
         // Track whether this block has been split or not.
         BlockState mState;
@@ -112,11 +116,13 @@ class BuddyAllocator {
 
     // Keep track the head and tail (for faster insertion/removal).
     struct BlockList {
-        BuddyBlock* head = nullptr;  // First free block in level.
+        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+        raw_ptr<BuddyBlock, DanglingUntriaged> head = nullptr;  // First free block in level.
         // TODO(crbug.com/dawn/827): Track the tail.
     };
 
-    BuddyBlock* mRoot = nullptr;  // Used to deallocate non-free blocks.
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<BuddyBlock, DanglingUntriaged> mRoot = nullptr;  // Used to deallocate non-free blocks.
 
     uint64_t mMaxBlockSize = 0;
 

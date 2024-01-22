@@ -39,6 +39,7 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/SystemEvent.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform.h"
@@ -56,7 +57,7 @@ struct TrackTaskCallback : CallbackTask {
     ~TrackTaskCallback() override = default;
 
   protected:
-    dawn::platform::Platform* mPlatform = nullptr;
+    raw_ptr<dawn::platform::Platform> mPlatform = nullptr;
     // The serial by which time the callback can be fired.
     ExecutionSerial mSerial = kMaxExecutionSerial;
 };
