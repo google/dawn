@@ -117,6 +117,8 @@ class RefBase {
         return *this;
     }
 
+    operator bool() const { return !!mValue; }
+
     // Comparison operators.
     bool operator==(const T& other) const { return mValue == other; }
 

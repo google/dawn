@@ -242,7 +242,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
 
-    req.inputProgram = GetTintProgram();
+    auto tintProgram = GetTintProgram();
+    req.inputProgram = &(tintProgram->program);
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);

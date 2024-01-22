@@ -1027,15 +1027,15 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
                                                       compilationMessages));
             }
 
-            ResultOrError<Ref<ShaderModuleBase>> result_or_error = [&] {
+            auto resultOrError = [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
                 SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateShaderModuleUS");
                 return CreateShaderModuleImpl(descriptor, parseResult, compilationMessages);
             }();
             DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateShaderModuleSuccess",
-                                   result_or_error.IsSuccess());
+                                   resultOrError.IsSuccess());
 
             Ref<ShaderModuleBase> result;
-            DAWN_TRY_ASSIGN(result, std::move(result_or_error));
+            DAWN_TRY_ASSIGN(result, std::move(resultOrError));
             result->SetContentHash(blueprintHash);
             return result;
         });
@@ -1248,7 +1248,6 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     // after all other operations are finished, even if any of them is failed and result
     // is an error shader module.
     result->InjectCompilationMessages(std::move(compilationMessages));
-
     return ReturnToAPI(std::move(result));
 }
 ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
@@ -1668,6 +1667,7 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateComputePipeline(
 
     MaybeError maybeError;
     {
+        auto scopedUsePrograms = uninitializedComputePipeline->UseShaderPrograms();
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
         maybeError = uninitializedComputePipeline->Initialize();
     }
@@ -1721,6 +1721,7 @@ void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> com
                                                     void* userdata) {
     MaybeError maybeError;
     {
+        auto scopedUsePrograms = computePipeline->UseShaderPrograms();
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
         maybeError = computePipeline->Initialize();
     }
@@ -1741,6 +1742,7 @@ void DeviceBase::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> rende
                                                    void* userdata) {
     MaybeError maybeError;
     {
+        auto scopedUsePrograms = renderPipeline->UseShaderPrograms();
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
         maybeError = renderPipeline->Initialize();
     }
@@ -1808,6 +1810,7 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
 
     MaybeError maybeError;
     {
+        auto scopedUsePrograms = uninitializedRenderPipeline->UseShaderPrograms();
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
         maybeError = uninitializedRenderPipeline->Initialize();
     }

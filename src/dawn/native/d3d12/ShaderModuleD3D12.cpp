@@ -276,7 +276,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
 
-    req.hlsl.inputProgram = GetTintProgram();
+    auto tintProgram = GetTintProgram();
+    req.hlsl.inputProgram = &(tintProgram->program);
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
     req.hlsl.firstIndexOffsetShaderRegister = layout->GetFirstIndexOffsetShaderRegister();

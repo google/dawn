@@ -312,7 +312,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     SpirvCompilationRequest req = {};
     req.stage = stage;
-    req.inputProgram = GetTintProgram();
+    auto tintProgram = GetTintProgram();
+    req.inputProgram = &(tintProgram->program);
     req.entryPointName = programmableStage.entryPoint;
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());

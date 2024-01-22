@@ -995,16 +995,6 @@ bool ShaderModuleParseResult::HasParsedShader() const {
     return tintProgram != nullptr;
 }
 
-// TintSource is a PIMPL container for a tint::Source::File, which needs to be kept alive for as
-// long as tint diagnostics are inspected / printed.
-class TintSource {
-  public:
-    template <typename... ARGS>
-    explicit TintSource(ARGS&&... args) : file(std::forward<ARGS>(args)...) {}
-
-    tint::Source::File file;
-};
-
 MaybeError ValidateAndParseShaderModule(DeviceBase* device,
                                         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                         ShaderModuleParseResult* parseResult,
@@ -1053,7 +1043,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
             tint::Program program;
             DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, device->GetWGSLAllowedFeatures(),
                                                 outMessages, spirvOptions));
-            parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
+            parseResult->tintProgram = AcquireRef(new TintProgram(std::move(program), nullptr));
 
             return {};
         }
@@ -1067,7 +1057,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
     }
     DAWN_ASSERT(wgslDesc != nullptr);
 
-    auto tintSource = std::make_unique<TintSource>("", wgslDesc->code);
+    auto tintFile = std::make_unique<tint::Source::File>("", wgslDesc->code);
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;
@@ -1077,9 +1067,9 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
 
     tint::Program program;
     DAWN_TRY_ASSIGN(program,
-                    ParseWGSL(&tintSource->file, device->GetWGSLAllowedFeatures(), outMessages));
-    parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-    parseResult->tintSource = std::move(tintSource);
+                    ParseWGSL(tintFile.get(), device->GetWGSLAllowedFeatures(), outMessages));
+
+    parseResult->tintProgram = AcquireRef(new TintProgram(std::move(program), std::move(tintFile)));
 
     return {};
 }
@@ -1230,7 +1220,7 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
-    : ApiObjectBase(device, descriptor->label), mType(Type::Undefined) {
+    : Base(device, descriptor->label), mType(Type::Undefined) {
     if (auto* spirvDesc = descriptor.Get<ShaderModuleSPIRVDescriptor>()) {
         mType = Type::Spirv;
         mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
@@ -1249,7 +1239,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
 }
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
-    : ApiObjectBase(device, tag, label), mType(Type::Undefined) {}
+    : Base(device, tag, label), mType(Type::Undefined) {}
 
 ShaderModuleBase::~ShaderModuleBase() = default;
 
@@ -1301,9 +1291,60 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
     return a->mType == b->mType && a->mOriginalSpirv == b->mOriginalSpirv && a->mWgsl == b->mWgsl;
 }
 
-const tint::Program* ShaderModuleBase::GetTintProgram() const {
-    DAWN_ASSERT(mTintProgram);
-    return mTintProgram.get();
+ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
+    mTintData.Use([&](auto tintData) {
+        // When the ShaderModuleBase is not referenced externally, and not used for initializing any
+        // pipeline, the mTintProgram will be released. However the ShaderModuleBase itself may
+        // still alive due to being referenced by some pipelines. In this case, when
+        // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look up
+        // from the cache and return the same ShaderModuleBase. In this case, we have to recreate
+        // mTintProgram, when the mTintProgram is required for initializing new pipelines.
+        if (tintData->tintProgram == nullptr) {
+            ShaderModuleDescriptor descriptor;
+            ShaderModuleWGSLDescriptor wgslDescriptor;
+            ShaderModuleSPIRVDescriptor sprivDescriptor;
+
+            switch (mType) {
+                case Type::Spirv:
+                    sprivDescriptor.codeSize = mOriginalSpirv.size();
+                    sprivDescriptor.code = mOriginalSpirv.data();
+                    descriptor.nextInChain = &sprivDescriptor;
+                    break;
+                case Type::Wgsl:
+                    wgslDescriptor.code = mWgsl.c_str();
+                    descriptor.nextInChain = &wgslDescriptor;
+                    break;
+                default:
+                    DAWN_ASSERT(false);
+            }
+
+            ShaderModuleParseResult parseResult;
+            ValidateAndParseShaderModule(GetDevice(), Unpack(&descriptor), &parseResult,
+                                         /*compilationMessages=*/nullptr)
+                .AcquireSuccess();
+            DAWN_ASSERT(parseResult.tintProgram != nullptr);
+
+            tintData->tintProgram = std::move(parseResult.tintProgram);
+            tintData->tintProgramRecreateCount++;
+        }
+    });
+
+    return ScopedUseTintProgram(this);
+}
+
+Ref<TintProgram> ShaderModuleBase::GetTintProgram() const {
+    return mTintData.Use([&](auto tintData) {
+        DAWN_ASSERT(tintData->tintProgram != nullptr);
+        return tintData->tintProgram;
+    });
+}
+
+Ref<TintProgram> ShaderModuleBase::GetTintProgramForTesting() const {
+    return mTintData.Use([&](auto tintData) { return tintData->tintProgram; });
+}
+
+int ShaderModuleBase::GetTintProgramRecreateCountForTesting() const {
+    return mTintData.Use([&](auto tintData) { return tintData->tintProgramRecreateCount; });
 }
 
 void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callback,
@@ -1354,11 +1395,13 @@ OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {
 
 MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult,
                                             OwnedCompilationMessages* compilationMessages) {
-    mTintProgram = std::move(parseResult->tintProgram);
-    mTintSource = std::move(parseResult->tintSource);
+    DAWN_TRY(mTintData.Use([&](auto tintData) -> MaybeError {
+        tintData->tintProgram = std::move(parseResult->tintProgram);
 
-    DAWN_TRY(ReflectShaderUsingTint(GetDevice(), mTintProgram.get(), compilationMessages,
-                                    &mEntryPoints));
+        DAWN_TRY(ReflectShaderUsingTint(GetDevice(), &(tintData->tintProgram->program),
+                                        compilationMessages, &mEntryPoints));
+        return {};
+    }));
 
     for (auto stage : IterateStages(kAllStages)) {
         mEntryPointCounts[stage] = 0;
@@ -1372,6 +1415,10 @@ MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult
     }
 
     return {};
+}
+
+void ShaderModuleBase::WillDropLastExternalRef() {
+    mTintData.Use([&](auto tintData) { tintData->tintProgram = nullptr; });
 }
 
 }  // namespace dawn::native

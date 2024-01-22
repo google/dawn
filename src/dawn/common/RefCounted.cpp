@@ -42,9 +42,12 @@ static constexpr size_t kPayloadBits = 1;
 static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;
 static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
 
-RefCount::RefCount(uint64_t payload) : mRefCount(kRefCountIncrement + payload) {
+RefCount::RefCount(uint64_t initCount, uint64_t payload)
+    : mRefCount(initCount * kRefCountIncrement + payload) {
     DAWN_ASSERT((payload & kPayloadMask) == payload);
 }
+
+RefCount::RefCount(uint64_t payload) : RefCount(1, payload) {}
 
 uint64_t RefCount::GetValueForTesting() const {
     return mRefCount >> kPayloadBits;
@@ -58,15 +61,15 @@ uint64_t RefCount::GetPayload() const {
     return kPayloadMask & mRefCount.load(std::memory_order_relaxed);
 }
 
-void RefCount::Increment() {
-    DAWN_ASSERT((mRefCount & ~kPayloadMask) != 0);
-
+bool RefCount::Increment() {
     // The relaxed ordering guarantees only the atomicity of the update, which is enough here
     // because the reference we are copying from still exists and makes sure other threads
     // don't delete `this`.
     // See the explanation in the Boost documentation:
     //     https://www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html
-    mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
+    uint32_t previousValue = mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
+
+    return (previousValue & ~kPayloadMask) == 0;
 }
 
 bool RefCount::TryIncrement() {
@@ -134,7 +137,9 @@ uint64_t RefCounted::GetRefCountPayload() const {
 }
 
 void RefCounted::Reference() {
-    mRefCount.Increment();
+    bool result = mRefCount.Increment();
+    // Never increase ref count from 0.
+    DAWN_ASSERT(!result);
 }
 
 void RefCounted::Release() {

@@ -350,4 +350,18 @@ bool PipelineBase::EqualForCache(const PipelineBase* a, const PipelineBase* b) {
     return true;
 }
 
+PipelineBase::ScopedUseShaderPrograms PipelineBase::UseShaderPrograms() {
+    ScopedUseShaderPrograms programs;
+    for (SingleShaderStage shaderStage :
+         {SingleShaderStage::Vertex, SingleShaderStage::Fragment, SingleShaderStage::Compute}) {
+        auto& module = mStages[shaderStage].module;
+        if (module.Get()) {
+            // Hold an external API reference of ShaderModuleBase to keep mTintProgram in
+            // ShaderModuleBase alive.
+            programs[shaderStage] = module->UseTintProgram();
+        }
+    }
+    return programs;
+}
+
 }  // namespace dawn::native

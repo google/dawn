@@ -60,6 +60,14 @@ struct RCTestDerived : public RCTest {
     using RCTest::RCTest;
 };
 
+TEST(RefCount, Increment) {
+    RefCount refCount(/*initCount=*/0, /*payload=*/0);
+    // Previous count is 0
+    EXPECT_TRUE(refCount.Increment());
+    // Previous count is 1
+    EXPECT_FALSE(refCount.Increment());
+}
+
 // Test that RCs start with one ref, and removing it destroys the object.
 TEST(RefCounted, StartsWithOneRef) {
     bool deleted = false;

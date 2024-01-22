@@ -472,9 +472,9 @@ MaybeError ComputePipeline::Initialize() {
             BuildSubstituteOverridesTransformConfig(computeStage));
     }
 
-    DAWN_TRY_ASSIGN(transformedProgram,
-                    RunTransforms(&transformManager, computeStage.module->GetTintProgram(),
-                                  transformInputs, nullptr, nullptr));
+    auto tintProgram = computeStage.module->GetTintProgram();
+    DAWN_TRY_ASSIGN(transformedProgram, RunTransforms(&transformManager, &(tintProgram->program),
+                                                      transformInputs, nullptr, nullptr));
 
     // Do the workgroup size validation, although different backend will have different
     // fullSubgroups parameter.

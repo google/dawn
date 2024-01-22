@@ -86,6 +86,9 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     // Implementation of the API entrypoint. Do not use in a reentrant manner.
     BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
 
+    using ScopedUseShaderPrograms = PerStage<ShaderModuleBase::ScopedUseTintProgram>;
+    ScopedUseShaderPrograms UseShaderPrograms();
+
     // Initialize() should only be called once by the frontend.
     virtual MaybeError Initialize() = 0;
 

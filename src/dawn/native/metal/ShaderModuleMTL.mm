@@ -252,7 +252,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     MslCompilationRequest req = {};
     req.stage = stage;
-    req.inputProgram = programmableStage.module->GetTintProgram();
+    auto tintProgram = programmableStage.module->GetTintProgram();
+    req.inputProgram = &(tintProgram->program);
     req.vertexPullingTransformConfig = std::move(vertexPullingTransformConfig);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.entryPointName = programmableStage.entryPoint.c_str();

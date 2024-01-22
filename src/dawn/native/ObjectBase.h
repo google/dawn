@@ -42,8 +42,25 @@ class FormatSink;
 
 namespace dawn::native {
 
+namespace detail {
+
+template <typename T>
+struct APIRefCountedTraits {
+    static constexpr T* kNullValue = nullptr;
+    static void Reference(T* value) { value->APIReference(); }
+    static void Release(T* value) { value->APIRelease(); }
+};
+
+}  // namespace detail
+
 class ApiObjectBase;
 class DeviceBase;
+
+template <typename T>
+class APIRef : public RefBase<T*, detail::APIRefCountedTraits<T>> {
+  public:
+    using RefBase<T*, detail::APIRefCountedTraits<T>>::RefBase;
+};
 
 class ErrorMonad : public RefCounted {
   public:
@@ -150,8 +167,16 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     std::string mLabel;
 };
 
+template <typename T>
+class RefCountedWithExternalCountBase;
+
 template <class T>
 T* ReturnToAPI(Ref<T>&& object) {
+    if constexpr (T::HasExternalRefCount) {
+        // For an object which has external ref count, just need to increase the external ref count,
+        // and keep the total ref count unchanged.
+        object->IncrementExternalRefCount();
+    }
     return object.Detach();
 }
 

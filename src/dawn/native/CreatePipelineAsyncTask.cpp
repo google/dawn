@@ -46,7 +46,8 @@ CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
     void* userdata)
     : mComputePipeline(std::move(nonInitializedComputePipeline)),
       mCallback(callback),
-      mUserdata(userdata) {
+      mUserdata(userdata),
+      mScopedUseShaderPrograms(mComputePipeline->UseShaderPrograms()) {
     DAWN_ASSERT(mComputePipeline != nullptr);
 }
 
@@ -66,9 +67,9 @@ void CreateComputePipelineAsyncTask::Run() {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateComputePipelineUS");
         maybeError = mComputePipeline->Initialize();
     }
+    mScopedUseShaderPrograms = {};
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateComputePipelineSuccess",
                            maybeError.IsSuccess());
-
     if (maybeError.IsError()) {
         device->AddComputePipelineAsyncCallbackTask(
             maybeError.AcquireError(), mComputePipeline->GetLabel().c_str(), mCallback, mUserdata);
@@ -83,6 +84,10 @@ void CreateComputePipelineAsyncTask::RunAsync(
 
     const char* eventLabel = utils::GetLabelForTrace(task->mComputePipeline->GetLabel().c_str());
 
+    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
+                            "CreateComputePipelineAsyncTask::RunAsync", task.get(), "label",
+                            eventLabel);
+
     // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
     // since C++14:
     // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
@@ -91,9 +96,6 @@ void CreateComputePipelineAsyncTask::RunAsync(
         innnerTaskPtr->Run();
     };
 
-    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
-                            "CreateComputePipelineAsyncTask::RunAsync", task.get(), "label",
-                            eventLabel);
     device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
 }
 
@@ -103,7 +105,8 @@ CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
     void* userdata)
     : mRenderPipeline(std::move(nonInitializedRenderPipeline)),
       mCallback(callback),
-      mUserdata(userdata) {
+      mUserdata(userdata),
+      mScopedUseShaderPrograms(mRenderPipeline->UseShaderPrograms()) {
     DAWN_ASSERT(mRenderPipeline != nullptr);
 }
 
@@ -123,9 +126,9 @@ void CreateRenderPipelineAsyncTask::Run() {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateRenderPipelineUS");
         maybeError = mRenderPipeline->Initialize();
     }
+    mScopedUseShaderPrograms = {};
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateRenderPipelineSuccess",
                            maybeError.IsSuccess());
-
     if (maybeError.IsError()) {
         device->AddRenderPipelineAsyncCallbackTask(
             maybeError.AcquireError(), mRenderPipeline->GetLabel().c_str(), mCallback, mUserdata);
@@ -139,6 +142,10 @@ void CreateRenderPipelineAsyncTask::RunAsync(std::unique_ptr<CreateRenderPipelin
 
     const char* eventLabel = utils::GetLabelForTrace(task->mRenderPipeline->GetLabel().c_str());
 
+    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
+                            "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
+                            eventLabel);
+
     // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
     // since C++14:
     // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
@@ -147,9 +154,6 @@ void CreateRenderPipelineAsyncTask::RunAsync(std::unique_ptr<CreateRenderPipelin
         innerTaskPtr->Run();
     };
 
-    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
-                            "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
-                            eventLabel);
     device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
 }
 }  // namespace dawn::native

@@ -34,6 +34,7 @@
 #include "dawn/common/Ref.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/Pipeline.h"
 #include "dawn/webgpu.h"
 
 namespace dawn::native {
@@ -62,6 +63,8 @@ class CreateComputePipelineAsyncTask {
     Ref<ComputePipelineBase> mComputePipeline;
     WGPUCreateComputePipelineAsyncCallback mCallback;
     void* mUserdata;
+    // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
+    PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };
 
 // CreateRenderPipelineAsyncTask defines all the inputs and outputs of
@@ -81,6 +84,8 @@ class CreateRenderPipelineAsyncTask {
     Ref<RenderPipelineBase> mRenderPipeline;
     WGPUCreateRenderPipelineAsyncCallback mCallback;
     void* mUserdata;
+    // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
+    PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };
 
 }  // namespace dawn::native
