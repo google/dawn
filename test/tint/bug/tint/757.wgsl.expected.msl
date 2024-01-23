@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct Constants {
   int level;
@@ -29,7 +30,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d_array<float, access::
   uint flatIndex = (((4u * GlobalInvocationID[2]) + (2u * GlobalInvocationID[1])) + GlobalInvocationID[0]);
   flatIndex = (flatIndex * 1u);
   float4 texel = tint_symbol_1.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
-  TINT_ISOLATE_UB for(uint i = 0u; (i < 1u); i = (i + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint i = 0u; (i < 1u); i = (i + 1u)) {
     (*(tint_symbol_2)).values[(flatIndex + i)] = texel[0];
   }
 }

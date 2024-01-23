@@ -2,8 +2,9 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_private_vars_struct {
   float2 v2f;
@@ -22,7 +23,7 @@ void foo(thread tint_private_vars_struct* const tint_private_vars) {
 
 kernel void tint_symbol() {
   thread tint_private_vars_struct tint_private_vars = {};
-  TINT_ISOLATE_UB for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
     foo(&(tint_private_vars));
   }
   return;

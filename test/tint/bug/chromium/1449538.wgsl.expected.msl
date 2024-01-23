@@ -2,25 +2,26 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 void f() {
-  TINT_ISOLATE_UB for(int i0520 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(int i0520 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i62 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_1) for(int i62 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i0520 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_2) for(int i0520 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i62 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_3) for(int i62 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i62 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_4) for(int i62 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i60 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_5) for(int i60 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i62 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_6) for(int i62 = 0; false; ) {
   }
-  TINT_ISOLATE_UB for(int i60 = 0; false; ) {
+  TINT_ISOLATE_UB(tint_volatile_true_7) for(int i60 = 0; false; ) {
   }
 }
 

@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_private_vars_struct {
   float2 tUV;
@@ -101,7 +102,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   float2 const x_111 = (*(tint_symbol_8)).stageSize;
   stageUnits = (float2(1.0f) / x_111);
   i = 0;
-  TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     int const x_122 = i;
     if ((x_122 < 2)) {
     } else {
@@ -137,7 +138,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
       float const x_184 = animationData[2];
       (*(tint_private_vars)).mt = fmod((x_181 * x_184), 1.0f);
       f = 0.0f;
-      TINT_ISOLATE_UB while(true) {
+      TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
         float const x_193 = f;
         if ((x_193 < 8.0f)) {
         } else {

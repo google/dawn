@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct S {
   int x;
@@ -24,7 +25,7 @@ struct S {
 };
 
 void compute_main_inner(uint local_invocation_index, threadgroup tint_array<S, 10>* const tint_symbol) {
-  TINT_ISOLATE_UB for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
     uint const i = idx;
     (*(tint_symbol))[i].x = 0;
     atomic_store_explicit(&((*(tint_symbol))[i].a), 0u, memory_order_relaxed);

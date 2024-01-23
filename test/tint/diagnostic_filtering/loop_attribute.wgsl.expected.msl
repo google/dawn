@@ -14,15 +14,16 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_symbol_2 {
   float x [[user(locn0)]];
 };
 
 void tint_symbol_inner(float x) {
-  TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     {
       if ((x > 0.0f)) { break; }
     }

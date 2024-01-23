@@ -2,17 +2,18 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 int f() {
   int i = 0;
   int j = 0;
-  TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     if ((i > 4)) {
       return 1;
     }
-    TINT_ISOLATE_UB while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       if ((j > 4)) {
         return 2;
       }

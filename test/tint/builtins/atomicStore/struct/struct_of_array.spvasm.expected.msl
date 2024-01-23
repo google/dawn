@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_private_vars_struct {
   uint local_invocation_index_1;
@@ -38,7 +39,7 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup S_atomic* con
   (*(tint_symbol)).x = 0;
   (*(tint_symbol)).y = 0u;
   idx = local_invocation_index_2;
-  TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     if (!((idx < 10u))) {
       break;
     }
@@ -64,7 +65,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param, thread tint_priva
     (*(tint_symbol_2)).x = 0;
     (*(tint_symbol_2)).y = 0u;
   }
-  TINT_ISOLATE_UB for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true_1) for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
     uint const i = idx_1;
     atomic_store_explicit(&((*(tint_symbol_2)).a[i]), 0u, memory_order_relaxed);
   }

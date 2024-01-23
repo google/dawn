@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct strided_arr {
   /* 0x0000 */ float el;
@@ -36,13 +37,13 @@ void assign_and_preserve_padding_4(device strided_arr* const dest, strided_arr v
 }
 
 void assign_and_preserve_padding_3(device tint_array<strided_arr, 2>* const dest, tint_array<strided_arr, 2> value) {
-  TINT_ISOLATE_UB for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint i = 0u; (i < 2u); i = (i + 1u)) {
     assign_and_preserve_padding_4(&((*(dest))[i]), value[i]);
   }
 }
 
 void assign_and_preserve_padding_2(device tint_array<tint_array<strided_arr, 2>, 3>* const dest, tint_array<tint_array<strided_arr, 2>, 3> value) {
-  TINT_ISOLATE_UB for(uint i = 0u; (i < 3u); i = (i + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true_1) for(uint i = 0u; (i < 3u); i = (i + 1u)) {
     assign_and_preserve_padding_3(&((*(dest))[i]), value[i]);
   }
 }
@@ -52,7 +53,7 @@ void assign_and_preserve_padding_1(device strided_arr_1* const dest, strided_arr
 }
 
 void assign_and_preserve_padding(device tint_array<strided_arr_1, 4>* const dest, tint_array<strided_arr_1, 4> value) {
-  TINT_ISOLATE_UB for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true_2) for(uint i = 0u; (i < 4u); i = (i + 1u)) {
     assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
   }
 }

@@ -3018,16 +3018,17 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
     return true;
 }
 
-std::string_view ASTPrinter::IsolateUB() {
+std::string ASTPrinter::IsolateUB() {
     if (isolate_ub_macro_name_.empty()) {
         isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
-        auto volatile_true = UniqueIdentifier("tint_volatile_true");
-        Line(&helpers_) << "#define " << isolate_ub_macro_name_ << " \\";
-        Line(&helpers_) << "  if (volatile bool " << volatile_true << " = true; " << volatile_true
-                        << ")";
+        Line(&helpers_) << "#define " << isolate_ub_macro_name_ << "(VOLATILE_NAME) \\";
+        Line(&helpers_) << "  volatile bool VOLATILE_NAME = true; \\";
+        Line(&helpers_) << "  if (VOLATILE_NAME)";
         Line(&helpers_);
     }
-    return isolate_ub_macro_name_;
+    StringStream ss;
+    ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_true") << ")";
+    return ss.str();
 }
 
 template <typename F>

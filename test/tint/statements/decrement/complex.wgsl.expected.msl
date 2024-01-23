@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_private_vars_struct {
   uint v;
@@ -63,7 +64,7 @@ void tint_symbol_1(thread tint_private_vars_struct* const tint_private_vars, dev
     int const tint_symbol_2_save_1 = tint_symbol_7;
     int const tint_symbol_3 = idx3(tint_private_vars);
     (*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3]) - as_type<uint>(1)));
-    TINT_ISOLATE_UB while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if (!(((*(tint_private_vars)).v < 10u))) {
         break;
       }

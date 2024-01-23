@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct LightData_tint_packed_vec3 {
   /* 0x0000 */ float4 position;
@@ -87,8 +88,8 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
   int const TILE_SIZE = 16;
   int const TILE_COUNT_X = 2;
   int const TILE_COUNT_Y = 2;
-  TINT_ISOLATE_UB for(int y = 0; (y < TILE_COUNT_Y); y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)))) {
-    TINT_ISOLATE_UB for(int x = 0; (x < TILE_COUNT_X); x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)))) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(int y = 0; (y < TILE_COUNT_Y); y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)))) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) for(int x = 0; (x < TILE_COUNT_X); x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)))) {
       int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_SIZE))));
       float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
       float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / (*(tint_symbol_3)).fullScreenSize.xy) - float2(1.0f));
@@ -99,7 +100,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
       frustumPlanes[2] = float4(0.0f, 1.0f, (-(viewFloorCoord[1]) / viewNear), 0.0f);
       frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord[1] / viewNear), 0.0f);
       float dp = 0.0f;
-      TINT_ISOLATE_UB for(uint i = 0u; (i < 6u); i = (i + 1u)) {
+      TINT_ISOLATE_UB(tint_volatile_true_2) for(uint i = 0u; (i < 6u); i = (i + 1u)) {
         float4 p = 0.0f;
         if ((frustumPlanes[i][0] > 0.0f)) {
           p[0] = boxMax[0];

@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_private_vars_struct {
   float u_Float;
@@ -333,7 +334,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, texture2d<
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
-  TINT_ISOLATE_UB while(true) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     int const x_388 = i;
     if ((x_388 < 15)) {
     } else {

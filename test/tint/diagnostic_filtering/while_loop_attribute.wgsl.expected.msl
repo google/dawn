@@ -14,8 +14,9 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct tint_symbol_2 {
   float x [[user(locn0)]];
@@ -23,7 +24,7 @@ struct tint_symbol_2 {
 
 void tint_symbol_inner(float x) {
   float4 v = float4(0.0f);
-  TINT_ISOLATE_UB while(((x > 0.0f) && (dfdx(1.0f) > 0.0f))) {
+  TINT_ISOLATE_UB(tint_volatile_true) while(((x > 0.0f) && (dfdx(1.0f) > 0.0f))) {
   }
 }
 

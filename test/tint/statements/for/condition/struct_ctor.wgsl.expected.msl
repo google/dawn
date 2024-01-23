@@ -2,8 +2,9 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct S {
   int i;
@@ -11,7 +12,7 @@ struct S {
 
 void f() {
   int i = 0;
-  TINT_ISOLATE_UB for(; (i < 1); ) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(; (i < 1); ) {
   }
 }
 

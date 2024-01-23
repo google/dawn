@@ -2,13 +2,14 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 void foo(texture2d<int, access::read_write> tint_symbol) {
   {
     int i = 0;
-    TINT_ISOLATE_UB while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if (!((i < 3))) {
         break;
       }

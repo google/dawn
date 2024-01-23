@@ -2,11 +2,12 @@
 
 using namespace metal;
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 void tint_symbol(device uint* const tint_symbol_1) {
-  TINT_ISOLATE_UB for(; (*(tint_symbol_1) < 10u); *(tint_symbol_1) = (*(tint_symbol_1) - 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(; (*(tint_symbol_1) < 10u); *(tint_symbol_1) = (*(tint_symbol_1) - 1u)) {
   }
 }
 

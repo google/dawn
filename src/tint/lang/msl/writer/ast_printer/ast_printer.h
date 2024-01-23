@@ -380,8 +380,8 @@ class ASTPrinter : public tint::TextGenerator {
 
     /// Lazilly generates the TINT_ISOLATE_UB macro, used to prevent UB statements from affecting
     /// later logic.
-    /// @return the unique name of the TINT_ISOLATE_UB macro.
-    std::string_view IsolateUB();
+    /// @return the MSL to call the TINT_ISOLATE_UB macro.
+    std::string IsolateUB();
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin

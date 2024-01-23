@@ -14,8 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB \
-  if (volatile bool tint_volatile_true = true; tint_volatile_true)
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
 
 struct str {
   int i;
@@ -27,7 +28,7 @@ void func(threadgroup str* const pointer) {
 }
 
 void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<str, 4>* const tint_symbol_3) {
-  TINT_ISOLATE_UB for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     uint const i_1 = idx;
     str const tint_symbol_1 = str{};
     (*(tint_symbol_3))[i_1] = tint_symbol_1;
