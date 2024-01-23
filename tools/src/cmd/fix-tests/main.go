@@ -168,7 +168,9 @@ func processFailure(test, wd, failure string) error {
 	// Matched regex strings will also need to be un-escaped, but do this after
 	// the match, as unescaped quotes may upset the regex patterns
 	unescape := func(s string) string {
-		return strings.ReplaceAll(s, `\"`, `"`)
+		s = strings.ReplaceAll(s, `\"`, `"`)
+		s = strings.ReplaceAll(s, `\\`, `\`)
+		return s
 	}
 	escape := func(s string) string {
 		s = strings.ReplaceAll(s, "\n", `\n`)
