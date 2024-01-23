@@ -29,11 +29,14 @@
 #define SRC_DAWN_NATIVE_METAL_SHAREDTEXTUREMEMORYMTL_H_
 
 #include <IOSurface/IOSurfaceRef.h>
+#import <Metal/Metal.h>
 #include <vector>
 
 #include "dawn/common/CoreFoundationRef.h"
+#include "dawn/common/NSRef.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/SharedTextureMemory.h"
+#include "dawn/native/Subresource.h"
 
 namespace dawn::native::metal {
 
@@ -48,12 +51,19 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
         const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
 
     IOSurfaceRef GetIOSurface() const;
+    const StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat>& GetMtlPlaneTextures() const;
+    MTLTextureUsage GetMtlTextureUsage() const;
+    MTLPixelFormat GetMtlPixelFormat() const;
 
   private:
     SharedTextureMemory(Device* device,
                         const char* label,
                         const SharedTextureMemoryProperties& properties,
                         IOSurfaceRef ioSurface);
+    // Performs initialization of the base class followed by Metal-specific
+    // initialization.
+    MaybeError Initialize();
+
     void DestroyImpl() override;
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
@@ -62,7 +72,11 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                                const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
                                                      UnpackedPtr<EndAccessState>& state) override;
+    MaybeError CreateMtlTextures();
 
+    StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
+    MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
+    MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface;
 };
 

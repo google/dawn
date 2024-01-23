@@ -49,16 +49,6 @@ namespace dawn::native::metal {
 
 namespace {
 
-// NOTE: When creating MTLTextures from IOSurfaces vended by
-// SharedTextureMemory, we pass all Metal texture usages. This will facilitate an
-// upcoming change to have SharedTextureMemory cache MTLTextures. See
-// discussion in https://bugs.chromium.org/p/dawn/issues/detail?id=2152#c14 and
-// following comments for both (a) why this is necessary and (b) why it is not
-// harmful to performance.
-const MTLTextureUsage kMetalTextureUsageForSharedTextureMemoryIOSurface =
-    MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead | MTLTextureUsagePixelFormatView |
-    MTLTextureUsageRenderTarget;
-
 MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage) {
     MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
@@ -412,49 +402,9 @@ MaybeError Texture::InitializeFromSharedTextureMemory(
         GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
 
     mIOSurface = memory->GetIOSurface();
-
-    Device* device = ToBackend(GetDevice());
-
-    // NOTE: The texture is guaranteed to be 2D/single-sampled/array length of
-    // 1/single mipmap level per SharedTextureMemory semantics and validation.
-    if (!GetFormat().IsMultiPlanar()) {
-        // Create the descriptor for the Metal texture.
-        NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-        MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
-
-        mtlDesc.storageMode = IOSurfaceStorageMode();
-        mtlDesc.width = GetBaseSize().width;
-        mtlDesc.height = GetBaseSize().height;
-        // NOTE: MetalTextureDescriptor defaults to the values mentioned above
-        // for the given parameters, so none of these need to be set explicitly.
-
-        // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
-        // between linear space and sRGB. For example, creating bgra8Unorm texture view on
-        // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
-        mtlDesc.usage = kMetalTextureUsageForSharedTextureMemoryIOSurface;
-        mtlDesc.pixelFormat = MetalPixelFormat(GetDevice(), GetFormat().format);
-
-        mMtlUsage = mtlDesc.usage;
-        mMtlFormat = mtlDesc.pixelFormat;
-        mMtlPlaneTextures->resize(1);
-        mMtlPlaneTextures[0] =
-            AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
-                                                                 iosurface:mIOSurface.Get()
-                                                                     plane:0]);
-    } else {
-        mMtlUsage = kMetalTextureUsageForSharedTextureMemoryIOSurface;
-        // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
-        mMtlFormat = MTLPixelFormatInvalid;
-        const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
-        mMtlPlaneTextures->resize(numPlanes);
-        for (size_t plane = 0; plane < numPlanes; ++plane) {
-            mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
-                mMtlUsage, GetFormat(), plane, device, /*sampleCount=*/1, GetIOSurface()));
-            if (mMtlPlaneTextures[plane] == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
-            }
-        }
-    }
+    mMtlUsage = memory->GetMtlTextureUsage();
+    mMtlFormat = memory->GetMtlPixelFormat();
+    mMtlPlaneTextures = memory->GetMtlPlaneTextures();
 
     SetLabelImpl();
 
