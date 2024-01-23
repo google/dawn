@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-01-22 07:55:19AM
+# Last rolled: 2024-01-23 10:06:16AM
 
 # Flaky on all platforms
 # KEEP
@@ -564,7 +564,7 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,memory_sync,texture,readonly_depth_stencil:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="compute";textureDimension="2d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="compute";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
