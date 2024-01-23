@@ -178,7 +178,7 @@ function(AddSubdirectoryDXC)
     set(CLANG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(CLANG_INCLUDE_TESTS OFF CACHE BOOL "" FORCE)
 
-    set(DIRECTX_HEADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/dxheaders/include")
+    set(DIRECTX_HEADER_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/third_party/dxheaders/include")
 
     # Disable HCT.cmake looking for and using clang-format. This is used to compare generated files
     # against the copy that is committed to the repo, but fails because the DXC .clangformat file is
