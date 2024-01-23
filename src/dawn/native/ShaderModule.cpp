@@ -1292,14 +1292,19 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
 }
 
 ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
-    mTintData.Use([&](auto tintData) {
-        // When the ShaderModuleBase is not referenced externally, and not used for initializing any
-        // pipeline, the mTintProgram will be released. However the ShaderModuleBase itself may
-        // still alive due to being referenced by some pipelines. In this case, when
-        // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look up
-        // from the cache and return the same ShaderModuleBase. In this case, we have to recreate
-        // mTintProgram, when the mTintProgram is required for initializing new pipelines.
-        if (tintData->tintProgram == nullptr) {
+    return mTintData.Use(
+        [&](auto tintData) {
+            if (tintData->tintProgram) {
+                return ScopedUseTintProgram(this);
+            }
+
+            // When the ShaderModuleBase is not referenced externally, and not used for initializing
+            // any pipeline, the mTintProgram will be released. However the ShaderModuleBase itself
+            // may still alive due to being referenced by some pipelines. In this case, when
+            // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look
+            // up from the cache and return the same ShaderModuleBase. In this case, we have to
+            // recreate mTintProgram, when the mTintProgram is required for initializing new
+            // pipelines.
             ShaderModuleDescriptor descriptor;
             ShaderModuleWGSLDescriptor wgslDescriptor;
             ShaderModuleSPIRVDescriptor sprivDescriptor;
@@ -1326,10 +1331,9 @@ ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
 
             tintData->tintProgram = std::move(parseResult.tintProgram);
             tintData->tintProgramRecreateCount++;
-        }
-    });
 
-    return ScopedUseTintProgram(this);
+            return ScopedUseTintProgram(this);
+        });
 }
 
 Ref<TintProgram> ShaderModuleBase::GetTintProgram() const {
