@@ -67,13 +67,6 @@ struct SanitizedResult {
 
     /// The sanitized program.
     Program program;
-
-    /// True if the shader needs a UBO.
-    bool needs_internal_uniform_buffer = false;
-
-    /// Store a map of global texture variable binding point to the byte offset and data type to
-    /// push into the internal uniform buffer.
-    TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset bindpoint_to_data;
 };
 
 /// Sanitize a program in preparation for generating GLSL.

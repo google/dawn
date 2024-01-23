@@ -1040,6 +1040,8 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
     std::cerr << "GLSL writer not enabled in tint build" << std::endl;
     return false;
 #else
+    tint::inspector::Inspector inspector(program);
+
     auto generate = [&](const tint::Program& prg, const std::string entry_point_name,
                         [[maybe_unused]] tint::ast::PipelineStage stage) -> bool {
         tint::glsl::writer::Options gen_options;
@@ -1049,7 +1051,20 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
         tint::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
         constexpr uint32_t kMaxBindGroups = 4u;
+
         textureBuiltinsFromUniform.ubo_binding = {kMaxBindGroups, 0u};
+
+        auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entry_point_name);
+        if (!textureBuiltinsFromUniformData.empty()) {
+            for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
+                const auto& info = textureBuiltinsFromUniformData[i];
+
+                // This is the unmodified binding point from the WGSL shader.
+                tint::BindingPoint srcBindingPoint{info.group, info.binding};
+                textureBuiltinsFromUniform.ubo_bindingpoint_ordering.emplace_back(srcBindingPoint);
+            }
+        }
+
         gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
 
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
@@ -1085,8 +1100,6 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         }
         return true;
     };
-
-    tint::inspector::Inspector inspector(program);
 
     if (inspector.GetEntryPoints().empty()) {
         // Pass empty string here so that the GLSL generator will generate

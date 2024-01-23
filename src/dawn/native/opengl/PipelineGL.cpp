@@ -212,8 +212,7 @@ const Buffer* PipelineGL::GetInternalUniformBuffer() const {
     return mTextureBuiltinsBuffer.Get();
 }
 
-const tint::TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset&
-PipelineGL::GetBindingPointBuiltinDataInfo() const {
+const BindingPointToFunctionAndOffset& PipelineGL::GetBindingPointBuiltinDataInfo() const {
     return mBindingPointEmulatedBuiltins;
 }
 

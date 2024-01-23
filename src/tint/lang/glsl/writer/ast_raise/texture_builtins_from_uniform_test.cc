@@ -36,53 +36,6 @@ namespace {
 
 using TextureBuiltinsFromUniformTest = ast::transform::TransformTest;
 
-TEST_F(TextureBuiltinsFromUniformTest, ShouldRunEmptyModule) {
-    auto* src = R"()";
-
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
-
-    ast::transform::DataMap data;
-    data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
-
-    EXPECT_FALSE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
-}
-
-TEST_F(TextureBuiltinsFromUniformTest, ShouldRunNoTextureNumLevels) {
-    auto* src = R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
-
-@compute @workgroup_size(1)
-fn main() {
-  _ = textureDimensions(t);
-}
-)";
-
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
-
-    ast::transform::DataMap data;
-    data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
-
-    EXPECT_FALSE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
-}
-
-TEST_F(TextureBuiltinsFromUniformTest, ShouldRunWithTextureNumLevels) {
-    auto* src = R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
-
-@compute @workgroup_size(1)
-fn main() {
-  var len : u32 = textureNumLevels(t);
-}
-)";
-
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
-
-    ast::transform::DataMap data;
-    data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
-
-    EXPECT_TRUE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
-}
-
 TEST_F(TextureBuiltinsFromUniformTest, Error_MissingTransformData) {
     auto* src = R"(
 @group(0) @binding(0) var t : texture_2d<f32>;
@@ -126,25 +79,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    // Note: Using the following EXPECT_EQ directly on BindingPointToFieldAndOffset seems to cause
-    // compiler to hang. EXPECT_EQ(
-    //     TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset{
-    //         {BindgPoint{0u, 0u},
-    //          std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u)}},
-    //     val->bindpoint_to_data);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, BasicTextureNumSamples) {
@@ -172,19 +114,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumSamples, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimes) {
@@ -214,19 +151,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimesTextureNumSamples) {
@@ -256,19 +188,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumSamples, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, TextureAsFunctionParameterBasic) {
@@ -304,19 +231,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, TextureAsFunctionParameterUsedTwice) {
@@ -356,19 +278,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, TextureAsFunctionParameterMultipleParameters) {
@@ -412,23 +329,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}, {0, 1}, {0, 2}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(3u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 4u),
-              val->bindpoint_to_data.at(BindingPoint{0, 1}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 8u),
-              val->bindpoint_to_data.at(BindingPoint{0, 2}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, TextureAsFunctionParameterNested) {
@@ -472,19 +380,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(1u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, TextureAsFunctionParameterMixed) {
@@ -549,25 +452,14 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 1}, {0, 3}, {0, 0}, {0, 2}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(4u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 1}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 4u),
-              val->bindpoint_to_data.at(BindingPoint{0, 3}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 8u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 12u),
-              val->bindpoint_to_data.at(BindingPoint{0, 2}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, MultipleTextures) {
@@ -625,7 +517,8 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
@@ -633,21 +526,6 @@ fn main() {
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
 
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(6u, val->bindpoint_to_data.size());
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumSamples, 4u),
-              val->bindpoint_to_data.at(BindingPoint{0, 1}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 8u),
-              val->bindpoint_to_data.at(BindingPoint{0, 2}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 12u),
-              val->bindpoint_to_data.at(BindingPoint{0, 3}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 16u),
-              val->bindpoint_to_data.at(BindingPoint{0, 4}));
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumSamples, 20u),
-              val->bindpoint_to_data.at(BindingPoint{1, 0}));
 }
 
 TEST_F(TextureBuiltinsFromUniformTest, BindingPointExist) {
@@ -682,7 +560,8 @@ fn main() {
 }
 )";
 
-    TextureBuiltinsFromUniform::Config cfg({0, 30u});
+    std::vector<BindingPoint> bps = {{0, 0}};
+    TextureBuiltinsFromUniform::Config cfg({0, 30u}, bps);
 
     ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
@@ -690,10 +569,6 @@ fn main() {
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
 
     EXPECT_EQ(expect, str(got));
-    auto* val = got.data.Get<TextureBuiltinsFromUniform::Result>();
-    ASSERT_NE(val, nullptr);
-    EXPECT_EQ(std::make_pair(TextureBuiltinsFromUniformOptions::Field::TextureNumLevels, 0u),
-              val->bindpoint_to_data.at(BindingPoint{0, 0}));
 }
 
 }  // namespace

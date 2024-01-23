@@ -55,7 +55,6 @@ if (tint_build_glsl_writer) {
     ]
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
@@ -96,7 +95,6 @@ if (tint_build_unittests) {
       deps = [
         "${tint_src_dir}:gmock_and_gtest",
         "${tint_src_dir}/api/common",
-        "${tint_src_dir}/api/options",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/ir",

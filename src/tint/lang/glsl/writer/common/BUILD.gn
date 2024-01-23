@@ -49,7 +49,6 @@ if (tint_build_glsl_writer) {
     deps = [
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/api/options",
-      "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",

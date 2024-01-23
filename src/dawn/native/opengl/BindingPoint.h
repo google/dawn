@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,59 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/writer.h"
+#ifndef SRC_DAWN_NATIVE_OPENGL_BINDPOINT_H_
+#define SRC_DAWN_NATIVE_OPENGL_BINDPOINT_H_
 
-#include <memory>
+#include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/glsl/writer/ast_printer/ast_printer.h"
-#include "src/tint/lang/glsl/writer/printer/printer.h"
-#include "src/tint/lang/glsl/writer/raise/raise.h"
+#include "src/tint/api/common/binding_point.h"
 
-namespace tint::glsl::writer {
+namespace dawn::native::opengl {
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
-    Output output;
+/// Indicate the type of field for each entry to push.
+enum class BindPointFunction : uint8_t {
+    /// The number of MIP levels of the bound texture view.
+    kTextureNumLevels,
+    /// The number of samples per texel of the bound multi-sampled texture.
+    kTextureNumSamples,
+};
 
-    // Raise from core-dialect to GLSL-dialect.
-    if (auto res = Raise(ir); res != Success) {
-        return res.Failure();
-    }
+/// Records the field and the byte offset of the data to push in the internal uniform buffer.
+using FunctionAndOffset = std::pair<BindPointFunction, uint32_t>;
+/// Maps from binding point to data entry with the information to populate the data.
+using BindingPointToFunctionAndOffset = std::unordered_map<tint::BindingPoint, FunctionAndOffset>;
 
-    // Generate the GLSL code.
-    auto result = Print(ir, options.version);
-    if (result != Success) {
-        return result.Failure();
-    }
-    output.glsl = result.Get();
+}  // namespace dawn::native::opengl
 
-    return output;
-}
-
-Result<Output> Generate(const Program& program,
-                        const Options& options,
-                        const std::string& entry_point) {
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
-    }
-
-    Output output;
-
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options, entry_point);
-    if (!sanitized_result.program.IsValid()) {
-        return Failure{sanitized_result.program.Diagnostics()};
-    }
-
-    // Generate the GLSL code.
-    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program, options.version);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics()};
-    }
-
-    output.glsl = impl->Result();
-
-    return output;
-}
-
-}  // namespace tint::glsl::writer
+#endif  // SRC_DAWN_NATIVE_OPENGL_BINDPOINT_H_

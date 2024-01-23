@@ -217,11 +217,10 @@ SanitizedResult Sanitize(const Program& in,
     // TextureBuiltinsFromUniform must come before CombineSamplers to preserve texture binding point
     // info, instead of combined sampler binding point. As a result, TextureBuiltinsFromUniform also
     // comes before BindingRemapper so the binding point info it reflects is before remapping.
-    if (options.texture_builtins_from_uniform) {
-        manager.Add<TextureBuiltinsFromUniform>();
-        data.Add<TextureBuiltinsFromUniform::Config>(
-            options.texture_builtins_from_uniform->ubo_binding);
-    }
+    manager.Add<TextureBuiltinsFromUniform>();
+    data.Add<TextureBuiltinsFromUniform::Config>(
+        options.texture_builtins_from_uniform.ubo_binding,
+        options.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
 
     data.Add<CombineSamplers::BindingInfo>(options.binding_map, options.placeholder_binding_point);
     manager.Add<CombineSamplers>();
@@ -249,10 +248,6 @@ SanitizedResult Sanitize(const Program& in,
     SanitizedResult result;
     ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);
-    if (auto* res = outputs.Get<TextureBuiltinsFromUniform::Result>()) {
-        result.needs_internal_uniform_buffer = true;
-        result.bindpoint_to_data = std::move(res->bindpoint_to_data);
-    }
     return result;
 }
 

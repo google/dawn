@@ -28,14 +28,12 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 
-#include <optional>
 #include <string>
 #include <unordered_map>
 
 #include "src/tint/api/options/binding_remapper.h"
 #include "src/tint/api/options/external_texture.h"
 #include "src/tint/api/options/texture_builtins_from_uniform.h"
-#include "src/tint/lang/core/access.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 
@@ -83,7 +81,7 @@ struct Options {
     /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
     /// buffer values. If not specified, emits corresponding GLSL builtins
     /// textureQueryLevels/textureSamples directly.
-    std::optional<TextureBuiltinsFromUniformOptions> texture_builtins_from_uniform = std::nullopt;
+    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,

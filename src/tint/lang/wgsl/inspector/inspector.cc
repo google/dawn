@@ -1141,6 +1141,7 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
                 });
         }
     }
+
     return res;
 }
 

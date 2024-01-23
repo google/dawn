@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
 
-#include <memory>
-#include <queue>
 #include <string>
 #include <utility>
 #include <variant>
@@ -49,7 +47,6 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform::Config);
-TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform::Result);
 
 namespace tint::glsl::writer {
 
@@ -58,27 +55,10 @@ namespace {
 /// The member name of the texture builtin values.
 constexpr std::string_view kTextureBuiltinValuesMemberNamePrefix = "texture_builtin_value_";
 
-bool ShouldRun(const Program& program) {
-    for (auto* fn : program.AST().Functions()) {
-        if (auto* sem_fn = program.Sem().Get(fn)) {
-            for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
-                // GLSL ES  has no native support for the counterpart of
-                // textureNumLevels (textureQueryLevels) and textureNumSamples (textureSamples)
-                if (builtin->Fn() == wgsl::BuiltinFn::kTextureNumLevels) {
-                    return true;
-                }
-                if (builtin->Fn() == wgsl::BuiltinFn::kTextureNumSamples) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
 }  // namespace
 
 TextureBuiltinsFromUniform::TextureBuiltinsFromUniform() = default;
+
 TextureBuiltinsFromUniform::~TextureBuiltinsFromUniform() = default;
 
 /// PIMPL state for the transform
@@ -86,11 +66,8 @@ struct TextureBuiltinsFromUniform::State {
     /// Constructor
     /// @param program the source program
     /// @param in the input transform data
-    /// @param out the output transform data
-    explicit State(const Program& program,
-                   const ast::transform::DataMap& in,
-                   ast::transform::DataMap& out)
-        : src(program), inputs(in), outputs(out) {}
+    explicit State(const Program& program, const ast::transform::DataMap& in)
+        : src(program), inputs(in) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -103,12 +80,14 @@ struct TextureBuiltinsFromUniform::State {
                     std::string(tint::TypeInfo::Of<TextureBuiltinsFromUniform>().name));
             return resolver::Resolve(b);
         }
+        ubo_bindingpoint_ordering = cfg->ubo_bindingpoint_ordering;
 
-        if (!ShouldRun(src)) {
+        // If there's no interested texture builtin at all, skip the transform.
+        if (ubo_bindingpoint_ordering.empty()) {
             return SkipTransform;
         }
 
-        // The dependency order declartions guaranteed that we traverse interested functions in the
+        // The dependency order declarations guaranteed that we traverse interested functions in the
         // following order:
         // 1. texture builtins
         // 2. user function directly calls texture builtins
@@ -143,21 +122,17 @@ struct TextureBuiltinsFromUniform::State {
                             auto* texture_sem = sem.GetVal(texture_expr)->RootIdentifier();
                             TINT_ASSERT(texture_sem);
 
-                            TextureBuiltinsFromUniformOptions::Field dataType =
-                                GetFieldFromBuiltinFunctionType(builtin->Fn());
-
                             tint::Switch(
                                 texture_sem,
                                 [&](const sem::GlobalVariable* global) {
                                     // This texture variable is a global variable.
-                                    auto binding = GetAndRecordGlobalBinding(global, dataType);
+                                    auto binding = GetGlobalBinding(global);
                                     // Record the call and binding to be replaced later.
                                     builtin_to_replace.Add(call_expr, binding);
                                 },
                                 [&](const sem::Variable* variable) {
                                     // This texture variable is a user function parameter.
-                                    auto new_param =
-                                        GetAndRecordFunctionParameter(fn, variable, dataType);
+                                    auto new_param = GetAndRecordFunctionParameter(fn, variable);
                                     // Record the call and new_param to be replaced later.
                                     builtin_to_replace.Add(call_expr, new_param);
                                 },  //
@@ -187,15 +162,14 @@ struct TextureBuiltinsFromUniform::State {
                                         texture_sem,
                                         [&](const sem::GlobalVariable* global) {
                                             // This texture variable is a global variable.
-                                            auto binding =
-                                                GetAndRecordGlobalBinding(global, info->field);
+                                            auto binding = GetGlobalBinding(global);
                                             // Record the binding to add to args.
                                             args.Push(binding);
                                         },
                                         [&](const sem::Variable* variable) {
                                             // This texture variable is a user function parameter.
-                                            auto new_param = GetAndRecordFunctionParameter(
-                                                fn, variable, info->field);
+                                            auto new_param =
+                                                GetAndRecordFunctionParameter(fn, variable);
                                             // Record adding extra function parameter
                                             args.Push(new_param);
                                         },  //
@@ -205,11 +179,6 @@ struct TextureBuiltinsFromUniform::State {
                         });
                 }
             }
-        }
-
-        // If there's no interested texture builtin at all, skip the transform.
-        if (bindpoint_to_data.empty()) {
-            return SkipTransform;
         }
 
         // If any functions need extra params, add them now.
@@ -263,8 +232,6 @@ struct TextureBuiltinsFromUniform::State {
             }
         }
 
-        outputs.Add<Result>(bindpoint_to_data);
-
         ctx.Clone();
         return resolver::Resolve(b);
     }
@@ -274,8 +241,6 @@ struct TextureBuiltinsFromUniform::State {
     const Program& src;
     /// The transform inputs
     const ast::transform::DataMap& inputs;
-    /// The transform outputs
-    ast::transform::DataMap& outputs;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
@@ -283,19 +248,10 @@ struct TextureBuiltinsFromUniform::State {
     /// Alias to the semantic info in ctx.src
     const sem::Info& sem = src.Sem();
 
-    /// The bindpoint to byte offset and field to pass out in transform result.
-    /// For one texture type, it could only be passed into one of the
-    /// textureNumLevels or textureNumSamples because their accepting param texture
-    /// type is different. There cannot be a binding entry with both field type.
-    /// Note: because this transform must be run before CombineSampler and BindingRemapper,
-    /// the binding number here is before remapped.
-    Result::BindingPointToFieldAndOffset bindpoint_to_data;
+    /// Ordered list of binding points for where they appear in the UBO
+    std::vector<BindingPoint> ubo_bindingpoint_ordering;
 
     struct FunctionExtraParamInfo {
-        using Field = TextureBuiltinsFromUniformOptions::Field;
-        // The kind of texture information this parameter holds.
-        Field field = Field::TextureNumLevels;
-
         // The extra passed in param that corresponds to the texture param.
         const ast::Parameter* param = nullptr;
 
@@ -337,6 +293,7 @@ struct TextureBuiltinsFromUniform::State {
 
     /// The internal uniform buffer
     const ast::Variable* ubo = nullptr;
+
     /// Get or create a UBO including u32 scalars for texture builtin values.
     /// @returns the symbol of the uniform buffer variable.
     Symbol GetUboSym() {
@@ -348,15 +305,13 @@ struct TextureBuiltinsFromUniform::State {
         auto* cfg = inputs.Get<Config>();
 
         Vector<const ast::StructMember*, 16> new_members;
-        new_members.Resize(bindpoint_to_data.size());
-        for (auto it : bindpoint_to_data) {
-            // Emit a u32 scalar for each binding that needs builtin value passed in.
-            size_t i = it.second.second / sizeof(uint32_t);
-            TINT_ASSERT(i < new_members.Length());
+        new_members.Resize(ubo_bindingpoint_ordering.size());
+
+        for (size_t i = 0; i < ubo_bindingpoint_ordering.size(); ++i) {
             // Append the vector index with the variable name to avoid unstable naming issue.
             auto sym = b.Symbols().New(std::string(kTextureBuiltinValuesMemberNamePrefix) +
                                        std::to_string(i));
-            bindpoint_to_syms.Add(it.first, sym);
+            bindpoint_to_syms.Add(ubo_bindingpoint_ordering[i], sym);
             new_members[i] = b.Member(sym, b.ty.u32());
         }
 
@@ -403,48 +358,31 @@ struct TextureBuiltinsFromUniform::State {
     /// @param binding of the global variable.
     /// @returns an expression of the builtin value.
     const ast::Expression* GetUniformValue(const BindingPoint& binding) {
-        auto iter = bindpoint_to_data.find(binding);
-        TINT_ASSERT(iter != bindpoint_to_data.end());
-
         // Make sure GetUboSym() is called first to initialize the uniform buffer struct.
         auto ubo_sym = GetUboSym();
+
         // Load the builtin value from the UBO.
         auto member_sym = bindpoint_to_syms.Get(binding);
         TINT_ASSERT(member_sym.has_value());
-        auto* builtin_value = b.MemberAccessor(ubo_sym, *member_sym);
 
-        return builtin_value;
+        return b.MemberAccessor(ubo_sym, *member_sym);
     }
 
-    /// Get and return the binding of the global texture variable. Record in bindpoint_to_data if
-    /// first visited.
+    /// Get and return the binding of the global texture variable.
     /// @param global global variable of the texture variable.
-    /// @param field type of the interested builtin function data related to this texture.
     /// @returns binding of the global variable.
-    BindingPoint GetAndRecordGlobalBinding(const sem::GlobalVariable* global,
-                                           TextureBuiltinsFromUniformOptions::Field field) {
-        auto binding = global->Attributes().binding_point.value();
-        auto iter = bindpoint_to_data.find(binding);
-        if (iter == bindpoint_to_data.end()) {
-            // First visit, recording the binding.
-            uint32_t index = static_cast<uint32_t>(bindpoint_to_data.size());
-            bindpoint_to_data.emplace(
-                binding,
-                Result::FieldAndOffset{field, index * static_cast<uint32_t>(sizeof(uint32_t))});
-        }
-        return binding;
+    BindingPoint GetGlobalBinding(const sem::GlobalVariable* global) {
+        return global->Attributes().binding_point.value();
     }
 
     /// Find which function param is the given texture variable.
-    /// Add a new u32 param relates to this texture param. Record in fn_to_data if first visited.
+    /// Add a new u32 param relates to this texture param. Record in fn_to_data if first
+    /// visited.
     /// @param fn the current function scope.
     /// @param var the texture variable.
-    /// @param field type of the interested builtin function data related to this texture.
     /// @returns the new u32 function parameter.
-    const ast::Parameter* GetAndRecordFunctionParameter(
-        const sem::Function* fn,
-        const sem::Variable* var,
-        TextureBuiltinsFromUniformOptions::Field field) {
+    const ast::Parameter* GetAndRecordFunctionParameter(const sem::Function* fn,
+                                                        const sem::Variable* var) {
         auto& param_to_info = fn_to_data.GetOrCreate(
             fn, [&] { return Hashmap<const ast::Parameter*, FunctionExtraParamInfo, 4>(); });
 
@@ -456,50 +394,36 @@ struct TextureBuiltinsFromUniform::State {
             }
         }
         TINT_ASSERT(param);
+
         // Get or record a new u32 param to this function if first visited.
         auto entry = param_to_info.Get(param);
         if (entry.has_value()) {
             return entry->param;
         }
+
         const ast::Parameter* new_param = b.Param(b.Sym(), b.ty.u32());
         size_t idx = param_to_info.Count();
-        param_to_info.Add(param, FunctionExtraParamInfo{field, new_param, idx});
+        param_to_info.Add(param, FunctionExtraParamInfo{new_param, idx});
         return new_param;
-    }
-
-    /// Get the uniform options field for the builtin function.
-    /// @param type of the builtin function
-    /// @returns corresponding TextureBuiltinsFromUniformOptions::Field for the builtin
-    static TextureBuiltinsFromUniformOptions::Field GetFieldFromBuiltinFunctionType(
-        wgsl::BuiltinFn type) {
-        switch (type) {
-            case wgsl::BuiltinFn::kTextureNumLevels:
-                return TextureBuiltinsFromUniformOptions::Field::TextureNumLevels;
-            case wgsl::BuiltinFn::kTextureNumSamples:
-                return TextureBuiltinsFromUniformOptions::Field::TextureNumSamples;
-            default:
-                TINT_UNREACHABLE() << "unsupported builtin function type " << type;
-        }
-        return TextureBuiltinsFromUniformOptions::Field::TextureNumLevels;
     }
 };
 
 ast::transform::Transform::ApplyResult TextureBuiltinsFromUniform::Apply(
     const Program& src,
     const ast::transform::DataMap& inputs,
-    ast::transform::DataMap& outputs) const {
-    return State{src, inputs, outputs}.Run();
+    ast::transform::DataMap&) const {
+    return State{src, inputs}.Run();
 }
 
-TextureBuiltinsFromUniform::Config::Config(BindingPoint ubo_bp) : ubo_binding(ubo_bp) {}
+TextureBuiltinsFromUniform::Config::Config(BindingPoint ubo_bp,
+                                           const std::vector<BindingPoint>& ordering)
+    : ubo_binding(ubo_bp), ubo_bindingpoint_ordering(ordering) {}
+
 TextureBuiltinsFromUniform::Config::Config(const Config&) = default;
+
 TextureBuiltinsFromUniform::Config& TextureBuiltinsFromUniform::Config::operator=(const Config&) =
     default;
-TextureBuiltinsFromUniform::Config::~Config() = default;
 
-TextureBuiltinsFromUniform::Result::Result(BindingPointToFieldAndOffset bindpoint_to_data_in)
-    : bindpoint_to_data(std::move(bindpoint_to_data_in)) {}
-TextureBuiltinsFromUniform::Result::Result(const Result&) = default;
-TextureBuiltinsFromUniform::Result::~Result() = default;
+TextureBuiltinsFromUniform::Config::~Config() = default;
 
 }  // namespace tint::glsl::writer

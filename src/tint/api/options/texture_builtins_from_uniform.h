@@ -28,8 +28,7 @@
 #ifndef SRC_TINT_API_OPTIONS_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 #define SRC_TINT_API_OPTIONS_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 
-#include <unordered_map>
-#include <utility>
+#include <vector>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/utils/reflection/reflection.h"
@@ -39,25 +38,16 @@ namespace tint {
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load buffer sizes.
 struct TextureBuiltinsFromUniformOptions {
-    /// Indicate the type of field for each entry to push.
-    enum class Field {
-        /// The number of mip levels of the bonnd texture view.
-        TextureNumLevels,
-        /// The number of samples per texel of the bound multipsampled texture.
-        TextureNumSamples,
-    };
-
-    /// Records the field and the byte offset of the data to push in the internal uniform buffer.
-    using FieldAndOffset = std::pair<Field, uint32_t>;
-    /// Maps from binding point to data entry with the information to populate the data.
-    using BindingPointToFieldAndOffset = std::unordered_map<BindingPoint, FieldAndOffset>;
-
     /// The binding point to use to generate a uniform buffer from which to read
     /// buffer sizes.
     BindingPoint ubo_binding = {};
 
+    /// Ordered list of binding points in the uniform buffer for polyfilling `textureNumSamples` and
+    /// `textureNumLevels`
+    std::vector<BindingPoint> ubo_bindingpoint_ordering = {};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ubo_binding);
+    TINT_REFLECT(ubo_binding, ubo_bindingpoint_ordering);
 };
 
 }  // namespace tint

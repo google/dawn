@@ -38,6 +38,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/RenderBundle.h"
+#include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/ComputePipelineGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -430,15 +431,15 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         }
 
         // Update data by retrieving information from texture view object.
-        const tint::TextureBuiltinsFromUniformOptions::Field field = iter->second.first;
+        const BindPointFunction field = iter->second.first;
         const size_t byteOffset = static_cast<size_t>(iter->second.second);
 
         uint32_t data;
         switch (field) {
-            case tint::TextureBuiltinsFromUniformOptions::Field::TextureNumLevels:
+            case BindPointFunction::kTextureNumLevels:
                 data = view->GetLevelCount();
                 break;
-            case tint::TextureBuiltinsFromUniformOptions::Field::TextureNumSamples:
+            case BindPointFunction::kTextureNumSamples:
                 data = view->GetTexture()->GetSampleCount();
                 break;
         }

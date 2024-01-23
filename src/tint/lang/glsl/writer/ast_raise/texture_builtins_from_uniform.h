@@ -28,11 +28,9 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 #define SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 
-#include <unordered_map>
-#include <unordered_set>
+#include <vector>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
 // Forward declarations
@@ -47,6 +45,7 @@ namespace tint::glsl::writer {
 /// builtin functions are not available in some version of GLSL.
 ///
 /// The generated uniform buffer will have the form:
+///
 /// ```
 /// struct internal_uniform {
 ///  texture_builtin_value_0 : u32,
@@ -54,15 +53,17 @@ namespace tint::glsl::writer {
 ///
 /// @group(0) @binding(0) var tex : texture_2d<f32>;
 /// ```
+///
 /// The binding group and number used for this uniform buffer are provided via
 /// the `Config` transform input.
 ///
-/// The transform coverts the texture builtins calls into values lookup from the internal
-/// buffer. If the texture is a function parameter instead of a global variable, this transform
-/// also takes care of adding extra paramters and arguments to these functions and their callsites.
+/// The transform coverts the texture builtins calls into values lookup from the internal buffer. If
+/// the texture is a function parameter instead of a global variable, this transform also takes care
+/// of adding extra parameters and arguments to these functions and their call-sites.
 ///
 /// This transform must run before `CombineSamplers` transform so that the binding point of the
 /// original texture object can be preserved.
+///
 class TextureBuiltinsFromUniform final
     : public Castable<TextureBuiltinsFromUniform, ast::transform::Transform> {
   public:
@@ -75,7 +76,8 @@ class TextureBuiltinsFromUniform final
     struct Config final : public Castable<Config, ast::transform::Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer.
-        explicit Config(BindingPoint ubo_bp);
+        /// @param ordering the ordered list of binding points to appear in the UBO
+        Config(BindingPoint ubo_bp, const std::vector<BindingPoint>& ordering);
 
         /// Copy constructor
         Config(const Config&);
@@ -89,34 +91,14 @@ class TextureBuiltinsFromUniform final
 
         /// The binding point to use for the generated uniform buffer.
         BindingPoint ubo_binding;
-    };
 
-    /// Information produced about what the transform did.
-    /// If there were no calls to the textureNumLevels() or textureNumSamples() builtin, then no
-    /// Result will be emitted.
-    struct Result final : public Castable<Result, ast::transform::Data> {
-        /// Using for shorter names
-        /// Records the field and the byte offset of the data to push in the internal uniform
-        /// buffer.
-        using FieldAndOffset = TextureBuiltinsFromUniformOptions::FieldAndOffset;
-        /// Maps from binding point to data entry with the information to populate the data.
-        using BindingPointToFieldAndOffset =
-            TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset;
-
-        /// Constructor
-        /// @param bindpoint_to_data_in mapping from binding points of global texture variables to
-        /// the byte offsets and data types needed to be pushed into the internal uniform buffer.
-        explicit Result(BindingPointToFieldAndOffset bindpoint_to_data_in);
-
-        /// Copy constructor
-        Result(const Result&);
-
-        /// Destructor
-        ~Result() override;
-
-        /// A map of global texture variable binding point to the byte offset and data type to push
-        /// into the internal uniform buffer.
-        BindingPointToFieldAndOffset bindpoint_to_data;
+        /// The set of binding points which will be in the extra UBO buffer. The binding points are
+        /// provided in the order that the data will be in the UBO buffer.
+        ///
+        /// Note, a given `BindingPoint` _must_ only appear once in the ordering list. This works
+        /// because the two types of calls we're substituting `textureNumLevels` and
+        /// `textureNumSamples` work on a disjoint set of texture types.
+        std::vector<BindingPoint> ubo_bindingpoint_ordering;
     };
 
     /// @copydoc ast::transform::Transform::Apply
