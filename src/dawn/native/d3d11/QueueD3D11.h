@@ -85,7 +85,8 @@ class Queue final : public d3d::Queue {
     ComPtr<ID3D11Fence> mFence;
     HANDLE mFenceEvent = nullptr;
     Ref<SharedFence> mSharedFence;
-    CommandRecordingContext mPendingCommands;
+    MutexProtected<CommandRecordingContext, CommandRecordingContextGuard> mPendingCommands;
+    std::atomic<bool> mPendingCommandsNeedSubmit = false;
 };
 
 }  // namespace dawn::native::d3d11

@@ -64,7 +64,20 @@ MaybeError Queue::Initialize() {
 }
 
 MaybeError Queue::InitializePendingContext() {
-    return mPendingCommands.Initialize(ToBackend(GetDevice()));
+    // Initialize mPendingCommands. After this, calls to the use the command context
+    // are thread safe.
+    CommandRecordingContext commands;
+    DAWN_TRY(commands.Initialize(ToBackend(GetDevice())));
+    mPendingCommands.Use([&](auto pendingCommands) { *pendingCommands = std::move(commands); });
+
+    // Configure the command context's uniform buffer. This is used to emulate builtins.
+    // Creating the buffer is done outside of Initialize because it requires mPendingCommands
+    // to already be initialized.
+    Ref<BufferBase> uniformBuffer;
+    DAWN_TRY_ASSIGN(uniformBuffer,
+                    CommandRecordingContext::CreateInternalUniformBuffer(GetDevice()));
+    mPendingCommands->SetInternalUniformBuffer(std::move(uniformBuffer));
+    return {};
 }
 
 void Queue::DestroyImpl() {
@@ -77,7 +90,10 @@ void Queue::DestroyImpl() {
     // underlying native fence so that we can return a SharedFence on EndAccess after destruction.
     mSharedFence = nullptr;
 
-    mPendingCommands.Release();
+    mPendingCommands.Use([&](auto pendingCommands) {
+        pendingCommands->Release();
+        mPendingCommandsNeedSubmit.store(false, std::memory_order_release);
+    });
 }
 
 ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
@@ -89,36 +105,28 @@ ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
 }
 
 ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode) {
-    // Callers of GetPendingCommandList do so to record commands. Only reserve a command
-    // allocator when it is needed so we don't submit empty command lists
-    DAWN_ASSERT(mPendingCommands.IsOpen());
-
-    if (submitMode == SubmitMode::Normal) {
-        mPendingCommands.SetNeedsSubmit();
-    }
-
-    return ScopedCommandRecordingContext(&mPendingCommands);
+    return mPendingCommands.Use([&](auto commands) {
+        if (submitMode == SubmitMode::Normal) {
+            mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
+        }
+        return ScopedCommandRecordingContext(std::move(commands));
+    });
 }
 
 ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandContext(
     SubmitMode submitMode) {
-    // Callers of GetPendingCommandList do so to record commands. Only reserve a command
-    // allocator when it is needed so we don't submit empty command lists
-    DAWN_ASSERT(mPendingCommands.IsOpen());
-
-    if (submitMode == SubmitMode::Normal) {
-        mPendingCommands.SetNeedsSubmit();
-    }
-
-    return ScopedSwapStateCommandRecordingContext(&mPendingCommands);
+    return mPendingCommands.Use([&](auto commands) {
+        if (submitMode == SubmitMode::Normal) {
+            mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
+        }
+        return ScopedSwapStateCommandRecordingContext(std::move(commands));
+    });
 }
 
 MaybeError Queue::SubmitPendingCommands() {
-    if (!mPendingCommands.IsOpen() || !mPendingCommands.NeedsSubmit()) {
+    if (!mPendingCommandsNeedSubmit.exchange(false, std::memory_order_acq_rel)) {
         return {};
     }
-
-    DAWN_TRY(mPendingCommands.ExecuteCommandList());
     return NextSerial();
 }
 
@@ -180,7 +188,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
 }
 
 bool Queue::HasPendingCommands() const {
-    return mPendingCommands.NeedsSubmit();
+    return mPendingCommandsNeedSubmit.load(std::memory_order_acquire);
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
