@@ -44,6 +44,7 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn::native {
 
@@ -63,7 +64,10 @@ struct StageAndDescriptor {
     raw_ptr<ShaderModuleBase> module;
     std::string entryPoint;
     size_t constantCount = 0u;
-    raw_ptr<const ConstantEntry, AllowPtrArithmetic> constants = nullptr;
+
+    // TODO(https://crbug.com/chromium/1521372): Investigate why this is assigned a dangling
+    // pointer. Then rewrite it as a raw_ptr<T, AllowPtrArithmetic>.
+    RAW_PTR_EXCLUSION ConstantEntry const* constants = nullptr;
 };
 
 class PipelineLayoutBase : public ApiObjectBase,
