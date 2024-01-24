@@ -288,9 +288,12 @@ crbug.com/tint/2129 [ intel-0x9bc5 win10 ] webgpu:shader,validation,shader_io,gr
 
 ################################################################################
 # Flaky multisampled sample_mask tests on Mac AMD (crbug.com/1496410 plus other flakes)
+# ... fragment_output_mask:interpolated=true;sampleCount=4;* is very flaky, so mark it Failure
 # KEEP
 ################################################################################
-[ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ RetryOnFailure ]
+[ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;* [ RetryOnFailure ]
+[ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;* [ RetryOnFailure ]
+[ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
 
 ################################################################################
 # Miscellaneous flakes
