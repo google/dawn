@@ -314,6 +314,10 @@ class Resolver {
     /// perform alias analysis.
     void RegisterStore(const sem::ValueExpression* expr);
 
+    /// Register a memory load of an expression, to track accesses to root identifiers in order to
+    /// perform alias analysis.
+    void RegisterLoad(const sem::ValueExpression* expr);
+
     /// Perform pointer alias analysis for `call`.
     /// @returns true is the call arguments are free from aliasing issues, false otherwise.
     bool AliasAnalysis(const sem::Call* call);

@@ -1666,11 +1666,25 @@ sem::BuiltinEnumExpression<core::InterpolationType>* Resolver::InterpolationType
 }
 
 void Resolver::RegisterStore(const sem::ValueExpression* expr) {
-    auto& info = alias_analysis_infos_[current_function_];
     Switch(
         expr->RootIdentifier(),
-        [&](const sem::GlobalVariable* global) { info.module_scope_writes.Add(global, expr); },
-        [&](const sem::Parameter* param) { info.parameter_writes.Add(param); });
+        [&](const sem::GlobalVariable* global) {
+            alias_analysis_infos_[current_function_].module_scope_writes.Add(global, expr);
+        },
+        [&](const sem::Parameter* param) {
+            alias_analysis_infos_[current_function_].parameter_writes.Add(param);
+        });
+}
+
+void Resolver::RegisterLoad(const sem::ValueExpression* expr) {
+    Switch(
+        expr->RootIdentifier(),
+        [&](const sem::GlobalVariable* global) {
+            alias_analysis_infos_[current_function_].module_scope_reads.Add(global, expr);
+        },
+        [&](const sem::Parameter* param) {
+            alias_analysis_infos_[current_function_].parameter_reads.Add(param);
+        });
 }
 
 bool Resolver::AliasAnalysis(const sem::Call* call) {
@@ -1843,12 +1857,8 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
     load->Behaviors() = expr->Behaviors();
     b.Sem().Replace(expr->Declaration(), load);
 
-    // Track the load for the alias analysis.
-    auto& alias_info = alias_analysis_infos_[current_function_];
-    Switch(
-        expr->RootIdentifier(),
-        [&](const sem::GlobalVariable* global) { alias_info.module_scope_reads.Add(global, expr); },
-        [&](const sem::Parameter* param) { alias_info.parameter_reads.Add(param); });
+    // Register the load for the alias analysis.
+    RegisterLoad(expr);
 
     return load;
 }
@@ -2467,16 +2477,43 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         CollectTextureSamplerPairs(target, call->Arguments());
     }
 
-    if (fn == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
-        if (!validator_.WorkgroupUniformLoad(call)) {
-            return nullptr;
-        }
-    }
+    switch (fn) {
+        case wgsl::BuiltinFn::kWorkgroupUniformLoad:
+            if (!validator_.WorkgroupUniformLoad(call)) {
+                return nullptr;
+            }
+            RegisterLoad(args[0]);
+            break;
 
-    if (fn == wgsl::BuiltinFn::kSubgroupBroadcast) {
-        if (!validator_.SubgroupBroadcast(call)) {
-            return nullptr;
-        }
+        case wgsl::BuiltinFn::kSubgroupBroadcast:
+            if (!validator_.SubgroupBroadcast(call)) {
+                return nullptr;
+            }
+            break;
+
+        case wgsl::BuiltinFn::kAtomicLoad:
+            RegisterLoad(args[0]);
+            break;
+
+        case wgsl::BuiltinFn::kAtomicStore:
+            RegisterStore(args[0]);
+            break;
+
+        case wgsl::BuiltinFn::kAtomicAdd:
+        case wgsl::BuiltinFn::kAtomicSub:
+        case wgsl::BuiltinFn::kAtomicMax:
+        case wgsl::BuiltinFn::kAtomicMin:
+        case wgsl::BuiltinFn::kAtomicAnd:
+        case wgsl::BuiltinFn::kAtomicOr:
+        case wgsl::BuiltinFn::kAtomicXor:
+        case wgsl::BuiltinFn::kAtomicExchange:
+        case wgsl::BuiltinFn::kAtomicCompareExchangeWeak:
+            RegisterLoad(args[0]);
+            RegisterStore(args[0]);
+            break;
+
+        default:
+            break;
     }
 
     if (!validator_.BuiltinCall(call)) {
