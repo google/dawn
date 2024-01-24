@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::spirv::writer {
+namespace tint::ast::transform {
 
 /// Add clamping of the `@builtin(frag_depth)` output of fragment shaders using two push constants
 /// provided by the outside environment. For example the following code:
@@ -78,6 +78,6 @@ class ClampFragDepth final : public Castable<ClampFragDepth, ast::transform::Tra
     struct State;
 };
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_

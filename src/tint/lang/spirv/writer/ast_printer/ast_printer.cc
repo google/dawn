@@ -29,7 +29,6 @@
 
 #include <unordered_map>
 
-#include "src/tint/lang/spirv/writer/ast_raise/clamp_frag_depth.h"
 #include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"
 #include "src/tint/lang/spirv/writer/ast_raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
@@ -41,6 +40,7 @@
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/lang/wgsl/ast/transform/builtin_polyfill.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
+#include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
 #include "src/tint/lang/wgsl/ast/transform/demote_to_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/direct_variable_access.h"
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
@@ -65,7 +65,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     ast::transform::DataMap data;
 
     if (options.clamp_frag_depth) {
-        manager.Add<ClampFragDepth>();
+        manager.Add<ast::transform::ClampFragDepth>();
     }
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();

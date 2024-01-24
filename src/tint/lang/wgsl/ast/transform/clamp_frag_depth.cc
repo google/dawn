@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/ast_raise/clamp_frag_depth.h"
+#include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
 
 #include <utility>
 
@@ -44,9 +44,9 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::ClampFragDepth);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth);
 
-namespace tint::spirv::writer {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct ClampFragDepth::State {
@@ -242,4 +242,4 @@ ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program& src,
     return State{src}.Run();
 }
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::ast::transform

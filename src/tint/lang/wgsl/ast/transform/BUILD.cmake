@@ -51,6 +51,8 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/builtin_polyfill.h
   lang/wgsl/ast/transform/canonicalize_entry_point_io.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io.h
+  lang/wgsl/ast/transform/clamp_frag_depth.cc
+  lang/wgsl/ast/transform/clamp_frag_depth.h
   lang/wgsl/ast/transform/data.cc
   lang/wgsl/ast/transform/data.h
   lang/wgsl/ast/transform/demote_to_helper.cc
@@ -146,6 +148,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/binding_remapper_test.cc
   lang/wgsl/ast/transform/builtin_polyfill_test.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io_test.cc
+  lang/wgsl/ast/transform/clamp_frag_depth_test.cc
   lang/wgsl/ast/transform/demote_to_helper_test.cc
   lang/wgsl/ast/transform/direct_variable_access_test.cc
   lang/wgsl/ast/transform/disable_uniformity_analysis_test.cc

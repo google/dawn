@@ -39,7 +39,6 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "ast_raise",
   srcs = [
-    "clamp_frag_depth.cc",
     "for_loop_to_loop.cc",
     "merge_return.cc",
     "var_for_dynamic_index.cc",
@@ -47,7 +46,6 @@ cc_library(
     "while_to_loop.cc",
   ],
   hdrs = [
-    "clamp_frag_depth.h",
     "for_loop_to_loop.h",
     "merge_return.h",
     "var_for_dynamic_index.h",
@@ -88,7 +86,6 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "clamp_frag_depth_test.cc",
     "for_loop_to_loop_test.cc",
     "merge_return_test.cc",
     "var_for_dynamic_index_test.cc",
