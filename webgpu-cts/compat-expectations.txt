@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-01-23 10:06:16AM
+# Last rolled: 2024-01-24 12:44:10PM
 
 # Flaky on all platforms
 # KEEP
@@ -595,6 +595,7 @@ crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_s
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp="_undef_";async=true [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=false [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,render_pipeline,depth_stencil_state:depthBiasClamp:depthBiasClamp=0;async=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:af_to_f32:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]

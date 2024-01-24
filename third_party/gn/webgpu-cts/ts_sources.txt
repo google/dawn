@@ -536,6 +536,10 @@ src/webgpu/shader/execution/expression/call/builtin/pack2x16snorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/pack2x16unorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/pack4x8snorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/pack4x8unorm.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/pack4xI8.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/pack4xI8Clamp.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/pack4xU8.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/pack4xU8Clamp.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/pow.cache.ts
 src/webgpu/shader/execution/expression/call/builtin/pow.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/quantizeToF16.cache.ts
@@ -598,6 +602,8 @@ src/webgpu/shader/execution/expression/call/builtin/unpack4x8snorm.cache.ts
 src/webgpu/shader/execution/expression/call/builtin/unpack4x8snorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/unpack4x8unorm.cache.ts
 src/webgpu/shader/execution/expression/call/builtin/unpack4x8unorm.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/unpack4xI8.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/unpack4xU8.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/workgroupBarrier.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/harness.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicAdd.spec.ts
@@ -673,6 +679,7 @@ src/webgpu/shader/validation/expression/call/builtin/const_override_validation.t
 src/webgpu/shader/validation/expression/call/builtin/abs.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/acos.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/acosh.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/arrayLength.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/asin.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/asinh.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atan.spec.ts
