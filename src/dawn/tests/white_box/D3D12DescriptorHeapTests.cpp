@@ -39,6 +39,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d12 {
 namespace {
@@ -114,8 +115,8 @@ class D3D12DescriptorHeapTests : public DawnTest {
         return {r, g, b, 1};
     }
 
-    Device* mD3DDevice = nullptr;
-    Queue* mD3DQueue = nullptr;
+    raw_ptr<Device> mD3DDevice = nullptr;
+    raw_ptr<Queue> mD3DQueue = nullptr;
 
     wgpu::ShaderModule mSimpleVSModule;
     wgpu::ShaderModule mSimpleFSModule;

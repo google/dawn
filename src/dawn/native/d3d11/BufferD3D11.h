@@ -33,6 +33,7 @@
 
 #include "dawn/native/Buffer.h"
 #include "dawn/native/d3d/d3d_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d11 {
 
@@ -108,8 +109,8 @@ class Buffer final : public BufferBase {
                   Buffer* buffer,
                   bool needsUnmap);
 
-        const ScopedCommandRecordingContext* mCommandContext = nullptr;
-        Buffer* mBuffer = nullptr;
+        raw_ptr<const ScopedCommandRecordingContext> mCommandContext = nullptr;
+        raw_ptr<Buffer> mBuffer = nullptr;
         // Whether the buffer needs to be unmapped when the ScopedMap object is destroyed.
         bool mNeedsUnmap = false;
     };
@@ -154,7 +155,7 @@ class Buffer final : public BufferBase {
     // The buffer object for non-constant buffer usages(e.g. storage buffer, vertex buffer, etc.)
     ComPtr<ID3D11Buffer> mD3d11NonConstantBuffer;
     bool mConstantBufferIsUpdated = true;
-    uint8_t* mMappedData = nullptr;
+    raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
 };
 
 }  // namespace dawn::native::d3d11

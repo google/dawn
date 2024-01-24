@@ -36,6 +36,7 @@
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn::native::d3d12 {
 
@@ -96,8 +97,10 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 
-    MutexProtected<StagingDescriptorAllocator>* mSamplerAllocator = nullptr;
-    MutexProtected<StagingDescriptorAllocator>* mViewAllocator = nullptr;
+    // TODO(https://crbug.com/dawn/2361): Rewrite those members with raw_ptr<T>.
+    // This is currently failing with MSVC cl.exe compiler.
+    RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>* mSamplerAllocator = nullptr;
+    RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>* mViewAllocator = nullptr;
 };
 
 }  // namespace dawn::native::d3d12

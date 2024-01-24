@@ -31,6 +31,7 @@
 #include <bitset>
 
 #include "dawn/native/d3d12/d3d12_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Error.h"
@@ -51,7 +52,7 @@ class CommandAllocatorManager {
 
   private:
     // The allocator manager is owned by the queue so the queue outlives it.
-    Queue* mQueue;
+    raw_ptr<Queue> mQueue;
 
     // This must be at least 2 because the Device and Queue use separate command allocators
     static constexpr unsigned int kMaxCommandAllocators = 32;

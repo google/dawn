@@ -46,6 +46,7 @@
 #include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d12 {
 
@@ -515,7 +516,7 @@ void Buffer::DestroyImpl() {
 
             std::unique_ptr<Heap> heap;
             wgpu::Callback callback;
-            void* userdata;
+            raw_ptr<void> userdata;
         };
         std::unique_ptr<DisposeTask> request = std::make_unique<DisposeTask>(
             std::move(mHostMappedHeap), mHostMappedDisposeCallback, mHostMappedDisposeUserdata);

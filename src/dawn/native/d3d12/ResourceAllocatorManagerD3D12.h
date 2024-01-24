@@ -37,6 +37,7 @@
 #include "dawn/native/PooledResourceMemoryAllocator.h"
 #include "dawn/native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d12 {
 
@@ -102,7 +103,7 @@ class ResourceAllocatorManager {
 
     void DestroyPool();
 
-    Device* mDevice;
+    raw_ptr<Device> mDevice;
     uint32_t mResourceHeapTier;
 
     static constexpr uint64_t kMaxHeapSize = 32ll * 1024ll * 1024ll * 1024ll;  // 32GB

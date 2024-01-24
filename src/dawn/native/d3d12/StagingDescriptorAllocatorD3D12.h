@@ -34,6 +34,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 // |StagingDescriptorAllocator| allocates a fixed-size block of descriptors from a CPU
 // descriptor heap pool.
@@ -83,7 +84,7 @@ class StagingDescriptorAllocator {
     std::vector<uint32_t> mAvailableHeaps;  // Indices into the pool.
     std::vector<NonShaderVisibleBuffer> mPool;
 
-    Device const* mDevice = nullptr;
+    raw_ptr<const Device> mDevice = nullptr;
 
     const uint32_t mSizeIncrement = 0;  // Size of the descriptor (in bytes).
     const uint32_t mBlockSize = 0;      // Size of the block of descriptors (in bytes).

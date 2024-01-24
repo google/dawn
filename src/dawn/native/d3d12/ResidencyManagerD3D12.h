@@ -32,6 +32,7 @@
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/d3d12/d3d12_platform.h"
 
@@ -83,7 +84,7 @@ class ResidencyManager {
     void UpdateVideoMemoryInfo();
     void UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo);
 
-    Device* mDevice;
+    raw_ptr<Device> mDevice;
     bool mResidencyManagementEnabled = false;
     bool mRestrictBudgetForTesting = false;
     VideoMemoryInfo mVideoMemoryInfo = {};

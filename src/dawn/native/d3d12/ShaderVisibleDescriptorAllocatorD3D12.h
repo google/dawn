@@ -37,6 +37,7 @@
 #include "dawn/native/d3d12/IntegerTypes.h"
 #include "dawn/native/d3d12/PageableD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 // |ShaderVisibleDescriptorAllocator| allocates a variable-sized block of descriptors from a GPU
 // descriptor heap pool.
@@ -101,7 +102,7 @@ class ShaderVisibleDescriptorAllocator {
     std::list<SerialDescriptorHeap> mPool;
     D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
 
-    Device* mDevice;
+    raw_ptr<Device> mDevice;
 
     // The serial value of 0 means the shader-visible heaps have not been allocated.
     // This value is never returned in the GPUDescriptorHeapAllocation after

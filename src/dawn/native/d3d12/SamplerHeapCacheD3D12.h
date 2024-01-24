@@ -37,6 +37,8 @@
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn/native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
+#include "partition_alloc/pointers/raw_ref.h"
 
 // |SamplerHeapCacheEntry| maintains a cache of sampler descriptor heap allocations.
 // Each entry represents one or more sampler descriptors that co-exist in a CPU and
@@ -91,8 +93,10 @@ class SamplerHeapCacheEntry : public RefCounted {
     // by the device and will already be unique.
     std::vector<Sampler*> mSamplers;
 
-    MutexProtected<StagingDescriptorAllocator>& mAllocator;
-    SamplerHeapCache* mCache = nullptr;
+    // TODO(https://crbug.com/dawn/2361): Rewrite this member with raw_ref<T>.
+    // This is currently failing with MSVC cl.exe compiler.
+    RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>& mAllocator;
+    raw_ptr<SamplerHeapCache> mCache = nullptr;
 };
 
 // Cache descriptor heap allocations so that we don't create duplicate ones for every
@@ -109,7 +113,7 @@ class SamplerHeapCache {
     void RemoveCacheEntry(SamplerHeapCacheEntry* entry);
 
   private:
-    Device* mDevice;
+    raw_ptr<Device> mDevice;
 
     using Cache = absl::flat_hash_set<SamplerHeapCacheEntry*,
                                       SamplerHeapCacheEntry::HashFunc,

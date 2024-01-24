@@ -54,6 +54,7 @@
 #include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -103,8 +104,8 @@ class VertexBufferTracker {
     }
 
   private:
-    const ScopedSwapStateCommandRecordingContext* mCommandContext;
-    const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
+    raw_ptr<const ScopedSwapStateCommandRecordingContext> mCommandContext;
+    raw_ptr<const RenderPipeline> mLastAppliedRenderPipeline = nullptr;
     PerVertexBuffer<ID3D11Buffer*> mD3D11Buffers = {};
     PerVertexBuffer<UINT> mStrides = {};
     PerVertexBuffer<UINT> mOffsets = {};

@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D_PHYSICALDEVICED3D_H_
 
 #include "dawn/native/PhysicalDevice.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/native/d3d/d3d_platform.h"
 
@@ -51,7 +52,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
   private:
     ComPtr<IDXGIAdapter3> mHardwareAdapter;
-    Backend* mBackend;
+    raw_ptr<Backend> mBackend;
 };
 
 }  // namespace dawn::native::d3d

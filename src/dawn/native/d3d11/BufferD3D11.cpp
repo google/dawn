@@ -488,7 +488,7 @@ MaybeError Buffer::ClearInternal(const ScopedCommandRecordingContext* commandCon
     }
 
     if (mMappedData) {
-        memset(mMappedData + offset, clearValue, size);
+        memset(mMappedData.get() + offset, clearValue, size);
         // The WebGPU uniform buffer is not mappable.
         DAWN_ASSERT(!mD3d11ConstantBuffer);
         return {};
@@ -710,7 +710,7 @@ void Buffer::ScopedMap::Reset() {
 }
 
 uint8_t* Buffer::ScopedMap::GetMappedData() const {
-    return mBuffer ? mBuffer->mMappedData : nullptr;
+    return mBuffer ? mBuffer->mMappedData.get() : nullptr;
 }
 
 }  // namespace dawn::native::d3d11
