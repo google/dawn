@@ -57,13 +57,15 @@
         ],
         "device create compute pipeline async": [
             { "name": "device id", "type": "ObjectId", "id_type": "device"},
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
         "device create render pipeline async": [
             { "name": "device id", "type": "ObjectId", "id_type": "device" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
             { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
         ],
@@ -123,14 +125,14 @@
             { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
         "device create compute pipeline async callback": [
-            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device create render pipeline async callback": [
-            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
@@ -213,7 +215,9 @@
             "BufferGetUsage",
             "DeviceCreateBuffer",
             "DeviceCreateComputePipelineAsync",
+            "DeviceCreateComputePipelineAsyncF",
             "DeviceCreateRenderPipelineAsync",
+            "DeviceCreateRenderPipelineAsyncF",
             "DeviceGetLimits",
             "DeviceHasFeature",
             "DeviceEnumerateFeatures",

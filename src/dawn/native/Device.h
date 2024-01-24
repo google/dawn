@@ -283,9 +283,14 @@ class DeviceBase : public RefCountedWithExternalCount {
     void APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
                                        WGPUCreateComputePipelineAsyncCallback callback,
                                        void* userdata);
+    Future APICreateComputePipelineAsyncF(
+        const ComputePipelineDescriptor* descriptor,
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
     void APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                       WGPUCreateRenderPipelineAsyncCallback callback,
                                       void* userdata);
+    Future APICreateRenderPipelineAsyncF(const RenderPipelineDescriptor* descriptor,
+                                         const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
     RenderBundleEncoder* APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor);
     RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDescriptor* descriptor);

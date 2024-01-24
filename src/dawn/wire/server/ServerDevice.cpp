@@ -98,7 +98,8 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
 
 WireResult Server::DoDeviceCreateComputePipelineAsync(
     Known<WGPUDevice> device,
-    uint64_t requestSerial,
+    ObjectHandle eventManager,
+    WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPUComputePipelineDescriptor* descriptor) {
     Known<WGPUComputePipeline> pipeline;
@@ -107,7 +108,8 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
-    userdata->requestSerial = requestSerial;
+    userdata->eventManager = eventManager;
+    userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
     mProcs.deviceCreateComputePipelineAsync(
@@ -124,9 +126,9 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
                                                                    status, pipeline, data);
 
     ReturnDeviceCreateComputePipelineAsyncCallbackCmd cmd;
-    cmd.device = data->device;
+    cmd.eventManager = data->eventManager;
+    cmd.future = data->future;
     cmd.status = status;
-    cmd.requestSerial = data->requestSerial;
     cmd.message = message;
 
     SerializeCommand(cmd);
@@ -134,7 +136,8 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
 
 WireResult Server::DoDeviceCreateRenderPipelineAsync(
     Known<WGPUDevice> device,
-    uint64_t requestSerial,
+    ObjectHandle eventManager,
+    WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPURenderPipelineDescriptor* descriptor) {
     Known<WGPURenderPipeline> pipeline;
@@ -143,7 +146,8 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
-    userdata->requestSerial = requestSerial;
+    userdata->eventManager = eventManager;
+    userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
     mProcs.deviceCreateRenderPipelineAsync(
@@ -160,9 +164,9 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
                                                                   pipeline, data);
 
     ReturnDeviceCreateRenderPipelineAsyncCallbackCmd cmd;
-    cmd.device = data->device;
+    cmd.eventManager = data->eventManager;
+    cmd.future = data->future;
     cmd.status = status;
-    cmd.requestSerial = data->requestSerial;
     cmd.message = message;
 
     SerializeCommand(cmd);
