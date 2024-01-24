@@ -679,13 +679,13 @@ class Resolver {
     /// of determining if any two arguments alias at any callsite.
     struct AliasAnalysisInfo {
         /// The set of module-scope variables that are written to, and where that write occurs.
-        std::unordered_map<const sem::Variable*, const sem::ValueExpression*> module_scope_writes;
+        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_writes;
         /// The set of module-scope variables that are read from, and where that read occurs.
-        std::unordered_map<const sem::Variable*, const sem::ValueExpression*> module_scope_reads;
+        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_reads;
         /// The set of function parameters that are written to.
-        std::unordered_set<const sem::Variable*> parameter_writes;
+        Hashset<const sem::Variable*, 4> parameter_writes;
         /// The set of function parameters that are read from.
-        std::unordered_set<const sem::Variable*> parameter_reads;
+        Hashset<const sem::Variable*, 4> parameter_reads;
     };
 
     ProgramBuilder& b;
