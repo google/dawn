@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -77,6 +78,9 @@ struct Options {
 
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};
+
+    /// Offset of the firstInstance push constant.
+    std::optional<int32_t> first_instance_offset;
 
     /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
     /// buffer values. If not specified, emits corresponding GLSL builtins

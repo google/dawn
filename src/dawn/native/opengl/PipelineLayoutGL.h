@@ -55,6 +55,10 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     GLuint GetInternalUniformBinding() const;
 
+    enum PushConstantLocation {
+        FirstInstance = 0,
+    };
+
   private:
     ~PipelineLayout() override = default;
     BindingIndexInfo mIndexInfo;

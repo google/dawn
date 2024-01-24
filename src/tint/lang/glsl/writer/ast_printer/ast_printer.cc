@@ -67,6 +67,7 @@
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/wgsl/ast/transform/offset_first_index.h"
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
@@ -152,8 +153,6 @@ SanitizedResult Sanitize(const Program& in,
         data.Add<ast::transform::SingleEntryPoint::Config>(entry_point);
     }
 
-    data.Add<ast::transform::AddBlockAttribute::Config>(true);
-
     manager.Add<ast::transform::PreservePadding>();  // Must come before DirectVariableAccess
 
     manager.Add<ast::transform::Unshadow>();  // Must come before DirectVariableAccess
@@ -203,6 +202,8 @@ SanitizedResult Sanitize(const Program& in,
         manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
+    manager.Add<ast::transform::OffsetFirstIndex>();
+
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<ast::transform::CanonicalizeEntryPointIO>();
 
@@ -244,6 +245,8 @@ SanitizedResult Sanitize(const Program& in,
 
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
+
+    data.Add<ast::transform::OffsetFirstIndex::Config>(std::nullopt, options.first_instance_offset);
 
     SanitizedResult result;
     ast::transform::DataMap outputs;
@@ -297,7 +300,8 @@ bool ASTPrinter::Generate() {
                 }
                 bool is_block =
                     ast::HasAttribute<ast::transform::AddBlockAttribute::BlockAttribute>(
-                        str->attributes);
+                        str->attributes) &&
+                    !sem->UsedAs(core::AddressSpace::kPushConstant);
                 if (!has_rt_arr && !is_block) {
                     EmitStructType(current_buffer_, sem);
                 }
@@ -2093,6 +2097,7 @@ void ASTPrinter::EmitPushConstant(const sem::GlobalVariable* var) {
 
     auto name = decl->name->symbol.Name();
     auto* type = var->Type()->UnwrapRef();
+    out << "layout(location=0) ";
     EmitTypeAndName(out, type, var->AddressSpace(), var->Access(), name);
     out << ";";
 }

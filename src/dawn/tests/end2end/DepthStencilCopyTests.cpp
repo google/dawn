@@ -1024,8 +1024,9 @@ class StencilCopyTests : public DepthStencilCopyTests {
         // glDrawArraysInstancedBaseInstance.
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && !IsANGLE());
 
-        // TODO(crbug.com/dawn/2202): Failing on ANGLE/D3D11 for unknown reasons.
-        DAWN_TEST_UNSUPPORTED_IF(IsANGLED3D11());
+        // TODO(crbug.com/dawn/2202): Failing on ANGLE/SwiftShader due to undiagnosed ANGLE bug.
+        // Passes on ANGLE/D3D11.
+        DAWN_TEST_UNSUPPORTED_IF(IsANGLESwiftShader());
 
         // Create a stencil texture
         constexpr uint32_t kWidth = 4;

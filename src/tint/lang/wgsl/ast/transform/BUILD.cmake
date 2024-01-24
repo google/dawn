@@ -73,6 +73,8 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/manager.h
   lang/wgsl/ast/transform/multiplanar_external_texture.cc
   lang/wgsl/ast/transform/multiplanar_external_texture.h
+  lang/wgsl/ast/transform/offset_first_index.cc
+  lang/wgsl/ast/transform/offset_first_index.h
   lang/wgsl/ast/transform/preserve_padding.cc
   lang/wgsl/ast/transform/preserve_padding.h
   lang/wgsl/ast/transform/promote_initializers_to_let.cc
@@ -159,6 +161,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
   lang/wgsl/ast/transform/manager_test.cc
   lang/wgsl/ast/transform/multiplanar_external_texture_test.cc
+  lang/wgsl/ast/transform/offset_first_index_test.cc
   lang/wgsl/ast/transform/preserve_padding_test.cc
   lang/wgsl/ast/transform/promote_initializers_to_let_test.cc
   lang/wgsl/ast/transform/promote_side_effects_to_decl_test.cc

@@ -418,6 +418,9 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                        /* fullSubgroups */ {}));
             }
 
+            r.tintOptions.first_instance_offset =
+                4 * PipelineLayout::PushConstantLocation::FirstInstance;
+
             auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.str());

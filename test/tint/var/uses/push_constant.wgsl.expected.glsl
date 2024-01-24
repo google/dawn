@@ -1,8 +1,12 @@
 #version 310 es
 
-uniform int a;
+struct a_block {
+  int inner;
+};
+
+layout(location=0) uniform a_block a;
 void uses_a() {
-  int foo = a;
+  int foo = a.inner;
 }
 
 void main1() {
@@ -16,9 +20,13 @@ void main() {
 }
 #version 310 es
 
-uniform int a;
+struct a_block {
+  int inner;
+};
+
+layout(location=0) uniform a_block a;
 void uses_a() {
-  int foo = a;
+  int foo = a.inner;
 }
 
 void uses_uses_a() {
@@ -36,9 +44,13 @@ void main() {
 }
 #version 310 es
 
-uniform int b;
+struct b_block {
+  int inner;
+};
+
+layout(location=0) uniform b_block b;
 void uses_b() {
-  int foo = b;
+  int foo = b.inner;
 }
 
 void main3() {
