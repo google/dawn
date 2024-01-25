@@ -206,7 +206,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
             // For buffer bindings that can be sharable across stages, we need to rename them to
             // avoid GL program link failures due to block naming issues.
-            if (std::holds_alternative<BufferBindingInfo>(bindingInfo.bindingInfo) &&
+            if (bindingInfo.bindingType == BindingInfoType::Buffer &&
                 stage != SingleShaderStage::Compute) {
                 req.bufferBindingVariables.emplace_back(bindingInfo.name);
             }
