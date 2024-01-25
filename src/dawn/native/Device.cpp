@@ -243,6 +243,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
         mLabel = descriptor->label;
     }
 
+    mIsImmediateErrorHandlingEnabled = IsToggleEnabled(Toggle::EnableImmediateErrorHandling);
+
     // Record the cache key from the properties. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
@@ -632,6 +634,9 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                 callback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)), messageStr.c_str(),
                          userdata);
             });
+            if (IsImmediateErrorHandlingEnabled()) {
+                mCallbackTaskManager->Flush();
+            }
         }
     }
 }
@@ -1514,6 +1519,10 @@ bool DeviceBase::IsRobustnessEnabled() const {
 
 bool DeviceBase::IsCompatibilityMode() const {
     return mAdapter != nullptr && mAdapter->GetFeatureLevel() == FeatureLevel::Compatibility;
+}
+
+bool DeviceBase::IsImmediateErrorHandlingEnabled() const {
+    return mIsImmediateErrorHandlingEnabled;
 }
 
 size_t DeviceBase::GetLazyClearCountForTesting() {

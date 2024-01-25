@@ -515,6 +515,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_polyfills_on_integer_div_and_mod",
       "Disable the Tint polyfills on integer division and modulo.", "https://crbug.com/tint/2128",
       ToggleStage::Device}},
+    {Toggle::EnableImmediateErrorHandling,
+     {"enable_immediate_error_handling",
+      "Have the uncaptured error callback invoked immediately when an error occurs, rather than "
+      "waiting for the next Tick. This enables using the stack trace in which the uncaptured error "
+      "occured when breaking into the uncaptured error callback.",
+      "https://crbug.com/dawn/1789", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
