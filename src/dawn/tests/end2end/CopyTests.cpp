@@ -667,13 +667,18 @@ class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFor
     }
 };
 
-namespace {
-using SrcColorFormat = wgpu::TextureFormat;
-DAWN_TEST_PARAM_STRUCT(SrcColorFormatParams, SrcColorFormat);
-}  // namespace
-
-class CopyTests_Formats : public CopyTests_T2TBase<DawnTestWithParams<SrcColorFormatParams>> {
+class CopyTests_T2T_Srgb : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFormatParams>> {
   protected:
+    void SetUp() override {
+        DawnTestWithParams<CopyTextureFormatParams>::SetUp();
+
+        const auto format = GetParam().mTextureFormat;
+        // TODO(dawn:596): Remove when bgra8unorm-srgb is supported on OpenGL.
+        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::BGRA8Unorm ||
+                               format == wgpu::TextureFormat::BGRA8UnormSrgb) &&
+                              (IsOpenGL() || IsOpenGLES()));
+    }
+
     // Texture format is compatible and could be copied to each other if the only diff is srgb-ness.
     wgpu::TextureFormat GetCopyCompatibleFormat(wgpu::TextureFormat format) {
         switch (format) {
@@ -695,10 +700,10 @@ class CopyTests_Formats : public CopyTests_T2TBase<DawnTestWithParams<SrcColorFo
                 const wgpu::Extent3D& copySize,
                 wgpu::TextureDimension srcDimension = wgpu::TextureDimension::e2D,
                 wgpu::TextureDimension dstDimension = wgpu::TextureDimension::e2D) {
-        srcSpec.format = GetParam().mSrcColorFormat;
+        srcSpec.format = GetParam().mTextureFormat;
         dstSpec.format = GetCopyCompatibleFormat(srcSpec.format);
 
-        CopyTests_T2TBase<DawnTestWithParams<SrcColorFormatParams>>::DoTest(
+        CopyTests_T2TBase<DawnTestWithParams<CopyTextureFormatParams>>::DoTest(
             srcSpec, dstSpec, copySize, srcDimension, dstDimension);
     }
 };
@@ -2934,12 +2939,7 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB9E5Ufloat});
 
 // Test copying between textures that have srgb compatible texture formats;
-TEST_P(CopyTests_Formats, SrgbCompatibility) {
-    // Skip backends because which fails to support *-srgb formats
-    // and bgra* formats.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
-
+TEST_P(CopyTests_T2T_Srgb, FullCopy) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
 
@@ -2948,7 +2948,7 @@ TEST_P(CopyTests_Formats, SrgbCompatibility) {
     DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
 }
 
-DAWN_INSTANTIATE_TEST_P(CopyTests_Formats,
+DAWN_INSTANTIATE_TEST_P(CopyTests_T2T_Srgb,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend()},
                         {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8UnormSrgb,

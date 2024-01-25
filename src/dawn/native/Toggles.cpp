@@ -424,6 +424,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy rgb9e5ufloat texture to a texture or a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/2079", ToggleStage::Device}},
+    {Toggle::UseT2B2TForSRGBTextureCopy,
+     {"use_t2b2t_for_srgb_texture_copy",
+      "Use T2B and B2T copies to emulate a T2T copy between sRGB and non-sRGB textures."
+      "Workaround for OpenGLES.",
+      "https://crbug.com/dawn/2362", ToggleStage::Device}},
     {Toggle::D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,
      {"d3d12_replace_add_with_minus_when_dst_factor_is_zero_and_src_factor_is_dst_alpha",
       "Replace the blending operation 'Add' with 'Minus' when dstBlendFactor is 'Zero' and "
