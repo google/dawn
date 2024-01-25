@@ -132,7 +132,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        for (const auto& [binding, bindingInfo] : moduleBindingInfo[group]) {
+        for (const auto& [binding, shaderBindingInfo] : moduleBindingInfo[group]) {
             tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                                static_cast<uint32_t>(binding)};
 
@@ -142,68 +142,65 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
             tint::BindingPoint dstBindingPoint{0, shaderIndex};
 
-            // Use the ShaderIndex as the indices for the buffer size lookups in the array length
-            // uniform transform. This is used to compute the size of variable length arrays in
-            // storage buffers.
-            if (bindingInfo.buffer.type == wgpu::BufferBindingType::Storage ||
-                bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage ||
-                bindingInfo.buffer.type == kInternalStorageBufferBinding) {
-                arrayLengthFromUniform.bindpoint_to_size_index.emplace(dstBindingPoint,
-                                                                       dstBindingPoint.binding);
-            }
+            // TODO(dawn:2370): implement a helper in dawn/utils to simplify the call of std::visit.
+            std::visit(
+                [&](const auto& bindingInfo) {
+                    using T = std::decay_t<decltype(bindingInfo)>;
 
-            switch (bindingInfo.bindingType) {
-                case BindingInfoType::Buffer:
-                    switch (bindingInfo.buffer.type) {
-                        case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(
-                                srcBindingPoint,
-                                tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
-                            break;
-                        case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::Storage:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
-                            bindings.storage.emplace(
-                                srcBindingPoint,
-                                tint::msl::writer::binding::Storage{dstBindingPoint.binding});
-                            break;
-                        case wgpu::BufferBindingType::Undefined:
-                            DAWN_UNREACHABLE();
-                            break;
+                    if constexpr (std::is_same_v<T, BufferBindingInfo>) {
+                        switch (bindingInfo.type) {
+                            case wgpu::BufferBindingType::Uniform:
+                                bindings.uniform.emplace(
+                                    srcBindingPoint,
+                                    tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
+                                break;
+                            case kInternalStorageBufferBinding:
+                            case wgpu::BufferBindingType::Storage:
+                            case wgpu::BufferBindingType::ReadOnlyStorage:
+                                bindings.storage.emplace(
+                                    srcBindingPoint,
+                                    tint::msl::writer::binding::Storage{dstBindingPoint.binding});
+                                // Use the ShaderIndex as the indices for the buffer size lookups in
+                                // the array length uniform transform. This is used to compute the
+                                // size of variable length arrays in storage buffers.
+                                arrayLengthFromUniform.bindpoint_to_size_index.emplace(
+                                    dstBindingPoint, dstBindingPoint.binding);
+                                break;
+                            case wgpu::BufferBindingType::Undefined:
+                                DAWN_UNREACHABLE();
+                                break;
+                        }
+                    } else if constexpr (std::is_same_v<T, SamplerBindingInfo>) {
+                        bindings.sampler.emplace(
+                            srcBindingPoint,
+                            tint::msl::writer::binding::Sampler{dstBindingPoint.binding});
+                    } else if constexpr (std::is_same_v<T, SampledTextureBindingInfo>) {
+                        bindings.texture.emplace(
+                            srcBindingPoint,
+                            tint::msl::writer::binding::Texture{dstBindingPoint.binding});
+                    } else if constexpr (std::is_same_v<T, StorageTextureBindingInfo>) {
+                        bindings.storage_texture.emplace(
+                            srcBindingPoint,
+                            tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
+                    } else if constexpr (std::is_same_v<T, ExternalTextureBindingInfo>) {
+                        const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                        const auto& expansion = etBindingMap.find(binding);
+                        DAWN_ASSERT(expansion != etBindingMap.end());
+
+                        const auto& bindingExpansion = expansion->second;
+                        tint::msl::writer::binding::BindingInfo plane0{
+                            static_cast<uint32_t>(shaderIndex)};
+                        tint::msl::writer::binding::BindingInfo plane1{
+                            bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                        tint::msl::writer::binding::BindingInfo metadata{
+                            bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+
+                        bindings.external_texture.emplace(
+                            srcBindingPoint,
+                            tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
                     }
-                    break;
-                case BindingInfoType::Sampler:
-                    bindings.sampler.emplace(srcBindingPoint, tint::msl::writer::binding::Sampler{
-                                                                  dstBindingPoint.binding});
-                    break;
-                case BindingInfoType::Texture:
-                    bindings.texture.emplace(srcBindingPoint, tint::msl::writer::binding::Texture{
-                                                                  dstBindingPoint.binding});
-                    break;
-                case BindingInfoType::StorageTexture:
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint,
-                        tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
-                    break;
-                case BindingInfoType::ExternalTexture: {
-                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                    const auto& expansion = etBindingMap.find(binding);
-                    DAWN_ASSERT(expansion != etBindingMap.end());
-
-                    const auto& bindingExpansion = expansion->second;
-                    tint::msl::writer::binding::BindingInfo plane0{
-                        static_cast<uint32_t>(shaderIndex)};
-                    tint::msl::writer::binding::BindingInfo plane1{
-                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
-                    tint::msl::writer::binding::BindingInfo metadata{
-                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
-
-                    bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
-                    break;
-                }
-            }
+                },
+                shaderBindingInfo.bindingInfo);
         }
     }
 
