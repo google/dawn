@@ -1,10 +1,10 @@
-void set_float3(inout float3 vec, int idx, float val) {
+void set_vector_element(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
 float3 Bad(uint index, float3 rd) {
   float3 normal = (0.0f).xxx;
-  set_float3(normal, index, -(float(sign(rd[index]))));
+  set_vector_element(normal, index, -(float(sign(rd[index]))));
   return normalize(normal);
 }
 

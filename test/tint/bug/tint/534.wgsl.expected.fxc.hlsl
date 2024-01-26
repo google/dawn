@@ -1,4 +1,4 @@
-void set_uint4(inout uint4 vec, int idx, uint val) {
+void set_vector_element(inout uint4 vec, int idx, uint val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
@@ -38,7 +38,7 @@ void main_inner(uint3 GlobalInvocationID) {
   {
     for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
       const uint tint_symbol_1 = i;
-      set_uint4(srcColorBits, tint_symbol_1, ConvertToFp16FloatValue(srcColor[i]));
+      set_vector_element(srcColorBits, tint_symbol_1, ConvertToFp16FloatValue(srcColor[i]));
       bool tint_tmp_1 = success;
       if (tint_tmp_1) {
         tint_tmp_1 = (srcColorBits[i] == dstColorBits[i]);

@@ -1,4 +1,4 @@
-void set_int4(inout int4 vec, int idx, int val) {
+void set_vector_element(inout int4 vec, int idx, int val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
@@ -29,7 +29,7 @@ void main() {
   const int tint_symbol_1 = bar();
   {
     int4 tint_symbol_3[4] = x.a;
-    set_int4(tint_symbol_3[tint_symbol_save], tint_symbol_1, (x.a[tint_symbol_save][tint_symbol_1] + 5));
+    set_vector_element(tint_symbol_3[tint_symbol_save], tint_symbol_1, (x.a[tint_symbol_save][tint_symbol_1] + 5));
     x.a = tint_symbol_3;
   }
 }

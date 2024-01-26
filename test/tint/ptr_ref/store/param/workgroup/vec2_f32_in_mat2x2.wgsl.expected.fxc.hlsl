@@ -1,4 +1,4 @@
-void set_vector_float2x2(inout float2x2 mat, int col, float2 val) {
+void set_matrix_column(inout float2x2 mat, int col, float2 val) {
   switch (col) {
     case 0: mat[0] = val; break;
     case 1: mat[1] = val; break;
@@ -8,7 +8,7 @@ void set_vector_float2x2(inout float2x2 mat, int col, float2 val) {
 groupshared float2x2 S;
 
 void func_S_X(uint pointer[1]) {
-  set_vector_float2x2(S, pointer[0], (0.0f).xx);
+  set_matrix_column(S, pointer[0], (0.0f).xx);
 }
 
 struct tint_symbol_1 {

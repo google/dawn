@@ -1,4 +1,4 @@
-void set_float4(inout float4 vec, int idx, float val) {
+void set_vector_element(inout float4 vec, int idx, float val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
@@ -11,6 +11,6 @@ float foo() {
   const int oob = 99;
   const float b = (0.0f).xxxx[min(uint(oob), 3u)];
   float4 v = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  set_float4(v, min(uint(oob), 3u), b);
+  set_vector_element(v, min(uint(oob), 3u), b);
   return b;
 }

@@ -1,4 +1,4 @@
-void set_vector_float3x3(inout float3x3 mat, int col, float3 val) {
+void set_matrix_column(inout float3x3 mat, int col, float3 val) {
   switch (col) {
     case 0: mat[0] = val; break;
     case 1: mat[1] = val; break;
@@ -167,7 +167,7 @@ void main() {
   float3x3 m = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   {
     for(uint c = 0u; (c < 3u); c = (c + 1u)) {
-      set_vector_float3x3(m, c, float3(float(((c * 3u) + 1u)), float(((c * 3u) + 2u)), float(((c * 3u) + 3u))));
+      set_matrix_column(m, c, float3(float(((c * 3u) + 1u)), float(((c * 3u) + 2u)), float(((c * 3u) + 3u))));
     }
   }
   {

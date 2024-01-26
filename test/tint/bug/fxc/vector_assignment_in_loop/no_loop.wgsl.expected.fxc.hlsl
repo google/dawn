@@ -1,48 +1,48 @@
-void set_float2(inout float2 vec, int idx, float val) {
+void set_vector_element(inout float2 vec, int idx, float val) {
   vec = (idx.xx == int2(0, 1)) ? val.xx : vec;
 }
 
-void set_float3(inout float3 vec, int idx, float val) {
+void set_vector_element_1(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
-void set_float4(inout float4 vec, int idx, float val) {
+void set_vector_element_2(inout float4 vec, int idx, float val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
-void set_int2(inout int2 vec, int idx, int val) {
+void set_vector_element_3(inout int2 vec, int idx, int val) {
   vec = (idx.xx == int2(0, 1)) ? val.xx : vec;
 }
 
-void set_int3(inout int3 vec, int idx, int val) {
+void set_vector_element_4(inout int3 vec, int idx, int val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
-void set_int4(inout int4 vec, int idx, int val) {
+void set_vector_element_5(inout int4 vec, int idx, int val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
-void set_uint2(inout uint2 vec, int idx, uint val) {
+void set_vector_element_6(inout uint2 vec, int idx, uint val) {
   vec = (idx.xx == int2(0, 1)) ? val.xx : vec;
 }
 
-void set_uint3(inout uint3 vec, int idx, uint val) {
+void set_vector_element_7(inout uint3 vec, int idx, uint val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
-void set_uint4(inout uint4 vec, int idx, uint val) {
+void set_vector_element_8(inout uint4 vec, int idx, uint val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
-void set_bool2(inout bool2 vec, int idx, bool val) {
+void set_vector_element_9(inout bool2 vec, int idx, bool val) {
   vec = (idx.xx == int2(0, 1)) ? val.xx : vec;
 }
 
-void set_bool3(inout bool3 vec, int idx, bool val) {
+void set_vector_element_10(inout bool3 vec, int idx, bool val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
-void set_bool4(inout bool4 vec, int idx, bool val) {
+void set_vector_element_11(inout bool4 vec, int idx, bool val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
 
@@ -61,17 +61,17 @@ void main() {
   bool3 v3b = bool3(false, false, false);
   bool4 v4b = bool4(false, false, false, false);
   int i = 0;
-  set_float2(v2f, i, 1.0f);
-  set_float3(v3f, i, 1.0f);
-  set_float4(v4f, i, 1.0f);
-  set_int2(v2i, i, 1);
-  set_int3(v3i, i, 1);
-  set_int4(v4i, i, 1);
-  set_uint2(v2u, i, 1u);
-  set_uint3(v3u, i, 1u);
-  set_uint4(v4u, i, 1u);
-  set_bool2(v2b, i, true);
-  set_bool3(v3b, i, true);
-  set_bool4(v4b, i, true);
+  set_vector_element(v2f, i, 1.0f);
+  set_vector_element_1(v3f, i, 1.0f);
+  set_vector_element_2(v4f, i, 1.0f);
+  set_vector_element_3(v2i, i, 1);
+  set_vector_element_4(v3i, i, 1);
+  set_vector_element_5(v4i, i, 1);
+  set_vector_element_6(v2u, i, 1u);
+  set_vector_element_7(v3u, i, 1u);
+  set_vector_element_8(v4u, i, 1u);
+  set_vector_element_9(v2b, i, true);
+  set_vector_element_10(v3b, i, true);
+  set_vector_element_11(v4b, i, true);
   return;
 }

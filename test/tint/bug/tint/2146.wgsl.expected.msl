@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_private_vars_struct {
+  uint3 localId;
+  uint localIndex;
+  uint3 globalId;
+  uint3 numWorkgroups;
+  uint3 workgroupId;
+};
+
+uint globalId2Index(thread tint_private_vars_struct* const tint_private_vars) {
+  return (*(tint_private_vars)).globalId[0];
+}
+
+kernel void tint_symbol() {
+  half4 a = half4(0.0h);
+  half const b = 1.0h;
+  int const tint_symbol_2 = 0;
+  a[tint_symbol_2] = (a[tint_symbol_2] + b);
+  return;
+}
+

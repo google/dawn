@@ -461,15 +461,7 @@ bool ASTPrinter::Generate() {
 bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt,
                                              const core::type::Vector* vec) {
     auto name = tint::GetOrCreate(dynamic_vector_write_, vec, [&]() -> std::string {
-        std::string fn;
-        {
-            StringStream ss;
-            if (!EmitType(ss, vec, tint::core::AddressSpace::kUndefined, core::Access::kUndefined,
-                          "")) {
-                return "";
-            }
-            fn = UniqueIdentifier("set_" + ss.str());
-        }
+        std::string fn = UniqueIdentifier("set_vector_element");
         {
             auto out = Line(&helpers_);
             out << "void " << fn << "(inout ";
@@ -534,15 +526,7 @@ bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stm
 bool ASTPrinter::EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatement* stmt,
                                                    const core::type::Matrix* mat) {
     auto name = tint::GetOrCreate(dynamic_matrix_vector_write_, mat, [&]() -> std::string {
-        std::string fn;
-        {
-            StringStream ss;
-            if (!EmitType(ss, mat, tint::core::AddressSpace::kUndefined, core::Access::kUndefined,
-                          "")) {
-                return "";
-            }
-            fn = UniqueIdentifier("set_vector_" + ss.str());
-        }
+        std::string fn = UniqueIdentifier("set_matrix_column");
         {
             auto out = Line(&helpers_);
             out << "void " << fn << "(inout ";
@@ -603,15 +587,7 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
     auto* lhs_col_access = lhs_row_access->object->As<ast::IndexAccessorExpression>();
 
     auto name = tint::GetOrCreate(dynamic_matrix_scalar_write_, mat, [&]() -> std::string {
-        std::string fn;
-        {
-            StringStream ss;
-            if (!EmitType(ss, mat, tint::core::AddressSpace::kUndefined, core::Access::kUndefined,
-                          "")) {
-                return "";
-            }
-            fn = UniqueIdentifier("set_scalar_" + ss.str());
-        }
+        std::string fn = UniqueIdentifier("set_matrix_scalar");
         {
             auto out = Line(&helpers_);
             out << "void " << fn << "(inout ";
