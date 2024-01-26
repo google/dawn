@@ -1310,45 +1310,45 @@ void Texture::TransitionUsageForPassImpl(
     wgpu::ShaderStage allNewShaderStages = wgpu::ShaderStage::None;
     wgpu::ShaderStage allLastShaderStages = wgpu::ShaderStage::None;
 
-    mSubresourceLastSyncInfos.Merge(
-        subresourceSyncInfos, [&](const SubresourceRange& range, TextureSyncInfo* lastSyncInfo,
-                                  const TextureSyncInfo& newSyncInfo) {
-            if (newSyncInfo.usage == wgpu::TextureUsage::None ||
-                CanReuseWithoutBarrier(lastSyncInfo->usage, newSyncInfo.usage,
-                                       lastSyncInfo->shaderStages, newSyncInfo.shaderStages)) {
-                return;
-            }
+    mSubresourceLastSyncInfos.Merge(subresourceSyncInfos, [&](const SubresourceRange& range,
+                                                              TextureSyncInfo* lastSyncInfo,
+                                                              const TextureSyncInfo& newSyncInfo) {
+        wgpu::TextureUsage newUsage = newSyncInfo.usage;
+        if (newSyncInfo.shaderStages == wgpu::ShaderStage::None) {
+            // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
+            // texture binding that isn't actually sampled in any shader.
+            newUsage &= ~kShaderTextureUsages;
+        }
 
-            imageBarriers->push_back(
-                BuildMemoryBarrier(this, lastSyncInfo->usage, newSyncInfo.usage, range));
+        if (newUsage == wgpu::TextureUsage::None ||
+            CanReuseWithoutBarrier(lastSyncInfo->usage, newUsage, lastSyncInfo->shaderStages,
+                                   newSyncInfo.shaderStages)) {
+            return;
+        }
 
-            allLastUsages |= lastSyncInfo->usage;
-            allNewUsages |= newSyncInfo.usage;
+        imageBarriers->push_back(BuildMemoryBarrier(this, lastSyncInfo->usage, newUsage, range));
 
-            allLastShaderStages |= lastSyncInfo->shaderStages;
-            allNewShaderStages |= newSyncInfo.shaderStages;
+        allLastUsages |= lastSyncInfo->usage;
+        allNewUsages |= newUsage;
 
-            if (lastSyncInfo->usage == newSyncInfo.usage &&
-                IsSubset(lastSyncInfo->usage, kReadOnlyTextureUsages)) {
-                // Read only usage and no layout transition. We can keep previous shader stages so
-                // future uses in those stages don't insert barriers.
-                lastSyncInfo->shaderStages |= newSyncInfo.shaderStages;
-            } else {
-                // Image was altered by write or layout transition. We need to clear previous shader
-                // stages so future uses in those stages will insert barriers.
-                lastSyncInfo->shaderStages = newSyncInfo.shaderStages;
-            }
-            lastSyncInfo->usage = newSyncInfo.usage;
-        });
+        allLastShaderStages |= lastSyncInfo->shaderStages;
+        allNewShaderStages |= newSyncInfo.shaderStages;
+
+        if (lastSyncInfo->usage == newUsage &&
+            IsSubset(lastSyncInfo->usage, kReadOnlyTextureUsages)) {
+            // Read only usage and no layout transition. We can keep previous shader stages so
+            // future uses in those stages don't insert barriers.
+            lastSyncInfo->shaderStages |= newSyncInfo.shaderStages;
+        } else {
+            // Image was altered by write or layout transition. We need to clear previous shader
+            // stages so future uses in those stages will insert barriers.
+            lastSyncInfo->shaderStages = newSyncInfo.shaderStages;
+        }
+        lastSyncInfo->usage = newUsage;
+    });
 
     if (mExternalState != ExternalState::InternalOnly) {
         TweakTransitionForExternalUsage(recordingContext, imageBarriers, transitionBarrierStart);
-    }
-
-    if (allNewShaderStages == wgpu::ShaderStage::None) {
-        // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a texture
-        // binding that isn't actually sampled in any shader.
-        allNewUsages &= ~kShaderTextureUsages;
     }
 
     // Skip adding pipeline stages if no barrier was needed to avoid putting TOP_OF_PIPE in the

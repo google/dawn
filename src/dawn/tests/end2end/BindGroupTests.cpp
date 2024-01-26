@@ -1252,13 +1252,17 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    wgpu::BindGroupLayoutEntry entry;
-    entry.binding = 0;
-    entry.visibility = wgpu::ShaderStage::None;
-    entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    wgpu::BindGroupLayoutEntry entries[2];
+    entries[0].binding = 0;
+    entries[0].visibility = wgpu::ShaderStage::None;
+    entries[0].buffer.type = wgpu::BufferBindingType::Uniform;
+    entries[1].binding = 1;
+    entries[1].visibility = wgpu::ShaderStage::None;
+    entries[1].texture.sampleType = wgpu::TextureSampleType::Float;
+
     wgpu::BindGroupLayoutDescriptor descriptor;
-    descriptor.entryCount = 1;
-    descriptor.entries = &entry;
+    descriptor.entryCount = 2;
+    descriptor.entries = entries;
     wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
 
     wgpu::RenderPipeline pipeline = MakeTestPipeline(renderPass, {}, {layout});
@@ -1266,8 +1270,16 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     std::array<float, 4> color = {1, 0, 0, 1};
     wgpu::Buffer uniformBuffer =
         utils::CreateBufferFromData(device, &color, sizeof(color), wgpu::BufferUsage::Uniform);
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, sizeof(color)}});
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {kRTSize, kRTSize};
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView textureView = texture.CreateView();
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+        device, layout, {{0, uniformBuffer, 0, sizeof(color)}, {1, textureView}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
