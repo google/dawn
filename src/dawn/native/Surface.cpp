@@ -348,4 +348,13 @@ uint32_t Surface::GetXWindow() const {
     return mXWindow;
 }
 
+wgpu::TextureFormat Surface::APIGetPreferredFormat(AdapterBase* adapter) const {
+    // This is the only supported format in native mode (see crbug.com/dawn/160).
+#if DAWN_PLATFORM_IS(ANDROID)
+    return wgpu::TextureFormat::RGBA8Unorm;
+#else
+    return wgpu::TextureFormat::BGRA8Unorm;
+#endif  // !DAWN_PLATFORM_IS(ANDROID)
+}
+
 }  // namespace dawn::native

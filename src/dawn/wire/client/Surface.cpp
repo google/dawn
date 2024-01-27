@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
-#define SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
-
-#include "dawn/wire/client/ObjectBase.h"
-
-#include "dawn/wire/client/Adapter.h"
-#include "dawn/wire/client/Buffer.h"
-#include "dawn/wire/client/Device.h"
-#include "dawn/wire/client/Instance.h"
-#include "dawn/wire/client/QuerySet.h"
-#include "dawn/wire/client/Queue.h"
-#include "dawn/wire/client/ShaderModule.h"
 #include "dawn/wire/client/Surface.h"
-#include "dawn/wire/client/SwapChain.h"
-#include "dawn/wire/client/Texture.h"
 
-#include "dawn/wire/client/ApiObjects_autogen.h"
+#include "dawn/common/Platform.h"
 
-#endif  // SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
+namespace dawn::wire::client {
+
+Surface::Surface(const ObjectBaseParams& params) : ObjectBase(params) {}
+
+Surface::~Surface() = default;
+
+WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
+    // This is the only supported format in native mode (see crbug.com/dawn/160).
+    return WGPUTextureFormat_BGRA8Unorm;
+}
+
+}  // namespace dawn::wire::client

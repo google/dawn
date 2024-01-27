@@ -236,6 +236,7 @@
             "QueueOnSubmittedWorkDoneF",
             "QueueWriteBuffer",
             "QueueWriteTexture",
+            "SurfaceGetPreferredFormat",
             "TextureGetWidth",
             "TextureGetHeight",
             "TextureGetDepthOrArrayLayers",
@@ -265,6 +266,7 @@
             "QuerySet",
             "Queue",
             "ShaderModule",
+            "Surface",
             "SwapChain",
             "Texture"
         ],

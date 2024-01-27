@@ -91,6 +91,8 @@ target_sources(dawn_wire PRIVATE
     "client/RequestTracker.h"
     "client/ShaderModule.cpp"
     "client/ShaderModule.h"
+    "client/Surface.cpp"
+    "client/Surface.h"
     "client/SwapChain.cpp"
     "client/SwapChain.h"
     "client/Texture.cpp"

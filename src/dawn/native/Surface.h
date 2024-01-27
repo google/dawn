@@ -103,6 +103,9 @@ class Surface final : public ErrorMonad {
     void* GetXDisplay() const;
     uint32_t GetXWindow() const;
 
+    // Dawn API
+    wgpu::TextureFormat APIGetPreferredFormat(AdapterBase* adapter) const;
+
   private:
     Surface(InstanceBase* instance, ErrorMonad::ErrorTag tag);
     ~Surface() override;
