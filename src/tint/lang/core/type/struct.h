@@ -72,6 +72,12 @@ using StructFlags = tint::EnumSet<StructFlag>;
 class Struct : public Castable<Struct, Type> {
   public:
     /// Constructor
+    /// Note: this constructs an empty structure, which should only be used find a struct with the
+    /// same name in a type::Manager.
+    /// @param name the name of the structure
+    explicit Struct(Symbol name);
+
+    /// Constructor
     /// @param name the name of the structure
     /// @param members the structure members
     /// @param align the byte alignment of the structure

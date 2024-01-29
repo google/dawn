@@ -70,7 +70,11 @@ constexpr std::array kModfVecAbstractNames{
 
 Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name, const Type* t) {
-        return types.Struct(symbols.Register(tint::ToString(name)),
+        auto symbol = symbols.Register(tint::ToString(name));
+        if (auto* existing = types.Find<type::Struct>(symbol)) {
+            return existing;
+        }
+        return types.Struct(symbol,
                             {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
     };
     return Switch(
@@ -127,9 +131,12 @@ constexpr std::array kFrexpVecAbstractNames{
 
 Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name, const Type* fract_ty, const Type* exp_ty) {
+        auto symbol = symbols.Register(tint::ToString(name));
+        if (auto* existing = types.Find<type::Struct>(symbol)) {
+            return existing;
+        }
         return types.Struct(
-            symbols.Register(tint::ToString(name)),
-            {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
+            symbol, {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
     };
     return Switch(
         ty,  //
@@ -172,11 +179,14 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
 
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name) {
-        return types.Struct(symbols.Register(tint::ToString(name)),
-                            {
-                                {symbols.Register("old_value"), ty},
-                                {symbols.Register("exchanged"), types.bool_()},
-                            });
+        auto symbol = symbols.Register(tint::ToString(name));
+        if (auto* existing = types.Find<type::Struct>(symbol)) {
+            return existing;
+        }
+        return types.Struct(symbol, {
+                                        {symbols.Register("old_value"), ty},
+                                        {symbols.Register("exchanged"), types.bool_()},
+                                    });
     };
     return Switch(
         ty,  //

@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/utils/macros/compiler.h"
 
 namespace tint::core::type {
 
@@ -198,6 +199,11 @@ const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {
+    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+        TINT_ICE() << "attempting to construct two structs named " << name.NameView();
+        return existing;
+    }
+
     uint32_t max_align = 0u;
     for (const auto& m : members) {
         max_align = std::max(max_align, m->Align());
@@ -208,6 +214,11 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md) {
+    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+        TINT_ICE() << "attempting to construct two structs named " << name.NameView();
+        return existing;
+    }
+
     tint::Vector<const StructMember*, 4> members;
     uint32_t current_size = 0u;
     uint32_t max_align = 0u;

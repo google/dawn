@@ -475,18 +475,21 @@ class Manager final {
     /// Create a new structure declaration.
     /// @param name the name of the structure
     /// @param members the list of structure members
+    /// @note a structure must not already exist with the same name
     /// @returns the structure type
     core::type::Struct* Struct(Symbol name, VectorRef<const StructMember*> members);
 
     /// Create a new structure declaration.
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
+    /// @note a structure must not already exist with the same name
     /// @returns the structure type
     core::type::Struct* Struct(Symbol name, VectorRef<StructMemberDesc> members);
 
     /// Create a new structure declaration.
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
+    /// @note a structure must not already exist with the same name
     /// @returns the structure type
     core::type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
         return Struct(name, tint::Vector<StructMemberDesc, 4>(members));

@@ -43,8 +43,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::StructMember);
 namespace tint::core::type {
 namespace {
 
-core::type::Flags FlagsFrom(VectorRef<const StructMember*> members) {
-    core::type::Flags flags{
+Flags FlagsFrom(VectorRef<const StructMember*> members) {
+    Flags flags{
         Flag::kConstructable,
         Flag::kCreationFixedFootprint,
         Flag::kFixedFootprint,
@@ -64,6 +64,14 @@ core::type::Flags FlagsFrom(VectorRef<const StructMember*> members) {
 }
 
 }  // namespace
+
+Struct::Struct(Symbol name)
+    : Base(Hash(tint::TypeInfo::Of<Struct>().full_hashcode, name), type::Flags{}),
+      name_(name),
+      members_{},
+      align_(0),
+      size_(0),
+      size_no_padding_(0) {}
 
 Struct::Struct(Symbol name,
                VectorRef<const StructMember*> members,
