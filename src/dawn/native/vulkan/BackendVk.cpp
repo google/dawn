@@ -86,6 +86,9 @@ constexpr SkippedMessage kSkippedMessages[] = {
     // so this is not expected to be worked around.
     // See http://crbug.com/dawn/1225 for more details.
     //
+    {"SYNC-HAZARD-READ-AFTER-WRITE",
+     "Access info (usage: SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, prior_usage: "
+     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE"},
     // Depth used as storage
     {"SYNC-HAZARD-WRITE-AFTER-READ",
      "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
