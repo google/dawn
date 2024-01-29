@@ -50,14 +50,15 @@ Device* ScopedCommandRecordingContext::GetDevice() const {
     return Get()->mDevice.Get();
 }
 
-void ScopedCommandRecordingContext::UpdateSubresource(ID3D11Resource* pDstResource,
-                                                      UINT DstSubresource,
-                                                      const D3D11_BOX* pDstBox,
-                                                      const void* pSrcData,
-                                                      UINT SrcRowPitch,
-                                                      UINT SrcDepthPitch) const {
-    Get()->mD3D11DeviceContext4->UpdateSubresource(pDstResource, DstSubresource, pDstBox, pSrcData,
-                                                   SrcRowPitch, SrcDepthPitch);
+void ScopedCommandRecordingContext::UpdateSubresource1(ID3D11Resource* pDstResource,
+                                                       UINT DstSubresource,
+                                                       const D3D11_BOX* pDstBox,
+                                                       const void* pSrcData,
+                                                       UINT SrcRowPitch,
+                                                       UINT SrcDepthPitch,
+                                                       UINT CopyFlags) const {
+    Get()->mD3D11DeviceContext4->UpdateSubresource1(pDstResource, DstSubresource, pDstBox, pSrcData,
+                                                    SrcRowPitch, SrcDepthPitch, CopyFlags);
 }
 
 void ScopedCommandRecordingContext::CopyResource(ID3D11Resource* pDstResource,

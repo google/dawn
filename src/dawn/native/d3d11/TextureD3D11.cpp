@@ -770,8 +770,9 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
         dstBox.back = origin.z + size.depthOrArrayLayers;
         uint32_t subresource =
             GetSubresourceIndex(subresources.baseMipLevel, 0, D3D11Aspect(subresources.aspects));
-        commandContext->UpdateSubresource(GetD3D11Resource(), subresource, &dstBox, data,
-                                          bytesPerRow, bytesPerRow * rowsPerImage);
+        commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, &dstBox, data,
+                                           bytesPerRow, bytesPerRow * rowsPerImage,
+                                           /*CopyFlags=*/0);
     } else {
         dstBox.front = 0;
         dstBox.back = 1;
@@ -780,8 +781,8 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
                 GetSubresourceIndex(subresources.baseMipLevel, subresources.baseArrayLayer + layer,
                                     D3D11Aspect(subresources.aspects));
             D3D11_BOX* pDstBox = GetFormat().HasDepthOrStencil() ? nullptr : &dstBox;
-            commandContext->UpdateSubresource(GetD3D11Resource(), subresource, pDstBox, data,
-                                              bytesPerRow, 0);
+            commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, pDstBox, data,
+                                               bytesPerRow, 0, /*CopyFlags=*/0);
             data += rowsPerImage * bytesPerRow;
         }
     }

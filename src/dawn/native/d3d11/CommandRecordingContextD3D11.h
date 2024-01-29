@@ -111,12 +111,13 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     Device* GetDevice() const;
 
     // Wrapper method which don't depend on context state.
-    void UpdateSubresource(ID3D11Resource* pDstResource,
-                           UINT DstSubresource,
-                           const D3D11_BOX* pDstBox,
-                           const void* pSrcData,
-                           UINT SrcRowPitch,
-                           UINT SrcDepthPitch) const;
+    void UpdateSubresource1(ID3D11Resource* pDstResource,
+                            UINT DstSubresource,
+                            const D3D11_BOX* pDstBox,
+                            const void* pSrcData,
+                            UINT SrcRowPitch,
+                            UINT SrcDepthPitch,
+                            UINT CopyFlags) const;
     void CopyResource(ID3D11Resource* pDstResource, ID3D11Resource* pSrcResource) const;
     void CopySubresourceRegion(ID3D11Resource* pDstResource,
                                UINT DstSubresource,
