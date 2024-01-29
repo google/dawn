@@ -43,6 +43,7 @@
 #include "dawn/native/Toggles.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "tint/lang/wgsl/features/status.h"
 
 // For SwiftShader fallback
@@ -260,7 +261,8 @@ Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
                                         const RequestAdapterCallbackInfo& callbackInfo) {
     struct RequestAdapterEvent final : public EventManager::TrackedEvent {
         WGPURequestAdapterCallback mCallback;
-        void* mUserdata;
+        // TODO(https://crbug.com/2349): Investigate dangling pointers in dawn/native.
+        raw_ptr<void, DanglingUntriaged> mUserdata;
         Ref<AdapterBase> mAdapter;
 
         RequestAdapterEvent(const RequestAdapterCallbackInfo& callbackInfo,

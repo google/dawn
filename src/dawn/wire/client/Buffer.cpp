@@ -207,7 +207,8 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     std::optional<WGPUBufferMapAsyncStatus> mStatus;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
-    Buffer* const mBuffer;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    const raw_ptr<Buffer, DanglingUntriaged> mBuffer;
 };
 
 // static

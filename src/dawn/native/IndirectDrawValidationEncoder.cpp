@@ -280,7 +280,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     DAWN_TRY(device->ValidateIsAlive());
 
     struct Batch {
-        const IndirectDrawMetadata::IndirectValidationBatch* metadata;
+        raw_ptr<const IndirectDrawMetadata::IndirectValidationBatch> metadata;
         uint64_t dataBufferOffset;
         uint64_t dataSize;
         uint64_t inputIndirectOffset;

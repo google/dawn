@@ -37,6 +37,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
 
@@ -271,7 +272,8 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
                                       const RequestDeviceCallbackInfo& callbackInfo) {
     struct RequestDeviceEvent final : public EventManager::TrackedEvent {
         WGPURequestDeviceCallback mCallback;
-        void* mUserdata;
+        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+        raw_ptr<void, DanglingUntriaged> mUserdata;
         ResultOrError<Ref<DeviceBase>> mDeviceOrError;
 
         RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo,

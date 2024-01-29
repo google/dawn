@@ -36,6 +36,7 @@
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -76,7 +77,7 @@ class CreatePipelineEventBase : public TrackedEvent {
         // so we don't need to handle it specifically.
         if (mStatus != WGPUCreatePipelineAsyncStatus_Success) {
             // If there was an error we need to reclaim the pipeline allocation.
-            mPipeline->GetClient()->Free(mPipeline);
+            mPipeline->GetClient()->Free(mPipeline.get());
             mPipeline = nullptr;
         }
         if (mCallback) {
@@ -86,14 +87,16 @@ class CreatePipelineEventBase : public TrackedEvent {
 
     using Callback = decltype(std::declval<CallbackInfo>().callback);
     Callback mCallback;
-    void* mUserdata;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
     WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
     std::optional<std::string> mMessage;
 
-    Pipeline* mPipeline = nullptr;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<Pipeline, DanglingUntriaged> mPipeline = nullptr;
 };
 
 using CreateComputePipelineEvent =

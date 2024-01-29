@@ -32,6 +32,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/wire/client/Client.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 namespace {
@@ -75,7 +76,7 @@ class RequestDeviceEvent : public TrackedEvent {
         if (mStatus != WGPURequestDeviceStatus_Success && mDevice != nullptr) {
             // If there was an error, we may need to reclaim the device allocation, otherwise the
             // device is returned to the user who owns it.
-            mDevice->GetClient()->Free(mDevice);
+            mDevice->GetClient()->Free(mDevice.get());
             mDevice = nullptr;
         }
         if (mCallback) {
@@ -84,7 +85,8 @@ class RequestDeviceEvent : public TrackedEvent {
     }
 
     WGPURequestDeviceCallback mCallback;
-    void* mUserdata;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -95,7 +97,8 @@ class RequestDeviceEvent : public TrackedEvent {
     // throughout the duration of a RequestDeviceEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the device to the user who then takes ownership as the Event goes away.
-    Device* mDevice = nullptr;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<Device, DanglingUntriaged> mDevice = nullptr;
 };
 
 }  // anonymous namespace
