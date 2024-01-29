@@ -61,9 +61,7 @@ class Module final : public Castable<Module, Node> {
     /// Modifies the severity of a specific diagnostic rule for this module.
     /// @param rule the diagnostic rule
     /// @param severity the new diagnostic severity
-    void SetDiagnosticSeverity(wgsl::DiagnosticRule rule, wgsl::DiagnosticSeverity severity) {
-        diagnostic_severities_[rule] = severity;
-    }
+    void SetDiagnosticSeverity(wgsl::DiagnosticRule rule, wgsl::DiagnosticSeverity severity);
 
     /// @returns the diagnostic severity modifications applied to this module
     const wgsl::DiagnosticRuleSeverities& DiagnosticSeverities() const {

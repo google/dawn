@@ -52,6 +52,11 @@ const BlockStatement* Statement::Block() const {
     return FindFirstParent<BlockStatement>();
 }
 
+void Statement::SetDiagnosticSeverity(wgsl::DiagnosticRule rule,
+                                      wgsl::DiagnosticSeverity severity) {
+    diagnostic_severities_.Add(rule, severity);
+}
+
 CompoundStatement::CompoundStatement(const ast::Statement* declaration,
                                      const CompoundStatement* parent,
                                      const sem::Function* function)

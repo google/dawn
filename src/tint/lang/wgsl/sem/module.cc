@@ -39,4 +39,8 @@ Module::Module(VectorRef<const ast::Node*> dep_ordered_decls, wgsl::Extensions e
 
 Module::~Module() = default;
 
+void Module::SetDiagnosticSeverity(wgsl::DiagnosticRule rule, wgsl::DiagnosticSeverity severity) {
+    diagnostic_severities_.Add(rule, severity);
+}
+
 }  // namespace tint::sem

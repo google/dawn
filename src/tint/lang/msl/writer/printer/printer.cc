@@ -1263,20 +1263,20 @@ class Printer : public tint::TextGenerator {
 
             if (auto location = attributes.location) {
                 auto& pipeline_stage_uses = str->PipelineStageUses();
-                if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
+                if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                     TINT_IR_ICE(ir_) << "invalid entry point IO struct uses";
                     return;
                 }
 
-                if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexInput)) {
+                if (pipeline_stage_uses.Contains(core::type::PipelineStageUsage::kVertexInput)) {
                     out << " [[attribute(" + std::to_string(location.value()) + ")]]";
-                } else if (pipeline_stage_uses.count(
+                } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kVertexOutput)) {
                     out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-                } else if (pipeline_stage_uses.count(
+                } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentInput)) {
                     out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-                } else if (TINT_LIKELY(pipeline_stage_uses.count(
+                } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentOutput))) {
                     out << " [[color(" + std::to_string(location.value()) + ")]]";
                 } else {

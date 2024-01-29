@@ -47,7 +47,7 @@ TEST_F(ResolverAddressSpaceUseTest, UnreachableStruct) {
 
     auto* sem = TypeOf(s)->As<core::type::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->AddressSpaceUsage().empty());
+    EXPECT_TRUE(sem->AddressSpaceUsage().IsEmpty());
 }
 
 TEST_F(ResolverAddressSpaceUseTest, StructReachableFromParameter) {

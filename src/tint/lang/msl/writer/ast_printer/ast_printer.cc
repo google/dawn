@@ -2798,18 +2798,20 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
 
         if (auto location = attributes.location) {
             auto& pipeline_stage_uses = str->PipelineStageUses();
-            if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
+            if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                 TINT_ICE() << "invalid entry point IO struct uses for " << str->Name().NameView();
                 return false;
             }
 
-            if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexInput)) {
+            if (pipeline_stage_uses.Contains(core::type::PipelineStageUsage::kVertexInput)) {
                 out << " [[attribute(" + std::to_string(location.value()) + ")]]";
-            } else if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexOutput)) {
+            } else if (pipeline_stage_uses.Contains(
+                           core::type::PipelineStageUsage::kVertexOutput)) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-            } else if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kFragmentInput)) {
+            } else if (pipeline_stage_uses.Contains(
+                           core::type::PipelineStageUsage::kFragmentInput)) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-            } else if (TINT_LIKELY(pipeline_stage_uses.count(
+            } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                            core::type::PipelineStageUsage::kFragmentOutput))) {
                 if (auto index = attributes.index) {
                     out << " [[color(" + std::to_string(location.value()) + ") index(" +

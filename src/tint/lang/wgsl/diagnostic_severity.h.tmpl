@@ -15,11 +15,11 @@ See:
 #define SRC_TINT_LANG_WGSL_DIAGNOSTIC_SEVERITY_H_
 
 #include <string>
-#include <unordered_map>
 
-#include "src/tint/utils/traits/traits.h"
 #include "src/tint/lang/wgsl/diagnostic_rule.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::wgsl {
 
@@ -30,7 +30,7 @@ namespace tint::wgsl {
 diag::Severity ToSeverity(DiagnosticSeverity sc);
 
 /// DiagnosticRuleSeverities is a map from diagnostic rule to diagnostic severity.
-using DiagnosticRuleSeverities = std::unordered_map<DiagnosticRule, DiagnosticSeverity>;
+using DiagnosticRuleSeverities = Hashmap<DiagnosticRule, DiagnosticSeverity, 1>;
 
 }  // namespace tint::wgsl
 

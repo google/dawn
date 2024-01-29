@@ -4879,7 +4879,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
     ty = const_cast<core::type::Type*>(ty->UnwrapRef());
 
     if (auto* str = ty->As<sem::Struct>()) {
-        if (str->AddressSpaceUsage().count(address_space)) {
+        if (str->AddressSpaceUsage().Contains(address_space)) {
             return true;  // Already applied
         }
 

@@ -49,7 +49,7 @@ TEST_F(ResolverPipelineStageUseTest, UnusedStruct) {
 
     auto* sem = TypeOf(s)->As<core::type::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->PipelineStageUses().empty());
+    EXPECT_TRUE(sem->PipelineStageUses().IsEmpty());
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
@@ -61,7 +61,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
 
     auto* sem = TypeOf(s)->As<core::type::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->PipelineStageUses().empty());
+    EXPECT_TRUE(sem->PipelineStageUses().IsEmpty());
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
@@ -73,7 +73,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
 
     auto* sem = TypeOf(s)->As<core::type::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->PipelineStageUses().empty());
+    EXPECT_TRUE(sem->PipelineStageUses().IsEmpty());
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {

@@ -31,7 +31,6 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <unordered_set>
 #include <utility>
 
 #include "src/tint/lang/core/address_space.h"
@@ -39,6 +38,7 @@
 #include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/type/node.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/symbol/symbol.h"
 
@@ -136,16 +136,14 @@ class Struct : public Castable<Struct, Type> {
 
     /// Adds the AddressSpace usage to the structure.
     /// @param usage the storage usage
-    void AddUsage(core::AddressSpace usage) { address_space_usage_.emplace(usage); }
+    void AddUsage(core::AddressSpace usage) { address_space_usage_.Add(usage); }
 
     /// @returns the set of address space uses of this structure
-    const std::unordered_set<core::AddressSpace>& AddressSpaceUsage() const {
-        return address_space_usage_;
-    }
+    const Hashset<core::AddressSpace, 1>& AddressSpaceUsage() const { return address_space_usage_; }
 
     /// @param usage the AddressSpace usage type to query
     /// @returns true iff this structure has been used as the given address space
-    bool UsedAs(core::AddressSpace usage) const { return address_space_usage_.count(usage) > 0; }
+    bool UsedAs(core::AddressSpace usage) const { return address_space_usage_.Contains(usage); }
 
     /// @returns true iff this structure has been used by address space that's
     /// host-shareable.
@@ -160,12 +158,10 @@ class Struct : public Castable<Struct, Type> {
 
     /// Adds the pipeline stage usage to the structure.
     /// @param usage the storage usage
-    void AddUsage(PipelineStageUsage usage) { pipeline_stage_uses_.emplace(usage); }
+    void AddUsage(PipelineStageUsage usage) { pipeline_stage_uses_.Add(usage); }
 
     /// @returns the set of entry point uses of this structure
-    const std::unordered_set<PipelineStageUsage>& PipelineStageUses() const {
-        return pipeline_stage_uses_;
-    }
+    const Hashset<PipelineStageUsage, 1>& PipelineStageUses() const { return pipeline_stage_uses_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -201,8 +197,8 @@ class Struct : public Castable<Struct, Type> {
     const uint32_t size_;
     const uint32_t size_no_padding_;
     core::type::StructFlags struct_flags_;
-    std::unordered_set<core::AddressSpace> address_space_usage_;
-    std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
+    Hashset<core::AddressSpace, 1> address_space_usage_;
+    Hashset<PipelineStageUsage, 1> pipeline_stage_uses_;
     tint::Vector<const Struct*, 2> concrete_types_;
 };
 

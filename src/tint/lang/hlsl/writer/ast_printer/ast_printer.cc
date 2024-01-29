@@ -425,9 +425,9 @@ bool ASTPrinter::Generate() {
             [&](const ast::Struct* str) {
                 auto* ty = builder_.Sem().Get(str);
                 auto address_space_uses = ty->AddressSpaceUsage();
-                if (address_space_uses.size() !=
-                    (address_space_uses.count(core::AddressSpace::kStorage) +
-                     address_space_uses.count(core::AddressSpace::kUniform))) {
+                if (address_space_uses.Count() !=
+                    ((address_space_uses.Contains(core::AddressSpace::kStorage) ? 1u : 0u) +
+                     (address_space_uses.Contains(core::AddressSpace::kUniform) ? 1u : 0u))) {
                     // The structure is used as something other than a storage buffer or
                     // uniform buffer, so it needs to be emitted.
                     // Storage buffer are read and written to via a ByteAddressBuffer
@@ -4554,18 +4554,18 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
 
             if (auto location = attributes.location) {
                 auto& pipeline_stage_uses = str->PipelineStageUses();
-                if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
+                if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                     TINT_ICE() << "invalid entry point IO struct uses";
                 }
-                if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexInput)) {
+                if (pipeline_stage_uses.Contains(core::type::PipelineStageUsage::kVertexInput)) {
                     post += " : TEXCOORD" + std::to_string(location.value());
-                } else if (pipeline_stage_uses.count(
+                } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kVertexOutput)) {
                     post += " : TEXCOORD" + std::to_string(location.value());
-                } else if (pipeline_stage_uses.count(
+                } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentInput)) {
                     post += " : TEXCOORD" + std::to_string(location.value());
-                } else if (TINT_LIKELY(pipeline_stage_uses.count(
+                } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentOutput))) {
                     if (auto index = attributes.index) {
                         post += " : SV_Target" + std::to_string(location.value() + index.value());

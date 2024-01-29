@@ -201,4 +201,8 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
     return ret;
 }
 
+void Function::SetDiagnosticSeverity(wgsl::DiagnosticRule rule, wgsl::DiagnosticSeverity severity) {
+    diagnostic_severities_.Add(rule, severity);
+}
+
 }  // namespace tint::sem

@@ -47,10 +47,8 @@ wgsl::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
                                                   wgsl::DiagnosticRule rule) const {
     // Get the diagnostic severity modification for a node.
     auto check = [&](auto* node) {
-        auto& severities = node->DiagnosticSeverities();
-        auto itr = severities.find(rule);
-        if (itr != severities.end()) {
-            return itr->second;
+        if (auto severity = node->DiagnosticSeverities().Get(rule)) {
+            return *severity;
         }
         return wgsl::DiagnosticSeverity::kUndefined;
     };
