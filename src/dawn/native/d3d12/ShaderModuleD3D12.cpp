@@ -195,7 +195,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         // the Tint AST to make the "bindings" decoration match the offset chosen by
         // d3d12::BindGroupLayout so that Tint produces HLSL with the correct registers
         // assigned to each interface variable.
-        for (const auto& [binding, bindingInfo] : moduleGroupBindingInfo) {
+        for (const auto& [binding, shaderBindingInfo] : moduleGroupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                          static_cast<uint32_t>(binding)};
@@ -205,12 +205,18 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
             }
 
+            const auto* bufferBindingInfo =
+                std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
+            if (bufferBindingInfo == nullptr) {
+                continue;
+            }
+
             // Declaring a read-only storage buffer in HLSL but specifying a storage
             // buffer in the BGL produces the wrong output. Force read-only storage
             // buffer bindings to be treated as UAV instead of SRV. Internal storage
             // buffer is a storage buffer used in the internal pipeline.
             const bool forceStorageBufferAsUAV =
-                (bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage &&
+                (bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage &&
                  (bgl->GetBindingInfo(bindingIndex).buffer.type ==
                       wgpu::BufferBindingType::Storage ||
                   bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
@@ -242,8 +248,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             //     }
             //     return 0u;
             // }
-            if ((bindingInfo.buffer.type == wgpu::BufferBindingType::Storage ||
-                 bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage) &&
+            if ((bufferBindingInfo->type == wgpu::BufferBindingType::Storage ||
+                 bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage) &&
                 !bgl->GetBindingInfo(bindingIndex).buffer.hasDynamicOffset) {
                 req.hlsl.tintOptions.binding_points_ignored_in_robustness_transform.emplace_back(
                     srcBindingPoint);
@@ -351,7 +357,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     // outside of the compilation.
     d3d::CompiledShader result = compiledShader.Acquire();
     result.hlslSource = "";
-    return result;
+    return std::move(result);
 }
 
 }  // namespace dawn::native::d3d12
