@@ -155,12 +155,12 @@ class Function final : public Castable<Function, CallTarget> {
 
     /// @returns the list of direct calls to functions / builtins made by this
     /// function
-    std::vector<const Call*> DirectCalls() const { return direct_calls_; }
+    const Vector<const Call*, 1>& DirectCalls() const { return direct_calls_; }
 
     /// Adds a record of the direct function / builtin calls made by this
     /// function
     /// @param call the call
-    void AddDirectCall(const Call* call) { direct_calls_.emplace_back(call); }
+    void AddDirectCall(const Call* call) { direct_calls_.Push(call); }
 
     /// @param target the target of a call
     /// @returns the Call to the given CallTarget, or nullptr the target was not
@@ -175,21 +175,19 @@ class Function final : public Castable<Function, CallTarget> {
     }
 
     /// @returns the list of callsites to this function
-    std::vector<const Call*> CallSites() const { return callsites_; }
+    const Vector<const Call*, 1>& CallSites() const { return callsites_; }
 
     /// Adds a record of a callsite to this function
     /// @param call the callsite
-    void AddCallSite(const Call* call) { callsites_.emplace_back(call); }
+    void AddCallSite(const Call* call) { callsites_.Push(call); }
 
     /// @returns the ancestor entry points
-    const std::vector<const Function*>& AncestorEntryPoints() const {
-        return ancestor_entry_points_;
-    }
+    const Vector<const Function*, 1>& AncestorEntryPoints() const { return ancestor_entry_points_; }
 
     /// Adds a record that the given entry point transitively calls this function
     /// @param entry_point the entry point that transtively calls this function
     void AddAncestorEntryPoint(const sem::Function* entry_point) {
-        ancestor_entry_points_.emplace_back(entry_point);
+        ancestor_entry_points_.Push(entry_point);
     }
 
     /// Retrieves any referenced location variables
@@ -300,9 +298,9 @@ class Function final : public Castable<Function, CallTarget> {
     UniqueVector<const Function*, 8> transitively_called_functions_;
     UniqueVector<const BuiltinFn*, 4> directly_called_builtins_;
     UniqueVector<VariablePair, 8> texture_sampler_pairs_;
-    std::vector<const Call*> direct_calls_;
-    std::vector<const Call*> callsites_;
-    std::vector<const Function*> ancestor_entry_points_;
+    Vector<const Call*, 1> direct_calls_;
+    Vector<const Call*, 1> callsites_;
+    Vector<const Function*, 1> ancestor_entry_points_;
     const Statement* discard_stmt_ = nullptr;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     wgsl::DiagnosticRuleSeverities diagnostic_severities_;

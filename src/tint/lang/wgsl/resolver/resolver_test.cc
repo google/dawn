@@ -1069,13 +1069,13 @@ TEST_F(ResolverTest, Function_CallSites) {
 
     auto* foo_sem = Sem().Get(foo);
     ASSERT_NE(foo_sem, nullptr);
-    ASSERT_EQ(foo_sem->CallSites().size(), 2u);
+    ASSERT_EQ(foo_sem->CallSites().Length(), 2u);
     EXPECT_EQ(foo_sem->CallSites()[0]->Declaration(), call_1);
     EXPECT_EQ(foo_sem->CallSites()[1]->Declaration(), call_2);
 
     auto* bar_sem = Sem().Get(bar);
     ASSERT_NE(bar_sem, nullptr);
-    EXPECT_EQ(bar_sem->CallSites().size(), 0u);
+    EXPECT_EQ(bar_sem->CallSites().Length(), 0u);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
@@ -2009,21 +2009,21 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     EXPECT_EQ(func_c_sem->Parameters().Length(), 0u);
 
     const auto& b_eps = func_b_sem->AncestorEntryPoints();
-    ASSERT_EQ(2u, b_eps.size());
+    ASSERT_EQ(2u, b_eps.Length());
     EXPECT_EQ(Symbols().Register("ep_1"), b_eps[0]->Declaration()->name->symbol);
     EXPECT_EQ(Symbols().Register("ep_2"), b_eps[1]->Declaration()->name->symbol);
 
     const auto& a_eps = func_a_sem->AncestorEntryPoints();
-    ASSERT_EQ(1u, a_eps.size());
+    ASSERT_EQ(1u, a_eps.Length());
     EXPECT_EQ(Symbols().Register("ep_1"), a_eps[0]->Declaration()->name->symbol);
 
     const auto& c_eps = func_c_sem->AncestorEntryPoints();
-    ASSERT_EQ(2u, c_eps.size());
+    ASSERT_EQ(2u, c_eps.Length());
     EXPECT_EQ(Symbols().Register("ep_1"), c_eps[0]->Declaration()->name->symbol);
     EXPECT_EQ(Symbols().Register("ep_2"), c_eps[1]->Declaration()->name->symbol);
 
-    EXPECT_TRUE(ep_1_sem->AncestorEntryPoints().empty());
-    EXPECT_TRUE(ep_2_sem->AncestorEntryPoints().empty());
+    EXPECT_TRUE(ep_1_sem->AncestorEntryPoints().IsEmpty());
+    EXPECT_TRUE(ep_2_sem->AncestorEntryPoints().IsEmpty());
 }
 
 // Check for linear-time traversal of functions reachable from entry points.

@@ -814,14 +814,14 @@ void Inspector::GenerateSamplerTargets() {
         }
 
         auto* call_func = call->Stmt()->Function();
-        std::vector<const sem::Function*> entry_points;
+        Vector<const sem::Function*, 4> entry_points;
         if (call_func->Declaration()->IsEntryPoint()) {
             entry_points = {call_func};
         } else {
             entry_points = call_func->AncestorEntryPoints();
         }
 
-        if (entry_points.empty()) {
+        if (entry_points.IsEmpty()) {
             continue;
         }
 
@@ -974,7 +974,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
             globals[i] = global;
         } else if (auto* param = root_ident->As<sem::Parameter>()) {
             auto* func = tint::As<sem::Function>(param->Owner());
-            if (func->CallSites().empty()) {
+            if (func->CallSites().IsEmpty()) {
                 // One or more of the expressions is a parameter, but this function
                 // is not called. Ignore.
                 return;
