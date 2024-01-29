@@ -61,15 +61,6 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
     DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
                     "Texture format %s is not depth/stencil renderable.", textureFormat);
-
-    if (!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
-        DAWN_INVALID_IF(
-            format->HasDepth() && format->HasStencil() && depthReadOnly != stencilReadOnly,
-            "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when format %s has "
-            "both depth and stencil aspects.",
-            depthReadOnly, stencilReadOnly, textureFormat);
-    }
-
     return {};
 }
 
