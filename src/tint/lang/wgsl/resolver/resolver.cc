@@ -2131,10 +2131,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         // Is this overload a constructor or conversion?
         if (match->info->flags.Contains(OverloadFlag::kIsConstructor)) {
             // Type constructor
-            auto params = Transform(match->parameters, [&](auto& p, size_t i) {
-                return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type, p.usage);
-            });
             target_sem = constructors_.GetOrCreate(match.Get(), [&] {
+                auto params = Transform(match->parameters, [&](auto& p, size_t i) {
+                    return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
+                                                    p.usage);
+                });
                 return b.create<sem::ValueConstructor>(match->return_type, std::move(params),
                                                        overload_stage);
             });
