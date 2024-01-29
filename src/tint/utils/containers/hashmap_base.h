@@ -639,7 +639,7 @@ class HashmapBase {
     size_t Wrap(size_t index) const { return index % slots_.Length(); }
 
     /// The vector of slots. The vector length is equal to its capacity.
-    Vector<Slot, kNumFixedSlots> slots_;
+    Vector<Slot, kMinSlots> slots_;
 
     /// The number of entries in the map.
     size_t count_ = 0;
