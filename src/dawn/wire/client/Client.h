@@ -121,9 +121,8 @@ class Client : public ClientBase {
     ChunkedCommandSerializer mSerializer;
     WireDeserializeAllocator mWireCommandAllocator;
     PerObjectType<ObjectStore> mObjectStores;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<MemoryTransferService, DanglingUntriaged> mMemoryTransferService = nullptr;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
+    raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;
     PerObjectType<LinkedList<ObjectBase>> mObjects;
     // Map of instance object handles to a corresponding event manager. Note that for now because we
     // do not have an internal refcount on the instances, i.e. we don't know when the last object
