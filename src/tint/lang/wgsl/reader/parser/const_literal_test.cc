@@ -147,7 +147,8 @@ TEST_P(ParserImplFloatLiteralTest, Parse) {
         EXPECT_EQ(c->As<ast::FloatLiteralExpression>()->suffix,
                   ast::FloatLiteralExpression::Suffix::kNone);
     }
-    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 1u + params.input.size()}}));
+    EXPECT_EQ(c->source.range,
+              (Source::Range{{1u, 1u}, {1u, 1u + static_cast<uint32_t>(params.input.size())}}));
 }
 using FloatLiteralTestCaseList = std::vector<FloatLiteralTestCase>;
 

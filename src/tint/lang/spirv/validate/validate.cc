@@ -44,8 +44,8 @@ Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_
         [&](spv_message_level_t level, const char*, const spv_position_t& pos, const char* msg) {
             diag::Diagnostic diag;
             diag.message = msg;
-            diag.source.range.begin.line = pos.line + 1;
-            diag.source.range.begin.column = pos.column + 1;
+            diag.source.range.begin.line = static_cast<uint32_t>(pos.line) + 1;
+            diag.source.range.begin.column = static_cast<uint32_t>(pos.column) + 1;
             diag.source.range.end = diag.source.range.begin;
             switch (level) {
                 case SPV_MSG_FATAL:

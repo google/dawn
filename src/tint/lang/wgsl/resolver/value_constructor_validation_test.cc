@@ -2626,7 +2626,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument
         }
         args_tys << "vec" << param.rows << "<" + element_type_name + ">";
     }
-    const size_t kInvalidLoc = 2 * (param.columns - 1);
+    const uint32_t kInvalidLoc = 2 * (param.columns - 1);
     auto invalid_vec_type = ty.vec(param.create_element_ast_type(*this), param.rows - 1);
     args.Push(Call(Source{{12, kInvalidLoc}}, invalid_vec_type));
     args_tys << ", vec" << (param.rows - 1) << "<" + element_type_name + ">";

@@ -3527,8 +3527,9 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                         swizzle.Push(3u);
                         break;
                     default:
-                        AddError("invalid vector swizzle character",
-                                 expr->member->source.Begin() + swizzle.Length());
+                        AddError(
+                            "invalid vector swizzle character",
+                            expr->member->source.Begin() + static_cast<uint32_t>(swizzle.Length()));
                         return nullptr;
                 }
 

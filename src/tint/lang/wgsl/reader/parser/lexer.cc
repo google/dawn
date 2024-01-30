@@ -58,7 +58,10 @@ static_assert(sizeof(decltype(tint::Source::FileContent::data[0])) == sizeof(uin
 // programs and being a bit bigger then those need (atan2-const-eval is the outlier here).
 static constexpr size_t kDefaultListSize = 4092;
 
-bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t* blankspace_size) {
+bool read_blankspace(std::string_view str,
+                     size_t i,
+                     bool* is_blankspace,
+                     uint32_t* blankspace_size) {
     // See https://www.w3.org/TR/WGSL/#blankspace
 
     auto* utf8 = reinterpret_cast<const uint8_t*>(&str[i]);
@@ -75,7 +78,7 @@ bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t
 
     if (cp == kSpace || cp == kHTab || cp == kL2R || cp == kR2L) {
         *is_blankspace = true;
-        *blankspace_size = n;
+        *blankspace_size = static_cast<uint32_t>(n);
         return true;
     }
 
@@ -139,15 +142,15 @@ std::string_view Lexer::line() const {
     return file_->content.lines[location_.line - 1];
 }
 
-size_t Lexer::pos() const {
+uint32_t Lexer::pos() const {
     return location_.column - 1;
 }
 
-size_t Lexer::length() const {
-    return line().size();
+uint32_t Lexer::length() const {
+    return static_cast<uint32_t>(line().size());
 }
 
-const char& Lexer::at(size_t pos) const {
+const char& Lexer::at(uint32_t pos) const {
     auto l = line();
     // Unlike for std::string, if pos == l.size(), indexing `l[pos]` is UB for
     // std::string_view.
@@ -158,15 +161,15 @@ const char& Lexer::at(size_t pos) const {
     return l[pos];
 }
 
-std::string_view Lexer::substr(size_t offset, size_t count) {
+std::string_view Lexer::substr(uint32_t offset, uint32_t count) {
     return line().substr(offset, count);
 }
 
-void Lexer::advance(size_t offset) {
+void Lexer::advance(uint32_t offset) {
     location_.column += offset;
 }
 
-void Lexer::set_pos(size_t pos) {
+void Lexer::set_pos(uint32_t pos) {
     location_.column = pos + 1;
 }
 
@@ -235,19 +238,18 @@ bool Lexer::is_null() const {
 bool Lexer::is_digit(char ch) const {
     return std::isdigit(static_cast<unsigned char>(ch));
 }
-
 bool Lexer::is_hex(char ch) const {
     return std::isxdigit(static_cast<unsigned char>(ch));
 }
 
-bool Lexer::matches(size_t pos, std::string_view sub_string) {
+bool Lexer::matches(uint32_t pos, std::string_view sub_string) {
     if (pos >= length()) {
         return false;
     }
-    return substr(pos, sub_string.size()) == sub_string;
+    return substr(pos, static_cast<uint32_t>(sub_string.size())) == sub_string;
 }
 
-bool Lexer::matches(size_t pos, char ch) {
+bool Lexer::matches(uint32_t pos, char ch) {
     if (pos >= length()) {
         return false;
     }
@@ -264,7 +266,7 @@ std::optional<Token> Lexer::skip_blankspace_and_comments() {
             }
 
             bool is_blankspace;
-            size_t blankspace_size;
+            uint32_t blankspace_size;
             if (!read_blankspace(line(), pos(), &is_blankspace, &blankspace_size)) {
                 return Token{Token::Type::kError, begin_source(), "invalid UTF-8"};
             }
@@ -383,7 +385,7 @@ std::optional<Token> Lexer::try_float() {
     }
 
     // Parse the exponent if one exists
-    std::optional<size_t> exponent_value_position;
+    std::optional<uint32_t> exponent_value_position;
     bool negative_exponent = false;
     if (end < length() && (matches(end, 'e') || matches(end, 'E'))) {
         end++;
@@ -893,8 +895,8 @@ std::optional<Token> Lexer::try_hex_float() {
 }
 
 Token Lexer::build_token_from_int_if_possible(Source source,
-                                              size_t start,
-                                              size_t prefix_count,
+                                              uint32_t start,
+                                              uint32_t prefix_count,
                                               int32_t base) {
     const char* start_ptr = &at(start);
     // The call to `from_chars` will return the pointer to just after the last parsed character.
@@ -907,7 +909,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     int64_t value = 0;
     auto res = std::from_chars(start_ptr, end_ptr, value, base);
     const bool overflow = res.ec != std::errc();
-    advance(static_cast<size_t>(res.ptr - start_ptr) + prefix_count);
+    advance(static_cast<uint32_t>(res.ptr - start_ptr) + prefix_count);
 
     if (matches(pos(), 'u')) {
         if (!overflow && core::CheckedConvert<u32>(AInt(value)) == Success) {
@@ -993,7 +995,7 @@ std::optional<Token> Lexer::try_ident() {
             return {};
         }
         // Consume start codepoint
-        advance(n);
+        advance(static_cast<uint32_t>(n));
     }
 
     while (!is_eol()) {
@@ -1009,7 +1011,7 @@ std::optional<Token> Lexer::try_ident() {
         }
 
         // Consume continuing codepoint
-        advance(n);
+        advance(static_cast<uint32_t>(n));
 
         if (pos() - start == 2 && substr(start, 2) == "__") {
             // Identifiers prefixed with two or more underscores are not allowed.

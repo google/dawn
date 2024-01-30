@@ -80,7 +80,7 @@ class Info {
 
     /// @param highest_node_id the last allocated (numerically highest) AST node identifier.
     void Reserve(ast::NodeID highest_node_id) {
-        nodes_.Resize(std::max(highest_node_id.value + 1, nodes_.Length()));
+        nodes_.Resize(std::max(highest_node_id.value + 1, static_cast<uint32_t>(nodes_.Length())));
     }
 
     /// Get looks up the semantic information for the AST node `ast_node`.

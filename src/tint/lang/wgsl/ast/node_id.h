@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_WGSL_AST_NODE_ID_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 namespace tint::ast {
 
@@ -46,7 +47,7 @@ struct NodeID {
     bool operator<(NodeID other) const { return value < other.value; }
 
     /// The numerical value for the node identifier
-    size_t value = 0;
+    uint32_t value = 0;
 };
 
 }  // namespace tint::ast

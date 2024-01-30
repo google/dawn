@@ -61,8 +61,8 @@ class Lexer {
     std::optional<Token> skip_comment();
 
     Token build_token_from_int_if_possible(Source source,
-                                           size_t start,
-                                           size_t prefix_count,
+                                           uint32_t start,
+                                           uint32_t prefix_count,
                                            int32_t base);
 
     std::optional<Token::Type> parse_keyword(std::string_view);
@@ -88,17 +88,17 @@ class Lexer {
     /// @returns view of current line
     std::string_view line() const;
     /// @returns position in current line
-    size_t pos() const;
+    uint32_t pos() const;
     /// @returns length of current line
-    size_t length() const;
+    uint32_t length() const;
     /// @returns reference to character at `pos` within current line
-    const char& at(size_t pos) const;
+    const char& at(uint32_t pos) const;
     /// @returns substring view at `offset` within current line of length `count`
-    std::string_view substr(size_t offset, size_t count);
+    std::string_view substr(uint32_t offset, uint32_t count);
     /// advances current position by `offset` within current line
-    void advance(size_t offset = 1);
+    void advance(uint32_t offset = 1);
     /// sets current position to `pos` within current line
-    void set_pos(size_t pos);
+    void set_pos(uint32_t pos);
     /// advances current position to next line
     void advance_line();
     /// @returns true if the end of the input has been reached.
@@ -115,9 +115,9 @@ class Lexer {
     /// @returns true if 'ch' is a hexadecimal digit
     bool is_hex(char ch) const;
     /// @returns true if string at `pos` matches `substr`
-    bool matches(size_t pos, std::string_view substr);
+    bool matches(uint32_t pos, std::string_view substr);
     /// @returns true if char at `pos` matches `ch`
-    bool matches(size_t pos, char ch);
+    bool matches(uint32_t pos, char ch);
     /// The source file content
     Source::File const* const file_;
     /// The current location within the input
