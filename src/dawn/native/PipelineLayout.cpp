@@ -34,6 +34,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/common/Numeric.h"
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_stack_vec.h"
@@ -233,58 +234,56 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         -> BindGroupLayoutEntry {
         BindGroupLayoutEntry entry = {};
 
-        // TODO(dawn:2370): implement a helper in dawn/utils to simplify the call of std::visit.
-        std::visit(
-            [&](const auto& bindingInfo) {
-                using T = std::decay_t<decltype(bindingInfo)>;
-
-                if constexpr (std::is_same_v<T, BufferBindingInfo>) {
-                    entry.buffer.type = bindingInfo.type;
-                    entry.buffer.minBindingSize = bindingInfo.minBindingSize;
-                } else if constexpr (std::is_same_v<T, SamplerBindingInfo>) {
-                    if (bindingInfo.isComparison) {
-                        entry.sampler.type = wgpu::SamplerBindingType::Comparison;
-                    } else {
-                        entry.sampler.type = wgpu::SamplerBindingType::Filtering;
-                    }
-                } else if constexpr (std::is_same_v<T, SampledTextureBindingInfo>) {
-                    switch (bindingInfo.compatibleSampleTypes) {
-                        case SampleTypeBit::Depth:
-                            entry.texture.sampleType = wgpu::TextureSampleType::Depth;
-                            break;
-                        case SampleTypeBit::Sint:
-                            entry.texture.sampleType = wgpu::TextureSampleType::Sint;
-                            break;
-                        case SampleTypeBit::Uint:
-                            entry.texture.sampleType = wgpu::TextureSampleType::Uint;
-                            break;
-                        case SampleTypeBit::Float:
-                        case SampleTypeBit::UnfilterableFloat:
-                        case SampleTypeBit::None:
-                            DAWN_UNREACHABLE();
-                            break;
-                        default:
-                            if (bindingInfo.compatibleSampleTypes ==
-                                (SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat)) {
-                                // Default to UnfilterableFloat. It will be promoted to Float if it
-                                // is used with a sampler.
-                                entry.texture.sampleType =
-                                    wgpu::TextureSampleType::UnfilterableFloat;
-                            } else {
-                                DAWN_UNREACHABLE();
-                            }
-                    }
-                    entry.texture.viewDimension = bindingInfo.viewDimension;
-                    entry.texture.multisampled = bindingInfo.multisampled;
-                } else if constexpr (std::is_same_v<T, StorageTextureBindingInfo>) {
-                    entry.storageTexture.access = bindingInfo.access;
-                    entry.storageTexture.format = bindingInfo.format;
-                    entry.storageTexture.viewDimension = bindingInfo.viewDimension;
-                } else if constexpr (std::is_same_v<T, ExternalTextureBindingInfo>) {
-                    entry.nextInChain = externalTextureBindingEntry;
+        MatchVariant(
+            shaderBinding.bindingInfo,
+            [&](const BufferBindingInfo& bindingInfo) {
+                entry.buffer.type = bindingInfo.type;
+                entry.buffer.minBindingSize = bindingInfo.minBindingSize;
+            },
+            [&](const SamplerBindingInfo& bindingInfo) {
+                if (bindingInfo.isComparison) {
+                    entry.sampler.type = wgpu::SamplerBindingType::Comparison;
+                } else {
+                    entry.sampler.type = wgpu::SamplerBindingType::Filtering;
                 }
             },
-            shaderBinding.bindingInfo);
+            [&](const SampledTextureBindingInfo& bindingInfo) {
+                switch (bindingInfo.compatibleSampleTypes) {
+                    case SampleTypeBit::Depth:
+                        entry.texture.sampleType = wgpu::TextureSampleType::Depth;
+                        break;
+                    case SampleTypeBit::Sint:
+                        entry.texture.sampleType = wgpu::TextureSampleType::Sint;
+                        break;
+                    case SampleTypeBit::Uint:
+                        entry.texture.sampleType = wgpu::TextureSampleType::Uint;
+                        break;
+                    case SampleTypeBit::Float:
+                    case SampleTypeBit::UnfilterableFloat:
+                    case SampleTypeBit::None:
+                        DAWN_UNREACHABLE();
+                        break;
+                    default:
+                        if (bindingInfo.compatibleSampleTypes ==
+                            (SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat)) {
+                            // Default to UnfilterableFloat. It will be promoted to Float
+                            // if it is used with a sampler.
+                            entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
+                        } else {
+                            DAWN_UNREACHABLE();
+                        }
+                }
+                entry.texture.viewDimension = bindingInfo.viewDimension;
+                entry.texture.multisampled = bindingInfo.multisampled;
+            },
+            [&](const StorageTextureBindingInfo& bindingInfo) {
+                entry.storageTexture.access = bindingInfo.access;
+                entry.storageTexture.format = bindingInfo.format;
+                entry.storageTexture.viewDimension = bindingInfo.viewDimension;
+            },
+            [&](const ExternalTextureBindingInfo&) {
+                entry.nextInChain = externalTextureBindingEntry;
+            });
 
         return entry;
     };

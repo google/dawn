@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Serializable.h"
@@ -250,65 +251,64 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             tint::BindingPoint dstBindingPoint{
                 static_cast<uint32_t>(group), static_cast<uint32_t>(bgl->GetBindingIndex(binding))};
 
-            // TODO(dawn:2370): implement a helper in dawn/utils to simplify the call of std::visit.
-            std::visit(
-                [&](const auto& bindingInfo) {
-                    using T = std::decay_t<decltype(bindingInfo)>;
-
-                    if constexpr (std::is_same_v<T, BufferBindingInfo>) {
-                        switch (bindingInfo.type) {
-                            case wgpu::BufferBindingType::Uniform:
-                                bindings.uniform.emplace(
-                                    srcBindingPoint,
-                                    tint::spirv::writer::binding::Uniform{dstBindingPoint.group,
-                                                                          dstBindingPoint.binding});
-                                break;
-                            case kInternalStorageBufferBinding:
-                            case wgpu::BufferBindingType::Storage:
-                            case wgpu::BufferBindingType::ReadOnlyStorage:
-                                bindings.storage.emplace(
-                                    srcBindingPoint,
-                                    tint::spirv::writer::binding::Storage{dstBindingPoint.group,
-                                                                          dstBindingPoint.binding});
-                                break;
-                            case wgpu::BufferBindingType::Undefined:
-                                DAWN_UNREACHABLE();
-                                break;
-                        }
-                    } else if constexpr (std::is_same_v<T, SamplerBindingInfo>) {
-                        bindings.sampler.emplace(
-                            srcBindingPoint, tint::spirv::writer::binding::Sampler{
-                                                 dstBindingPoint.group, dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, SampledTextureBindingInfo>) {
-                        bindings.texture.emplace(
-                            srcBindingPoint, tint::spirv::writer::binding::Texture{
-                                                 dstBindingPoint.group, dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, StorageTextureBindingInfo>) {
-                        bindings.storage_texture.emplace(
-                            srcBindingPoint, tint::spirv::writer::binding::StorageTexture{
-                                                 dstBindingPoint.group, dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, ExternalTextureBindingInfo>) {
-                        const auto& bindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                        const auto& expansion = bindingMap.find(binding);
-                        DAWN_ASSERT(expansion != bindingMap.end());
-
-                        const auto& bindingExpansion = expansion->second;
-                        tint::spirv::writer::binding::BindingInfo plane0{
-                            static_cast<uint32_t>(group),
-                            static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane0))};
-                        tint::spirv::writer::binding::BindingInfo plane1{
-                            static_cast<uint32_t>(group),
-                            static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane1))};
-                        tint::spirv::writer::binding::BindingInfo metadata{
-                            static_cast<uint32_t>(group),
-                            static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.params))};
-
-                        bindings.external_texture.emplace(
-                            srcBindingPoint, tint::spirv::writer::binding::ExternalTexture{
-                                                 metadata, plane0, plane1});
+            MatchVariant(
+                shaderBindingInfo.bindingInfo,
+                [&](const BufferBindingInfo& bindingInfo) {
+                    switch (bindingInfo.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            bindings.uniform.emplace(
+                                srcBindingPoint,
+                                tint::spirv::writer::binding::Uniform{dstBindingPoint.group,
+                                                                      dstBindingPoint.binding});
+                            break;
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::Storage:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            bindings.storage.emplace(
+                                srcBindingPoint,
+                                tint::spirv::writer::binding::Storage{dstBindingPoint.group,
+                                                                      dstBindingPoint.binding});
+                            break;
+                        case wgpu::BufferBindingType::Undefined:
+                            DAWN_UNREACHABLE();
+                            break;
                     }
                 },
-                shaderBindingInfo.bindingInfo);
+                [&](const SamplerBindingInfo& bindingInfo) {
+                    bindings.sampler.emplace(srcBindingPoint,
+                                             tint::spirv::writer::binding::Sampler{
+                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                },
+                [&](const SampledTextureBindingInfo& bindingInfo) {
+                    bindings.texture.emplace(srcBindingPoint,
+                                             tint::spirv::writer::binding::Texture{
+                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                },
+                [&](const StorageTextureBindingInfo& bindingInfo) {
+                    bindings.storage_texture.emplace(
+                        srcBindingPoint, tint::spirv::writer::binding::StorageTexture{
+                                             dstBindingPoint.group, dstBindingPoint.binding});
+                },
+                [&](const ExternalTextureBindingInfo& bindingInfo) {
+                    const auto& bindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                    const auto& expansion = bindingMap.find(binding);
+                    DAWN_ASSERT(expansion != bindingMap.end());
+
+                    const auto& bindingExpansion = expansion->second;
+                    tint::spirv::writer::binding::BindingInfo plane0{
+                        static_cast<uint32_t>(group),
+                        static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane0))};
+                    tint::spirv::writer::binding::BindingInfo plane1{
+                        static_cast<uint32_t>(group),
+                        static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane1))};
+                    tint::spirv::writer::binding::BindingInfo metadata{
+                        static_cast<uint32_t>(group),
+                        static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.params))};
+
+                    bindings.external_texture.emplace(
+                        srcBindingPoint,
+                        tint::spirv::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                });
         }
     }
 

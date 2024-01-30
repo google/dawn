@@ -30,6 +30,7 @@
 #include <bitset>
 #include <utility>
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/EnumMaskIterator.h"
@@ -596,29 +597,16 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     return table;
 }
 
-namespace {
-
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
-}  // anonymous namespace
-
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const UnsupportedReason& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-    std::visit(
-        overloaded{
-            [](const std::monostate&) { DAWN_UNREACHABLE(); },
-            [s](const RequiresFeature& requiresFeature) {
-                s->Append(absl::StrFormat("requires feature %s", requiresFeature.feature));
-            },
-            [s](const CompatibilityMode&) { s->Append("not supported in compatibility mode"); }},
-        value);
+    MatchVariant(
+        value, [](const std::monostate&) { DAWN_UNREACHABLE(); },
+        [s](const RequiresFeature& requiresFeature) {
+            s->Append(absl::StrFormat("requires feature %s", requiresFeature.feature));
+        },
+        [s](const CompatibilityMode&) { s->Append("not supported in compatibility mode"); });
     return {true};
 }
 

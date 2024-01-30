@@ -67,6 +67,7 @@ target_sources(dawn_common PRIVATE
     "LinkedList.h"
     "Log.cpp"
     "Log.h"
+    "MatchVariant.h"
     "Math.cpp"
     "Math.h"
     "Mutex.cpp"

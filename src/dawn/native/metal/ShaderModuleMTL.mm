@@ -27,6 +27,7 @@
 
 #include "dawn/native/metal/ShaderModuleMTL.h"
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
@@ -147,65 +148,62 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
             tint::BindingPoint dstBindingPoint{0, shaderIndex};
 
-            // TODO(dawn:2370): implement a helper in dawn/utils to simplify the call of std::visit.
-            std::visit(
-                [&](const auto& bindingInfo) {
-                    using T = std::decay_t<decltype(bindingInfo)>;
-
-                    if constexpr (std::is_same_v<T, BufferBindingInfo>) {
-                        switch (bindingInfo.type) {
-                            case wgpu::BufferBindingType::Uniform:
-                                bindings.uniform.emplace(
-                                    srcBindingPoint,
-                                    tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
-                                break;
-                            case kInternalStorageBufferBinding:
-                            case wgpu::BufferBindingType::Storage:
-                            case wgpu::BufferBindingType::ReadOnlyStorage:
-                                bindings.storage.emplace(
-                                    srcBindingPoint,
-                                    tint::msl::writer::binding::Storage{dstBindingPoint.binding});
-                                // Use the ShaderIndex as the indices for the buffer size lookups in
-                                // the array length uniform transform. This is used to compute the
-                                // size of variable length arrays in storage buffers.
-                                arrayLengthFromUniform.bindpoint_to_size_index.emplace(
-                                    dstBindingPoint, dstBindingPoint.binding);
-                                break;
-                            case wgpu::BufferBindingType::Undefined:
-                                DAWN_UNREACHABLE();
-                                break;
-                        }
-                    } else if constexpr (std::is_same_v<T, SamplerBindingInfo>) {
-                        bindings.sampler.emplace(
-                            srcBindingPoint,
-                            tint::msl::writer::binding::Sampler{dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, SampledTextureBindingInfo>) {
-                        bindings.texture.emplace(
-                            srcBindingPoint,
-                            tint::msl::writer::binding::Texture{dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, StorageTextureBindingInfo>) {
-                        bindings.storage_texture.emplace(
-                            srcBindingPoint,
-                            tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
-                    } else if constexpr (std::is_same_v<T, ExternalTextureBindingInfo>) {
-                        const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                        const auto& expansion = etBindingMap.find(binding);
-                        DAWN_ASSERT(expansion != etBindingMap.end());
-
-                        const auto& bindingExpansion = expansion->second;
-                        tint::msl::writer::binding::BindingInfo plane0{
-                            static_cast<uint32_t>(shaderIndex)};
-                        tint::msl::writer::binding::BindingInfo plane1{
-                            bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
-                        tint::msl::writer::binding::BindingInfo metadata{
-                            bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
-
-                        bindings.external_texture.emplace(
-                            srcBindingPoint,
-                            tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+            MatchVariant(
+                shaderBindingInfo.bindingInfo,
+                [&](const BufferBindingInfo& bindingInfo) {
+                    switch (bindingInfo.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            bindings.uniform.emplace(
+                                srcBindingPoint,
+                                tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
+                            break;
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::Storage:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            bindings.storage.emplace(
+                                srcBindingPoint,
+                                tint::msl::writer::binding::Storage{dstBindingPoint.binding});
+                            // Use the ShaderIndex as the indices for the buffer size lookups in
+                            // the array length uniform transform. This is used to compute the
+                            // size of variable length arrays in storage buffers.
+                            arrayLengthFromUniform.bindpoint_to_size_index.emplace(
+                                dstBindingPoint, dstBindingPoint.binding);
+                            break;
+                        case wgpu::BufferBindingType::Undefined:
+                            DAWN_UNREACHABLE();
+                            break;
                     }
                 },
-                shaderBindingInfo.bindingInfo);
+                [&](const SamplerBindingInfo& bindingInfo) {
+                    bindings.sampler.emplace(srcBindingPoint, tint::msl::writer::binding::Sampler{
+                                                                  dstBindingPoint.binding});
+                },
+                [&](const SampledTextureBindingInfo& bindingInfo) {
+                    bindings.texture.emplace(srcBindingPoint, tint::msl::writer::binding::Texture{
+                                                                  dstBindingPoint.binding});
+                },
+                [&](const StorageTextureBindingInfo& bindingInfo) {
+                    bindings.storage_texture.emplace(
+                        srcBindingPoint,
+                        tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
+                },
+                [&](const ExternalTextureBindingInfo& bindingInfo) {
+                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                    const auto& expansion = etBindingMap.find(binding);
+                    DAWN_ASSERT(expansion != etBindingMap.end());
+
+                    const auto& bindingExpansion = expansion->second;
+                    tint::msl::writer::binding::BindingInfo plane0{
+                        static_cast<uint32_t>(shaderIndex)};
+                    tint::msl::writer::binding::BindingInfo plane1{
+                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                    tint::msl::writer::binding::BindingInfo metadata{
+                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+
+                    bindings.external_texture.emplace(
+                        srcBindingPoint,
+                        tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                });
         }
     }
 
