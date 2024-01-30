@@ -73,7 +73,7 @@ class EventManager final : NonMovable {
     class TrackedEvent;
     // Track a TrackedEvent and give it a FutureID.
     [[nodiscard]] FutureID TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&&);
-    void ProcessPollEvents();
+    bool ProcessPollEvents();
     [[nodiscard]] wgpu::WaitStatus WaitAny(size_t count,
                                            FutureWaitInfo* infos,
                                            Nanoseconds timeout);

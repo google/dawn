@@ -162,6 +162,10 @@ class InstanceBase final : public RefCountedWithExternalCount {
     const X11Functions* GetOrLoadX11Functions();
     const AHBFunctions* GetOrLoadAHBFunctions();
 
+    // TODO(dawn:752) Standardize webgpu.h to decide if we should return bool.
+    //   Currently this is a backdoor for Chromium's process event loop.
+    bool ProcessEvents();
+
     // Dawn API
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
     void APIProcessEvents();

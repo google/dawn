@@ -218,7 +218,7 @@ DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
-DAWN_NATIVE_EXPORT void InstanceProcessEvents(WGPUInstance instance);
+DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);
 
 // ErrorInjector functions used for testing only. Defined in dawn_native/ErrorInjector.cpp
 DAWN_NATIVE_EXPORT void EnableErrorInjector();

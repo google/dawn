@@ -301,7 +301,7 @@ FutureID EventManager::TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&& f
     return futureID;
 }
 
-void EventManager::ProcessPollEvents() {
+bool EventManager::ProcessPollEvents() {
     DAWN_ASSERT(mEvents.has_value());
 
     std::vector<TrackedFutureWaitInfo> futures;
@@ -323,7 +323,7 @@ void EventManager::ProcessPollEvents() {
         std::lock_guard<std::mutex> lock(mProcessEventLock);
         wgpu::WaitStatus waitStatus = WaitImpl(futures, Nanoseconds(0));
         if (waitStatus == wgpu::WaitStatus::TimedOut) {
-            return;
+            return false;
         }
         DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
     }
@@ -343,6 +343,7 @@ void EventManager::ProcessPollEvents() {
     for (auto it = futures.begin(); it != readyEnd; ++it) {
         it->event->EnsureComplete(EventCompletionType::Ready);
     }
+    return readyEnd != futures.end();
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {
