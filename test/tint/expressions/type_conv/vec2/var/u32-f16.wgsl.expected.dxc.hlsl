@@ -6,5 +6,5 @@ void unused_entry_point() {
 static uint2 u = (1u).xx;
 
 void f() {
-  const vector<float16_t, 2> v = vector<float16_t, 2>(u);
+  vector<float16_t, 2> v = vector<float16_t, 2>(u);
 }

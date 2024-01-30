@@ -17,7 +17,7 @@ struct tint_symbol_2 {
 int main_inner(int3 x) {
   int y = x.x;
   while (true) {
-    const int r = f(y);
+    int r = f(y);
     if ((r == 0)) {
       break;
     }
@@ -26,7 +26,7 @@ int main_inner(int3 x) {
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const int inner_result = main_inner(tint_symbol.x);
+  int inner_result = main_inner(tint_symbol.x);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   if (tint_discarded) {

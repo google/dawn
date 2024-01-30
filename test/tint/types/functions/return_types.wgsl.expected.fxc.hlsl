@@ -36,12 +36,12 @@ float2x3 ret_m2x3() {
 
 typedef float ret_arr_ret[4];
 ret_arr_ret ret_arr() {
-  const float tint_symbol[4] = (float[4])0;
+  float tint_symbol[4] = (float[4])0;
   return tint_symbol;
 }
 
 S ret_struct() {
-  const S tint_symbol_1 = (S)0;
+  S tint_symbol_1 = (S)0;
   return tint_symbol_1;
 }
 

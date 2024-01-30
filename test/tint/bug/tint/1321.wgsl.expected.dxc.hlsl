@@ -4,10 +4,10 @@ int foo() {
 
 void main() {
   float arr[4] = (float[4])0;
-  const int a_save = foo();
+  int a_save = foo();
   {
     for(; ; ) {
-      const float x = arr[a_save];
+      float x = arr[a_save];
       break;
     }
   }

@@ -11,6 +11,6 @@ bool4 m() {
 }
 
 void f() {
-  const bool4 tint_symbol = m();
+  bool4 tint_symbol = m();
   uint4 v = uint4(tint_symbol);
 }

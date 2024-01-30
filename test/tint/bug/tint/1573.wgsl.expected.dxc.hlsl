@@ -15,6 +15,6 @@ atomic_compare_exchange_result_u32 aatomicCompareExchangeWeak(uint offset, uint 
 [numthreads(16, 1, 1)]
 void main() {
   uint value = 42u;
-  const atomic_compare_exchange_result_u32 result = aatomicCompareExchangeWeak(0u, 0u, value);
+  atomic_compare_exchange_result_u32 result = aatomicCompareExchangeWeak(0u, 0u, value);
   return;
 }

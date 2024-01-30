@@ -8,5 +8,5 @@ void unused_entry_point() {
 }
 
 void foo() {
-  const modf_result_f32 s1 = (modf_result_f32)0;
+  modf_result_f32 s1 = (modf_result_f32)0;
 }

@@ -8,6 +8,6 @@ int func_S() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int r = func_S();
+  int r = func_S();
   return;
 }

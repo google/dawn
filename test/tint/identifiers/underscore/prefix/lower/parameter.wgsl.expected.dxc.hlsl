@@ -1,7 +1,7 @@
 RWByteAddressBuffer s : register(u0);
 
 void f(int _a) {
-  const int b = _a;
+  int b = _a;
   s.Store(0u, asuint(b));
 }
 

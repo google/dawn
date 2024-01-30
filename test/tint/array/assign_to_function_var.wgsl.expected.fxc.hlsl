@@ -11,12 +11,12 @@ RWByteAddressBuffer src_storage : register(u1);
 
 typedef int4 ret_arr_ret[4];
 ret_arr_ret ret_arr() {
-  const int4 tint_symbol_4[4] = (int4[4])0;
+  int4 tint_symbol_4[4] = (int4[4])0;
   return tint_symbol_4;
 }
 
 S ret_struct_arr() {
-  const S tint_symbol_5 = (S)0;
+  S tint_symbol_5 = (S)0;
   return tint_symbol_5;
 }
 
@@ -46,16 +46,16 @@ src_storage_load_ret src_storage_load(uint offset) {
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
   int4 tint_symbol[4] = (int4[4])0;
-  const int4 tint_symbol_6[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
+  int4 tint_symbol_6[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
   tint_symbol = tint_symbol_6;
   tint_symbol = src_param;
   tint_symbol = ret_arr();
-  const int4 src_let[4] = (int4[4])0;
+  int4 src_let[4] = (int4[4])0;
   tint_symbol = src_let;
   tint_symbol = src_function;
   tint_symbol = src_private;
   tint_symbol = src_workgroup;
-  const S tint_symbol_1 = ret_struct_arr();
+  S tint_symbol_1 = ret_struct_arr();
   tint_symbol = tint_symbol_1.arr;
   tint_symbol = src_uniform_load(0u);
   tint_symbol = src_storage_load(0u);
@@ -71,12 +71,12 @@ struct tint_symbol_3 {
 void main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      const uint i = idx;
+      uint i = idx;
       src_workgroup[i] = (0).xxxx;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const int4 val[4] = (int4[4])0;
+  int4 val[4] = (int4[4])0;
   foo(val);
 }
 

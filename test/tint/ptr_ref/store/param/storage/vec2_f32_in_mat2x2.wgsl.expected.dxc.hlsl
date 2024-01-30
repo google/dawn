@@ -6,7 +6,7 @@ void func_S_X(uint pointer[1]) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const uint tint_symbol[1] = {1u};
+  uint tint_symbol[1] = {1u};
   func_S_X(tint_symbol);
   return;
 }

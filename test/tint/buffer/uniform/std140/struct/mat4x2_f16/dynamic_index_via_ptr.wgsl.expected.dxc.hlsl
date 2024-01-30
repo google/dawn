@@ -61,23 +61,23 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_a_i_save = i();
-  const int p_a_i_a_i_save = i();
-  const int p_a_i_a_i_m_i_save = i();
+  int p_a_i_save = i();
+  int p_a_i_a_i_save = i();
+  int p_a_i_a_i_m_i_save = i();
   Outer l_a[4] = a_load(0u);
   Outer l_a_i = a_load_1((256u * uint(p_a_i_save)));
   Inner l_a_i_a[4] = a_load_2((256u * uint(p_a_i_save)));
   Inner l_a_i_a_i = a_load_3(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
-  const matrix<float16_t, 4, 2> l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
+  matrix<float16_t, 4, 2> l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
   const uint scalar_offset_4 = ((((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))) + (4u * uint(p_a_i_a_i_m_i_save)))) / 4;
   uint ubo_load_4 = a[scalar_offset_4 / 4][scalar_offset_4 % 4];
-  const vector<float16_t, 2> l_a_i_a_i_m_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16)));
-  const int tint_symbol = p_a_i_save;
-  const int tint_symbol_1 = p_a_i_a_i_save;
-  const int tint_symbol_2 = p_a_i_a_i_m_i_save;
-  const int tint_symbol_3 = i();
+  vector<float16_t, 2> l_a_i_a_i_m_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16)));
+  int tint_symbol = p_a_i_save;
+  int tint_symbol_1 = p_a_i_a_i_save;
+  int tint_symbol_2 = p_a_i_a_i_m_i_save;
+  int tint_symbol_3 = i();
   const uint scalar_offset_bytes = (((((256u * uint(tint_symbol)) + (64u * uint(tint_symbol_1))) + (4u * uint(tint_symbol_2))) + (2u * uint(tint_symbol_3))));
   const uint scalar_offset_index = scalar_offset_bytes / 4;
-  const float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32(((a[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF)));
+  float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32(((a[scalar_offset_index / 4][scalar_offset_index % 4] >> (scalar_offset_bytes % 4 == 0 ? 0 : 16)) & 0xFFFF)));
   return;
 }

@@ -29,10 +29,10 @@ matrix<float16_t, 3, 4> m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 3, 4> l_m = m_load(0u);
+  matrix<float16_t, 3, 4> l_m = m_load(0u);
   uint2 ubo_load_6 = m[0].zw;
   vector<float16_t, 2> ubo_load_6_xz = vector<float16_t, 2>(f16tof32(ubo_load_6 & 0xFFFF));
   vector<float16_t, 2> ubo_load_6_yw = vector<float16_t, 2>(f16tof32(ubo_load_6 >> 16));
-  const vector<float16_t, 4> l_m_1 = vector<float16_t, 4>(ubo_load_6_xz[0], ubo_load_6_yw[0], ubo_load_6_xz[1], ubo_load_6_yw[1]);
+  vector<float16_t, 4> l_m_1 = vector<float16_t, 4>(ubo_load_6_xz[0], ubo_load_6_yw[0], ubo_load_6_xz[1], ubo_load_6_yw[1]);
   return;
 }

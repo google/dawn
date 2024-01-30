@@ -24,13 +24,13 @@ matrix<float16_t, 2, 3> m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_m_i_save = i();
-  const matrix<float16_t, 2, 3> l_m = m_load(0u);
+  int p_m_i_save = i();
+  matrix<float16_t, 2, 3> l_m = m_load(0u);
   const uint scalar_offset_2 = ((8u * uint(p_m_i_save))) / 4;
   uint4 ubo_load_5 = m[scalar_offset_2 / 4];
   uint2 ubo_load_4 = ((scalar_offset_2 & 2) ? ubo_load_5.zw : ubo_load_5.xy);
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
-  const vector<float16_t, 3> l_m_i = vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]);
+  vector<float16_t, 3> l_m_i = vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]);
   return;
 }

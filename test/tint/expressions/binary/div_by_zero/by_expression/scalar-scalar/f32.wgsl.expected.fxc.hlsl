@@ -2,6 +2,6 @@
 void f() {
   float a = 1.0f;
   float b = 0.0f;
-  const float r = (a / (b + b));
+  float r = (a / (b + b));
   return;
 }

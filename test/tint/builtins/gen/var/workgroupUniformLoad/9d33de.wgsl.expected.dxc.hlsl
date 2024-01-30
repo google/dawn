@@ -2,7 +2,7 @@ groupshared int arg_0;
 
 int tint_workgroupUniformLoad_arg_0() {
   GroupMemoryBarrierWithGroupSync();
-  const int result = arg_0;
+  int result = arg_0;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

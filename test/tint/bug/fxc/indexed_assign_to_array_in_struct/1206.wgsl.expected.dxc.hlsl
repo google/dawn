@@ -22,7 +22,7 @@ particles_load_1_ret particles_load_1(uint offset) {
 }
 
 Particle particles_load(uint offset) {
-  const Particle tint_symbol_2 = {particles_load_1((offset + 0u)), asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
+  Particle tint_symbol_2 = {particles_load_1((offset + 0u)), asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
   return tint_symbol_2;
 }
 

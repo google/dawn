@@ -11,6 +11,6 @@ struct B {
 };
 
 B f(A a) {
-  const B tint_symbol = (B)0;
+  B tint_symbol = (B)0;
   return tint_symbol;
 }

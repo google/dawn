@@ -9,7 +9,7 @@ uint sb_rwatomicSub(uint offset, uint value) {
 
 void atomicSub_15bfc9() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicSub(0u, 1u);
+  uint x_9 = sb_rwatomicSub(0u, 1u);
   res = x_9;
   return;
 }

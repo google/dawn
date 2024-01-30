@@ -9,7 +9,7 @@ uint sb_rwatomicXor(uint offset, uint value) {
 
 void atomicXor_54510e() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicXor(0u, 1u);
+  uint x_9 = sb_rwatomicXor(0u, 1u);
   res = x_9;
   return;
 }

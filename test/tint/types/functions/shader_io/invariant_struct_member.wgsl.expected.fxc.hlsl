@@ -6,12 +6,12 @@ struct tint_symbol {
 };
 
 Out main_inner() {
-  const Out tint_symbol_1 = (Out)0;
+  Out tint_symbol_1 = (Out)0;
   return tint_symbol_1;
 }
 
 tint_symbol main() {
-  const Out inner_result = main_inner();
+  Out inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;

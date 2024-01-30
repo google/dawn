@@ -1,6 +1,6 @@
 int tint_dot4_i8_packed(uint a, uint b) {
-  const int4 a_i8 = (asint((uint4((a).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
-  const int4 b_i8 = (asint((uint4((b).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
+  int4 a_i8 = (asint((uint4((a).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
+  int4 b_i8 = (asint((uint4((b).xxxx) << uint4(24u, 16u, 8u, 0u))) >> (24u).xxxx);
   return dot(a_i8, b_i8);
 }
 
@@ -23,7 +23,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

@@ -5,6 +5,6 @@ void unused_entry_point() {
 
 float f() {
   float3 v = float3(1.0f, 2.0f, 3.0f);
-  const int i = 1;
+  int i = 1;
   return v[i];
 }

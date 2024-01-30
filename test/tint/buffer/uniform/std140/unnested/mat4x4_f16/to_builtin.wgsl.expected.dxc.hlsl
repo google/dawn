@@ -28,14 +28,14 @@ matrix<float16_t, 4, 4> u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 4, 4> t = transpose(u_load(0u));
+  matrix<float16_t, 4, 4> t = transpose(u_load(0u));
   uint2 ubo_load_8 = u[0].zw;
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));
   vector<float16_t, 2> ubo_load_8_yw = vector<float16_t, 2>(f16tof32(ubo_load_8 >> 16));
-  const float16_t l = length(vector<float16_t, 4>(ubo_load_8_xz[0], ubo_load_8_yw[0], ubo_load_8_xz[1], ubo_load_8_yw[1]));
+  float16_t l = length(vector<float16_t, 4>(ubo_load_8_xz[0], ubo_load_8_yw[0], ubo_load_8_xz[1], ubo_load_8_yw[1]));
   uint2 ubo_load_9 = u[0].xy;
   vector<float16_t, 2> ubo_load_9_xz = vector<float16_t, 2>(f16tof32(ubo_load_9 & 0xFFFF));
   vector<float16_t, 2> ubo_load_9_yw = vector<float16_t, 2>(f16tof32(ubo_load_9 >> 16));
-  const float16_t a = abs(vector<float16_t, 4>(ubo_load_9_xz[0], ubo_load_9_yw[0], ubo_load_9_xz[1], ubo_load_9_yw[1]).ywxz.x);
+  float16_t a = abs(vector<float16_t, 4>(ubo_load_9_xz[0], ubo_load_9_yw[0], ubo_load_9_xz[1], ubo_load_9_yw[1]).ywxz.x);
   return;
 }

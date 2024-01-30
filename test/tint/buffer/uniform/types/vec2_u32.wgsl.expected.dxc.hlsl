@@ -5,7 +5,7 @@ RWByteAddressBuffer s : register(u1);
 
 [numthreads(1, 1, 1)]
 void main() {
-  const uint2 x = u[0].xy;
+  uint2 x = u[0].xy;
   s.Store2(0u, asuint(x));
   return;
 }

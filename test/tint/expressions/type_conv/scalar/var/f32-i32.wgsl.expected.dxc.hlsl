@@ -10,5 +10,5 @@ int tint_ftoi(float v) {
 static float u = 1.0f;
 
 void f() {
-  const int v = tint_ftoi(u);
+  int v = tint_ftoi(u);
 }

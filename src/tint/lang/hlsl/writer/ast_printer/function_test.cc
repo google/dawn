@@ -158,7 +158,7 @@ float frag_main_inner(float foo) {
 }
 
 tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  const float inner_result = frag_main_inner(tint_symbol.foo);
+  float inner_result = frag_main_inner(tint_symbol.foo);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -197,7 +197,7 @@ float frag_main_inner(float4 coord) {
 }
 
 tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  const float inner_result = frag_main_inner(float4(tint_symbol.coord.xyz, (1.0f / tint_symbol.coord.w)));
+  float inner_result = frag_main_inner(float4(tint_symbol.coord.xyz, (1.0f / tint_symbol.coord.w)));
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -256,12 +256,12 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  const Interface tint_symbol_3 = {(0.0f).xxxx, 0.5f, 0.25f};
+  Interface tint_symbol_3 = {(0.0f).xxxx, 0.5f, 0.25f};
   return tint_symbol_3;
 }
 
 tint_symbol vert_main() {
-  const Interface inner_result = vert_main_inner();
+  Interface inner_result = vert_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.pos = inner_result.pos;
   wrapper_result.col1 = inner_result.col1;
@@ -276,13 +276,13 @@ struct tint_symbol_2 {
 };
 
 void frag_main_inner(Interface inputs) {
-  const float r = inputs.col1;
-  const float g = inputs.col2;
-  const float4 p = inputs.pos;
+  float r = inputs.col1;
+  float g = inputs.col2;
+  float4 p = inputs.pos;
 }
 
 void frag_main(tint_symbol_2 tint_symbol_1) {
-  const Interface tint_symbol_4 = {float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w)), tint_symbol_1.col1, tint_symbol_1.col2};
+  Interface tint_symbol_4 = {float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w)), tint_symbol_1.col1, tint_symbol_1.col2};
   frag_main_inner(tint_symbol_4);
   return;
 }
@@ -332,7 +332,7 @@ TEST_F(HlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Helpe
 };
 
 VertexOutput foo(float x) {
-  const VertexOutput tint_symbol_2 = {float4(x, x, x, 1.0f)};
+  VertexOutput tint_symbol_2 = {float4(x, x, x, 1.0f)};
   return tint_symbol_2;
 }
 
@@ -345,7 +345,7 @@ VertexOutput vert_main1_inner() {
 }
 
 tint_symbol vert_main1() {
-  const VertexOutput inner_result = vert_main1_inner();
+  VertexOutput inner_result = vert_main1_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
@@ -360,7 +360,7 @@ VertexOutput vert_main2_inner() {
 }
 
 tint_symbol_1 vert_main2() {
-  const VertexOutput inner_result_1 = vert_main2_inner();
+  VertexOutput inner_result_1 = vert_main2_inner();
   tint_symbol_1 wrapper_result_1 = (tint_symbol_1)0;
   wrapper_result_1.pos = inner_result_1.pos;
   return wrapper_result_1;

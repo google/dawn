@@ -59,8 +59,8 @@ void f() {
   Outer l_a_3 = a_load_1(768u);
   Inner l_a_3_a[4] = a_load_2(768u);
   Inner l_a_3_a_2 = a_load_3(896u);
-  const float4x2 l_a_3_a_2_m = a_load_4(896u);
-  const float2 l_a_3_a_2_m_1 = asfloat(a[56].zw);
-  const float l_a_3_a_2_m_1_0 = asfloat(a[56].z);
+  float4x2 l_a_3_a_2_m = a_load_4(896u);
+  float2 l_a_3_a_2_m_1 = asfloat(a[56].zw);
+  float l_a_3_a_2_m_1_0 = asfloat(a[56].z);
   return;
 }

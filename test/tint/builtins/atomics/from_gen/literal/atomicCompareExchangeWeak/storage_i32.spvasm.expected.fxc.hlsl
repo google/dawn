@@ -19,10 +19,10 @@ atomic_compare_exchange_result_i32 sb_rwatomicCompareExchangeWeak(uint offset, i
 
 void atomicCompareExchangeWeak_1bd40a() {
   x__atomic_compare_exchange_resulti32 res = (x__atomic_compare_exchange_resulti32)0;
-  const atomic_compare_exchange_result_i32 tint_symbol = sb_rwatomicCompareExchangeWeak(0u, 1, 1);
-  const int old_value_1 = tint_symbol.old_value;
-  const int x_19 = old_value_1;
-  const x__atomic_compare_exchange_resulti32 tint_symbol_1 = {x_19, (x_19 == 1)};
+  atomic_compare_exchange_result_i32 tint_symbol = sb_rwatomicCompareExchangeWeak(0u, 1, 1);
+  int old_value_1 = tint_symbol.old_value;
+  int x_19 = old_value_1;
+  x__atomic_compare_exchange_resulti32 tint_symbol_1 = {x_19, (x_19 == 1)};
   res = tint_symbol_1;
   return;
 }

@@ -9,7 +9,7 @@ uint sb_rwatomicAnd(uint offset, uint value) {
 
 void atomicAnd_85a8d9() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicAnd(0u, 1u);
+  uint x_9 = sb_rwatomicAnd(0u, 1u);
   res = x_9;
   return;
 }

@@ -13,8 +13,8 @@ void main_inner(uint local_invocation_index) {
     S = float2x2((0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint tint_symbol_2[1] = {1u};
-  const float2 r = func_S_X(tint_symbol_2);
+  uint tint_symbol_2[1] = {1u};
+  float2 r = func_S_X(tint_symbol_2);
 }
 
 [numthreads(1, 1, 1)]

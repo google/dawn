@@ -171,7 +171,7 @@ void main() {
     }
   }
   {
-    const float3x3 a = m;
+    float3x3 a = m;
     buffer0_store(0u, a);
   }
   {

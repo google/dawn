@@ -47,12 +47,12 @@ main_out main_inner(float3 position_1_param, float2 uv_param, float3 normal_para
   uv = uv_param;
   normal = normal_param;
   main_1();
-  const main_out tint_symbol_3 = {gl_Position, vUV};
+  main_out tint_symbol_3 = {gl_Position, vUV};
   return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const main_out inner_result = main_inner(tint_symbol.position_1_param, tint_symbol.uv_param, tint_symbol.normal_param);
+  main_out inner_result = main_inner(tint_symbol.position_1_param, tint_symbol.uv_param, tint_symbol.normal_param);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.gl_Position = inner_result.gl_Position;
   wrapper_result.vUV_1 = inner_result.vUV_1;

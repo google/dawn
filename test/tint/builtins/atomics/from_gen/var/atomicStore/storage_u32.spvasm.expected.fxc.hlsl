@@ -9,7 +9,7 @@ void sb_rwatomicStore(uint offset, uint value) {
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
-  const uint x_18 = arg_1;
+  uint x_18 = arg_1;
   sb_rwatomicStore(0u, x_18);
   return;
 }

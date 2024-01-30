@@ -21,7 +21,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

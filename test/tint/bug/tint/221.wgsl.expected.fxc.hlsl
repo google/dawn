@@ -11,7 +11,7 @@ void main() {
     if ((i >= b.Load(0u))) {
       break;
     }
-    const uint p_save = i;
+    uint p_save = i;
     if ((tint_mod(i, 2u) == 0u)) {
       {
         b.Store((4u + (4u * p_save)), asuint((b.Load((4u + (4u * p_save))) * 2u)));

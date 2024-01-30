@@ -18,16 +18,16 @@ struct tint_symbol_7 {
 };
 
 float4 main_inner(uint VertexIndex) {
-  const float4 tint_symbol = (0.0f).xxxx;
-  const float4 tint_symbol_1 = (1.0f).xxxx;
-  const int tint_symbol_2 = vec4f();
-  const float tint_symbol_3 = vec2f(tint_symbol_2);
-  const bool tint_symbol_4 = vec2i(tint_symbol_3);
+  float4 tint_symbol = (0.0f).xxxx;
+  float4 tint_symbol_1 = (1.0f).xxxx;
+  int tint_symbol_2 = vec4f();
+  float tint_symbol_3 = vec2f(tint_symbol_2);
+  bool tint_symbol_4 = vec2i(tint_symbol_3);
   return (tint_symbol_4 ? tint_symbol_1 : tint_symbol);
 }
 
 tint_symbol_7 main(tint_symbol_6 tint_symbol_5) {
-  const float4 inner_result = main_inner(tint_symbol_5.VertexIndex);
+  float4 inner_result = main_inner(tint_symbol_5.VertexIndex);
   tint_symbol_7 wrapper_result = (tint_symbol_7)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

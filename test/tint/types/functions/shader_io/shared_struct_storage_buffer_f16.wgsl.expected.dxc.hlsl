@@ -25,16 +25,16 @@ void output_store(uint offset, S value) {
 }
 
 void frag_main_inner(S input) {
-  const float f = input.f;
-  const uint u = input.u;
-  const float4 v = input.v;
-  const float16_t x = input.x;
-  const vector<float16_t, 3> y = input.y;
+  float f = input.f;
+  uint u = input.u;
+  float4 v = input.v;
+  float16_t x = input.x;
+  vector<float16_t, 3> y = input.y;
   output_store(0u, input);
 }
 
 void frag_main(tint_symbol_1 tint_symbol) {
-  const S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w)), tint_symbol.x, tint_symbol.y};
+  S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w)), tint_symbol.x, tint_symbol.y};
   frag_main_inner(tint_symbol_2);
   return;
 }

@@ -19,7 +19,7 @@ int runTest() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int tint_symbol = runTest();
+  int tint_symbol = runTest();
   result.Store(0u, asuint(uint(tint_symbol)));
   return;
 }

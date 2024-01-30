@@ -31,11 +31,11 @@ a_load_ret a_load(uint offset) {
 [numthreads(1, 1, 1)]
 void f() {
   matrix<float16_t, 2, 4> l_a[4] = a_load(0u);
-  const matrix<float16_t, 2, 4> l_a_i = a_load_1(32u);
+  matrix<float16_t, 2, 4> l_a_i = a_load_1(32u);
   uint2 ubo_load_4 = a[2].zw;
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   vector<float16_t, 2> ubo_load_4_yw = vector<float16_t, 2>(f16tof32(ubo_load_4 >> 16));
-  const vector<float16_t, 4> l_a_i_i = vector<float16_t, 4>(ubo_load_4_xz[0], ubo_load_4_yw[0], ubo_load_4_xz[1], ubo_load_4_yw[1]);
+  vector<float16_t, 4> l_a_i_i = vector<float16_t, 4>(ubo_load_4_xz[0], ubo_load_4_yw[0], ubo_load_4_xz[1], ubo_load_4_yw[1]);
   s.Store<float16_t>(0u, (((float16_t(f16tof32(((a[2].z) & 0xFFFF))) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x));
   return;
 }

@@ -24,17 +24,17 @@ int idx3() {
 void foo() {
   float a[4] = (float[4])0;
   {
-    const int tint_symbol_save = idx1();
+    int tint_symbol_save = idx1();
     a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
     while (true) {
-      const int tint_symbol_2 = idx2();
+      int tint_symbol_2 = idx2();
       if (!((a[tint_symbol_2] < 10.0f))) {
         break;
       }
       {
       }
       {
-        const int tint_symbol_1_save = idx3();
+        int tint_symbol_1_save = idx3();
         a[tint_symbol_1_save] = (a[tint_symbol_1_save] + 1.0f);
       }
     }

@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void i() {
-  const float s = 1.0f;
+  float s = 1.0f;
 }

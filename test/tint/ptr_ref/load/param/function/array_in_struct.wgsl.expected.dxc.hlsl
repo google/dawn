@@ -10,6 +10,6 @@ func_ret func(inout int pointer[4]) {
 [numthreads(1, 1, 1)]
 void main() {
   str F = (str)0;
-  const int r[4] = func(F.arr);
+  int r[4] = func(F.arr);
   return;
 }

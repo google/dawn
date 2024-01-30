@@ -13,7 +13,7 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
-  const uint p_save = uniforms[0].x;
+  uint p_save = uniforms[0].x;
   {
     InnerS tint_symbol_1[8] = s1.a1;
     tint_symbol_1[p_save] = v;

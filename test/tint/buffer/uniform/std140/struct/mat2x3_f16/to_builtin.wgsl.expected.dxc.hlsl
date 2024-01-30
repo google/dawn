@@ -18,14 +18,14 @@ matrix<float16_t, 2, 3> u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 3, 2> t = transpose(u_load(264u));
+  matrix<float16_t, 3, 2> t = transpose(u_load(264u));
   uint2 ubo_load_4 = u[1].xy;
   vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
   float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
-  const float16_t l = length(vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]).zxy);
+  float16_t l = length(vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]).zxy);
   uint2 ubo_load_5 = u[1].xy;
   vector<float16_t, 2> ubo_load_5_xz = vector<float16_t, 2>(f16tof32(ubo_load_5 & 0xFFFF));
   float16_t ubo_load_5_y = f16tof32(ubo_load_5[0] >> 16);
-  const float16_t a = abs(vector<float16_t, 3>(ubo_load_5_xz[0], ubo_load_5_y, ubo_load_5_xz[1]).zxy.x);
+  float16_t a = abs(vector<float16_t, 3>(ubo_load_5_xz[0], ubo_load_5_y, ubo_load_5_xz[1]).zxy.x);
   return;
 }

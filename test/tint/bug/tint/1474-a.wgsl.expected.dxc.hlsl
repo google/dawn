@@ -7,6 +7,6 @@ void main() {
       return;
     }
   }
-  const int x = 5;
+  int x = 5;
   return;
 }

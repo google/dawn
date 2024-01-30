@@ -11,8 +11,8 @@ void atomicExchange_f2e22f() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
-  const int x_20 = arg_1;
-  const int x_13 = sb_rwatomicExchange(0u, x_20);
+  int x_20 = arg_1;
+  int x_13 = sb_rwatomicExchange(0u, x_20);
   res = x_13;
   return;
 }

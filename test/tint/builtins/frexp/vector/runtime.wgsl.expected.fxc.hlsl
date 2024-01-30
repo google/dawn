@@ -11,9 +11,9 @@ frexp_result_vec2_f32 tint_frexp(float2 param_0) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const float2 tint_symbol = float2(1.25f, 3.75f);
-  const frexp_result_vec2_f32 res = tint_frexp(tint_symbol);
-  const float2 fract = res.fract;
-  const int2 exp = res.exp;
+  float2 tint_symbol = float2(1.25f, 3.75f);
+  frexp_result_vec2_f32 res = tint_frexp(tint_symbol);
+  float2 fract = res.fract;
+  int2 exp = res.exp;
   return;
 }

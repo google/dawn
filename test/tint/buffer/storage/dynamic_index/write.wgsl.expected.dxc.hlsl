@@ -89,7 +89,7 @@ void main_inner(uint idx) {
   sb_store_18(((544u * idx) + 352u), float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
   sb_store_19(((544u * idx) + 384u), float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
   sb_store_20(((544u * idx) + 448u), float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  const float3 tint_symbol_2[2] = (float3[2])0;
+  float3 tint_symbol_2[2] = (float3[2])0;
   sb_store_21(((544u * idx) + 512u), tint_symbol_2);
 }
 

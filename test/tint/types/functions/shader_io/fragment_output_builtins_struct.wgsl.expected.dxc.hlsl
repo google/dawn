@@ -8,12 +8,12 @@ struct tint_symbol {
 };
 
 FragmentOutputs main_inner() {
-  const FragmentOutputs tint_symbol_1 = {1.0f, 1u};
+  FragmentOutputs tint_symbol_1 = {1.0f, 1u};
   return tint_symbol_1;
 }
 
 tint_symbol main() {
-  const FragmentOutputs inner_result = main_inner();
+  FragmentOutputs inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.frag_depth = inner_result.frag_depth;
   wrapper_result.sample_mask = inner_result.sample_mask;

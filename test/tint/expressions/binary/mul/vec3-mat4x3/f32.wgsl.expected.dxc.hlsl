@@ -11,6 +11,6 @@ float4x3 data_load_1(uint offset) {
 }
 
 void main() {
-  const float4 x = mul(data_load_1(0u), asfloat(data[4].xyz));
+  float4 x = mul(data_load_1(0u), asfloat(data[4].xyz));
   return;
 }

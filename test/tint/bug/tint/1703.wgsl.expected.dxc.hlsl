@@ -16,7 +16,7 @@ void foo_member_initialize() {
   vb2.x = (asfloat(my_uniform[0].x) == -1.0f);
   vb2 = bool2((asfloat(my_uniform[0].x) == -1.0f), false);
   if (vb2.x) {
-    const float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
+    float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
   }
 }
 
@@ -26,6 +26,6 @@ void foo_default_initialize() {
   vb2.x = (asfloat(my_uniform[0].x) == -1.0f);
   vb2 = (false).xx;
   if (vb2.x) {
-    const float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
+    float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
   }
 }

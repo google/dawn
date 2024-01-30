@@ -19,14 +19,14 @@ void output_store(uint offset, S value) {
 }
 
 void frag_main_inner(S input) {
-  const float f = input.f;
-  const uint u = input.u;
-  const float4 v = input.v;
+  float f = input.f;
+  uint u = input.u;
+  float4 v = input.v;
   output_store(0u, input);
 }
 
 void frag_main(tint_symbol_1 tint_symbol) {
-  const S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w))};
+  S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w))};
   frag_main_inner(tint_symbol_2);
   return;
 }

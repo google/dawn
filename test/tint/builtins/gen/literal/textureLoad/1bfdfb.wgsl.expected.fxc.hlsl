@@ -25,14 +25,14 @@ cbuffer cbuffer_ext_tex_params : register(b2, space1) {
 Texture2D<float4> arg_0 : register(t0, space1);
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
-  const bool3 cond = (abs(v) < float3((params.D).xxx));
-  const float3 t = (float3(sign(v)) * ((params.C * abs(v)) + params.F));
-  const float3 f = (float3(sign(v)) * (pow(((params.A * abs(v)) + params.B), float3((params.G).xxx)) + params.E));
+  bool3 cond = (abs(v) < float3((params.D).xxx));
+  float3 t = (float3(sign(v)) * ((params.C * abs(v)) + params.F));
+  float3 f = (float3(sign(v)) * (pow(((params.A * abs(v)) + params.B), float3((params.G).xxx)) + params.E));
   return (cond ? t : f);
 }
 
 float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, uint2 coord, ExternalTextureParams params) {
-  const uint2 coord1 = (coord >> (1u).xx);
+  uint2 coord1 = (coord >> (1u).xx);
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
     color = plane0.Load(uint3(coord, uint(0))).rgba;
@@ -63,7 +63,7 @@ GammaTransferParams ext_tex_params_load_4(uint offset) {
   const uint scalar_offset_8 = ((offset + 20u)) / 4;
   const uint scalar_offset_9 = ((offset + 24u)) / 4;
   const uint scalar_offset_10 = ((offset + 28u)) / 4;
-  const GammaTransferParams tint_symbol_1 = {asfloat(ext_tex_params[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(ext_tex_params[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(ext_tex_params[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(ext_tex_params[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(ext_tex_params[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(ext_tex_params[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(ext_tex_params[scalar_offset_9 / 4][scalar_offset_9 % 4]), ext_tex_params[scalar_offset_10 / 4][scalar_offset_10 % 4]};
+  GammaTransferParams tint_symbol_1 = {asfloat(ext_tex_params[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(ext_tex_params[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(ext_tex_params[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(ext_tex_params[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(ext_tex_params[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(ext_tex_params[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(ext_tex_params[scalar_offset_9 / 4][scalar_offset_9 % 4]), ext_tex_params[scalar_offset_10 / 4][scalar_offset_10 % 4]};
   return tint_symbol_1;
 }
 
@@ -108,7 +108,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

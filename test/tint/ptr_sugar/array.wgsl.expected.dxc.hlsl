@@ -12,14 +12,14 @@ void no_deref_const() {
 
 void deref_let() {
   int a[10] = (int[10])0;
-  const int i = 0;
+  int i = 0;
   int b = a[i];
   a[0] = 42;
 }
 
 void no_deref_let() {
   int a[10] = (int[10])0;
-  const int i = 0;
+  int i = 0;
   int b = a[i];
   a[0] = 42;
 }

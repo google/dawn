@@ -16,7 +16,7 @@ void s_store(uint offset, float2x4 value) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const float2x4 x = u_load(0u);
+  float2x4 x = u_load(0u);
   s_store(0u, x);
   return;
 }

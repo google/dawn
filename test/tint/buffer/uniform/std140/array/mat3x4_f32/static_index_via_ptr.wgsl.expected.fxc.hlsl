@@ -24,8 +24,8 @@ a_load_ret a_load(uint offset) {
 [numthreads(1, 1, 1)]
 void f() {
   float3x4 l_a[4] = a_load(0u);
-  const float3x4 l_a_i = a_load_1(96u);
-  const float4 l_a_i_i = asfloat(a[7]);
+  float3x4 l_a_i = a_load_1(96u);
+  float4 l_a_i_i = asfloat(a[7]);
   s.Store(0u, asuint((((asfloat(a[7].x) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x)));
   return;
 }

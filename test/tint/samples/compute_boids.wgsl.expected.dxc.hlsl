@@ -14,7 +14,7 @@ float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos)
 }
 
 tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
-  const float4 inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
+  float4 inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -29,7 +29,7 @@ float4 frag_main_inner() {
 }
 
 tint_symbol_3 frag_main() {
-  const float4 inner_result_1 = frag_main_inner();
+  float4 inner_result_1 = frag_main_inner();
   tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;

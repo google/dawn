@@ -6,5 +6,5 @@ void unused_entry_point() {
 static int u = 1;
 
 void f() {
-  const uint v = uint(u);
+  uint v = uint(u);
 }

@@ -20,7 +20,7 @@ void main_inner(uint local_invocation_index) {
     S = float2x4((0.0f).xxxx, (0.0f).xxxx);
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint tint_symbol_2[1] = {1u};
+  uint tint_symbol_2[1] = {1u};
   func_S_X(tint_symbol_2);
 }
 

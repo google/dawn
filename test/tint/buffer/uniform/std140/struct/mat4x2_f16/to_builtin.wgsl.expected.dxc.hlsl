@@ -16,10 +16,10 @@ matrix<float16_t, 4, 2> u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 2, 4> t = transpose(u_load(260u));
+  matrix<float16_t, 2, 4> t = transpose(u_load(260u));
   uint ubo_load_4 = u[0].z;
-  const float16_t l = length(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
+  float16_t l = length(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
   uint ubo_load_5 = u[0].z;
-  const float16_t a = abs(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  float16_t a = abs(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
   return;
 }

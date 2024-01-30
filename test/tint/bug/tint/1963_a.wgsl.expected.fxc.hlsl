@@ -13,7 +13,7 @@ float2 Y() {
 void f() {
   float2 v = float2(0.0f, 0.0f);
   X((0.0f).xx, v);
-  const float2 tint_symbol = (0.0f).xx;
-  const float2 tint_symbol_1 = Y();
+  float2 tint_symbol = (0.0f).xx;
+  float2 tint_symbol_1 = Y();
   X(tint_symbol, tint_symbol_1);
 }

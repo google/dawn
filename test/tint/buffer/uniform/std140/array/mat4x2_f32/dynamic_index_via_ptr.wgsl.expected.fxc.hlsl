@@ -34,13 +34,13 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_a_i_save = i();
-  const int p_a_i_i_save = i();
+  int p_a_i_save = i();
+  int p_a_i_i_save = i();
   float4x2 l_a[4] = a_load(0u);
-  const float4x2 l_a_i = a_load_1((32u * uint(p_a_i_save)));
+  float4x2 l_a_i = a_load_1((32u * uint(p_a_i_save)));
   const uint scalar_offset_4 = (((32u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save)))) / 4;
   uint4 ubo_load_4 = a[scalar_offset_4 / 4];
-  const float2 l_a_i_i = asfloat(((scalar_offset_4 & 2) ? ubo_load_4.zw : ubo_load_4.xy));
+  float2 l_a_i_i = asfloat(((scalar_offset_4 & 2) ? ubo_load_4.zw : ubo_load_4.xy));
   const uint scalar_offset_5 = (((32u * uint(p_a_i_save)) + (8u * uint(p_a_i_i_save)))) / 4;
   s.Store(0u, asuint((((asfloat(a[scalar_offset_5 / 4][scalar_offset_5 % 4]) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x)));
   return;

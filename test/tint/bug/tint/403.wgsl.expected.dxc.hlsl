@@ -30,18 +30,18 @@ float2x2 x_26_load(uint offset) {
 
 float4 main_inner(uint gl_VertexIndex) {
   float2 indexable[3] = (float2[3])0;
-  const float2x2 x_23 = x_20_load(0u);
-  const float2x2 x_28 = x_26_load(0u);
-  const uint x_46 = gl_VertexIndex;
-  const float2 tint_symbol_3[3] = {float2(-1.0f, 1.0f), (1.0f).xx, (-1.0f).xx};
+  float2x2 x_23 = x_20_load(0u);
+  float2x2 x_28 = x_26_load(0u);
+  uint x_46 = gl_VertexIndex;
+  float2 tint_symbol_3[3] = {float2(-1.0f, 1.0f), (1.0f).xx, (-1.0f).xx};
   indexable = tint_symbol_3;
-  const float2 x_51 = indexable[x_46];
-  const float2 x_52 = mul(x_51, float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])));
+  float2 x_51 = indexable[x_46];
+  float2 x_52 = mul(x_51, float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])));
   return float4(x_52.x, x_52.y, 0.0f, 1.0f);
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float4 inner_result = main_inner(tint_symbol.gl_VertexIndex);
+  float4 inner_result = main_inner(tint_symbol.gl_VertexIndex);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

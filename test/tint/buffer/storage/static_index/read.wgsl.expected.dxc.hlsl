@@ -58,7 +58,7 @@ sb_load_21_ret sb_load_21(uint offset) {
 }
 
 Inner sb_load_22(uint offset) {
-  const Inner tint_symbol = {asint(sb.Load((offset + 0u))), asfloat(sb.Load((offset + 4u)))};
+  Inner tint_symbol = {asint(sb.Load((offset + 0u))), asfloat(sb.Load((offset + 4u)))};
   return tint_symbol;
 }
 
@@ -75,30 +75,30 @@ sb_load_23_ret sb_load_23(uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const float scalar_f32 = asfloat(sb.Load(0u));
-  const int scalar_i32 = asint(sb.Load(4u));
-  const uint scalar_u32 = sb.Load(8u);
-  const float2 vec2_f32 = asfloat(sb.Load2(16u));
-  const int2 vec2_i32 = asint(sb.Load2(24u));
-  const uint2 vec2_u32 = sb.Load2(32u);
-  const float3 vec3_f32 = asfloat(sb.Load3(48u));
-  const int3 vec3_i32 = asint(sb.Load3(64u));
-  const uint3 vec3_u32 = sb.Load3(80u);
-  const float4 vec4_f32 = asfloat(sb.Load4(96u));
-  const int4 vec4_i32 = asint(sb.Load4(112u));
-  const uint4 vec4_u32 = sb.Load4(128u);
-  const float2x2 mat2x2_f32 = sb_load_12(144u);
-  const float2x3 mat2x3_f32 = sb_load_13(160u);
-  const float2x4 mat2x4_f32 = sb_load_14(192u);
-  const float3x2 mat3x2_f32 = sb_load_15(224u);
-  const float3x3 mat3x3_f32 = sb_load_16(256u);
-  const float3x4 mat3x4_f32 = sb_load_17(304u);
-  const float4x2 mat4x2_f32 = sb_load_18(352u);
-  const float4x3 mat4x3_f32 = sb_load_19(384u);
-  const float4x4 mat4x4_f32 = sb_load_20(448u);
-  const float3 arr2_vec3_f32[2] = sb_load_21(512u);
-  const Inner struct_inner = sb_load_22(544u);
-  const Inner array_struct_inner[4] = sb_load_23(552u);
+  float scalar_f32 = asfloat(sb.Load(0u));
+  int scalar_i32 = asint(sb.Load(4u));
+  uint scalar_u32 = sb.Load(8u);
+  float2 vec2_f32 = asfloat(sb.Load2(16u));
+  int2 vec2_i32 = asint(sb.Load2(24u));
+  uint2 vec2_u32 = sb.Load2(32u);
+  float3 vec3_f32 = asfloat(sb.Load3(48u));
+  int3 vec3_i32 = asint(sb.Load3(64u));
+  uint3 vec3_u32 = sb.Load3(80u);
+  float4 vec4_f32 = asfloat(sb.Load4(96u));
+  int4 vec4_i32 = asint(sb.Load4(112u));
+  uint4 vec4_u32 = sb.Load4(128u);
+  float2x2 mat2x2_f32 = sb_load_12(144u);
+  float2x3 mat2x3_f32 = sb_load_13(160u);
+  float2x4 mat2x4_f32 = sb_load_14(192u);
+  float3x2 mat3x2_f32 = sb_load_15(224u);
+  float3x3 mat3x3_f32 = sb_load_16(256u);
+  float3x4 mat3x4_f32 = sb_load_17(304u);
+  float4x2 mat4x2_f32 = sb_load_18(352u);
+  float4x3 mat4x3_f32 = sb_load_19(384u);
+  float4x4 mat4x4_f32 = sb_load_20(448u);
+  float3 arr2_vec3_f32[2] = sb_load_21(512u);
+  Inner struct_inner = sb_load_22(544u);
+  Inner array_struct_inner[4] = sb_load_23(552u);
   s.Store(0u, asuint((((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + tint_ftoi(arr2_vec3_f32[0].x)) + struct_inner.scalar_i32) + array_struct_inner[0].scalar_i32)));
   return;
 }

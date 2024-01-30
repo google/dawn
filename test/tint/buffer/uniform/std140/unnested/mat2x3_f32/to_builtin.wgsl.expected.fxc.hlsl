@@ -10,8 +10,8 @@ float2x3 u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float3x2 t = transpose(u_load(0u));
-  const float l = length(asfloat(u[1].xyz));
-  const float a = abs(asfloat(u[0].xyz).zxy.x);
+  float3x2 t = transpose(u_load(0u));
+  float l = length(asfloat(u[1].xyz));
+  float a = abs(asfloat(u[0].xyz).zxy.x);
   return;
 }

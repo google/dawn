@@ -3,7 +3,7 @@ struct str {
 };
 
 void func(inout int pointer[4]) {
-  const int tint_symbol[4] = (int[4])0;
+  int tint_symbol[4] = (int[4])0;
   pointer = tint_symbol;
 }
 

@@ -5,7 +5,7 @@ uint2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(-4.0h));
-  const uint2 b = tint_bitcast_from_f16(a);
+  vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(-4.0h));
+  uint2 b = tint_bitcast_from_f16(a);
   return;
 }

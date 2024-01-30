@@ -139,7 +139,7 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint numTriangles = countersatomicLoad((4u * voxelIndex));
   int offset = -1;
   if ((numTriangles > 0u)) {
-    const uint tint_symbol = dbgatomicAdd(0u, numTriangles);
+    uint tint_symbol = dbgatomicAdd(0u, numTriangles);
     offset = int(tint_symbol);
   }
   LUTatomicStore((4u * voxelIndex), offset);

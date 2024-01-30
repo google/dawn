@@ -9,6 +9,6 @@ str func(inout str pointer) {
 [numthreads(1, 1, 1)]
 void main() {
   str F[4] = (str[4])0;
-  const str r = func(F[2]);
+  str r = func(F[2]);
   return;
 }

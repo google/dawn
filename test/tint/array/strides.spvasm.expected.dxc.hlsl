@@ -8,7 +8,7 @@ struct strided_arr_1 {
 RWByteAddressBuffer s : register(u0);
 
 strided_arr s_load_4(uint offset) {
-  const strided_arr tint_symbol = {asfloat(s.Load((offset + 0u)))};
+  strided_arr tint_symbol = {asfloat(s.Load((offset + 0u)))};
   return tint_symbol;
 }
 
@@ -35,7 +35,7 @@ s_load_2_ret s_load_2(uint offset) {
 }
 
 strided_arr_1 s_load_1(uint offset) {
-  const strided_arr_1 tint_symbol_1 = {s_load_2((offset + 0u))};
+  strided_arr_1 tint_symbol_1 = {s_load_2((offset + 0u))};
   return tint_symbol_1;
 }
 
@@ -86,11 +86,11 @@ void s_store(uint offset, strided_arr_1 value[4]) {
 }
 
 void f_1() {
-  const strided_arr_1 x_19[4] = s_load(0u);
-  const strided_arr x_24[3][2] = s_load_2(384u);
-  const strided_arr x_28[2] = s_load_3(416u);
-  const float x_32 = asfloat(s.Load(424u));
-  const strided_arr_1 tint_symbol_2[4] = (strided_arr_1[4])0;
+  strided_arr_1 x_19[4] = s_load(0u);
+  strided_arr x_24[3][2] = s_load_2(384u);
+  strided_arr x_28[2] = s_load_3(416u);
+  float x_32 = asfloat(s.Load(424u));
+  strided_arr_1 tint_symbol_2[4] = (strided_arr_1[4])0;
   s_store(0u, tint_symbol_2);
   s.Store(424u, asuint(5.0f));
   return;

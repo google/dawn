@@ -1,6 +1,6 @@
 uint tint_pack_4xi8(int4 a) {
-  const uint4 a_u32 = asuint(a);
-  const uint4 a_u8 = ((a_u32 & (255u).xxxx) << uint4(0u, 8u, 16u, 24u));
+  uint4 a_u32 = asuint(a);
+  uint4 a_u8 = ((a_u32 & (255u).xxxx) << uint4(0u, 8u, 16u, 24u));
   return dot(a_u8, (1u).xxxx);
 }
 
@@ -22,7 +22,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

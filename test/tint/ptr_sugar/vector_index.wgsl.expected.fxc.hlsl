@@ -12,14 +12,14 @@ void no_deref_const() {
 
 void deref_let() {
   int3 a = int3(0, 0, 0);
-  const int i = 0;
+  int i = 0;
   int b = a[i];
   a[0] = 42;
 }
 
 void no_deref_let() {
   int3 a = int3(0, 0, 0);
-  const int i = 0;
+  int i = 0;
   int b = a[i];
   a[0] = 42;
 }
@@ -33,7 +33,7 @@ void deref_var() {
 
 void no_deref_var() {
   int3 a = int3(0, 0, 0);
-  const int i = 0;
+  int i = 0;
   int b = a[i];
   a[0] = 42;
 }

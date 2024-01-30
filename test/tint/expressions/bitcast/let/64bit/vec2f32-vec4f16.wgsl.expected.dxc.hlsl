@@ -7,7 +7,7 @@ vector<float16_t, 4> tint_bitcast_to_f16(float2 src) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float2 a = float2(2.003662109375f, -513.03125f);
-  const vector<float16_t, 4> b = tint_bitcast_to_f16(a);
+  float2 a = float2(2.003662109375f, -513.03125f);
+  vector<float16_t, 4> b = tint_bitcast_to_f16(a);
   return;
 }

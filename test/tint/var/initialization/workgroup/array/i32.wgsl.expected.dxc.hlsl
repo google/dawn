@@ -7,7 +7,7 @@ struct tint_symbol_1 {
 void main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 3u); idx = (idx + 1u)) {
-      const uint i = idx;
+      uint i = idx;
       zero[i] = 0;
     }
   }

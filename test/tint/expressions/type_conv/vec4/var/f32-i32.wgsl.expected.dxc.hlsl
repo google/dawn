@@ -10,5 +10,5 @@ int4 tint_ftoi(float4 v) {
 static float4 u = (1.0f).xxxx;
 
 void f() {
-  const int4 v = tint_ftoi(u);
+  int4 v = tint_ftoi(u);
 }

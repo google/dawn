@@ -13,7 +13,7 @@ struct tint_symbol_1 {
 void compute_main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
-      const uint i = idx;
+      uint i = idx;
       wg[i].x = 0;
       uint atomic_result = 0u;
       InterlockedExchange(wg[i].a, 0u, atomic_result);

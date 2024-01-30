@@ -1,9 +1,9 @@
 uint4 tint_extract_bits(uint4 v, uint offset, uint count) {
-  const uint s = min(offset, 32u);
-  const uint e = min(32u, (s + count));
-  const uint shl = (32u - e);
-  const uint shr = (shl + s);
-  const uint4 shl_result = ((shl < 32u) ? (v << uint4((shl).xxxx)) : (0u).xxxx);
+  uint s = min(offset, 32u);
+  uint e = min(32u, (s + count));
+  uint shl = (32u - e);
+  uint shr = (shl + s);
+  uint4 shl_result = ((shl < 32u) ? (v << uint4((shl).xxxx)) : (0u).xxxx);
   return ((shr < 32u) ? (shl_result >> uint4((shr).xxxx)) : ((shl_result >> (31u).xxxx) >> (1u).xxxx));
 }
 
@@ -27,7 +27,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

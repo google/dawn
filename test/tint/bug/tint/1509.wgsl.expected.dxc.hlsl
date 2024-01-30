@@ -2013,7 +2013,7 @@ uint main_inner() {
 }
 
 tint_symbol main() {
-  const uint inner_result = main_inner();
+  uint inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

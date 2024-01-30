@@ -5,7 +5,7 @@ struct S {
 static S A[4] = (S[4])0;
 
 void f() {
-  const S tint_symbol = {1};
+  S tint_symbol = {1};
   A[0] = tint_symbol;
   return;
 }

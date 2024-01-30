@@ -5,6 +5,6 @@ float4 func(inout float4 pointer) {
 [numthreads(1, 1, 1)]
 void main() {
   float4 F = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  const float4 r = func(F);
+  float4 r = func(F);
   return;
 }

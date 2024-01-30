@@ -9,7 +9,7 @@ void sb_rwatomicStore(uint offset, int value) {
 void atomicStore_d1e9a6() {
   int arg_1 = 0;
   arg_1 = 1;
-  const int x_20 = arg_1;
+  int x_20 = arg_1;
   sb_rwatomicStore(0u, x_20);
   return;
 }

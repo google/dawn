@@ -1,7 +1,7 @@
 void main_1() {
   int i = 0;
   i = 123;
-  const int x_12 = (i + 1);
+  int x_12 = (i + 1);
   return;
 }
 

@@ -23,17 +23,17 @@ struct tint_symbol_1 {
 void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
-      const uint i_1 = (idx / 256u);
-      const uint i_2 = (idx % 256u);
+      uint i_1 = (idx / 256u);
+      uint i_2 = (idx % 256u);
       tile[i_1][i_2] = (0.0f).xxx;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint filterOffset = tint_div((params[0].x - 1u), 2u);
+  uint filterOffset = tint_div((params[0].x - 1u), 2u);
   uint3 tint_tmp;
   inputTex.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
-  const uint2 dims = tint_tmp.xy;
-  const uint2 baseIndex = (((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u))) - uint2(filterOffset, 0u));
+  uint2 dims = tint_tmp.xy;
+  uint2 baseIndex = (((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u))) - uint2(filterOffset, 0u));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
@@ -56,7 +56,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
           if ((flip[0].x != 0u)) {
             writeIndex = writeIndex.yx;
           }
-          const uint center = ((4u * LocalInvocationID.x) + c);
+          uint center = ((4u * LocalInvocationID.x) + c);
           bool tint_tmp_2 = (center >= filterOffset);
           if (tint_tmp_2) {
             tint_tmp_2 = (center < (256u - filterOffset));

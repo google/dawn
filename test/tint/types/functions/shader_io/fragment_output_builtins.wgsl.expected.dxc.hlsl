@@ -7,7 +7,7 @@ float main1_inner() {
 }
 
 tint_symbol main1() {
-  const float inner_result = main1_inner();
+  float inner_result = main1_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -22,7 +22,7 @@ uint main2_inner() {
 }
 
 tint_symbol_1 main2() {
-  const uint inner_result_1 = main2_inner();
+  uint inner_result_1 = main2_inner();
   tint_symbol_1 wrapper_result_1 = (tint_symbol_1)0;
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;

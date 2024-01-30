@@ -38,9 +38,9 @@ int idx6() {
 
 void main() {
   {
-    const int tint_symbol_save = idx1();
-    const int tint_symbol_save_1 = idx2();
-    const int tint_symbol_1 = idx3();
+    int tint_symbol_save = idx1();
+    int tint_symbol_save_1 = idx2();
+    int tint_symbol_1 = idx3();
     buffer.Store((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))))) + 1)));
     while (true) {
       if (!((v < 10u))) {
@@ -49,9 +49,9 @@ void main() {
       {
       }
       {
-        const int tint_symbol_2_save = idx4();
-        const int tint_symbol_2_save_1 = idx5();
-        const int tint_symbol_3 = idx6();
+        int tint_symbol_2_save = idx4();
+        int tint_symbol_2_save_1 = idx5();
+        int tint_symbol_3 = idx6();
         buffer.Store((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))))) + 1)));
       }
     }

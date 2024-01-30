@@ -9,7 +9,7 @@ int sb_rwatomicExchange(uint offset, int value) {
 
 void atomicExchange_f2e22f() {
   int res = 0;
-  const int x_9 = sb_rwatomicExchange(0u, 1);
+  int x_9 = sb_rwatomicExchange(0u, 1);
   res = x_9;
   return;
 }

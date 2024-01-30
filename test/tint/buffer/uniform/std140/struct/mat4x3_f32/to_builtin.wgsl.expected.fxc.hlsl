@@ -12,8 +12,8 @@ float4x3 u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float3x4 t = transpose(u_load(400u));
-  const float l = length(asfloat(u[2].xyz).zxy);
-  const float a = abs(asfloat(u[2].xyz).zxy.x);
+  float3x4 t = transpose(u_load(400u));
+  float l = length(asfloat(u[2].xyz).zxy);
+  float a = abs(asfloat(u[2].xyz).zxy.x);
   return;
 }

@@ -16,16 +16,16 @@ struct tint_symbol_3 {
 };
 
 FragmentOutput main_inner(FragmentInput fIn) {
-  const float tint_symbol = depthMap.Sample(texSampler, fIn.vUv).x;
-  const float3 color = float3(tint_symbol, tint_symbol, tint_symbol);
+  float tint_symbol = depthMap.Sample(texSampler, fIn.vUv).x;
+  float3 color = float3(tint_symbol, tint_symbol, tint_symbol);
   FragmentOutput fOut = (FragmentOutput)0;
   fOut.color = float4(color, 1.0f);
   return fOut;
 }
 
 tint_symbol_3 main(tint_symbol_2 tint_symbol_1) {
-  const FragmentInput tint_symbol_4 = {tint_symbol_1.vUv};
-  const FragmentOutput inner_result = main_inner(tint_symbol_4);
+  FragmentInput tint_symbol_4 = {tint_symbol_1.vUv};
+  FragmentOutput inner_result = main_inner(tint_symbol_4);
   tint_symbol_3 wrapper_result = (tint_symbol_3)0;
   wrapper_result.color = inner_result.color;
   return wrapper_result;

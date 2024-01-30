@@ -9,7 +9,7 @@ int sb_rwatomicAdd(uint offset, int value) {
 
 void atomicAdd_d32fe4() {
   int res = 0;
-  const int x_9 = sb_rwatomicAdd(0u, 1);
+  int x_9 = sb_rwatomicAdd(0u, 1);
   res = x_9;
   return;
 }

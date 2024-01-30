@@ -10,7 +10,7 @@ void tint_symbol_1_store(uint offset, S value) {
 }
 
 S tint_symbol_load(uint offset) {
-  const S tint_symbol_2 = {asfloat(tint_symbol.Load((offset + 0u)))};
+  S tint_symbol_2 = {asfloat(tint_symbol.Load((offset + 0u)))};
   return tint_symbol_2;
 }
 

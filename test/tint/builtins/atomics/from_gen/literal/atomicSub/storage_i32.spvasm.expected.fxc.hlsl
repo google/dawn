@@ -9,7 +9,7 @@ int sb_rwatomicSub(uint offset, int value) {
 
 void atomicSub_051100() {
   int res = 0;
-  const int x_9 = sb_rwatomicSub(0u, 1);
+  int x_9 = sb_rwatomicSub(0u, 1);
   res = x_9;
   return;
 }

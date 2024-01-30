@@ -9,7 +9,7 @@ int f() {
     g();
     break;
   }
-  const int o = g();
+  int o = g();
   return 0;
 }
 

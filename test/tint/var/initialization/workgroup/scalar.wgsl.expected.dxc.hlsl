@@ -9,7 +9,7 @@ void main_inner(uint local_invocation_index) {
     v = 0;
   }
   GroupMemoryBarrierWithGroupSync();
-  const int i = v;
+  int i = v;
 }
 
 [numthreads(1, 1, 1)]

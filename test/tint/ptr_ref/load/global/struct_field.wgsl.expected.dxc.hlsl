@@ -6,6 +6,6 @@ static S V = (S)0;
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int i = V.i;
+  int i = V.i;
   return;
 }

@@ -19,7 +19,7 @@ void main() {
   OuterS s1 = (OuterS)0;
   float3 v = float3(0.0f, 0.0f, 0.0f);
   set_vector_element(v, s1.a1[uniforms[0].x], 1.0f);
-  const uint tint_symbol = f(s1.a1[uniforms[0].x]);
+  uint tint_symbol = f(s1.a1[uniforms[0].x]);
   set_vector_element(v, tint_symbol, 1.0f);
   return;
 }

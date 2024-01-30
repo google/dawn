@@ -15,6 +15,6 @@ float3 m() {
 }
 
 void f() {
-  const float3 tint_symbol = m();
+  float3 tint_symbol = m();
   int3 v = tint_ftoi(tint_symbol);
 }

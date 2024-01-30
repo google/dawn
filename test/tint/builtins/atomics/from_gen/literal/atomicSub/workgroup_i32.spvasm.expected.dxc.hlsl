@@ -5,7 +5,7 @@ void atomicSub_77883a() {
   int res = 0;
   int atomic_result = 0;
   InterlockedAdd(arg_0, -(1), atomic_result);
-  const int x_11 = atomic_result;
+  int x_11 = atomic_result;
   res = x_11;
   return;
 }
@@ -19,7 +19,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_31 = local_invocation_index_1;
+  uint x_31 = local_invocation_index_1;
   compute_main_inner(x_31);
   return;
 }

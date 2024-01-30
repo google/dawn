@@ -4,6 +4,6 @@ void unused_entry_point() {
 }
 
 void v() {
-  const int i = 1;
+  int i = 1;
   int b = (1).xx[i];
 }

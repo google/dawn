@@ -15,6 +15,6 @@ float m() {
 }
 
 void f() {
-  const float tint_symbol = m();
+  float tint_symbol = m();
   uint v = tint_ftou(tint_symbol);
 }

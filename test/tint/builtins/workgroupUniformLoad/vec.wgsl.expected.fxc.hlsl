@@ -7,7 +7,7 @@ groupshared float4 v;
 
 float4 tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const float4 result = v;
+  float4 result = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

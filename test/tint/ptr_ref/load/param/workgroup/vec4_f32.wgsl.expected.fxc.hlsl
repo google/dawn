@@ -13,7 +13,7 @@ void main_inner(uint local_invocation_index) {
     S = (0.0f).xxxx;
   }
   GroupMemoryBarrierWithGroupSync();
-  const float4 r = func_S();
+  float4 r = func_S();
 }
 
 [numthreads(1, 1, 1)]

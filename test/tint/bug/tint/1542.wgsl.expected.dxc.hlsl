@@ -4,6 +4,6 @@ cbuffer cbuffer_u_input : register(b0) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int3 temp = (asint(u_input[0].xyz) << (0u).xxx);
+  int3 temp = (asint(u_input[0].xyz) << (0u).xxx);
   return;
 }

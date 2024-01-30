@@ -7,7 +7,7 @@ groupshared bool v;
 
 bool tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const bool result = v;
+  bool result = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

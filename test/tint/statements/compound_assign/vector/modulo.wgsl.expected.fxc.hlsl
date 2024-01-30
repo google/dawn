@@ -6,7 +6,7 @@ void unused_entry_point() {
 RWByteAddressBuffer v : register(u0);
 
 int4 tint_mod(int4 lhs, int4 rhs) {
-  const int4 rhs_or_one = (((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx))) ? (1).xxxx : rhs);
+  int4 rhs_or_one = (((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx))) ? (1).xxxx : rhs);
   if (any(((uint4((lhs | rhs_or_one)) & (2147483648u).xxxx) != (0u).xxxx))) {
     return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
   } else {

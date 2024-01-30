@@ -1,8 +1,8 @@
 void main_1() {
   float3 v = (0.0f).xxx;
-  const float x_14 = v.y;
-  const float2 x_17 = v.xz;
-  const float3 x_19 = v.xzy;
+  float x_14 = v.y;
+  float2 x_17 = v.xz;
+  float3 x_19 = v.xzy;
   return;
 }
 

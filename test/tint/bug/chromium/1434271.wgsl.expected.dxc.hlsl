@@ -21,7 +21,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol_4 vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol_4 wrapper_result = (tint_symbol_4)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
@@ -84,8 +84,8 @@ VertexOutput vs_main_inner(VertexInput tint_symbol) {
 }
 
 tint_symbol_7 vs_main(tint_symbol_6 tint_symbol_5) {
-  const VertexInput tint_symbol_12 = {tint_symbol_5.position, tint_symbol_5.color, tint_symbol_5.quad_pos};
-  const VertexOutput inner_result_1 = vs_main_inner(tint_symbol_12);
+  VertexInput tint_symbol_12 = {tint_symbol_5.position, tint_symbol_5.color, tint_symbol_5.quad_pos};
+  VertexOutput inner_result_1 = vs_main_inner(tint_symbol_12);
   tint_symbol_7 wrapper_result_1 = (tint_symbol_7)0;
   wrapper_result_1.position = inner_result_1.position;
   wrapper_result_1.color = inner_result_1.color;
@@ -111,7 +111,7 @@ struct tint_symbol_9 {
 };
 
 Particle data_load(uint offset) {
-  const Particle tint_symbol_13 = {asfloat(data.Load3((offset + 0u))), asfloat(data.Load((offset + 12u))), asfloat(data.Load4((offset + 16u))), asfloat(data.Load2((offset + 32u)))};
+  Particle tint_symbol_13 = {asfloat(data.Load3((offset + 0u))), asfloat(data.Load((offset + 12u))), asfloat(data.Load4((offset + 16u))), asfloat(data.Load2((offset + 32u)))};
   return tint_symbol_13;
 }
 
@@ -124,7 +124,7 @@ void data_store(uint offset, Particle value) {
 
 void simulate_inner(uint3 GlobalInvocationID) {
   rand_seed = ((asfloat(sim_params[1]).xy * float2(GlobalInvocationID.xy)) * asfloat(sim_params[1]).zw);
-  const uint idx = GlobalInvocationID.x;
+  uint idx = GlobalInvocationID.x;
   Particle particle = data_load((48u * idx));
   data_store((48u * idx), particle);
 }
@@ -155,15 +155,15 @@ void export_level_inner(uint3 coord) {
   uint2 tint_tmp;
   tex_out.GetDimensions(tint_tmp.x, tint_tmp.y);
   if (all((coord.xy < uint2(tint_tmp)))) {
-    const uint dst_offset = (coord.x << ((coord.y * ubo[0].x) & 31u));
-    const uint src_offset = ((coord.x - 2u) + ((coord.y >> 2u) * ubo[0].x));
-    const float a = asfloat(buf_in.Load((4u * (src_offset << 0u))));
-    const float b = asfloat(buf_in.Load((4u * (src_offset + 1u))));
-    const float c = asfloat(buf_in.Load((4u * ((src_offset + 1u) + ubo[0].x))));
-    const float d = asfloat(buf_in.Load((4u * ((src_offset + 1u) + ubo[0].x))));
-    const float sum = dot(float4(a, b, c, d), (1.0f).xxxx);
+    uint dst_offset = (coord.x << ((coord.y * ubo[0].x) & 31u));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> 2u) * ubo[0].x));
+    float a = asfloat(buf_in.Load((4u * (src_offset << 0u))));
+    float b = asfloat(buf_in.Load((4u * (src_offset + 1u))));
+    float c = asfloat(buf_in.Load((4u * ((src_offset + 1u) + ubo[0].x))));
+    float d = asfloat(buf_in.Load((4u * ((src_offset + 1u) + ubo[0].x))));
+    float sum = dot(float4(a, b, c, d), (1.0f).xxxx);
     buf_out.Store((4u * dst_offset), asuint(tint_float_mod(sum, 4.0f)));
-    const float4 probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
+    float4 probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     tex_out[int2(coord.xy)] = probabilities;
   }
 }

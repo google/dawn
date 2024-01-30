@@ -11,6 +11,6 @@ static str P = (str)0;
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int r[4] = func(P.arr);
+  int r[4] = func(P.arr);
   return;
 }

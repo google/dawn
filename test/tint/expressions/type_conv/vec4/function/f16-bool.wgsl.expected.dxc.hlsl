@@ -11,6 +11,6 @@ vector<float16_t, 4> m() {
 }
 
 void f() {
-  const vector<float16_t, 4> tint_symbol = m();
+  vector<float16_t, 4> tint_symbol = m();
   bool4 v = bool4(tint_symbol);
 }

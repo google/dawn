@@ -16,7 +16,7 @@ float2x4 m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float2x4 l_m = m_load(0u);
-  const float4 l_m_1 = asfloat(m[1]);
+  float2x4 l_m = m_load(0u);
+  float4 l_m_1 = asfloat(m[1]);
   return;
 }

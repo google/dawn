@@ -9,7 +9,7 @@ uint sb_rwatomicOr(uint offset, uint value) {
 
 void atomicOr_5e95d4() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicOr(0u, 1u);
+  uint x_9 = sb_rwatomicOr(0u, 1u);
   res = x_9;
   return;
 }

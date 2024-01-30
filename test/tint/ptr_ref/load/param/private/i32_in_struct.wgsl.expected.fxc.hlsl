@@ -10,6 +10,6 @@ static str P = (str)0;
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int r = func(P.i);
+  int r = func(P.i);
   return;
 }

@@ -9,7 +9,7 @@ int sb_rwatomicLoad(uint offset) {
 
 void atomicLoad_0806ad() {
   int res = 0;
-  const int x_9 = sb_rwatomicLoad(0u);
+  int x_9 = sb_rwatomicLoad(0u);
   res = x_9;
   return;
 }

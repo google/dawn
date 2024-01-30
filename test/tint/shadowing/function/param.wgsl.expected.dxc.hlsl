@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void a(int a_1) {
-  const int b = a_1;
+  int b = a_1;
 }

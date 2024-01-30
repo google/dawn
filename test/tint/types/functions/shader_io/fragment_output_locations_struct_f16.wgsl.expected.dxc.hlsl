@@ -16,12 +16,12 @@ struct tint_symbol {
 };
 
 FragmentOutputs main_inner() {
-  const FragmentOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), float16_t(2.25h), vector<float16_t, 3>(float16_t(3.0h), float16_t(5.0h), float16_t(8.0h))};
+  FragmentOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), float16_t(2.25h), vector<float16_t, 3>(float16_t(3.0h), float16_t(5.0h), float16_t(8.0h))};
   return tint_symbol_1;
 }
 
 tint_symbol main() {
-  const FragmentOutputs inner_result = main_inner();
+  FragmentOutputs inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.loc0 = inner_result.loc0;
   wrapper_result.loc1 = inner_result.loc1;

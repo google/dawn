@@ -7,7 +7,7 @@ RWByteAddressBuffer non_uniform_value : register(u0);
 [numthreads(1, 1, 1)]
 void main() {
   return;
-  const bool non_uniform_cond = (asint(non_uniform_value.Load(0u)) == 0);
+  bool non_uniform_cond = (asint(non_uniform_value.Load(0u)) == 0);
   if (non_uniform_cond) {
     GroupMemoryBarrierWithGroupSync();
   }

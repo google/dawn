@@ -11,6 +11,6 @@ bool3 m() {
 }
 
 void f() {
-  const bool3 tint_symbol = m();
+  bool3 tint_symbol = m();
   int3 v = int3(tint_symbol);
 }

@@ -5,10 +5,10 @@ void atomicXor_75dc95() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
-  const int x_19 = arg_1;
+  int x_19 = arg_1;
   int atomic_result = 0;
   InterlockedXor(arg_0, x_19, atomic_result);
-  const int x_15 = atomic_result;
+  int x_15 = atomic_result;
   res = x_15;
   return;
 }
@@ -22,7 +22,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_33 = local_invocation_index_1;
+  uint x_33 = local_invocation_index_1;
   compute_main_inner(x_33);
   return;
 }

@@ -31,9 +31,9 @@ void main_inner(uint local_invocation_index) {
   v3u32_var = (0u).xxx;
   v4f32_var = (0.0f).xxxx;
   m2x3_var = float2x3((0.0f).xxx, (0.0f).xxx);
-  const float tint_symbol_2[4] = (float[4])0;
+  float tint_symbol_2[4] = (float[4])0;
   arr_var = tint_symbol_2;
-  const S tint_symbol_3 = (S)0;
+  S tint_symbol_3 = (S)0;
   struct_var = tint_symbol_3;
   wg_var = 42.0f;
 }

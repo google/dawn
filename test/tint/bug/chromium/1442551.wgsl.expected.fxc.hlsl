@@ -4,6 +4,6 @@ void unused_entry_point() {
 }
 
 void f() {
-  const int i = 1;
+  int i = 1;
   int b = int2(1, 2)[i];
 }

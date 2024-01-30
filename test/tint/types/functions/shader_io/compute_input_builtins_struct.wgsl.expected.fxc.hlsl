@@ -17,12 +17,12 @@ struct tint_symbol_1 {
 };
 
 void main_inner(ComputeInputs inputs) {
-  const uint foo = ((((inputs.local_invocation_id.x + inputs.local_invocation_index) + inputs.global_invocation_id.x) + inputs.workgroup_id.x) + inputs.num_workgroups.x);
+  uint foo = ((((inputs.local_invocation_id.x + inputs.local_invocation_index) + inputs.global_invocation_id.x) + inputs.workgroup_id.x) + inputs.num_workgroups.x);
 }
 
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {
-  const ComputeInputs tint_symbol_4 = {tint_symbol.local_invocation_id, tint_symbol.local_invocation_index, tint_symbol.global_invocation_id, tint_symbol.workgroup_id, tint_symbol_3[0].xyz};
+  ComputeInputs tint_symbol_4 = {tint_symbol.local_invocation_id, tint_symbol.local_invocation_index, tint_symbol.global_invocation_id, tint_symbol.workgroup_id, tint_symbol_3[0].xyz};
   main_inner(tint_symbol_4);
   return;
 }

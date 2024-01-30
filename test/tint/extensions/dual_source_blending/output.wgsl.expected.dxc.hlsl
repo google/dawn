@@ -15,7 +15,7 @@ FragOutput frag_main_inner() {
 }
 
 tint_symbol frag_main() {
-  const FragOutput inner_result = frag_main_inner();
+  FragOutput inner_result = frag_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.color = inner_result.color;
   wrapper_result.blend = inner_result.blend;

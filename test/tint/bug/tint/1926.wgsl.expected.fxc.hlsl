@@ -2,7 +2,7 @@ groupshared uint sh_atomic_failed;
 
 uint tint_workgroupUniformLoad_sh_atomic_failed() {
   GroupMemoryBarrierWithGroupSync();
-  const uint result = sh_atomic_failed;
+  uint result = sh_atomic_failed;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
@@ -20,7 +20,7 @@ void main_inner(uint3 global_id, uint3 local_id, uint local_invocation_index) {
     sh_atomic_failed = 0u;
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint failed = tint_workgroupUniformLoad_sh_atomic_failed();
+  uint failed = tint_workgroupUniformLoad_sh_atomic_failed();
   if ((local_id.x == 0u)) {
     output.Store(0u, asuint(failed));
   }

@@ -9,8 +9,8 @@ struct S {
 
 void a() {
   int4 a_1 = (0).xxxx;
-  const int b = a_1.x;
-  const int4 c = a_1.zzyy;
+  int b = a_1.x;
+  int4 c = a_1.zzyy;
   S d = (S)0;
-  const float3 e = d.val[2].yzx;
+  float3 e = d.val[2].yzx;
 }

@@ -9,7 +9,7 @@ uint sb_rwatomicLoad(uint offset) {
 
 void atomicLoad_fe6cc3() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicLoad(0u);
+  uint x_9 = sb_rwatomicLoad(0u);
   res = x_9;
   return;
 }

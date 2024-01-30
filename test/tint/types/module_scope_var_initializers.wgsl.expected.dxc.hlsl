@@ -23,9 +23,9 @@ void main() {
   v3u32_var = (0u).xxx;
   v4f32_var = (0.0f).xxxx;
   m2x3_var = float2x3((0.0f).xxx, (0.0f).xxx);
-  const float tint_symbol[4] = (float[4])0;
+  float tint_symbol[4] = (float[4])0;
   arr_var = tint_symbol;
-  const S tint_symbol_1 = (S)0;
+  S tint_symbol_1 = (S)0;
   struct_var = tint_symbol_1;
   return;
 }

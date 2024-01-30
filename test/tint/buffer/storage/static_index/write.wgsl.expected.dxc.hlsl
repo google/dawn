@@ -105,11 +105,11 @@ void main() {
   sb_store_18(352u, float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
   sb_store_19(384u, float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
   sb_store_20(448u, float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  const float3 tint_symbol[2] = (float3[2])0;
+  float3 tint_symbol[2] = (float3[2])0;
   sb_store_21(512u, tint_symbol);
-  const Inner tint_symbol_1 = (Inner)0;
+  Inner tint_symbol_1 = (Inner)0;
   sb_store_22(544u, tint_symbol_1);
-  const Inner tint_symbol_2[4] = (Inner[4])0;
+  Inner tint_symbol_2[4] = (Inner[4])0;
   sb_store_23(552u, tint_symbol_2);
   return;
 }

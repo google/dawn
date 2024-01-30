@@ -7,6 +7,6 @@ groupshared float a[10];
 groupshared float b[20];
 
 void f() {
-  const float x = a[0];
-  const float y = b[0];
+  float x = a[0];
+  float y = b[0];
 }

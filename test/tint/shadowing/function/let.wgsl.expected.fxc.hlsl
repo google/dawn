@@ -8,6 +8,6 @@ void a() {
     int a_1 = 1;
     int b = a_1;
   }
-  const int a_2 = 1;
-  const int b = a_2;
+  int a_2 = 1;
+  int b = a_2;
 }

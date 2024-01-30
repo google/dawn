@@ -6,10 +6,10 @@ struct tint_symbol_1 {
 };
 
 void main_inner(int loc0, uint loc1, float loc2, float4 loc3) {
-  const int i = loc0;
-  const uint u = loc1;
-  const float f = loc2;
-  const float4 v = loc3;
+  int i = loc0;
+  uint u = loc1;
+  float f = loc2;
+  float4 v = loc3;
 }
 
 void main(tint_symbol_1 tint_symbol) {

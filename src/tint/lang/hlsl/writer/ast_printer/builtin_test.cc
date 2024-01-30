@@ -407,8 +407,8 @@ modf_result_f32 tint_modf(float param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const float f = 1.5f;
-  const modf_result_f32 v = tint_modf(f);
+  float f = 1.5f;
+  modf_result_f32 v = tint_modf(f);
   return;
 }
 )");
@@ -435,8 +435,8 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const float16_t f = float16_t(1.5h);
-  const modf_result_f16 v = tint_modf(f);
+  float16_t f = float16_t(1.5h);
+  modf_result_f16 v = tint_modf(f);
   return;
 }
 )");
@@ -461,8 +461,8 @@ modf_result_vec3_f32 tint_modf(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const float3 f = float3(1.5f, 2.5f, 3.5f);
-  const modf_result_vec3_f32 v = tint_modf(f);
+  float3 f = float3(1.5f, 2.5f, 3.5f);
+  modf_result_vec3_f32 v = tint_modf(f);
   return;
 }
 )");
@@ -489,8 +489,8 @@ modf_result_vec3_f16 tint_modf(vector<float16_t, 3> param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const vector<float16_t, 3> f = vector<float16_t, 3>(float16_t(1.5h), float16_t(2.5h), float16_t(3.5h));
-  const modf_result_vec3_f16 v = tint_modf(f);
+  vector<float16_t, 3> f = vector<float16_t, 3>(float16_t(1.5h), float16_t(2.5h), float16_t(3.5h));
+  modf_result_vec3_f16 v = tint_modf(f);
   return;
 }
 )");
@@ -508,7 +508,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Scalar_f32) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const modf_result_f32 v = {0.5f, 1.0f};
+  modf_result_f32 v = {0.5f, 1.0f};
   return;
 }
 )");
@@ -528,7 +528,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Scalar_f16) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const modf_result_f16 v = {float16_t(0.5h), float16_t(1.0h)};
+  modf_result_f16 v = {float16_t(0.5h), float16_t(1.0h)};
   return;
 }
 )");
@@ -546,7 +546,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Vector_f32) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const modf_result_vec3_f32 v = {(0.5f).xxx, float3(1.0f, 2.0f, 3.0f)};
+  modf_result_vec3_f32 v = {(0.5f).xxx, float3(1.0f, 2.0f, 3.0f)};
   return;
 }
 )");
@@ -566,7 +566,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Vector_f16) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const modf_result_vec3_f16 v = {(float16_t(0.5h)).xxx, vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h))};
+  modf_result_vec3_f16 v = {(float16_t(0.5h)).xxx, vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h))};
   return;
 }
 )");
@@ -722,7 +722,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Scalar_f32) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const frexp_result_f32 v = {0.5f, 1};
+  frexp_result_f32 v = {0.5f, 1};
   return;
 }
 )");
@@ -742,7 +742,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Scalar_f16) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const frexp_result_f16 v = {float16_t(0.5h), 1};
+  frexp_result_f16 v = {float16_t(0.5h), 1};
   return;
 }
 )");
@@ -760,7 +760,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Vector_f32) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const frexp_result_vec3_f32 v = (frexp_result_vec3_f32)0;
+  frexp_result_vec3_f32 v = (frexp_result_vec3_f32)0;
   return;
 }
 )");
@@ -780,7 +780,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Vector_f16) {
 };
 [numthreads(1, 1, 1)]
 void test_function() {
-  const frexp_result_vec3_f16 v = (frexp_result_vec3_f16)0;
+  frexp_result_vec3_f16 v = (frexp_result_vec3_f16)0;
   return;
 }
 )");
@@ -827,7 +827,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Degrees_Scalar_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
-  const float tint_symbol = tint_degrees(val);
+  float tint_symbol = tint_degrees(val);
   return;
 }
 )");
@@ -848,7 +848,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Degrees_Vector_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
-  const float3 tint_symbol = tint_degrees(val);
+  float3 tint_symbol = tint_degrees(val);
   return;
 }
 )");
@@ -871,7 +871,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Degrees_Scalar_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float16_t val = float16_t(0.0h);
-  const float16_t tint_symbol = tint_degrees(val);
+  float16_t tint_symbol = tint_degrees(val);
   return;
 }
 )");
@@ -894,7 +894,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Degrees_Vector_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
-  const vector<float16_t, 3> tint_symbol = tint_degrees(val);
+  vector<float16_t, 3> tint_symbol = tint_degrees(val);
   return;
 }
 )");
@@ -915,7 +915,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Radians_Scalar_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
-  const float tint_symbol = tint_radians(val);
+  float tint_symbol = tint_radians(val);
   return;
 }
 )");
@@ -936,7 +936,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Radians_Vector_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
-  const float3 tint_symbol = tint_radians(val);
+  float3 tint_symbol = tint_radians(val);
   return;
 }
 )");
@@ -959,7 +959,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Radians_Scalar_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float16_t val = float16_t(0.0h);
-  const float16_t tint_symbol = tint_radians(val);
+  float16_t tint_symbol = tint_radians(val);
   return;
 }
 )");
@@ -982,7 +982,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Radians_Vector_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
-  const vector<float16_t, 3> tint_symbol = tint_radians(val);
+  vector<float16_t, 3> tint_symbol = tint_radians(val);
   return;
 }
 )");
@@ -999,7 +999,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Scalar_i32) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val = 0;
-  const int tint_symbol = int(sign(val));
+  int tint_symbol = int(sign(val));
   return;
 }
 )");
@@ -1016,7 +1016,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Vector_i32) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int3 val = int3(0, 0, 0);
-  const int3 tint_symbol = int3(sign(val));
+  int3 tint_symbol = int3(sign(val));
   return;
 }
 )");
@@ -1033,7 +1033,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Scalar_f32) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
-  const float tint_symbol = float(sign(val));
+  float tint_symbol = float(sign(val));
   return;
 }
 )");
@@ -1050,7 +1050,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Vector_f32) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
-  const float3 tint_symbol = float3(sign(val));
+  float3 tint_symbol = float3(sign(val));
   return;
 }
 )");
@@ -1069,7 +1069,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Scalar_f16) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float16_t val = float16_t(0.0h);
-  const float16_t tint_symbol = float16_t(sign(val));
+  float16_t tint_symbol = float16_t(sign(val));
   return;
 }
 )");
@@ -1088,7 +1088,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Sign_Vector_f16) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
-  const vector<float16_t, 3> tint_symbol = vector<float16_t, 3>(sign(val));
+  vector<float16_t, 3> tint_symbol = vector<float16_t, 3>(sign(val));
   return;
 }
 )");
@@ -1109,7 +1109,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Trunc_Scalar_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
-  const float tint_symbol = tint_trunc(val);
+  float tint_symbol = tint_trunc(val);
   return;
 }
 )");
@@ -1130,7 +1130,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Trunc_Vector_f32) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
-  const float3 tint_symbol = tint_trunc(val);
+  float3 tint_symbol = tint_trunc(val);
   return;
 }
 )");
@@ -1153,7 +1153,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Trunc_Scalar_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float16_t val = float16_t(0.0h);
-  const float16_t tint_symbol = tint_trunc(val);
+  float16_t tint_symbol = tint_trunc(val);
   return;
 }
 )");
@@ -1176,7 +1176,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Trunc_Vector_f16) {
 [numthreads(1, 1, 1)]
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
-  const vector<float16_t, 3> tint_symbol = tint_trunc(val);
+  vector<float16_t, 3> tint_symbol = tint_trunc(val);
   return;
 }
 )");
@@ -1468,7 +1468,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Dot4I8Packed) {
 void test_function() {
   uint val1 = 0u;
   uint val2 = 0u;
-  const int tint_symbol = tint_dot4I8Packed(val1, val2);
+  int tint_symbol = tint_dot4I8Packed(val1, val2);
   return;
 }
 )");
@@ -1494,7 +1494,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Dot4U8Packed) {
 void test_function() {
   uint val1 = 0u;
   uint val2 = 0u;
-  const uint tint_symbol = tint_dot4U8Packed(val1, val2);
+  uint tint_symbol = tint_dot4U8Packed(val1, val2);
   return;
 }
 )");
@@ -1511,7 +1511,7 @@ TEST_F(HlslASTPrinterTest_Builtin, CountOneBits) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val1 = 0;
-  const int tint_symbol = asint(countbits(asuint(val1)));
+  int tint_symbol = asint(countbits(asuint(val1)));
   return;
 }
 )");
@@ -1528,7 +1528,7 @@ TEST_F(HlslASTPrinterTest_Builtin, ReverseBits) {
     EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val1 = 0;
-  const int tint_symbol = asint(reversebits(asuint(val1)));
+  int tint_symbol = asint(reversebits(asuint(val1)));
   return;
 }
 )");

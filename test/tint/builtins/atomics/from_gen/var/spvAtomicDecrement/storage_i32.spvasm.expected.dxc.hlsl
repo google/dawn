@@ -11,7 +11,7 @@ void atomicAdd_d32fe4() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
-  const int x_13 = sb_rwatomicSub(0u, 1);
+  int x_13 = sb_rwatomicSub(0u, 1);
   res = x_13;
   return;
 }

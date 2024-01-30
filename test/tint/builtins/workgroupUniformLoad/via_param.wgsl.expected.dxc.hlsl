@@ -7,17 +7,17 @@ groupshared int v[4];
 
 int tint_workgroupUniformLoad_v_X(uint p[1]) {
   GroupMemoryBarrierWithGroupSync();
-  const int result = v[p[0]];
+  int result = v[p[0]];
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
 int foo_v_X(uint p[1]) {
-  const uint tint_symbol[1] = {p[0u]};
+  uint tint_symbol[1] = {p[0u]};
   return tint_workgroupUniformLoad_v_X(tint_symbol);
 }
 
 int bar() {
-  const uint tint_symbol_1[1] = (uint[1])0;
+  uint tint_symbol_1[1] = (uint[1])0;
   return foo_v_X(tint_symbol_1);
 }

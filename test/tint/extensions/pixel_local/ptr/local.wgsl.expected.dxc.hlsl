@@ -7,12 +7,12 @@ struct PixelLocal {
 static PixelLocal V = (PixelLocal)0;
 
 void load_from_pixel_local_storage(float4 my_input) {
-  const uint2 rov_texcoord = uint2(my_input.xy);
+  uint2 rov_texcoord = uint2(my_input.xy);
   V.a = pixel_local_a.Load(rov_texcoord).x;
 }
 
 void store_into_pixel_local_storage(float4 my_input) {
-  const uint2 rov_texcoord = uint2(my_input.xy);
+  uint2 rov_texcoord = uint2(my_input.xy);
   pixel_local_a[rov_texcoord] = uint4((V.a).xxxx);
 }
 
@@ -25,7 +25,7 @@ void f_inner() {
 }
 
 void f_inner_1(float4 my_pos) {
-  const float4 hlsl_sv_position = my_pos;
+  float4 hlsl_sv_position = my_pos;
   load_from_pixel_local_storage(hlsl_sv_position);
   f_inner();
   store_into_pixel_local_storage(hlsl_sv_position);

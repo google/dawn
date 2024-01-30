@@ -1,5 +1,5 @@
 void main_1() {
-  const float x_24 = 5.0f;
+  float x_24 = 5.0f;
   return;
 }
 

@@ -11,14 +11,14 @@ struct PixelLocal {
 static PixelLocal P = (PixelLocal)0;
 
 void load_from_pixel_local_storage(float4 my_input) {
-  const uint2 rov_texcoord = uint2(my_input.xy);
+  uint2 rov_texcoord = uint2(my_input.xy);
   P.a = pixel_local_a.Load(rov_texcoord).x;
   P.b = pixel_local_b.Load(rov_texcoord).x;
   P.c = pixel_local_c.Load(rov_texcoord).x;
 }
 
 void store_into_pixel_local_storage(float4 my_input) {
-  const uint2 rov_texcoord = uint2(my_input.xy);
+  uint2 rov_texcoord = uint2(my_input.xy);
   pixel_local_a[rov_texcoord] = uint4((P.a).xxxx);
   pixel_local_b[rov_texcoord] = int4((P.b).xxxx);
   pixel_local_c[rov_texcoord] = float4((P.c).xxxx);
@@ -41,14 +41,14 @@ void f_inner(float4 pos, In tint_symbol) {
 }
 
 void f_inner_1(float4 pos, In tint_symbol) {
-  const float4 hlsl_sv_position = pos;
+  float4 hlsl_sv_position = pos;
   load_from_pixel_local_storage(hlsl_sv_position);
   f_inner(pos, tint_symbol);
   store_into_pixel_local_storage(hlsl_sv_position);
 }
 
 void f(tint_symbol_2 tint_symbol_1) {
-  const In tint_symbol_3 = {tint_symbol_1.uv};
+  In tint_symbol_3 = {tint_symbol_1.uv};
   f_inner_1(float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w)), tint_symbol_3);
   return;
 }

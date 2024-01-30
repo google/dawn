@@ -165,7 +165,7 @@ void main_inner(uint idx) {
   sb_store_31(((800u * idx) + 648u), matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx));
   sb_store_32(((800u * idx) + 664u), matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx));
   sb_store_33(((800u * idx) + 696u), matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
-  const float3 tint_symbol_2[2] = (float3[2])0;
+  float3 tint_symbol_2[2] = (float3[2])0;
   sb_store_34(((800u * idx) + 736u), tint_symbol_2);
   matrix<float16_t, 4, 2> tint_symbol_3[2] = (matrix<float16_t, 4, 2>[2])0;
   sb_store_35(((800u * idx) + 768u), tint_symbol_3);

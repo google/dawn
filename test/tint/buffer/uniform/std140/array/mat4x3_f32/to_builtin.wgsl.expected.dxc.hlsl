@@ -13,9 +13,9 @@ float4x3 u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float3x4 t = transpose(u_load(128u));
-  const float l = length(asfloat(u[1].xyz).zxy);
-  const float a = abs(asfloat(u[1].xyz).zxy.x);
+  float3x4 t = transpose(u_load(128u));
+  float l = length(asfloat(u[1].xyz).zxy);
+  float a = abs(asfloat(u[1].xyz).zxy.x);
   s.Store(0u, asuint(((t[0].x + float(l)) + float(a))));
   return;
 }

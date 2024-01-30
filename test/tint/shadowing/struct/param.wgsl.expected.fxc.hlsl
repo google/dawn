@@ -8,5 +8,5 @@ struct a {
 };
 
 void f(a a_1) {
-  const a b = a_1;
+  a b = a_1;
 }

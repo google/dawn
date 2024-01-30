@@ -6,12 +6,12 @@ struct S {
 ByteAddressBuffer sb : register(t0);
 
 S sb_load(uint offset) {
-  const S tint_symbol = {asfloat(sb.Load4((offset + 0u))), asint(sb.Load((offset + 16u)))};
+  S tint_symbol = {asfloat(sb.Load4((offset + 0u))), asint(sb.Load((offset + 16u)))};
   return tint_symbol;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S x = sb_load(32u);
+  S x = sb_load(32u);
   return;
 }

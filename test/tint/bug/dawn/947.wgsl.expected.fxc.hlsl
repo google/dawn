@@ -30,7 +30,7 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
 }
 
 tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
-  const VertexOutputs inner_result = vs_main_inner(tint_symbol.VertexIndex);
+  VertexOutputs inner_result = vs_main_inner(tint_symbol.VertexIndex);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.texcoords = inner_result.texcoords;
   wrapper_result.position = inner_result.position;
@@ -57,7 +57,7 @@ float4 fs_main_inner(float2 texcoord) {
 }
 
 tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
-  const float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
+  float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
   tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
   wrapper_result_1.value = inner_result_1;
   if (tint_discarded) {

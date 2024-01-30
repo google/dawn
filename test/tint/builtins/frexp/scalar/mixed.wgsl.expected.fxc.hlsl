@@ -12,11 +12,11 @@ frexp_result_f32 tint_frexp(float param_0) {
 static const frexp_result_f32 c = {0.625f, 1};
 [numthreads(1, 1, 1)]
 void main() {
-  const float runtime_in = 1.25f;
+  float runtime_in = 1.25f;
   frexp_result_f32 res = {0.625f, 1};
   res = tint_frexp(runtime_in);
   res = c;
-  const float fract = res.fract;
-  const int exp = res.exp;
+  float fract = res.fract;
+  int exp = res.exp;
   return;
 }

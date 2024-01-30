@@ -5,7 +5,7 @@ RWByteAddressBuffer j : register(u1);
 
 [numthreads(1, 1, 1)]
 void main() {
-  const uint l = dot(i[0].xyz, i[0].xyz);
+  uint l = dot(i[0].xyz, i[0].xyz);
   j.Store(0u, asuint(i[0].x));
   return;
 }

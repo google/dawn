@@ -4,7 +4,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void arrayLength_cfca0a() {
   uint tint_symbol_2 = 0u;
   sb_ro.GetDimensions(tint_symbol_2);
-  const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 4u);
+  uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 4u);
   uint res = tint_symbol_3;
   prevent_dce.Store(0u, asuint(res));
 }
@@ -19,7 +19,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

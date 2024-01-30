@@ -9,7 +9,7 @@ uint sb_rwatomicMax(uint offset, uint value) {
 
 void atomicMax_51b9be() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicMax(0u, 1u);
+  uint x_9 = sb_rwatomicMax(0u, 1u);
   res = x_9;
   return;
 }

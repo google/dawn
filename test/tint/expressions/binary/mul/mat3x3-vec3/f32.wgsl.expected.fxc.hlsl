@@ -10,6 +10,6 @@ float3x3 data_load(uint offset) {
 }
 
 void main() {
-  const float3 x = mul(asfloat(data[3].xyz), data_load(0u));
+  float3 x = mul(asfloat(data[3].xyz), data_load(0u));
   return;
 }

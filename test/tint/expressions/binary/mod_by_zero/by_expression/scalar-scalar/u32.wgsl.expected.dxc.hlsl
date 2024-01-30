@@ -6,6 +6,6 @@ uint tint_mod(uint lhs, uint rhs) {
 void f() {
   uint a = 1u;
   uint b = 0u;
-  const uint r = tint_mod(a, (b + b));
+  uint r = tint_mod(a, (b + b));
   return;
 }

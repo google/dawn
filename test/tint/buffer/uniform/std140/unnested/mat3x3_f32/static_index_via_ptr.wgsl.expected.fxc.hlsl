@@ -17,7 +17,7 @@ float3x3 m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float3x3 l_m = m_load(0u);
-  const float3 l_m_1 = asfloat(m[1].xyz);
+  float3x3 l_m = m_load(0u);
+  float3 l_m_1 = asfloat(m[1].xyz);
   return;
 }

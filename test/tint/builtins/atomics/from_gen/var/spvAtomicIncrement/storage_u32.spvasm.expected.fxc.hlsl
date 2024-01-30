@@ -11,7 +11,7 @@ void atomicAdd_8a199a() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  const uint x_13 = sb_rwatomicAdd(0u, 1u);
+  uint x_13 = sb_rwatomicAdd(0u, 1u);
   res = x_13;
   return;
 }

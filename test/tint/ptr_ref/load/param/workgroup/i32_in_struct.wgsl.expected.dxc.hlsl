@@ -14,11 +14,11 @@ struct tint_symbol_1 {
 
 void main_inner(uint local_invocation_index) {
   {
-    const str tint_symbol_2 = (str)0;
+    str tint_symbol_2 = (str)0;
     S = tint_symbol_2;
   }
   GroupMemoryBarrierWithGroupSync();
-  const int r = func_S_i();
+  int r = func_S_i();
 }
 
 [numthreads(1, 1, 1)]

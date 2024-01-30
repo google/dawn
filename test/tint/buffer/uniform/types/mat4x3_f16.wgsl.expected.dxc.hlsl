@@ -36,7 +36,7 @@ void s_store(uint offset, matrix<float16_t, 4, 3> value) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const matrix<float16_t, 4, 3> x = u_load(0u);
+  matrix<float16_t, 4, 3> x = u_load(0u);
   s_store(0u, x);
   return;
 }

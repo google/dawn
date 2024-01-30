@@ -11,6 +11,6 @@ bool m() {
 }
 
 void f() {
-  const bool tint_symbol = m();
+  bool tint_symbol = m();
   float v = float(tint_symbol);
 }

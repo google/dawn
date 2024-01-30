@@ -39,7 +39,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_44 = local_invocation_index_1;
+  uint x_44 = local_invocation_index_1;
   compute_main_inner(x_44);
   return;
 }

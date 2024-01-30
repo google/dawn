@@ -35,8 +35,8 @@ VertexOutput vtx_main_inner(VertexInput input) {
 }
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
-  const VertexInput tint_symbol_6 = {tint_symbol.cur_position, tint_symbol.color};
-  const VertexOutput inner_result = vtx_main_inner(tint_symbol_6);
+  VertexInput tint_symbol_6 = {tint_symbol.cur_position, tint_symbol.color};
+  VertexOutput inner_result = vtx_main_inner(tint_symbol_6);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.vtxFragColor = inner_result.vtxFragColor;
   wrapper_result.Position = inner_result.Position;
@@ -55,7 +55,7 @@ float4 frag_main_inner(float4 fragColor) {
 }
 
 tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3) {
-  const float4 inner_result_1 = frag_main_inner(tint_symbol_3.fragColor);
+  float4 inner_result_1 = frag_main_inner(tint_symbol_3.fragColor);
   tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;

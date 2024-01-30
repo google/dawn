@@ -6,6 +6,6 @@ int tint_div(int lhs, int rhs) {
 void f() {
   int a = 1;
   int b = 0;
-  const int r = tint_div(a, b);
+  int r = tint_div(a, b);
   return;
 }

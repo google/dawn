@@ -16,16 +16,16 @@ struct tint_symbol_1 {
 };
 
 void main_inner(FragmentInputs inputs) {
-  const int i = inputs.loc0;
-  const uint u = inputs.loc1;
-  const float f = inputs.loc2;
-  const float4 v = inputs.loc3;
-  const float16_t x = inputs.loc4;
-  const vector<float16_t, 3> y = inputs.loc5;
+  int i = inputs.loc0;
+  uint u = inputs.loc1;
+  float f = inputs.loc2;
+  float4 v = inputs.loc3;
+  float16_t x = inputs.loc4;
+  vector<float16_t, 3> y = inputs.loc5;
 }
 
 void main(tint_symbol_1 tint_symbol) {
-  const FragmentInputs tint_symbol_2 = {tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3, tint_symbol.loc4, tint_symbol.loc5};
+  FragmentInputs tint_symbol_2 = {tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3, tint_symbol.loc4, tint_symbol.loc5};
   main_inner(tint_symbol_2);
   return;
 }

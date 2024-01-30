@@ -7,7 +7,7 @@ static S_6 x_82[46] = (S_6[46])0;
 static float3 x_85[37] = (float3[37])0;
 
 void main_1() {
-  const uint x_88 = 58u;
+  uint x_88 = 58u;
   return;
 }
 

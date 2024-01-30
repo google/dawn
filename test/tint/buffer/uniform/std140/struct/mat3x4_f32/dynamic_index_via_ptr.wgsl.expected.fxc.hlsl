@@ -56,21 +56,21 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_a_i_save = i();
-  const int p_a_i_a_i_save = i();
-  const int p_a_i_a_i_m_i_save = i();
+  int p_a_i_save = i();
+  int p_a_i_a_i_save = i();
+  int p_a_i_a_i_m_i_save = i();
   Outer l_a[4] = a_load(0u);
   Outer l_a_i = a_load_1((256u * uint(p_a_i_save)));
   Inner l_a_i_a[4] = a_load_2((256u * uint(p_a_i_save)));
   Inner l_a_i_a_i = a_load_3(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
-  const float3x4 l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
+  float3x4 l_a_i_a_i_m = a_load_4(((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))));
   const uint scalar_offset_3 = ((((256u * uint(p_a_i_save)) + (64u * uint(p_a_i_a_i_save))) + (16u * uint(p_a_i_a_i_m_i_save)))) / 4;
-  const float4 l_a_i_a_i_m_i = asfloat(a[scalar_offset_3 / 4]);
-  const int tint_symbol = p_a_i_save;
-  const int tint_symbol_1 = p_a_i_a_i_save;
-  const int tint_symbol_2 = p_a_i_a_i_m_i_save;
-  const int tint_symbol_3 = i();
+  float4 l_a_i_a_i_m_i = asfloat(a[scalar_offset_3 / 4]);
+  int tint_symbol = p_a_i_save;
+  int tint_symbol_1 = p_a_i_a_i_save;
+  int tint_symbol_2 = p_a_i_a_i_m_i_save;
+  int tint_symbol_3 = i();
   const uint scalar_offset_4 = (((((256u * uint(tint_symbol)) + (64u * uint(tint_symbol_1))) + (16u * uint(tint_symbol_2))) + (4u * uint(tint_symbol_3)))) / 4;
-  const float l_a_i_a_i_m_i_i = asfloat(a[scalar_offset_4 / 4][scalar_offset_4 % 4]);
+  float l_a_i_a_i_m_i_i = asfloat(a[scalar_offset_4 / 4][scalar_offset_4 % 4]);
   return;
 }

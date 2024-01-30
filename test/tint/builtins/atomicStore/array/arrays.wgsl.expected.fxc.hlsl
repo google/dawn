@@ -7,9 +7,9 @@ struct tint_symbol_1 {
 void compute_main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
-      const uint i = (idx / 2u);
-      const uint i_1 = (idx % 2u);
-      const uint i_2 = (idx % 1u);
+      uint i = (idx / 2u);
+      uint i_1 = (idx % 2u);
+      uint i_2 = (idx % 1u);
       uint atomic_result = 0u;
       InterlockedExchange(wg[i][i_1][i_2], 0u, atomic_result);
     }

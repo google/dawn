@@ -50,9 +50,9 @@ void main_inner(uint3 GlobalInvocationID) {
   float4 frustumPlanes[6] = (float4[6])0;
   frustumPlanes[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
   frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
-  const int TILE_SIZE = 16;
-  const int TILE_COUNT_X = 2;
-  const int TILE_COUNT_Y = 2;
+  int TILE_SIZE = 16;
+  int TILE_COUNT_X = 2;
+  int TILE_COUNT_Y = 2;
   {
     for(int y = 0; (y < TILE_COUNT_Y); y = (y + 1)) {
       {

@@ -25,8 +25,8 @@ void main() {
   OuterS s = (OuterS)0;
   {
     S1 tint_symbol_1[8] = s.a1;
-    const uint tint_symbol_4 = getNextIndex();
-    const uint tint_symbol_2_save = tint_symbol_4;
+    uint tint_symbol_4 = getNextIndex();
+    uint tint_symbol_2_save = tint_symbol_4;
     InnerS tint_symbol_3[8] = tint_symbol_1[tint_symbol_2_save].a2;
     tint_symbol_3[uniforms[0].y] = v;
     tint_symbol_1[tint_symbol_2_save].a2 = tint_symbol_3;

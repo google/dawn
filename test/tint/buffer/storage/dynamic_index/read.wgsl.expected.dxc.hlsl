@@ -57,28 +57,28 @@ sb_load_21_ret sb_load_21(uint offset) {
 }
 
 void main_inner(uint idx) {
-  const float scalar_f32 = asfloat(sb.Load((544u * idx)));
-  const int scalar_i32 = asint(sb.Load(((544u * idx) + 4u)));
-  const uint scalar_u32 = sb.Load(((544u * idx) + 8u));
-  const float2 vec2_f32 = asfloat(sb.Load2(((544u * idx) + 16u)));
-  const int2 vec2_i32 = asint(sb.Load2(((544u * idx) + 24u)));
-  const uint2 vec2_u32 = sb.Load2(((544u * idx) + 32u));
-  const float3 vec3_f32 = asfloat(sb.Load3(((544u * idx) + 48u)));
-  const int3 vec3_i32 = asint(sb.Load3(((544u * idx) + 64u)));
-  const uint3 vec3_u32 = sb.Load3(((544u * idx) + 80u));
-  const float4 vec4_f32 = asfloat(sb.Load4(((544u * idx) + 96u)));
-  const int4 vec4_i32 = asint(sb.Load4(((544u * idx) + 112u)));
-  const uint4 vec4_u32 = sb.Load4(((544u * idx) + 128u));
-  const float2x2 mat2x2_f32 = sb_load_12(((544u * idx) + 144u));
-  const float2x3 mat2x3_f32 = sb_load_13(((544u * idx) + 160u));
-  const float2x4 mat2x4_f32 = sb_load_14(((544u * idx) + 192u));
-  const float3x2 mat3x2_f32 = sb_load_15(((544u * idx) + 224u));
-  const float3x3 mat3x3_f32 = sb_load_16(((544u * idx) + 256u));
-  const float3x4 mat3x4_f32 = sb_load_17(((544u * idx) + 304u));
-  const float4x2 mat4x2_f32 = sb_load_18(((544u * idx) + 352u));
-  const float4x3 mat4x3_f32 = sb_load_19(((544u * idx) + 384u));
-  const float4x4 mat4x4_f32 = sb_load_20(((544u * idx) + 448u));
-  const float3 arr2_vec3_f32[2] = sb_load_21(((544u * idx) + 512u));
+  float scalar_f32 = asfloat(sb.Load((544u * idx)));
+  int scalar_i32 = asint(sb.Load(((544u * idx) + 4u)));
+  uint scalar_u32 = sb.Load(((544u * idx) + 8u));
+  float2 vec2_f32 = asfloat(sb.Load2(((544u * idx) + 16u)));
+  int2 vec2_i32 = asint(sb.Load2(((544u * idx) + 24u)));
+  uint2 vec2_u32 = sb.Load2(((544u * idx) + 32u));
+  float3 vec3_f32 = asfloat(sb.Load3(((544u * idx) + 48u)));
+  int3 vec3_i32 = asint(sb.Load3(((544u * idx) + 64u)));
+  uint3 vec3_u32 = sb.Load3(((544u * idx) + 80u));
+  float4 vec4_f32 = asfloat(sb.Load4(((544u * idx) + 96u)));
+  int4 vec4_i32 = asint(sb.Load4(((544u * idx) + 112u)));
+  uint4 vec4_u32 = sb.Load4(((544u * idx) + 128u));
+  float2x2 mat2x2_f32 = sb_load_12(((544u * idx) + 144u));
+  float2x3 mat2x3_f32 = sb_load_13(((544u * idx) + 160u));
+  float2x4 mat2x4_f32 = sb_load_14(((544u * idx) + 192u));
+  float3x2 mat3x2_f32 = sb_load_15(((544u * idx) + 224u));
+  float3x3 mat3x3_f32 = sb_load_16(((544u * idx) + 256u));
+  float3x4 mat3x4_f32 = sb_load_17(((544u * idx) + 304u));
+  float4x2 mat4x2_f32 = sb_load_18(((544u * idx) + 352u));
+  float4x3 mat4x3_f32 = sb_load_19(((544u * idx) + 384u));
+  float4x4 mat4x4_f32 = sb_load_20(((544u * idx) + 448u));
+  float3 arr2_vec3_f32[2] = sb_load_21(((544u * idx) + 512u));
   s.Store(0u, asuint((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + tint_ftoi(arr2_vec3_f32[0].x))));
 }
 

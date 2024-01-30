@@ -11,7 +11,7 @@ void main_inner(ComputeInputs inputs) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const ComputeInputs tint_symbol = {WaveGetLaneIndex(), WaveGetLaneCount()};
+  ComputeInputs tint_symbol = {WaveGetLaneIndex(), WaveGetLaneCount()};
   main_inner(tint_symbol);
   return;
 }

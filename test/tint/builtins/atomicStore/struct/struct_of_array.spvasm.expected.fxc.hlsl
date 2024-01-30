@@ -16,7 +16,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     if (!((idx < 10u))) {
       break;
     }
-    const uint x_35 = idx;
+    uint x_35 = idx;
     uint atomic_result = 0u;
     InterlockedExchange(wg.a[x_35], 0u, atomic_result);
     {
@@ -30,7 +30,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_53 = local_invocation_index_1;
+  uint x_53 = local_invocation_index_1;
   compute_main_inner(x_53);
   return;
 }
@@ -46,7 +46,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param) {
   }
   {
     for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
-      const uint i = idx_1;
+      uint i = idx_1;
       uint atomic_result_2 = 0u;
       InterlockedExchange(wg.a[i], 0u, atomic_result_2);
     }

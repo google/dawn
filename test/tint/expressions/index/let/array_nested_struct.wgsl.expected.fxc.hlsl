@@ -9,6 +9,6 @@ struct S {
 };
 
 uint f() {
-  const S a[2] = (S[2])0;
+  S a[2] = (S[2])0;
   return a[1].n[1];
 }

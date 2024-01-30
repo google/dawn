@@ -11,8 +11,8 @@ void atomicOr_5e95d4() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  const uint x_18 = arg_1;
-  const uint x_13 = sb_rwatomicOr(0u, x_18);
+  uint x_18 = arg_1;
+  uint x_13 = sb_rwatomicOr(0u, x_18);
   res = x_13;
   return;
 }

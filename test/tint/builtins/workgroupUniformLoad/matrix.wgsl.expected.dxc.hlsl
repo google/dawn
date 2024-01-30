@@ -7,7 +7,7 @@ groupshared float3x3 v;
 
 float3x3 tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const float3x3 result = v;
+  float3x3 result = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

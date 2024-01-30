@@ -44,12 +44,12 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float16_t tint_symbol = a(u_load(0u));
-  const float16_t tint_symbol_1 = b(u_load_1(16u));
+  float16_t tint_symbol = a(u_load(0u));
+  float16_t tint_symbol_1 = b(u_load_1(16u));
   uint ubo_load_4 = u[1].x;
-  const float16_t tint_symbol_2 = c(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
+  float16_t tint_symbol_2 = c(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
   uint ubo_load_5 = u[1].x;
-  const float16_t tint_symbol_3 = d(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  float16_t tint_symbol_3 = d(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
   s.Store<float16_t>(0u, (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3));
   return;
 }

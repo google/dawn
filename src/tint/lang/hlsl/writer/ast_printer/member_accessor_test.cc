@@ -1405,7 +1405,7 @@ TEST_F(HlslASTPrinterTest_MemberAccessor,
 RWByteAddressBuffer data : register(u0, space1);
 
 Inner data_load(uint offset) {
-  const Inner tint_symbol = {asint(data.Load((offset + 0u)))};
+  Inner tint_symbol = {asint(data.Load((offset + 0u)))};
   return tint_symbol;
 }
 
@@ -1458,7 +1458,7 @@ cbuffer cbuffer_data : register(b1, space1) {
 
 Inner data_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
-  const Inner tint_symbol = {asint(data[scalar_offset / 4][scalar_offset % 4])};
+  Inner tint_symbol = {asint(data[scalar_offset / 4][scalar_offset % 4])};
   return tint_symbol;
 }
 

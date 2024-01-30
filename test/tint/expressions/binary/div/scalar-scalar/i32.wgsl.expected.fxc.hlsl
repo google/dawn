@@ -4,8 +4,8 @@ int tint_div(int lhs, int rhs) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int a = 1;
-  const int b = 2;
-  const int r = tint_div(a, b);
+  int a = 1;
+  int b = 2;
+  int r = tint_div(a, b);
   return;
 }

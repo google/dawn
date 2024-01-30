@@ -5,6 +5,6 @@ int func(inout int pointer) {
 [numthreads(1, 1, 1)]
 void main() {
   int F = 0;
-  const int r = func(F);
+  int r = func(F);
   return;
 }

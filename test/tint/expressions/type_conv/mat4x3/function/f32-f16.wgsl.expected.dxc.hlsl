@@ -11,6 +11,6 @@ float4x3 m() {
 }
 
 void f() {
-  const float4x3 tint_symbol = m();
+  float4x3 tint_symbol = m();
   matrix<float16_t, 4, 3> v = matrix<float16_t, 4, 3>(tint_symbol);
 }

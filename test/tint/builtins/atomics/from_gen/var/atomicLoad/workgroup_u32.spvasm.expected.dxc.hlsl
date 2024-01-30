@@ -5,7 +5,7 @@ void atomicLoad_361bf1() {
   uint res = 0u;
   uint atomic_result = 0u;
   InterlockedOr(arg_0, 0, atomic_result);
-  const uint x_10 = atomic_result;
+  uint x_10 = atomic_result;
   res = x_10;
   return;
 }
@@ -19,7 +19,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_29 = local_invocation_index_1;
+  uint x_29 = local_invocation_index_1;
   compute_main_inner(x_29);
   return;
 }

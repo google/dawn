@@ -6,5 +6,5 @@ void unused_entry_point() {
 static float16_t u = float16_t(1.0h);
 
 void f() {
-  const int v = int(u);
+  int v = int(u);
 }

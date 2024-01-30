@@ -36,7 +36,7 @@ u_load_ret u_load(uint offset) {
 void f_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      const uint i = idx;
+      uint i = idx;
       w[i] = matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
     }
   }

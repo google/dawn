@@ -11,7 +11,7 @@ int c() {
 
 void b() {
   int b_1 = c();
-  const int tint_symbol = b_1;
-  const int tint_symbol_1 = c();
+  int tint_symbol = b_1;
+  int tint_symbol_1 = c();
   b_1 = (tint_symbol + tint_symbol_1);
 }

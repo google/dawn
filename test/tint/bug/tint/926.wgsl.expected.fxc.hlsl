@@ -13,7 +13,7 @@ uint drawOutatomicAdd(uint offset, uint value) {
 
 
 void computeMain_inner(uint3 global_id) {
-  const uint firstVertex = drawOutatomicAdd(0u, cubeVerts);
+  uint firstVertex = drawOutatomicAdd(0u, cubeVerts);
 }
 
 [numthreads(1, 1, 1)]

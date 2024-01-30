@@ -21,6 +21,6 @@ func_S_arr_ret func_S_arr() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int4 r[4] = func_S_arr();
+  int4 r[4] = func_S_arr();
   return;
 }

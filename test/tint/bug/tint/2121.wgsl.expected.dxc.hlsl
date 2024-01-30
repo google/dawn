@@ -18,7 +18,7 @@ VSOut main_inner() {
 }
 
 tint_symbol_1 main() {
-  const VSOut inner_result = main_inner();
+  VSOut inner_result = main_inner();
   tint_symbol_1 wrapper_result = (tint_symbol_1)0;
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;

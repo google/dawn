@@ -15,13 +15,13 @@ float ret_f32() {
 }
 
 MyStruct ret_MyStruct() {
-  const MyStruct tint_symbol_1 = (MyStruct)0;
+  MyStruct tint_symbol_1 = (MyStruct)0;
   return tint_symbol_1;
 }
 
 typedef float ret_MyArray_ret[10];
 ret_MyArray_ret ret_MyArray() {
-  const float tint_symbol_2[10] = (float[10])0;
+  float tint_symbol_2[10] = (float[10])0;
   return tint_symbol_2;
 }
 
@@ -52,7 +52,7 @@ float4 main_inner() {
 }
 
 tint_symbol main() {
-  const float4 inner_result = main_inner();
+  float4 inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

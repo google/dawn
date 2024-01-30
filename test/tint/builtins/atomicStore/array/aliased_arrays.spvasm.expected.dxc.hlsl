@@ -16,9 +16,9 @@ void compute_main_inner(uint local_invocation_index_2) {
     if (!((idx < 6u))) {
       break;
     }
-    const uint x_31 = idx;
-    const uint x_33 = idx;
-    const uint x_35 = idx;
+    uint x_31 = idx;
+    uint x_33 = idx;
+    uint x_35 = idx;
     uint atomic_result = 0u;
     InterlockedExchange(wg[tint_div(x_31, 2u)][tint_mod(x_33, 2u)][tint_mod(x_35, 1u)], 0u, atomic_result);
     {
@@ -32,7 +32,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_57 = local_invocation_index_1;
+  uint x_57 = local_invocation_index_1;
   compute_main_inner(x_57);
   return;
 }
@@ -44,9 +44,9 @@ struct tint_symbol_1 {
 void compute_main_inner_1(uint local_invocation_index_1_param) {
   {
     for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
-      const uint i = (idx_1 / 2u);
-      const uint i_1 = (idx_1 % 2u);
-      const uint i_2 = (idx_1 % 1u);
+      uint i = (idx_1 / 2u);
+      uint i_1 = (idx_1 % 2u);
+      uint i_2 = (idx_1 % 1u);
       uint atomic_result_2 = 0u;
       InterlockedExchange(wg[i][i_1][i_2], 0u, atomic_result_2);
     }

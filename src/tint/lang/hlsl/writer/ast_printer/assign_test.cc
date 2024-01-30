@@ -76,7 +76,7 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_Assign_LetIndex) {
 void fn() {
   float3 lhs = float3(0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
-  const uint index = 0u;
+  uint index = 0u;
   set_vector_element(lhs, index, rhs);
 }
 )");
@@ -154,7 +154,7 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
 void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float2 rhs = float2(0.0f, 0.0f);
-  const uint index = 0u;
+  uint index = 0u;
   set_matrix_column(lhs, index, rhs);
 }
 )");
@@ -248,8 +248,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Scalar_LetIndices) {
 void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
-  const uint col = 0u;
-  const uint row = 1u;
+  uint col = 0u;
+  uint row = 1u;
   set_matrix_scalar(lhs, col, row, rhs);
 }
 )");
@@ -348,7 +348,7 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_f16_Assign) {
 void fn() {
   vector<float16_t, 3> lhs = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
   float16_t rhs = float16_t(0.0h);
-  const uint index = 0u;
+  uint index = 0u;
   set_vector_element(lhs, index, rhs);
 }
 )");
@@ -382,7 +382,7 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_f16_Assign_Vector) {
 void fn() {
   matrix<float16_t, 4, 2> lhs = matrix<float16_t, 4, 2>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
   vector<float16_t, 2> rhs = vector<float16_t, 2>(float16_t(0.0h), float16_t(0.0h));
-  const uint index = 0u;
+  uint index = 0u;
   set_matrix_column(lhs, index, rhs);
 }
 )");
@@ -427,8 +427,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_f16_Assign_Scalar) {
 void fn() {
   matrix<float16_t, 4, 2> lhs = matrix<float16_t, 4, 2>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
   float16_t rhs = float16_t(0.0h);
-  const uint col = 0u;
-  const uint row = 1u;
+  uint col = 0u;
+  uint row = 1u;
   set_matrix_scalar(lhs, col, row, rhs);
 }
 )");

@@ -10,7 +10,7 @@ void main_inner(uint local_invocation_index) {
     w = 0.0f;
   }
   GroupMemoryBarrierWithGroupSync();
-  const float x = (p + w);
+  float x = (p + w);
   p = x;
 }
 

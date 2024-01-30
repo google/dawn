@@ -2,6 +2,6 @@ static int i = 123;
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int u = (i + 1);
+  int u = (i + 1);
   return;
 }

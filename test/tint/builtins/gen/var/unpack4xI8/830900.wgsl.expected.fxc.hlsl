@@ -1,6 +1,6 @@
 int4 tint_unpack_4xi8(uint a) {
-  const uint4 a_vec4u = uint4((a).xxxx);
-  const int4 a_vec4i = asint((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  uint4 a_vec4u = uint4((a).xxxx);
+  int4 a_vec4i = asint((a_vec4u << uint4(24u, 16u, 8u, 0u)));
   return (a_vec4i >> (24u).xxxx);
 }
 
@@ -22,7 +22,7 @@ float4 vertex_main_inner() {
 }
 
 tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
+  float4 inner_result = vertex_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

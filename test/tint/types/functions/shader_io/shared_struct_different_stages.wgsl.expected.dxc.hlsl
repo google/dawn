@@ -10,12 +10,12 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  const Interface tint_symbol_3 = {0.40000000596046447754f, 0.60000002384185791016f, (0.0f).xxxx};
+  Interface tint_symbol_3 = {0.40000000596046447754f, 0.60000002384185791016f, (0.0f).xxxx};
   return tint_symbol_3;
 }
 
 tint_symbol vert_main() {
-  const Interface inner_result = vert_main_inner();
+  Interface inner_result = vert_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.col1 = inner_result.col1;
   wrapper_result.col2 = inner_result.col2;
@@ -30,12 +30,12 @@ struct tint_symbol_2 {
 };
 
 void frag_main_inner(Interface colors) {
-  const float r = colors.col1;
-  const float g = colors.col2;
+  float r = colors.col1;
+  float g = colors.col2;
 }
 
 void frag_main(tint_symbol_2 tint_symbol_1) {
-  const Interface tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
+  Interface tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w))};
   frag_main_inner(tint_symbol_4);
   return;
 }

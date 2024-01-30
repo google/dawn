@@ -16,12 +16,12 @@ struct tint_symbol_1 {
 void main_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      const uint i = idx;
+      uint i = idx;
       S.arr[i] = 0;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const int r[4] = func_S_arr();
+  int r[4] = func_S_arr();
 }
 
 [numthreads(1, 1, 1)]

@@ -13,13 +13,13 @@ struct tint_symbol_1 {
 
 void main_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
-    const float4 foo = inputs.position;
-    const uint bar = (inputs.sample_index + inputs.sample_mask);
+    float4 foo = inputs.position;
+    uint bar = (inputs.sample_index + inputs.sample_mask);
   }
 }
 
 void main(tint_symbol_1 tint_symbol) {
-  const FragmentInputs tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.front_facing, tint_symbol.sample_index, tint_symbol.sample_mask};
+  FragmentInputs tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.front_facing, tint_symbol.sample_index, tint_symbol.sample_mask};
   main_inner(tint_symbol_2);
   return;
 }

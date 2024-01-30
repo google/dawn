@@ -128,13 +128,13 @@ vector<float16_t, 2> tint_bitcast_to_f16_2(uint src) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const vector<float16_t, 2> a = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
-  const int b = tint_bitcast_from_f16(a);
-  const vector<float16_t, 2> c = tint_bitcast_to_f16(b);
-  const float d = tint_bitcast_from_f16_1(c);
-  const vector<float16_t, 2> e = tint_bitcast_to_f16_1(d);
-  const uint f = tint_bitcast_from_f16_2(e);
-  const vector<float16_t, 2> g = tint_bitcast_to_f16_2(f);
+  vector<float16_t, 2> a = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
+  int b = tint_bitcast_from_f16(a);
+  vector<float16_t, 2> c = tint_bitcast_to_f16(b);
+  float d = tint_bitcast_from_f16_1(c);
+  vector<float16_t, 2> e = tint_bitcast_to_f16_1(d);
+  uint f = tint_bitcast_from_f16_2(e);
+  vector<float16_t, 2> g = tint_bitcast_to_f16_2(f);
   return;
 }
 )");
@@ -194,13 +194,13 @@ vector<float16_t, 4> tint_bitcast_to_f16_2(uint2 src) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  const vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(4.0h));
-  const int2 b = tint_bitcast_from_f16(a);
-  const vector<float16_t, 4> c = tint_bitcast_to_f16(b);
-  const float2 d = tint_bitcast_from_f16_1(c);
-  const vector<float16_t, 4> e = tint_bitcast_to_f16_1(d);
-  const uint2 f = tint_bitcast_from_f16_2(e);
-  const vector<float16_t, 4> g = tint_bitcast_to_f16_2(f);
+  vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(4.0h));
+  int2 b = tint_bitcast_from_f16(a);
+  vector<float16_t, 4> c = tint_bitcast_to_f16(b);
+  float2 d = tint_bitcast_from_f16_1(c);
+  vector<float16_t, 4> e = tint_bitcast_to_f16_1(d);
+  uint2 f = tint_bitcast_from_f16_2(e);
+  vector<float16_t, 4> g = tint_bitcast_to_f16_2(f);
   return;
 }
 )");

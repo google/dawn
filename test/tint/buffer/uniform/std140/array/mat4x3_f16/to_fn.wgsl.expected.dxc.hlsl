@@ -56,16 +56,16 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float16_t tint_symbol = a(u_load(0u));
-  const float16_t tint_symbol_1 = b(u_load_1(32u));
+  float16_t tint_symbol = a(u_load(0u));
+  float16_t tint_symbol_1 = b(u_load_1(32u));
   uint2 ubo_load_8 = u[2].xy;
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));
   float16_t ubo_load_8_y = f16tof32(ubo_load_8[0] >> 16);
-  const float16_t tint_symbol_2 = c(vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]).zxy);
+  float16_t tint_symbol_2 = c(vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]).zxy);
   uint2 ubo_load_9 = u[2].xy;
   vector<float16_t, 2> ubo_load_9_xz = vector<float16_t, 2>(f16tof32(ubo_load_9 & 0xFFFF));
   float16_t ubo_load_9_y = f16tof32(ubo_load_9[0] >> 16);
-  const float16_t tint_symbol_3 = d(vector<float16_t, 3>(ubo_load_9_xz[0], ubo_load_9_y, ubo_load_9_xz[1]).zxy.x);
+  float16_t tint_symbol_3 = d(vector<float16_t, 3>(ubo_load_9_xz[0], ubo_load_9_y, ubo_load_9_xz[1]).zxy.x);
   s.Store<float16_t>(0u, (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3));
   return;
 }

@@ -10,7 +10,7 @@ void S_store(uint offset, int value[4]) {
 }
 
 void func_S_arr() {
-  const int tint_symbol[4] = (int[4])0;
+  int tint_symbol[4] = (int[4])0;
   S_store(0u, tint_symbol);
 }
 

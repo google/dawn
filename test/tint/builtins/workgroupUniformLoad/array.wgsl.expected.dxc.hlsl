@@ -8,7 +8,7 @@ groupshared int v[4];
 typedef int tint_workgroupUniformLoad_v_ret[4];
 tint_workgroupUniformLoad_v_ret tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const int result[4] = v;
+  int result[4] = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

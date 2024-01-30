@@ -5,6 +5,6 @@ void unused_entry_point() {
 
 int f(int x) {
   int a[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-  const int i = x;
+  int i = x;
   return a[i];
 }

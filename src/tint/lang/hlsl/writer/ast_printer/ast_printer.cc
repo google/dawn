@@ -4665,41 +4665,11 @@ bool ASTPrinter::EmitVar(const ast::Var* var) {
     return true;
 }
 
-bool ASTPrinter::IsStructOrArrayOfMatrix(const core::type::Type* ty) {
-    if (!ty->IsAnyOf<core::type::Struct, core::type::Array>()) {
-        return false;
-    }
-    return GetOrCreate(is_struct_or_array_of_matrix_, ty, [&]() {
-        Vector<const core::type::Type*, 4> to_visit({ty});
-        while (!to_visit.IsEmpty()) {
-            auto* curr = to_visit.Pop();
-            if (curr->Is<core::type::Matrix>()) {
-                return true;
-            }
-            auto [child_ty, child_count] = curr->Elements();
-            if (child_ty) {
-                to_visit.Push(child_ty);
-            } else {
-                for (uint32_t i = 0; i < child_count; ++i) {
-                    to_visit.Push(curr->Element(i));
-                }
-            }
-        }
-        return false;
-    });
-}
-
 bool ASTPrinter::EmitLet(const ast::Let* let) {
     auto* sem = builder_.Sem().Get(let);
     auto* type = sem->Type()->UnwrapRef();
 
     auto out = Line();
-
-    // TODO(crbug.com/tint/2059): Workaround DXC bug with const instances of struct/array-of-matrix.
-    if (!IsStructOrArrayOfMatrix(type)) {
-        out << "const ";
-    }
-
     if (!EmitTypeAndName(out, type, core::AddressSpace::kUndefined, core::Access::kUndefined,
                          let->name->symbol.Name())) {
         return false;

@@ -9,13 +9,13 @@ void S_store(uint offset, str value) {
 }
 
 void func_S_X(uint pointer[1]) {
-  const str tint_symbol = (str)0;
+  str tint_symbol = (str)0;
   S_store((4u * pointer[0]), tint_symbol);
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  const uint tint_symbol_1[1] = {2u};
+  uint tint_symbol_1[1] = {2u};
   func_S_X(tint_symbol_1);
   return;
 }

@@ -2,7 +2,7 @@ groupshared float16_t arg_0;
 
 float16_t tint_workgroupUniformLoad_arg_0() {
   GroupMemoryBarrierWithGroupSync();
-  const float16_t result = arg_0;
+  float16_t result = arg_0;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }

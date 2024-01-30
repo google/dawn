@@ -9,7 +9,7 @@ int sb_rwatomicOr(uint offset, int value) {
 
 void atomicOr_8d96a0() {
   int res = 0;
-  const int x_9 = sb_rwatomicOr(0u, 1);
+  int x_9 = sb_rwatomicOr(0u, 1);
   res = x_9;
   return;
 }

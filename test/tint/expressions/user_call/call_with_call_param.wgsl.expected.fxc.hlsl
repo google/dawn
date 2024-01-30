@@ -12,6 +12,6 @@ int c(uint u) {
 }
 
 void a() {
-  const int tint_symbol = c(2u);
+  int tint_symbol = c(2u);
   float a_1 = b(tint_symbol);
 }

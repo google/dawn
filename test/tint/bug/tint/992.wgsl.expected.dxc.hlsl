@@ -9,7 +9,7 @@ float4 frag_main_inner() {
 }
 
 tint_symbol frag_main() {
-  const float4 inner_result = frag_main_inner();
+  float4 inner_result = frag_main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

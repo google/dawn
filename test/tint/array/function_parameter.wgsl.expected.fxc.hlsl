@@ -14,12 +14,12 @@ float f3(float a[2][3][4]) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const float a1[4] = (float[4])0;
-  const float a2[3][4] = (float[3][4])0;
-  const float a3[2][3][4] = (float[2][3][4])0;
-  const float v1 = f1(a1);
-  const float v2 = f2(a2);
-  const float v3 = f3(a3);
+  float a1[4] = (float[4])0;
+  float a2[3][4] = (float[3][4])0;
+  float a3[2][3][4] = (float[2][3][4])0;
+  float v1 = f1(a1);
+  float v2 = f2(a2);
+  float v3 = f3(a3);
   s.Store(0u, asuint(((v1 + v2) + v3)));
   return;
 }

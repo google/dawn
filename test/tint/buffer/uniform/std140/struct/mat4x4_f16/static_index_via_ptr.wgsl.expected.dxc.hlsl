@@ -71,11 +71,11 @@ void f() {
   Outer l_a_3 = a_load_1(768u);
   Inner l_a_3_a[4] = a_load_2(768u);
   Inner l_a_3_a_2 = a_load_3(896u);
-  const matrix<float16_t, 4, 4> l_a_3_a_2_m = a_load_4(896u);
+  matrix<float16_t, 4, 4> l_a_3_a_2_m = a_load_4(896u);
   uint2 ubo_load_8 = a[56].zw;
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));
   vector<float16_t, 2> ubo_load_8_yw = vector<float16_t, 2>(f16tof32(ubo_load_8 >> 16));
-  const vector<float16_t, 4> l_a_3_a_2_m_1 = vector<float16_t, 4>(ubo_load_8_xz[0], ubo_load_8_yw[0], ubo_load_8_xz[1], ubo_load_8_yw[1]);
-  const float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(((a[56].z) & 0xFFFF)));
+  vector<float16_t, 4> l_a_3_a_2_m_1 = vector<float16_t, 4>(ubo_load_8_xz[0], ubo_load_8_yw[0], ubo_load_8_xz[1], ubo_load_8_yw[1]);
+  float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(((a[56].z) & 0xFFFF)));
   return;
 }

@@ -6,5 +6,5 @@ void unused_entry_point() {
 static bool3 u = (true).xxx;
 
 void f() {
-  const vector<float16_t, 3> v = vector<float16_t, 3>(u);
+  vector<float16_t, 3> v = vector<float16_t, 3>(u);
 }

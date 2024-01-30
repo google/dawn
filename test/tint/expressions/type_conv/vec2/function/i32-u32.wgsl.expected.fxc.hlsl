@@ -11,6 +11,6 @@ int2 m() {
 }
 
 void f() {
-  const int2 tint_symbol = m();
+  int2 tint_symbol = m();
   uint2 v = uint2(tint_symbol);
 }

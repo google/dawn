@@ -22,20 +22,20 @@ struct tint_symbol_1 {
 
 void main_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint sample_index, FragmentInputs1 inputs1, float loc2, float16_t loc4) {
   if (front_facing) {
-    const float4 foo = inputs0.position;
-    const uint bar = (sample_index + inputs1.sample_mask);
-    const int i = inputs0.loc0;
-    const uint u = loc1;
-    const float f = loc2;
-    const float4 v = inputs1.loc3;
-    const float16_t x = loc4;
-    const vector<float16_t, 3> y = inputs1.loc5;
+    float4 foo = inputs0.position;
+    uint bar = (sample_index + inputs1.sample_mask);
+    int i = inputs0.loc0;
+    uint u = loc1;
+    float f = loc2;
+    float4 v = inputs1.loc3;
+    float16_t x = loc4;
+    vector<float16_t, 3> y = inputs1.loc5;
   }
 }
 
 void main(tint_symbol_1 tint_symbol) {
-  const FragmentInputs0 tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.loc0};
-  const FragmentInputs1 tint_symbol_3 = {tint_symbol.loc3, tint_symbol.loc5, tint_symbol.sample_mask};
+  FragmentInputs0 tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.loc0};
+  FragmentInputs1 tint_symbol_3 = {tint_symbol.loc3, tint_symbol.loc5, tint_symbol.sample_mask};
   main_inner(tint_symbol_2, tint_symbol.front_facing, tint_symbol.loc1, tint_symbol.sample_index, tint_symbol_3, tint_symbol.loc2, tint_symbol.loc4);
   return;
 }

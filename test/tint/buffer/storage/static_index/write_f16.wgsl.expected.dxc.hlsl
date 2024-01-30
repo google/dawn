@@ -183,13 +183,13 @@ void main() {
   sb_store_31(648u, matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx));
   sb_store_32(664u, matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx));
   sb_store_33(696u, matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
-  const float3 tint_symbol[2] = (float3[2])0;
+  float3 tint_symbol[2] = (float3[2])0;
   sb_store_34(736u, tint_symbol);
   matrix<float16_t, 4, 2> tint_symbol_1[2] = (matrix<float16_t, 4, 2>[2])0;
   sb_store_35(768u, tint_symbol_1);
-  const Inner tint_symbol_2 = (Inner)0;
+  Inner tint_symbol_2 = (Inner)0;
   sb_store_36(800u, tint_symbol_2);
-  const Inner tint_symbol_3[4] = (Inner[4])0;
+  Inner tint_symbol_3[4] = (Inner[4])0;
   sb_store_37(812u, tint_symbol_3);
   return;
 }

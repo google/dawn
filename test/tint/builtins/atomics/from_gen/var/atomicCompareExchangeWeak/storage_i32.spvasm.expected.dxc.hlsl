@@ -23,12 +23,12 @@ void atomicCompareExchangeWeak_1bd40a() {
   x__atomic_compare_exchange_resulti32 res = (x__atomic_compare_exchange_resulti32)0;
   arg_1 = 1;
   arg_2 = 1;
-  const int x_23 = arg_2;
-  const int x_24 = arg_1;
-  const atomic_compare_exchange_result_i32 tint_symbol = sb_rwatomicCompareExchangeWeak(0u, x_24, x_23);
-  const int old_value_1 = tint_symbol.old_value;
-  const int x_25 = old_value_1;
-  const x__atomic_compare_exchange_resulti32 tint_symbol_1 = {x_25, (x_25 == x_23)};
+  int x_23 = arg_2;
+  int x_24 = arg_1;
+  atomic_compare_exchange_result_i32 tint_symbol = sb_rwatomicCompareExchangeWeak(0u, x_24, x_23);
+  int old_value_1 = tint_symbol.old_value;
+  int x_25 = old_value_1;
+  x__atomic_compare_exchange_resulti32 tint_symbol_1 = {x_25, (x_25 == x_23)};
   res = tint_symbol_1;
   return;
 }

@@ -18,9 +18,9 @@ float4x3 m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_m_i_save = i();
-  const float4x3 l_m = m_load(0u);
+  int p_m_i_save = i();
+  float4x3 l_m = m_load(0u);
   const uint scalar_offset_4 = ((16u * uint(p_m_i_save))) / 4;
-  const float3 l_m_i = asfloat(m[scalar_offset_4 / 4].xyz);
+  float3 l_m_i = asfloat(m[scalar_offset_4 / 4].xyz);
   return;
 }

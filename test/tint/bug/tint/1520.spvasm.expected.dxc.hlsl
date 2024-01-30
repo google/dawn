@@ -23,7 +23,7 @@ bool test_int_S1_c0_b() {
   bool x_55 = false;
   bool x_65 = false;
   bool x_66 = false;
-  const int x_27 = tint_ftoi(asfloat(x_4[1].x));
+  int x_27 = tint_ftoi(asfloat(x_4[1].x));
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -32,15 +32,15 @@ bool test_int_S1_c0_b() {
     x_41 = x_40;
   }
   ok = x_41;
-  const int4 x_44 = int4((x_27).xxxx);
+  int4 x_44 = int4((x_27).xxxx);
   val = x_44;
-  const int4 x_47 = (x_44 + (1).xxxx);
+  int4 x_47 = (x_44 + (1).xxxx);
   val = x_47;
-  const int4 x_48 = (x_47 - (1).xxxx);
+  int4 x_48 = (x_47 - (1).xxxx);
   val = x_48;
-  const int4 x_49 = (x_48 + (1).xxxx);
+  int4 x_49 = (x_48 + (1).xxxx);
   val = x_49;
-  const int4 x_50 = (x_49 - (1).xxxx);
+  int4 x_50 = (x_49 - (1).xxxx);
   val = x_50;
   x_55 = false;
   if (x_41) {
@@ -48,13 +48,13 @@ bool test_int_S1_c0_b() {
     x_55 = x_54;
   }
   ok = x_55;
-  const int4 x_58 = (x_50 * (2).xxxx);
+  int4 x_58 = (x_50 * (2).xxxx);
   val = x_58;
-  const int4 x_59 = tint_div(x_58, (2).xxxx);
+  int4 x_59 = tint_div(x_58, (2).xxxx);
   val = x_59;
-  const int4 x_60 = (x_59 * (2).xxxx);
+  int4 x_60 = (x_59 * (2).xxxx);
   val = x_60;
-  const int4 x_61 = tint_div(x_60, (2).xxxx);
+  int4 x_61 = tint_div(x_60, (2).xxxx);
   val = x_61;
   x_66 = false;
   if (x_55) {
@@ -81,7 +81,7 @@ void main_1() {
   bool x_114 = false;
   bool x_115 = false;
   outputColor_S0 = vcolor_S0;
-  const float x_77 = asfloat(x_4[1].x);
+  float x_77 = asfloat(x_4[1].x);
   x_8_unknown = x_77;
   x_9_ok = true;
   x_87 = false;
@@ -90,15 +90,15 @@ void main_1() {
     x_87 = x_86;
   }
   x_9_ok = x_87;
-  const float4 x_89 = float4((x_77).xxxx);
+  float4 x_89 = float4((x_77).xxxx);
   x_10_val = x_89;
-  const float4 x_92 = (x_89 + (1.0f).xxxx);
+  float4 x_92 = (x_89 + (1.0f).xxxx);
   x_10_val = x_92;
-  const float4 x_93 = (x_92 - (1.0f).xxxx);
+  float4 x_93 = (x_92 - (1.0f).xxxx);
   x_10_val = x_93;
-  const float4 x_94 = (x_93 + (1.0f).xxxx);
+  float4 x_94 = (x_93 + (1.0f).xxxx);
   x_10_val = x_94;
-  const float4 x_95 = (x_94 - (1.0f).xxxx);
+  float4 x_95 = (x_94 - (1.0f).xxxx);
   x_10_val = x_95;
   x_100 = false;
   if (x_87) {
@@ -106,13 +106,13 @@ void main_1() {
     x_100 = x_99;
   }
   x_9_ok = x_100;
-  const float4 x_103 = (x_95 * (2.0f).xxxx);
+  float4 x_103 = (x_95 * (2.0f).xxxx);
   x_10_val = x_103;
-  const float4 x_104 = (x_103 / (2.0f).xxxx);
+  float4 x_104 = (x_103 / (2.0f).xxxx);
   x_10_val = x_104;
-  const float4 x_105 = (x_104 * (2.0f).xxxx);
+  float4 x_105 = (x_104 * (2.0f).xxxx);
   x_10_val = x_105;
-  const float4 x_106 = (x_105 / (2.0f).xxxx);
+  float4 x_106 = (x_105 / (2.0f).xxxx);
   x_10_val = x_106;
   x_111 = false;
   if (x_100) {
@@ -130,7 +130,7 @@ void main_1() {
   } else {
     x_116 = asfloat(x_4[2]);
   }
-  const float4 x_125 = x_116;
+  float4 x_125 = x_116;
   output_S1 = x_116;
   sk_FragColor = x_125;
   return;
@@ -151,12 +151,12 @@ main_out main_inner(bool sk_Clockwise_param, float4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  const main_out tint_symbol_3 = {sk_FragColor};
+  main_out tint_symbol_3 = {sk_FragColor};
   return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const main_out inner_result = main_inner(tint_symbol.sk_Clockwise_param, tint_symbol.vcolor_S0_param);
+  main_out inner_result = main_inner(tint_symbol.sk_Clockwise_param, tint_symbol.vcolor_S0_param);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.sk_FragColor_1 = inner_result.sk_FragColor_1;
   return wrapper_result;

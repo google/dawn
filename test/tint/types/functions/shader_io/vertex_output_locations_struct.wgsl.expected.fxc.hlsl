@@ -14,12 +14,12 @@ struct tint_symbol {
 };
 
 VertexOutputs main_inner() {
-  const VertexOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx};
+  VertexOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx};
   return tint_symbol_1;
 }
 
 tint_symbol main() {
-  const VertexOutputs inner_result = main_inner();
+  VertexOutputs inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.loc0 = inner_result.loc0;
   wrapper_result.loc1 = inner_result.loc1;

@@ -7,8 +7,8 @@ struct tint_symbol_1 {
 
 void main_inner(float4 position, bool front_facing, uint sample_index, uint sample_mask) {
   if (front_facing) {
-    const float4 foo = position;
-    const uint bar = (sample_index + sample_mask);
+    float4 foo = position;
+    uint bar = (sample_index + sample_mask);
   }
 }
 

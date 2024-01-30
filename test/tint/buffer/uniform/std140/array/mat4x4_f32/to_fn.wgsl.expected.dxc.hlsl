@@ -40,10 +40,10 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float tint_symbol = a(u_load(0u));
-  const float tint_symbol_1 = b(u_load_1(64u));
-  const float tint_symbol_2 = c(asfloat(u[4]).ywxz);
-  const float tint_symbol_3 = d(asfloat(u[4]).ywxz.x);
+  float tint_symbol = a(u_load(0u));
+  float tint_symbol_1 = b(u_load_1(64u));
+  float tint_symbol_2 = c(asfloat(u[4]).ywxz);
+  float tint_symbol_3 = d(asfloat(u[4]).ywxz.x);
   s.Store(0u, asuint((((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3)));
   return;
 }

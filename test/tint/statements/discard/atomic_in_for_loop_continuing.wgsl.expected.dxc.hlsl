@@ -50,7 +50,7 @@ int foo_inner(float tint_symbol, float2 coord) {
 }
 
 tint_symbol_3 foo(tint_symbol_2 tint_symbol_1) {
-  const int inner_result = foo_inner(tint_symbol_1.tint_symbol, tint_symbol_1.coord);
+  int inner_result = foo_inner(tint_symbol_1.tint_symbol, tint_symbol_1.coord);
   tint_symbol_3 wrapper_result = (tint_symbol_3)0;
   wrapper_result.value = inner_result;
   if (tint_discarded) {

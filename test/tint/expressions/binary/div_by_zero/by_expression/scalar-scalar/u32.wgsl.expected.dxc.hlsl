@@ -6,6 +6,6 @@ uint tint_div(uint lhs, uint rhs) {
 void f() {
   uint a = 1u;
   uint b = 0u;
-  const uint r = tint_div(a, (b + b));
+  uint r = tint_div(a, (b + b));
   return;
 }

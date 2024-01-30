@@ -18,7 +18,7 @@ void bar(float a, float b) {
 }
 
 void foo(float a) {
-  const float b = 2.0f;
+  float b = 2.0f;
   bar(a, b);
   no_uses();
 }

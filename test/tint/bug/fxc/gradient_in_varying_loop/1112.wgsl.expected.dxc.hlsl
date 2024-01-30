@@ -10,14 +10,14 @@ struct tint_symbol_3 {
 };
 
 float4 main_inner(float2 vUV) {
-  const float3 random = randomTexture.Sample(tint_symbol, vUV).rgb;
+  float3 random = randomTexture.Sample(tint_symbol, vUV).rgb;
   int i = 0;
   while (true) {
     if ((i < 1)) {
     } else {
       break;
     }
-    const float3 offset = float3((random.x).xxx);
+    float3 offset = float3((random.x).xxx);
     bool tint_tmp_2 = (offset.x < 0.0f);
     if (!tint_tmp_2) {
       tint_tmp_2 = (offset.y < 0.0f);
@@ -34,14 +34,14 @@ float4 main_inner(float2 vUV) {
       i = (i + 1);
       continue;
     }
-    const float sampleDepth = 0.0f;
+    float sampleDepth = 0.0f;
     i = (i + 1);
   }
   return (1.0f).xxxx;
 }
 
 tint_symbol_3 main(tint_symbol_2 tint_symbol_1) {
-  const float4 inner_result = main_inner(tint_symbol_1.vUV);
+  float4 inner_result = main_inner(tint_symbol_1.vUV);
   tint_symbol_3 wrapper_result = (tint_symbol_3)0;
   wrapper_result.value = inner_result;
   return wrapper_result;

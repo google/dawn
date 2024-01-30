@@ -11,7 +11,7 @@ void ssbo_store(uint offset, float2x2 value) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float2x2 v = ssbo_load(0u);
+  float2x2 v = ssbo_load(0u);
   ssbo_store(0u, v);
   return;
 }

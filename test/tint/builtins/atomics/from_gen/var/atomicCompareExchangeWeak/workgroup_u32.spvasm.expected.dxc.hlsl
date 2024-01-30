@@ -16,16 +16,16 @@ void atomicCompareExchangeWeak_83580d() {
   x__atomic_compare_exchange_resultu32 res = (x__atomic_compare_exchange_resultu32)0;
   arg_1 = 1u;
   arg_2 = 1u;
-  const uint x_21 = arg_2;
-  const uint x_22 = arg_1;
+  uint x_21 = arg_2;
+  uint x_22 = arg_1;
   atomic_compare_exchange_result_u32 atomic_result = (atomic_compare_exchange_result_u32)0;
   uint atomic_compare_value = x_22;
   InterlockedCompareExchange(arg_0, atomic_compare_value, x_21, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
-  const atomic_compare_exchange_result_u32 tint_symbol = atomic_result;
-  const uint old_value_1 = tint_symbol.old_value;
-  const uint x_23 = old_value_1;
-  const x__atomic_compare_exchange_resultu32 tint_symbol_3 = {x_23, (x_23 == x_21)};
+  atomic_compare_exchange_result_u32 tint_symbol = atomic_result;
+  uint old_value_1 = tint_symbol.old_value;
+  uint x_23 = old_value_1;
+  x__atomic_compare_exchange_resultu32 tint_symbol_3 = {x_23, (x_23 == x_21)};
   res = tint_symbol_3;
   return;
 }
@@ -39,7 +39,7 @@ void compute_main_inner(uint local_invocation_index_2) {
 }
 
 void compute_main_1() {
-  const uint x_40 = local_invocation_index_1;
+  uint x_40 = local_invocation_index_1;
   compute_main_inner(x_40);
   return;
 }

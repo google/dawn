@@ -8,8 +8,8 @@ void unused_entry_point() {
 }
 
 float foo() {
-  const int oob = 99;
-  const float b = (0.0f).xxxx[min(uint(oob), 3u)];
+  int oob = 99;
+  float b = (0.0f).xxxx[min(uint(oob), 3u)];
   float4 v = float4(0.0f, 0.0f, 0.0f, 0.0f);
   set_vector_element(v, min(uint(oob), 3u), b);
   return b;

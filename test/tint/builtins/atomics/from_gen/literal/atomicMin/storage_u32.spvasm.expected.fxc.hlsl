@@ -9,7 +9,7 @@ uint sb_rwatomicMin(uint offset, uint value) {
 
 void atomicMin_c67a74() {
   uint res = 0u;
-  const uint x_9 = sb_rwatomicMin(0u, 1u);
+  uint x_9 = sb_rwatomicMin(0u, 1u);
   res = x_9;
   return;
 }

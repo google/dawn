@@ -10,5 +10,5 @@ uint tint_ftou(float v) {
 static float u = 1.0f;
 
 void f() {
-  const uint v = tint_ftou(u);
+  uint v = tint_ftou(u);
 }

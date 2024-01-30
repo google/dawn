@@ -11,7 +11,7 @@ float mm_readA(uint row, uint col) {
     tint_tmp = (col < uniforms[0].y);
   }
   if ((tint_tmp)) {
-    const float result = asfloat(firstMatrix.Load((4u * ((row * uniforms[0].y) + col))));
+    float result = asfloat(firstMatrix.Load((4u * ((row * uniforms[0].y) + col))));
     return result;
   }
   return 0.0f;
@@ -23,7 +23,7 @@ float mm_readB(uint row, uint col) {
     tint_tmp_1 = (col < uniforms[0].z);
   }
   if ((tint_tmp_1)) {
-    const float result = asfloat(secondMatrix.Load((4u * ((row * uniforms[0].z) + col))));
+    float result = asfloat(secondMatrix.Load((4u * ((row * uniforms[0].z) + col))));
     return result;
   }
   return 0.0f;
@@ -35,7 +35,7 @@ void mm_write(uint row, uint col, float value) {
     tint_tmp_2 = (col < uniforms[0].z);
   }
   if ((tint_tmp_2)) {
-    const uint index = (col + (row * uniforms[0].z));
+    uint index = (col + (row * uniforms[0].z));
     resultMatrix.Store((4u * index), asuint(value));
   }
 }
@@ -56,18 +56,18 @@ struct tint_symbol_5 {
 void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
-      const uint i = (idx / 64u);
-      const uint i_1 = (idx % 64u);
+      uint i = (idx / 64u);
+      uint i_1 = (idx % 64u);
       mm_Asub[i][i_1] = 0.0f;
       mm_Bsub[i][i_1] = 0.0f;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint tileRow = (local_id.y * 4u);
-  const uint tileCol = (local_id.x * 4u);
-  const uint globalRow = (global_id.y * 4u);
-  const uint globalCol = (global_id.x * 4u);
-  const uint numTiles = (tint_div((uniforms[0].y - 1u), 64u) + 1u);
+  uint tileRow = (local_id.y * 4u);
+  uint tileCol = (local_id.x * 4u);
+  uint globalRow = (global_id.y * 4u);
+  uint globalCol = (global_id.x * 4u);
+  uint numTiles = (tint_div((uniforms[0].y - 1u), 64u) + 1u);
   float acc[16] = (float[16])0;
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
@@ -76,20 +76,20 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
       acc[index] = 0.0f;
     }
   }
-  const uint ColPerThreadA = 4u;
-  const uint tileColA = (local_id.x * ColPerThreadA);
-  const uint RowPerThreadB = 4u;
-  const uint tileRowB = (local_id.y * RowPerThreadB);
+  uint ColPerThreadA = 4u;
+  uint tileColA = (local_id.x * ColPerThreadA);
+  uint RowPerThreadB = 4u;
+  uint tileRowB = (local_id.y * RowPerThreadB);
   {
     for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
       {
         for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
           {
             for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
-              const uint inputRow = (tileRow + innerRow);
-              const uint inputCol = (tileColA + innerCol);
-              const uint tint_symbol = inputRow;
-              const uint tint_symbol_1 = inputCol;
+              uint inputRow = (tileRow + innerRow);
+              uint inputCol = (tileColA + innerCol);
+              uint tint_symbol = inputRow;
+              uint tint_symbol_1 = inputCol;
               mm_Asub[tint_symbol][tint_symbol_1] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
             }
           }
@@ -99,10 +99,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
         for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
           {
             for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
-              const uint inputRow = (tileRowB + innerRow);
-              const uint inputCol = (tileCol + innerCol);
-              const uint tint_symbol_2 = innerCol;
-              const uint tint_symbol_3 = inputCol;
+              uint inputRow = (tileRowB + innerRow);
+              uint inputCol = (tileCol + innerCol);
+              uint tint_symbol_2 = innerCol;
+              uint tint_symbol_3 = inputCol;
               mm_Bsub[tint_symbol_2][tint_symbol_3] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
             }
           }
@@ -121,7 +121,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
               ACached = mm_Asub[(tileRow + innerRow)][k];
               {
                 for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
-                  const uint index = ((innerRow * 4u) + innerCol);
+                  uint index = ((innerRow * 4u) + innerCol);
                   acc[index] = (acc[index] + (ACached * BCached[innerCol]));
                 }
               }
@@ -136,7 +136,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
     for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
       {
         for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
-          const uint index = ((innerRow * 4u) + innerCol);
+          uint index = ((innerRow * 4u) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
         }
       }

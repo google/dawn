@@ -6,5 +6,5 @@ void unused_entry_point() {
 static float u = 1.0f;
 
 void f() {
-  const bool v = bool(u);
+  bool v = bool(u);
 }

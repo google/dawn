@@ -204,7 +204,7 @@ TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_F32_Var) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.Result(), HasSubstr(R"(float v = 2.0f;
-  const float3 tint_symbol = float3((v).xxx);)"));
+  float3 tint_symbol = float3((v).xxx);)"));
 }
 
 TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_F16_Var) {
@@ -218,7 +218,7 @@ TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_F16_Var) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.Result(), HasSubstr(R"(float16_t v = float16_t(2.0h);
-  const vector<float16_t, 3> tint_symbol = vector<float16_t, 3>((v).xxx);)"));
+  vector<float16_t, 3> tint_symbol = vector<float16_t, 3>((v).xxx);)"));
 }
 
 TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_Bool_Literal) {
@@ -239,7 +239,7 @@ TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_Bool_Var) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.Result(), HasSubstr(R"(bool v = true;
-  const bool3 tint_symbol = bool3((v).xxx);)"));
+  bool3 tint_symbol = bool3((v).xxx);)"));
 }
 
 TEST_F(HlslASTPrinterTest_Constructor, Type_Vec_SingleScalar_Int) {

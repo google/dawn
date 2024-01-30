@@ -9,9 +9,9 @@ struct a {
 
 void f() {
   {
-    const a a_1 = (a)0;
-    const a b = a_1;
+    a a_1 = (a)0;
+    a b = a_1;
   }
-  const a a_2 = (a)0;
-  const a b = a_2;
+  a a_2 = (a)0;
+  a b = a_2;
 }

@@ -22,10 +22,10 @@ float4x2 m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_m_i_save = i();
-  const float4x2 l_m = m_load(0u);
+  int p_m_i_save = i();
+  float4x2 l_m = m_load(0u);
   const uint scalar_offset_4 = ((8u * uint(p_m_i_save))) / 4;
   uint4 ubo_load_4 = m[scalar_offset_4 / 4];
-  const float2 l_m_i = asfloat(((scalar_offset_4 & 2) ? ubo_load_4.zw : ubo_load_4.xy));
+  float2 l_m_i = asfloat(((scalar_offset_4 & 2) ? ubo_load_4.zw : ubo_load_4.xy));
   return;
 }

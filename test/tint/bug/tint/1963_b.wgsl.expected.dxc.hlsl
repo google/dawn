@@ -14,7 +14,7 @@ atomic_compare_exchange_result_i32 aatomicCompareExchangeWeak(uint offset, int c
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  const atomic_compare_exchange_result_i32 tint_symbol = aatomicCompareExchangeWeak(0u, 1, 1);
-  const int v = tint_symbol.old_value;
+  atomic_compare_exchange_result_i32 tint_symbol = aatomicCompareExchangeWeak(0u, 1, 1);
+  int v = tint_symbol.old_value;
   return;
 }

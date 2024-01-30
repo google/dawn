@@ -1,6 +1,6 @@
 void main_1() {
   float3x3 m = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
-  const float x_16 = m[1].y;
+  float x_16 = m[1].y;
   return;
 }
 

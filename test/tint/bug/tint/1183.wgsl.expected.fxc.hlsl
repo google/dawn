@@ -10,7 +10,7 @@ float4 f_inner() {
 }
 
 tint_symbol f() {
-  const float4 inner_result = f_inner();
+  float4 inner_result = f_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.value = inner_result;
   return wrapper_result;
