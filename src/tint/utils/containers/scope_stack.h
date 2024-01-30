@@ -31,6 +31,7 @@
 
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/macros/compiler.h"
 
 namespace tint {
 
@@ -39,13 +40,22 @@ namespace tint {
 template <class K, class V>
 class ScopeStack {
   public:
+    ScopeStack() { Push(); }
+
     /// Push a new scope on to the stack
-    void Push() { stack_.Push({}); }
+    void Push() {
+        depth_++;
+        if (TINT_LIKELY(stack_.Length() >= depth_)) {
+            Top().Clear();
+        } else {
+            stack_.Push({});
+        }
+    }
 
     /// Pop the scope off the top of the stack
     void Pop() {
-        if (stack_.Length() > 1) {
-            stack_.Pop();
+        if (depth_ > 1) {
+            depth_--;
         }
     }
 
@@ -55,12 +65,11 @@ class ScopeStack {
     /// @returns the old value if there was an existing key at the top of the
     /// stack, otherwise the zero initializer for type T.
     V Set(const K& key, V val) {
-        auto& back = stack_.Back();
-        if (auto el = back.Find(key)) {
+        if (auto el = Top().Find(key)) {
             std::swap(val, *el);
             return val;
         }
-        back.Add(key, val);
+        Top().Add(key, val);
         return {};
     }
 
@@ -68,8 +77,8 @@ class ScopeStack {
     /// @param key the key to look for
     /// @returns the value, or the zero initializer if the value was not found
     V Get(const K& key) const {
-        for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
-            if (auto val = iter->Find(key)) {
+        for (size_t i = depth_; i > 0; i--) {
+            if (auto val = stack_[i - 1].Find(key)) {
                 return *val;
             }
         }
@@ -79,16 +88,24 @@ class ScopeStack {
 
     /// Return the top scope of the stack.
     /// @returns the top scope of the stack
-    const Hashmap<K, V, 4>& Top() const { return stack_.Back(); }
+    const Hashmap<K, V, 4>& Top() const { return stack_[depth_ - 1]; }
+
+    /// Return the top scope of the stack.
+    /// @returns the top scope of the stack
+    Hashmap<K, V, 4>& Top() { return stack_[depth_ - 1]; }
 
     /// Clear the scope stack.
     void Clear() {
-        stack_.Clear();
-        stack_.Push({});
+        depth_ = 1;
+        stack_.Resize(1);
+        stack_.Front().Clear();
     }
 
   private:
-    Vector<Hashmap<K, V, 4>, 8> stack_ = {{}};
+    Vector<Hashmap<K, V, 4>, 8> stack_;
+    /// The active count in stack. We don't push and pop the stack to avoid frequent re-allocations
+    /// of the hashmaps.
+    size_t depth_ = 0;
 };
 
 }  // namespace tint
