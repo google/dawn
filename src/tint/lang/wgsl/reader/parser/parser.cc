@@ -3112,6 +3112,8 @@ Maybe<const ast::Attribute*> Parser::attribute() {
         case core::Attribute::kId:
             return create<ast::IdAttribute>(t.source(), args[0]);
         case core::Attribute::kIndex:
+        case core::Attribute::kBlendSrc:
+            // TODO(dawn:2380): Remove the aliasing of index and blend_src once Skia uses blend_src
             return create<ast::IndexAttribute>(t.source(), args[0]);
         case core::Attribute::kInterpolate:
             return create<ast::InterpolateAttribute>(t.source(), args[0],

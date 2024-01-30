@@ -198,6 +198,7 @@ enum builtin_type {
 enum attribute {
   align
   binding
+  blend_src
   builtin
   compute
   diagnostic
