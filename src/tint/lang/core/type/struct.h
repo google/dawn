@@ -206,8 +206,8 @@ class Struct : public Castable<Struct, Type> {
 struct StructMemberAttributes {
     /// The value of a `@location` attribute
     std::optional<uint32_t> location;
-    /// The value of a `@index` attribute
-    std::optional<uint32_t> index;
+    /// The value of a `@blend_src` attribute
+    std::optional<uint32_t> blend_src;
     /// The value of a `@color` attribute
     std::optional<uint32_t> color;
     /// The value of a `@builtin` attribute

@@ -35,6 +35,7 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -55,7 +56,6 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/index_attribute.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
@@ -511,8 +511,8 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 EmitExpression(out, color->expr);
                 out << ")";
             },
-            [&](const ast::IndexAttribute* index) {
-                out << "index(";
+            [&](const ast::BlendSrcAttribute* index) {
+                out << "blend_src(";
                 EmitExpression(out, index->expr);
                 out << ")";
             },

@@ -106,8 +106,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             }
             if (io.attributes.location) {
                 name << "_loc" << io.attributes.location.value();
-                if (io.attributes.index.has_value()) {
-                    name << "_idx" << io.attributes.index.value();
+                if (io.attributes.blend_src.has_value()) {
+                    name << "_idx" << io.attributes.blend_src.value();
                 }
             }
             name << name_suffix;
@@ -117,7 +117,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* var = b.Var(name.str(), ptr);
             var->SetAttributes(core::ir::IOAttributes{
                 io.attributes.location,
-                io.attributes.index,
+                io.attributes.blend_src,
                 io.attributes.builtin,
                 io.attributes.interpolation,
                 io.attributes.invariant,

@@ -276,7 +276,7 @@ TEST_F(IRBinaryRoundtripTest, struct) {
 TEST_F(IRBinaryRoundtripTest, StructMemberAttributes) {
     type::StructMemberAttributes attrs{};
     attrs.location = 1;
-    attrs.index = 2;
+    attrs.blend_src = 2;
     attrs.color = 3;
     attrs.builtin = core::BuiltinValue::kFragDepth;
     attrs.interpolation = core::Interpolation{

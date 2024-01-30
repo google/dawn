@@ -801,7 +801,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                                    Operand(sem->Attributes().location.value())});
                 return true;
             },
-            [&](const ast::IndexAttribute*) {
+            [&](const ast::BlendSrcAttribute*) {
                 module_.PushAnnot(spv::Op::OpDecorate,
                                   {Operand(var_id), U32Operand(SpvDecorationIndex),
                                    Operand(sem->Attributes().index.value())});

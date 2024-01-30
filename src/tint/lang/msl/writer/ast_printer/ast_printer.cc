@@ -2813,9 +2813,9 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
             } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                            core::type::PipelineStageUsage::kFragmentOutput))) {
-                if (auto index = attributes.index) {
+                if (auto blend_src = attributes.blend_src) {
                     out << " [[color(" + std::to_string(location.value()) + ") index(" +
-                               std::to_string(index.value()) + ")]]";
+                               std::to_string(blend_src.value()) + ")]]";
                 } else {
                     out << " [[color(" + std::to_string(location.value()) + ")]]";
                 }

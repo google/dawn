@@ -61,6 +61,7 @@
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/binding_attribute.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -86,7 +87,6 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/index_attribute.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
@@ -3193,21 +3193,21 @@ class Builder {
         return create<ast::LocationAttribute>(source_, Expr(std::forward<EXPR>(location)));
     }
 
-    /// Creates an ast::IndexAttribute
+    /// Creates an ast::BlendSrcAttribute
     /// @param source the source information
-    /// @param index the index value expression
-    /// @returns the index attribute pointer
+    /// @param blend_src the blend_src value expression
+    /// @returns the blend_src attribute pointer
     template <typename EXPR>
-    const ast::IndexAttribute* Index(const Source& source, EXPR&& index) {
-        return create<ast::IndexAttribute>(source, Expr(std::forward<EXPR>(index)));
+    const ast::BlendSrcAttribute* BlendSrc(const Source& source, EXPR&& blend_src) {
+        return create<ast::BlendSrcAttribute>(source, Expr(std::forward<EXPR>(blend_src)));
     }
 
-    /// Creates an ast::IndexAttribute
-    /// @param index the index value expression
-    /// @returns the index attribute pointer
+    /// Creates an ast::BlendSrcAttribute
+    /// @param blend_src the blend_src value expression
+    /// @returns the blend_src attribute pointer
     template <typename EXPR>
-    const ast::IndexAttribute* Index(EXPR&& index) {
-        return create<ast::IndexAttribute>(source_, Expr(std::forward<EXPR>(index)));
+    const ast::BlendSrcAttribute* BlendSrc(EXPR&& blend_src) {
+        return create<ast::BlendSrcAttribute>(source_, Expr(std::forward<EXPR>(blend_src)));
     }
 
     /// Creates an ast::IdAttribute

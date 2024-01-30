@@ -8,9 +8,9 @@ struct FragInput {
 }
 
 struct FragOutput {
-  @location(0) @index(0)
+  @location(0) @blend_src(0)
   color : vec4<f32>,
-  @location(0) @index(1)
+  @location(0) @blend_src(1)
   blend : vec4<f32>,
 }
 

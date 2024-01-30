@@ -72,9 +72,6 @@ Attribute ParseAttribute(std::string_view str) {
     if (str == "id") {
         return Attribute::kId;
     }
-    if (str == "index") {
-        return Attribute::kIndex;
-    }
     if (str == "interpolate") {
         return Attribute::kInterpolate;
     }
@@ -123,8 +120,6 @@ std::string_view ToString(Attribute value) {
             return "group";
         case Attribute::kId:
             return "id";
-        case Attribute::kIndex:
-            return "index";
         case Attribute::kInterpolate:
             return "interpolate";
         case Attribute::kInvariant:

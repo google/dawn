@@ -47,6 +47,7 @@
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
@@ -55,7 +56,6 @@
 #include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
-#include "src/tint/lang/wgsl/ast/index_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
@@ -1147,9 +1147,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // TODO(jrprice): This state could be stored in sem::Function instead, and then passed to
     // sem::Function since it would be useful there too.
     Hashset<core::BuiltinValue, 4> builtins;
-    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_indices;
+    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
     const ast::LocationAttribute* first_nonzero_location = nullptr;
-    const ast::IndexAttribute* first_nonzero_index = nullptr;
+    const ast::BlendSrcAttribute* first_nonzero_blend_src = nullptr;
     Hashset<uint32_t, 4> colors;
     enum class ParamOrRetType {
         kParameter,
@@ -1162,14 +1162,14 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                                                      ParamOrRetType param_or_ret,
                                                      bool is_struct_member,
                                                      std::optional<uint32_t> location,
-                                                     std::optional<uint32_t> index,
+                                                     std::optional<uint32_t> blend_src,
                                                      std::optional<uint32_t> color) {
         // Scan attributes for pipeline IO attributes.
         // Check for overlap with attributes that have been seen previously.
         const ast::Attribute* pipeline_io_attribute = nullptr;
         const ast::LocationAttribute* location_attribute = nullptr;
         const ast::ColorAttribute* color_attribute = nullptr;
-        const ast::IndexAttribute* index_attribute = nullptr;
+        const ast::BlendSrcAttribute* blend_src_attribute = nullptr;
         const ast::InterpolateAttribute* interpolate_attribute = nullptr;
         const ast::InvariantAttribute* invariant_attribute = nullptr;
         for (auto* attr : attrs) {
@@ -1219,15 +1219,15 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
                     return LocationAttribute(loc_attr, ty, stage, source);
                 },
-                [&](const ast::IndexAttribute* index_attr) {
-                    index_attribute = index_attr;
+                [&](const ast::BlendSrcAttribute* blend_src_attr) {
+                    blend_src_attribute = blend_src_attr;
 
-                    if (TINT_UNLIKELY(!index.has_value())) {
-                        TINT_ICE() << "@index has no value";
+                    if (TINT_UNLIKELY(!blend_src.has_value())) {
+                        TINT_ICE() << "@blend_src has no value";
                         return false;
                     }
 
-                    return IndexAttribute(index_attr, stage);
+                    return BlendSrcAttribute(blend_src_attr, stage);
                 },
                 [&](const ast::ColorAttribute* col_attr) {
                     color_attribute = col_attr;
@@ -1300,12 +1300,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
             }
 
-            if (index_attribute) {
+            if (blend_src_attribute) {
                 // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we
-                // should restrict targets with @index to location 0 for easy translation
+                // should restrict targets with @blend_src to location 0 for easy translation
                 // in the backend writers.
                 if (location.value_or(1) != 0) {
-                    AddError("@index can only be used with @location(0)", index_attribute->source);
+                    AddError("@blend_src can only be used with @location(0)",
+                             blend_src_attribute->source);
                     return false;
                 }
             }
@@ -1314,23 +1315,23 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 if (!first_nonzero_location && location > 0u) {
                     first_nonzero_location = location_attribute;
                 }
-                if (!first_nonzero_index && index > 0u) {
-                    first_nonzero_index = index_attribute;
+                if (!first_nonzero_blend_src && blend_src > 0u) {
+                    first_nonzero_blend_src = blend_src_attribute;
                 }
-                if (first_nonzero_location && first_nonzero_index) {
-                    AddError("pipeline cannot use both non-zero @index and non-zero @location",
-                             first_nonzero_index->source);
+                if (first_nonzero_location && first_nonzero_blend_src) {
+                    AddError("pipeline cannot use both non-zero @blend_src and non-zero @location",
+                             first_nonzero_blend_src->source);
                     AddNote("non-zero @location declared here", first_nonzero_location->source);
                     return false;
                 }
 
-                std::pair<uint32_t, uint32_t> location_and_index(location.value(),
-                                                                 index.value_or(0));
-                if (!locations_and_indices.Add(location_and_index)) {
+                std::pair<uint32_t, uint32_t> location_and_blend_src(location.value(),
+                                                                     blend_src.value_or(0));
+                if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
                     StringStream err;
                     err << "@location(" << location.value() << ") ";
-                    if (index_attribute) {
-                        err << "@index(" << index.value() << ") ";
+                    if (blend_src_attribute) {
+                        err << "@blend_src(" << blend_src.value() << ") ";
                     }
                     err << "appears multiple times";
                     AddError(err.str(), location_attribute->source);
@@ -1389,7 +1390,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                             member->Declaration()->attributes, member->Type(),
                             member->Declaration()->source, param_or_ret,
                             /*is_struct_member*/ true, member->Attributes().location,
-                            member->Attributes().index, member->Attributes().color)) {
+                            member->Attributes().blend_src, member->Attributes().color)) {
                         AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
                                 decl->source);
                         return false;
@@ -1413,9 +1414,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // Clear IO sets after parameter validation. Builtin and location attributes in return types
     // should be validated independently from those used in parameters.
     builtins.Clear();
-    locations_and_indices.Clear();
+    locations_and_blend_srcs.Clear();
     first_nonzero_location = nullptr;
-    first_nonzero_index = nullptr;
+    first_nonzero_blend_src = nullptr;
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
@@ -2225,7 +2226,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
-    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_indices;
+    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
     Hashset<uint32_t, 4> colors;
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<sem::Array>()) {
@@ -2249,7 +2250,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         }
 
         auto has_position = false;
-        const ast::IndexAttribute* index_attribute = nullptr;
+        const ast::BlendSrcAttribute* blend_src_attribute = nullptr;
         const ast::LocationAttribute* location_attribute = nullptr;
         const ast::ColorAttribute* color_attribute = nullptr;
         const ast::InvariantAttribute* invariant_attribute = nullptr;
@@ -2267,9 +2268,9 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     return LocationAttribute(location, member->Type(), stage,
                                              member->Declaration()->source);
                 },
-                [&](const ast::IndexAttribute* index) {
-                    index_attribute = index;
-                    return IndexAttribute(index, stage);
+                [&](const ast::BlendSrcAttribute* blend_src) {
+                    blend_src_attribute = blend_src;
+                    return BlendSrcAttribute(blend_src, stage);
                 },
                 [&](const ast::ColorAttribute* color) {
                     color_attribute = color;
@@ -2313,12 +2314,13 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             return false;
         }
 
-        if (index_attribute) {
+        if (blend_src_attribute) {
             // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we should
             // restrict targets with index attributes to location 0 for easy translation in the
             // backend writers.
             if (member->Attributes().location.value_or(1) != 0) {
-                AddError("@index can only be used with @location(0)", index_attribute->source);
+                AddError("@blend_src can only be used with @location(0)",
+                         blend_src_attribute->source);
                 return false;
             }
         }
@@ -2331,14 +2333,14 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         // Ensure all locations and index pairs are unique
         if (location_attribute) {
             uint32_t location = member->Attributes().location.value();
-            uint32_t index = member->Attributes().index.value_or(0);
+            uint32_t blend_src = member->Attributes().blend_src.value_or(0);
 
-            std::pair<uint32_t, uint32_t> location_and_index(location, index);
-            if (!locations_and_indices.Add(location_and_index)) {
+            std::pair<uint32_t, uint32_t> location_and_blend_src(location, blend_src);
+            if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
                 StringStream err;
                 err << "@location(" << location << ") ";
-                if (index_attribute) {
-                    err << "@index(" << index << ") ";
+                if (blend_src_attribute) {
+                    err << "@blend_src(" << blend_src << ") ";
                 }
                 err << "appears multiple times";
                 AddError(err.str(), location_attribute->source);
@@ -2414,12 +2416,13 @@ bool Validator::ColorAttribute(const ast::ColorAttribute* attr,
     return true;
 }
 
-bool Validator::IndexAttribute(const ast::IndexAttribute* attr,
-                               ast::PipelineStage stage,
-                               const std::optional<bool> is_input) const {
+bool Validator::BlendSrcAttribute(const ast::BlendSrcAttribute* attr,
+                                  ast::PipelineStage stage,
+                                  const std::optional<bool> is_input) const {
     if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
         AddError(
-            "use of @index requires enabling extension 'chromium_internal_dual_source_blending'",
+            "use of @blend_src requires enabling extension "
+            "'chromium_internal_dual_source_blending'",
             attr->source);
         return false;
     }

@@ -25,40 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_INDEX_ATTRIBUTE_H_
-#define SRC_TINT_LANG_WGSL_AST_INDEX_ATTRIBUTE_H_
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 
 #include <string>
 
-#include "src/tint/lang/wgsl/ast/attribute.h"
-#include "src/tint/lang/wgsl/ast/expression.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::ast::BlendSrcAttribute);
 
 namespace tint::ast {
 
-/// An id attribute for pipeline-overridable constants
-class IndexAttribute final : public Castable<IndexAttribute, Attribute> {
-  public:
-    /// Create an index attribute.
-    /// @param pid the identifier of the program that owns this node
-    /// @param nid the unique node identifier
-    /// @param src the source of this node
-    /// @param expr the numeric id expression
-    IndexAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
-    ~IndexAttribute() override;
+BlendSrcAttribute::BlendSrcAttribute(GenerationID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const Expression* exp)
+    : Base(pid, nid, src), expr(exp) {}
 
-    /// @returns the WGSL name for the attribute
-    std::string Name() const override;
+BlendSrcAttribute::~BlendSrcAttribute() = default;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IndexAttribute* Clone(CloneContext& ctx) const override;
+std::string BlendSrcAttribute::Name() const {
+    return "blend_src";
+}
 
-    /// The id expression
-    const Expression* const expr;
-};
+const BlendSrcAttribute* BlendSrcAttribute::Clone(CloneContext& ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx.Clone(source);
+    auto* expr_ = ctx.Clone(expr);
+    return ctx.dst->create<BlendSrcAttribute>(src, expr_);
+}
 
 }  // namespace tint::ast
-
-#endif  // SRC_TINT_LANG_WGSL_AST_INDEX_ATTRIBUTE_H_

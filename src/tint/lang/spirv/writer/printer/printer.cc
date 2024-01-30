@@ -2008,9 +2008,9 @@ class Printer {
             module_.PushAnnot(spv::Op::OpDecorate,
                               {id, U32Operand(SpvDecorationLocation), *attrs.location});
         }
-        if (attrs.index) {
+        if (attrs.blend_src) {
             module_.PushAnnot(spv::Op::OpDecorate,
-                              {id, U32Operand(SpvDecorationIndex), *attrs.index});
+                              {id, U32Operand(SpvDecorationIndex), *attrs.blend_src});
         }
         if (attrs.interpolation) {
             switch (attrs.interpolation->type) {

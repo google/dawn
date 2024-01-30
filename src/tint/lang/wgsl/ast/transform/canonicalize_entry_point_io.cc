@@ -109,7 +109,7 @@ uint32_t BuiltinOrder(core::BuiltinValue builtin) {
 // Returns true if `attr` is a shader IO attribute.
 bool IsShaderIOAttribute(const Attribute* attr) {
     return attr->IsAnyOf<BuiltinAttribute, InterpolateAttribute, InvariantAttribute,
-                         LocationAttribute, ColorAttribute, IndexAttribute>();
+                         LocationAttribute, ColorAttribute, BlendSrcAttribute>();
 }
 
 }  // namespace
@@ -128,8 +128,8 @@ struct CanonicalizeEntryPointIO::State {
         const Expression* value;
         /// The output location.
         std::optional<uint32_t> location;
-        /// The output index.
-        std::optional<uint32_t> index;
+        /// The output blend_src.
+        std::optional<uint32_t> blend_src;
     };
 
     /// The clone context.
@@ -374,13 +374,13 @@ struct CanonicalizeEntryPointIO::State {
     /// @param name the name of the shader output
     /// @param type the type of the shader output
     /// @param location the location if provided
-    /// @param index the index if provided
+    /// @param blend_src the blend_src if provided
     /// @param attrs the attributes to apply to the shader output
     /// @param value the value of the shader output
     void AddOutput(std::string name,
                    const core::type::Type* type,
                    std::optional<uint32_t> location,
-                   std::optional<uint32_t> index,
+                   std::optional<uint32_t> blend_src,
                    tint::Vector<const Attribute*, 8> attrs,
                    const Expression* value) {
         auto builtin_attr = BuiltinOf(attrs);
@@ -412,7 +412,7 @@ struct CanonicalizeEntryPointIO::State {
         output.attributes = std::move(attrs);
         output.value = value;
         output.location = location;
-        output.index = index;
+        output.blend_src = blend_src;
         wrapper_output_values.Push(output);
     }
 
@@ -510,7 +510,7 @@ struct CanonicalizeEntryPointIO::State {
 
                 // Extract the original structure member.
                 AddOutput(name, member->Type(), member->Attributes().location,
-                          member->Attributes().index, std::move(attributes),
+                          member->Attributes().blend_src, std::move(attributes),
                           b.MemberAccessor(original_result, name));
             }
         } else if (!inner_ret_type->Is<core::type::Void>()) {
@@ -658,7 +658,7 @@ struct CanonicalizeEntryPointIO::State {
             wrapper_struct_output_members.Push({
                 /* member */ b.Member(name, outval.type, std::move(outval.attributes)),
                 /* location */ outval.location,
-                /* index */ outval.index,
+                /* blend_src */ outval.blend_src,
                 /* color */ std::nullopt,
             });
             assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));

@@ -4134,8 +4134,8 @@ TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Spirv) {
 enable chromium_internal_dual_source_blending;
 
 struct FragOutput {
-  @location(0) @index(0) color : vec4<f32>,
-  @location(0) @index(1) blend : vec4<f32>,
+  @location(0) @blend_src(0) color : vec4<f32>,
+  @location(0) @blend_src(1) blend : vec4<f32>,
   @builtin(frag_depth) depth : f32,
   @builtin(sample_mask) mask : u32,
 };
@@ -4154,9 +4154,9 @@ fn frag_main() -> FragOutput {
     auto* expect = R"(
 enable chromium_internal_dual_source_blending;
 
-@location(0) @index(0) @internal(disable_validation__ignore_address_space) var<__out> color_1 : vec4<f32>;
+@location(0) @blend_src(0) @internal(disable_validation__ignore_address_space) var<__out> color_1 : vec4<f32>;
 
-@location(0) @index(1) @internal(disable_validation__ignore_address_space) var<__out> blend_1 : vec4<f32>;
+@location(0) @blend_src(1) @internal(disable_validation__ignore_address_space) var<__out> blend_1 : vec4<f32>;
 
 @builtin(frag_depth) @internal(disable_validation__ignore_address_space) var<__out> depth_1 : f32;
 
@@ -4200,8 +4200,8 @@ TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Msl) {
 enable chromium_internal_dual_source_blending;
 
 struct FragOutput {
-  @location(0) @index(0) color : vec4<f32>,
-  @location(0) @index(1) blend : vec4<f32>,
+  @location(0) @blend_src(0) color : vec4<f32>,
+  @location(0) @blend_src(1) blend : vec4<f32>,
   @builtin(frag_depth) depth : f32,
   @builtin(sample_mask) mask : u32,
 };
@@ -4228,9 +4228,9 @@ struct FragOutput {
 }
 
 struct tint_symbol {
-  @location(0) @index(0)
+  @location(0) @blend_src(0)
   color : vec4<f32>,
-  @location(0) @index(1)
+  @location(0) @blend_src(1)
   blend : vec4<f32>,
   @builtin(frag_depth)
   depth : f32,
@@ -4271,8 +4271,8 @@ TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Hlsl) {
 enable chromium_internal_dual_source_blending;
 
 struct FragOutput {
-  @location(0) @index(0) color : vec4<f32>,
-  @location(0) @index(1) blend : vec4<f32>,
+  @location(0) @blend_src(0) color : vec4<f32>,
+  @location(0) @blend_src(1) blend : vec4<f32>,
   @builtin(frag_depth) depth : f32,
   @builtin(sample_mask) mask : u32,
 };
@@ -4299,9 +4299,9 @@ struct FragOutput {
 }
 
 struct tint_symbol {
-  @location(0) @index(0)
+  @location(0) @blend_src(0)
   color : vec4<f32>,
-  @location(0) @index(1)
+  @location(0) @blend_src(1)
   blend : vec4<f32>,
   @builtin(frag_depth)
   depth : f32,

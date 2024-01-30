@@ -634,11 +634,11 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     global->Attributes().location = value.Get();
                     return kSuccess;
                 },
-                [&](const ast::IndexAttribute* attr) {
+                [&](const ast::BlendSrcAttribute* attr) {
                     if (!has_io_address_space) {
                         return kInvalid;
                     }
-                    auto value = IndexAttribute(attr);
+                    auto value = BlendSrcAttribute(attr);
                     if (value != Success) {
                         return kErrored;
                     }
@@ -1080,8 +1080,8 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     func->SetReturnLocation(value.Get());
                     return kSuccess;
                 },
-                [&](const ast::IndexAttribute* attr) {
-                    auto value = IndexAttribute(attr);
+                [&](const ast::BlendSrcAttribute* attr) {
+                    auto value = BlendSrcAttribute(attr);
                     if (value != Success) {
                         return kErrored;
                     }
@@ -3821,8 +3821,8 @@ tint::Result<uint32_t> Resolver::ColorAttribute(const ast::ColorAttribute* attr)
 
     return static_cast<uint32_t>(value);
 }
-tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr) {
-    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@index value"};
+tint::Result<uint32_t> Resolver::BlendSrcAttribute(const ast::BlendSrcAttribute* attr) {
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@blend_src value"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -3838,7 +3838,7 @@ tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr)
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value != 0 && value != 1) {
-        AddError("@index value must be zero or one", attr->source);
+        AddError("@blend_src value must be zero or one", attr->source);
         return Failure{};
     }
 
@@ -4447,12 +4447,12 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     attributes.location = value.Get();
                     return true;
                 },
-                [&](const ast::IndexAttribute* attr) {
-                    auto value = IndexAttribute(attr);
+                [&](const ast::BlendSrcAttribute* attr) {
+                    auto value = BlendSrcAttribute(attr);
                     if (value != Success) {
                         return false;
                     }
-                    attributes.index = value.Get();
+                    attributes.blend_src = value.Get();
                     return true;
                 },
                 [&](const ast::ColorAttribute* attr) {

@@ -366,7 +366,7 @@ message InstructionUnreachable {}
 ////////////////////////////////////////////////////////////////////////////////
 message AttributesStructMember {
     optional uint32 location = 1;
-    optional uint32 index = 2;
+    optional uint32 blend_src = 2;
     optional uint32 color = 3;
     optional BuiltinValue builtin = 4;
     optional Interpolation interpolation = 5;

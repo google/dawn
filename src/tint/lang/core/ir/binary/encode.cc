@@ -423,8 +423,8 @@ struct Encoder {
             if (attrs_in.location) {
                 member_out.mutable_attributes()->set_location(*attrs_in.location);
             }
-            if (attrs_in.index) {
-                member_out.mutable_attributes()->set_index(*attrs_in.index);
+            if (attrs_in.blend_src) {
+                member_out.mutable_attributes()->set_blend_src(*attrs_in.blend_src);
             }
             if (attrs_in.color) {
                 member_out.mutable_attributes()->set_color(*attrs_in.color);

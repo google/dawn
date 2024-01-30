@@ -679,8 +679,8 @@ Output = struct @align(4) {
 }
 
 %b1 = block {  # root
-  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var @location(0) @index(0)
-  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @index(1)
+  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var @location(0) @blend_src(0)
+  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @blend_src(1)
 }
 
 %foo_inner = func():Output -> %b2 {

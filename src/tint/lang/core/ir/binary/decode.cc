@@ -610,8 +610,8 @@ struct Decoder {
                 if (attributes_in.has_location()) {
                     attributes_out.location = attributes_in.location();
                 }
-                if (attributes_in.has_index()) {
-                    attributes_out.index = attributes_in.index();
+                if (attributes_in.has_blend_src()) {
+                    attributes_out.blend_src = attributes_in.blend_src();
                 }
                 if (attributes_in.has_color()) {
                     attributes_out.color = attributes_in.color();

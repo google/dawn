@@ -205,7 +205,6 @@ enum attribute {
   fragment
   group
   id
-  index
   interpolate
   invariant
   location

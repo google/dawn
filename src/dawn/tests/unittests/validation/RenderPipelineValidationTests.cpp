@@ -2587,8 +2587,8 @@ TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
                 @group(0) @binding(0) var<uniform> testData : TestData;
 
                 struct FragOut {
-                    @location(0) @index(0) color : vec4<f32>,
-                    @location(0) @index(1) blend : vec4<f32>,
+                    @location(0) @blend_src(0) color : vec4<f32>,
+                    @location(0) @blend_src(1) blend : vec4<f32>,
                     @location()"
                 << location << R"("invalidOutput : vec4<f32>
                 }

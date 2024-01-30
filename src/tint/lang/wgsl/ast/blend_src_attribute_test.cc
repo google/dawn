@@ -25,34 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/index_attribute.h"
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 
-#include <string>
-
-#include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAttribute);
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
+namespace {
 
-IndexAttribute::IndexAttribute(GenerationID pid,
-                               NodeID nid,
-                               const Source& src,
-                               const Expression* exp)
-    : Base(pid, nid, src), expr(exp) {}
+using namespace tint::core::number_suffixes;  // NOLINT
+using BlendSrcAttributeTest = TestHelper;
 
-IndexAttribute::~IndexAttribute() = default;
-
-std::string IndexAttribute::Name() const {
-    return "index";
+TEST_F(BlendSrcAttributeTest, Creation) {
+    auto* d = BlendSrc(1_a);
+    EXPECT_TRUE(d->expr->Is<IntLiteralExpression>());
 }
 
-const IndexAttribute* IndexAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* expr_ = ctx.Clone(expr);
-    return ctx.dst->create<IndexAttribute>(src, expr_);
-}
-
+}  // namespace
 }  // namespace tint::ast

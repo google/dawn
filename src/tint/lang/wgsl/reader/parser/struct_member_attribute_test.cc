@@ -240,8 +240,8 @@ align(4 + 5 << 6)
 )");
 }
 
-TEST_F(WGSLParserTest, Attribute_Index) {
-    auto p = parser("index(1)");
+TEST_F(WGSLParserTest, Attribute_BlendSrc) {
+    auto p = parser("blend_src(1)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
@@ -250,9 +250,9 @@ TEST_F(WGSLParserTest, Attribute_Index) {
 
     auto* member_attr = attr.value->As<ast::Attribute>();
     ASSERT_NE(member_attr, nullptr);
-    ASSERT_TRUE(member_attr->Is<ast::IndexAttribute>());
+    ASSERT_TRUE(member_attr->Is<ast::BlendSrcAttribute>());
 
-    auto* o = member_attr->As<ast::IndexAttribute>();
+    auto* o = member_attr->As<ast::BlendSrcAttribute>();
     ASSERT_TRUE(o->expr->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(o->expr->As<ast::IntLiteralExpression>()->value, 1);
 }

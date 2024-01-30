@@ -59,12 +59,12 @@ namespace {
 enum class AttributeKind {
     kAlign,
     kBinding,
+    kBlendSrc,
     kBuiltinPosition,
     kColor,
     kDiagnostic,
     kGroup,
     kId,
-    kIndex,
     kInterpolate,
     kInvariant,
     kLocation,
@@ -81,6 +81,8 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@align";
         case AttributeKind::kBinding:
             return o << "@binding";
+        case AttributeKind::kBlendSrc:
+            return o << "@blend_src";
         case AttributeKind::kBuiltinPosition:
             return o << "@builtin(position)";
         case AttributeKind::kColor:
@@ -91,8 +93,6 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@group";
         case AttributeKind::kId:
             return o << "@id";
-        case AttributeKind::kIndex:
-            return o << "@index";
         case AttributeKind::kInterpolate:
             return o << "@interpolate";
         case AttributeKind::kInvariant:
@@ -143,6 +143,10 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
                 "1:2 error: @binding is not valid for " + thing,
             },
             TestParams{
+                {AttributeKind::kBlendSrc},
+                "1:2 error: @blend_src is not valid for " + thing,
+            },
+            TestParams{
                 {AttributeKind::kBuiltinPosition},
                 "1:2 error: @builtin is not valid for " + thing,
             },
@@ -161,10 +165,6 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
             TestParams{
                 {AttributeKind::kId},
                 "1:2 error: @id is not valid for " + thing,
-            },
-            TestParams{
-                {AttributeKind::kIndex},
-                "1:2 error: @index is not valid for " + thing,
             },
             TestParams{
                 {AttributeKind::kInterpolate},
@@ -231,8 +231,8 @@ const ast::Attribute* CreateAttribute(const Source& source,
             return builder.Group(source, 1_a);
         case AttributeKind::kId:
             return builder.Id(source, 0_a);
-        case AttributeKind::kIndex:
-            return builder.Index(source, 0_a);
+        case AttributeKind::kBlendSrc:
+            return builder.BlendSrc(source, 0_a);
         case AttributeKind::kInterpolate:
             return builder.Interpolate(source, core::InterpolationType::kLinear,
                                        core::InterpolationSampling::kCenter);
@@ -263,7 +263,7 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {
             case AttributeKind::kColor:
                 Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
                 break;
-            case AttributeKind::kIndex:
+            case AttributeKind::kBlendSrc:
                 Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
                 break;
             default:
@@ -323,6 +323,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for functions)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for functions)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for functions)",
         },
@@ -341,10 +345,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for functions)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for functions)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -407,6 +407,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                  R"(1:2 error: @binding is not valid for functions)",
                              },
                              TestParams{
+                                 {AttributeKind::kBlendSrc},
+                                 R"(1:2 error: @blend_src is not valid for functions)",
+                             },
+                             TestParams{
                                  {AttributeKind::kBuiltinPosition},
                                  R"(1:2 error: @builtin is not valid for functions)",
                              },
@@ -425,10 +429,6 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              TestParams{
                                  {AttributeKind::kId},
                                  R"(1:2 error: @id is not valid for functions)",
-                             },
-                             TestParams{
-                                 {AttributeKind::kIndex},
-                                 R"(1:2 error: @index is not valid for functions)",
                              },
                              TestParams{
                                  {AttributeKind::kInterpolate},
@@ -498,6 +498,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for function parameters)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for function parameters)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for non-entry point function parameters)",
         },
@@ -516,10 +520,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -583,6 +583,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for non-entry point function return types)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for non-entry point function return types)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for non-entry point function return types)",
         },
@@ -601,10 +605,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for non-entry point function return types)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for non-entry point function return types)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -673,6 +673,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for function parameters)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for function parameters)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for compute shader input)",
         },
@@ -691,10 +695,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -757,6 +757,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for function parameters)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for function parameters)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             Pass,
         },
@@ -780,10 +784,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -865,6 +865,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for function parameters)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for function parameters)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for vertex shader input)",
         },
@@ -883,10 +887,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -970,6 +970,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for entry point return types)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src can only be used for fragment shader output)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for compute shader output)",
         },
@@ -988,10 +992,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index can only be used for fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1056,6 +1056,14 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for entry point return types)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(9:9 error: missing entry point IO attribute on return type)",
+        },
+        TestParams{
+            {AttributeKind::kBlendSrc, AttributeKind::kLocation},
+            Pass,
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin(position) cannot be used for fragment shader output)",
         },
@@ -1074,14 +1082,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(9:9 error: missing entry point IO attribute on return type)",
-        },
-        TestParams{
-            {AttributeKind::kIndex, AttributeKind::kLocation},
-            Pass,
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1132,7 +1132,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for entry point return types)",
         },
         TestParams{
-            {AttributeKind::kIndex, AttributeKind::kLocation},
+            {AttributeKind::kBlendSrc, AttributeKind::kLocation},
             Pass,
         }));
 
@@ -1168,6 +1168,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for entry point return types)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src can only be used for fragment shader output)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             Pass,
         },
@@ -1186,10 +1190,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index can only be used for fragment shader output)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1293,6 +1293,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for struct declarations)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for struct declarations)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for struct declarations)",
         },
@@ -1311,10 +1315,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for struct declarations)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for struct declarations)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1376,6 +1376,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                  R"(1:2 error: @binding is not valid for struct members)",
                              },
                              TestParams{
+                                 {AttributeKind::kBlendSrc},
+                                 R"(1:2 error: @blend_src can only be used with @location(0))",
+                             },
+                             TestParams{
                                  {AttributeKind::kBuiltinPosition},
                                  Pass,
                              },
@@ -1394,10 +1398,6 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              TestParams{
                                  {AttributeKind::kId},
                                  R"(1:2 error: @id is not valid for struct members)",
-                             },
-                             TestParams{
-                                 {AttributeKind::kIndex},
-                                 R"(1:2 error: @index can only be used with @location(0))",
                              },
                              TestParams{
                                  {AttributeKind::kInterpolate},
@@ -1648,6 +1648,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                  R"(1:2 error: @binding is not valid for array types)",
                              },
                              TestParams{
+                                 {AttributeKind::kBlendSrc},
+                                 R"(1:2 error: @blend_src is not valid for array types)",
+                             },
+                             TestParams{
                                  {AttributeKind::kBuiltinPosition},
                                  R"(1:2 error: @builtin is not valid for array types)",
                              },
@@ -1662,10 +1666,6 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              TestParams{
                                  {AttributeKind::kId},
                                  R"(1:2 error: @id is not valid for array types)",
-                             },
-                             TestParams{
-                                 {AttributeKind::kIndex},
-                                 R"(1:2 error: @index is not valid for array types)",
                              },
                              TestParams{
                                  {AttributeKind::kInterpolate},
@@ -1739,6 +1739,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(9:9 error: resource variables require @group and @binding attributes)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for module-scope 'var')",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for module-scope 'var')",
         },
@@ -1753,10 +1757,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for module-scope 'var')",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for module-scope 'var')",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1843,6 +1843,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for 'const' declaration)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for 'const' declaration)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for 'const' declaration)",
         },
@@ -1857,10 +1861,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kId},
             R"(1:2 error: @id is not valid for 'const' declaration)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for 'const' declaration)",
         },
         TestParams{
             {AttributeKind::kInterpolate},
@@ -1924,6 +1924,10 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: @binding is not valid for 'override' declaration)",
         },
         TestParams{
+            {AttributeKind::kBlendSrc},
+            R"(1:2 error: @blend_src is not valid for 'override' declaration)",
+        },
+        TestParams{
             {AttributeKind::kBuiltinPosition},
             R"(1:2 error: @builtin is not valid for 'override' declaration)",
         },
@@ -1934,10 +1938,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kGroup},
             R"(1:2 error: @group is not valid for 'override' declaration)",
-        },
-        TestParams{
-            {AttributeKind::kIndex},
-            R"(1:2 error: @index is not valid for 'override' declaration)",
         },
         TestParams{
             {AttributeKind::kId},

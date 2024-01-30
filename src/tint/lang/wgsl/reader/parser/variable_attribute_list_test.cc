@@ -31,7 +31,7 @@
 namespace tint::wgsl::reader {
 namespace {
 
-TEST_F(WGSLParserTest, AttributeList_Parses) {
+TEST_F(WGSLParserTest, VariableAttributeList_Parses) {
     auto p = parser(R"(@location(4) @builtin(position))");
     auto attrs = p->attribute_list();
     ASSERT_FALSE(p->has_error()) << p->error();
@@ -55,7 +55,7 @@ TEST_F(WGSLParserTest, AttributeList_Parses) {
     ast::CheckIdentifier(attr_1->As<ast::BuiltinAttribute>()->builtin, "position");
 }
 
-TEST_F(WGSLParserTest, AttributeList_Invalid) {
+TEST_F(WGSLParserTest, VariableAttributeList_Invalid) {
     auto p = parser(R"(@invalid)");
     auto attrs = p->attribute_list();
     EXPECT_TRUE(p->has_error());
@@ -64,7 +64,7 @@ TEST_F(WGSLParserTest, AttributeList_Invalid) {
     EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), R"(1:2: expected attribute
 Did you mean 'invariant'?
-Possible values: 'align', 'binding', 'blend_src', 'builtin', 'color', 'compute', 'diagnostic', 'fragment', 'group', 'id', 'index', 'interpolate', 'invariant', 'location', 'must_use', 'size', 'vertex', 'workgroup_size')");
+Possible values: 'align', 'binding', 'blend_src', 'builtin', 'color', 'compute', 'diagnostic', 'fragment', 'group', 'id', 'interpolate', 'invariant', 'location', 'must_use', 'size', 'vertex', 'workgroup_size')");
 }
 
 }  // namespace

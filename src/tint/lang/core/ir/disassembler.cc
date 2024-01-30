@@ -506,8 +506,8 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             if (v->Attributes().location.has_value()) {
                 out_ << " @location(" << v->Attributes().location.value() << ")";
             }
-            if (v->Attributes().index.has_value()) {
-                out_ << " @index(" << v->Attributes().index.value() << ")";
+            if (v->Attributes().blend_src.has_value()) {
+                out_ << " @blend_src(" << v->Attributes().blend_src.value() << ")";
             }
             if (v->Attributes().interpolation.has_value()) {
                 auto& interp = v->Attributes().interpolation.value();

@@ -25,20 +25,40 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/id_attribute.h"
+#ifndef SRC_TINT_LANG_WGSL_AST_BLEND_SRC_ATTRIBUTE_H_
+#define SRC_TINT_LANG_WGSL_AST_BLEND_SRC_ATTRIBUTE_H_
 
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+#include <string>
+
+#include "src/tint/lang/wgsl/ast/attribute.h"
+#include "src/tint/lang/wgsl/ast/expression.h"
 
 namespace tint::ast {
-namespace {
 
-using namespace tint::core::number_suffixes;  // NOLINT
-using IndexAttributeTest = TestHelper;
+/// An blend_src attribute for shader IO.
+class BlendSrcAttribute final : public Castable<BlendSrcAttribute, Attribute> {
+  public:
+    /// Create a blend_src ttribute.
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
+    /// @param src the source of this node
+    /// @param expr the numeric id expression
+    BlendSrcAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
+    ~BlendSrcAttribute() override;
 
-TEST_F(IndexAttributeTest, Creation) {
-    auto* d = Index(1_a);
-    EXPECT_TRUE(d->expr->Is<IntLiteralExpression>());
-}
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-}  // namespace
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BlendSrcAttribute* Clone(CloneContext& ctx) const override;
+
+    /// The blend_src expression
+    const Expression* const expr;
+};
+
 }  // namespace tint::ast
+
+#endif  // SRC_TINT_LANG_WGSL_AST_BLEND_SRC_ATTRIBUTE_H_

@@ -4567,8 +4567,9 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
                     post += " : TEXCOORD" + std::to_string(location.value());
                 } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentOutput))) {
-                    if (auto index = attributes.index) {
-                        post += " : SV_Target" + std::to_string(location.value() + index.value());
+                    if (auto blend_src = attributes.blend_src) {
+                        post +=
+                            " : SV_Target" + std::to_string(location.value() + blend_src.value());
                     } else {
                         post += " : SV_Target" + std::to_string(location.value());
                     }

@@ -427,9 +427,9 @@ class Resolver {
     /// @returns the color value on success.
     tint::Result<uint32_t> ColorAttribute(const ast::ColorAttribute* attr);
 
-    /// Resolves the `@index` attribute @p attr
-    /// @returns the index value on success.
-    tint::Result<uint32_t> IndexAttribute(const ast::IndexAttribute* attr);
+    /// Resolves the `@blend_src` attribute @p attr
+    /// @returns the blend_src value on success.
+    tint::Result<uint32_t> BlendSrcAttribute(const ast::BlendSrcAttribute* attr);
 
     /// Resolves the `@binding` attribute @p attr
     /// @returns the binding value on success.
