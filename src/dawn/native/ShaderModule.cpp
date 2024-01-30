@@ -340,7 +340,6 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
                                        const tint::wgsl::AllowedFeatures& allowedFeatures,
                                        OwnedCompilationMessages* outMessages) {
-#if TINT_BUILD_WGSL_READER
     tint::wgsl::reader::Options options;
     options.allowed_features = allowedFeatures;
     tint::Program program = tint::wgsl::reader::Parse(file, options);
@@ -348,13 +347,10 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
     if (!program.IsValid()) {
-        return DAWN_VALIDATION_ERROR("Tint WGSL reader failure: %s\n", program.Diagnostics().str());
+        return DAWN_VALIDATION_ERROR("Error while parsing WGSL: %s\n", program.Diagnostics().str());
     }
 
     return std::move(program);
-#else
-    return DAWN_VALIDATION_ERROR("TINT_BUILD_WGSL_READER is not defined.");
-#endif
 }
 
 #if TINT_BUILD_SPV_READER
@@ -372,7 +368,7 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
     if (!program.IsValid()) {
-        return DAWN_VALIDATION_ERROR("Tint SPIR-V reader failure:\nParser: %s\n",
+        return DAWN_VALIDATION_ERROR("Error while parsing SPIR-V: %s\n",
                                      program.Diagnostics().str());
     }
 
@@ -1406,22 +1402,6 @@ void ShaderModuleBase::InjectCompilationMessages(
     }
     // Move the compilationMessages into the shader module and emit the tint errors and warnings
     mCompilationMessages = std::move(compilationMessages);
-
-    // Emit the formatted Tint errors and warnings within the moved compilationMessages
-    const std::vector<std::string>& formattedTintMessages =
-        mCompilationMessages->GetFormattedTintMessages();
-    if (formattedTintMessages.empty()) {
-        return;
-    }
-    std::ostringstream t;
-    for (auto pMessage = formattedTintMessages.begin(); pMessage != formattedTintMessages.end();
-         pMessage++) {
-        if (pMessage != formattedTintMessages.begin()) {
-            t << std::endl;
-        }
-        t << *pMessage;
-    }
-    this->GetDevice()->EmitLog(WGPULoggingType_Warning, t.str().c_str());
 }
 
 OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {

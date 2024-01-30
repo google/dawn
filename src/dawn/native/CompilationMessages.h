@@ -67,7 +67,8 @@ class OwnedCompilationMessages : public NonCopyable {
     void ClearMessages();
 
     const WGPUCompilationInfo* GetCompilationInfo();
-    const std::vector<std::string>& GetFormattedTintMessages();
+    const std::vector<std::string>& GetFormattedTintMessages() const;
+    bool HasWarningsOrErrors() const;
 
   private:
     MaybeError AddMessage(const tint::diag::Diagnostic& diagnostic);

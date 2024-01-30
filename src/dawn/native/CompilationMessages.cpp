@@ -217,8 +217,18 @@ const WGPUCompilationInfo* OwnedCompilationMessages::GetCompilationInfo() {
     return &mCompilationInfo;
 }
 
-const std::vector<std::string>& OwnedCompilationMessages::GetFormattedTintMessages() {
+const std::vector<std::string>& OwnedCompilationMessages::GetFormattedTintMessages() const {
     return mFormattedTintMessages;
+}
+
+bool OwnedCompilationMessages::HasWarningsOrErrors() const {
+    for (const auto& message : mMessages) {
+        if (message.type == WGPUCompilationMessageType_Error ||
+            message.type == WGPUCompilationMessageType_Warning) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& diagnostics) {
