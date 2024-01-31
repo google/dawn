@@ -47,8 +47,8 @@ TEST_F(ConstantTest_Composite, AllZero) {
     auto* fPos1 = constants.Get(1_f);
     auto* fNeg1 = constants.Get(-1_f);
 
-    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0});
-    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0, fPos0});
+    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0, fNeg0});
     auto* compositeMixed = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
     auto* compositePosNeg = constants.Composite(vec3f, Vector{fNeg1, fPos1, fPos1});
 
@@ -66,8 +66,8 @@ TEST_F(ConstantTest_Composite, AnyZero) {
     auto* fPos1 = constants.Get(1_f);
     auto* fNeg1 = constants.Get(-1_f);
 
-    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0});
-    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0, fPos0});
+    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0, fNeg0});
     auto* compositeMixed = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
     auto* compositePosNeg = constants.Composite(vec3f, Vector{fNeg1, fPos1, fPos1});
 
@@ -78,12 +78,12 @@ TEST_F(ConstantTest_Composite, AnyZero) {
 }
 
 TEST_F(ConstantTest_Composite, Index) {
-    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
+    auto* vec2f = create<core::type::Vector>(create<core::type::F32>(), 2u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* composite = constants.Composite(vec3f, Vector{fPos1, fPos0});
+    auto* composite = constants.Composite(vec2f, Vector{fPos1, fPos0});
 
     ASSERT_NE(composite->Index(0), nullptr);
     ASSERT_NE(composite->Index(1), nullptr);
@@ -96,12 +96,12 @@ TEST_F(ConstantTest_Composite, Index) {
 }
 
 TEST_F(ConstantTest_Composite, Clone) {
-    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
+    auto* vec2f = create<core::type::Vector>(create<core::type::F32>(), 2u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* composite = constants.Composite(vec3f, Vector{fPos1, fPos0});
+    auto* composite = constants.Composite(vec2f, Vector{fPos1, fPos0});
 
     constant::Manager mgr;
     constant::CloneContext ctx{core::type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};

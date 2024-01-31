@@ -479,8 +479,9 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Pow_F32_Overflow) {
 }
 
 TEST_F(ConstEvalRuntimeSemanticsTest, Unpack2x16Float_OutOfRange) {
+    auto* vec2f = create<core::type::Vector>(create<core::type::F32>(), 2u);
     auto* a = constants.Get(u32(0x51437C00));
-    auto result = eval.unpack2x16float(create<core::type::U32>(), Vector{a}, {});
+    auto result = eval.unpack2x16float(vec2f, Vector{a}, {});
     ASSERT_EQ(result, Success);
     EXPECT_FLOAT_EQ(result.Get()->Index(0)->ValueAs<f32>(), 0.f);
     EXPECT_FLOAT_EQ(result.Get()->Index(1)->ValueAs<f32>(), 42.09375f);
