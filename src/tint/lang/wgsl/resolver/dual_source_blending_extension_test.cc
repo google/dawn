@@ -215,6 +215,49 @@ TEST_F(DualSourceBlendingExtensionTests, NoNonZeroCollisionsBetweenInAndOut) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(DualSourceBlendingExtensionTests, MixedBlendSrcAndNonBlendSrcOnLocationZero_Struct) {
+    // struct S {
+    //   @location(0) a : vec4<f32>,
+    //   @location(0) @blend_src(1) b : vec4<f32>,
+    // };
+    Structure("S", Vector{
+                       Member("a", ty.vec4<f32>(),
+                              Vector{
+                                  Location(Source{{12, 34}}, 0_a),
+                              }),
+                       Member("b", ty.vec4<f32>(),
+                              Vector{Location(0_a), BlendSrc(Source{{56, 78}}, 1_a)}),
+                   });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(DualSourceBlendingExtensionTests,
+       MixedBlendSrcAndNonBlendSrcOnLocationZero_StructUsedInEntryPoint) {
+    // struct S {
+    //   @location(0) a : vec4<f32>,
+    //   @location(0) @blend_src(1) b : vec4<f32>,
+    // };
+    // fn F() -> S { return S(); }
+    Structure("S", Vector{
+                       Member("a", ty.vec4<f32>(),
+                              Vector{
+                                  Location(Source{{12, 34}}, 0_a),
+                              }),
+                       Member("b", ty.vec4<f32>(),
+                              Vector{Location(0_a), BlendSrc(Source{{56, 78}}, 1_a)}),
+                   });
+    Func("F", Empty, ty("S"), Vector{Return(Call("S"))},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
+56:78 note: use of @blend_src here
+note: while analyzing entry point 'F')");
+}
+
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {
   public:
     DualSourceBlendingExtensionTestWithParams() {
@@ -224,7 +267,7 @@ class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<i
 
 // Rendering to multiple render targets while using dual source blending should fail.
 TEST_P(DualSourceBlendingExtensionTestWithParams,
-       MultipleRenderTargetsNotAllowed_BlendSrcThenNonZeroLocation) {
+       MultipleRenderTargetsNotAllowed_BlendSrcAndNoBlendSrc) {
     // struct S {
     //   @location(0) @blend_src(0) a : vec4<f32>,
     //   @location(0) @blend_src(1) b : vec4<f32>,
@@ -241,9 +284,10 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(1:2 error: pipeline cannot use both non-zero @blend_src and non-zero @location
-3:4 note: non-zero @location declared here
+    EXPECT_EQ(
+        r()->error(),
+        R"(3:4 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
+1:2 note: use of @blend_src here
 note: while analyzing entry point 'F')");
 }
 
@@ -265,9 +309,10 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(3:4 error: pipeline cannot use both non-zero @blend_src and non-zero @location
-1:2 note: non-zero @location declared here
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
+note: use of @blend_src here
 5:6 note: while analyzing entry point 'F')");
 }
 

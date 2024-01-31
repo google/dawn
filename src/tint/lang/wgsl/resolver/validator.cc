@@ -1149,7 +1149,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     Hashset<core::BuiltinValue, 4> builtins;
     Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
     const ast::LocationAttribute* first_nonzero_location = nullptr;
-    const ast::BlendSrcAttribute* first_nonzero_blend_src = nullptr;
+    const ast::BlendSrcAttribute* first_blend_src = nullptr;
+    const ast::LocationAttribute* first_location_without_blend_src = nullptr;
     Hashset<uint32_t, 4> colors;
     enum class ParamOrRetType {
         kParameter,
@@ -1311,16 +1312,28 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
             }
 
+            if (blend_src_attribute) {
+                first_blend_src = blend_src_attribute;
+            } else if (location_attribute) {
+                first_location_without_blend_src = location_attribute;
+            }
+
+            if (first_blend_src && first_location_without_blend_src) {
+                AddError(
+                    "use of @blend_src requires all the output @location attributes of the entry "
+                    "point to be paired with a @blend_src attribute",
+                    first_location_without_blend_src->source);
+                AddNote("use of @blend_src here", first_blend_src->source);
+                return false;
+            }
+
             if (location_attribute) {
                 if (!first_nonzero_location && location > 0u) {
                     first_nonzero_location = location_attribute;
                 }
-                if (!first_nonzero_blend_src && blend_src > 0u) {
-                    first_nonzero_blend_src = blend_src_attribute;
-                }
-                if (first_nonzero_location && first_nonzero_blend_src) {
-                    AddError("pipeline cannot use both non-zero @blend_src and non-zero @location",
-                             first_nonzero_blend_src->source);
+                if (first_nonzero_location && first_blend_src) {
+                    AddError("pipeline cannot use both a @blend_src and non-zero @location",
+                             first_blend_src->source);
                     AddNote("non-zero @location declared here", first_nonzero_location->source);
                     return false;
                 }
@@ -1416,7 +1429,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     builtins.Clear();
     locations_and_blend_srcs.Clear();
     first_nonzero_location = nullptr;
-    first_nonzero_blend_src = nullptr;
+    first_blend_src = nullptr;
+    first_location_without_blend_src = nullptr;
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
@@ -2226,7 +2240,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
-    Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
+    Hashset<std::pair<uint32_t, std::optional<uint32_t>>, 8> locations_and_blend_srcs;
     Hashset<uint32_t, 4> colors;
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<sem::Array>()) {
@@ -2330,17 +2344,16 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             return false;
         }
 
-        // Ensure all locations and index pairs are unique
+        // Ensure all locations and optional blend_src pairs are unique
         if (location_attribute) {
             uint32_t location = member->Attributes().location.value();
-            uint32_t blend_src = member->Attributes().blend_src.value_or(0);
+            std::optional<uint32_t> blend_src = member->Attributes().blend_src;
 
-            std::pair<uint32_t, uint32_t> location_and_blend_src(location, blend_src);
-            if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
+            if (!locations_and_blend_srcs.Add(std::make_pair(location, blend_src))) {
                 StringStream err;
                 err << "@location(" << location << ") ";
-                if (blend_src_attribute) {
-                    err << "@blend_src(" << blend_src << ") ";
+                if (blend_src) {
+                    err << "@blend_src(" << blend_src.value() << ") ";
                 }
                 err << "appears multiple times";
                 AddError(err.str(), location_attribute->source);
