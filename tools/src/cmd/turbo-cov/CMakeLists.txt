@@ -29,6 +29,11 @@ project(turbo-cov)
 
 if (LLVM_SOURCE_DIR)
     set(LLVM_INCLUDE_TESTS OFF)
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
+        set(HAVE_CXX_ATOMICS_WITHOUT_LIB TRUE)
+        set(HAVE_CXX_ATOMICS64_WITHOUT_LIB TRUE)
+        set(LLVM_HOST_TRIPLE "x86_64-pc-win32")
+    endif()
     set(LLVM_TARGETS_TO_BUILD "X86") # At least one target needs to be provided
     add_subdirectory("${LLVM_SOURCE_DIR}" "llvm" EXCLUDE_FROM_ALL)
 

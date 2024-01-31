@@ -28,9 +28,14 @@
 // Package fileutils contains utility functions for files
 package fileutils
 
+import "os"
+
 const ExeExt = ".exe"
 
 // IsExe returns true if the file at path is an executable
 func IsExe(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		return false
+	}
 	return true
 }

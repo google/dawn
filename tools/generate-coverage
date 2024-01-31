@@ -50,8 +50,8 @@ pushd out/coverage
 ninja
 popd
 
-./tools/run run-cts --export-coverage ./out/coverage/win_api_operation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:api,operation,*'
-./tools/run run-cts --export-coverage ./out/coverage/win_api_validation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:api,validation,*'
-./tools/run run-cts --export-coverage ./out/coverage/win_shader_execution.dat --dawn-node ./out/coverage/dawn.node 'webgpu:shader,execution,*'
-./tools/run run-cts --export-coverage ./out/coverage/win_shader_validation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:shader,validation,*'
-./tools/run run-cts --export-coverage ./out/coverage/win.dat --dawn-node ./out/coverage/dawn.node 'webgpu:*'
+./tools/run run-cts --export-coverage ./out/coverage/win_api_operation.dat --bin ./out/coverage 'webgpu:api,operation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_api_validation.dat --bin ./out/coverage 'webgpu:api,validation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_shader_execution.dat --bin ./out/coverage 'webgpu:shader,execution,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_shader_validation.dat --bin ./out/coverage 'webgpu:shader,validation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win.dat --bin ./out/coverage 'webgpu:*'

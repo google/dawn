@@ -36,6 +36,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ProfileData/Coverage/CoverageMapping.h"
 #include "llvm/ProfileData/InstrProfReader.h"
+#include "llvm/Support/VirtualFileSystem.h"
 
 #if defined(_MSC_VER)
 #include <fcntl.h>  // _O_BINARY
@@ -72,8 +73,8 @@ int main(int argc, const char** argv) {
 
     auto exe = argv[1];
     auto profdata = argv[2];
-
-    auto res = llvm::coverage::CoverageMapping::load({exe}, profdata);
+    auto filesystem = llvm::vfs::getRealFileSystem();
+    auto res = llvm::coverage::CoverageMapping::load({exe}, profdata, *filesystem);
     if (auto E = res.takeError()) {
         fprintf(stderr, "failed to load executable '%s': %s\n", exe,
                 llvm::toString(std::move(E)).c_str());

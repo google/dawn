@@ -572,6 +572,10 @@ endif()
 # Run on all subdirectories
 ################################################################################
 if (EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+  if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
+    set(protobuf_HAVE_BUILTIN_ATOMICS 1)
+  endif()
+
   # Needs to come before SPIR-V Tools
   include("third_party/protobuf.cmake")
 endif()
@@ -619,4 +623,3 @@ if (DAWN_EMIT_COVERAGE)
     COMMENT "Generating tint coverage data"
     VERBATIM)
 endif()
-

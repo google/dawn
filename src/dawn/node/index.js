@@ -1,8 +1,9 @@
 'use strict';
 
-const { create, globals } = require('./dawn.node');
+const { create, coverage, globals } = require('./dawn.node');
 
 module.exports = {
   ...globals,
+  coverage,
   gpu: create(process.env.DAWN_FLAGS?.split(',') || []),
 };

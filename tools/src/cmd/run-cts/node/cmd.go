@@ -271,7 +271,7 @@ func (c *cmd) processFlags() error {
 }
 
 func (c *cmd) maybeInitCoverage() error {
-	if c.flags.coverageFile == "" {
+	if !c.flags.genCoverage && c.flags.coverageFile == "" {
 		return nil
 	}
 
@@ -303,7 +303,7 @@ func (c *cmd) maybeInitCoverage() error {
 		OutputFile: c.flags.coverageFile,
 		Env: &cov.Env{
 			Profdata: profdata,
-			Binary:   c.flags.bin,
+			Binary:   filepath.Join(c.flags.bin, "dawn.node"),
 			Cov:      llvmCov,
 			TurboCov: turboCov,
 		},
