@@ -172,7 +172,7 @@ class Manager final {
               typename _ = std::enable_if<tint::traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
     auto* Find(ARGS&&... args) const {
-        return types_.Find<ToType<TYPE>>(std::forward<ARGS>(args)...);
+        return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
     /// @returns a void type
@@ -501,16 +501,6 @@ class Manager final {
     TypeIterator end() const { return types_.end(); }
 
   private:
-    /// ToType<T> is specialized for various `T` types and each specialization contains a single
-    /// `type` alias to the corresponding type deriving from `core::type::Type`.
-    template <typename T>
-    struct ToTypeImpl {
-        using type = T;
-    };
-
-    template <typename T>
-    using ToType = typename ToTypeImpl<T>::type;
-
     /// Unique types owned by the manager
     UniqueAllocator<Type> types_;
     /// Unique nodes (excluding types) owned by the manager
