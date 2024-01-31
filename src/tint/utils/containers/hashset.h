@@ -105,6 +105,16 @@ class Hashset : public HashmapBase<HashmapKey<KEY, HASH, EQUAL>, N> {
         }
         return true;
     }
+
+    /// Looks up an entry in the set that is equal to @p key
+    /// @param key the key to search for.
+    /// @returns the entry that is equal to @p key
+    std::optional<KEY> Get(const KEY& key) const {
+        if (auto [found, index] = this->IndexOf(key); found) {
+            return this->slots_[index].entry;
+        }
+        return std::nullopt;
+    }
 };
 
 }  // namespace tint
