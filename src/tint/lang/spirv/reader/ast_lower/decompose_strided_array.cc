@@ -107,7 +107,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
             return nullptr;
         }
         if (!arr->IsStrideImplicit()) {
-            auto el_ty = tint::GetOrCreate(decomposed, arr, [&] {
+            auto el_ty = tint::GetOrAdd(decomposed, arr, [&] {
                 auto name = b.Symbols().New("strided_arr");
                 auto* member_ty = ctx.Clone(ident->arguments[0]->As<ast::IdentifierExpression>());
                 auto* member = b.Member(kMemberName, ast::Type{member_ty},

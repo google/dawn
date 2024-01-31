@@ -129,34 +129,33 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
 
         // Get or create a new truncated struct/truncate function for the interstage inputs &
         // outputs.
-        auto entry =
-            old_shader_io_structs_to_new_struct_and_truncate_functions.GetOrCreate(str, [&] {
-                auto new_struct_sym = b.Symbols().New();
+        auto entry = old_shader_io_structs_to_new_struct_and_truncate_functions.GetOrAdd(str, [&] {
+            auto new_struct_sym = b.Symbols().New();
 
-                Vector<const ast::StructMember*, 20> truncated_members;
-                Vector<const ast::Expression*, 20> initializer_exprs;
+            Vector<const ast::StructMember*, 20> truncated_members;
+            Vector<const ast::Expression*, 20> initializer_exprs;
 
-                for (auto* member : str->Members()) {
-                    if (omit_members.Contains(member)) {
-                        continue;
-                    }
-
-                    truncated_members.Push(ctx.Clone(member->Declaration()));
-                    initializer_exprs.Push(b.MemberAccessor("io", ctx.Clone(member->Name())));
+            for (auto* member : str->Members()) {
+                if (omit_members.Contains(member)) {
+                    continue;
                 }
 
-                // Create the new shader io struct.
-                b.Structure(new_struct_sym, std::move(truncated_members));
+                truncated_members.Push(ctx.Clone(member->Declaration()));
+                initializer_exprs.Push(b.MemberAccessor("io", ctx.Clone(member->Name())));
+            }
 
-                // Create the mapping function to truncate the shader io.
-                auto mapping_fn_sym = b.Symbols().New("truncate_shader_output");
-                b.Func(mapping_fn_sym, Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
-                       b.ty(new_struct_sym),
-                       Vector{
-                           b.Return(b.Call(new_struct_sym, std::move(initializer_exprs))),
-                       });
-                return TruncatedStructAndConverter{new_struct_sym, mapping_fn_sym};
-            });
+            // Create the new shader io struct.
+            b.Structure(new_struct_sym, std::move(truncated_members));
+
+            // Create the mapping function to truncate the shader io.
+            auto mapping_fn_sym = b.Symbols().New("truncate_shader_output");
+            b.Func(mapping_fn_sym, Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
+                   b.ty(new_struct_sym),
+                   Vector{
+                       b.Return(b.Call(new_struct_sym, std::move(initializer_exprs))),
+                   });
+            return TruncatedStructAndConverter{new_struct_sym, mapping_fn_sym};
+        });
 
         ctx.Replace(func_ast->return_type.expr, b.Expr(entry.truncated_struct));
 
@@ -172,7 +171,7 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
         [&](const ast::ReturnStatement* return_statement) -> const ast::ReturnStatement* {
             auto* return_sem = sem.Get(return_statement);
             if (auto mapping_fn_sym =
-                    entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
+                    entry_point_functions_to_truncate_functions.Get(return_sem->Function())) {
                 return b.Return(return_statement->source,
                                 b.Call(*mapping_fn_sym, ctx.Clone(return_statement->value)));
             }
@@ -181,7 +180,7 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
 
     // Remove IO attributes from old shader IO struct which is not used as entry point output
     // anymore.
-    for (auto it : old_shader_io_structs_to_new_struct_and_truncate_functions) {
+    for (auto& it : old_shader_io_structs_to_new_struct_and_truncate_functions) {
         const ast::Struct* struct_ty = it.key->Declaration();
         for (auto* member : struct_ty->members) {
             for (auto* attr : member->attributes) {

@@ -125,7 +125,7 @@ struct State {
     /// @param type the type to rewrite
     /// @returns the new type
     const core::type::Type* RewriteType(const core::type::Type* type) {
-        return rewritten_types.GetOrCreate(type, [&]() -> const core::type::Type* {
+        return rewritten_types.GetOrAdd(type, [&]() -> const core::type::Type* {
             return tint::Switch(
                 type,
                 [&](const core::type::Array* arr) -> const core::type::Type* {
@@ -219,7 +219,7 @@ struct State {
             orig_ty,  //
             [&](const core::type::Struct* str) -> Value* {
                 // Create a helper function that converts the struct to the original type.
-                auto* helper = convert_helpers.GetOrCreate(str, [&] {
+                auto* helper = convert_helpers.GetOrAdd(str, [&] {
                     auto* input_str = source->Type()->As<core::type::Struct>();
                     auto* func = b.Function("convert_" + str->FriendlyName(), str);
                     auto* input = b.FunctionParam("input", input_str);

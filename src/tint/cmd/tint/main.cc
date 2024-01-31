@@ -1184,8 +1184,8 @@ int main(int argc, const char** argv) {
              std::unordered_map<tint::OverrideId, double> values;
              values.reserve(options.overrides.Count());
 
-             for (auto override : options.overrides) {
-                 const auto& name = override.key;
+             for (auto& override : options.overrides) {
+                 const auto& name = override.key.Value();
                  const auto& value = override.value;
                  if (name.empty()) {
                      std::cerr << "empty override name\n";

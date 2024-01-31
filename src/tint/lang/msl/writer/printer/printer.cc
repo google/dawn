@@ -1432,8 +1432,8 @@ class Printer : public tint::TextGenerator {
     std::string StructName(const core::type::Struct* s) {
         auto name = s->Name().Name();
         if (HasPrefix(name, "__")) {
-            name = tint::GetOrCreate(builtin_struct_names_, s,
-                                     [&] { return UniqueIdentifier(name.substr(2)); });
+            name = tint::GetOrAdd(builtin_struct_names_, s,
+                                  [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
     }
@@ -1442,7 +1442,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
     /// the module.
     std::string NameOf(const core::ir::Value* value) {
-        return names_.GetOrCreate(value, [&] {
+        return names_.GetOrAdd(value, [&] {
             if (auto sym = ir_.NameOf(value); sym.IsValid()) {
                 return sym.Name();
             }

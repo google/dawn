@@ -139,7 +139,7 @@ struct TextureBuiltinsFromUniform::State {
                                 TINT_ICE_ON_NO_MATCH);
                         },
                         [&](const sem::Function* user_fn) {
-                            auto user_param_to_info = fn_to_data.Find(user_fn);
+                            auto user_param_to_info = fn_to_data.Get(user_fn);
                             if (!user_param_to_info) {
                                 // Uninterested function not calling texture builtins with function
                                 // texture param.
@@ -149,11 +149,10 @@ struct TextureBuiltinsFromUniform::State {
                                         user_fn->Declaration()->params.Length());
                             for (size_t i = 0; i < call->Arguments().Length(); i++) {
                                 auto param = user_fn->Declaration()->params[i];
-                                auto info = user_param_to_info->Get(param);
-                                if (info.has_value()) {
+                                if (auto info = user_param_to_info->Get(param)) {
                                     auto* arg = call->Arguments()[i];
                                     auto* texture_sem = arg->RootIdentifier();
-                                    auto& args = call_to_data.GetOrCreate(call_expr, [&] {
+                                    auto& args = call_to_data.GetOrAdd(call_expr, [&] {
                                         return Vector<
                                             std::variant<BindingPoint, const ast::Parameter*>, 4>();
                                     });
@@ -183,8 +182,8 @@ struct TextureBuiltinsFromUniform::State {
 
         // If any functions need extra params, add them now.
         if (!fn_to_data.IsEmpty()) {
-            for (auto pair : fn_to_data) {
-                auto* fn = pair.key;
+            for (auto& pair : fn_to_data) {
+                auto* fn = pair.key.Value();
 
                 // Reorder the param to a vector to make sure params are in the correct order.
                 Vector<const ast::Parameter*, 4> extra_params_in_order;
@@ -201,8 +200,8 @@ struct TextureBuiltinsFromUniform::State {
         }
 
         // Replace all interested texture builtin calls.
-        for (auto pair : builtin_to_replace) {
-            auto call = pair.key;
+        for (auto& pair : builtin_to_replace) {
+            auto call = pair.key.Value();
             if (std::holds_alternative<BindingPoint>(pair.value)) {
                 // This texture is a global variable with binding point.
                 // Read builtin value from uniform buffer.
@@ -216,8 +215,8 @@ struct TextureBuiltinsFromUniform::State {
         }
 
         // Insert all extra args to interested function calls.
-        for (auto pair : call_to_data) {
-            auto call = pair.key;
+        for (auto& pair : call_to_data) {
+            auto call = pair.key.Value();
             for (auto new_arg_info : pair.value) {
                 if (std::holds_alternative<BindingPoint>(new_arg_info)) {
                     // This texture is a global variable with binding point.
@@ -363,7 +362,7 @@ struct TextureBuiltinsFromUniform::State {
 
         // Load the builtin value from the UBO.
         auto member_sym = bindpoint_to_syms.Get(binding);
-        TINT_ASSERT(member_sym.has_value());
+        TINT_ASSERT(member_sym);
 
         return b.MemberAccessor(ubo_sym, *member_sym);
     }
@@ -383,7 +382,7 @@ struct TextureBuiltinsFromUniform::State {
     /// @returns the new u32 function parameter.
     const ast::Parameter* GetAndRecordFunctionParameter(const sem::Function* fn,
                                                         const sem::Variable* var) {
-        auto& param_to_info = fn_to_data.GetOrCreate(
+        auto& param_to_info = fn_to_data.GetOrAdd(
             fn, [&] { return Hashmap<const ast::Parameter*, FunctionExtraParamInfo, 4>(); });
 
         const ast::Parameter* param = nullptr;
@@ -397,7 +396,7 @@ struct TextureBuiltinsFromUniform::State {
 
         // Get or record a new u32 param to this function if first visited.
         auto entry = param_to_info.Get(param);
-        if (entry.has_value()) {
+        if (entry) {
             return entry->param;
         }
 

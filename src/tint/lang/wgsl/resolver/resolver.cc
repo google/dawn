@@ -911,7 +911,7 @@ bool Resolver::AllocateOverridableConstantIds() {
 }
 
 void Resolver::SetShadows() {
-    for (auto it : dependencies_.shadows) {
+    for (auto& it : dependencies_.shadows) {
         CastableBase* shadowed = sem_.Get(it.value);
         if (TINT_UNLIKELY(!shadowed)) {
             StringStream err;
@@ -921,7 +921,7 @@ void Resolver::SetShadows() {
         }
 
         Switch(
-            sem_.Get(it.key),  //
+            sem_.Get(it.key.Value()),  //
             [&](sem::LocalVariable* local) { local->SetShadows(shadowed); },
             [&](sem::Parameter* param) { param->SetShadows(shadowed); });
     }
@@ -1019,7 +1019,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
             if (auto added = parameter_names.Add(param->name->symbol, param->source); !added) {
                 auto name = param->name->symbol.Name();
                 AddError("redefinition of parameter '" + name + "'", param->source);
-                AddNote("previous definition is here", *added.value);
+                AddNote("previous definition is here", added.value);
                 return nullptr;
             }
         }
@@ -1560,7 +1560,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
         // If we just processed the lhs of a constexpr logical binary expression, mark the rhs for
         // short-circuiting.
         if (val && val->ConstantValue()) {
-            if (auto binary = logical_binary_lhs_to_parent_.Find(expr)) {
+            if (auto binary = logical_binary_lhs_to_parent_.Get(expr)) {
                 const bool lhs_is_true = val->ConstantValue()->ValueAs<bool>();
                 if (((*binary)->IsLogicalAnd() && !lhs_is_true) ||
                     ((*binary)->IsLogicalOr() && lhs_is_true)) {
@@ -2131,7 +2131,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         // Is this overload a constructor or conversion?
         if (match->info->flags.Contains(OverloadFlag::kIsConstructor)) {
             // Type constructor
-            target_sem = constructors_.GetOrCreate(match.Get(), [&] {
+            target_sem = constructors_.GetOrAdd(match.Get(), [&] {
                 auto params = Transform(match->parameters, [&](auto& p, size_t i) {
                     return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
                                                     p.usage);
@@ -2141,7 +2141,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             });
         } else {
             // Type conversion
-            target_sem = converters_.GetOrCreate(match.Get(), [&] {
+            target_sem = converters_.GetOrAdd(match.Get(), [&] {
                 auto* param = b.create<sem::Parameter>(nullptr, 0u, match->parameters[0].type,
                                                        match->parameters[0].usage);
                 return b.create<sem::ValueConversion>(match->return_type, param, overload_stage);
@@ -2233,7 +2233,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                     m->type());
             },
             [&](const sem::Array* arr) -> sem::Call* {
-                auto* call_target = array_ctors_.GetOrCreate(
+                auto* call_target = array_ctors_.GetOrAdd(
                     ArrayConstructorSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
                         auto params = tint::Transform(args, [&](auto, size_t i) {
@@ -2255,7 +2255,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 return arr_or_str_init(arr, call_target);
             },
             [&](const core::type::Struct* str) -> sem::Call* {
-                auto* call_target = struct_ctors_.GetOrCreate(
+                auto* call_target = struct_ctors_.GetOrAdd(
                     StructConstructorSig{{str, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
                         Vector<sem::Parameter*, 8> params;
@@ -2398,7 +2398,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     // De-duplicate builtins that are identical.
-    auto* target = builtins_.GetOrCreate(std::make_pair(overload.Get(), fn), [&] {
+    auto* target = builtins_.GetOrAdd(std::make_pair(overload.Get(), fn), [&] {
         auto params = Transform(overload->parameters, [&](auto& p, size_t i) {
             return b.create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type, p.usage);
         });
@@ -3312,7 +3312,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                             // If our identifier is in loop_block->decls, make sure its index is
                             // less than first_continue
                             auto symbol = ident->symbol;
-                            if (auto decl = loop_block->Decls().Find(symbol)) {
+                            if (auto decl = loop_block->Decls().Get(symbol)) {
                                 if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
                                     AddError("continue statement bypasses declaration of '" +
                                                  symbol.Name() + "'",
@@ -4314,7 +4314,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         Mark(member->name);
         if (auto added = member_map.Add(member->name->symbol, member); !added) {
             AddError("redefinition of '" + member->name->symbol.Name() + "'", member->source);
-            AddNote("previous definition is here", (*added.value)->source);
+            AddNote("previous definition is here", added.value->source);
             return nullptr;
         }
 

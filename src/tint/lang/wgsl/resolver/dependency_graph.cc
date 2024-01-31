@@ -166,7 +166,7 @@ class DependencyScanner {
           graph_(graph),
           dependency_edges_(edges) {
         // Register all the globals at global-scope
-        for (auto it : globals_by_name) {
+        for (auto& it : globals_by_name) {
             scope_stack_.Set(it.key, it.value->node);
         }
     }
@@ -242,7 +242,7 @@ class DependencyScanner {
         TINT_DEFER(scope_stack_.Pop());
 
         for (auto* param : func->params) {
-            if (auto* shadows = scope_stack_.Get(param->name->symbol)) {
+            if (auto shadows = scope_stack_.Get(param->name->symbol)) {
                 graph_.shadows.Add(param, shadows);
             }
             Declare(param->name->symbol, param);
@@ -465,7 +465,7 @@ class DependencyScanner {
     /// @param symbol the symbol
     /// @returns the builtin info
     DependencyScanner::BuiltinInfo GetBuiltinInfo(Symbol symbol) {
-        return builtin_info_map.GetOrCreate(symbol, [&] {
+        return builtin_info_map.GetOrAdd(symbol, [&] {
             if (auto builtin_fn = wgsl::ParseBuiltinFn(symbol.NameView());
                 builtin_fn != wgsl::BuiltinFn::kNone) {
                 return BuiltinInfo{BuiltinType::kFunction, builtin_fn};
@@ -549,7 +549,7 @@ class DependencyScanner {
             return;
         }
 
-        if (auto global = globals_.Find(to); global && (*global)->node == resolved) {
+        if (auto global = globals_.Get(to); global && (*global)->node == resolved) {
             if (dependency_edges_.Add(DependencyEdge{current_global_, *global},
                                       DependencyInfo{from->source})) {
                 current_global_->deps.Push(*global);
@@ -765,7 +765,7 @@ struct DependencyAnalysis {
     /// of global `from` depending on `to`.
     /// @note will raise an ICE if the edge is not found.
     DependencyInfo DepInfoFor(const Global* from, const Global* to) const {
-        auto info = dependency_edges_.Find(DependencyEdge{from, to});
+        auto info = dependency_edges_.Get(DependencyEdge{from, to});
         if (TINT_LIKELY(info)) {
             return *info;
         }
@@ -819,7 +819,7 @@ struct DependencyAnalysis {
         printf("------ dependencies ------ \n");
         for (auto* node : sorted_) {
             auto symbol = SymbolOf(node);
-            auto* global = *globals_.Find(symbol);
+            auto* global = *globals_.Get(symbol);
             printf("%s depends on:\n", symbol.Name().c_str());
             for (auto* dep : global->deps) {
                 printf("  %s\n", NameOf(dep->node).c_str());

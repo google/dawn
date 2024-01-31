@@ -56,7 +56,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
         }
         auto* var = inst->As<core::ir::Var>();
         if (auto bp = var->BindingPoint()) {
-            if (auto val = group_to_next_binding_number.Find(bp->group)) {
+            if (auto val = group_to_next_binding_number.Get(bp->group)) {
                 *val = std::max(*val, bp->binding + 1);
             } else {
                 group_to_next_binding_number.Add(bp->group, bp->binding + 1);
@@ -104,13 +104,11 @@ Bindings GenerateBindings(const core::ir::Module& module) {
 
     for (auto bp : ext_tex_bps) {
         uint32_t g = bp.group;
-        uint32_t next_num = *(group_to_next_binding_number.GetOrZero(g));
+        uint32_t& next_num = group_to_next_binding_number.GetOrAddZero(g);
 
         binding::BindingInfo plane0{bp.group, bp.binding};
         binding::BindingInfo plane1{g, next_num++};
         binding::BindingInfo metadata{g, next_num++};
-
-        group_to_next_binding_number.Replace(g, next_num);
 
         bindings.external_texture.emplace(bp, binding::ExternalTexture{metadata, plane0, plane1});
     }

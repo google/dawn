@@ -65,7 +65,7 @@ class ScopeStack {
     /// @returns the old value if there was an existing key at the top of the
     /// stack, otherwise the zero initializer for type T.
     V Set(const K& key, V val) {
-        if (auto el = Top().Find(key)) {
+        if (auto el = Top().Get(key)) {
             std::swap(val, *el);
             return val;
         }
@@ -78,7 +78,7 @@ class ScopeStack {
     /// @returns the value, or the zero initializer if the value was not found
     V Get(const K& key) const {
         for (size_t i = depth_; i > 0; i--) {
-            if (auto val = stack_[i - 1].Find(key)) {
+            if (auto val = stack_[i - 1].Get(key)) {
                 return *val;
             }
         }

@@ -1528,7 +1528,7 @@ bool ASTParser::EmitModuleScopeVariables() {
         // TODO(dneto): initializers (a.k.a. initializer expression)
         if (ast_var) {
             builder_.AST().AddGlobalVariable(ast_var);
-            module_variable_.GetOrCreate(var.result_id(), [&] {
+            module_variable_.GetOrAdd(var.result_id(), [&] {
                 return ModuleVariable{ast_var, ast_address_space, ast_access};
             });
         }
@@ -1564,7 +1564,7 @@ bool ASTParser::EmitModuleScopeVariables() {
                                 storage_type, ast_initializer, {});
 
         builder_.AST().AddGlobalVariable(ast_var);
-        module_variable_.GetOrCreate(builtin_position_.per_vertex_var_id, [&] {
+        module_variable_.GetOrAdd(builtin_position_.per_vertex_var_id, [&] {
             return ModuleVariable{ast_var, ast_address_space};
         });
     }

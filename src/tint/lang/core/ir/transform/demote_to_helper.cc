@@ -91,7 +91,7 @@ struct State {
     /// @param func the function to check
     /// @returns true if @p func contains a discard instruction
     bool HasDiscard(Function* func) {
-        return function_discard_status.GetOrCreate(func, [&] { return HasDiscard(func->Block()); });
+        return function_discard_status.GetOrAdd(func, [&] { return HasDiscard(func->Block()); });
     }
 
     /// Check if a block (transitively) contains a discard instruction.

@@ -139,7 +139,7 @@ struct PackedVec3::State {
                         // Create a struct with a single `__packed_vec3` member.
                         // Give the struct member the same alignment as the original unpacked vec3
                         // type, to avoid changing the array element stride.
-                        return b.ty(packed_vec3_wrapper_struct_names.GetOrCreate(vec, [&] {
+                        return b.ty(packed_vec3_wrapper_struct_names.GetOrAdd(vec, [&] {
                             auto name = b.Symbols().New(
                                 "tint_packed_vec3_" + vec->type()->FriendlyName() +
                                 (array_element ? "_array_element" : "_struct_member"));
@@ -181,7 +181,7 @@ struct PackedVec3::State {
             },
             [&](const core::type::Struct* str) -> ast::Type {
                 if (ContainsVec3(str)) {
-                    auto name = rewritten_structs.GetOrCreate(str, [&] {
+                    auto name = rewritten_structs.GetOrAdd(str, [&] {
                         tint::Vector<const ast::StructMember*, 4> members;
                         for (auto* member : str->Members()) {
                             // If the member type contains a vec3, rewrite it.
@@ -317,7 +317,7 @@ struct PackedVec3::State {
     /// @returns an expression that holds the unpacked value
     const ast::Expression* UnpackComposite(const ast::Expression* expr,
                                            const core::type::Type* ty) {
-        auto helper = unpack_helpers.GetOrCreate(ty, [&] {
+        auto helper = unpack_helpers.GetOrAdd(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_unpack_vec3_in_composite", ty,
                 [&](const ast::Expression* element,
@@ -345,7 +345,7 @@ struct PackedVec3::State {
     /// @param ty the unpacked type
     /// @returns an expression that holds the packed value
     const ast::Expression* PackComposite(const ast::Expression* expr, const core::type::Type* ty) {
-        auto helper = pack_helpers.GetOrCreate(ty, [&] {
+        auto helper = pack_helpers.GetOrAdd(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_pack_vec3_in_composite", ty,
                 [&](const ast::Expression* element,

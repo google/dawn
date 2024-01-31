@@ -265,7 +265,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Get or create the intrinsic function.
         auto builtin = BuiltinOf(attrs);
-        auto intrinsic = wave_intrinsics.GetOrCreate(builtin, [&] {
+        auto intrinsic = wave_intrinsics.GetOrAdd(builtin, [&] {
             if (builtin == core::BuiltinValue::kSubgroupInvocationId) {
                 return make_intrinsic("__WaveGetLaneIndex",
                                       HLSLWaveIntrinsic::Op::kWaveGetLaneIndex);

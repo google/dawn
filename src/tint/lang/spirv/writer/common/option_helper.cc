@@ -46,7 +46,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
                                                          const binding::BindingInfo& dst) -> bool {
-        if (auto binding = seen_wgsl_bindings.Find(src)) {
+        if (auto binding = seen_wgsl_bindings.Get(src)) {
             if (*binding != dst) {
                 std::stringstream str;
                 str << "found duplicate WGSL binding point: " << src;
@@ -61,7 +61,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     auto spirv_seen = [&diagnostics, &seen_spirv_bindings](const binding::BindingInfo& src,
                                                            const tint::BindingPoint& dst) -> bool {
-        if (auto binding = seen_spirv_bindings.Find(src)) {
+        if (auto binding = seen_spirv_bindings.Get(src)) {
             if (*binding != dst) {
                 std::stringstream str;
                 str << "found duplicate SPIR-V binding point: [group: " << src.group

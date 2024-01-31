@@ -83,7 +83,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program& src,
         if (needs_wrapping) {
             const char* kMemberName = "inner";
 
-            auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
+            auto* wrapper = wrapper_structs.GetOrAdd(ty, [&] {
                 auto* block = b.ASTNodes().Create<BlockAttribute>(b.ID(), b.AllocateNodeID());
                 auto wrapper_name = global->name->symbol.Name() + "_block";
                 auto* ret =

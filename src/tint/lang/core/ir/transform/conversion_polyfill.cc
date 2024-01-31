@@ -106,7 +106,7 @@ struct State {
         auto* src_el_ty = src_ty->DeepestElement();
 
         auto& helpers = src_el_ty->Is<type::F32>() ? f32toi_helpers : f16toi_helpers;
-        auto* helper = helpers.GetOrCreate(res_ty, [&] {
+        auto* helper = helpers.GetOrAdd(res_ty, [&] {
             // Generate a name for the helper function.
             StringStream name;
             name << "tint_";

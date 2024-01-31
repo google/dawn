@@ -49,7 +49,7 @@ Symbol Module::NameOf(const Instruction* inst) const {
 }
 
 Symbol Module::NameOf(const Value* value) const {
-    return value_to_name_.Get(value).value_or(Symbol{});
+    return value_to_name_.GetOr(value, Symbol{});
 }
 
 void Module::SetName(Instruction* inst, std::string_view name) {

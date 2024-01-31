@@ -52,7 +52,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
                                                          const binding::BindingInfo& dst) -> bool {
-        if (auto binding = seen_wgsl_bindings.Find(src)) {
+        if (auto binding = seen_wgsl_bindings.Get(src)) {
             if (*binding != dst) {
                 std::stringstream str;
                 str << "found duplicate WGSL binding point: " << src;
@@ -67,7 +67,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     auto msl_seen = [&diagnostics](InfoToPointMap& map, const binding::BindingInfo& src,
                                    const tint::BindingPoint& dst) -> bool {
-        if (auto binding = map.Find(src)) {
+        if (auto binding = map.Get(src)) {
             if (*binding != dst) {
                 std::stringstream str;
                 str << "found duplicate MSL binding point: [binding: " << src.binding << "]";

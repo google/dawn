@@ -55,11 +55,11 @@ TEST(Hashset, Empty) {
 TEST(Hashset, InitializerConstructor) {
     Hashset<int, 8> set{1, 5, 7};
     EXPECT_EQ(set.Count(), 3u);
-    EXPECT_TRUE(set.Contains(1u));
-    EXPECT_FALSE(set.Contains(3u));
-    EXPECT_TRUE(set.Contains(5u));
-    EXPECT_TRUE(set.Contains(7u));
-    EXPECT_FALSE(set.Contains(9u));
+    EXPECT_TRUE(set.Contains(1));
+    EXPECT_FALSE(set.Contains(3));
+    EXPECT_TRUE(set.Contains(5));
+    EXPECT_TRUE(set.Contains(7));
+    EXPECT_FALSE(set.Contains(9));
 }
 
 TEST(Hashset, AddRemove) {
@@ -83,27 +83,11 @@ TEST(Hashset, AddMany) {
         ASSERT_TRUE(set.Add(prime)) << "i: " << i;
         ASSERT_FALSE(set.Add(prime)) << "i: " << i;
         ASSERT_EQ(set.Count(), i + 1);
-        set.ValidateIntegrity();
     }
     ASSERT_EQ(set.Count(), kPrimes.size());
     for (int prime : kPrimes) {
         ASSERT_TRUE(set.Contains(prime)) << prime;
     }
-}
-
-TEST(Hashset, Generation) {
-    Hashset<int, 8> set;
-    EXPECT_EQ(set.Generation(), 0u);
-    set.Add(1);
-    EXPECT_EQ(set.Generation(), 1u);
-    set.Add(1);
-    EXPECT_EQ(set.Generation(), 1u);
-    set.Add(2);
-    EXPECT_EQ(set.Generation(), 2u);
-    set.Remove(1);
-    EXPECT_EQ(set.Generation(), 3u);
-    set.Clear();
-    EXPECT_EQ(set.Generation(), 4u);
 }
 
 TEST(Hashset, Iterator) {
@@ -160,7 +144,6 @@ TEST(Hashset, Soak) {
                 break;
             }
         }
-        set.ValidateIntegrity();
     }
 }
 

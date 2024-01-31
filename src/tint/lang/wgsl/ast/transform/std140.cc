@@ -403,14 +403,14 @@ struct Std140::State {
         return Switch(
             ty,  //
             [&](const core::type::Struct* str) {
-                if (auto std140 = std140_structs.Find(str)) {
+                if (auto std140 = std140_structs.Get(str)) {
                     return b.ty(*std140);
                 }
                 return Type{};
             },
             [&](const core::type::Matrix* mat) {
                 if (MatrixNeedsDecomposing(mat)) {
-                    auto std140_mat = std140_mats.GetOrCreate(mat, [&] {
+                    auto std140_mat = std140_mats.GetOrAdd(mat, [&] {
                         auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
                                                     std::to_string(mat->rows()) + "_" +
                                                     mat->type()->FriendlyName());
@@ -671,7 +671,7 @@ struct Std140::State {
     /// @returns the converted value expression.
     const Expression* Convert(const core::type::Type* ty, const Expression* expr) {
         // Get an existing, or create a new function for converting the std140 type to ty.
-        auto fn = conv_fns.GetOrCreate(ty, [&] {
+        auto fn = conv_fns.GetOrAdd(ty, [&] {
             auto std140_ty = Std140Type(ty);
             if (!std140_ty) {
                 // ty was not forked for std140.
@@ -690,7 +690,7 @@ struct Std140::State {
                     // call, or by reassembling a std140 matrix from column vector members.
                     tint::Vector<const Expression*, 8> args;
                     for (auto* member : str->Members()) {
-                        if (auto col_members = std140_mat_members.Find(member)) {
+                        if (auto col_members = std140_mat_members.Get(member)) {
                             // std140 decomposed matrix. Reassemble.
                             auto mat_ty = CreateASTTypeFor(ctx, member->Type());
                             auto mat_args =
@@ -772,7 +772,7 @@ struct Std140::State {
     const Expression* LoadMatrixWithFn(const AccessChain& access) {
         // Get an existing, or create a new function for loading the uniform buffer value.
         // This function is keyed off the uniform buffer variable and the access chain.
-        auto fn = load_fns.GetOrCreate(LoadFnKey{access.var, access.indices}, [&] {
+        auto fn = load_fns.GetOrAdd(LoadFnKey{access.var, access.indices}, [&] {
             if (access.IsMatrixSubset()) {
                 // Access chain passes through the matrix, but ends either at a column vector,
                 // column swizzle, or element.

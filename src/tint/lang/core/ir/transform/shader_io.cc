@@ -228,9 +228,9 @@ struct State {
     /// Finalize any state needed to complete the transform.
     void Finalize() {
         // Remove IO attributes from all structure members that had them prior to this transform.
-        for (auto* member : members_to_strip) {
+        for (auto& member : members_to_strip) {
             // TODO(crbug.com/tint/745): Remove the const_cast.
-            const_cast<core::type::StructMember*>(member)->SetAttributes({});
+            const_cast<core::type::StructMember*>(member.Value())->SetAttributes({});
         }
     }
 };

@@ -356,7 +356,7 @@ struct State {
             }
 
             // Look to see if this callee signature already has a variant created.
-            auto* new_target = (*target_info)->variants_by_sig.GetOrCreate(signature, [&] {
+            auto* new_target = (*target_info)->variants_by_sig.GetOrAdd(signature, [&] {
                 // New signature.
 
                 // Clone the original function to seed the new variant.

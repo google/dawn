@@ -39,7 +39,7 @@ CloneContext::CloneContext(ast::Builder* to, GenerationID from) : dst(to), src_i
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(Symbol s) {
-    return cloned_symbols_.GetOrCreate(s, [&]() -> Symbol {
+    return cloned_symbols_.GetOrAdd(s, [&]() -> Symbol {
         if (symbol_transform_) {
             return symbol_transform_(s);
         }
@@ -67,7 +67,7 @@ const ast::Node* CloneContext::CloneNode(const ast::Node* node) {
     }
 
     // Was Replace() called for this node?
-    if (auto fn = replacements_.Find(node)) {
+    if (auto fn = replacements_.Get(node)) {
         return (*fn)();
     }
 

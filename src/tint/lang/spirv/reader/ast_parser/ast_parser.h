@@ -695,8 +695,7 @@ class ASTParser {
     /// @param id a SPIR-V ID
     /// @returns the AST variable or null.
     ModuleVariable GetModuleVariable(uint32_t id) {
-        auto entry = module_variable_.Find(id);
-        return entry ? *entry : ModuleVariable{};
+        return module_variable_.GetOr(id, ModuleVariable{});
     }
 
     /// Returns the channel component type corresponding to the given image

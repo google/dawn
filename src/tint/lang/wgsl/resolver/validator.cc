@@ -802,7 +802,7 @@ bool Validator::Override(const sem::GlobalVariable* v,
     }
 
     if (auto id = v->Attributes().override_id) {
-        if (auto var = override_ids.Find(*id); var && *var != v) {
+        if (auto var = override_ids.Get(*id); var && *var != v) {
             auto* attr = ast::GetAttribute<ast::IdAttribute>(v->Declaration()->attributes);
             AddError("@id values must be unique", attr->source);
             AddNote("a override with an ID of " + std::to_string(id->value) +
@@ -1485,7 +1485,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             !added &&
             IsValidationEnabled(decl->attributes,
                                 ast::DisabledValidation::kBindingPointCollision) &&
-            IsValidationEnabled((*added.value)->attributes,
+            IsValidationEnabled(added.value->attributes,
                                 ast::DisabledValidation::kBindingPointCollision)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Bindings must not alias within a shader stage: two different variables in the
@@ -1497,7 +1497,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     "' references multiple variables that use the same resource binding @group(" +
                     std::to_string(bp->group) + "), @binding(" + std::to_string(bp->binding) + ")",
                 var_decl->source);
-            AddNote("first resource binding usage declared here", (*added.value)->source);
+            AddNote("first resource binding usage declared here", added.value->source);
             return false;
         }
     }
@@ -2524,7 +2524,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
                                   : std::to_string(value)) +
                              "'",
                          selector->Declaration()->source);
-                AddNote("previous case declared here", *added.value);
+                AddNote("previous case declared here", added.value);
                 return false;
             }
         }
@@ -2686,7 +2686,7 @@ bool Validator::NoDuplicateAttributes(VectorRef<const ast::Attribute*> attribute
             auto added = seen.Add(&d->TypeInfo(), d->source);
             if (!added && !d->Is<ast::InternalAttribute>()) {
                 AddError("duplicate " + d->Name() + " attribute", d->source);
-                AddNote("first attribute declared here", *added.value);
+                AddNote("first attribute declared here", added.value);
                 return false;
             }
         }
@@ -2704,7 +2704,7 @@ bool Validator::DiagnosticControls(VectorRef<const ast::DiagnosticControl*> cont
         auto name = dc->rule_name->name->symbol;
 
         auto diag_added = diagnostics.Add(std::make_pair(category, name), dc);
-        if (!diag_added && (*diag_added.value)->severity != dc->severity) {
+        if (!diag_added && diag_added.value->severity != dc->severity) {
             {
                 StringStream ss;
                 ss << "conflicting diagnostic " << use;
@@ -2714,7 +2714,7 @@ bool Validator::DiagnosticControls(VectorRef<const ast::DiagnosticControl*> cont
                 StringStream ss;
                 ss << "severity of '" << dc->rule_name->String() << "' set to '" << dc->severity
                    << "' here";
-                AddNote(ss.str(), (*diag_added.value)->rule_name->source);
+                AddNote(ss.str(), diag_added.value->rule_name->source);
             }
             return false;
         }

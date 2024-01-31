@@ -757,8 +757,8 @@ TEST_P(ResolverDependencyGraphUndeclaredSymbolTest, Test) {
 
     auto graph = Build();
 
-    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
-    ASSERT_NE(resolved_identifier, nullptr);
+    auto resolved_identifier = graph.resolved_identifiers.Get(ident);
+    ASSERT_TRUE(resolved_identifier);
     auto* unresolved = resolved_identifier->Unresolved();
     ASSERT_NE(unresolved, nullptr);
     EXPECT_EQ(unresolved->name, "SYMBOL");
@@ -805,7 +805,7 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, LocalVar) {
     WrapInFunction(Decl(Var(symbol, ty.i32(), Mul(Expr(ident), 123_i))));
     auto graph = Build();
 
-    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
+    auto resolved_identifier = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved_identifier);
     auto* unresolved = resolved_identifier->Unresolved();
     ASSERT_NE(unresolved, nullptr);
@@ -818,7 +818,7 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, LocalLet) {
     WrapInFunction(Decl(Let(symbol, ty.i32(), Mul(Expr(ident), 123_i))));
     auto graph = Build();
 
-    auto resolved_identifier = graph.resolved_identifiers.Find(ident);
+    auto resolved_identifier = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved_identifier);
     auto* unresolved = resolved_identifier->Unresolved();
     ASSERT_NE(unresolved, nullptr);
@@ -1155,7 +1155,7 @@ TEST_P(ResolverDependencyGraphResolveToUserDeclTest, Test) {
     bool expect_resolved = ScopeDepth(decl_kind) <= ScopeDepth(use_kind);
     auto graph = Build();
 
-    auto resolved_identifier = graph.resolved_identifiers.Find(use);
+    auto resolved_identifier = graph.resolved_identifiers.Get(use);
     ASSERT_TRUE(resolved_identifier);
 
     if (expect_resolved) {
@@ -1205,7 +1205,8 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFn, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->BuiltinFn(), builtin) << resolved->String();
 }
@@ -1244,7 +1245,8 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->BuiltinType(), core::ParseBuiltinType(name)) << resolved->String();
 }
@@ -1283,7 +1285,8 @@ TEST_P(ResolverDependencyGraphResolveToAccess, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->Access(), core::ParseAccess(name)) << resolved->String();
 }
@@ -1322,7 +1325,8 @@ TEST_P(ResolverDependencyGraphResolveToAddressSpace, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->AddressSpace(), core::ParseAddressSpace(name)) << resolved->String();
 }
@@ -1361,7 +1365,8 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinValue, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->BuiltinValue(), core::ParseBuiltinValue(name)) << resolved->String();
 }
@@ -1400,7 +1405,8 @@ TEST_P(ResolverDependencyGraphResolveToInterpolationSampling, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->InterpolationSampling(), core::ParseInterpolationSampling(name))
         << resolved->String();
@@ -1440,7 +1446,8 @@ TEST_P(ResolverDependencyGraphResolveToInterpolationType, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->InterpolationType(), core::ParseInterpolationType(name))
         << resolved->String();
@@ -1480,7 +1487,8 @@ TEST_P(ResolverDependencyGraphResolveToTexelFormat, Resolve) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->TexelFormat(), core::ParseTexelFormat(name)) << resolved->String();
 }
@@ -1527,7 +1535,7 @@ TEST_P(ResolverDependencyGraphShadowScopeTest, Test) {
     helper.Build();
 
     auto shadows = Build().shadows;
-    auto shadow = shadows.Find(inner_var);
+    auto shadow = shadows.Get(inner_var);
     ASSERT_TRUE(shadow);
     EXPECT_EQ(*shadow, outer);
 }
@@ -1561,7 +1569,8 @@ TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByGlobalVar) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->Node(), decl) << resolved->String();
 }
@@ -1578,7 +1587,8 @@ TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByStruct) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->Node(), decl) << resolved->String();
 }
@@ -1593,7 +1603,8 @@ TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByFunc) {
     auto* ident = helper.Add(use, symbol);
     helper.Build();
 
-    auto resolved = Build().resolved_identifiers.Get(ident);
+    auto graph = Build();
+    auto resolved = graph.resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
     EXPECT_EQ(resolved->Node(), decl) << resolved->String();
 }
@@ -1760,7 +1771,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     auto graph = Build();
     for (auto use : symbol_uses) {
-        auto resolved_identifier = graph.resolved_identifiers.Find(use.use);
+        auto resolved_identifier = graph.resolved_identifiers.Get(use.use);
         ASSERT_TRUE(resolved_identifier) << use.where;
         EXPECT_EQ(*resolved_identifier, use.decl) << use.where;
     }

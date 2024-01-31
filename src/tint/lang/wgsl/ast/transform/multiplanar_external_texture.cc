@@ -497,7 +497,7 @@ struct MultiplanarExternalTexture::State {
             createGammaCorrectionFn();
         }
 
-        auto texture_load_external_sym = texture_load_external_fns.GetOrCreate(call->Target(), [&] {
+        auto texture_load_external_sym = texture_load_external_fns.GetOrAdd(call->Target(), [&] {
             auto& sig = call->Target()->Signature();
             auto* coord_ty = sig.Parameter(core::ParameterUsage::kCoords)->Type();
 

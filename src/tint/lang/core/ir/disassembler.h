@@ -89,24 +89,20 @@ class Disassembler {
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction
     Source InstructionSource(const Instruction* inst) {
-        return instruction_to_src_.Get(inst).value_or(Source{});
+        return instruction_to_src_.GetOr(inst, Source{});
     }
 
     /// @param operand the operand to retrieve
     /// @returns the source for the operand
-    Source OperandSource(IndexedValue operand) {
-        return operand_to_src_.Get(operand).value_or(Source{});
-    }
+    Source OperandSource(IndexedValue operand) { return operand_to_src_.GetOr(operand, Source{}); }
 
     /// @param result the result to retrieve
     /// @returns the source for the result
-    Source ResultSource(IndexedValue result) {
-        return result_to_src_.Get(result).value_or(Source{});
-    }
+    Source ResultSource(IndexedValue result) { return result_to_src_.GetOr(result, Source{}); }
 
     /// @param blk teh block to retrieve
     /// @returns the source for the block
-    Source BlockSource(const Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
+    Source BlockSource(const Block* blk) { return block_to_src_.GetOr(blk, Source{}); }
 
     /// Stores the given @p src location for @p inst instruction
     /// @param inst the instruction to store

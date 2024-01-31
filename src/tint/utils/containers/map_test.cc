@@ -43,22 +43,22 @@ TEST(Lookup, Test) {
     EXPECT_EQ(Lookup(map, 20), 0);       // missing, without if_missing
 }
 
-TEST(GetOrCreateTest, NewKey) {
+TEST(GetOrAddTest, NewKey) {
     std::unordered_map<int, int> map;
-    EXPECT_EQ(GetOrCreate(map, 1, [&] { return 2; }), 2);
+    EXPECT_EQ(GetOrAdd(map, 1, [&] { return 2; }), 2);
     EXPECT_EQ(map.size(), 1u);
     EXPECT_EQ(map[1], 2);
 }
 
-TEST(GetOrCreateTest, ExistingKey) {
+TEST(GetOrAddTest, ExistingKey) {
     std::unordered_map<int, int> map;
     map[1] = 2;
     bool called = false;
-    EXPECT_EQ(GetOrCreate(map, 1,
-                          [&] {
-                              called = true;
-                              return -2;
-                          }),
+    EXPECT_EQ(GetOrAdd(map, 1,
+                       [&] {
+                           called = true;
+                           return -2;
+                       }),
               2);
     EXPECT_EQ(called, false);
     EXPECT_EQ(map.size(), 1u);

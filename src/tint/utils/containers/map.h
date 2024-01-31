@@ -46,7 +46,7 @@ V Lookup(const std::unordered_map<K, V, H, C>& map, const KV& key, const V& if_m
     return it != map.end() ? it->second : if_missing;
 }
 
-/// GetOrCreate is a utility function for lazily adding to an unordered map.
+/// GetOrAdd is a utility function for lazily adding to an unordered map.
 /// If the map already contains the key `key` then this is returned, otherwise
 /// `create()` is called and the result is added to the map and is returned.
 /// @param map the unordered_map
@@ -54,7 +54,7 @@ V Lookup(const std::unordered_map<K, V, H, C>& map, const KV& key, const V& if_m
 /// @param create a callable function-like object with the signature `V()`
 /// @return the value of the item with the given key, or the newly created item
 template <typename K, typename V, typename H, typename C, typename CREATE>
-V GetOrCreate(std::unordered_map<K, V, H, C>& map, const K& key, CREATE&& create) {
+V GetOrAdd(std::unordered_map<K, V, H, C>& map, const K& key, CREATE&& create) {
     auto it = map.find(key);
     if (it != map.end()) {
         return it->second;

@@ -175,7 +175,7 @@ struct Encoder {
         if (block_in == nullptr) {
             return 0;
         }
-        return blocks_.GetOrCreate(block_in, [&]() -> uint32_t {
+        return blocks_.GetOrAdd(block_in, [&]() -> uint32_t {
             auto& block_out = *mod_out_.add_blocks();
             auto id = static_cast<uint32_t>(blocks_.Count());
             for (auto* inst : *block_in) {
@@ -351,7 +351,7 @@ struct Encoder {
         if (type_in == nullptr) {
             return 0;
         }
-        return types_.GetOrCreate(type_in, [&]() -> uint32_t {
+        return types_.GetOrAdd(type_in, [&]() -> uint32_t {
             pb::Type type_out;
             tint::Switch(
                 type_in,  //
@@ -498,7 +498,7 @@ struct Encoder {
         if (!value_in) {
             return 0;
         }
-        return values_.GetOrCreate(value_in, [&] {
+        return values_.GetOrAdd(value_in, [&] {
             auto& value_out = *mod_out_.add_values();
             auto id = static_cast<uint32_t>(mod_out_.values().size());
 
@@ -563,7 +563,7 @@ struct Encoder {
         if (!constant_in) {
             return 0;
         }
-        return constant_values_.GetOrCreate(constant_in, [&] {
+        return constant_values_.GetOrAdd(constant_in, [&] {
             pb::ConstantValue constant_out;
             tint::Switch(
                 constant_in,  //

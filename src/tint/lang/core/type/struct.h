@@ -148,7 +148,7 @@ class Struct : public Castable<Struct, Type> {
     /// @returns true iff this structure has been used by address space that's
     /// host-shareable.
     bool IsHostShareable() const {
-        for (auto sc : address_space_usage_) {
+        for (auto& sc : address_space_usage_) {
             if (core::IsHostShareable(sc)) {
                 return true;
             }

@@ -1398,7 +1398,7 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         }
 
         // Create a replacement for this symbol, if we haven't already.
-        auto replacement = remappings.GetOrCreate(symbol, [&] {
+        auto replacement = remappings.GetOrAdd(symbol, [&] {
             if (requested_names) {
                 auto iter = requested_names->find(symbol.Name());
                 if (iter != requested_names->end()) {
@@ -1422,8 +1422,8 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
     ctx.Clone();
 
     Remappings out;
-    for (auto it : remappings) {
-        out[it.key.Name()] = it.value.Name();
+    for (auto& it : remappings) {
+        out[it.key->Name()] = it.value.Name();
     }
     outputs.Add<Data>(std::move(out));
 

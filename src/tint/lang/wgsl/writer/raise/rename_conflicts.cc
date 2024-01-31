@@ -241,13 +241,13 @@ struct State {
     void EnsureResolvesTo(std::string_view identifier, const CastableBase* thing) {
         for (auto& scope : tint::Reverse(scopes)) {
             if (auto decl = scope.Get(identifier)) {
-                if (decl.value() == thing) {
+                if (*decl == thing) {
                     return;  // Resolved to the right thing.
                 }
 
                 // Operand is shadowed
                 scope.Remove(identifier);
-                Rename(decl.value(), identifier);
+                Rename(*decl, identifier);
             }
         }
     }
@@ -257,7 +257,7 @@ struct State {
     /// renamed.
     void Declare(Scope& scope, CastableBase* thing, std::string_view name) {
         auto add = scope.Add(name, thing);
-        if (!add && *add.value != thing) {
+        if (!add && add.value != thing) {
             // Multiple declarations with the same name in the same scope.
             // Rename the later declaration.
             Rename(thing, name);

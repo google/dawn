@@ -133,7 +133,7 @@ struct PassWorkgroupIdAsArgument::State {
     /// @param type the type of the parameter
     /// @returns the name of the parameter
     Symbol GetParameter(const ast::Function* func, const ast::Type& type) {
-        return func_to_param.GetOrCreate(func, [&] {
+        return func_to_param.GetOrAdd(func, [&] {
             // Append a new parameter to the function.
             auto name = b.Symbols().New("tint_wgid");
             ctx.InsertBack(func->params, b.Param(name, ctx.Clone(type)));

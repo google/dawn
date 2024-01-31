@@ -125,7 +125,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& s
             // Generate a helper function for constructing the matrix.
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
-            auto fn = tint::GetOrCreate(scalar_inits, mat_type, [&] {
+            auto fn = tint::GetOrAdd(scalar_inits, mat_type, [&] {
                 auto name = b.Symbols().New("build_mat" + std::to_string(mat_type->columns()) +
                                             "x" + std::to_string(mat_type->rows()));
                 b.Func(name,

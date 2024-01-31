@@ -258,7 +258,7 @@ struct SimplifyPointers::State {
         // variable identifier.
         ctx.ReplaceAll([&](const Expression* expr) -> const Expression* {
             // Look to see if we need to swap this Expression with a saved variable.
-            if (auto saved_var = saved_vars.Find(expr)) {
+            if (auto saved_var = saved_vars.Get(expr)) {
                 return ctx.dst->Expr(*saved_var);
             }
 

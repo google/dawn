@@ -110,12 +110,12 @@ void Disassembler::EmitLine() {
 
 size_t Disassembler::IdOf(const Block* node) {
     TINT_ASSERT(node);
-    return block_ids_.GetOrCreate(node, [&] { return block_ids_.Count(); });
+    return block_ids_.GetOrAdd(node, [&] { return block_ids_.Count(); });
 }
 
 std::string Disassembler::IdOf(const Value* value) {
     TINT_ASSERT(value);
-    return value_ids_.GetOrCreate(value, [&] {
+    return value_ids_.GetOrAdd(value, [&] {
         if (auto sym = mod_.NameOf(value)) {
             if (ids_.Add(sym.Name())) {
                 return sym.Name();
@@ -137,7 +137,7 @@ std::string Disassembler::NameOf(const If* inst) {
         return "undef";
     }
 
-    return if_names_.GetOrCreate(inst, [&] { return "if_" + std::to_string(if_names_.Count()); });
+    return if_names_.GetOrAdd(inst, [&] { return "if_" + std::to_string(if_names_.Count()); });
 }
 
 std::string Disassembler::NameOf(const Loop* inst) {
@@ -145,8 +145,8 @@ std::string Disassembler::NameOf(const Loop* inst) {
         return "undef";
     }
 
-    return loop_names_.GetOrCreate(inst,
-                                   [&] { return "loop_" + std::to_string(loop_names_.Count()); });
+    return loop_names_.GetOrAdd(inst,
+                                [&] { return "loop_" + std::to_string(loop_names_.Count()); });
 }
 
 std::string Disassembler::NameOf(const Switch* inst) {
@@ -154,7 +154,7 @@ std::string Disassembler::NameOf(const Switch* inst) {
         return "undef";
     }
 
-    return switch_names_.GetOrCreate(
+    return switch_names_.GetOrAdd(
         inst, [&] { return "switch_" + std::to_string(switch_names_.Count()); });
 }
 

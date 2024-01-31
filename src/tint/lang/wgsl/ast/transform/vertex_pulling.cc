@@ -318,7 +318,7 @@ struct VertexPulling::State {
     /// Generate the vertex buffer binding name
     /// @param index index to append to buffer name
     Symbol GetVertexBufferName(uint32_t index) {
-        return tint::GetOrCreate(vertex_buffer_names, index, [&] {
+        return tint::GetOrAdd(vertex_buffer_names, index, [&] {
             static const char kVertexBufferNamePrefix[] = "tint_pulling_vertex_buffer_";
             return b.Symbols().New(kVertexBufferNamePrefix + std::to_string(index));
         });

@@ -398,8 +398,8 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
         auto* src_vec = src_type->As<core::type::Vector>();
         TINT_ASSERT(src_vec);
         TINT_ASSERT(((src_vec->Width() == 2u) || (src_vec->Width() == 4u)));
-        std::string fn = GetOrCreate(
-            bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
+        std::string fn =
+            GetOrAdd(bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
                 TextBuffer b;
                 TINT_DEFER(helpers_.Append(b));
 
@@ -452,8 +452,8 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
         auto* dst_vec = dst_type->As<core::type::Vector>();
         TINT_ASSERT(dst_vec);
         TINT_ASSERT(((dst_vec->Width() == 2u) || (dst_vec->Width() == 4u)));
-        std::string fn = GetOrCreate(
-            bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
+        std::string fn =
+            GetOrAdd(bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
                 TextBuffer b;
                 TINT_DEFER(helpers_.Append(b));
 
@@ -613,37 +613,37 @@ void ASTPrinter::EmitFloatModulo(StringStream& out, const ast::BinaryExpression*
     auto* ret_ty = TypeOf(expr)->UnwrapRef();
     auto* lhs_ty = TypeOf(expr->lhs)->UnwrapRef();
     auto* rhs_ty = TypeOf(expr->rhs)->UnwrapRef();
-    fn = tint::GetOrCreate(float_modulo_funcs_, BinaryOperandType{{lhs_ty, rhs_ty}},
-                           [&]() -> std::string {
-                               TextBuffer b;
-                               TINT_DEFER(helpers_.Append(b));
+    fn = tint::GetOrAdd(float_modulo_funcs_, BinaryOperandType{{lhs_ty, rhs_ty}},
+                        [&]() -> std::string {
+                            TextBuffer b;
+                            TINT_DEFER(helpers_.Append(b));
 
-                               auto fn_name = UniqueIdentifier("tint_float_modulo");
-                               std::vector<std::string> parameter_names;
-                               {
-                                   auto decl = Line(&b);
-                                   EmitTypeAndName(decl, ret_ty, core::AddressSpace::kUndefined,
-                                                   core::Access::kUndefined, fn_name);
-                                   {
-                                       ScopedParen sp(decl);
-                                       const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
-                                       EmitTypeAndName(decl, ty, core::AddressSpace::kUndefined,
-                                                       core::Access::kUndefined, "lhs");
-                                       decl << ", ";
-                                       ty = TypeOf(expr->rhs)->UnwrapRef();
-                                       EmitTypeAndName(decl, ty, core::AddressSpace::kUndefined,
-                                                       core::Access::kUndefined, "rhs");
-                                   }
-                                   decl << " {";
-                               }
-                               {
-                                   ScopedIndent si(&b);
-                                   Line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
-                               }
-                               Line(&b) << "}";
-                               Line(&b);
-                               return fn_name;
-                           });
+                            auto fn_name = UniqueIdentifier("tint_float_modulo");
+                            std::vector<std::string> parameter_names;
+                            {
+                                auto decl = Line(&b);
+                                EmitTypeAndName(decl, ret_ty, core::AddressSpace::kUndefined,
+                                                core::Access::kUndefined, fn_name);
+                                {
+                                    ScopedParen sp(decl);
+                                    const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
+                                    EmitTypeAndName(decl, ty, core::AddressSpace::kUndefined,
+                                                    core::Access::kUndefined, "lhs");
+                                    decl << ", ";
+                                    ty = TypeOf(expr->rhs)->UnwrapRef();
+                                    EmitTypeAndName(decl, ty, core::AddressSpace::kUndefined,
+                                                    core::Access::kUndefined, "rhs");
+                                }
+                                decl << " {";
+                            }
+                            {
+                                ScopedIndent si(&b);
+                                Line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
+                            }
+                            Line(&b) << "}";
+                            Line(&b);
+                            return fn_name;
+                        });
 
     // Call the helper
     out << fn;
@@ -1145,7 +1145,7 @@ void ASTPrinter::EmitDotCall(StringStream& out,
     if (vec_ty->type()->is_integer_scalar()) {
         // GLSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
-        fn = tint::GetOrCreate(int_dot_funcs_, vec_ty, [&]() -> std::string {
+        fn = tint::GetOrAdd(int_dot_funcs_, vec_ty, [&]() -> std::string {
             TextBuffer b;
             TINT_DEFER(helpers_.Append(b));
 
@@ -2942,7 +2942,7 @@ void ASTPrinter::CallBuiltinHelper(StringStream& out,
                                    const sem::BuiltinFn* builtin,
                                    F&& build) {
     // Generate the helper function if it hasn't been created already
-    auto fn = tint::GetOrCreate(builtins_, builtin, [&]() -> std::string {
+    auto fn = tint::GetOrAdd(builtins_, builtin, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
@@ -3009,8 +3009,8 @@ core::type::Type* ASTPrinter::BoolTypeToUint(const core::type::Type* type) {
 std::string ASTPrinter::StructName(const core::type::Struct* s) {
     auto name = s->Name().Name();
     if (HasPrefix(name, "__")) {
-        name = tint::GetOrCreate(builtin_struct_names_, s,
-                                 [&] { return UniqueIdentifier(name.substr(2)); });
+        name = tint::GetOrAdd(builtin_struct_names_, s,
+                              [&] { return UniqueIdentifier(name.substr(2)); });
     }
     return name;
 }

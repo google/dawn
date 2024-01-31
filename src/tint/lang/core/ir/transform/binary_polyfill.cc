@@ -155,7 +155,7 @@ struct State {
         bool is_signed = result_ty->is_signed_integer_scalar_or_vector();
 
         auto& helpers = is_div ? int_div_helpers : int_mod_helpers;
-        auto* helper = helpers.GetOrCreate(result_ty, [&] {
+        auto* helper = helpers.GetOrAdd(result_ty, [&] {
             // Generate a name for the helper function.
             StringStream name;
             name << "tint_" << (is_div ? "div_" : "mod_");

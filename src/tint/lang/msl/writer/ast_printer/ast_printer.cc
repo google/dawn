@@ -947,7 +947,7 @@ bool ASTPrinter::EmitAtomicCall(StringStream& out,
             auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<core::type::Struct>();
 
-            auto func = tint::GetOrCreate(
+            auto func = tint::GetOrAdd(
                 atomicCompareExchangeWeak_, ACEWKeyType{{sc, str}}, [&]() -> std::string {
                     if (!EmitStructType(&helpers_,
                                         builtin->ReturnType()->As<core::type::Struct>())) {
@@ -1342,7 +1342,7 @@ bool ASTPrinter::EmitDotCall(StringStream& out,
     if (vec_ty->type()->is_integer_scalar()) {
         // MSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
-        fn = tint::GetOrCreate(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
+        fn = tint::GetOrAdd(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
             TextBuffer b;
             TINT_DEFER(helpers_.Append(b));
 
@@ -2872,7 +2872,7 @@ bool ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* ex
     // largest negative value, it returns `e`.
     auto* expr_type = TypeOf(expr->expr)->UnwrapRef();
     if (expr->op == core::UnaryOp::kNegation && expr_type->is_signed_integer_scalar_or_vector()) {
-        auto fn = tint::GetOrCreate(unary_minus_funcs_, expr_type, [&]() -> std::string {
+        auto fn = tint::GetOrAdd(unary_minus_funcs_, expr_type, [&]() -> std::string {
             // e.g.:
             // int tint_unary_minus(const int v) {
             //     return (v == -2147483648) ? v : -v;
@@ -3039,7 +3039,7 @@ bool ASTPrinter::CallBuiltinHelper(StringStream& out,
                                    const sem::BuiltinFn* builtin,
                                    F&& build) {
     // Generate the helper function if it hasn't been created already
-    auto fn = tint::GetOrCreate(builtins_, builtin, [&]() -> std::string {
+    auto fn = tint::GetOrAdd(builtins_, builtin, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
@@ -3122,8 +3122,8 @@ const std::string& ASTPrinter::ArrayType() {
 std::string ASTPrinter::StructName(const core::type::Struct* s) {
     auto name = s->Name().Name();
     if (HasPrefix(name, "__")) {
-        name = tint::GetOrCreate(builtin_struct_names_, s,
-                                 [&] { return UniqueIdentifier(name.substr(2)); });
+        name = tint::GetOrAdd(builtin_struct_names_, s,
+                              [&] { return UniqueIdentifier(name.substr(2)); });
     }
     return name;
 }

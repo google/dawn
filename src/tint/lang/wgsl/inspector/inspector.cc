@@ -1034,14 +1034,7 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
 
     auto record_function_param = [&fn_to_data](const sem::Function* func,
                                                const ast::Parameter* param, TextureQueryType type) {
-        auto& param_to_type = *fn_to_data.GetOrZero(func);
-
-        auto entry = param_to_type.Get(param);
-        if (entry.has_value()) {
-            return;
-        }
-
-        param_to_type.Add(param, type);
+        fn_to_data.GetOrAddZero(func).Add(param, type);
     };
 
     auto save_if_needed = [&res, &seen](const sem::GlobalVariable* global, TextureQueryType type) {
@@ -1110,7 +1103,7 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
                     // A function call, check to see if any params needed to be tracked back to a
                     // global texture.
 
-                    auto param_to_type = fn_to_data.Find(func);
+                    auto param_to_type = fn_to_data.Get(func);
                     if (!param_to_type) {
                         return;
                     }
@@ -1121,7 +1114,7 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
 
                         // Determine if this had a texture we cared about
                         auto type = param_to_type->Get(param);
-                        if (!type.has_value()) {
+                        if (!type) {
                             continue;
                         }
 
@@ -1131,10 +1124,10 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
                         tint::Switch(
                             texture_sem,
                             [&](const sem::GlobalVariable* global) {
-                                save_if_needed(global, type.value());
+                                save_if_needed(global, *type);
                             },
                             [&](const sem::Parameter* p) {
-                                record_function_param(fn, p->Declaration(), type.value());
+                                record_function_param(fn, p->Declaration(), *type);
                             },
                             TINT_ICE_ON_NO_MATCH);
                     }

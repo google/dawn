@@ -139,7 +139,7 @@ struct ClampFragDepth::State {
                 //       return S(s.first, s.second, clamp_frag_depth(s.frag_depth), s.last);
                 //   }
                 auto* struct_ty = sem.Get(fn)->ReturnType()->As<sem::Struct>()->Declaration();
-                auto helper = io_structs_clamp_helpers.GetOrCreate(struct_ty, [&] {
+                auto helper = io_structs_clamp_helpers.GetOrAdd(struct_ty, [&] {
                     auto return_ty = fn->return_type;
                     auto fn_sym =
                         b.Symbols().New("clamp_frag_depth_" + struct_ty->name->symbol.Name());

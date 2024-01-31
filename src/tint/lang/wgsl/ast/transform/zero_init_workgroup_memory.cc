@@ -369,8 +369,8 @@ struct ZeroInitWorkgroupMemory::State {
                 }
                 auto array_indices = a.array_indices;
                 array_indices.Add(ArrayIndex{modulo, division});
-                auto index = tint::GetOrCreate(array_index_names, ArrayIndex{modulo, division},
-                                               [&] { return b.Symbols().New("i"); });
+                auto index = tint::GetOrAdd(array_index_names, ArrayIndex{modulo, division},
+                                            [&] { return b.Symbols().New("i"); });
                 return Expression{b.IndexAccessor(a.expr, index), a.num_iterations, array_indices};
             };
             return BuildZeroingStatements(arr->ElemType(), get_el);

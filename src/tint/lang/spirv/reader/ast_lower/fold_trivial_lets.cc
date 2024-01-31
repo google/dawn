@@ -73,8 +73,7 @@ struct FoldTrivialLets::State {
         auto fold_lets = [&](const ast::Expression* expr) {
             ast::TraverseExpressions(expr, [&](const ast::IdentifierExpression* ident) {
                 if (auto* user = sem.Get<sem::VariableUser>(ident)) {
-                    auto itr = pending_lets.Find(user->Variable());
-                    if (itr) {
+                    if (auto itr = pending_lets.Get(user->Variable())) {
                         TINT_ASSERT(itr->remaining_uses > 0);
 
                         // We found a reference to a pending let, so replace it with the inlined
@@ -83,7 +82,7 @@ struct FoldTrivialLets::State {
 
                         // Decrement the remaining uses count and remove the let declaration if this
                         // was the last remaining use.
-                        if (--itr->remaining_uses == 0) {
+                        if (--(itr->remaining_uses) == 0) {
                             ctx.Remove(block->statements, itr->decl);
                         }
                     }

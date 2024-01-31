@@ -78,7 +78,7 @@ void Var::DestroyIfOnlyAssigned() {
     if (result->Usages().All([](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
         while (!result->Usages().IsEmpty()) {
             auto& usage = *result->Usages().begin();
-            usage.instruction->Destroy();
+            usage->instruction->Destroy();
         }
         Destroy();
     }

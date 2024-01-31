@@ -335,7 +335,7 @@ struct Robustness::State {
         }
 
         auto* stmt = expr->Stmt();
-        auto obj_pred = *predicates.GetOrZero(obj);
+        auto& obj_pred = predicates.GetOrAddZero(obj);
 
         auto idx_let = b.Symbols().New("index");
         auto pred = b.Symbols().New("predicate");

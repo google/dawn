@@ -100,7 +100,7 @@ class Value : public Castable<Value> {
     /// @param instruction the instruction
     /// @param operand_index the in
     bool HasUsage(const Instruction* instruction, size_t operand_index) const {
-        return uses_.Contains({const_cast<Instruction*>(instruction), operand_index});
+        return uses_.Contains(Usage{const_cast<Instruction*>(instruction), operand_index});
     }
 
     /// Apply a function to all uses of the value that exist prior to calling this method.

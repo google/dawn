@@ -91,8 +91,8 @@ class SymbolTable {
     /// signature: `void(Symbol)`
     template <typename F>
     void Foreach(F&& callback) const {
-        for (auto it : name_to_symbol_) {
-            callback(it.value);
+        for (auto& it : name_to_symbol_) {
+            callback(Symbol{it.value, generation_id_, it.key});
         }
     }
 
@@ -103,12 +103,12 @@ class SymbolTable {
     SymbolTable(const SymbolTable&) = delete;
     SymbolTable& operator=(const SymbolTable& other) = delete;
 
-    Symbol RegisterInternal(std::string_view name);
+    std::string_view Allocate(std::string_view name);
 
     // The value to be associated to the next registered symbol table entry.
     uint32_t next_symbol_ = 1;
 
-    Hashmap<std::string_view, Symbol, 0> name_to_symbol_;
+    Hashmap<std::string_view, uint32_t, 0> name_to_symbol_;
     Hashmap<std::string, size_t, 0> last_prefix_to_index_;
     tint::GenerationID generation_id_;
 

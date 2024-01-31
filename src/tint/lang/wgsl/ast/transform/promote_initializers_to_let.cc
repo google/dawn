@@ -135,8 +135,8 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
 
     // After walking the full AST, const_chains only contains the outer-most constant expressions.
     // Check if any of these need hoisting, and append those to to_hoist.
-    for (auto* expr : const_chains) {
-        if (auto* sem = src.Sem().GetVal(expr); should_hoist(sem)) {
+    for (auto& expr : const_chains) {
+        if (auto* sem = src.Sem().GetVal(expr.Value()); should_hoist(sem)) {
             to_hoist.Push(sem);
         }
     }

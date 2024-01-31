@@ -123,7 +123,7 @@ struct PreservePadding::State {
         const char* kDestParamName = "dest";
         const char* kValueParamName = "value";
         auto call_helper = [&](auto&& body) {
-            auto helper = helpers.GetOrCreate(ty, [&] {
+            auto helper = helpers.GetOrAdd(ty, [&] {
                 auto helper_name = b.Symbols().New("assign_and_preserve_padding");
                 tint::Vector<const Parameter*, 2> params = {
                     b.Param(kDestParamName,

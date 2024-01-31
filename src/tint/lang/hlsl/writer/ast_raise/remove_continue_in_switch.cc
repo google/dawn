@@ -68,7 +68,7 @@ struct RemoveContinueInSwitch::State {
                 continue;
             }
 
-            auto& info = switch_infos.GetOrCreate(switch_stmt, [&] {
+            auto& info = switch_infos.GetOrAdd(switch_stmt, [&] {
                 switch_stmts.Push(switch_stmt);
                 auto* block = sem.Get(switch_stmt)->FindFirstParent<sem::LoopBlockStatement>();
                 return SwitchInfo{/* loop_block */ block, /* continues */ Empty};
@@ -89,7 +89,7 @@ struct RemoveContinueInSwitch::State {
         for (auto* switch_stmt : switch_stmts) {
             const auto& info = switch_infos.Get(switch_stmt);
 
-            auto var_name = loop_to_var.GetOrCreate(info->loop_block, [&] {
+            auto var_name = loop_to_var.GetOrAdd(info->loop_block, [&] {
                 // Create and insert 'var tint_continue : bool;' before loop
                 auto var = b.Symbols().New("tint_continue");
                 auto* decl = b.Decl(b.Var(var, b.ty.bool_()));

@@ -84,7 +84,7 @@ struct State {
         Access pending_access = Access::kLoad;
 
         auto put_pending_in_lets = [&] {
-            for (auto* pending : pending_resolution) {
+            for (auto& pending : pending_resolution) {
                 PutInLet(pending);
             }
             pending_resolution.Clear();
@@ -97,7 +97,7 @@ struct State {
                     case 0:  // No usage
                         break;
                     case 1: {  // Single usage
-                        auto* usage = (*usages.begin()).instruction;
+                        auto usage = (*usages.begin())->instruction;
                         if (usage->Block() == inst->Block()) {
                             // Usage in same block. Assign to pending_resolution, as we don't
                             // know whether its safe to inline yet.

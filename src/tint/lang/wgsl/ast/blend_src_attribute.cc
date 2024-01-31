@@ -37,9 +37,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BlendSrcAttribute);
 namespace tint::ast {
 
 BlendSrcAttribute::BlendSrcAttribute(GenerationID pid,
-                               NodeID nid,
-                               const Source& src,
-                               const Expression* exp)
+                                     NodeID nid,
+                                     const Source& src,
+                                     const Expression* exp)
     : Base(pid, nid, src), expr(exp) {}
 
 BlendSrcAttribute::~BlendSrcAttribute() = default;

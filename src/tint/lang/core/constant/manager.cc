@@ -144,7 +144,7 @@ const Value* Manager::Zero(const core::type::Type* type) {
             zeros.Reserve(s->Members().Length());
             for (auto* member : s->Members()) {
                 auto* zero =
-                    zero_by_type.GetOrCreate(member->Type(), [&] { return Zero(member->Type()); });
+                    zero_by_type.GetOrAdd(member->Type(), [&] { return Zero(member->Type()); });
                 if (!zero) {
                     return nullptr;
                 }

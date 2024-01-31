@@ -169,7 +169,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
             unconsumed.Push(arg);
             continue;
         }
-        if (auto opt = options_by_name.Find(name)) {
+        if (auto opt = options_by_name.Get(name)) {
             if (auto err = (*opt)->Parse(arguments); !err.empty()) {
                 return Failure{err};
             }

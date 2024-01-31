@@ -124,7 +124,7 @@ struct State {
         }
 
         // The type contains padding bytes, so call a helper function that decomposes the accesses.
-        auto* helper = helpers.GetOrCreate(store_type, [&] {
+        auto* helper = helpers.GetOrAdd(store_type, [&] {
             auto* func = b.Function("tint_store_and_preserve_padding", ty.void_());
             auto* target = b.FunctionParam("target", ty.ptr(storage, store_type));
             auto* value_param = b.FunctionParam("value_param", store_type);

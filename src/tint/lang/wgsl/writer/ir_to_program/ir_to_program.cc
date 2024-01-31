@@ -886,7 +886,7 @@ class State {
                 return {Constant(c), PtrKind::kRef};
             },
             [&](Default) -> ExprAndPtrKind {
-                auto lookup = bindings_.Find(value);
+                auto lookup = bindings_.Get(value);
                 if (TINT_UNLIKELY(!lookup)) {
                     TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
                                << ") value has no expression";
@@ -1064,7 +1064,7 @@ class State {
     }
 
     ast::Type Struct(const core::type::Struct* s) {
-        auto n = structs_.GetOrCreate(s, [&] {
+        auto n = structs_.GetOrAdd(s, [&] {
             auto members = tint::Transform<8>(s->Members(), [&](const core::type::StructMember* m) {
                 auto ty = Type(m->Type());
                 const auto& ir_attrs = m->Attributes();
@@ -1125,7 +1125,7 @@ class State {
     /// @returns the AST name for the given value, creating and returning a new name on the first
     /// call.
     Symbol NameFor(const core::ir::Value* value, std::string_view suggested = {}) {
-        return names_.GetOrCreate(value, [&] {
+        return names_.GetOrAdd(value, [&] {
             if (!suggested.empty()) {
                 return b.Symbols().Register(suggested);
             }

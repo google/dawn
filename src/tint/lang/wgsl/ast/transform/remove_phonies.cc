@@ -130,7 +130,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program& src, const DataMap&, 
                         for (auto* arg : side_effects) {
                             sig.push_back(sem.GetVal(arg)->Type()->UnwrapRef());
                         }
-                        auto sink = sinks.GetOrCreate(sig, [&] {
+                        auto sink = sinks.GetOrAdd(sig, [&] {
                             auto name = b.Symbols().New("phony_sink");
                             tint::Vector<const Parameter*, 8> params;
                             for (auto* ty : sig) {
