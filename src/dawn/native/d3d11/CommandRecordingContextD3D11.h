@@ -55,15 +55,19 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
 
     CommandRecordingContextGuard(CommandRecordingContextGuard&& rhs) = default;
     CommandRecordingContextGuard(Ctx* ctx, typename Traits::MutexType& mutex) : Base(ctx, mutex) {
-        if (this->Get()->mD3D11Multithread) {
+        if (this->Get() && this->Get()->mD3D11Multithread) {
             this->Get()->mD3D11Multithread->Enter();
         }
     }
     ~CommandRecordingContextGuard() {
-        if (this->Get()->mD3D11Multithread) {
+        if (this->Get() && this->Get()->mD3D11Multithread) {
             this->Get()->mD3D11Multithread->Leave();
         }
     }
+
+    CommandRecordingContextGuard(const CommandRecordingContextGuard& other) = delete;
+    CommandRecordingContextGuard& operator=(const CommandRecordingContextGuard& other) = delete;
+    CommandRecordingContextGuard& operator=(CommandRecordingContextGuard&& other) = delete;
 };
 
 class CommandRecordingContext {
