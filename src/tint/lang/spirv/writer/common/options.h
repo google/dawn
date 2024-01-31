@@ -160,6 +160,7 @@ struct Options {
                  use_zero_initialize_workgroup_memory_extension,
                  emit_vertex_point_size,
                  clamp_frag_depth,
+                 pass_matrix_by_pointer,
                  experimental_require_subgroup_uniform_control_flow,
                  polyfill_dot_4x8_packed,
                  disable_polyfill_integer_div_mod,
