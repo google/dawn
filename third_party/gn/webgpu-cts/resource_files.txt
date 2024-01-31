@@ -89,6 +89,7 @@ cache/webgpu/shader/execution/transpose.bin
 cache/webgpu/shader/execution/trunc.bin
 cache/webgpu/shader/execution/unary/af_arithmetic.bin
 cache/webgpu/shader/execution/unary/af_assignment.bin
+cache/webgpu/shader/execution/unary/ai_assignment.bin
 cache/webgpu/shader/execution/unary/bool_conversion.bin
 cache/webgpu/shader/execution/unary/f16_arithmetic.bin
 cache/webgpu/shader/execution/unary/f16_conversion.bin

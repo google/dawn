@@ -206,6 +206,7 @@ src/webgpu/api/operation/rendering/robust_access_index.spec.ts
 src/webgpu/api/operation/rendering/stencil.spec.ts
 src/webgpu/api/operation/resource_init/buffer.spec.ts
 src/webgpu/util/texture/subresource.ts
+src/webgpu/api/operation/resource_init/check_texture/texture_zero_init_test.ts
 src/webgpu/api/operation/resource_init/check_texture/by_copy.ts
 src/webgpu/api/operation/resource_init/check_texture/by_ds_test.ts
 src/webgpu/api/operation/resource_init/check_texture/by_sampling.ts
@@ -623,6 +624,8 @@ src/webgpu/shader/execution/expression/unary/unary.ts
 src/webgpu/shader/execution/expression/unary/af_arithmetic.spec.ts
 src/webgpu/shader/execution/expression/unary/af_assignment.cache.ts
 src/webgpu/shader/execution/expression/unary/af_assignment.spec.ts
+src/webgpu/shader/execution/expression/unary/ai_assignment.cache.ts
+src/webgpu/shader/execution/expression/unary/ai_assignment.spec.ts
 src/webgpu/shader/execution/expression/unary/bool_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/bool_conversion.spec.ts
 src/webgpu/shader/execution/expression/unary/bool_logical.spec.ts
@@ -640,6 +643,7 @@ src/webgpu/shader/execution/expression/unary/i32_complement.cache.ts
 src/webgpu/shader/execution/expression/unary/i32_complement.spec.ts
 src/webgpu/shader/execution/expression/unary/i32_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/i32_conversion.spec.ts
+src/webgpu/shader/execution/expression/unary/indirection.spec.ts
 src/webgpu/shader/execution/expression/unary/u32_complement.cache.ts
 src/webgpu/shader/execution/expression/unary/u32_complement.spec.ts
 src/webgpu/shader/execution/expression/unary/u32_conversion.cache.ts
@@ -686,6 +690,7 @@ src/webgpu/shader/validation/expression/call/builtin/atan.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atan2.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atanh.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/atomics.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/barriers.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/bitcast.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/ceil.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/clamp.spec.ts
@@ -716,6 +721,7 @@ src/webgpu/shader/validation/expression/call/builtin/sqrt.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/tan.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/unpack4xI8.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/unpack4xU8.spec.ts
+src/webgpu/shader/validation/extension/pointer_composite_access.spec.ts
 src/webgpu/shader/validation/functions/alias_analysis.spec.ts
 src/webgpu/shader/validation/functions/restrictions.spec.ts
 src/webgpu/shader/validation/parse/align.spec.ts
@@ -723,10 +729,12 @@ src/webgpu/shader/validation/parse/attribute.spec.ts
 src/webgpu/shader/validation/parse/binary_ops.spec.ts
 src/webgpu/shader/validation/parse/blankspace.spec.ts
 src/webgpu/shader/validation/parse/break.spec.ts
+src/webgpu/shader/validation/parse/break_if.spec.ts
 src/webgpu/shader/validation/parse/builtin.spec.ts
 src/webgpu/shader/validation/parse/comments.spec.ts
 src/webgpu/shader/validation/parse/const.spec.ts
 src/webgpu/shader/validation/parse/const_assert.spec.ts
+src/webgpu/shader/validation/parse/continuing.spec.ts
 src/webgpu/shader/validation/parse/diagnostic.spec.ts
 src/webgpu/shader/validation/parse/discard.spec.ts
 src/webgpu/shader/validation/parse/enable.spec.ts
@@ -734,6 +742,7 @@ src/webgpu/shader/validation/parse/identifiers.spec.ts
 src/webgpu/shader/validation/parse/literal.spec.ts
 src/webgpu/shader/validation/parse/must_use.spec.ts
 src/webgpu/shader/validation/parse/pipeline_stage.spec.ts
+src/webgpu/shader/validation/parse/requires.spec.ts
 src/webgpu/shader/validation/parse/semicolon.spec.ts
 src/webgpu/shader/validation/parse/source.spec.ts
 src/webgpu/shader/validation/parse/unary_ops.spec.ts
@@ -755,6 +764,7 @@ src/webgpu/shader/validation/types/struct.spec.ts
 src/webgpu/shader/validation/types/vector.spec.ts
 src/webgpu/shader/validation/uniformity/uniformity.spec.ts
 src/webgpu/util/copy_to_texture.ts
+src/webgpu/util/texture/color_space_conversions.spec.ts
 src/webgpu/util/texture/texel_data.spec.ts
 src/webgpu/util/texture/texture_ok.spec.ts
 src/webgpu/web_platform/canvas/configure.spec.ts
