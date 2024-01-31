@@ -122,11 +122,11 @@ struct Hasher<T*> {
     /// @param ptr the pointer to hash
     /// @returns a hash of the pointer
     size_t operator()(T* ptr) const {
-        auto hash = std::hash<T*>()(ptr);
+        auto hash = static_cast<size_t>(reinterpret_cast<uintptr_t>(ptr));
 #ifdef TINT_HASH_SEED
         hash ^= static_cast<uint32_t>(TINT_HASH_SEED);
 #endif
-        return hash ^ (hash >> 4);
+        return hash >> 4;
     }
 };
 
