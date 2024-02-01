@@ -305,7 +305,7 @@ TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeSimple) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(4u, result[0].workgroup_storage_size);
+    EXPECT_EQ(16u, result[0].workgroup_storage_size);
 }
 
 TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeCompoundTypes) {
@@ -338,7 +338,7 @@ TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeCompoundTypes) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(72u, result[0].workgroup_storage_size);
+    EXPECT_EQ(96u, result[0].workgroup_storage_size);
 }
 
 TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeAlignmentPadding) {

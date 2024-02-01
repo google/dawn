@@ -920,7 +920,7 @@ uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const
             // turn specified as an upper bound for Vulkan layout sizing. Since D3D
             // and Metal are even less specific, we assume Vulkan behavior as a
             // good-enough approximation everywhere.
-            total_size += tint::RoundUp(align, size);
+            total_size += tint::RoundUp(16u, tint::RoundUp(align, size));
         }
     }
 
