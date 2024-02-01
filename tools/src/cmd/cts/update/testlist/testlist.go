@@ -25,47 +25,61 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// cts is a collection of sub-commands for operating on the WebGPU CTS.
-//
-// To view available commands run: '<dawn>/tools/run cts --help'
-package main
+package testlist
 
 import (
 	"context"
-	"fmt"
+	"flag"
 	"os"
-	"path/filepath"
+	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
-
-	// Register sub-commands
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/export"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/format"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/merge"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/results"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/roll"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/time"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/treemap"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/update/expectations"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/update/testlist"
-	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/validate"
 )
 
-func main() {
-	ctx := context.Background()
+func init() {
+	common.Register(&cmd{})
+}
 
-	cfg, err := common.LoadConfig(filepath.Join(fileutils.ThisDir(), "config.json"))
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return strings.Join((*i), " ")
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
+type cmd struct {
+	flags struct {
+		ctsDir   string
+		nodePath string
+		output   string
+	}
+}
+
+func (cmd) Name() string {
+	return "update-testlist"
+}
+
+func (cmd) Desc() string {
+	return "updates a CTS expectations file"
+}
+
+func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
+	flag.StringVar(&c.flags.ctsDir, "cts", common.DefaultCTSPath(), "path to the CTS")
+	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
+	flag.StringVar(&c.flags.output, "out", common.DefaultTestListPath(), "output testlist path")
+	return nil, nil
+}
+
+func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
+	list, err := common.GenTestList(ctx, c.flags.ctsDir, c.flags.nodePath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		return err
 	}
 
-	if err := subcmd.Run(ctx, *cfg, common.Commands()...); err != nil {
-		if err != subcmd.ErrInvalidCLA {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		os.Exit(1)
-	}
+	return os.WriteFile(c.flags.output, []byte(list), 0666)
 }

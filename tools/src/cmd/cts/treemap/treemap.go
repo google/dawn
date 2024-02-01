@@ -155,17 +155,13 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 // loadCasesData creates the JSON payload for a cases visualization
 func loadCasesData() (string, error) {
-	testListPath := filepath.Join(fileutils.DawnRoot(), common.TestListRelPath)
-
-	file, err := os.Open(testListPath)
+	testlist, err := common.GenTestList(context.Background(), common.DefaultCTSPath(), fileutils.NodePath())
 	if err != nil {
-		return "", fmt.Errorf("failed to open test list: %w", err)
+		return "", err
 	}
-	defer file.Close()
-
 	queryCounts := container.NewMap[string, int]()
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(strings.NewReader(testlist))
 	for scanner.Scan() {
 		if name := strings.TrimSpace(scanner.Text()); name != "" {
 			q := query.Parse(name)
@@ -184,7 +180,7 @@ func loadCasesData() (string, error) {
 	data := &strings.Builder{}
 	fmt.Fprint(data, `{`)
 	fmt.Fprint(data, `"desc":"Treemap visualization of the CTS test cases.<br>Area represents total number of test cases.<br>Color represents the number of parameterized test cases for a single test.",`)
-	fmt.Fprint(data, `"limit": 5000,`)
+	fmt.Fprintf(data, `"limit": 1000,`)
 	fmt.Fprint(data, `"data":[`)
 	fmt.Fprint(data, `["Query", "Parent", "Number of tests", "Color"],`)
 	fmt.Fprint(data, `["root", null, 0, 0]`)
