@@ -34,19 +34,10 @@
 
 namespace dawn::native {
 
-Blob CreateBlob(size_t size, size_t alignment) {
-    DAWN_ASSERT(IsPowerOfTwo(alignment));
-    DAWN_ASSERT(alignment != 0);
+Blob CreateBlob(size_t size) {
     if (size > 0) {
-        // Allocate extra space so that there will be sufficient space for |size| even after
-        // the |data| pointer is aligned.
-        // TODO(crbug.com/dawn/824): Use aligned_alloc when possible. It should be available
-        // with C++17 but on macOS it also requires macOS 10.15 to work.
-        size_t allocatedSize = size + alignment - 1;
-        uint8_t* data = new uint8_t[allocatedSize];
-        uint8_t* ptr = AlignPtr(data, alignment);
-        DAWN_ASSERT(ptr + size <= data + allocatedSize);
-        return Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] data; });
+        uint8_t* ptr = new uint8_t[size];
+        return Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] ptr; });
     } else {
         return Blob();
     }
@@ -101,16 +92,6 @@ uint8_t* Blob::Data() {
 
 size_t Blob::Size() const {
     return mSize;
-}
-
-void Blob::AlignTo(size_t alignment) {
-    if (IsPtrAligned(mData, alignment)) {
-        return;
-    }
-
-    Blob blob = CreateBlob(mSize, alignment);
-    memcpy(blob.Data(), mData, mSize);
-    *this = std::move(blob);
 }
 
 template <>
