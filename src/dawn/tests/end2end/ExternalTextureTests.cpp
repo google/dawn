@@ -528,7 +528,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
-    // Control case to verify flipY and rotation defaults
+    // Control case to verify mirrored and rotation defaults
     {
         // Pipeline Creation
         utils::ComboRenderPipelineDescriptor descriptor;
@@ -576,7 +576,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
-        bool flipY;
+        bool mirrored;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;
@@ -592,14 +592,14 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
           utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kGreen},
          {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kBlack,
           utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kRed,
-          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kBlue,
-          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen},
-         {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kBlack,
+         {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kBlack,
           utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kGreen,
-          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue}}};
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kGreen,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kRed,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kBlue,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
 
     for (const RotationExpectation& exp : expectations) {
         // Pipeline Creation
@@ -613,7 +613,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
         wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = sourceTexture.CreateView();
         externalDesc.rotation = exp.rotation;
-        externalDesc.flipY = exp.flipY;
+        externalDesc.mirrored = exp.mirrored;
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -711,7 +711,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
-    // Control case to verify flipY and rotation defaults
+    // Control case to verify mirrored and rotation defaults
     {
         // Pipeline Creation
         utils::ComboRenderPipelineDescriptor descriptor;
@@ -760,7 +760,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
 
     struct RotationExpectation {
         wgpu::ExternalTextureRotation rotation;
-        bool flipY;
+        bool mirrored;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
         utils::RGBA8 lowerLeftColor;
@@ -776,14 +776,14 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
           utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kGreen},
          {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kBlack,
           utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kRed,
-          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
-         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kBlue,
-          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen},
-         {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kBlack,
+         {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kBlack,
           utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kRed},
-         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kGreen,
-          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue}}};
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kGreen,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kRed,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kBlue,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
 
     for (const RotationExpectation& exp : expectations) {
         // Pipeline Creation
@@ -798,7 +798,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
         externalDesc.plane0 = sourceTexturePlane0.CreateView();
         externalDesc.plane1 = sourceTexturePlane1.CreateView();
         externalDesc.rotation = exp.rotation;
-        externalDesc.flipY = exp.flipY;
+        externalDesc.mirrored = exp.mirrored;
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 

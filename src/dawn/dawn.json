@@ -1604,6 +1604,7 @@
         "category": "structure",
         "extensible": "in",
         "tags": ["dawn"],
+        "_comment": "TODO(crbug.com/1514732): deprecate flipY",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
@@ -1619,7 +1620,8 @@
                 "length": 7},
             {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
                 "length": 9},
-            {"name": "flip y", "type": "bool", "default": "false"},
+            {"name": "flip y", "type": "bool", "default": "false", "tags": ["deprecated"]},
+            {"name": "mirrored", "type": "bool", "default": "false"},
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
