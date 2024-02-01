@@ -139,7 +139,7 @@ some:other,test:* [ Failure ]
 `,
 			results: result.List{
 				result.Result{
-					Query:  Q("a:b,c:d"),
+					Query:  Q("a:b,c:d:e"),
 					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
 					Status: result.Failure,
 				},
@@ -187,23 +187,23 @@ crbug.com/a/123 [ os-b ] a:b,c:* [ Failure ]
 		{ //////////////////////////////////////////////////////////////////////
 			name: "expectation case now passes",
 			expectations: `
-crbug.com/a/123 [ gpu-a os-a ] a:b,c:d [ Failure ]
-crbug.com/a/123 [ gpu-b os-b ] a:b,c:d [ Failure ]
+crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
+crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
 `,
 			results: result.List{
 				result.Result{
-					Query:  Q("a:b,c:d"),
+					Query:  Q("a:b,c:d:*"),
 					Tags:   result.NewTags("os-a", "gpu-a"),
 					Status: result.Pass,
 				},
 				result.Result{
-					Query:  Q("a:b,c:d"),
+					Query:  Q("a:b,c:d:*"),
 					Tags:   result.NewTags("os-b", "gpu-b"),
 					Status: result.Abort,
 				},
 			},
 			updated: `
-crbug.com/a/123 [ os-b ] a:b,c:d: [ Failure ]
+crbug.com/a/123 [ os-b ] a:b,c:d:* [ Failure ]
 `,
 			diagnostics: expectations.Diagnostics{
 				{
@@ -214,28 +214,71 @@ crbug.com/a/123 [ os-b ] a:b,c:d: [ Failure ]
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			name: "expectation case now passes KEEP - single",
+			name: "first expectation expands to cover later expectations - no diagnostics",
 			expectations: `
-# KEEP
-crbug.com/a/123 [ gpu-a os-a ] a:b,c:d [ Failure ]
-crbug.com/a/123 [ gpu-b os-b ] a:b,c:d [ Failure ]
+crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
+crbug.com/a/123 [ gpu-c os-a ] a:b,c:d:* [ Failure ]
 `,
 			results: result.List{
 				result.Result{
-					Query:  Q("a:b,c:d"),
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-a", "os-a"),
+					Status: result.Failure,
+				},
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-a", "os-b"),
+					Status: result.Pass,
+				},
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-b", "os-a"),
+					Status: result.Pass,
+				},
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-b", "os-b"),
+					Status: result.Pass,
+				},
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-c", "os-a"),
+					Status: result.Failure,
+				},
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
+					Tags:   result.NewTags("gpu-c", "os-b"),
+					Status: result.Pass,
+				},
+			},
+			updated: `
+crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
+crbug.com/a/123 [ gpu-c os-a ] a:b,c:d:* [ Failure ]
+`,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			name: "expectation case now passes KEEP - single",
+			expectations: `
+# KEEP
+crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
+crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
+`,
+			results: result.List{
+				result.Result{
+					Query:  Q("a:b,c:d:e"),
 					Tags:   result.NewTags("os-a", "gpu-a"),
 					Status: result.Pass,
 				},
 				result.Result{
-					Query:  Q("a:b,c:d"),
+					Query:  Q("a:b,c:d:e"),
 					Tags:   result.NewTags("os-b", "gpu-b"),
 					Status: result.Abort,
 				},
 			},
 			updated: `
 # KEEP
-crbug.com/a/123 [ gpu-a os-a ] a:b,c:d [ Failure ]
-crbug.com/a/123 [ gpu-b os-b ] a:b,c:d [ Failure ]
+crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
+crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
 `,
 			diagnostics: expectations.Diagnostics{
 				{

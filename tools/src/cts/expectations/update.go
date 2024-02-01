@@ -427,11 +427,8 @@ func (u *updater) chunk(in Chunk, isImmutable bool, progress *Progress) Chunk {
 		}
 	}
 
-	// Begin building the output chunk.
-	// Copy over the chunk's comments.
-	out := Chunk{Comments: in.Comments}
-
 	// Build the new chunk's expectations
+	newExpectations := container.NewMap[string, Expectation]()
 	for _, exIn := range in.Expectations {
 		if u.pb != nil {
 			u.pb.Update(progressbar.Status{Total: progress.totalExpectations, Segments: []progressbar.Segment{
@@ -440,20 +437,17 @@ func (u *updater) chunk(in Chunk, isImmutable bool, progress *Progress) Chunk {
 			progress.currentExpectation++
 		}
 
-		exOut := u.expectation(exIn, isImmutable)
-		out.Expectations = append(out.Expectations, exOut...)
+		u.addExpectations(newExpectations, exIn, isImmutable)
 	}
 
 	// Sort the expectations to keep things clean and tidy.
-	out.Expectations.Sort()
-	return out
+	return Chunk{Comments: in.Comments, Expectations: newExpectations.Values()}
 }
 
 // expectation returns a new list of Expectations, based on the Expectation 'in',
 // using the new result data.
-func (u *updater) expectation(in Expectation, immutable bool) []Expectation {
-	// noResults is a helper for returning when the expectation has no test
-	// results.
+func (u *updater) addExpectations(out container.Map[string, Expectation], in Expectation, isImmutable bool) {
+	// noResults is a helper for returning when the expectation has no test results.
 	noResults := func() []Expectation {
 		if len(in.Tags) > 0 {
 			u.diag(Warning, in.Line, "no results found for '%v' with tags %v", in.Query, in.Tags)
@@ -472,12 +466,14 @@ func (u *updater) expectation(in Expectation, immutable bool) []Expectation {
 	// If we can't find any results for this query + tag combination, then bail.
 	switch {
 	case errors.As(err, &query.ErrNoDataForQuery{}):
-		return noResults()
+		noResults()
+		return
 	case err != nil:
 		u.diag(Error, in.Line, "%v", err)
-		return []Expectation{}
+		return
 	case len(results) == 0:
-		return noResults()
+		noResults()
+		return
 	}
 
 	// Before returning, mark all the results as consumed.
@@ -486,21 +482,31 @@ func (u *updater) expectation(in Expectation, immutable bool) []Expectation {
 	// expectationsForRoot()
 	defer u.qt.markAsConsumed(q, in.Tags, in.Line)
 
-	if immutable { // Expectation chunk was marked with 'KEEP'
+	// keyOf returns the map key for out
+	keyOf := func(e Expectation) string { return fmt.Sprint(e.Tags, e.Query, e.Status) }
+
+	if isImmutable { // Expectation chunk was marked with 'KEEP'
 		// Add a diagnostic if all tests of the expectation were 'Pass'
 		if s := results.Statuses(); len(s) == 1 && s.One() == result.Pass {
 			u.diagAllPass(in.Line, results)
 		}
-		return []Expectation{in}
+		out.Add(keyOf(in), in)
+		return
 	}
 
 	// Rebuild the expectations for this query.
 	expectations, somePass, someConsumed := u.expectationsForRoot(q, in.Line, in.Bug, in.Comment)
 
+	// Add the new expectations to out
+	for _, expectation := range expectations {
+		out.Add(keyOf(expectation), expectation)
+	}
+
 	// Add a diagnostic if the expectation is filtered away
-	if len(expectations) == 0 {
+	if !out.Contains(keyOf(in)) && len(expectations) == 0 {
 		switch {
 		case somePass && someConsumed:
+			fmt.Println("\n", strings.Join(out.Keys(), "\n"))
 			u.diag(Note, in.Line, "expectation is partly covered by previous expectations and the remaining tests all pass")
 		case someConsumed:
 			u.diag(Note, in.Line, "expectation is fully covered by previous expectations")
@@ -509,7 +515,6 @@ func (u *updater) expectation(in Expectation, immutable bool) []Expectation {
 		}
 	}
 
-	return expectations
 }
 
 // addNewExpectations (potentially) appends to 'u.out' chunks for new flaky and
