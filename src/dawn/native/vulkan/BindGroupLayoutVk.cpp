@@ -31,6 +31,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
@@ -62,33 +63,30 @@ VkShaderStageFlags VulkanShaderStageFlags(wgpu::ShaderStage stages) {
 }  // anonymous namespace
 
 VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
-    switch (bindingInfo.bindingType) {
-        case BindingInfoType::Buffer:
-            switch (bindingInfo.buffer.type) {
+    return MatchVariant(
+        bindingInfo.bindingLayout,
+        [](const BufferBindingLayout& layout) -> VkDescriptorType {
+            switch (layout.type) {
                 case wgpu::BufferBindingType::Uniform:
-                    if (bindingInfo.buffer.hasDynamicOffset) {
+                    if (layout.hasDynamicOffset) {
                         return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
                     }
                     return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                 case wgpu::BufferBindingType::Storage:
                 case kInternalStorageBufferBinding:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
-                    if (bindingInfo.buffer.hasDynamicOffset) {
+                    if (layout.hasDynamicOffset) {
                         return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                     }
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
                 case wgpu::BufferBindingType::Undefined:
                     DAWN_UNREACHABLE();
+                    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             }
-        case BindingInfoType::Sampler:
-            return VK_DESCRIPTOR_TYPE_SAMPLER;
-        case BindingInfoType::Texture:
-        case BindingInfoType::ExternalTexture:
-            return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        case BindingInfoType::StorageTexture:
-            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    }
-    DAWN_UNREACHABLE();
+        },
+        [](const SamplerBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
+        [](const TextureBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
+        [](const StorageTextureBindingLayout&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; });
 }
 
 // static

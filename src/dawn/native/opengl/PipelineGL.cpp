@@ -147,7 +147,8 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
             GLuint textureIndex = indices[combined.textureLocation.group][bindingIndex];
             mUnitsForTextures[textureIndex].push_back(textureUnit);
 
-            shouldUseFiltering = bgl->GetBindingInfo(bindingIndex).texture.sampleType ==
+            const auto& bindingLayout = bgl->GetBindingInfo(bindingIndex).bindingLayout;
+            shouldUseFiltering = std::get<TextureBindingLayout>(bindingLayout).sampleType ==
                                  wgpu::TextureSampleType::Float;
         }
         {

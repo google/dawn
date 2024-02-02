@@ -27,10 +27,22 @@
 
 #include "dawn/native/BindingInfo.h"
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Limits.h"
 
 namespace dawn::native {
+
+BindingInfoType GetBindingInfoType(const BindingInfo& info) {
+    return MatchVariant(
+        info.bindingLayout,
+        [](const BufferBindingLayout&) -> BindingInfoType { return BindingInfoType::Buffer; },
+        [](const SamplerBindingLayout&) -> BindingInfoType { return BindingInfoType::Sampler; },
+        [](const TextureBindingLayout&) -> BindingInfoType { return BindingInfoType::Texture; },
+        [](const StorageTextureBindingLayout&) -> BindingInfoType {
+            return BindingInfoType::StorageTexture;
+        });
+}
 
 void IncrementBindingCounts(BindingCounts* bindingCounts,
                             const UnpackedPtr<BindGroupLayoutEntry>& entry) {

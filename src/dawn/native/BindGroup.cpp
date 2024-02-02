@@ -28,6 +28,7 @@
 #include "dawn/native/BindGroup.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -50,7 +51,7 @@ namespace {
 
 MaybeError ValidateBufferBinding(const DeviceBase* device,
                                  const BindGroupEntry& entry,
-                                 const BindingInfo& bindingInfo) {
+                                 const BufferBindingLayout& layout) {
     DAWN_INVALID_IF(entry.buffer == nullptr, "Binding entry buffer not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.textureView != nullptr,
@@ -59,8 +60,6 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
 
     DAWN_TRY(device->ValidateObject(entry.buffer));
-
-    DAWN_ASSERT(bindingInfo.bindingType == BindingInfoType::Buffer);
 
     uint64_t bufferSize = entry.buffer->GetSize();
 
@@ -87,7 +86,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     wgpu::BufferUsage requiredUsage;
     uint64_t maxBindingSize;
     uint64_t requiredBindingAlignment;
-    switch (bindingInfo.buffer.type) {
+    switch (layout.type) {
         case wgpu::BufferBindingType::Uniform:
             requiredUsage = wgpu::BufferUsage::Uniform;
             maxBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
@@ -101,7 +100,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             DAWN_INVALID_IF(
                 bindingSize % 4 != 0,
                 "Binding size (%u) of %s isn't a multiple of 4 when binding type is (%s).",
-                bindingSize, entry.buffer, bindingInfo.buffer.type);
+                bindingSize, entry.buffer, layout.type);
             break;
         case kInternalStorageBufferBinding:
             requiredUsage = kInternalStorageBuffer;
@@ -114,15 +113,15 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
 
     DAWN_INVALID_IF(!IsAligned(entry.offset, requiredBindingAlignment),
                     "Offset (%u) of %s does not satisfy the minimum %s alignment (%u).",
-                    entry.offset, entry.buffer, bindingInfo.buffer.type, requiredBindingAlignment);
+                    entry.offset, entry.buffer, layout.type, requiredBindingAlignment);
 
     DAWN_INVALID_IF(!(entry.buffer->GetUsage() & requiredUsage),
                     "Binding usage (%s) of %s doesn't match expected usage (%s).",
                     entry.buffer->GetUsageExternalOnly(), entry.buffer, requiredUsage);
 
-    DAWN_INVALID_IF(bindingSize < bindingInfo.buffer.minBindingSize,
+    DAWN_INVALID_IF(bindingSize < layout.minBindingSize,
                     "Binding size (%u) of %s is smaller than the minimum binding size (%u).",
-                    bindingSize, entry.buffer, bindingInfo.buffer.minBindingSize);
+                    bindingSize, entry.buffer, layout.minBindingSize);
 
     DAWN_INVALID_IF(bindingSize > maxBindingSize,
                     "Binding size (%u) of %s is larger than the maximum binding size (%u).",
@@ -131,10 +130,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureBinding(DeviceBase* device,
-                                  const BindGroupEntry& entry,
-                                  const BindingInfo& bindingInfo,
-                                  UsageValidationMode mode) {
+MaybeError ValidateTextureBindGroupEntry(DeviceBase* device, const BindGroupEntry& entry) {
     DAWN_INVALID_IF(entry.textureView == nullptr, "Binding entry textureView not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.buffer != nullptr,
@@ -142,7 +138,20 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
 
     DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
 
+    TextureViewBase* view = entry.textureView;
     DAWN_TRY(device->ValidateObject(entry.textureView));
+
+    Aspect aspect = view->GetAspects();
+    DAWN_INVALID_IF(!HasOneBit(aspect), "Multiple aspects (%s) selected in %s.", aspect, view);
+
+    return {};
+}
+
+MaybeError ValidateSampledTextureBinding(DeviceBase* device,
+                                         const BindGroupEntry& entry,
+                                         const TextureBindingLayout& layout,
+                                         UsageValidationMode mode) {
+    DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
 
     TextureViewBase* view = entry.textureView;
 
@@ -150,76 +159,73 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
     DAWN_INVALID_IF(!HasOneBit(aspect), "Multiple aspects (%s) selected in %s.", aspect, view);
 
     TextureBase* texture = view->GetTexture();
-    switch (bindingInfo.bindingType) {
-        case BindingInfoType::Texture: {
-            SampleTypeBit supportedTypes =
-                texture->GetFormat().GetAspectInfo(aspect).supportedSampleTypes;
-            DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::TextureBinding, mode));
 
-            DAWN_INVALID_IF(texture->IsMultisampledTexture() != bindingInfo.texture.multisampled,
-                            "Sample count (%u) of %s doesn't match expectation (multisampled: %d).",
-                            texture->GetSampleCount(), texture, bindingInfo.texture.multisampled);
+    SampleTypeBit supportedTypes = texture->GetFormat().GetAspectInfo(aspect).supportedSampleTypes;
+    DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::TextureBinding, mode));
 
-            SampleTypeBit requiredType;
-            if (bindingInfo.texture.sampleType == kInternalResolveAttachmentSampleType) {
-                // If the binding's sample type is kInternalResolveAttachmentSampleType,
-                // then the supported types must contain float.
-                requiredType = SampleTypeBit::UnfilterableFloat;
-            } else {
-                requiredType = SampleTypeToSampleTypeBit(bindingInfo.texture.sampleType);
-            }
+    DAWN_INVALID_IF(texture->IsMultisampledTexture() != layout.multisampled,
+                    "Sample count (%u) of %s doesn't match expectation (multisampled: %d).",
+                    texture->GetSampleCount(), texture, layout.multisampled);
 
-            DAWN_INVALID_IF(
-                !(supportedTypes & requiredType),
-                "None of the supported sample types (%s) of %s match the expected sample "
-                "types (%s).",
-                supportedTypes, texture, requiredType);
-
-            DAWN_INVALID_IF(entry.textureView->GetDimension() != bindingInfo.texture.viewDimension,
-                            "Dimension (%s) of %s doesn't match the expected dimension (%s).",
-                            entry.textureView->GetDimension(), entry.textureView,
-                            bindingInfo.texture.viewDimension);
-
-            DAWN_INVALID_IF(device->IsCompatibilityMode() &&
-                                entry.textureView->GetDimension() !=
-                                    texture->GetCompatibilityTextureBindingViewDimension(),
-                            "Dimension (%s) of %s must match textureBindingViewDimension (%s) of "
-                            "%s in compatibility mode.",
-                            entry.textureView->GetDimension(), entry.textureView,
-                            texture->GetCompatibilityTextureBindingViewDimension(), texture);
-            break;
-        }
-        case BindingInfoType::StorageTexture: {
-            DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::StorageBinding, mode));
-
-            DAWN_ASSERT(!texture->IsMultisampledTexture());
-
-            DAWN_INVALID_IF(texture->GetFormat().format != bindingInfo.storageTexture.format,
-                            "Format (%s) of %s expected to be (%s).", texture->GetFormat().format,
-                            texture, bindingInfo.storageTexture.format);
-
-            DAWN_INVALID_IF(
-                entry.textureView->GetDimension() != bindingInfo.storageTexture.viewDimension,
-                "Dimension (%s) of %s doesn't match the expected dimension (%s).",
-                entry.textureView->GetDimension(), entry.textureView,
-                bindingInfo.storageTexture.viewDimension);
-
-            DAWN_INVALID_IF(entry.textureView->GetLevelCount() != 1,
-                            "mipLevelCount (%u) of %s expected to be 1.",
-                            entry.textureView->GetLevelCount(), entry.textureView);
-            break;
-        }
-        default:
-            DAWN_UNREACHABLE();
-            break;
+    SampleTypeBit requiredType;
+    if (layout.sampleType == kInternalResolveAttachmentSampleType) {
+        // If the binding's sample type is kInternalResolveAttachmentSampleType,
+        // then the supported types must contain float.
+        requiredType = SampleTypeBit::UnfilterableFloat;
+    } else {
+        requiredType = SampleTypeToSampleTypeBit(layout.sampleType);
     }
+
+    DAWN_INVALID_IF(!(supportedTypes & requiredType),
+                    "None of the supported sample types (%s) of %s match the expected sample "
+                    "types (%s).",
+                    supportedTypes, texture, requiredType);
+
+    DAWN_INVALID_IF(entry.textureView->GetDimension() != layout.viewDimension,
+                    "Dimension (%s) of %s doesn't match the expected dimension (%s).",
+                    entry.textureView->GetDimension(), entry.textureView, layout.viewDimension);
+
+    DAWN_INVALID_IF(
+        device->IsCompatibilityMode() && entry.textureView->GetDimension() !=
+                                             texture->GetCompatibilityTextureBindingViewDimension(),
+        "Dimension (%s) of %s must match textureBindingViewDimension (%s) of "
+        "%s in compatibility mode.",
+        entry.textureView->GetDimension(), entry.textureView,
+        texture->GetCompatibilityTextureBindingViewDimension(), texture);
+
+    return {};
+}
+
+MaybeError ValidateStorageTextureBinding(DeviceBase* device,
+                                         const BindGroupEntry& entry,
+                                         const StorageTextureBindingLayout& layout,
+                                         UsageValidationMode mode) {
+    DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
+
+    TextureViewBase* view = entry.textureView;
+    TextureBase* texture = view->GetTexture();
+
+    DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::StorageBinding, mode));
+
+    DAWN_ASSERT(!texture->IsMultisampledTexture());
+
+    DAWN_INVALID_IF(texture->GetFormat().format != layout.format,
+                    "Format (%s) of %s expected to be (%s).", texture->GetFormat().format, texture,
+                    layout.format);
+
+    DAWN_INVALID_IF(view->GetDimension() != layout.viewDimension,
+                    "Dimension (%s) of %s doesn't match the expected dimension (%s).",
+                    view->GetDimension(), entry.textureView, layout.viewDimension);
+
+    DAWN_INVALID_IF(view->GetLevelCount() != 1, "mipLevelCount (%u) of %s expected to be 1.",
+                    view->GetLevelCount(), view);
 
     return {};
 }
 
 MaybeError ValidateSamplerBinding(const DeviceBase* device,
                                   const BindGroupEntry& entry,
-                                  const BindingInfo& bindingInfo) {
+                                  const SamplerBindingLayout& layout) {
     DAWN_INVALID_IF(entry.sampler == nullptr, "Binding entry sampler not set.");
 
     DAWN_INVALID_IF(entry.textureView != nullptr || entry.buffer != nullptr,
@@ -229,9 +235,7 @@ MaybeError ValidateSamplerBinding(const DeviceBase* device,
 
     DAWN_TRY(device->ValidateObject(entry.sampler));
 
-    DAWN_ASSERT(bindingInfo.bindingType == BindingInfoType::Sampler);
-
-    switch (bindingInfo.sampler.type) {
+    switch (layout.type) {
         case wgpu::SamplerBindingType::NonFiltering:
             DAWN_INVALID_IF(entry.sampler->IsFiltering(),
                             "Filtering sampler %s is incompatible with non-filtering sampler "
@@ -283,7 +287,9 @@ template <typename F>
 void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* bgl, F&& f) {
     uint32_t packedIndex = 0;
     for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
-        if (bgl->GetBindingInfo(bindingIndex).buffer.minBindingSize == 0) {
+        const auto* bufferLayout =
+            std::get_if<BufferBindingLayout>(&bgl->GetBindingInfo(bindingIndex).bindingLayout);
+        if (bufferLayout == nullptr || bufferLayout->minBindingSize == 0) {
             f(bindingIndex, packedIndex++);
         }
     }
@@ -353,31 +359,37 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
 
         // Perform binding-type specific validation.
-        switch (bindingInfo.bindingType) {
-            case BindingInfoType::Buffer:
+        DAWN_TRY(MatchVariant(
+            bindingInfo.bindingLayout,
+            [&](const BufferBindingLayout& layout) -> MaybeError {
                 // TODO(dawn:1485): Validate buffer binding with usage validation mode.
-                DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, bindingInfo),
+                DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, layout),
                                  "validating entries[%u] as a Buffer."
                                  "\nExpected entry layout: %s",
-                                 i, bindingInfo);
-                break;
-            case BindingInfoType::Texture:
-            case BindingInfoType::StorageTexture:
-                DAWN_TRY_CONTEXT(ValidateTextureBinding(device, entry, bindingInfo, mode),
-                                 "validating entries[%u] as a Texture."
+                                 i, layout);
+                return {};
+            },
+            [&](const TextureBindingLayout& layout) -> MaybeError {
+                DAWN_TRY_CONTEXT(ValidateSampledTextureBinding(device, entry, layout, mode),
+                                 "validating entries[%u] as a Sampled Texture."
                                  "\nExpected entry layout: %s",
-                                 i, bindingInfo);
-                break;
-            case BindingInfoType::Sampler:
-                DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, bindingInfo),
+                                 i, layout);
+                return {};
+            },
+            [&](const StorageTextureBindingLayout& layout) -> MaybeError {
+                DAWN_TRY_CONTEXT(ValidateStorageTextureBinding(device, entry, layout, mode),
+                                 "validating entries[%u] as a Storage Texture."
+                                 "\nExpected entry layout: %s",
+                                 i, layout);
+                return {};
+            },
+            [&](const SamplerBindingLayout& layout) -> MaybeError {
+                DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, layout),
                                  "validating entries[%u] as a Sampler."
                                  "\nExpected entry layout: %s",
-                                 i, bindingInfo);
-                break;
-            case BindingInfoType::ExternalTexture:
-                DAWN_UNREACHABLE();
-                break;
-        }
+                                 i, layout);
+                return {};
+            }));
     }
 
     // This should always be true because
@@ -545,7 +557,8 @@ BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(layout->GetBindingInfo(bindingIndex).bindingType == BindingInfoType::Buffer);
+    DAWN_ASSERT(std::holds_alternative<BufferBindingLayout>(
+        layout->GetBindingInfo(bindingIndex).bindingLayout));
     BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
     return {buffer, mBindingData.bufferData[bindingIndex].offset,
             mBindingData.bufferData[bindingIndex].size};
@@ -555,7 +568,8 @@ SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) const
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(layout->GetBindingInfo(bindingIndex).bindingType == BindingInfoType::Sampler);
+    DAWN_ASSERT(std::holds_alternative<SamplerBindingLayout>(
+        layout->GetBindingInfo(bindingIndex).bindingLayout));
     return static_cast<SamplerBase*>(mBindingData.bindings[bindingIndex].Get());
 }
 
@@ -563,9 +577,10 @@ TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingInde
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(layout->GetBindingInfo(bindingIndex).bindingType == BindingInfoType::Texture ||
-                layout->GetBindingInfo(bindingIndex).bindingType ==
-                    BindingInfoType::StorageTexture);
+    DAWN_ASSERT(std::holds_alternative<TextureBindingLayout>(
+                    layout->GetBindingInfo(bindingIndex).bindingLayout) ||
+                std::holds_alternative<StorageTextureBindingLayout>(
+                    layout->GetBindingInfo(bindingIndex).bindingLayout));
     return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
 }
 

@@ -120,7 +120,7 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
     for (BindingIndex bindingIndex = bgl->GetDynamicBufferCount();
          bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
         const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-        if (bindingInfo.bindingType == BindingInfoType::Sampler) {
+        if (std::holds_alternative<SamplerBindingLayout>(bindingInfo.bindingLayout)) {
             samplers.push_back(ToBackend(group->GetBindingAsSampler(bindingIndex)));
         }
     }

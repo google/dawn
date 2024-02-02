@@ -32,6 +32,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
@@ -269,7 +270,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
              ++bindingIndex) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
 
-            if (bindingInfo.bindingType == BindingInfoType::Texture) {
+            if (std::holds_alternative<TextureBindingLayout>(bindingInfo.bindingLayout)) {
                 TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 view->CopyIfNeeded();
             }
@@ -278,21 +279,21 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
              ++bindingIndex) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-
-            switch (bindingInfo.bindingType) {
-                case BindingInfoType::Buffer: {
+            MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const BufferBindingLayout& layout) {
                     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                     GLuint buffer = ToBackend(binding.buffer)->GetHandle();
                     GLuint index = indices[bindingIndex];
                     GLuint offset = binding.offset;
 
-                    if (bindingInfo.buffer.hasDynamicOffset) {
+                    if (layout.hasDynamicOffset) {
                         // Dynamic buffers are packed at the front of BindingIndices.
                         offset += dynamicOffsets[bindingIndex];
                     }
 
                     GLenum target;
-                    switch (bindingInfo.buffer.type) {
+                    switch (layout.type) {
                         case wgpu::BufferBindingType::Uniform:
                             target = GL_UNIFORM_BUFFER;
                             break;
@@ -306,10 +307,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     }
 
                     gl.BindBufferRange(target, index, buffer, offset, binding.size);
-                    break;
-                }
-
-                case BindingInfoType::Sampler: {
+                },
+                [&](const SamplerBindingLayout&) {
                     Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     GLuint samplerIndex = indices[bindingIndex];
 
@@ -323,10 +322,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             gl.BindSampler(unit.unit, sampler->GetNonFilteringHandle());
                         }
                     }
-                    break;
-                }
-
-                case BindingInfoType::Texture: {
+                },
+                [&](const TextureBindingLayout&) {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     GLuint handle = view->GetHandle();
                     GLenum target = view->GetGLTarget();
@@ -365,18 +362,15 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     // Some texture builtin function data needs emulation to update into the
                     // internal uniform buffer.
                     UpdateTextureBuiltinsUniformData(gl, view, groupIndex, bindingIndex);
-
-                    break;
-                }
-
-                case BindingInfoType::StorageTexture: {
+                },
+                [&](const StorageTextureBindingLayout& layout) {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     Texture* texture = ToBackend(view->GetTexture());
                     GLuint handle = texture->GetHandle();
                     GLuint imageIndex = indices[bindingIndex];
 
                     GLenum access;
-                    switch (bindingInfo.storageTexture.access) {
+                    switch (layout.access) {
                         case wgpu::StorageTextureAccess::WriteOnly:
                             access = GL_WRITE_ONLY;
                             break;
@@ -405,13 +399,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                                         view->GetBaseArrayLayer(), access,
                                         texture->GetGLFormat().internalFormat);
                     texture->Touch();
-                    break;
-                }
-
-                case BindingInfoType::ExternalTexture:
-                    DAWN_UNREACHABLE();
-                    break;
-            }
+                });
         }
     }
 

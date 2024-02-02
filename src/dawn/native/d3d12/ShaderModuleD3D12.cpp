@@ -211,15 +211,17 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 continue;
             }
 
+            const auto& bindingLayout =
+                std::get<BufferBindingLayout>(bgl->GetBindingInfo(bindingIndex).bindingLayout);
+
             // Declaring a read-only storage buffer in HLSL but specifying a storage
             // buffer in the BGL produces the wrong output. Force read-only storage
             // buffer bindings to be treated as UAV instead of SRV. Internal storage
             // buffer is a storage buffer used in the internal pipeline.
             const bool forceStorageBufferAsUAV =
                 (bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage &&
-                 (bgl->GetBindingInfo(bindingIndex).buffer.type ==
-                      wgpu::BufferBindingType::Storage ||
-                  bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
+                 (bindingLayout.type == wgpu::BufferBindingType::Storage ||
+                  bindingLayout.type == kInternalStorageBufferBinding));
             if (forceStorageBufferAsUAV) {
                 accessControls.emplace(srcBindingPoint, tint::core::Access::kReadWrite);
             }
@@ -250,7 +252,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             // }
             if ((bufferBindingInfo->type == wgpu::BufferBindingType::Storage ||
                  bufferBindingInfo->type == wgpu::BufferBindingType::ReadOnlyStorage) &&
-                !bgl->GetBindingInfo(bindingIndex).buffer.hasDynamicOffset) {
+                !bindingLayout.hasDynamicOffset) {
                 req.hlsl.tintOptions.binding_points_ignored_in_robustness_transform.emplace_back(
                     srcBindingPoint);
             }

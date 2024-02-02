@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
@@ -37,9 +38,10 @@
 namespace dawn::native::d3d12 {
 namespace {
 D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingInfo& bindingInfo) {
-    switch (bindingInfo.bindingType) {
-        case BindingInfoType::Buffer:
-            switch (bindingInfo.buffer.type) {
+    return MatchVariant(
+        bindingInfo.bindingLayout,
+        [](const BufferBindingLayout& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+            switch (layout.type) {
                 case wgpu::BufferBindingType::Uniform:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
                 case wgpu::BufferBindingType::Storage:
@@ -50,16 +52,15 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case wgpu::BufferBindingType::Undefined:
                     DAWN_UNREACHABLE();
             }
-
-        case BindingInfoType::Sampler:
+        },
+        [](const SamplerBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-
-        case BindingInfoType::Texture:
-        case BindingInfoType::ExternalTexture:
+        },
+        [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-
-        case BindingInfoType::StorageTexture:
-            switch (bindingInfo.storageTexture.access) {
+        },
+        [](const StorageTextureBindingLayout& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+            switch (layout.access) {
                 case wgpu::StorageTextureAccess::WriteOnly:
                 case wgpu::StorageTextureAccess::ReadWrite:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
@@ -68,7 +69,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case wgpu::StorageTextureAccess::Undefined:
                     DAWN_UNREACHABLE();
             }
-    }
+        });
 }
 }  // anonymous namespace
 
@@ -97,7 +98,8 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         if (bindingIndex < GetDynamicBufferCount()) {
             continue;
         }
-        DAWN_ASSERT(!bindingInfo.buffer.hasDynamicOffset);
+        DAWN_ASSERT(!std::holds_alternative<BufferBindingLayout>(bindingInfo.bindingLayout) ||
+                    !std::get<BufferBindingLayout>(bindingInfo.bindingLayout).hasDynamicOffset);
 
         mDescriptorHeapOffsets[bindingIndex] =
             descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
@@ -116,36 +118,32 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         // the descriptor table is set on a command list (during recording), and the descriptors
         // cannot be changed until the command list has finished executing for the last time, so we
         // don't need to set DESCRIPTORS_VOLATILE for any binding types.
-        switch (bindingInfo.bindingType) {
-            // Sampler descriptor ranges don't support DATA_* flags at all since samplers do not
-            // point to data.
-            case BindingInfoType::Sampler:
-                range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-                break;
+        range.Flags = MatchVariant(
+            bindingInfo.bindingLayout,
+            [](const SamplerBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                // Sampler descriptor ranges don't support DATA_* flags at all since samplers do not
+                // point to data.
+                return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+            },
+            [](const BufferBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                // In Dawn it's allowed to do state transitions on the buffers or textures after
+                // binding
+                // them on the current command list, which indicates a change to its data (or
+                // possibly resource metadata), so we cannot bind them as DATA_STATIC. We cannot
+                // bind them as DATA_STATIC_WHILE_SET_AT_EXECUTE either because it is required to be
+                // rebound to the command list before the next (this) Draw/Dispatch call, while
+                // currently we may not rebind these resources if the current bind group is not
+                // changed.
+                return D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS |
+                       D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+            },
+            [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+            },
+            [](const StorageTextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+            });
 
-            // In Dawn it's allowed to do state transitions on the buffers or textures after binding
-            // them on the current command list, which indicates a change to its data (or possibly
-            // resource metadata), so we cannot bind them as DATA_STATIC.
-            // We cannot bind them as DATA_STATIC_WHILE_SET_AT_EXECUTE either because it is required
-            // to be rebound to the command list before the next (this) Draw/Dispatch call, while
-            // currently we may not rebind these resources if the current bind group is not changed.
-            case BindingInfoType::Buffer:
-                range.Flags =
-                    D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS |
-                    D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
-                break;
-            case BindingInfoType::Texture:
-            case BindingInfoType::StorageTexture:
-                range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
-                break;
-
-            // ExternalTexture bindings are decayed in the frontend and backends shouldn't need to
-            // handle them.
-            case BindingInfoType::ExternalTexture:
-            default:
-                DAWN_UNREACHABLE();
-                break;
-        }
         std::vector<D3D12_DESCRIPTOR_RANGE1>& descriptorRanges =
             descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER ? mSamplerDescriptorRanges
                                                                        : mCbvUavSrvDescriptorRanges;

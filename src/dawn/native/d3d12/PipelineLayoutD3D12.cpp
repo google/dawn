@@ -249,7 +249,8 @@ MaybeError PipelineLayout::Initialize() {
             mDynamicRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
 
             // Set parameter types according to bind group layout descriptor.
-            rootParameter.ParameterType = RootParameterType(bindingInfo.buffer.type);
+            rootParameter.ParameterType =
+                RootParameterType(std::get<BufferBindingLayout>(bindingInfo.bindingLayout).type);
 
             // Set visibilities according to bind group layout descriptor.
             rootParameter.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
@@ -424,7 +425,9 @@ PipelineLayout::GetDynamicStorageBufferLengthInfo() const {
 uint32_t PipelineLayout::GetDynamicRootParameterIndex(BindGroupIndex group,
                                                       BindingIndex bindingIndex) const {
     DAWN_ASSERT(group < kMaxBindGroupsTyped);
-    DAWN_ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).buffer.hasDynamicOffset);
+    DAWN_ASSERT(std::get<BufferBindingLayout>(
+                    GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).bindingLayout)
+                    .hasDynamicOffset);
     DAWN_ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                 wgpu::ShaderStage::None);
     return mDynamicRootParameterIndices[group][bindingIndex];

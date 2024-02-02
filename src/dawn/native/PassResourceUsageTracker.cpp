@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/EnumMaskIterator.h"
@@ -108,10 +109,11 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
          ++bindingIndex) {
         const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
 
-        switch (bindingInfo.bindingType) {
-            case BindingInfoType::Buffer: {
+        MatchVariant(
+            bindingInfo.bindingLayout,
+            [&](const BufferBindingLayout& layout) {
                 BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
-                switch (bindingInfo.buffer.type) {
+                switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform:
                         BufferUsedAs(buffer, wgpu::BufferUsage::Uniform, bindingInfo.visibility);
                         break;
@@ -127,12 +129,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
-                break;
-            }
-
-            case BindingInfoType::Texture: {
+            },
+            [&](const TextureBindingLayout& layout) {
                 TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                switch (bindingInfo.texture.sampleType) {
+                switch (layout.sampleType) {
                     case kInternalResolveAttachmentSampleType:
                         TextureViewUsedAs(view, kResolveAttachmentLoadingUsage,
                                           bindingInfo.visibility);
@@ -142,12 +142,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                                           bindingInfo.visibility);
                         break;
                 }
-                break;
-            }
-
-            case BindingInfoType::StorageTexture: {
+            },
+            [&](const StorageTextureBindingLayout& layout) {
                 TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                switch (bindingInfo.storageTexture.access) {
+                switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
                         TextureViewUsedAs(view, kWriteOnlyStorageTexture, bindingInfo.visibility);
                         break;
@@ -161,16 +159,8 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                     case wgpu::StorageTextureAccess::Undefined:
                         DAWN_UNREACHABLE();
                 }
-                break;
-            }
-
-            case BindingInfoType::ExternalTexture:
-                DAWN_UNREACHABLE();
-                break;
-
-            case BindingInfoType::Sampler:
-                break;
-        }
+            },
+            [&](const SamplerBindingLayout&) {});
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
@@ -222,24 +212,20 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
     for (BindingIndex index{0}; index < group->GetLayout()->GetBindingCount(); ++index) {
         const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(index);
 
-        switch (bindingInfo.bindingType) {
-            case BindingInfoType::Buffer: {
+        MatchVariant(
+            bindingInfo.bindingLayout,
+            [&](const BufferBindingLayout&) {
                 mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(index).buffer);
-                break;
-            }
-
-            case BindingInfoType::Texture:
-            case BindingInfoType::StorageTexture: {
+            },
+            [&](const TextureBindingLayout&) {
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
-                break;
-            }
-
-            case BindingInfoType::ExternalTexture:
-                DAWN_UNREACHABLE();
-            case BindingInfoType::Sampler:
-                break;
-        }
+            },
+            [&](const StorageTextureBindingLayout&) {
+                mUsage.referencedTextures.insert(
+                    group->GetBindingAsTextureView(index)->GetTexture());
+            },
+            [](const SamplerBindingLayout&) {});
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {

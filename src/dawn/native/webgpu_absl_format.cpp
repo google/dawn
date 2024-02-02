@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/Device.h"
@@ -115,26 +116,24 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     absl::FormatSink* s) {
     static const auto* const fmt =
         new absl::ParsedFormat<'u', 's', 's', 's'>("{ binding: %u, visibility: %s, %s: %s }");
-    switch (value.bindingType) {
-        case BindingInfoType::Buffer:
+    MatchVariant(
+        value.bindingLayout,
+        [&](const BufferBindingLayout& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
-                                      value.bindingType, value.buffer));
-            break;
-        case BindingInfoType::Sampler:
+                                      BindingInfoType::Buffer, layout));
+        },
+        [&](const SamplerBindingLayout& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
-                                      value.bindingType, value.sampler));
-            break;
-        case BindingInfoType::Texture:
+                                      BindingInfoType::Sampler, layout));
+        },
+        [&](const TextureBindingLayout& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
-                                      value.bindingType, value.texture));
-            break;
-        case BindingInfoType::StorageTexture:
+                                      BindingInfoType::Texture, layout));
+        },
+        [&](const StorageTextureBindingLayout& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
-                                      value.bindingType, value.storageTexture));
-            break;
-        case BindingInfoType::ExternalTexture:
-            break;
-    }
+                                      BindingInfoType::StorageTexture, layout));
+        });
     return {true};
 }
 

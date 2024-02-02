@@ -27,6 +27,7 @@
 
 #include "dawn/native/metal/CommandBufferMTL.h"
 
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Commands.h"
@@ -570,8 +571,9 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     SingleShaderStage::Compute)[index][bindingIndex];
             }
 
-            switch (bindingInfo.bindingType) {
-                case BindingInfoType::Buffer: {
+            MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const BufferBindingLayout& layout) {
                     const BufferBinding& binding = group->GetBindingAsBufferBinding(bindingIndex);
                     ToBackend(binding.buffer)->TrackUsage();
                     const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
@@ -579,7 +581,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
 
                     // TODO(crbug.com/dawn/854): Record bound buffer status to use
                     // setBufferOffset to achieve better performance.
-                    if (bindingInfo.buffer.hasDynamicOffset) {
+                    if (layout.hasDynamicOffset) {
                         // Dynamic buffers are packed at the front of BindingIndices.
                         offset += dynamicOffsets[bindingIndex];
                     }
@@ -606,11 +608,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                                     offsets:&offset
                                   withRange:NSMakeRange(computeIndex, 1)];
                     }
-
-                    break;
-                }
-
-                case BindingInfoType::Sampler: {
+                },
+                [&](const SamplerBindingLayout&) {
                     auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     if (hasVertStage) {
                         [render setVertexSamplerState:sampler->GetMTLSamplerState()
@@ -624,11 +623,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                         [compute setSamplerState:sampler->GetMTLSamplerState()
                                          atIndex:computeIndex];
                     }
-                    break;
-                }
-
-                case BindingInfoType::Texture:
-                case BindingInfoType::StorageTexture: {
+                },
+                [&](const TextureBindingLayout&) {
                     auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     if (hasVertStage) {
                         [render setVertexTexture:textureView->GetMTLTexture() atIndex:vertIndex];
@@ -639,12 +635,19 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     if (hasComputeStage) {
                         [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
                     }
-                    break;
-                }
-
-                case BindingInfoType::ExternalTexture:
-                    DAWN_UNREACHABLE();
-            }
+                },
+                [&](const StorageTextureBindingLayout&) {
+                    auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                    if (hasVertStage) {
+                        [render setVertexTexture:textureView->GetMTLTexture() atIndex:vertIndex];
+                    }
+                    if (hasFragStage) {
+                        [render setFragmentTexture:textureView->GetMTLTexture() atIndex:fragIndex];
+                    }
+                    if (hasComputeStage) {
+                        [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
+                    }
+                });
         }
     }
 

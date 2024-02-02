@@ -28,6 +28,7 @@
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/metal/DeviceMTL.h"
 
@@ -60,24 +61,24 @@ PipelineLayout::PipelineLayout(Device* device,
                     continue;
                 }
 
-                switch (bindingInfo.bindingType) {
-                    case BindingInfoType::Buffer:
+                MatchVariant(
+                    bindingInfo.bindingLayout,
+                    [&](const BufferBindingLayout&) {
                         mIndexInfo[stage][group][bindingIndex] = bufferIndex;
                         bufferIndex++;
-                        break;
-
-                    case BindingInfoType::Sampler:
+                    },
+                    [&](const SamplerBindingLayout&) {
                         mIndexInfo[stage][group][bindingIndex] = samplerIndex;
                         samplerIndex++;
-                        break;
-
-                    case BindingInfoType::Texture:
-                    case BindingInfoType::StorageTexture:
-                    case BindingInfoType::ExternalTexture:
+                    },
+                    [&](const TextureBindingLayout&) {
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
-                        break;
-                }
+                    },
+                    [&](const StorageTextureBindingLayout&) {
+                        mIndexInfo[stage][group][bindingIndex] = textureIndex;
+                        textureIndex++;
+                    });
             }
         }
 
