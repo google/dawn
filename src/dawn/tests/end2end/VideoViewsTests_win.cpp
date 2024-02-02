@@ -106,6 +106,20 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         }
     }
 
+    static UINT GetD3D11TextureBindFlags(wgpu::TextureUsage usage) {
+        UINT bindFlags = 0;
+        if (usage & wgpu::TextureUsage::TextureBinding) {
+            bindFlags |= D3D11_BIND_SHADER_RESOURCE;
+        }
+        if (usage & wgpu::TextureUsage::StorageBinding) {
+            bindFlags |= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+        }
+        if (usage & wgpu::TextureUsage::RenderAttachment) {
+            bindFlags |= D3D11_BIND_RENDER_TARGET;
+        }
+        return bindFlags;
+    }
+
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> CreateVideoTextureForTest(
         wgpu::TextureFormat format,
         wgpu::TextureUsage usage,
@@ -128,7 +142,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         d3dDescriptor.SampleDesc.Count = 1;
         d3dDescriptor.SampleDesc.Quality = 0;
         d3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
-        d3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        d3dDescriptor.BindFlags = GetD3D11TextureBindFlags(usage);
         d3dDescriptor.CPUAccessFlags = 0;
         d3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED;
 

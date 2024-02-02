@@ -196,6 +196,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.supportsSharedResourceCapabilityTier2) {
         EnableFeature(Feature::DawnMultiPlanarFormats);
         EnableFeature(Feature::MultiPlanarFormatP010);
+        EnableFeature(Feature::MultiPlanarRenderTargets);
     }
     if (mDeviceInfo.supportsROV) {
         EnableFeature(Feature::PixelLocalStorageCoherent);
