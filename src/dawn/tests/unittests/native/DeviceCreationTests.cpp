@@ -289,7 +289,7 @@ class DeviceCreationFutureTest
         }
 
         wgpu::Future future =
-            wgpuAdapter.RequestDeviceF(descriptor, {nullptr, *GetParam(), callback, userdata});
+            wgpuAdapter.RequestDevice(descriptor, {nullptr, *GetParam(), callback, userdata});
         wgpu::Instance wgpuInstance(instance->Get());
         switch (*GetParam()) {
             case wgpu::CallbackMode::WaitAnyOnly: {

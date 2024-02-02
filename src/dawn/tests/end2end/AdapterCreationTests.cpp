@@ -86,7 +86,7 @@ class AdapterCreationTest : public ::testing::TestWithParam<std::optional<wgpu::
         }
 
         wgpu::Future future =
-            inst.RequestAdapterF(options, {nullptr, *GetParam(), callback, userdata});
+            inst.RequestAdapter(options, {nullptr, *GetParam(), callback, userdata});
         switch (*GetParam()) {
             case wgpu::CallbackMode::WaitAnyOnly: {
                 // Callback should complete as soon as poll once.

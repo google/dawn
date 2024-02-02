@@ -223,6 +223,23 @@ namespace {{metadata.namespace}} {
     ) const
 {%- endmacro %}
 
+{% macro render_cpp_method_future_overrides_declaration(type, method) %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set OriginalMethodName = method.name.CamelCase() %}
+    {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" else OriginalMethodName %}
+    {{as_cppType(method.return_type.name)}} {{MethodName}}(
+        {%- for arg in method.arguments -%}
+            {%- if not loop.first %}, {% endif -%}
+            {%- if arg.type.category == "object" and arg.annotation == "value" -%}
+                {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}
+            {%- else -%}
+                {{as_annotated_cppType(arg)}}
+            {%- endif -%}
+            {{render_cpp_default_value(arg, False)}}
+        {%- endfor -%}
+    ) const
+{%- endmacro %}
+
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -233,6 +250,9 @@ namespace {{metadata.namespace}} {
 
             {% for method in type.methods %}
                 {{render_cpp_method_declaration(type, method)}};
+                {% if method.return_type.dict_name == "future" %}
+                    {{render_cpp_method_future_overrides_declaration(type, method)}};
+                {% endif %}
             {% endfor %}
 
           private:
