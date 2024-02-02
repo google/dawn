@@ -444,7 +444,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
     InstanceRequestAdapter(instance, &options, nullptr);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), nullptr))
+        EXPECT_CALL(mockCb,
+                    Call(WGPURequestAdapterStatus_InstanceDropped, nullptr, NotNull(), nullptr))
             .Times(1);
 
         GetWireClient()->Disconnect();

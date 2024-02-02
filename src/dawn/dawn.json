@@ -95,9 +95,10 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "unavailable"},
-            {"value": 2, "name": "error"},
-            {"value": 3, "name": "unknown"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "unavailable"},
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "unknown"}
         ]
     },
     "adapter": {
@@ -618,14 +619,15 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "validation error"},
-            {"value": 2, "name": "unknown"},
-            {"value": 3, "name": "device lost"},
-            {"value": 4, "name": "destroyed before callback"},
-            {"value": 5, "name": "unmapped before callback"},
-            {"value": 6, "name": "mapping already pending"},
-            {"value": 7, "name": "offset out of range"},
-            {"value": 8, "name": "size out of range"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "validation error"},
+            {"value": 3, "name": "unknown"},
+            {"value": 4, "name": "device lost"},
+            {"value": 5, "name": "destroyed before callback"},
+            {"value": 6, "name": "unmapped before callback"},
+            {"value": 7, "name": "mapping already pending"},
+            {"value": 8, "name": "offset out of range"},
+            {"value": 9, "name": "size out of range"}
         ]
     },
     "buffer map state": {
@@ -869,9 +871,10 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "error"},
-            {"value": 2, "name": "device lost"},
-            {"value": 3, "name": "unknown"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "error"},
+            {"value": 3, "name": "device lost"},
+            {"value": 4, "name": "unknown"}
         ]
     },
     "compilation message": {
@@ -1082,11 +1085,12 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "validation error"},
-            {"value": 2, "name": "internal error"},
-            {"value": 3, "name": "device lost"},
-            {"value": 4, "name": "device destroyed"},
-            {"value": 5, "name": "unknown"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "validation error"},
+            {"value": 3, "name": "internal error"},
+            {"value": 4, "name": "device lost"},
+            {"value": 5, "name": "device destroyed"},
+            {"value": 6, "name": "unknown"}
         ]
     },
     "create render pipeline async callback": {
@@ -2522,9 +2526,10 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "error"},
-            {"value": 2, "name": "unknown"},
-            {"value": 3, "name": "device lost"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "error"},
+            {"value": 3, "name": "unknown"},
+            {"value": 4, "name": "device lost"}
         ]
     },
 
@@ -2957,8 +2962,9 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
-            {"value": 1, "name": "error"},
-            {"value": 2, "name": "unknown"}
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "error"},
+            {"value": 3, "name": "unknown"}
         ]
     },
 

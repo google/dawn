@@ -55,6 +55,9 @@ class WorkDoneEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        if (completionType == EventCompletionType::Shutdown) {
+            mStatus = WGPUQueueWorkDoneStatus_InstanceDropped;
+        }
         if (mStatus == WGPUQueueWorkDoneStatus_DeviceLost) {
             mStatus = WGPUQueueWorkDoneStatus_Success;
         }

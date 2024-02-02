@@ -212,7 +212,8 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), nullptr, this))
+        EXPECT_CALL(mockCb,
+                    Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, NotNull(), this))
             .Times(1);
 
         GetWireClient()->Disconnect();
@@ -232,7 +233,8 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), nullptr, this))
+        EXPECT_CALL(mockCb,
+                    Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, NotNull(), this))
             .Times(1);
 
         GetWireClient()->Disconnect();
@@ -245,7 +247,8 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), nullptr, this))
+        EXPECT_CALL(mockCb,
+                    Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, NotNull(), this))
             .Times(1);
 
         DeviceCreateRenderPipelineAsync(device, &mDescriptor, this);
@@ -258,7 +261,8 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), nullptr, this))
+        EXPECT_CALL(mockCb,
+                    Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, NotNull(), this))
             .Times(1);
 
         DeviceCreateComputePipelineAsync(device, &mDescriptor, this);

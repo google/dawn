@@ -456,7 +456,7 @@ TEST_P(WireAdapterTests, RequestDeviceWireDisconnectedBeforeCallback) {
     AdapterRequestDevice(adapter, &desc, this);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPURequestDeviceStatus_Unknown, nullptr, NotNull(), this))
+        EXPECT_CALL(mockCb, Call(WGPURequestDeviceStatus_InstanceDropped, nullptr, NotNull(), this))
             .Times(1);
 
         GetWireClient()->Disconnect();

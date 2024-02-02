@@ -175,7 +175,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         }
 
         if (completionType == EventCompletionType::Shutdown) {
-            mCallback(ToAPI(wgpu::BufferMapAsyncStatus::Unknown), mUserdata);
+            mCallback(ToAPI(wgpu::BufferMapAsyncStatus::InstanceDropped), mUserdata);
             return;
         }
 

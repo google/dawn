@@ -70,8 +70,8 @@ class RequestDeviceEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPURequestDeviceStatus_Unknown;
-            mMessage = "GPU connection lost";
+            mStatus = WGPURequestDeviceStatus_InstanceDropped;
+            mMessage = "A valid external Instance reference no longer exists.";
         }
         if (mStatus != WGPURequestDeviceStatus_Success && mDevice != nullptr) {
             // If there was an error, we may need to reclaim the device allocation, otherwise the

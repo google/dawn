@@ -228,7 +228,7 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
         // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
         wgpu::QueueWorkDoneStatus status = wgpu::QueueWorkDoneStatus::Success;
         if (completionType == EventCompletionType::Shutdown) {
-            status = wgpu::QueueWorkDoneStatus::Unknown;
+            status = wgpu::QueueWorkDoneStatus::InstanceDropped;
         } else if (mEarlyStatus) {
             status = mEarlyStatus.value();
         }

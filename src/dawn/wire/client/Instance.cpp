@@ -77,8 +77,8 @@ class RequestAdapterEvent : public TrackedEvent {
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPURequestAdapterStatus_Unknown;
-            mMessage = "GPU connection lost";
+            mStatus = WGPURequestAdapterStatus_InstanceDropped;
+            mMessage = "A valid external Instance reference no longer exists.";
         }
         if (mStatus != WGPURequestAdapterStatus_Success && mAdapter != nullptr) {
             // If there was an error, we may need to reclaim the adapter allocation, otherwise the

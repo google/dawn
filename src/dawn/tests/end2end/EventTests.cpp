@@ -431,7 +431,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
     //
     // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect the
     // callback to be cleaned up immediately (and should expect it to happen on a future Tick).
-    ASSERT_EQ(status, WGPUQueueWorkDoneStatus_Unknown);
+    ASSERT_EQ(status, WGPUQueueWorkDoneStatus_InstanceDropped);
 }
 
 TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
@@ -457,7 +457,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
     //
     // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect the
     // callback to be cleaned up immediately (and should expect it to happen on a future Tick).
-    ASSERT_EQ(status, WGPUQueueWorkDoneStatus_Unknown);
+    ASSERT_EQ(status, WGPUQueueWorkDoneStatus_InstanceDropped);
 }
 
 // TODO(crbug.com/dawn/1987):
