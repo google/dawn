@@ -1324,48 +1324,47 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
 }
 
 ShaderModuleBase::ScopedUseTintProgram ShaderModuleBase::UseTintProgram() {
-    return mTintData.Use(
-        [&](auto tintData) {
-            if (tintData->tintProgram) {
-                return ScopedUseTintProgram(this);
-            }
-
-            // When the ShaderModuleBase is not referenced externally, and not used for initializing
-            // any pipeline, the mTintProgram will be released. However the ShaderModuleBase itself
-            // may still alive due to being referenced by some pipelines. In this case, when
-            // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look
-            // up from the cache and return the same ShaderModuleBase. In this case, we have to
-            // recreate mTintProgram, when the mTintProgram is required for initializing new
-            // pipelines.
-            ShaderModuleDescriptor descriptor;
-            ShaderModuleWGSLDescriptor wgslDescriptor;
-            ShaderModuleSPIRVDescriptor sprivDescriptor;
-
-            switch (mType) {
-                case Type::Spirv:
-                    sprivDescriptor.codeSize = mOriginalSpirv.size();
-                    sprivDescriptor.code = mOriginalSpirv.data();
-                    descriptor.nextInChain = &sprivDescriptor;
-                    break;
-                case Type::Wgsl:
-                    wgslDescriptor.code = mWgsl.c_str();
-                    descriptor.nextInChain = &wgslDescriptor;
-                    break;
-                default:
-                    DAWN_ASSERT(false);
-            }
-
-            ShaderModuleParseResult parseResult;
-            ValidateAndParseShaderModule(GetDevice(), Unpack(&descriptor), &parseResult,
-                                         /*compilationMessages=*/nullptr)
-                .AcquireSuccess();
-            DAWN_ASSERT(parseResult.tintProgram != nullptr);
-
-            tintData->tintProgram = std::move(parseResult.tintProgram);
-            tintData->tintProgramRecreateCount++;
-
+    return mTintData.Use([&](auto tintData) {
+        if (tintData->tintProgram) {
             return ScopedUseTintProgram(this);
-        });
+        }
+
+        // When the ShaderModuleBase is not referenced externally, and not used for initializing
+        // any pipeline, the mTintProgram will be released. However the ShaderModuleBase itself
+        // may still alive due to being referenced by some pipelines. In this case, when
+        // DeviceBase::APICreateShaderModule() with the same shader source code, Dawn will look
+        // up from the cache and return the same ShaderModuleBase. In this case, we have to
+        // recreate mTintProgram, when the mTintProgram is required for initializing new
+        // pipelines.
+        ShaderModuleDescriptor descriptor;
+        ShaderModuleWGSLDescriptor wgslDescriptor;
+        ShaderModuleSPIRVDescriptor sprivDescriptor;
+
+        switch (mType) {
+            case Type::Spirv:
+                sprivDescriptor.codeSize = mOriginalSpirv.size();
+                sprivDescriptor.code = mOriginalSpirv.data();
+                descriptor.nextInChain = &sprivDescriptor;
+                break;
+            case Type::Wgsl:
+                wgslDescriptor.code = mWgsl.c_str();
+                descriptor.nextInChain = &wgslDescriptor;
+                break;
+            default:
+                DAWN_ASSERT(false);
+        }
+
+        ShaderModuleParseResult parseResult;
+        ValidateAndParseShaderModule(GetDevice(), Unpack(&descriptor), &parseResult,
+                                     /*compilationMessages=*/nullptr)
+            .AcquireSuccess();
+        DAWN_ASSERT(parseResult.tintProgram != nullptr);
+
+        tintData->tintProgram = std::move(parseResult.tintProgram);
+        tintData->tintProgramRecreateCount++;
+
+        return ScopedUseTintProgram(this);
+    });
 }
 
 Ref<TintProgram> ShaderModuleBase::GetTintProgram() const {
