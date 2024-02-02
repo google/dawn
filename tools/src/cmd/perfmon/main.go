@@ -750,7 +750,6 @@ func (e env) buildTint() error {
 		"-DCMAKE_BUILD_TESTS=0",
 		"-DCMAKE_BUILD_SAMPLES=0",
 		"-DTINT_EXTERNAL_BENCHMARK_CORPUS_DIR="+e.cfg.ExternalBenchmarkCorpus,
-		"-DTINT_BUILD_DOCS=0",
 		"-DTINT_BUILD_CMD_TOOLS=0",
 		"-DTINT_BUILD_TESTS=0",
 		"-DTINT_BUILD_SPV_READER=1",

@@ -121,7 +121,6 @@ call :status "Configuring build system"
 mkdir %BUILD_DIR%
 cd /d %BUILD_DIR%
 set COMMON_CMAKE_FLAGS=             ^
-    -DTINT_BUILD_DOCS=O             ^
     -DTINT_BUILD_BENCHMARKS=1       ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DTINT_BUILD_BENCHMARKS=1       ^
