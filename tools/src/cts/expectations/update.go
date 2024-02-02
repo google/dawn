@@ -546,8 +546,7 @@ func (u *updater) addNewExpectations() error {
 		// Add all the reduced leaf nodes to 'roots'.
 		for _, qd := range tree.List() {
 			if qd.Data != result.Pass {
-				// Use Split() to ensure that only the leaves have data (true) in the tree
-				roots.Split(qd.Query, true)
+				roots.Add(qd.Query, true)
 			}
 		}
 	}

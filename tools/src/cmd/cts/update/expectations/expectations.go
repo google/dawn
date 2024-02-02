@@ -142,7 +142,6 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 		// Update the expectations file with the results
 		log.Printf("updating expectations %s...\n", expectationsFilename)
-		// Not clear what to do here
 		name := result.ExecutionMode("core")
 		if strings.Contains(expectationsFilename, "compat") {
 			name = "compat"
