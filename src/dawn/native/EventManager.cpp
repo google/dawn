@@ -439,12 +439,7 @@ EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode,
     : mCallbackMode(callbackMode), mCompletionData(QueueAndSerial{queue, completionSerial}) {}
 
 EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode, Completed tag)
-    : TrackedEvent(callbackMode, [] {
-          // Make a system event that is already signaled.
-          // Note that this won't make a real OS event because the OS
-          // event is lazily created when waited on.
-          return SystemEvent::CreateSignaled();
-      }()) {}
+    : TrackedEvent(callbackMode, SystemEvent::CreateSignaled()) {}
 
 EventManager::TrackedEvent::~TrackedEvent() {
     DAWN_ASSERT(mCompleted);

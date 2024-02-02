@@ -151,7 +151,7 @@ class EventManager::TrackedEvent : public RefCounted {
     wgpu::CallbackMode mCallbackMode;
 
 #if DAWN_ENABLE_ASSERTS
-    std::atomic<bool> mCurrentlyBeingWaited;
+    std::atomic<bool> mCurrentlyBeingWaited = false;
 #endif
 
   private:
