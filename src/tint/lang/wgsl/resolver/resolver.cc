@@ -3694,7 +3694,8 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
         case core::UnaryOp::kAddressOf:
             if (auto* ref = expr_ty->As<core::type::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
-                    AddError("cannot take the address of expression in handle address space",
+                    AddError("cannot take the address of " + sem_.Describe(expr) +
+                                 " in handle address space",
                              unary->expr->source);
                     return nullptr;
                 }
@@ -3713,7 +3714,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
                 root_ident = expr->RootIdentifier();
             } else {
-                AddError("cannot take the address of expression", unary->expr->source);
+                AddError("cannot take the address of " + sem_.Describe(expr), unary->expr->source);
                 return nullptr;
             }
             break;

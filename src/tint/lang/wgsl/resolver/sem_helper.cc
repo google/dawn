@@ -94,7 +94,7 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
         },
         [&](const sem::ValueExpression* val_expr) {
             auto type = val_expr->Type()->FriendlyName();
-            return "value expression of type '" + type + "'";
+            return "value of type '" + type + "'";
         },
         [&](const sem::TypeExpression* ty_expr) {
             auto name = ty_expr->Type()->FriendlyName();

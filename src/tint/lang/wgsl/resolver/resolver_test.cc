@@ -138,7 +138,7 @@ TEST_F(ResolverTest, Stmt_Case_AddressOf_Invalid) {
     WrapInFunction(cond_var, Switch("i", Case(CaseSelector(AddressOf(1_a)), Block())));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot take the address of expression");
+    EXPECT_EQ(r()->error(), "error: cannot take the address of value of type 'abstract-int'");
 }
 
 TEST_F(ResolverTest, Stmt_Block) {
@@ -2411,7 +2411,7 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
          });
 
     ASSERT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot take the address of expression in handle address space");
+    EXPECT_EQ(r()->error(), "error: cannot take the address of var 's' in handle address space");
 }
 
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {

@@ -276,7 +276,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
     WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1_i), 1_i, core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to value expression of type 'i32')");
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to value of type 'i32')");
 }
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {

@@ -143,7 +143,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_LetIdentExpr) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of let 'z'");
 }
 
 TEST_F(ResolverCallValidationTest,
@@ -214,7 +214,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfLetMember) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of value of type 'i32'");
 }
 
 TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParam) {

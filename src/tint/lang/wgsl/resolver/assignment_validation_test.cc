@@ -222,7 +222,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
                    Assign(Expr(Source{{12, 34}}, 1_i), "my_var"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value expression of type 'i32')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value of type 'i32')");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToOverride_Fail) {
@@ -292,7 +292,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToLetMember_Fail) {
                    Assign(MemberAccessor(Source{{12, 34}}, Expr(Source{{56, 78}}, "a"), "i"), 2_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value expression of type 'i32'
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot assign to value of type 'i32'
 56:78 note: 'let' variables are immutable
 98:76 note: let 'a' declared here)");
 }
