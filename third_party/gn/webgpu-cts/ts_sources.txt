@@ -361,10 +361,12 @@ src/webgpu/idl/constants/flags.spec.ts
 src/webgpu/shader/types.ts
 src/webgpu/shader/values.ts
 src/webgpu/shader/execution/float_parse.spec.ts
+src/webgpu/shader/execution/memory_layout.spec.ts
 src/webgpu/shader/execution/padding.spec.ts
 src/webgpu/shader/execution/robust_access.spec.ts
 src/webgpu/shader/execution/robust_access_vertex.spec.ts
 src/webgpu/shader/execution/shadow.spec.ts
+src/webgpu/shader/execution/stage.spec.ts
 src/webgpu/shader/execution/zero_init.spec.ts
 src/webgpu/shader/execution/expression/expression.ts
 src/webgpu/shader/execution/expression/binary/af_addition.cache.ts
@@ -669,13 +671,16 @@ src/webgpu/shader/execution/shader_io/compute_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/fragment_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/shared_structs.spec.ts
 src/webgpu/shader/execution/shader_io/workgroup_size.spec.ts
+src/webgpu/shader/execution/statement/compound.spec.ts
 src/webgpu/shader/execution/statement/increment_decrement.spec.ts
 src/webgpu/shader/validation/shader_validation_test.ts
 src/webgpu/shader/validation/const_assert/const_assert.spec.ts
+src/webgpu/shader/validation/decl/compound_statement.spec.ts
 src/webgpu/shader/validation/decl/const.spec.ts
 src/webgpu/shader/validation/decl/override.spec.ts
 src/webgpu/shader/validation/decl/util.ts
 src/webgpu/shader/validation/decl/ptr_spelling.spec.ts
+src/webgpu/shader/validation/decl/var.spec.ts
 src/webgpu/shader/validation/decl/var_access_mode.spec.ts
 src/webgpu/shader/validation/expression/access/vector.spec.ts
 src/webgpu/shader/validation/expression/binary/bitwise_shift.spec.ts
@@ -732,6 +737,7 @@ src/webgpu/shader/validation/parse/break.spec.ts
 src/webgpu/shader/validation/parse/break_if.spec.ts
 src/webgpu/shader/validation/parse/builtin.spec.ts
 src/webgpu/shader/validation/parse/comments.spec.ts
+src/webgpu/shader/validation/parse/compound.spec.ts
 src/webgpu/shader/validation/parse/const.spec.ts
 src/webgpu/shader/validation/parse/const_assert.spec.ts
 src/webgpu/shader/validation/parse/continuing.spec.ts
