@@ -133,6 +133,7 @@
     X(LIMITS_STORAGE_BUFFER_BINDINGS)      \
     X(LIMITS_ATTACHMENTS)                  \
     X(LIMITS_INTER_STAGE_SHADER_VARIABLES) \
+    X(LIMITS_TEXTURE_DIMENSIONS)           \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                          \
