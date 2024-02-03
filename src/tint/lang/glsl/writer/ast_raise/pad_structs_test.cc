@@ -580,6 +580,142 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PadStructsTest, MemberNamedPad) {
+    auto* src = R"(
+struct S {
+  @align(8) pad_5 : u32,
+  @align(8) pad_3 : u32,
+  @align(8) pad :   u32,
+  @align(8) pad_1 : u32,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn main() {
+  _ = s;
+}
+)";
+    auto* expect = R"(
+@internal(disable_validation__ignore_struct_member)
+struct S {
+  pad_5 : u32,
+  pad_2 : u32,
+  pad_3 : u32,
+  pad_4 : u32,
+  pad : u32,
+  pad_6 : u32,
+  pad_1 : u32,
+  pad_7 : u32,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn main() {
+  _ = s;
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PadStructs>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PadStructsTest, TwoStructs) {
+    auto* src = R"(
+struct S {
+  @align(8) i : i32,
+  @align(8) u : u32,
+}
+
+struct T {
+  @align(8) i : i32,
+  @align(8) u : u32,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+@group(0) @binding(1) var<uniform> t : T;
+
+fn main() {
+  _ = s;
+  _ = t;
+}
+)";
+    auto* expect = R"(
+@internal(disable_validation__ignore_struct_member)
+struct S {
+  i : i32,
+  pad : u32,
+  u : u32,
+  pad_1 : u32,
+}
+
+@internal(disable_validation__ignore_struct_member)
+struct T {
+  i : i32,
+  pad : u32,
+  u : u32,
+  pad_1 : u32,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+
+@group(0) @binding(1) var<uniform> t : T;
+
+fn main() {
+  _ = s;
+  _ = t;
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PadStructs>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PadStructsTest, GlobalVariableNamedPad) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> pad : u32;
+@group(0) @binding(1) var<uniform> pad_1 : u32;
+
+struct S {
+  @align(8) i : u32,
+  @align(8) j : u32,
+}
+
+@group(0) @binding(1) var<uniform> s : S;
+
+fn main() {
+  _ = s;
+}
+)";
+    auto* expect = R"(
+@group(0) @binding(0) var<uniform> pad : u32;
+
+@group(0) @binding(1) var<uniform> pad_1 : u32;
+
+@internal(disable_validation__ignore_struct_member)
+struct S {
+  i : u32,
+  pad : u32,
+  j : u32,
+  pad_1 : u32,
+}
+
+@group(0) @binding(1) var<uniform> s : S;
+
+fn main() {
+  _ = s;
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<PadStructs>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PadStructsTest, InitializerZeroArgs) {
     // Calls to a zero-argument initializer of a padded struct should not be modified.
     auto* src = R"(

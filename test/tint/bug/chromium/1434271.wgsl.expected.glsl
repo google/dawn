@@ -279,8 +279,8 @@ struct Particle {
   float lifetime;
   vec4 color;
   vec2 velocity;
-  uint pad_3;
-  uint pad_4;
+  uint pad;
+  uint pad_1;
 };
 
 layout(binding = 0, std140) uniform sim_params_block_ubo {

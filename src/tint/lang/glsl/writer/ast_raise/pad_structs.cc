@@ -50,13 +50,20 @@ namespace {
 
 void CreatePadding(Vector<const ast::StructMember*, 8>* new_members,
                    Hashset<const ast::StructMember*, 8>* padding_members,
+                   Hashset<std::string, 8>* member_names,
+                   int& last_padding_index,
                    ast::Builder* b,
                    uint32_t bytes) {
     const size_t count = bytes / 4u;
     padding_members->Reserve(count);
     new_members->Reserve(count);
+    member_names->Reserve(count);
+    std::string name = "pad";
     for (uint32_t i = 0; i < count; ++i) {
-        auto name = b->Symbols().New("pad");
+        while (member_names->Contains(name)) {
+            name = "pad_" + std::to_string(++last_padding_index);
+        }
+        member_names->Add(name);
         auto* member = b->Member(name, b->ty.u32());
         padding_members->Add(member);
         new_members->Push(member);
@@ -87,11 +94,18 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
         uint32_t offset = 0;
         bool has_runtime_sized_array = false;
         tint::Vector<const ast::StructMember*, 8> new_members;
+        Hashset<std::string, 8> member_names;
+        for (auto* mem : str->Members()) {
+            member_names.Add(mem->Name().Name());
+        }
+
+        int last_padding_index = 0;
         for (auto* mem : str->Members()) {
             auto name = mem->Name().Name();
 
             if (offset < mem->Offset()) {
-                CreatePadding(&new_members, &padding_members, ctx.dst, mem->Offset() - offset);
+                CreatePadding(&new_members, &padding_members, &member_names, last_padding_index,
+                              ctx.dst, mem->Offset() - offset);
                 offset = mem->Offset();
             }
 
@@ -118,7 +132,8 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
             struct_size = tint::RoundUp(16u, struct_size);
         }
         if (offset < struct_size && !has_runtime_sized_array) {
-            CreatePadding(&new_members, &padding_members, ctx.dst, struct_size - offset);
+            CreatePadding(&new_members, &padding_members, &member_names, last_padding_index,
+                          ctx.dst, struct_size - offset);
         }
 
         tint::Vector<const ast::Attribute*, 1> struct_attribs;

@@ -33,8 +33,8 @@ struct Light0 {
   uint padding_2;
   vec4 shadowsInfo;
   vec2 depthValues;
-  uint pad_2;
-  uint pad_3;
+  uint pad;
+  uint pad_1;
 };
 
 float u_Float = 0.0f;

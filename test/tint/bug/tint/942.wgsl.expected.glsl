@@ -14,9 +14,9 @@ layout(binding = 1, std140) uniform params_block_ubo {
 layout(rgba8) uniform highp writeonly image2D outputTex;
 struct Flip {
   uint value;
+  uint pad;
+  uint pad_1;
   uint pad_2;
-  uint pad_3;
-  uint pad_4;
 };
 
 layout(binding = 3, std140) uniform flip_block_ubo {

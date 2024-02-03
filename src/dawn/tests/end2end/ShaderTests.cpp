@@ -2128,6 +2128,38 @@ TEST_P(ShaderTests, UniformAcrossStagesSeparateModuleMismatch) {
     device.CreateRenderPipeline(&desc);
 }
 
+// Test that padding is correctly applied to a UBO used in both vert and
+// frag stages. Insert an additional UBO in the frag stage before the reused UBO.
+TEST_P(ShaderTests, UniformAcrossStagesSeparateModuleMismatchWithCustomSize) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        struct A {
+          f : f32,
+        };
+        struct B {
+          u : u32,
+        }
+        @group(0) @binding(0) var<uniform> tint_symbol_ubo_0: A;
+        @group(0) @binding(1) var<uniform> tint_symbol_ubo_1: B;
+
+        @vertex fn vertex() -> @builtin(position) vec4f {
+          _ = tint_symbol_ubo_0;
+          _ = tint_symbol_ubo_1;
+          return vec4f(tint_symbol_ubo_0.f) + vec4f(f32(tint_symbol_ubo_1.u));
+        }
+
+        @fragment fn fragment() -> @location(0) vec4f {
+          _ = tint_symbol_ubo_1;
+          return vec4f(f32(tint_symbol_ubo_1.u));
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+
+    device.CreateRenderPipeline(&desc);
+}
+
 // Having different block contents at the same binding point used in different stages is allowed.
 TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollide) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(

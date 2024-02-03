@@ -10,12 +10,12 @@ struct Simulation {
 struct Particle {
   vec3 position[8];
   float lifetime;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   vec4 color;
   vec3 velocity;
-  uint pad_6;
+  uint pad_3;
 };
 
 layout(binding = 3, std430) buffer Particles_ssbo {

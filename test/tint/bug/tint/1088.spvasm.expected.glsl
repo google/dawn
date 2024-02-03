@@ -14,9 +14,9 @@ struct strided_arr {
 struct LeftOver {
   mat4 worldViewProjection;
   float time;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   mat4 test2[2];
   strided_arr test[4];
 };

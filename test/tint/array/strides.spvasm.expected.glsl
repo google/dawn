@@ -7,6 +7,7 @@ struct strided_arr {
 
 struct strided_arr_1 {
   strided_arr el[3][2];
+  uint pad;
   uint pad_1;
   uint pad_2;
   uint pad_3;
@@ -26,7 +27,6 @@ struct strided_arr_1 {
   uint pad_17;
   uint pad_18;
   uint pad_19;
-  uint pad_20;
 };
 
 struct S {
