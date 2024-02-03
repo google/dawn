@@ -1187,11 +1187,6 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
     auto* expect = R"(
 var<private> tint_discarded = false;
 
-struct tint_symbol_1 {
-  old_value : i32,
-  exchanged : bool,
-}
-
 @group(0) @binding(0) var t : texture_2d<f32>;
 
 @group(0) @binding(1) var s : sampler;
@@ -1204,20 +1199,16 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
     tint_discarded = true;
   }
   var result = 0;
-  var tint_symbol : tint_symbol_1;
+  var tint_symbol : __atomic_compare_exchange_result_i32;
   if (!(tint_discarded)) {
-    let tint_symbol_2 = atomicCompareExchangeWeak(&(a), i32(in), 42);
-    tint_symbol.old_value = tint_symbol_2.old_value;
-    tint_symbol.exchanged = tint_symbol_2.exchanged;
+    tint_symbol = atomicCompareExchangeWeak(&(a), i32(in), 42);
   }
   if (!(tint_symbol.exchanged)) {
-    var tint_symbol_3 : tint_symbol_1;
+    var tint_symbol_1 : __atomic_compare_exchange_result_i32;
     if (!(tint_discarded)) {
-      let tint_symbol_4 = atomicCompareExchangeWeak(&(a), i32(in), 42);
-      tint_symbol_3.old_value = tint_symbol_4.old_value;
-      tint_symbol_3.exchanged = tint_symbol_4.exchanged;
+      tint_symbol_1 = atomicCompareExchangeWeak(&(a), i32(in), 42);
     }
-    let xchg = tint_symbol_3;
+    let xchg = tint_symbol_1;
     result = xchg.old_value;
   }
   result += i32(textureSample(t, s, coord).x);

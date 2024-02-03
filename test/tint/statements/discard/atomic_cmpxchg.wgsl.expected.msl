@@ -16,35 +16,28 @@ struct tint_private_vars_struct {
   bool tint_discarded;
 };
 
-struct tint_symbol_2 {
-  int old_value;
-  bool exchanged;
-};
-
 struct tint_symbol {
   int value [[color(0)]];
 };
 
-int foo_inner(thread tint_private_vars_struct* const tint_private_vars, device atomic_int* const tint_symbol_4) {
+int foo_inner(thread tint_private_vars_struct* const tint_private_vars, device atomic_int* const tint_symbol_2) {
   (*(tint_private_vars)).tint_discarded = true;
   int x = 0;
-  tint_symbol_2 tint_symbol_1 = {};
+  atomic_compare_exchange_result_i32 tint_symbol_1 = {};
   if (!((*(tint_private_vars)).tint_discarded)) {
-    atomic_compare_exchange_result_i32 const tint_symbol_3 = atomicCompareExchangeWeak_1(tint_symbol_4, 0, 1);
-    tint_symbol_1.old_value = tint_symbol_3.old_value;
-    tint_symbol_1.exchanged = tint_symbol_3.exchanged;
+    tint_symbol_1 = atomicCompareExchangeWeak_1(tint_symbol_2, 0, 1);
   }
-  tint_symbol_2 const result = tint_symbol_1;
+  atomic_compare_exchange_result_i32 const result = tint_symbol_1;
   if (result.exchanged) {
     x = result.old_value;
   }
   return x;
 }
 
-fragment tint_symbol foo(device atomic_int* tint_symbol_5 [[buffer(0)]]) {
+fragment tint_symbol foo(device atomic_int* tint_symbol_3 [[buffer(0)]]) {
   thread tint_private_vars_struct tint_private_vars = {};
   tint_private_vars.tint_discarded = false;
-  int const inner_result = foo_inner(&(tint_private_vars), tint_symbol_5);
+  int const inner_result = foo_inner(&(tint_private_vars), tint_symbol_3);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   if (tint_private_vars.tint_discarded) {

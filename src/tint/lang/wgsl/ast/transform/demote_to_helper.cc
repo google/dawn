@@ -191,50 +191,10 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program& src, const DataMap&,
                         //   }
                         //   let y = x + tmp;
                         auto result = b.Sym();
-                        Type result_ty;
-                        const Statement* masked_call = nullptr;
-                        if (builtin->Fn() == wgsl::BuiltinFn::kAtomicCompareExchangeWeak) {
-                            // Special case for atomicCompareExchangeWeak as we cannot name its
-                            // result type. We have to declare an equivalent struct and copy the
-                            // original member values over to it.
-
-                            // Declare a struct to hold the result values.
-                            auto* result_struct = sem_call->Type()->As<core::type::Struct>();
-                            auto* atomic_ty = result_struct->Members()[0]->Type();
-                            result_ty =
-                                b.ty(tint::GetOrAdd(atomic_cmpxchg_result_types, atomic_ty, [&] {
-                                    auto name = b.Sym();
-                                    b.Structure(
-                                        name,
-                                        tint::Vector{
-                                            b.Member("old_value", CreateASTTypeFor(ctx, atomic_ty)),
-                                            b.Member("exchanged", b.ty.bool_()),
-                                        });
-                                    return name;
-                                }));
-
-                            // Generate the masked call and member-wise copy:
-                            //   if (!tint_discarded) {
-                            //     let tmp_result = atomicCompareExchangeWeak(&p, 1, 2);
-                            //     result.exchanged = tmp_result.exchanged;
-                            //     result.old_value = tmp_result.old_value;
-                            //   }
-                            auto tmp_result = b.Sym();
-                            masked_call =
-                                b.If(b.Not(flag),
-                                     b.Block(tint::Vector{
-                                         b.Decl(b.Let(tmp_result, ctx.CloneWithoutTransform(call))),
-                                         b.Assign(b.MemberAccessor(result, "old_value"),
-                                                  b.MemberAccessor(tmp_result, "old_value")),
-                                         b.Assign(b.MemberAccessor(result, "exchanged"),
-                                                  b.MemberAccessor(tmp_result, "exchanged")),
-                                     }));
-                        } else {
-                            result_ty = CreateASTTypeFor(ctx, sem_call->Type());
-                            masked_call =
-                                b.If(b.Not(flag),
-                                     b.Block(b.Assign(result, ctx.CloneWithoutTransform(call))));
-                        }
+                        auto result_ty = CreateASTTypeFor(ctx, sem_call->Type());
+                        auto* masked_call =
+                            b.If(b.Not(flag),
+                                 b.Block(b.Assign(result, ctx.CloneWithoutTransform(call))));
                         auto* result_decl = b.Decl(b.Var(result, result_ty));
                         hoist_to_decl_before.Prepare(sem_call);
                         hoist_to_decl_before.InsertBefore(stmt, result_decl);

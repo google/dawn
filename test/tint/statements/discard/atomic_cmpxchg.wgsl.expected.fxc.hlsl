@@ -3,12 +3,6 @@ struct atomic_compare_exchange_result_i32 {
   bool exchanged;
 };
 static bool tint_discarded = false;
-
-struct tint_symbol_2 {
-  int old_value;
-  bool exchanged;
-};
-
 RWByteAddressBuffer a : register(u0);
 
 struct tint_symbol {
@@ -26,13 +20,11 @@ atomic_compare_exchange_result_i32 aatomicCompareExchangeWeak(uint offset, int c
 int foo_inner() {
   tint_discarded = true;
   int x = 0;
-  tint_symbol_2 tint_symbol_1 = (tint_symbol_2)0;
+  atomic_compare_exchange_result_i32 tint_symbol_1 = (atomic_compare_exchange_result_i32)0;
   if (!(tint_discarded)) {
-    atomic_compare_exchange_result_i32 tint_symbol_3 = aatomicCompareExchangeWeak(0u, 0, 1);
-    tint_symbol_1.old_value = tint_symbol_3.old_value;
-    tint_symbol_1.exchanged = tint_symbol_3.exchanged;
+    tint_symbol_1 = aatomicCompareExchangeWeak(0u, 0, 1);
   }
-  tint_symbol_2 result = tint_symbol_1;
+  atomic_compare_exchange_result_i32 result = tint_symbol_1;
   if (result.exchanged) {
     x = result.old_value;
   }
