@@ -36,7 +36,7 @@
 namespace tint::spirv::reader::ast_parser {
 
 /// Parses the SPIR-V source data, returning the parsed program.
-/// If the source data fails to parse then the returned `program.Diagnostics.contains_errors()` will
+/// If the source data fails to parse then the returned `program.Diagnostics.ContainsErrors()` will
 /// be true, and the `program.Diagnostics()` will describe the error.
 /// @param input the source data
 /// @param options the parser options

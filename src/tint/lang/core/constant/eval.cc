@@ -281,7 +281,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
             // [abstract-numeric -> x] - materialization failure
             auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (ctx.use_runtime_semantics) {
-                ctx.diags.add_warning(tint::diag::System::Resolver, msg, ctx.source);
+                ctx.diags.AddWarning(tint::diag::System::Resolver, msg, ctx.source);
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Lowest());
@@ -289,7 +289,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Highest());
                 }
             } else {
-                ctx.diags.add_error(tint::diag::System::Resolver, msg, ctx.source);
+                ctx.diags.AddError(tint::diag::System::Resolver, msg, ctx.source);
                 return nullptr;
             }
         } else if constexpr (IsFloatingPoint<TO>) {
@@ -297,7 +297,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
             // https://www.w3.org/TR/WGSL/#floating-point-conversion
             auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (ctx.use_runtime_semantics) {
-                ctx.diags.add_warning(tint::diag::System::Resolver, msg, ctx.source);
+                ctx.diags.AddWarning(tint::diag::System::Resolver, msg, ctx.source);
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Lowest());
@@ -305,7 +305,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Highest());
                 }
             } else {
-                ctx.diags.add_error(tint::diag::System::Resolver, msg, ctx.source);
+                ctx.diags.AddError(tint::diag::System::Resolver, msg, ctx.source);
                 return nullptr;
             }
         } else if constexpr (IsFloatingPoint<FROM>) {
@@ -3990,18 +3990,18 @@ Eval::Result Eval::Convert(const core::type::Type* target_ty,
 
 void Eval::AddError(const std::string& msg, const Source& source) const {
     if (use_runtime_semantics_) {
-        diags.add_warning(diag::System::Constant, msg, source);
+        diags.AddWarning(diag::System::Constant, msg, source);
     } else {
-        diags.add_error(diag::System::Constant, msg, source);
+        diags.AddError(diag::System::Constant, msg, source);
     }
 }
 
 void Eval::AddWarning(const std::string& msg, const Source& source) const {
-    diags.add_warning(diag::System::Constant, msg, source);
+    diags.AddWarning(diag::System::Constant, msg, source);
 }
 
 void Eval::AddNote(const std::string& msg, const Source& source) const {
-    diags.add_note(diag::System::Constant, msg, source);
+    diags.AddNote(diag::System::Constant, msg, source);
 }
 
 }  // namespace tint::core::constant

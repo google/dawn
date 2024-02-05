@@ -137,11 +137,23 @@ class List {
     /// @return this list.
     List& operator=(List&& list);
 
-    /// adds a diagnostic to the end of this list.
+    /// Adds a diagnostic to the end of this list.
     /// @param diag the diagnostic to append to this list.
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add(Diagnostic&& diag) {
+    diag::Diagnostic& Add(const Diagnostic& diag) {
+        if (diag.severity >= Severity::Error) {
+            error_count_++;
+        }
+        entries_.Push(diag);
+        return entries_.Back();
+    }
+
+    /// Adds a diagnostic to the end of this list.
+    /// @param diag the diagnostic to append to this list.
+    /// @returns a reference to the new diagnostic.
+    /// @note The returned reference must not be used after the list is mutated again.
+    diag::Diagnostic& Add(Diagnostic&& diag) {
         if (diag.severity >= Severity::Error) {
             error_count_++;
         }
@@ -149,112 +161,118 @@ class List {
         return entries_.Back();
     }
 
-    /// adds a list of diagnostics to the end of this list.
+    /// Adds a list of diagnostics to the end of this list.
     /// @param list the diagnostic to append to this list.
-    void add(const List& list) {
+    void Add(const List& list) {
         for (auto diag : list) {
-            add(std::move(diag));
+            Add(std::move(diag));
         }
     }
 
-    /// adds the note message with the given Source to the end of this list.
+    /// Adds the note message with the given Source to the end of this list.
     /// @param system the system raising the note message
     /// @param note_msg the note message
     /// @param source the source of the note diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add_note(System system, std::string_view note_msg, const Source& source) {
+    diag::Diagnostic& AddNote(System system, std::string_view note_msg, const Source& source) {
         diag::Diagnostic note{};
         note.severity = diag::Severity::Note;
         note.system = system;
         note.source = source;
         note.message = note_msg;
-        return add(std::move(note));
+        return Add(std::move(note));
     }
 
-    /// adds the warning message with the given Source to the end of this list.
+    /// Adds the warning message with the given Source to the end of this list.
     /// @param system the system raising the warning message
     /// @param warning_msg the warning message
     /// @param source the source of the warning diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add_warning(System system,
-                                  std::string_view warning_msg,
-                                  const Source& source) {
+    diag::Diagnostic& AddWarning(System system,
+                                 std::string_view warning_msg,
+                                 const Source& source) {
         diag::Diagnostic warning{};
         warning.severity = diag::Severity::Warning;
         warning.system = system;
         warning.source = source;
         warning.message = warning_msg;
-        return add(std::move(warning));
+        return Add(std::move(warning));
     }
 
-    /// adds the error message without a source to the end of this list.
+    /// Adds the error message without a source to the end of this list.
     /// @param system the system raising the error message
     /// @param err_msg the error message
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add_error(System system, std::string_view err_msg) {
+    diag::Diagnostic& AddError(System system, std::string_view err_msg) {
         diag::Diagnostic error{};
         error.severity = diag::Severity::Error;
         error.system = system;
         error.message = err_msg;
-        return add(std::move(error));
+        return Add(std::move(error));
     }
 
-    /// adds the error message with the given Source to the end of this list.
+    /// Adds the error message with the given Source to the end of this list.
     /// @param system the system raising the error message
     /// @param err_msg the error message
     /// @param source the source of the error diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add_error(System system, std::string_view err_msg, const Source& source) {
+    diag::Diagnostic& AddError(System system, std::string_view err_msg, const Source& source) {
         diag::Diagnostic error{};
         error.severity = diag::Severity::Error;
         error.system = system;
         error.source = source;
         error.message = err_msg;
-        return add(std::move(error));
+        return Add(std::move(error));
     }
 
-    /// adds an internal compiler error message to the end of this list.
+    /// Adds an internal compiler error message to the end of this list.
     /// @param system the system raising the error message
     /// @param err_msg the error message
     /// @param source the source of the internal compiler error
     /// @param file the Source::File owned by this diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& add_ice(System system,
-                              std::string_view err_msg,
-                              const Source& source,
-                              std::shared_ptr<Source::File> file) {
+    diag::Diagnostic& AddIce(System system,
+                             std::string_view err_msg,
+                             const Source& source,
+                             std::shared_ptr<Source::File> file) {
         diag::Diagnostic ice{};
         ice.severity = diag::Severity::InternalCompilerError;
         ice.system = system;
         ice.source = source;
         ice.message = err_msg;
         ice.owned_file = std::move(file);
-        return add(std::move(ice));
+        return Add(std::move(ice));
     }
 
     /// @returns true iff the diagnostic list contains errors diagnostics (or of
     /// higher severity).
-    bool contains_errors() const { return error_count_ > 0; }
+    bool ContainsErrors() const { return error_count_ > 0; }
     /// @returns the number of error diagnostics (or of higher severity).
-    size_t error_count() const { return error_count_; }
+    size_t NumErrors() const { return error_count_; }
     /// @returns the number of entries in the list.
-    size_t count() const { return entries_.Length(); }
+    size_t Count() const { return entries_.Length(); }
+    /// @returns true if the diagnostics list is empty
+    bool IsEmpty() const { return entries_.IsEmpty(); }
+
+    /// @returns a formatted string of all the diagnostics in this list.
+    std::string Str() const;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// STL-interface support
+    ////////////////////////////////////////////////////////////////////////////
     /// @returns true if the diagnostics list is empty
     bool empty() const { return entries_.IsEmpty(); }
-    /// @returns the number of entrise in the diagnostics list
+    /// @returns the number of entries in the list.
     size_t size() const { return entries_.Length(); }
     /// @returns the first diagnostic in the list.
     iterator begin() const { return entries_.begin(); }
     /// @returns the last diagnostic in the list.
     iterator end() const { return entries_.end(); }
-
-    /// @returns a formatted string of all the diagnostics in this list.
-    std::string str() const;
 
   private:
     Vector<Diagnostic, 0> entries_;
@@ -267,7 +285,7 @@ class List {
 /// @returns the output stream
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& out, const List& list) {
-    return out << list.str();
+    return out << list.Str();
 }
 
 }  // namespace tint::diag

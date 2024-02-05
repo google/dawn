@@ -53,7 +53,7 @@ TEST_F(CheckSupportedExtensionsTest, Unsupported) {
                                           Vector{
                                               wgsl::Extension::kChromiumExperimentalSubgroups,
                                           }));
-    EXPECT_EQ(Diagnostics().str(), "12:34 error: writer backend does not support extension 'f16'");
+    EXPECT_EQ(Diagnostics().Str(), "12:34 error: writer backend does not support extension 'f16'");
 }
 
 }  // namespace

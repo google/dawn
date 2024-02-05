@@ -47,7 +47,7 @@ namespace tint::spirv::reader {
 #define EXPECT_IR(asm, ir)                                           \
     do {                                                             \
         auto result = Run(asm);                                      \
-        ASSERT_EQ(result, Success) << result.Failure().reason.str(); \
+        ASSERT_EQ(result, Success) << result.Failure().reason.Str(); \
         auto got = "\n" + result.Get();                              \
         ASSERT_THAT(got, testing::HasSubstr(ir)) << got;             \
     } while (false)

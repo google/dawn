@@ -49,58 +49,58 @@ namespace {
 using PrinterTest = testing::Test;
 
 TEST_F(PrinterTest, WithColors) {
-    auto printer = Printer::create(stdout, true);
-    printer->write("Default", Style{Color::kDefault, false});
-    printer->write("Black", Style{Color::kBlack, false});
-    printer->write("Red", Style{Color::kRed, false});
-    printer->write("Green", Style{Color::kGreen, false});
-    printer->write("Yellow", Style{Color::kYellow, false});
-    printer->write("Blue", Style{Color::kBlue, false});
-    printer->write("Magenta", Style{Color::kMagenta, false});
-    printer->write("Cyan", Style{Color::kCyan, false});
-    printer->write("White", Style{Color::kWhite, false});
+    auto printer = Printer::Create(stdout, true);
+    printer->Write("Default", Style{Color::kDefault, false});
+    printer->Write("Black", Style{Color::kBlack, false});
+    printer->Write("Red", Style{Color::kRed, false});
+    printer->Write("Green", Style{Color::kGreen, false});
+    printer->Write("Yellow", Style{Color::kYellow, false});
+    printer->Write("Blue", Style{Color::kBlue, false});
+    printer->Write("Magenta", Style{Color::kMagenta, false});
+    printer->Write("Cyan", Style{Color::kCyan, false});
+    printer->Write("White", Style{Color::kWhite, false});
     printf("\n");
 }
 
 TEST_F(PrinterTest, BoldWithColors) {
-    auto printer = Printer::create(stdout, true);
-    printer->write("Default", Style{Color::kDefault, true});
-    printer->write("Black", Style{Color::kBlack, true});
-    printer->write("Red", Style{Color::kRed, true});
-    printer->write("Green", Style{Color::kGreen, true});
-    printer->write("Yellow", Style{Color::kYellow, true});
-    printer->write("Blue", Style{Color::kBlue, true});
-    printer->write("Magenta", Style{Color::kMagenta, true});
-    printer->write("Cyan", Style{Color::kCyan, true});
-    printer->write("White", Style{Color::kWhite, true});
+    auto printer = Printer::Create(stdout, true);
+    printer->Write("Default", Style{Color::kDefault, true});
+    printer->Write("Black", Style{Color::kBlack, true});
+    printer->Write("Red", Style{Color::kRed, true});
+    printer->Write("Green", Style{Color::kGreen, true});
+    printer->Write("Yellow", Style{Color::kYellow, true});
+    printer->Write("Blue", Style{Color::kBlue, true});
+    printer->Write("Magenta", Style{Color::kMagenta, true});
+    printer->Write("Cyan", Style{Color::kCyan, true});
+    printer->Write("White", Style{Color::kWhite, true});
     printf("\n");
 }
 
 TEST_F(PrinterTest, WithoutColors) {
-    auto printer = Printer::create(stdout, false);
-    printer->write("Default", Style{Color::kDefault, false});
-    printer->write("Black", Style{Color::kBlack, false});
-    printer->write("Red", Style{Color::kRed, false});
-    printer->write("Green", Style{Color::kGreen, false});
-    printer->write("Yellow", Style{Color::kYellow, false});
-    printer->write("Blue", Style{Color::kBlue, false});
-    printer->write("Magenta", Style{Color::kMagenta, false});
-    printer->write("Cyan", Style{Color::kCyan, false});
-    printer->write("White", Style{Color::kWhite, false});
+    auto printer = Printer::Create(stdout, false);
+    printer->Write("Default", Style{Color::kDefault, false});
+    printer->Write("Black", Style{Color::kBlack, false});
+    printer->Write("Red", Style{Color::kRed, false});
+    printer->Write("Green", Style{Color::kGreen, false});
+    printer->Write("Yellow", Style{Color::kYellow, false});
+    printer->Write("Blue", Style{Color::kBlue, false});
+    printer->Write("Magenta", Style{Color::kMagenta, false});
+    printer->Write("Cyan", Style{Color::kCyan, false});
+    printer->Write("White", Style{Color::kWhite, false});
     printf("\n");
 }
 
 TEST_F(PrinterTest, BoldWithoutColors) {
-    auto printer = Printer::create(stdout, false);
-    printer->write("Default", Style{Color::kDefault, true});
-    printer->write("Black", Style{Color::kBlack, true});
-    printer->write("Red", Style{Color::kRed, true});
-    printer->write("Green", Style{Color::kGreen, true});
-    printer->write("Yellow", Style{Color::kYellow, true});
-    printer->write("Blue", Style{Color::kBlue, true});
-    printer->write("Magenta", Style{Color::kMagenta, true});
-    printer->write("Cyan", Style{Color::kCyan, true});
-    printer->write("White", Style{Color::kWhite, true});
+    auto printer = Printer::Create(stdout, false);
+    printer->Write("Default", Style{Color::kDefault, true});
+    printer->Write("Black", Style{Color::kBlack, true});
+    printer->Write("Red", Style{Color::kRed, true});
+    printer->Write("Green", Style{Color::kGreen, true});
+    printer->Write("Yellow", Style{Color::kYellow, true});
+    printer->Write("Blue", Style{Color::kBlue, true});
+    printer->Write("Magenta", Style{Color::kMagenta, true});
+    printer->Write("Cyan", Style{Color::kCyan, true});
+    printer->Write("White", Style{Color::kWhite, true});
     printf("\n");
 }
 

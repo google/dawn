@@ -38,7 +38,7 @@ TEST(DiagListTest, CtorInitializerList) {
     err_a.severity = Severity::Error;
     err_b.severity = Severity::Fatal;
     List list{err_a, err_b};
-    EXPECT_EQ(list.count(), 2u);
+    EXPECT_EQ(list.Count(), 2u);
 }
 
 TEST(DiagListTest, CtorVectorRef) {
@@ -46,7 +46,7 @@ TEST(DiagListTest, CtorVectorRef) {
     err_a.severity = Severity::Error;
     err_b.severity = Severity::Fatal;
     List list(Vector{err_a, err_b});
-    EXPECT_EQ(list.count(), 2u);
+    EXPECT_EQ(list.Count(), 2u);
 }
 
 TEST(DiagListTest, OwnedFilesShared) {
@@ -56,12 +56,12 @@ TEST(DiagListTest, OwnedFilesShared) {
     {
         Diagnostic diag{};
         diag.source = Source{Source::Range{{0, 0}}, file.get()};
-        list_a.add(std::move(diag));
+        list_a.Add(std::move(diag));
     }
 
     list_b = list_a;
 
-    ASSERT_EQ(list_b.count(), list_a.count());
+    ASSERT_EQ(list_b.Count(), list_a.Count());
     EXPECT_EQ(list_b.begin()->source.file, file.get());
 }
 

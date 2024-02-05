@@ -233,7 +233,7 @@ TEST_F(WGSLParserTest, Attribute_Align_ExpressionInvalid) {
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
 
-    EXPECT_EQ(p->builder().Diagnostics().str(),
+    EXPECT_EQ(p->builder().Diagnostics().Str(),
               R"(test.wgsl:1:9 error: mixing '+' and '<<' requires parenthesis
 align(4 + 5 << 6)
         ^^^^^^

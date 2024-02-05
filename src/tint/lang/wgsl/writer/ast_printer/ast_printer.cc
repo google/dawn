@@ -133,7 +133,7 @@ bool ASTPrinter::Generate() {
         }
     }
 
-    return !diagnostics_.contains_errors();
+    return !diagnostics_.ContainsErrors();
 }
 
 void ASTPrinter::EmitDiagnosticControl(StringStream& out,
@@ -349,7 +349,7 @@ void ASTPrinter::EmitFunction(const ast::Function* func) {
 void ASTPrinter::EmitImageFormat(StringStream& out, const core::TexelFormat fmt) {
     switch (fmt) {
         case core::TexelFormat::kUndefined:
-            diagnostics_.add_error(diag::System::Writer, "unknown image format");
+            diagnostics_.AddError(diag::System::Writer, "unknown image format");
             break;
         default:
             out << fmt;

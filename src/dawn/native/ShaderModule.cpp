@@ -347,7 +347,7 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }
     if (!program.IsValid()) {
-        return DAWN_VALIDATION_ERROR("Error while parsing WGSL: %s\n", program.Diagnostics().str());
+        return DAWN_VALIDATION_ERROR("Error while parsing WGSL: %s\n", program.Diagnostics().Str());
     }
 
     return std::move(program);
@@ -369,7 +369,7 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
     }
     if (!program.IsValid()) {
         return DAWN_VALIDATION_ERROR("Error while parsing SPIR-V: %s\n",
-                                     program.Diagnostics().str());
+                                     program.Diagnostics().Str());
     }
 
     return std::move(program);
@@ -1132,7 +1132,7 @@ ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transf
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
     }
-    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().str());
+    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().Str());
     if (outputs != nullptr) {
         *outputs = std::move(transform_outputs);
     }

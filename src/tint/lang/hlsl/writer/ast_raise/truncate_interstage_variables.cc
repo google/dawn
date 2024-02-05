@@ -70,7 +70,7 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
 
     const auto* data = config.Get<Config>();
     if (data == nullptr) {
-        b.Diagnostics().add_error(
+        b.Diagnostics().AddError(
             diag::System::Transform,
             "missing transform data for " +
                 std::string(tint::TypeInfo::Of<TruncateInterstageVariables>().name));

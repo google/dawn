@@ -117,13 +117,13 @@ class SpirvWriterTestHelperBase : public BASE {
     bool Generate(Options options = {}, bool zero_init_workgroup_memory = false) {
         auto raised = Raise(mod, options);
         if (raised != Success) {
-            err_ = raised.Failure().reason.str();
+            err_ = raised.Failure().reason.Str();
             return false;
         }
 
         auto spirv = PrintModule(mod, zero_init_workgroup_memory);
         if (spirv != Success) {
-            err_ = spirv.Failure().reason.str();
+            err_ = spirv.Failure().reason.Str();
             return false;
         }
 

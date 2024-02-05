@@ -261,7 +261,7 @@ struct VertexPulling::State {
         for (auto* fn : src.AST().Functions()) {
             if (fn->PipelineStage() == PipelineStage::kVertex) {
                 if (func != nullptr) {
-                    b.Diagnostics().add_error(
+                    b.Diagnostics().AddError(
                         diag::System::Transform,
                         "VertexPulling found more than one vertex entry point");
                     return resolver::Resolve(b);
@@ -270,8 +270,7 @@ struct VertexPulling::State {
             }
         }
         if (func == nullptr) {
-            b.Diagnostics().add_error(diag::System::Transform,
-                                      "Vertex stage entry point not found");
+            b.Diagnostics().AddError(diag::System::Transform, "Vertex stage entry point not found");
             return resolver::Resolve(b);
         }
 
@@ -359,7 +358,7 @@ struct VertexPulling::State {
             const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[buffer_idx];
 
             if ((buffer_layout.array_stride & 3) != 0) {
-                b.Diagnostics().add_error(
+                b.Diagnostics().AddError(
                     diag::System::Transform,
                     "WebGPU requires that vertex stride must be a multiple of 4 bytes, "
                     "but VertexPulling array stride for buffer " +
@@ -404,7 +403,7 @@ struct VertexPulling::State {
                         << std::to_string(attribute_desc.shader_location) << " has format "
                         << attribute_desc.format << " but shader expects "
                         << var.type->FriendlyName();
-                    b.Diagnostics().add_error(diag::System::Transform, err.str());
+                    b.Diagnostics().AddError(diag::System::Transform, err.str());
                     return nullptr;
                 }
 

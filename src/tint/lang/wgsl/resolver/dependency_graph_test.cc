@@ -53,7 +53,7 @@ class ResolverDependencyGraphTestWithParam : public ResolverTestWithParam<T> {
             EXPECT_TRUE(result) << this->Diagnostics();
         } else {
             EXPECT_FALSE(result);
-            EXPECT_EQ(expected_error, this->Diagnostics().str());
+            EXPECT_EQ(expected_error, this->Diagnostics().Str());
         }
         return graph;
     }

@@ -51,7 +51,7 @@ Program ParseAndBuild(std::string spirv) {
     auto p = std::make_unique<ASTParser>(test::Assemble(preamble + spirv));
     if (!p->BuildAndParseInternalModule()) {
         ProgramBuilder builder;
-        builder.Diagnostics().add_error(diag::System::Reader, p->error());
+        builder.Diagnostics().AddError(diag::System::Reader, p->error());
         return Program(std::move(builder));
     }
     return p->Program();
@@ -227,7 +227,7 @@ TEST_F(SpirvASTParserTest, ErrBarrierInvalidExecution) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(),
+    EXPECT_THAT(program.Diagnostics().Str(),
                 HasSubstr("unsupported control barrier execution scope"));
 }
 
@@ -245,7 +245,7 @@ TEST_F(SpirvASTParserTest, ErrBarrierSemanticsMissingAcquireRelease) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(),
+    EXPECT_THAT(program.Diagnostics().Str(),
                 HasSubstr("control barrier semantics requires acquire and release"));
 }
 
@@ -263,7 +263,7 @@ TEST_F(SpirvASTParserTest, ErrBarrierInvalidSemantics) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(), HasSubstr("unsupported control barrier semantics"));
+    EXPECT_THAT(program.Diagnostics().Str(), HasSubstr("unsupported control barrier semantics"));
 }
 
 TEST_F(SpirvASTParserTest, ErrWorkgroupBarrierInvalidMemory) {
@@ -281,7 +281,7 @@ TEST_F(SpirvASTParserTest, ErrWorkgroupBarrierInvalidMemory) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(),
+    EXPECT_THAT(program.Diagnostics().Str(),
                 HasSubstr("workgroupBarrier requires workgroup memory scope"));
 }
 
@@ -300,7 +300,7 @@ TEST_F(SpirvASTParserTest, ErrStorageBarrierInvalidMemory) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(),
+    EXPECT_THAT(program.Diagnostics().Str(),
                 HasSubstr("storageBarrier requires workgroup memory scope"));
 }
 
@@ -319,7 +319,7 @@ TEST_F(SpirvASTParserTest, ErrTextureBarrierInvalidMemory) {
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
-    EXPECT_THAT(program.Diagnostics().str(),
+    EXPECT_THAT(program.Diagnostics().Str(),
                 HasSubstr("textureBarrier requires workgroup memory scope"));
 }
 

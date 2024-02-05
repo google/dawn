@@ -43,7 +43,7 @@ struct ConsoleInfo {
     operator bool() const { return handle != INVALID_HANDLE_VALUE; }
 };
 
-ConsoleInfo console_info(FILE* file) {
+ConsoleInfo ConsoleInfoFor(FILE* file) {
     if (file == nullptr) {
         return {};
     }
@@ -69,16 +69,16 @@ ConsoleInfo console_info(FILE* file) {
 class PrinterWindows : public Printer {
   public:
     PrinterWindows(FILE* f, bool use_colors)
-        : file(f), console(console_info(use_colors ? f : nullptr)) {}
+        : file(f), console(ConsoleInfoFor(use_colors ? f : nullptr)) {}
 
-    void write(const std::string& str, const Style& style) override {
-        write_color(style.color, style.bold);
+    void Write(const std::string& str, const Style& style) override {
+        WriteColor(style.color, style.bold);
         fwrite(str.data(), 1, str.size(), file);
-        write_color(Color::kDefault, false);
+        WriteColor(Color::kDefault, false);
     }
 
   private:
-    WORD attributes(Color color, bool bold) {
+    WORD Attributes(Color color, bool bold) {
         switch (color) {
             case Color::kDefault:
                 return console.default_attributes;
@@ -103,9 +103,9 @@ class PrinterWindows : public Printer {
         return 0;  // unreachable
     }
 
-    void write_color(Color color, bool bold) {
+    void WriteColor(Color color, bool bold) {
         if (console) {
-            SetConsoleTextAttribute(console.handle, attributes(color, bold));
+            SetConsoleTextAttribute(console.handle, Attributes(color, bold));
             fflush(file);
         }
     }
@@ -116,7 +116,7 @@ class PrinterWindows : public Printer {
 
 }  // namespace
 
-std::unique_ptr<Printer> Printer::create(FILE* out, bool use_colors) {
+std::unique_ptr<Printer> Printer::Create(FILE* out, bool use_colors) {
     return std::make_unique<PrinterWindows>(out, use_colors);
 }
 

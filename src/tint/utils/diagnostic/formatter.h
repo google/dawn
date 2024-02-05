@@ -64,16 +64,16 @@ class Formatter {
 
     /// @param list the list of diagnostic messages to format
     /// @param printer the printer used to display the formatted diagnostics
-    void format(const List& list, Printer* printer) const;
+    void Format(const List& list, Printer* printer) const;
 
     /// @return the list of diagnostics `list` formatted to a string.
     /// @param list the list of diagnostic messages to format
-    std::string format(const List& list) const;
+    std::string Format(const List& list) const;
 
   private:
     struct State;
 
-    void format(const Diagnostic& diag, State& state) const;
+    void Format(const Diagnostic& diag, State& state) const;
 
     const Style style_;
 };

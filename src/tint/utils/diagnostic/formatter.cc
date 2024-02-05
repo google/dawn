@@ -75,10 +75,10 @@ struct Formatter::State {
     explicit State(Printer* p) : printer(p) {}
     ~State() { flush(); }
 
-    /// set_style() sets the current style to new_style, flushing any pending
-    /// messages to the printer if the style changed.
+    /// SetStyle sets the current style to new_style, flushing any pending messages to the printer
+    /// if the style changed.
     /// @param new_style the new style to apply for future written messages.
-    void set_style(const diag::Style& new_style) {
+    void SetStyle(const diag::Style& new_style) {
         if (style.color != new_style.color || style.bold != new_style.bold) {
             flush();
             style = new_style;
@@ -89,7 +89,7 @@ struct Formatter::State {
     void flush() {
         auto str = stream.str();
         if (str.length() > 0) {
-            printer->write(str, style);
+            printer->Write(str, style);
             StringStream reset;
             stream.swap(reset);
         }
@@ -104,8 +104,8 @@ struct Formatter::State {
         return *this;
     }
 
-    /// newline queues a newline to be written to the printer.
-    void newline() { stream << std::endl; }
+    /// Newline queues a newline to be written to the printer.
+    void Newline() { stream << std::endl; }
 
     /// repeat queues the character c to be written to the printer n times.
     /// @param c the character to print `n` times
@@ -121,29 +121,29 @@ struct Formatter::State {
 Formatter::Formatter() {}
 Formatter::Formatter(const Style& style) : style_(style) {}
 
-void Formatter::format(const List& list, Printer* printer) const {
+void Formatter::Format(const List& list, Printer* printer) const {
     State state{printer};
 
     bool first = true;
     for (auto diag : list) {
-        state.set_style({});
+        state.SetStyle({});
         if (!first) {
-            state.newline();
+            state.Newline();
         }
-        format(diag, state);
+        Format(diag, state);
         first = false;
     }
 
     if (style_.print_newline_at_end) {
-        state.newline();
+        state.Newline();
     }
 }
 
-void Formatter::format(const Diagnostic& diag, State& state) const {
+void Formatter::Format(const Diagnostic& diag, State& state) const {
     auto const& src = diag.source;
     auto const& rng = src.range;
 
-    state.set_style({Color::kDefault, true});
+    state.SetStyle({Color::kDefault, true});
 
     struct TextAndColor {
         std::string text;
@@ -187,19 +187,19 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
         if (i > 0) {
             state << " ";
         }
-        state.set_style({prefix[i].color, prefix[i].bold});
+        state.SetStyle({prefix[i].color, prefix[i].bold});
         state << prefix[i].text;
     }
 
-    state.set_style({Color::kDefault, true});
+    state.SetStyle({Color::kDefault, true});
     if (!prefix.empty()) {
         state << ": ";
     }
     state << diag.message;
 
     if (style_.print_line && src.file && rng.begin.line > 0) {
-        state.newline();
-        state.set_style({Color::kDefault, false});
+        state.Newline();
+        state.SetStyle({Color::kDefault, false});
 
         for (size_t line_num = rng.begin.line;
              (line_num <= rng.end.line) && (line_num <= src.file->content.lines.size());
@@ -219,7 +219,7 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
                 }
             }
 
-            state.newline();
+            state.Newline();
 
             // If the line contains non-ascii characters, then we cannot assume that
             // a single utf8 code unit represents a single glyph, so don't attempt to
@@ -228,7 +228,7 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
                 continue;
             }
 
-            state.set_style({Color::kCyan, false});
+            state.SetStyle({Color::kCyan, false});
 
             // Count the number of glyphs in the line span.
             // start and end use 1-based indexing.
@@ -258,16 +258,16 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
                 // Middle of multi-line
                 state.repeat('^', num_glyphs(1, line_len + 1));
             }
-            state.newline();
+            state.Newline();
         }
 
-        state.set_style({});
+        state.SetStyle({});
     }
 }
 
-std::string Formatter::format(const List& list) const {
+std::string Formatter::Format(const List& list) const {
     StringPrinter printer;
-    format(list, &printer);
+    Format(list, &printer);
     return printer.str();
 }
 

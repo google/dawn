@@ -268,7 +268,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
     auto result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
     DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
-                    result.Failure().reason.str());
+                    result.Failure().reason.Str());
 
     compiledShader->usesVertexIndex = usesVertexIndex;
     compiledShader->usesInstanceIndex = usesInstanceIndex;

@@ -135,7 +135,7 @@ struct MultiplanarExternalTexture::State {
 
             BindingsMap::const_iterator it = new_binding_points->bindings_map.find(bp);
             if (it == new_binding_points->bindings_map.end()) {
-                b.Diagnostics().add_error(
+                b.Diagnostics().AddError(
                     diag::System::Transform,
                     "missing new binding points for texture_external at binding {" +
                         std::to_string(bp.group) + "," + std::to_string(bp.binding) + "}");
@@ -552,8 +552,8 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program& src,
     ProgramBuilder b;
     program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
     if (!new_binding_points) {
-        b.Diagnostics().add_error(diag::System::Transform, "missing new binding point data for " +
-                                                               std::string(TypeInfo().name));
+        b.Diagnostics().AddError(diag::System::Transform, "missing new binding point data for " +
+                                                              std::string(TypeInfo().name));
         return resolver::Resolve(b);
     }
 

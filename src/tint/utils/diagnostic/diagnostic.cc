@@ -66,10 +66,10 @@ List& List::operator=(const List& rhs) = default;
 
 List& List::operator=(List&& rhs) = default;
 
-std::string List::str() const {
+std::string List::Str() const {
     diag::Formatter::Style style;
     style.print_newline_at_end = false;
-    return Formatter{style}.format(*this);
+    return Formatter{style}.Format(*this);
 }
 
 }  // namespace tint::diag

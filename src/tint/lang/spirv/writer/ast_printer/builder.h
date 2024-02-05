@@ -111,7 +111,7 @@ class Builder {
     const diag::List& Diagnostics() const { return builder_.Diagnostics(); }
 
     /// @returns true if the builder encountered an error
-    bool has_error() const { return Diagnostics().contains_errors(); }
+    bool has_error() const { return Diagnostics().ContainsErrors(); }
 
     /// @returns the module that this builder has produced
     writer::Module& Module() { return module_; }

@@ -257,9 +257,9 @@ struct PixelLocal::State {
     uint32_t AttachmentIndex(uint32_t field_index) {
         auto idx = cfg.attachments.Get(field_index);
         if (TINT_UNLIKELY(!idx)) {
-            b.Diagnostics().add_error(diag::System::Transform,
-                                      "PixelLocal::Config::attachments missing entry for field " +
-                                          std::to_string(field_index));
+            b.Diagnostics().AddError(diag::System::Transform,
+                                     "PixelLocal::Config::attachments missing entry for field " +
+                                         std::to_string(field_index));
             return 0;
         }
         return *idx;
@@ -276,8 +276,8 @@ ast::transform::Transform::ApplyResult PixelLocal::Apply(const Program& src,
     auto* cfg = inputs.Get<Config>();
     if (!cfg) {
         ProgramBuilder b;
-        b.Diagnostics().add_error(diag::System::Transform,
-                                  "missing transform data for " + std::string(TypeInfo().name));
+        b.Diagnostics().AddError(diag::System::Transform,
+                                 "missing transform data for " + std::string(TypeInfo().name));
         return resolver::Resolve(b);
     }
 

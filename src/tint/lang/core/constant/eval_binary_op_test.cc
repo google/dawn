@@ -2215,7 +2215,7 @@ const result = (one == 0) && (1111111111111111111111111111111i == 0);
     auto program = wgsl::reader::Parse(file.get());
     EXPECT_FALSE(program.IsValid());
 
-    auto error = program.Diagnostics().str();
+    auto error = program.Diagnostics().Str();
     EXPECT_EQ(error, R"(test:3:31 error: value cannot be represented as 'i32'
 const result = (one == 0) && (1111111111111111111111111111111i == 0);
                               ^
@@ -2234,7 +2234,7 @@ const result = (one == 1) || (1111111111111111111111111111111i == 0);
     auto program = wgsl::reader::Parse(file.get());
     EXPECT_FALSE(program.IsValid());
 
-    auto error = program.Diagnostics().str();
+    auto error = program.Diagnostics().Str();
     EXPECT_EQ(error, R"(test:3:31 error: value cannot be represented as 'i32'
 const result = (one == 1) || (1111111111111111111111111111111i == 0);
                               ^
@@ -2442,7 +2442,7 @@ const result = )");
     auto program = wgsl::reader::Parse(file.get());
 
     if (should_pass) {
-        auto error = program.Diagnostics().str();
+        auto error = program.Diagnostics().Str();
 
         EXPECT_TRUE(program.IsValid()) << error;
     } else {

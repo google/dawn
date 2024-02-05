@@ -38,7 +38,7 @@ class PrinterOther : public Printer {
   public:
     explicit PrinterOther(FILE* f) : file(f) {}
 
-    void write(const std::string& str, const Style&) override {
+    void Write(const std::string& str, const Style&) override {
         fwrite(str.data(), 1, str.size(), file);
     }
 
@@ -48,7 +48,7 @@ class PrinterOther : public Printer {
 
 }  // namespace
 
-std::unique_ptr<Printer> Printer::create(FILE* out, bool) {
+std::unique_ptr<Printer> Printer::Create(FILE* out, bool) {
     return std::make_unique<PrinterOther>(out);
 }
 

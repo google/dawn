@@ -40,7 +40,7 @@ std::string StringPrinter::str() const {
     return stream.str();
 }
 
-void StringPrinter::write(const std::string& str, const Style&) {
+void StringPrinter::Write(const std::string& str, const Style&) {
     stream << str;
 }
 

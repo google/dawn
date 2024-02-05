@@ -36,7 +36,7 @@ namespace tint::wgsl::reader {
 
 /// Parses the WGSL source, returning the parsed program.
 /// If the source fails to parse then the returned
-/// `program.Diagnostics.contains_errors()` will be true, and the
+/// `program.Diagnostics.ContainsErrors()` will be true, and the
 /// `program.Diagnostics()` will describe the error.
 /// @param file the source file
 /// @param options the configuration options to use when parsing WGSL

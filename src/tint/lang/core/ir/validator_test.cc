@@ -59,7 +59,7 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:2:3 error: root block: invalid instruction: tint::core::ir::Loop
   loop [b: %b2] {  # loop_1
   ^^^^^^^^^^^^^
@@ -90,7 +90,7 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:2:38 error: var: instruction in root block does not have root block as parent
   %1:ptr<private, i32, read_write> = var
                                      ^^^
@@ -131,7 +131,7 @@ TEST_F(IR_ValidatorTest, Function_Duplicate) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(error: function 'my_func' added to module multiple times
 note: # Disassembly
 %my_func = func(%2:i32, %3:f32):void -> %b1 {
@@ -160,7 +160,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:20 error: call: call target is not part of the module
     %2:void = call %g
                    ^^
@@ -191,7 +191,7 @@ TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:20 error: call: call target must not have a pipeline stage
     %2:void = call %g
                    ^^
@@ -228,7 +228,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:20 error: call: function has 2 parameters, but call provides 1 arguments
     %5:void = call %g, 42i
                    ^^
@@ -265,7 +265,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooManyArguments) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:20 error: call: function has 2 parameters, but call provides 3 arguments
     %5:void = call %g, 1i, 2i, 3i
                    ^^
@@ -302,7 +302,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:28 error: call: function parameter 1 is of type i32, but argument is of type f32
     %6:void = call %g, 1i, 2.0f, 3i
                            ^^^^
@@ -331,7 +331,7 @@ TEST_F(IR_ValidatorTest, Block_NoTerminator) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:2:3 error: block: does not end in a terminator instruction
   %b1 = block {
   ^^^^^^^^^^^
@@ -358,7 +358,7 @@ TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:41 error: var: block instruction does not have same block as parent
     %2:ptr<function, i32, read_write> = var
                                         ^^^
@@ -398,7 +398,7 @@ TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:25 error: access: constant index must be positive, got -1
     %3:f32 = access %2, -1i
                         ^^^
@@ -429,7 +429,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:29 error: access: index out of bounds for type vec2<f32>
     %3:f32 = access %2, 1u, 3u
                             ^^
@@ -465,7 +465,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:55 error: access: index out of bounds for type ptr<private, array<f32, 2>, read_write>
     %3:ptr<private, f32, read_write> = access %2, 1u, 3u
                                                       ^^
@@ -500,7 +500,7 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:25 error: access: type f32 cannot be indexed
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:25 error: access: type f32 cannot be indexed
     %3:f32 = access %2, 1u
                         ^^
 
@@ -530,7 +530,7 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Ptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:51 error: access: type ptr<private, f32, read_write> cannot be indexed
     %3:ptr<private, f32, read_write> = access %2, 1u
                                                   ^^
@@ -567,7 +567,7 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:25 error: access: type MyStruct cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
@@ -610,7 +610,7 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Ptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:8:25 error: access: type ptr<private, MyStruct, read_write> cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
@@ -646,7 +646,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Value_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:14 error: access: result of access chain is type f32 but instruction type is i32
     %3:i32 = access %2, 1u, 1u
              ^^^^^^
@@ -678,7 +678,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Ptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:40 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is ptr<private, i32, read_write>
     %3:ptr<private, i32, read_write> = access %2, 1u, 1u
                                        ^^^^^^
@@ -710,7 +710,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Value) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:14 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is f32
     %3:f32 = access %2, 1u, 1u
              ^^^^^^
@@ -741,7 +741,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:25 error: access: cannot obtain address of vector element
     %3:f32 = access %2, 1u
                         ^^
@@ -786,7 +786,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:29 error: access: cannot obtain address of vector element
     %3:f32 = access %2, 1u, 1u
                             ^^
@@ -832,7 +832,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_AddressSpace) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:34 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<uniform, f32, read>
     %3:ptr<uniform, f32, read> = access %2, 1u
                                  ^^^^^^
@@ -864,7 +864,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_Access) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:40 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<storage, f32, read_write>
     %3:ptr<storage, f32, read_write> = access %2, 1u
                                        ^^^^^^
@@ -921,7 +921,7 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:5 error: block: terminator which isn't the final instruction
     ret
     ^^^
@@ -963,7 +963,7 @@ TEST_F(IR_ValidatorTest, If_EmptyTrue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:7 error: block: does not end in a terminator instruction
       %b2 = block {  # true
       ^^^^^^^^^^^
@@ -996,7 +996,7 @@ TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:8 error: if: condition must be a `bool` type
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: condition must be a `bool` type
     if 1i [t: %b2, f: %b3] {  # if_1
        ^^
 
@@ -1033,7 +1033,7 @@ TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:8 error: if: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: operand is undefined
     if undef [t: %b2, f: %b3] {  # if_1
        ^^^^^
 
@@ -1072,7 +1072,7 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: if: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: if: result is undefined
     undef = if true [t: %b2, f: %b3] {  # if_1
     ^^^^^
 
@@ -1119,7 +1119,7 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:7 error: block: does not end in a terminator instruction
       %b2 = block {  # body
       ^^^^^^^^^^^
@@ -1143,7 +1143,7 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:2:3 error: var: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:2:3 error: var: result is undefined
   undef = var
   ^^^^^
 
@@ -1170,7 +1170,7 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: var: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: var: result is undefined
     undef = var
     ^^^^^
 
@@ -1200,7 +1200,7 @@ TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:41 error: var: initializer has incorrect type
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:41 error: var: initializer has incorrect type
     %2:ptr<function, f32, read_write> = var, %3
                                         ^^^
 
@@ -1229,7 +1229,7 @@ TEST_F(IR_ValidatorTest, Let_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: let: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: let: result is undefined
     undef = let 1i
     ^^^^^
 
@@ -1258,7 +1258,7 @@ TEST_F(IR_ValidatorTest, Let_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:18 error: let: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:18 error: let: operand is undefined
     %2:f32 = let undef
                  ^^^^^
 
@@ -1287,7 +1287,7 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:14 error: let: result type does not match value type
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:14 error: let: result type does not match value type
     %2:f32 = let 1i
              ^^^
 
@@ -1340,7 +1340,7 @@ note: # Disassembly
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), expected);
+    EXPECT_EQ(res.Failure().reason.Str(), expected);
 }
 
 TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
@@ -1354,7 +1354,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:5 error: var: instruction of result is undefined
     %2:ptr<function, f32, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1386,7 +1386,7 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: operand is not alive
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:46 error: var: operand is not alive
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 
@@ -1417,7 +1417,7 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:46 error: var: operand missing usage
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:46 error: var: operand missing usage
     %2:ptr<function, f32, read_write> = var, %3
                                              ^^
 
@@ -1447,7 +1447,7 @@ TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(error: orphaned instruction: load
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: orphaned instruction: load
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
@@ -1467,7 +1467,7 @@ TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:18 error: binary: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:18 error: binary: operand is undefined
     %2:i32 = add undef, 2i
                  ^^^^^
 
@@ -1494,7 +1494,7 @@ TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:22 error: binary: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:22 error: binary: operand is undefined
     %2:i32 = add 2i, undef
                      ^^^^^
 
@@ -1524,7 +1524,7 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: binary: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: binary: result is undefined
     undef = add 3i, 2i
     ^^^^^
 
@@ -1551,7 +1551,7 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:23 error: unary: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:23 error: unary: operand is undefined
     %2:i32 = negation undef
                       ^^^^^
 
@@ -1581,7 +1581,7 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: unary: result is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: unary: result is undefined
     undef = negation 2i
     ^^^^^
 
@@ -1611,7 +1611,7 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:3:5 error: unary: unary instruction result type (f32) does not match overload result type (i32)
     %2:f32 = complement 2i
     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1653,7 +1653,7 @@ TEST_F(IR_ValidatorTest, ExitIf_NullIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:5:9 error: exit_if: has no parent control instruction
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:5:9 error: exit_if: has no parent control instruction
         exit_if  # undef
         ^^^^^^^
 
@@ -1691,7 +1691,7 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_if: args count (1) does not match control instruction result count (2)
         exit_if 1i  # if_1
         ^^^^^^^^^^
@@ -1735,7 +1735,7 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_if: args count (3) does not match control instruction result count (2)
         exit_if 1i, 2.0f, 3i  # if_1
         ^^^^^^^^^^^^^^^^^^^^
@@ -1796,7 +1796,7 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:21 error: exit_if: argument type (f32) does not match control instruction type (i32)
         exit_if 1i, 2i  # if_1
                     ^^
@@ -1836,7 +1836,7 @@ TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:5 error: exit_if: found outside all control instructions
     exit_if  # if_1
     ^^^^^^^
@@ -1879,7 +1879,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
@@ -1932,7 +1932,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
@@ -1984,7 +1984,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
@@ -2043,7 +2043,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:5:9 error: exit_switch: has no parent control instruction
         exit_switch  # undef
         ^^^^^^^^^^^
@@ -2084,7 +2084,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_switch: args count (1) does not match control instruction result count (2)
         exit_switch 1i  # switch_1
         ^^^^^^^^^^^^^^
@@ -2128,7 +2128,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_switch: args count (3) does not match control instruction result count (2)
         exit_switch 1i, 2.0f, 3i  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2190,7 +2190,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:25 error: exit_switch: argument type (f32) does not match control instruction type (i32)
         exit_switch 1i, 2i  # switch_1
                         ^^
@@ -2234,7 +2234,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:10:9 error: exit_switch: switch not found in parent control instructions
         exit_switch  # switch_1
         ^^^^^^^^^^^
@@ -2315,7 +2315,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_switch: switch target jumps over other control instructions
             exit_switch  # switch_1
             ^^^^^^^^^^^
@@ -2366,7 +2366,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_switch: switch target jumps over other control instructions
             exit_switch  # switch_1
             ^^^^^^^^^^^
@@ -2423,7 +2423,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_NullLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:5:9 error: exit_loop: has no parent control instruction
         exit_loop  # undef
         ^^^^^^^^^
@@ -2466,7 +2466,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_loop: args count (1) does not match control instruction result count (2)
         exit_loop 1i  # loop_1
         ^^^^^^^^^^^^
@@ -2513,7 +2513,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:9 error: exit_loop: args count (3) does not match control instruction result count (2)
         exit_loop 1i, 2.0f, 3i  # loop_1
         ^^^^^^^^^^^^^^^^^^^^^^
@@ -2578,7 +2578,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
-        res.Failure().reason.str(),
+        res.Failure().reason.Str(),
         R"(:5:23 error: exit_loop: argument type (f32) does not match control instruction type (i32)
         exit_loop 1i, 2i  # loop_1
                       ^^
@@ -2624,7 +2624,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:13:9 error: exit_loop: loop not found in parent control instructions
         exit_loop  # loop_1
         ^^^^^^^^^
@@ -2707,7 +2707,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
@@ -2762,7 +2762,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
@@ -2812,7 +2812,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:9 error: exit_loop: loop exit jumps out of continuing block
         exit_loop  # loop_1
         ^^^^^^^^^
@@ -2858,7 +2858,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:10:13 error: exit_loop: loop exit jumps out of continuing block
             exit_loop  # loop_1
             ^^^^^^^^^
@@ -2910,7 +2910,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:5:9 error: exit_loop: loop exit not permitted in loop initializer
         exit_loop  # loop_1
         ^^^^^^^^^
@@ -2960,7 +2960,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:7:13 error: exit_loop: loop exit not permitted in loop initializer
             exit_loop  # loop_1
             ^^^^^^^^^
@@ -3024,7 +3024,7 @@ TEST_F(IR_ValidatorTest, Return_NullFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: return: undefined function
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: undefined function
     ret
     ^^^
 
@@ -3049,7 +3049,7 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: return: unexpected return value
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: unexpected return value
     ret 42i
     ^^^^^^^
 
@@ -3074,7 +3074,7 @@ TEST_F(IR_ValidatorTest, Return_MissingValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:5 error: return: expected return value
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: expected return value
     ret
     ^^^
 
@@ -3099,7 +3099,7 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:5 error: return: return value type does not match function return type
     ret 42.0f
     ^^^^^^^^^
@@ -3127,7 +3127,7 @@ TEST_F(IR_ValidatorTest, Load_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:19 error: load: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:19 error: load: operand is undefined
     %2:i32 = load undef
                   ^^^^^
 
@@ -3156,7 +3156,7 @@ TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:19 error: load source operand is not a memory view
     %3:f32 = load %l
                   ^^
@@ -3187,7 +3187,7 @@ TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:19 error: result type does not match source store type
     %3:f32 = load %2
                   ^^
@@ -3217,7 +3217,7 @@ TEST_F(IR_ValidatorTest, Store_NullTo) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:11 error: store: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:11 error: store: operand is undefined
     store undef, 42i
           ^^^^^
 
@@ -3246,7 +3246,7 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:4:15 error: store: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:15 error: store: operand is undefined
     store %2, undef
               ^^^^^
 
@@ -3276,7 +3276,7 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:15 error: store target operand is not a memory view
     store %l, 42u
               ^^^
@@ -3307,7 +3307,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:15 error: value type does not match store type
     store %2, 42u
               ^^^
@@ -3339,7 +3339,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(),
+    EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:5 error: load_vector_element: result is undefined
     undef = load_vector_element %2, 1i
     ^^^^^
@@ -3370,7 +3370,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:34 error: load_vector_element: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:34 error: load_vector_element: operand is undefined
     %2:f32 = load_vector_element undef, 1i
                                  ^^^^^
 
@@ -3400,7 +3400,7 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:4:38 error: load_vector_element: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:38 error: load_vector_element: operand is undefined
     %3:f32 = load_vector_element %2, undef
                                      ^^^^^
 
@@ -3430,7 +3430,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:3:26 error: store_vector_element: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:26 error: store_vector_element: operand is undefined
     store_vector_element undef, 1i, 2i
                          ^^^^^
 
@@ -3460,7 +3460,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:4:30 error: store_vector_element: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:30 error: store_vector_element: operand is undefined
     store_vector_element %2, undef, 2i
                              ^^^^^
 
@@ -3499,7 +3499,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(:4:34 error: store_vector_element: operand is undefined
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:34 error: store_vector_element: operand is undefined
     store_vector_element %2, 1i, undef
                                  ^^^^^
 

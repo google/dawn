@@ -61,14 +61,14 @@ class PrinterPosix : public Printer {
   public:
     PrinterPosix(FILE* f, bool colors) : file(f), use_colors(colors && supports_colors(f)) {}
 
-    void write(const std::string& str, const Style& style) override {
-        write_color(style.color, style.bold);
+    void Write(const std::string& str, const Style& style) override {
+        WriteColor(style.color, style.bold);
         fwrite(str.data(), 1, str.size(), file);
-        write_color(Color::kDefault, false);
+        WriteColor(Color::kDefault, false);
     }
 
   private:
-    constexpr const char* color_code(Color color, bool bold) {
+    constexpr const char* ColorCode(Color color, bool bold) {
         switch (color) {
             case Color::kDefault:
                 return bold ? "\u001b[1m" : "\u001b[0m";
@@ -92,9 +92,9 @@ class PrinterPosix : public Printer {
         return "";  // unreachable
     }
 
-    void write_color(Color color, bool bold) {
+    void WriteColor(Color color, bool bold) {
         if (use_colors) {
-            auto* code = color_code(color, bold);
+            auto* code = ColorCode(color, bold);
             fwrite(code, 1, strlen(code), file);
         }
     }
@@ -105,7 +105,7 @@ class PrinterPosix : public Printer {
 
 }  // namespace
 
-std::unique_ptr<Printer> Printer::create(FILE* out, bool use_colors) {
+std::unique_ptr<Printer> Printer::Create(FILE* out, bool use_colors) {
     return std::make_unique<PrinterPosix>(out, use_colors);
 }
 

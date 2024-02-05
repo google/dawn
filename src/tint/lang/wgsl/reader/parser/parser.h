@@ -103,7 +103,7 @@ class Parser {
     /// Expect is the return type of the parser methods that are expected to
     /// return a parsed value of type T, unless there was an parse error.
     /// In the case of a parse error the called method will have called
-    /// add_error() and #errored will be set to true.
+    /// AddError() and #errored will be set to true.
     template <typename T>
     struct Expect {
         /// An alias to the templated type T.
@@ -154,7 +154,7 @@ class Parser {
     /// In the case of a successful grammar match, the Maybe will have #matched
     /// set to true.
     /// In the case of a parse error the called method will have called
-    /// add_error() and the Maybe will have #errored set to true.
+    /// AddError() and the Maybe will have #errored set to true.
     template <typename T>
     struct Maybe {
         inline Maybe(std::nullptr_t) = delete;  // NOLINT
@@ -323,12 +323,12 @@ class Parser {
     size_t get_max_errors() const { return max_errors_; }
 
     /// @returns true if an error was encountered.
-    bool has_error() const { return builder_.Diagnostics().contains_errors(); }
+    bool has_error() const { return builder_.Diagnostics().ContainsErrors(); }
 
     /// @returns the parser error string
     std::string error() const {
         diag::Formatter formatter{{false, false, false, false}};
-        return formatter.format(builder_.Diagnostics());
+        return formatter.Format(builder_.Diagnostics());
     }
 
     /// @returns the Program. The program builder in the parser will be reset
@@ -355,28 +355,28 @@ class Parser {
     /// Appends an error at `t` with the message `msg`
     /// @param t the token to associate the error with
     /// @param msg the error message
-    /// @return `Failure::Errored::kError` so that you can combine an add_error()
+    /// @return `Failure::Errored::kError` so that you can combine an AddError()
     /// call and return on the same line.
-    Failure::Errored add_error(const Token& t, std::string_view msg);
+    Failure::Errored AddError(const Token& t, std::string_view msg);
     /// Appends an error raised when parsing `use` at `t` with the message
     /// `msg`
     /// @param source the source to associate the error with
     /// @param msg the error message
     /// @param use a description of what was being parsed when the error was
     /// raised.
-    /// @return `Failure::Errored::kError` so that you can combine an add_error()
+    /// @return `Failure::Errored::kError` so that you can combine an AddError()
     /// call and return on the same line.
-    Failure::Errored add_error(const Source& source, std::string_view msg, std::string_view use);
+    Failure::Errored AddError(const Source& source, std::string_view msg, std::string_view use);
     /// Appends an error at `source` with the message `msg`
     /// @param source the source to associate the error with
     /// @param msg the error message
-    /// @return `Failure::Errored::kError` so that you can combine an add_error()
+    /// @return `Failure::Errored::kError` so that you can combine an AddError()
     /// call and return on the same line.
-    Failure::Errored add_error(const Source& source, std::string_view msg);
+    Failure::Errored AddError(const Source& source, std::string_view msg);
     /// Appends a note at `source` with the message `msg`
     /// @param source the source to associate the error with
     /// @param msg the note message
-    void add_note(const Source& source, std::string_view msg);
+    void AddNote(const Source& source, std::string_view msg);
     /// Appends a deprecated-language-feature warning at `source` with the message
     /// `msg`
     /// @param source the source to associate the error with
@@ -838,7 +838,7 @@ class Parser {
     /// @returns true if #synchronized_ is true and the number of reported errors
     /// is less than #max_errors_.
     bool continue_parsing() {
-        return synchronized_ && builder_.Diagnostics().error_count() < max_errors_;
+        return synchronized_ && builder_.Diagnostics().NumErrors() < max_errors_;
     }
 
     /// without_diag() calls the function `func` muting any diagnostics found while executing the

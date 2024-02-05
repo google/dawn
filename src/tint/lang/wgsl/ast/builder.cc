@@ -66,7 +66,7 @@ Builder& Builder::operator=(Builder&& rhs) {
 }
 
 bool Builder::IsValid() const {
-    return !diagnostics_.contains_errors();
+    return !diagnostics_.ContainsErrors();
 }
 
 void Builder::MarkAsMoved() {

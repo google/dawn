@@ -441,8 +441,8 @@ ast::transform::Transform::ApplyResult CombineSamplers::Apply(const Program& src
     auto* binding_info = inputs.Get<BindingInfo>();
     if (!binding_info) {
         ProgramBuilder b;
-        b.Diagnostics().add_error(diag::System::Transform,
-                                  "missing transform data for " + std::string(TypeInfo().name));
+        b.Diagnostics().AddError(diag::System::Transform,
+                                 "missing transform data for " + std::string(TypeInfo().name));
         return resolver::Resolve(b);
     }
 

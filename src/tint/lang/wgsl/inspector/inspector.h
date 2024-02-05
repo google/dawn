@@ -62,9 +62,9 @@ class Inspector {
     ~Inspector();
 
     /// @returns error messages from the Inspector
-    std::string error() { return diagnostics_.str(); }
+    std::string error() { return diagnostics_.Str(); }
     /// @returns true if an error was encountered
-    bool has_error() const { return diagnostics_.contains_errors(); }
+    bool has_error() const { return diagnostics_.ContainsErrors(); }
 
     /// @returns vector of entry point information
     std::vector<EntryPoint> GetEntryPoints();

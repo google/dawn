@@ -296,7 +296,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) 
     ASTPrinter& gen = SanitizeAndBuild(options);
 
     ASSERT_FALSE(gen.Generate());
-    EXPECT_THAT(gen.Diagnostics().str(), HasSubstr("Unable to translate builtin: arrayLength"));
+    EXPECT_THAT(gen.Diagnostics().Str(), HasSubstr("Unable to translate builtin: arrayLength"));
 }
 
 }  // namespace

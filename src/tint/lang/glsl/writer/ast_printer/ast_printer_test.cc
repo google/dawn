@@ -35,13 +35,13 @@ namespace {
 using GlslASTPrinterTest = TestHelper;
 
 TEST_F(GlslASTPrinterTest, InvalidProgram) {
-    Diagnostics().add_error(diag::System::Writer, "make the program invalid");
+    Diagnostics().AddError(diag::System::Writer, "make the program invalid");
     ASSERT_FALSE(IsValid());
     auto program = resolver::Resolve(*this);
     ASSERT_FALSE(program.IsValid());
     auto result = Generate(program, Options{}, "");
     EXPECT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.str(), "error: make the program invalid");
+    EXPECT_EQ(result.Failure().reason.Str(), "error: make the program invalid");
 }
 
 TEST_F(GlslASTPrinterTest, Generate) {
@@ -128,7 +128,7 @@ TEST_F(GlslASTPrinterTest, UnsupportedExtension) {
 
     ASSERT_FALSE(gen.Generate());
     EXPECT_EQ(
-        gen.Diagnostics().str(),
+        gen.Diagnostics().Str(),
         R"(12:34 error: GLSL backend does not support extension 'chromium_internal_relaxed_uniform_layout')");
 }
 

@@ -272,8 +272,8 @@ struct Robustness::State {
                 }
                 // Note: Don't be tempted to use the array override variable as an expression here,
                 // the name might be shadowed!
-                b.Diagnostics().add_error(diag::System::Transform,
-                                          core::type::Array::kErrExpectedConstantCount);
+                b.Diagnostics().AddError(diag::System::Transform,
+                                         core::type::Array::kErrExpectedConstantCount);
                 return nullptr;
             },  //
             TINT_ICE_ON_NO_MATCH);

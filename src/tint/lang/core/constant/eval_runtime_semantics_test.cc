@@ -44,7 +44,7 @@ class ConstEvalRuntimeSemanticsTest : public ConstEvalTest {
     Eval eval;
 
     /// @returns the contents of the diagnostics list as a string
-    std::string error() { return Diagnostics().str(); }
+    std::string error() { return Diagnostics().Str(); }
 };
 
 TEST_F(ConstEvalRuntimeSemanticsTest, Add_AInt_Overflow) {

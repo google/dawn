@@ -67,28 +67,28 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
         Source::File file{"test", in};
         auto program_in = wgsl::reader::Parse(&file, parser_options);
         if (!program_in.IsValid()) {
-            return "wgsl::reader::Parse() failed: \n" + program_in.Diagnostics().str();
+            return "wgsl::reader::Parse() failed: \n" + program_in.Diagnostics().Str();
         }
 
         auto module = wgsl::reader::ProgramToIR(program_in);
         if (module != Success) {
-            return "ProgramToIR() failed:\n" + module.Failure().reason.str();
+            return "ProgramToIR() failed:\n" + module.Failure().reason.Str();
         }
 
         auto res = DirectVariableAccess(module.Get(), transform_options);
         if (res != Success) {
-            return "DirectVariableAccess failed:\n" + res.Failure().reason.str();
+            return "DirectVariableAccess failed:\n" + res.Failure().reason.Str();
         }
 
         auto pre_raise = ir::Disassemble(module.Get());
 
         if (auto raise = wgsl::writer::Raise(module.Get()); raise != Success) {
-            return "wgsl::writer::Raise failed:\n" + res.Failure().reason.str();
+            return "wgsl::writer::Raise failed:\n" + res.Failure().reason.Str();
         }
 
         auto program_out = wgsl::writer::IRToProgram(module.Get(), program_options);
         if (!program_out.IsValid()) {
-            return "wgsl::writer::IRToProgram() failed: \n" + program_out.Diagnostics().str() +
+            return "wgsl::writer::IRToProgram() failed: \n" + program_out.Diagnostics().Str() +
                    "\n\nIR (pre):\n" + pre_raise +                       //
                    "\n\nIR (post):\n" + ir::Disassemble(module.Get()) +  //
                    "\n\nAST:\n" + Program::printer(program_out);
@@ -96,7 +96,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
 
         auto output = wgsl::writer::Generate(program_out, wgsl::writer::Options{});
         if (output != Success) {
-            return "wgsl::writer::IRToProgram() failed: \n" + output.Failure().reason.str() +
+            return "wgsl::writer::IRToProgram() failed: \n" + output.Failure().reason.Str() +
                    "\n\nIR:\n" + ir::Disassemble(module.Get());
         }
 

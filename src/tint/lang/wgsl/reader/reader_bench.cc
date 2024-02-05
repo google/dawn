@@ -36,13 +36,13 @@ namespace {
 void ParseWGSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadInputFile(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.str());
+        state.SkipWithError(res.Failure().reason.Str());
         return;
     }
     for (auto _ : state) {
         auto program = Parse(&res.Get());
-        if (program.Diagnostics().contains_errors()) {
-            state.SkipWithError(program.Diagnostics().str());
+        if (program.Diagnostics().ContainsErrors()) {
+            state.SkipWithError(program.Diagnostics().Str());
         }
     }
 }

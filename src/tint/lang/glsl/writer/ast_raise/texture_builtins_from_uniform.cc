@@ -74,7 +74,7 @@ struct TextureBuiltinsFromUniform::State {
     ApplyResult Run() {
         auto* cfg = inputs.Get<Config>();
         if (cfg == nullptr) {
-            b.Diagnostics().add_error(
+            b.Diagnostics().AddError(
                 diag::System::Transform,
                 "missing transform data for " +
                     std::string(tint::TypeInfo::Of<TextureBuiltinsFromUniform>().name));

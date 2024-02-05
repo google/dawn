@@ -428,7 +428,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.str());
+                                ir.Failure().reason.Str());
 
                 tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
             } else {
@@ -436,7 +436,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
             DAWN_INVALID_IF(tintResult != tint::Success,
                             "An error occurred while generating SPIR-V\n%s",
-                            tintResult.Failure().reason.str());
+                            tintResult.Failure().reason.Str());
 
             CompiledSpirv result;
             result.spirv = std::move(tintResult.Get().spirv);

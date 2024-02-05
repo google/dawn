@@ -141,7 +141,7 @@ Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed
 Resolver::~Resolver() = default;
 
 bool Resolver::Resolve() {
-    if (diagnostics_.contains_errors()) {
+    if (diagnostics_.ContainsErrors()) {
         return false;
     }
 
@@ -156,7 +156,7 @@ bool Resolver::Resolve() {
 
     bool result = ResolveInternal();
 
-    if (TINT_UNLIKELY(!result && !diagnostics_.contains_errors())) {
+    if (TINT_UNLIKELY(!result && !diagnostics_.ContainsErrors())) {
         AddICE("resolving failed, but no error was raised", {});
         return false;
     }
@@ -5063,19 +5063,19 @@ void Resolver::AddICE(const std::string& msg, const Source& source) const {
     err.system = diag::System::Resolver;
     err.source = source;
     err.message = msg;
-    diagnostics_.add(std::move(err));
+    diagnostics_.Add(std::move(err));
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {
-    diagnostics_.add_error(diag::System::Resolver, msg, source);
+    diagnostics_.AddError(diag::System::Resolver, msg, source);
 }
 
 void Resolver::AddWarning(const std::string& msg, const Source& source) const {
-    diagnostics_.add_warning(diag::System::Resolver, msg, source);
+    diagnostics_.AddWarning(diag::System::Resolver, msg, source);
 }
 
 void Resolver::AddNote(const std::string& msg, const Source& source) const {
-    diagnostics_.add_note(diag::System::Resolver, msg, source);
+    diagnostics_.AddNote(diag::System::Resolver, msg, source);
 }
 
 }  // namespace tint::resolver

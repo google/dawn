@@ -241,16 +241,16 @@ void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& 
             case (tint::diag::Severity::Error):
             case (tint::diag::Severity::InternalCompilerError): {
                 errorCount++;
-                messageList.add(tint::diag::Diagnostic(diag));
+                messageList.Add(diag);
                 break;
             }
             case (tint::diag::Severity::Warning): {
                 warningCount++;
-                messageList.add(tint::diag::Diagnostic(diag));
+                messageList.Add(diag);
                 break;
             }
             case (tint::diag::Severity::Note): {
-                messageList.add(tint::diag::Diagnostic(diag));
+                messageList.Add(diag);
                 break;
             }
             default:
@@ -273,7 +273,7 @@ void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& 
         t << warningCount << " warning(s) ";
     }
     t << "generated while compiling the shader:" << std::endl
-      << tint::diag::Formatter{style}.format(messageList);
+      << tint::diag::Formatter{style}.Format(messageList);
     mFormattedTintMessages.push_back(t.str());
 }
 

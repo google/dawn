@@ -70,7 +70,7 @@ TEST(SpirvValidateTest, Invalid) {
     };
     auto res = Validate(spirv, SPV_ENV_VULKAN_1_3);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.str(), R"(spirv error: SPIR-V failed validation.
+    EXPECT_EQ(res.Failure().reason.Str(), R"(spirv error: SPIR-V failed validation.
 
 Disassembly:
 ; SPIR-V

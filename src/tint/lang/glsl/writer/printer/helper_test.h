@@ -63,13 +63,13 @@ class GlslPrinterTestHelperBase : public BASE {
     /// @returns true if generation and validation succeeded
     bool Generate() {
         if (auto raised = Raise(mod); raised != Success) {
-            err_ = raised.Failure().reason.str();
+            err_ = raised.Failure().reason.Str();
             return false;
         }
 
         auto result = Print(mod, version);
         if (result != Success) {
-            err_ = result.Failure().reason.str();
+            err_ = result.Failure().reason.Str();
             return false;
         }
         output_ = result.Get();

@@ -829,7 +829,7 @@ TEST_F(GlslASTPrinterTest_Function,
     ASTPrinter& gen = Build();
     gen.Generate();
     EXPECT_EQ(
-        gen.Diagnostics().str(),
+        gen.Diagnostics().Str(),
         R"(error: override-expressions should have been removed with the SubstituteOverride transform
 error: override-expressions should have been removed with the SubstituteOverride transform
 error: override-expressions should have been removed with the SubstituteOverride transform

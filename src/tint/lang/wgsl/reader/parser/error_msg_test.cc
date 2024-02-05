@@ -46,8 +46,8 @@ class ParserImplErrorTest : public WGSLParserTest {};
         p->set_max_errors(5);                                                      \
         EXPECT_EQ(false, p->Parse());                                              \
         auto diagnostics = p->builder().Diagnostics();                             \
-        EXPECT_EQ(true, diagnostics.contains_errors());                            \
-        EXPECT_EQ(expected, diag::Formatter(formatter_style).format(diagnostics)); \
+        EXPECT_EQ(true, diagnostics.ContainsErrors());                             \
+        EXPECT_EQ(expected, diag::Formatter(formatter_style).Format(diagnostics)); \
     } while (false)
 
 TEST_F(ParserImplErrorTest, AdditiveInvalidExpr) {

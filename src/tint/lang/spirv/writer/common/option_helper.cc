@@ -51,7 +51,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
                 std::stringstream str;
                 str << "found duplicate WGSL binding point: " << src;
 
-                diagnostics.add_error(diag::System::Writer, str.str());
+                diagnostics.AddError(diag::System::Writer, str.str());
                 return true;
             }
         }
@@ -66,7 +66,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
                 std::stringstream str;
                 str << "found duplicate SPIR-V binding point: [group: " << src.group
                     << ", binding: " << src.binding << "]";
-                diagnostics.add_error(diag::System::Writer, str.str());
+                diagnostics.AddError(diag::System::Writer, str.str());
                 return true;
             }
         }
@@ -91,23 +91,23 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
     };
 
     if (!valid(options.bindings.uniform)) {
-        diagnostics.add_note(diag::System::Writer, "when processing uniform", {});
+        diagnostics.AddNote(diag::System::Writer, "when processing uniform", {});
         return Failure{std::move(diagnostics)};
     }
     if (!valid(options.bindings.storage)) {
-        diagnostics.add_note(diag::System::Writer, "when processing storage", {});
+        diagnostics.AddNote(diag::System::Writer, "when processing storage", {});
         return Failure{std::move(diagnostics)};
     }
     if (!valid(options.bindings.texture)) {
-        diagnostics.add_note(diag::System::Writer, "when processing texture", {});
+        diagnostics.AddNote(diag::System::Writer, "when processing texture", {});
         return Failure{std::move(diagnostics)};
     }
     if (!valid(options.bindings.storage_texture)) {
-        diagnostics.add_note(diag::System::Writer, "when processing storage_texture", {});
+        diagnostics.AddNote(diag::System::Writer, "when processing storage_texture", {});
         return Failure{std::move(diagnostics)};
     }
     if (!valid(options.bindings.sampler)) {
-        diagnostics.add_note(diag::System::Writer, "when processing sampler", {});
+        diagnostics.AddNote(diag::System::Writer, "when processing sampler", {});
         return Failure{std::move(diagnostics)};
     }
 
@@ -119,20 +119,20 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
         // Validate with the actual source regardless of what the remapper will do
         if (wgsl_seen(src_binding, plane0)) {
-            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
+            diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
 
         if (spirv_seen(plane0, src_binding)) {
-            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
+            diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
         if (spirv_seen(plane1, src_binding)) {
-            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
+            diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
         if (spirv_seen(metadata, src_binding)) {
-            diagnostics.add_note(diag::System::Writer, "when processing external_texture", {});
+            diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
     }

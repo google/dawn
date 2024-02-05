@@ -1831,9 +1831,9 @@ class UniformityGraph {
         auto* control_flow = TraceBackAlongPathUntil(
             non_uniform_source, [](Node* node) { return node->affects_control_flow; });
         if (control_flow) {
-            diagnostics_.add_note(diag::System::Resolver,
-                                  "control flow depends on possibly non-uniform value",
-                                  control_flow->ast->source);
+            diagnostics_.AddNote(diag::System::Resolver,
+                                 "control flow depends on possibly non-uniform value",
+                                 control_flow->ast->source);
             // TODO(jrprice): There are cases where the function with uniformity requirements is not
             // actually inside this control flow construct, for example:
             // - A conditional interrupt (e.g. break), with a barrier elsewhere in the loop
@@ -1887,20 +1887,20 @@ class UniformityGraph {
                     ss << "reading from " << var_type(var) << "'" << NameFor(ident)
                        << "' may result in a non-uniform value";
                 }
-                diagnostics_.add_note(diag::System::Resolver, ss.str(), ident->source);
+                diagnostics_.AddNote(diag::System::Resolver, ss.str(), ident->source);
             },
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
                 StringStream ss;
                 ss << "reading from " << var_type(var) << "'" << NameFor(v)
                    << "' may result in a non-uniform value";
-                diagnostics_.add_note(diag::System::Resolver, ss.str(), v->source);
+                diagnostics_.AddNote(diag::System::Resolver, ss.str(), v->source);
             },
             [&](const ast::CallExpression* c) {
                 auto target_name = NameFor(c->target);
                 switch (non_uniform_source->type) {
                     case Node::kFunctionCallReturnValue: {
-                        diagnostics_.add_note(
+                        diagnostics_.AddNote(
                             diag::System::Resolver,
                             "return value of '" + target_name + "' may be non-uniform", c->source);
                         break;
@@ -1911,21 +1911,21 @@ class UniformityGraph {
                         StringStream ss;
                         ss << "reading from " << var_type(var) << "'" << NameFor(var)
                            << "' may result in a non-uniform value";
-                        diagnostics_.add_note(diag::System::Resolver, ss.str(),
-                                              var->Declaration()->source);
+                        diagnostics_.AddNote(diag::System::Resolver, ss.str(),
+                                             var->Declaration()->source);
                         break;
                     }
                     case Node::kFunctionCallArgumentValue: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         // TODO(jrprice): Which output? (return value vs another pointer argument).
-                        diagnostics_.add_note(diag::System::Resolver,
-                                              "passing non-uniform pointer to '" + target_name +
-                                                  "' may produce a non-uniform output",
-                                              arg->source);
+                        diagnostics_.AddNote(diag::System::Resolver,
+                                             "passing non-uniform pointer to '" + target_name +
+                                                 "' may produce a non-uniform output",
+                                             arg->source);
                         break;
                     }
                     case Node::kFunctionCallPointerArgumentResult: {
-                        diagnostics_.add_note(
+                        diagnostics_.AddNote(
                             diag::System::Resolver,
                             "contents of pointer may become non-uniform after calling '" +
                                 target_name + "'",
@@ -1939,8 +1939,8 @@ class UniformityGraph {
                 }
             },
             [&](const ast::Expression* e) {
-                diagnostics_.add_note(diag::System::Resolver,
-                                      "result of expression may be non-uniform", e->source);
+                diagnostics_.AddNote(diag::System::Resolver,
+                                     "result of expression may be non-uniform", e->source);
             },  //
             TINT_ICE_ON_NO_MATCH);
     }
@@ -1957,7 +1957,7 @@ class UniformityGraph {
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;
-            diagnostics_.add(std::move(error));
+            diagnostics_.Add(std::move(error));
         };
 
         // Traverse the graph to generate a path from RequiredToBeUniform to the source node.

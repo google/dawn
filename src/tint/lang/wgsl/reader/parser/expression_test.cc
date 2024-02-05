@@ -180,7 +180,7 @@ TEST_F(WGSLParserTest, Expression_Mixing_OrWithAnd) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->builder().Diagnostics().str(),
+    EXPECT_EQ(p->builder().Diagnostics().Str(),
               R"(test.wgsl:1:3 error: mixing '&&' and '||' requires parenthesis
 a && true || b
   ^^^^^^^^^^
@@ -194,7 +194,7 @@ TEST_F(WGSLParserTest, Expression_Mixing_AndWithOr) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->builder().Diagnostics().str(),
+    EXPECT_EQ(p->builder().Diagnostics().Str(),
               R"(test.wgsl:1:3 error: mixing '||' and '&&' requires parenthesis
 a || true && b
   ^^^^^^^^^^

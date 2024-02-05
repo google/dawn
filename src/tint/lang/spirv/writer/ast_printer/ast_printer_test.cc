@@ -34,13 +34,13 @@ namespace {
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, InvalidProgram) {
-    Diagnostics().add_error(diag::System::Writer, "make the program invalid");
+    Diagnostics().AddError(diag::System::Writer, "make the program invalid");
     ASSERT_FALSE(IsValid());
     auto program = resolver::Resolve(*this);
     ASSERT_FALSE(program.IsValid());
     auto result = Generate(program, Options{});
     EXPECT_NE(result, Success);
-    EXPECT_EQ(result.Failure().reason.str(), "error: make the program invalid");
+    EXPECT_EQ(result.Failure().reason.Str(), "error: make the program invalid");
 }
 
 TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
@@ -50,7 +50,7 @@ TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
     auto result = Generate(program, Options{});
     EXPECT_NE(result, Success);
     EXPECT_EQ(
-        result.Failure().reason.str(),
+        result.Failure().reason.Str(),
         R"(12:34 error: SPIR-V backend does not support extension 'chromium_internal_relaxed_uniform_layout')");
 }
 

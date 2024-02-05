@@ -104,7 +104,7 @@ class CommonFuzzer {
     const tint::diag::List& Diagnostics() const { return diagnostics_; }
 
     /// @returns if there are any errors in the diagnostic messages
-    bool HasErrors() const { return diagnostics_.contains_errors(); }
+    bool HasErrors() const { return diagnostics_.ContainsErrors(); }
 
     /// @returns generated SPIR-V binary, if SPIR-V was emitted.
     const std::vector<uint32_t>& GetGeneratedSpirv() const { return generated_spirv_; }

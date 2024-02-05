@@ -38,7 +38,7 @@ namespace {
 void GenerateGLSL(benchmark::State& state, std::string input_name) {
     auto res = bench::LoadProgram(input_name);
     if (res != Success) {
-        state.SkipWithError(res.Failure().reason.str());
+        state.SkipWithError(res.Failure().reason.Str());
         return;
     }
     auto& program = res->program;
@@ -53,7 +53,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
         for (auto& ep : entry_points) {
             auto gen_res = Generate(program, {}, ep);
             if (gen_res != Success) {
-                state.SkipWithError(gen_res.Failure().reason.str());
+                state.SkipWithError(gen_res.Failure().reason.Str());
             }
         }
     }

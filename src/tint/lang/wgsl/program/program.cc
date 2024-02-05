@@ -74,14 +74,14 @@ Program::Program(ProgramBuilder&& builder) {
     ast_ = &builder.AST();  // ast::Module is actually a heap allocation.
     sem_ = std::move(builder.Sem());
     symbols_ = std::move(builder.Symbols());
-    diagnostics_.add(std::move(builder.Diagnostics()));
+    diagnostics_.Add(std::move(builder.Diagnostics()));
     builder.MarkAsMoved();
 
-    if (!is_valid_ && !diagnostics_.contains_errors()) {
+    if (!is_valid_ && !diagnostics_.ContainsErrors()) {
         // If the builder claims to be invalid, then we really should have an error
         // message generated. If we find a situation where the program is not valid
         // and there are no errors reported, add one here.
-        diagnostics_.add_error(diag::System::Program, "invalid program generated");
+        diagnostics_.AddError(diag::System::Program, "invalid program generated");
     }
 }
 

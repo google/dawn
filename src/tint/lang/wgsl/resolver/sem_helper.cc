@@ -214,14 +214,14 @@ void SemHelper::NoteDeclarationSource(const ast::Node* node) const {
 }
 
 void SemHelper::AddError(const std::string& msg, const Source& source) const {
-    builder_->Diagnostics().add_error(diag::System::Resolver, msg, source);
+    builder_->Diagnostics().AddError(diag::System::Resolver, msg, source);
 }
 
 void SemHelper::AddWarning(const std::string& msg, const Source& source) const {
-    builder_->Diagnostics().add_warning(diag::System::Resolver, msg, source);
+    builder_->Diagnostics().AddWarning(diag::System::Resolver, msg, source);
 }
 
 void SemHelper::AddNote(const std::string& msg, const Source& source) const {
-    builder_->Diagnostics().add_note(diag::System::Resolver, msg, source);
+    builder_->Diagnostics().AddNote(diag::System::Resolver, msg, source);
 }
 }  // namespace tint::resolver

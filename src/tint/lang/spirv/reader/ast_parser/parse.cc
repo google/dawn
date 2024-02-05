@@ -83,7 +83,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     ProgramBuilder& builder = parser.builder();
     if (!parsed) {
         // TODO(bclayton): Migrate ASTParser to using diagnostics.
-        builder.Diagnostics().add_error(diag::System::Reader, parser.error());
+        builder.Diagnostics().AddError(diag::System::Reader, parser.error());
         return Program(std::move(builder));
     }
 

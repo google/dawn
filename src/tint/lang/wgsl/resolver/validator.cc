@@ -182,15 +182,15 @@ Validator::Validator(
 Validator::~Validator() = default;
 
 void Validator::AddError(const std::string& msg, const Source& source) const {
-    diagnostics_.add_error(diag::System::Resolver, msg, source);
+    diagnostics_.AddError(diag::System::Resolver, msg, source);
 }
 
 void Validator::AddWarning(const std::string& msg, const Source& source) const {
-    diagnostics_.add_warning(diag::System::Resolver, msg, source);
+    diagnostics_.AddWarning(diag::System::Resolver, msg, source);
 }
 
 void Validator::AddNote(const std::string& msg, const Source& source) const {
-    diagnostics_.add_note(diag::System::Resolver, msg, source);
+    diagnostics_.AddNote(diag::System::Resolver, msg, source);
 }
 
 bool Validator::AddDiagnostic(wgsl::DiagnosticRule rule,
@@ -203,7 +203,7 @@ bool Validator::AddDiagnostic(wgsl::DiagnosticRule rule,
         d.system = diag::System::Resolver;
         d.source = source;
         d.message = msg;
-        diagnostics_.add(std::move(d));
+        diagnostics_.Add(std::move(d));
         if (severity == wgsl::DiagnosticSeverity::kError) {
             return false;
         }

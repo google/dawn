@@ -53,7 +53,7 @@ std::string ToString(const Program& program) {
     writer.Generate();
 
     if (!writer.Diagnostics().empty()) {
-        return "WGSL writer error: " + writer.Diagnostics().str();
+        return "WGSL writer error: " + writer.Diagnostics().Str();
     }
     return writer.Result();
 }
@@ -64,7 +64,7 @@ std::string ToString(const Program& program, VectorRef<const ast::Statement*> st
         writer.EmitStatement(stmt);
     }
     if (!writer.Diagnostics().empty()) {
-        return "WGSL writer error: " + writer.Diagnostics().str();
+        return "WGSL writer error: " + writer.Diagnostics().Str();
     }
     return writer.Result();
 }
@@ -77,14 +77,14 @@ std::string ToString(const Program& program, const ast::Node* node) {
             StringStream out;
             writer.EmitExpression(out, expr);
             if (!writer.Diagnostics().empty()) {
-                return "WGSL writer error: " + writer.Diagnostics().str();
+                return "WGSL writer error: " + writer.Diagnostics().Str();
             }
             return out.str();
         },
         [&](const ast::Statement* stmt) {
             writer.EmitStatement(stmt);
             if (!writer.Diagnostics().empty()) {
-                return "WGSL writer error: " + writer.Diagnostics().str();
+                return "WGSL writer error: " + writer.Diagnostics().Str();
             }
             return writer.Result();
         },

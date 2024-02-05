@@ -73,11 +73,11 @@ namespace {
 #define FATAL_ERROR(diags, msg_string)                             \
     do {                                                           \
         std::string msg = msg_string;                              \
-        auto printer = tint::diag::Printer::create(stderr, true);  \
+        auto printer = tint::diag::Printer::Create(stderr, true);  \
         if (!msg.empty()) {                                        \
-            printer->write(msg + "\n", {diag::Color::kRed, true}); \
+            printer->Write(msg + "\n", {diag::Color::kRed, true}); \
         }                                                          \
-        tint::diag::Formatter().format(diags, printer.get());      \
+        tint::diag::Formatter().Format(diags, printer.get());      \
         __builtin_trap();                                          \
     } while (false)
 
@@ -117,9 +117,9 @@ bool SPIRVToolsValidationCheck(const tint::Program& program, const std::vector<u
             out << "Unexpected spirv-val error:\n"
                 << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg << std::endl;
 
-            auto printer = tint::diag::Printer::create(stderr, true);
-            printer->write(out.str(), {diag::Color::kYellow, false});
-            tint::diag::Formatter().format(diags, printer.get());
+            auto printer = tint::diag::Printer::Create(stderr, true);
+            printer->Write(out.str(), {diag::Color::kYellow, false});
+            tint::diag::Formatter().Format(diags, printer.get());
         });
 
     return tools.Validate(spirv.data(), spirv.size(), spvtools::ValidatorOptions());

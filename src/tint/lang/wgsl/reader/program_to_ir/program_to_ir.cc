@@ -201,8 +201,8 @@ class Impl {
         ~ControlStackScope() { impl_->control_stack_.Pop(); }
     };
 
-    void add_error(const Source& s, const std::string& err) {
-        diagnostics_.add_error(tint::diag::System::IR, err, s);
+    void AddError(const Source& s, const std::string& err) {
+        diagnostics_.AddError(tint::diag::System::IR, err, s);
     }
 
     bool NeedTerminator() { return current_block_ && !current_block_->Terminator(); }
@@ -266,7 +266,7 @@ class Impl {
                 TINT_ICE_ON_NO_MATCH);
         }
 
-        if (diagnostics_.contains_errors()) {
+        if (diagnostics_.ContainsErrors()) {
             return Failure{std::move(diagnostics_)};
         }
 
@@ -1005,8 +1005,8 @@ class Impl {
                     if (mat->ConstantValue()) {
                         auto* cv = mat->ConstantValue()->Clone(impl.clone_ctx_);
                         if (!cv) {
-                            impl.add_error(expr->source, "failed to get constant value for call " +
-                                                             std::string(expr->TypeInfo().name));
+                            impl.AddError(expr->source, "failed to get constant value for call " +
+                                                            std::string(expr->TypeInfo().name));
                             return;
                         }
                         Bind(expr, impl.builder_.Constant(cv));
@@ -1019,15 +1019,15 @@ class Impl {
                 for (const auto* arg : expr->args) {
                     auto value = GetValue(arg);
                     if (!value) {
-                        impl.add_error(arg->source, "failed to convert arguments");
+                        impl.AddError(arg->source, "failed to convert arguments");
                         return;
                     }
                     args.Push(value);
                 }
                 auto* sem = impl.program_.Sem().Get<sem::Call>(expr);
                 if (!sem) {
-                    impl.add_error(expr->source, "failed to get semantic information for call " +
-                                                     std::string(expr->TypeInfo().name));
+                    impl.AddError(expr->source, "failed to get semantic information for call " +
+                                                    std::string(expr->TypeInfo().name));
                     return;
                 }
                 auto* ty = sem->Target()->ReturnType()->Clone(impl.clone_ctx_.type_ctx);
@@ -1061,8 +1061,8 @@ class Impl {
             void EmitIdentifier(const ast::IdentifierExpression* i) {
                 auto* v = impl.scopes_.Get(i->identifier->symbol);
                 if (TINT_UNLIKELY(!v)) {
-                    impl.add_error(i->source,
-                                   "unable to find identifier " + i->identifier->symbol.Name());
+                    impl.AddError(i->source,
+                                  "unable to find identifier " + i->identifier->symbol.Name());
                     return;
                 }
                 Bind(i, v);
@@ -1071,14 +1071,14 @@ class Impl {
             void EmitLiteral(const ast::LiteralExpression* lit) {
                 auto* sem = impl.program_.Sem().Get(lit);
                 if (!sem) {
-                    impl.add_error(lit->source, "failed to get semantic information for node " +
-                                                    std::string(lit->TypeInfo().name));
+                    impl.AddError(lit->source, "failed to get semantic information for node " +
+                                                   std::string(lit->TypeInfo().name));
                     return;
                 }
                 auto* cv = sem->ConstantValue()->Clone(impl.clone_ctx_);
                 if (!cv) {
-                    impl.add_error(lit->source, "failed to get constant value for node " +
-                                                    std::string(lit->TypeInfo().name));
+                    impl.AddError(lit->source, "failed to get constant value for node " +
+                                                   std::string(lit->TypeInfo().name));
                     return;
                 }
                 auto* val = impl.builder_.Constant(cv);
@@ -1272,9 +1272,9 @@ class Impl {
                 scopes_.Set(l->name->symbol, let->Result(0));
             },
             [&](const ast::Override*) {
-                add_error(var->source,
-                          "found an `Override` variable. The SubstituteOverrides "
-                          "transform must be run before converting to IR");
+                AddError(var->source,
+                         "found an `Override` variable. The SubstituteOverrides "
+                         "transform must be run before converting to IR");
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a
@@ -1346,7 +1346,7 @@ tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     auto r = b.Build();
     if (r != Success) {
         diag::List err = std::move(r.Failure().reason);
-        err.add_note(diag::System::IR, "AST:\n" + Program::printer(program), Source{});
+        err.AddNote(diag::System::IR, "AST:\n" + Program::printer(program), Source{});
         return Failure{err};
     }
 

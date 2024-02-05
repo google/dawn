@@ -104,7 +104,7 @@ class Resolver {
     ~Resolver();
 
     /// @returns error messages from the resolver
-    std::string error() const { return diagnostics_.str(); }
+    std::string error() const { return diagnostics_.Str(); }
 
     /// @returns the list of diagnostics raised by the generator.
     const diag::List& Diagnostics() const { return diagnostics_; }

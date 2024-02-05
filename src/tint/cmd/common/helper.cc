@@ -127,7 +127,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
             opts.spirv_reader_options.allow_non_uniform_derivatives;
         options.allowed_features = opts.spirv_reader_options.allowed_features;
         auto ast = tint::wgsl::writer::IRToProgram(result.Get(), options);
-        if (!ast.IsValid() || ast.Diagnostics().contains_errors()) {
+        if (!ast.IsValid() || ast.Diagnostics().ContainsErrors()) {
             std::cerr << "Failed to convert IR to AST:\n\n" << ast.Diagnostics() << "\n";
             exit(1);
         }
@@ -145,9 +145,9 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 }  // namespace
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
-    auto printer = diag::Printer::create(stderr, true);
+    auto printer = diag::Printer::Create(stderr, true);
     diag::Style bold_red{diag::Color::kRed, true};
-    printer->write(err.Error(), bold_red);
+    printer->Write(err.Error(), bold_red);
     constexpr const char* please_file_bug = R"(
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
@@ -156,7 +156,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
 )";
-    printer->write(please_file_bug, bold_red);
+    printer->Write(please_file_bug, bold_red);
     exit(1);
 }
 
@@ -260,16 +260,16 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
 
     ProgramInfo info = load();
 
-    if (info.program.Diagnostics().count() > 0) {
+    if (info.program.Diagnostics().Count() > 0) {
         if (!info.program.IsValid() && input_format != InputFormat::kWgsl) {
             // Invalid program from a non-wgsl source.
             // Print the WGSL, to help understand the diagnostics.
             PrintWGSL(std::cout, info.program);
         }
 
-        auto diag_printer = tint::diag::Printer::create(stderr, true);
+        auto diag_printer = tint::diag::Printer::Create(stderr, true);
         tint::diag::Formatter diag_formatter;
-        diag_formatter.format(info.program.Diagnostics(), diag_printer.get());
+        diag_formatter.Format(info.program.Diagnostics(), diag_printer.get());
     }
 
     if (!info.program.IsValid()) {

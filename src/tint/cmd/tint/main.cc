@@ -776,9 +776,9 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
         auto reparsed_program = tint::wgsl::reader::Parse(source.get(), parser_options);
         if (!reparsed_program.IsValid()) {
-            auto diag_printer = tint::diag::Printer::create(stderr, true);
+            auto diag_printer = tint::diag::Printer::Create(stderr, true);
             tint::diag::Formatter diag_formatter;
-            diag_formatter.format(reparsed_program.Diagnostics(), diag_printer.get());
+            diag_formatter.Format(reparsed_program.Diagnostics(), diag_printer.get());
             return false;
         }
     }

@@ -53,12 +53,12 @@ class UniformityAnalysisTestBase {
     /// @param program the program
     /// @param should_pass true if `builder` program should pass the analysis, otherwise false
     void RunTest(Program&& program, bool should_pass) {
-        error_ = program.Diagnostics().str();
+        error_ = program.Diagnostics().Str();
 
         bool valid = program.IsValid();
         if (should_pass) {
             EXPECT_TRUE(valid) << error_;
-            EXPECT_FALSE(program.Diagnostics().contains_errors());
+            EXPECT_FALSE(program.Diagnostics().ContainsErrors());
         } else {
             if (kUniformityFailuresAsError) {
                 EXPECT_FALSE(valid);

@@ -324,7 +324,7 @@ Result<SuccessType> Validator::Run() {
         CheckFunction(func);
     }
 
-    if (!diagnostics_.contains_errors()) {
+    if (!diagnostics_.ContainsErrors()) {
         // Check for orphaned instructions.
         for (auto* inst : mod_.instructions.Objects()) {
             if (inst->Alive() && !visited_instructions_.Contains(inst)) {
@@ -333,10 +333,10 @@ Result<SuccessType> Validator::Run() {
         }
     }
 
-    if (diagnostics_.contains_errors()) {
+    if (diagnostics_.ContainsErrors()) {
         DisassembleIfNeeded();
-        diagnostics_.add_note(tint::diag::System::IR,
-                              "# Disassembly\n" + disassembly_file->content.data, {});
+        diagnostics_.AddNote(tint::diag::System::IR,
+                             "# Disassembly\n" + disassembly_file->content.data, {});
         return Failure{std::move(diagnostics_)};
     }
     return Success;
@@ -401,7 +401,7 @@ void Validator::AddNote(const Block* blk, std::string err) {
 }
 
 void Validator::AddError(std::string err, Source src) {
-    auto& diag = diagnostics_.add_error(tint::diag::System::IR, std::move(err), src);
+    auto& diag = diagnostics_.AddError(tint::diag::System::IR, std::move(err), src);
     if (src.range != Source::Range{{}}) {
         diag.source.file = disassembly_file.get();
         diag.owned_file = disassembly_file;
@@ -409,7 +409,7 @@ void Validator::AddError(std::string err, Source src) {
 }
 
 void Validator::AddNote(std::string note, Source src) {
-    auto& diag = diagnostics_.add_note(tint::diag::System::IR, std::move(note), src);
+    auto& diag = diagnostics_.AddNote(tint::diag::System::IR, std::move(note), src);
     if (src.range != Source::Range{{}}) {
         diag.source.file = disassembly_file.get();
         diag.owned_file = disassembly_file;

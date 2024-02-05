@@ -53,7 +53,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
     options.allowed_features = AllowedFeatures::Everything();
     auto output_program = IRToProgram(mod, options);
     if (!output_program.IsValid()) {
-        result.err = output_program.Diagnostics().str();
+        result.err = output_program.Diagnostics().Str();
         result.ast = Program::printer(output_program);
         return result;
     }
