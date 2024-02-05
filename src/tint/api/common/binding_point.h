@@ -48,6 +48,9 @@ struct BindingPoint {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(BindingPoint, group, binding);
 
+    /// @returns the hash code of the BindingPoint
+    tint::HashCode HashCode() const { return tint::Hash(group, binding); }
+
     /// Equality operator
     /// @param rhs the BindingPoint to compare against
     /// @returns true if this BindingPoint is equal to `rhs`
@@ -97,8 +100,9 @@ class hash<tint::BindingPoint> {
   public:
     /// @param binding_point the binding point to create a hash for
     /// @return the hash value
-    inline std::size_t operator()(const tint::BindingPoint& binding_point) const {
-        return tint::Hash(binding_point.group, binding_point.binding);
+    inline size_t operator()(const tint::BindingPoint& binding_point) const {
+        return static_cast<size_t>(binding_point.group) << 16 |
+               static_cast<size_t>(binding_point.binding);
     }
 };
 

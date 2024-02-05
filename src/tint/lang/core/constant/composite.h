@@ -69,7 +69,7 @@ class Composite : public Castable<Composite, Value> {
     bool AnyZero() const override { return any_zero; }
 
     /// @copydoc Value::Hash()
-    size_t Hash() const override { return hash; }
+    HashCode Hash() const override { return hash; }
 
     /// Clones the constant into the provided context
     /// @param ctx the clone context
@@ -85,14 +85,14 @@ class Composite : public Castable<Composite, Value> {
     /// True if any element is zero
     const bool any_zero;
     /// The hash of the composite
-    const size_t hash;
+    const HashCode hash;
 
   protected:
     /// @copydoc Value::InternalValue()
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 
   private:
-    size_t CalcHash() {
+    HashCode CalcHash() {
         auto h = tint::Hash(type, all_zero, any_zero);
         for (auto* el : elements) {
             h = HashCombine(h, el->Hash());

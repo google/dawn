@@ -107,22 +107,16 @@ struct DependencyEdge {
     const Global* from;
     /// The Global that is depended on by #from
     const Global* to;
-};
 
-/// DependencyEdgeCmp implements the contracts of std::equal_to<DependencyEdge>
-/// and std::hash<DependencyEdge>.
-struct DependencyEdgeCmp {
+    /// @returns the hash code of the DependencyEdge
+    tint::HashCode HashCode() const { return Hash(from, to); }
+
     /// Equality operator
-    bool operator()(const DependencyEdge& lhs, const DependencyEdge& rhs) const {
-        return lhs.from == rhs.from && lhs.to == rhs.to;
-    }
-    /// Hashing operator
-    inline std::size_t operator()(const DependencyEdge& d) const { return Hash(d.from, d.to); }
+    bool operator==(const DependencyEdge& rhs) const { return from == rhs.from && to == rhs.to; }
 };
 
 /// A map of DependencyEdge to DependencyInfo
-using DependencyEdges =
-    Hashmap<DependencyEdge, DependencyInfo, 64, DependencyEdgeCmp, DependencyEdgeCmp>;
+using DependencyEdges = Hashmap<DependencyEdge, DependencyInfo, 64>;
 
 /// Global describes a module-scope variable, type or function.
 struct Global {

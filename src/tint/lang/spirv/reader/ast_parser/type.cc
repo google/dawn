@@ -70,55 +70,57 @@ namespace tint::spirv::reader::ast_parser {
 namespace {
 
 struct PointerHasher {
-    size_t operator()(const Pointer& t) const { return Hash(t.address_space, t.type, t.access); }
+    HashCode operator()(const Pointer& t) const { return Hash(t.address_space, t.type, t.access); }
 };
 
 struct ReferenceHasher {
-    size_t operator()(const Reference& t) const { return Hash(t.address_space, t.type, t.access); }
+    HashCode operator()(const Reference& t) const {
+        return Hash(t.address_space, t.type, t.access);
+    }
 };
 
 struct VectorHasher {
-    size_t operator()(const Vector& t) const { return Hash(t.type, t.size); }
+    HashCode operator()(const Vector& t) const { return Hash(t.type, t.size); }
 };
 
 struct MatrixHasher {
-    size_t operator()(const Matrix& t) const { return Hash(t.type, t.columns, t.rows); }
+    HashCode operator()(const Matrix& t) const { return Hash(t.type, t.columns, t.rows); }
 };
 
 struct ArrayHasher {
-    size_t operator()(const Array& t) const { return Hash(t.type, t.size, t.stride); }
+    HashCode operator()(const Array& t) const { return Hash(t.type, t.size, t.stride); }
 };
 
 struct AliasHasher {
-    size_t operator()(const Alias& t) const { return Hash(t.name); }
+    HashCode operator()(const Alias& t) const { return Hash(t.name); }
 };
 
 struct StructHasher {
-    size_t operator()(const Struct& t) const { return Hash(t.name); }
+    HashCode operator()(const Struct& t) const { return Hash(t.name); }
 };
 
 struct SamplerHasher {
-    size_t operator()(const Sampler& s) const { return Hash(s.kind); }
+    HashCode operator()(const Sampler& s) const { return Hash(s.kind); }
 };
 
 struct DepthTextureHasher {
-    size_t operator()(const DepthTexture& t) const { return Hash(t.dims); }
+    HashCode operator()(const DepthTexture& t) const { return Hash(t.dims); }
 };
 
 struct DepthMultisampledTextureHasher {
-    size_t operator()(const DepthMultisampledTexture& t) const { return Hash(t.dims); }
+    HashCode operator()(const DepthMultisampledTexture& t) const { return Hash(t.dims); }
 };
 
 struct MultisampledTextureHasher {
-    size_t operator()(const MultisampledTexture& t) const { return Hash(t.dims, t.type); }
+    HashCode operator()(const MultisampledTexture& t) const { return Hash(t.dims, t.type); }
 };
 
 struct SampledTextureHasher {
-    size_t operator()(const SampledTexture& t) const { return Hash(t.dims, t.type); }
+    HashCode operator()(const SampledTexture& t) const { return Hash(t.dims, t.type); }
 };
 
 struct StorageTextureHasher {
-    size_t operator()(const StorageTexture& t) const { return Hash(t.dims, t.format, t.access); }
+    HashCode operator()(const StorageTexture& t) const { return Hash(t.dims, t.format, t.access); }
 };
 }  // namespace
 

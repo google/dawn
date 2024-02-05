@@ -77,7 +77,7 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     bool AnyZero() const override { return IsZero(); }
 
     /// @copydoc Value::Hash()
-    size_t Hash() const override { return tint::Hash(type, ValueOf()); }
+    HashCode Hash() const override { return tint::Hash(type, ValueOf()); }
 
     /// Clones the constant into the provided context
     /// @param ctx the clone context

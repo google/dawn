@@ -73,7 +73,7 @@ struct AccessRoot {
     tint::core::AddressSpace address_space = tint::core::AddressSpace::kUndefined;
 
     /// @return a hash code for this object
-    size_t HashCode() const { return Hash(type, variable); }
+    tint::HashCode HashCode() const { return Hash(type, variable); }
 };
 
 /// Inequality operator for AccessRoot
@@ -85,7 +85,7 @@ bool operator!=(const AccessRoot& a, const AccessRoot& b) {
 /// vector index.
 struct DynamicIndex {
     /// @return a hash code for this object
-    size_t HashCode() const { return 42 /* empty struct: any number will do */; }
+    tint::HashCode HashCode() const { return 42 /* empty struct: any number will do */; }
 };
 
 /// Inequality operator for DynamicIndex
@@ -160,7 +160,7 @@ struct AccessShape {
     }
 
     /// @return a hash code for this object
-    size_t HashCode() const { return Hash(root, ops); }
+    tint::HashCode HashCode() const { return Hash(root, ops); }
 };
 
 /// Equality operator for AccessShape

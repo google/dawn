@@ -54,10 +54,8 @@ struct CallTargetSignature {
     /// Destructor
     ~CallTargetSignature();
 
-    /// The type of the call target return value
-    const core::type::Type* return_type = nullptr;
-    /// The parameters of the call target
-    tint::Vector<const sem::Parameter*, 8> parameters;
+    /// @returns the hash code of the CallTargetSignature
+    tint::HashCode HashCode() const;
 
     /// Equality operator
     /// @param other the signature to compare this to
@@ -76,6 +74,12 @@ struct CallTargetSignature {
         auto idx = IndexOf(usage);
         return (idx >= 0) ? parameters[static_cast<size_t>(idx)] : nullptr;
     }
+
+    /// The type of the call target return value
+    const core::type::Type* return_type = nullptr;
+
+    /// The parameters of the call target
+    tint::Vector<const sem::Parameter*, 8> parameters;
 };
 
 /// CallTarget is the base for callable functions, builtins, value constructors and value
@@ -139,20 +143,5 @@ class CallTarget : public Castable<CallTarget, Node> {
 };
 
 }  // namespace tint::sem
-
-namespace std {
-
-/// Custom std::hash specialization for tint::sem::CallTargetSignature so
-/// CallTargetSignature can be used as keys for std::unordered_map and
-/// std::unordered_set.
-template <>
-class hash<tint::sem::CallTargetSignature> {
-  public:
-    /// @param sig the CallTargetSignature to hash
-    /// @return the hash value
-    std::size_t operator()(const tint::sem::CallTargetSignature& sig) const;
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_LANG_WGSL_SEM_CALL_TARGET_H_

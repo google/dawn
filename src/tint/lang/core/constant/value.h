@@ -70,7 +70,7 @@ class Value : public Castable<Value, Node> {
     virtual bool AnyZero() const = 0;
 
     /// @returns a hash of the value.
-    virtual size_t Hash() const = 0;
+    virtual HashCode Hash() const = 0;
 
     /// @returns the value as the given scalar or abstract value.
     template <typename T>

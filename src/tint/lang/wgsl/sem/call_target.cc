@@ -71,6 +71,14 @@ int CallTargetSignature::IndexOf(core::ParameterUsage usage) const {
     return -1;
 }
 
+tint::HashCode CallTargetSignature::HashCode() const {
+    auto hash = tint::Hash(parameters.Length());
+    for (auto* p : parameters) {
+        hash = HashCombine(hash, p->Type(), p->Usage());
+    }
+    return Hash(hash, return_type);
+}
+
 bool CallTargetSignature::operator==(const CallTargetSignature& other) const {
     if (return_type != other.return_type || parameters.Length() != other.parameters.Length()) {
         return false;
@@ -86,16 +94,3 @@ bool CallTargetSignature::operator==(const CallTargetSignature& other) const {
 }
 
 }  // namespace tint::sem
-
-namespace std {
-
-std::size_t hash<tint::sem::CallTargetSignature>::operator()(
-    const tint::sem::CallTargetSignature& sig) const {
-    size_t hash = tint::Hash(sig.parameters.Length());
-    for (auto* p : sig.parameters) {
-        hash = HashCombine(hash, p->Type(), p->Usage());
-    }
-    return Hash(hash, sig.return_type);
-}
-
-}  // namespace std

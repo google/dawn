@@ -64,7 +64,7 @@ class Disassembler {
         size_t index = 0u;
 
         /// @returns the hash code of the IndexedValue
-        size_t HashCode() const { return Hash(instruction, index); }
+        tint::HashCode HashCode() const { return Hash(instruction, index); }
 
         /// An equality helper for IndexedValue.
         /// @param other the IndexedValue to compare against

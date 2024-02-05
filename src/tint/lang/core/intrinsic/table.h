@@ -295,8 +295,8 @@ template <>
 struct Hasher<core::intrinsic::Overload> {
     /// @param i the core::intrinsic::Overload to create a hash for
     /// @return the hash value
-    inline std::size_t operator()(const core::intrinsic::Overload& i) const {
-        size_t hash = Hash(i.parameters.Length());
+    inline HashCode operator()(const core::intrinsic::Overload& i) const {
+        HashCode hash = Hash(i.parameters.Length());
         for (auto& p : i.parameters) {
             hash = HashCombine(hash, p.type, p.usage);
         }

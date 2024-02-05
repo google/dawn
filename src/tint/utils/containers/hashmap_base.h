@@ -75,12 +75,12 @@ class HashmapKey {
     /// Constructor using pre-computed hash and copied value.
     /// @param hash_ the precomputed hash of @p value
     /// @param value the key value
-    HashmapKey(size_t hash_, const T& value) : value_(value), hash(hash_) {}
+    HashmapKey(HashCode hash_, const T& value) : value_(value), hash(hash_) {}
 
     /// Constructor using pre-computed hash and moved value.
     /// @param hash_ the precomputed hash of @p value
     /// @param value the key value
-    HashmapKey(size_t hash_, T&& value) : value_(std::forward<T>(value)), hash(hash_) {}
+    HashmapKey(HashCode hash_, T&& value) : value_(std::forward<T>(value)), hash(hash_) {}
 
     /// Copy constructor
     HashmapKey(const HashmapKey&) = default;
@@ -145,7 +145,7 @@ class HashmapKey {
     }
 
     /// The hash of value
-    const size_t hash;
+    const HashCode hash;
 };
 
 /// Writes the HashmapKey to the stream.
@@ -298,7 +298,7 @@ class HashmapBase {
     /// the map is cleared, or the map is destructed.
     template <typename K>
     Entry* GetEntry(K&& key) {
-        size_t hash = Hash{}(key);
+        HashCode hash = Hash{}(key);
         auto& slot = slots_[hash % slots_.Length()];
         return slot.Find(hash, key);
     }
@@ -310,7 +310,7 @@ class HashmapBase {
     /// the map is cleared, or the map is destructed.
     template <typename K>
     const Entry* GetEntry(K&& key) const {
-        size_t hash = Hash{}(key);
+        HashCode hash = Hash{}(key);
         auto& slot = slots_[hash % slots_.Length()];
         return slot.Find(hash, key);
     }
@@ -327,7 +327,7 @@ class HashmapBase {
     /// @param key the key to look for.
     template <typename K = Key>
     bool Remove(K&& key) {
-        size_t hash = Hash{}(key);
+        HashCode hash = Hash{}(key);
         auto& slot = slots_[hash % slots_.Length()];
         Node** edge = &slot.nodes;
         for (auto* node = *edge; node; node = node->next) {
@@ -442,7 +442,7 @@ class HashmapBase {
         /// @returns true if the Entry's hash is equal to @p hash, and the Entry's key is equal to
         /// @p value.
         template <typename T>
-        bool Equals(size_t hash, T&& value) const {
+        bool Equals(HashCode hash, T&& value) const {
             auto& key = Key();
             return key.hash == hash && HashmapBase::Equal{}(key.Value(), value);
         }
@@ -497,7 +497,7 @@ class HashmapBase {
         /// The slot that will hold the edit.
         Slot& slot;
         /// The hash of the key, passed to EditAt().
-        size_t hash;
+        HashCode hash;
         /// The resolved node entry, or nullptr if EditAt() did not resolve to an existing entry.
         Entry* entry = nullptr;
 
@@ -540,7 +540,7 @@ class HashmapBase {
             capacity_ += capacity_;
             Rehash();
         }
-        size_t hash = Hash{}(key);
+        HashCode hash = Hash{}(key);
         auto& slot = slots_[hash % slots_.Length()];
         auto* entry = slot.Find(hash, key);
         return {*this, slot, hash, entry};
@@ -582,7 +582,7 @@ class HashmapBase {
         /// @param hash the key hash to search for.
         /// @param key the key value to search for.
         template <typename K>
-        const Entry* Find(size_t hash, K&& key) const {
+        const Entry* Find(HashCode hash, K&& key) const {
             for (auto* node = nodes; node; node = node->next) {
                 if (node->Equals(hash, key)) {
                     return &node->Entry();
@@ -595,7 +595,7 @@ class HashmapBase {
         /// @param hash the key hash to search for.
         /// @param key the key value to search for.
         template <typename K>
-        Entry* Find(size_t hash, K&& key) {
+        Entry* Find(HashCode hash, K&& key) {
             for (auto* node = nodes; node; node = node->next) {
                 if (node->Equals(hash, key)) {
                     return &node->Entry();

@@ -33,7 +33,6 @@
 
 #include "src/tint/fuzzers/mersenne_twister_engine.h"
 #include "src/tint/fuzzers/random_generator_engine.h"
-#include "src/tint/utils/math/hash.h"
 
 namespace tint::fuzzers {
 
@@ -47,9 +46,9 @@ namespace {
 /// @param size - number of elements in buffer
 /// @returns hash of the data in the buffer
 size_t HashBuffer(const uint8_t* data, const size_t size) {
-    size_t hash = Hash(size);
+    size_t hash = std::hash<size_t>{}(size);
     for (size_t i = 0; i < size; i++) {
-        hash = HashCombine(hash, data[i]);
+        hash ^= (static_cast<uint64_t>(data[i]) * 31) + (0x7f4a7c16 ^ (hash >> 2));
     }
     return hash;
 }

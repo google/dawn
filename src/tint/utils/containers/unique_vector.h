@@ -41,7 +41,7 @@ namespace tint {
 
 /// UniqueVector is an ordered container that only contains unique items.
 /// Attempting to add a duplicate is a no-op.
-template <typename T, size_t N, typename HASH = std::hash<T>, typename EQUAL = std::equal_to<T>>
+template <typename T, size_t N, typename HASH = Hasher<T>, typename EQUAL = std::equal_to<T>>
 struct UniqueVector {
     /// STL-friendly alias to T. Used by gmock.
     using value_type = T;

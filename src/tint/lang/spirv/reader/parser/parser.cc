@@ -669,14 +669,8 @@ class Parser {
             return type == other.type && access_mode == other.access_mode;
         }
 
-        /// Hasher provides a hash function for the TypeKey.
-        struct Hasher {
-            /// @param tk the TypeKey to create a hash for
-            /// @return the hash value
-            inline std::size_t operator()(const TypeKey& tk) const {
-                return HashCombine(Hash(tk.type), tk.access_mode);
-            }
-        };
+        /// @returns the hash code of the TypeKey
+        tint::HashCode HashCode() const { return Hash(type, access_mode); }
     };
 
     /// The generated IR module.
@@ -691,7 +685,7 @@ class Parser {
     /// The Tint IR block that is currently being emitted.
     core::ir::Block* current_block_ = nullptr;
     /// A map from a SPIR-V type declaration to the corresponding Tint type object.
-    Hashmap<TypeKey, const core::type::Type*, 16, TypeKey::Hasher> types_;
+    Hashmap<TypeKey, const core::type::Type*, 16> types_;
     /// A map from a SPIR-V function definition result ID to the corresponding Tint function object.
     Hashmap<uint32_t, core::ir::Function*, 8> functions_;
     /// A map from a SPIR-V result ID to the corresponding Tint value object.

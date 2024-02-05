@@ -225,18 +225,14 @@ class Printer {
         uint32_t return_type_id;
         Vector<uint32_t, 4> param_type_ids;
 
-        /// Hasher provides a hash function for the FunctionType.
-        struct Hasher {
-            /// @param ft the FunctionType to create a hash for
-            /// @return the hash value
-            inline std::size_t operator()(const FunctionType& ft) const {
-                size_t hash = Hash(ft.return_type_id);
-                for (auto& p : ft.param_type_ids) {
-                    hash = HashCombine(hash, p);
-                }
-                return hash;
+        /// @returns the hash code of the FunctionType
+        tint::HashCode HashCode() const {
+            auto hash = Hash(return_type_id);
+            for (auto& p : param_type_ids) {
+                hash = HashCombine(hash, p);
             }
-        };
+            return hash;
+        }
 
         /// Equality operator for FunctionType.
         bool operator==(const FunctionType& other) const {
@@ -249,7 +245,7 @@ class Printer {
     Hashmap<const core::type::Type*, uint32_t, 8> types_;
 
     /// The map of function types to their result IDs.
-    Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
+    Hashmap<FunctionType, uint32_t, 8> function_types_;
 
     /// The map of constants to their result IDs.
     Hashmap<const core::constant::Value*, uint32_t, 16> constants_;

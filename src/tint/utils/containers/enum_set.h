@@ -33,6 +33,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint {
@@ -148,7 +149,7 @@ struct EnumSet {
     inline bool Empty() const { return set == 0; }
 
     /// @return the hash value of this object
-    inline size_t HashCode() const { return std::hash<uint64_t>()(Value()); }
+    tint::HashCode HashCode() const { return Hash(Value()); }
 
     /// Equality operator
     /// @param rhs the other EnumSet to compare this to

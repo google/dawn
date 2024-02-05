@@ -155,7 +155,7 @@ class Manager final {
     struct Hasher {
         /// @param value the value to hash
         /// @returns a hash of the value
-        size_t operator()(const constant::Value& value) const { return value.Hash(); }
+        HashCode operator()(const constant::Value& value) const { return value.Hash(); }
     };
 
     /// An equality helper for constant::Value

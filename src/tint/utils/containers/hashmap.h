@@ -331,7 +331,7 @@ template <typename K, typename V, size_t N, typename HASH, typename EQUAL>
 struct Hasher<Hashmap<K, V, N, HASH, EQUAL>> {
     /// @param map the Hashmap to hash
     /// @returns a hash of the map
-    size_t operator()(const Hashmap<K, V, N, HASH, EQUAL>& map) const {
+    HashCode operator()(const Hashmap<K, V, N, HASH, EQUAL>& map) const {
         auto hash = Hash(map.Count());
         for (auto it : map) {
             // Use an XOR to ensure that the non-deterministic ordering of the map still produces

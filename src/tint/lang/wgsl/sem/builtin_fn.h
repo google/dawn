@@ -123,7 +123,7 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     wgsl::LanguageFeature RequiredLanguageFeature() const;
 
     /// @return the hash code for this object
-    std::size_t HashCode() const {
+    tint::HashCode HashCode() const {
         return Hash(Fn(), SupportedStages(), ReturnType(), Parameters(), IsDeprecated());
     }
 

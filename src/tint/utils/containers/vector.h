@@ -777,7 +777,7 @@ class Vector {
 #endif
 
     /// @returns a hash code for this Vector
-    size_t HashCode() const {
+    tint::HashCode HashCode() const {
         auto hash = Hash(Length());
         for (auto& el : *this) {
             hash = HashCombine(hash, el);
@@ -1160,7 +1160,7 @@ class VectorRef {
     auto rend() const { return slice_.rend(); }
 
     /// @returns a hash code of the Vector
-    size_t HashCode() const {
+    tint::HashCode HashCode() const {
         auto hash = Hash(Length());
         for (auto& el : *this) {
             hash = HashCombine(hash, el);

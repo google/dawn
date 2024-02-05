@@ -94,23 +94,19 @@ struct ZeroInitWorkgroupMemory::State {
         /// The RHS of the division part of the expression
         uint32_t division = 1;
 
+        /// @returns the hash code of the ArrayIndex
+        tint::HashCode HashCode() const { return Hash(modulo, division); }
+
         /// Equality operator
         /// @param i the ArrayIndex to compare to this ArrayIndex
         /// @returns true if `i` and this ArrayIndex are equal
         bool operator==(const ArrayIndex& i) const {
             return modulo == i.modulo && division == i.division;
         }
-
-        /// Hash function for the ArrayIndex type
-        struct Hasher {
-            /// @param i the ArrayIndex to calculate a hash for
-            /// @returns the hash value for the ArrayIndex `i`
-            size_t operator()(const ArrayIndex& i) const { return Hash(i.modulo, i.division); }
-        };
     };
 
     /// A list of unique ArrayIndex
-    using ArrayIndices = UniqueVector<ArrayIndex, 4, ArrayIndex::Hasher>;
+    using ArrayIndices = UniqueVector<ArrayIndex, 4>;
 
     /// Expression holds information about an expression that is being built for a
     /// statement will zero workgroup values.
@@ -142,7 +138,7 @@ struct ZeroInitWorkgroupMemory::State {
 
     /// A map of ArrayIndex to the name reserved for the `let` declaration of that
     /// index.
-    std::unordered_map<ArrayIndex, Symbol, ArrayIndex::Hasher> array_index_names;
+    Hashmap<ArrayIndex, Symbol, 4> array_index_names;
 
     /// Constructor
     /// @param c the program::CloneContext used for the transform
@@ -397,8 +393,8 @@ struct ZeroInitWorkgroupMemory::State {
                 }
                 auto array_indices = a.array_indices;
                 array_indices.Add(ArrayIndex{modulo, division});
-                auto index = tint::GetOrAdd(array_index_names, ArrayIndex{modulo, division},
-                                            [&] { return b.Symbols().New("i"); });
+                auto index = array_index_names.GetOrAdd(ArrayIndex{modulo, division},
+                                                        [&] { return b.Symbols().New("i"); });
                 return Expression{b.IndexAccessor(a.expr, index), a.num_iterations, array_indices};
             };
             return BuildZeroingStatements(arr->ElemType(), get_el);
@@ -422,13 +418,13 @@ struct ZeroInitWorkgroupMemory::State {
         StatementList stmts;
         std::map<Symbol, ArrayIndex> indices_by_name;
         for (auto index : array_indices) {
-            auto name = array_index_names.at(index);
+            auto name = array_index_names.Get(index);
             auto* mod = (num_iterations > index.modulo)
                             ? b.create<BinaryExpression>(core::BinaryOp::kModulo, iteration(),
                                                          b.Expr(u32(index.modulo)))
                             : iteration();
             auto* div = (index.division != 1u) ? b.Div(mod, u32(index.division)) : mod;
-            auto* decl = b.Decl(b.Let(name, b.ty.u32(), div));
+            auto* decl = b.Decl(b.Let(*name, b.ty.u32(), div));
             stmts.Push(decl);
         }
         return stmts;

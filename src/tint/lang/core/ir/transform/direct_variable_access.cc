@@ -53,7 +53,7 @@ struct RootModuleScopeVar {
     Var* var = nullptr;
 
     /// @return a hash value for this object
-    size_t HashCode() const { return Hash(var); }
+    tint::HashCode HashCode() const { return Hash(var); }
 
     /// Inequality operator
     bool operator!=(const RootModuleScopeVar& other) const { return var != other.var; }
@@ -66,7 +66,7 @@ struct RootPtrParameter {
     const type::Pointer* type = nullptr;
 
     /// @return a hash value for this object
-    size_t HashCode() const { return Hash(type); }
+    tint::HashCode HashCode() const { return Hash(type); }
 
     /// Inequality operator
     bool operator!=(const RootPtrParameter& other) const { return type != other.type; }
@@ -81,7 +81,7 @@ struct MemberAccess {
     const type::StructMember* member;
 
     /// @return a hash member for this object
-    size_t HashCode() const { return Hash(member); }
+    tint::HashCode HashCode() const { return Hash(member); }
 
     /// Inequality operator
     bool operator!=(const MemberAccess& other) const { return member != other.member; }
@@ -91,7 +91,7 @@ struct MemberAccess {
 /// The ordered list of indices is passed by parameter.
 struct IndexAccess {
     /// @return a hash value for this object
-    size_t HashCode() const { return 42; }
+    tint::HashCode HashCode() const { return 42; }
 
     /// Inequality operator
     bool operator!=(const IndexAccess&) const { return false; }
@@ -166,7 +166,7 @@ struct AccessShape {
     }
 
     /// @return a hash value for this object
-    size_t HashCode() const { return Hash(root, ops); }
+    tint::HashCode HashCode() const { return Hash(root, ops); }
 
     /// Inequality operator
     bool operator!=(const AccessShape& other) const {

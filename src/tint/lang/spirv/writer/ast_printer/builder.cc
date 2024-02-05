@@ -622,7 +622,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
 }
 
 uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
-    return tint::GetOrAdd(func_sig_to_id_, func->Signature(), [&]() -> uint32_t {
+    return func_sig_to_id_.GetOrAdd(func->Signature(), [&]() -> uint32_t {
         auto func_op = result_op();
         auto func_type_id = std::get<uint32_t>(func_op);
 

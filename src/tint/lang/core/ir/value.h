@@ -48,7 +48,7 @@ struct Usage {
     size_t operand_index = 0u;
 
     /// @returns the hash code of the Usage
-    size_t HashCode() const { return Hash(instruction, operand_index); }
+    tint::HashCode HashCode() const { return Hash(instruction, operand_index); }
 
     /// An equality helper for Usage.
     /// @param other the usage to compare against

@@ -98,7 +98,7 @@ struct TypeAndAddressSpace {
     }
 
     /// @returns the hash value of this object
-    std::size_t HashCode() const { return Hash(type, address_space); }
+    tint::HashCode HashCode() const { return Hash(type, address_space); }
 };
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.

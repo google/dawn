@@ -57,7 +57,7 @@ namespace {
 /// UniformVariable is used by Std140::State::AccessIndex to indicate the root uniform variable
 struct UniformVariable {
     /// @returns a hash code for this object
-    size_t HashCode() const { return 0; }
+    tint::HashCode HashCode() const { return 0; }
 };
 
 /// Inequality operator for UniformVariable
@@ -70,7 +70,7 @@ struct DynamicIndex {
     size_t slot;  // The index of the expression in Std140::State::AccessChain::dynamic_indices
 
     /// @returns a hash code for this object
-    size_t HashCode() const { return Hash(slot); }
+    tint::HashCode HashCode() const { return Hash(slot); }
 };
 
 /// Inequality operator for DynamicIndex
@@ -193,12 +193,8 @@ struct Std140::State {
         /// The chain of accesses indices.
         AccessIndices indices;
 
-        /// Hash function for LoadFnKey.
-        struct Hasher {
-            /// @param fn the LoadFnKey to hash
-            /// @return the hash for the given LoadFnKey
-            size_t operator()(const LoadFnKey& fn) const { return Hash(fn.var, fn.indices); }
-        };
+        /// @returns the hash code for the LoadFnKey
+        tint::HashCode HashCode() const { return Hash(var, indices); }
 
         /// Equality operator
         bool operator==(const LoadFnKey& other) const {
@@ -218,7 +214,7 @@ struct Std140::State {
     const SymbolTable& sym = src.Symbols();
 
     /// Map of load function signature, to the generated function
-    Hashmap<LoadFnKey, Symbol, 8, LoadFnKey::Hasher> load_fns;
+    Hashmap<LoadFnKey, Symbol, 8> load_fns;
 
     /// Map of std140-forked type to converter function name
     Hashmap<const core::type::Type*, Symbol, 8> conv_fns;

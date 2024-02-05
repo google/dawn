@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <functional>
 
+#include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/reflection/reflection.h"
 
 namespace tint {
@@ -42,6 +43,9 @@ struct OverrideId {
 
     /// Reflect the fields of this struct so that it can be used by tint::ForeachField()
     TINT_REFLECT(OverrideId, value);
+
+    /// @returns the hash code of the OverrideId
+    tint::HashCode HashCode() const { return Hash(value); }
 };
 
 /// Ensure that all the fields of OverrideId are reflected.
@@ -73,7 +77,7 @@ class hash<tint::OverrideId> {
   public:
     /// @param id the override identifier
     /// @return the hash of the override identifier
-    inline std::size_t operator()(tint::OverrideId id) const {
+    inline size_t operator()(tint::OverrideId id) const {
         return std::hash<decltype(tint::OverrideId::value)>()(id.value);
     }
 };

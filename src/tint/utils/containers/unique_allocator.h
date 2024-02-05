@@ -37,7 +37,7 @@
 namespace tint {
 
 /// UniqueAllocator is used to allocate unique instances of the template type `T`.
-template <typename T, typename HASH = std::hash<T>, typename EQUAL = std::equal_to<T>>
+template <typename T, typename HASH = Hasher<T>, typename EQUAL = std::equal_to<T>>
 class UniqueAllocator {
   public:
     /// Iterator is the type returned by begin() and end()
@@ -90,7 +90,7 @@ class UniqueAllocator {
         /// Hashing function
         /// @param e the entry
         /// @returns the hash of the entry
-        size_t operator()(T* e) const { return HASH{}(*e); }
+        HashCode operator()(T* e) const { return HASH{}(*e); }
     };
 
     /// Equality is the equality function used by the Hashset
