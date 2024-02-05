@@ -523,7 +523,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
             descriptor.cTargets[0].format = colorFormat;
 
             descriptor.cTargets[0].blend = nullptr;
-            if (componentCount >= utils::GetWGSLRenderableColorTextureComponentCount(colorFormat)) {
+            if (componentCount >= utils::GetTextureComponentCount(colorFormat)) {
                 device.CreateRenderPipeline(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
@@ -541,8 +541,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
                             descriptor.cBlends[0].alpha.dstFactor = alphaDstFactor;
 
                             bool valid = true;
-                            if (componentCount >=
-                                utils::GetWGSLRenderableColorTextureComponentCount(colorFormat)) {
+                            if (componentCount >= utils::GetTextureComponentCount(colorFormat)) {
                                 if (BlendFactorContainsSrcAlpha(
                                         descriptor.cTargets[0].blend->color.srcFactor) ||
                                     BlendFactorContainsSrcAlpha(

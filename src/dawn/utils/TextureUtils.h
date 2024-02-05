@@ -295,7 +295,7 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat);
 
 const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat);
 const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
-uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat textureFormat);
+uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat);
 
 wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDimension dimension);
 }  // namespace dawn::utils

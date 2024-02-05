@@ -740,9 +740,10 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
     }
 }
 
-uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat textureFormat) {
+uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
         case wgpu::TextureFormat::R8Unorm:
+        case wgpu::TextureFormat::R8Snorm:
         case wgpu::TextureFormat::R8Uint:
         case wgpu::TextureFormat::R8Sint:
         case wgpu::TextureFormat::R16Unorm:
@@ -753,8 +754,13 @@ uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat texture
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
+        case wgpu::TextureFormat::Depth16Unorm:
+        case wgpu::TextureFormat::Depth24Plus:
+        case wgpu::TextureFormat::Depth32Float:
+        case wgpu::TextureFormat::Stencil8:
             return 1u;
         case wgpu::TextureFormat::RG8Unorm:
+        case wgpu::TextureFormat::RG8Snorm:
         case wgpu::TextureFormat::RG8Uint:
         case wgpu::TextureFormat::RG8Sint:
         case wgpu::TextureFormat::RG16Unorm:
@@ -766,8 +772,12 @@ uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat texture
         case wgpu::TextureFormat::RG32Uint:
         case wgpu::TextureFormat::RG32Sint:
             return 2u;
+        case wgpu::TextureFormat::RGB9E5Ufloat:
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            return 3u;
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::RGBA8UnormSrgb:
+        case wgpu::TextureFormat::RGBA8Snorm:
         case wgpu::TextureFormat::RGBA8Uint:
         case wgpu::TextureFormat::RGBA8Sint:
         case wgpu::TextureFormat::BGRA8Unorm:
@@ -784,8 +794,11 @@ uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat texture
         case wgpu::TextureFormat::RGBA32Sint:
             return 4u;
         default:
-            DAWN_UNREACHABLE();
+            // Compressed foramts, depth-stencil combined formats, multi-planar formats are
+            // unreachable.
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {

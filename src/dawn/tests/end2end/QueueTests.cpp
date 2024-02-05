@@ -413,6 +413,9 @@ TEST_P(QueueWriteTextureTests, LargeWriteTexture) {
 
 // Test writing a pixel with an offset.
 TEST_P(QueueWriteTextureTests, VaryingTextureOffset) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
     DataSpec pixelData = MinimumDataSpec({1, 1, 1});
@@ -434,6 +437,8 @@ TEST_P(QueueWriteTextureTests, VaryingTextureOffset) {
 
 // Test writing a pixel with an offset to a texture array
 TEST_P(QueueWriteTextureTests, VaryingTextureArrayOffset) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
 
@@ -461,6 +466,8 @@ TEST_P(QueueWriteTextureTests, VaryingTextureArrayOffset) {
 
 // Test writing with varying write sizes.
 TEST_P(QueueWriteTextureTests, VaryingWriteSize) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 127;
     for (unsigned int w : {13, 63, 128, 256}) {
@@ -476,6 +483,8 @@ TEST_P(QueueWriteTextureTests, VaryingWriteSize) {
 
 // Test writing with varying write sizes to texture arrays.
 TEST_P(QueueWriteTextureTests, VaryingArrayWriteSize) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 127;
     constexpr uint32_t kDepth = 65;
@@ -533,17 +542,27 @@ TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
     constexpr uint32_t kHeight = 31;
     constexpr uint32_t kDepth = 17;
 
-    constexpr wgpu::Extent3D copySize = {kWidth - 1, kHeight - 1, kDepth - 1};
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    textureSpec.level = 0;
 
-    for (unsigned int r : {1, 2, 3, 64, 200}) {
-        TextureSpec textureSpec;
-        textureSpec.copyOrigin = {1, 1, 1};
-        textureSpec.textureSize = {kWidth, kHeight, kDepth};
-        textureSpec.level = 0;
+    auto TestBody = [&](wgpu::Origin3D copyOrigin, wgpu::Extent3D copySize) {
+        textureSpec.copyOrigin = copyOrigin;
+        for (unsigned int r : {1, 2, 3, 64, 200}) {
+            DataSpec dataSpec =
+                MinimumDataSpec(copySize, kStrideComputeDefault, copySize.height + r);
+            DoTest(textureSpec, dataSpec, copySize);
+        }
+    };
 
-        DataSpec dataSpec = MinimumDataSpec(copySize, kStrideComputeDefault, copySize.height + r);
-        DoTest(textureSpec, dataSpec, copySize);
+    TestBody({0, 0, 0}, textureSpec.textureSize);
+
+    if (utils::IsDepthOrStencilFormat(GetParam().mTextureFormat)) {
+        // The entire subresource must be copied when the format is a depth/stencil format.
+        return;
     }
+
+    TestBody({1, 1, 1}, {kWidth - 1, kHeight - 1, kDepth - 1});
 }
 
 // Test with bytesPerRow greater than needed
@@ -553,21 +572,33 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
 
     TextureSpec textureSpec;
     textureSpec.textureSize = {kWidth, kHeight, 1};
-    textureSpec.copyOrigin = {1, 2, 0};
     textureSpec.level = 0;
 
-    constexpr wgpu::Extent3D copyExtent = {17, 19, 1};
+    auto TestBody = [&](wgpu::Origin3D copyOrigin, wgpu::Extent3D copyExtent) {
+        textureSpec.copyOrigin = copyOrigin;
+        for (unsigned int b : {1, 2, 3, 4}) {
+            uint32_t bytesPerRow =
+                copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
+            DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow), copyExtent);
+        }
+    };
 
-    for (unsigned int b : {1, 2, 3, 4}) {
-        uint32_t bytesPerRow =
-            copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
-        DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow), copyExtent);
+    TestBody({0, 0, 0}, textureSpec.textureSize);
+
+    if (utils::IsDepthOrStencilFormat(GetParam().mTextureFormat)) {
+        // The entire subresource must be copied when the format is a depth/stencil format.
+        return;
     }
+
+    TestBody({1, 2, 0}, {17, 19, 1});
 }
 
 // Test that writing with bytesPerRow = 0 and bytesPerRow < bytesInACompleteRow works
 // when we're copying one row only
 TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
 
@@ -597,30 +628,42 @@ TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
 
     TextureSpec textureSpec;
     textureSpec.textureSize = {kWidth, kHeight, kLayers};
-    textureSpec.copyOrigin = {1, 2, 3};
     textureSpec.level = 0;
 
-    constexpr wgpu::Extent3D copyExtent = {17, 19, 21};
+    auto TestBody = [&](wgpu::Origin3D copyOrigin, wgpu::Extent3D copyExtent) {
+        textureSpec.copyOrigin = copyOrigin;
+        // Test with bytesPerRow divisible by blockWidth
+        for (unsigned int b : {1, 2, 3, 65, 300}) {
+            uint32_t bytesPerRow =
+                (copyExtent.width + b) * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
+            uint32_t rowsPerImage = copyExtent.height;
+            DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
+        }
 
-    // Test with bytesPerRow divisible by blockWidth
-    for (unsigned int b : {1, 2, 3, 65, 300}) {
-        uint32_t bytesPerRow =
-            (copyExtent.width + b) * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
-        uint32_t rowsPerImage = 23;
-        DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
+        // Test with bytesPerRow not divisible by blockWidth
+        for (unsigned int b : {1, 2, 3, 19, 301}) {
+            uint32_t bytesPerRow =
+                copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
+            uint32_t rowsPerImage = copyExtent.height;
+            DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
+        }
+    };
+
+    TestBody({0, 0, 0}, textureSpec.textureSize);
+
+    if (utils::IsDepthOrStencilFormat(GetParam().mTextureFormat)) {
+        // The entire subresource must be copied when the format is a depth/stencil format.
+        return;
     }
 
-    // Test with bytesPerRow not divisible by blockWidth
-    for (unsigned int b : {1, 2, 3, 19, 301}) {
-        uint32_t bytesPerRow =
-            copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
-        uint32_t rowsPerImage = 23;
-        DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow, rowsPerImage), copyExtent);
-    }
+    TestBody({1, 2, 3}, {17, 19, 21});
 }
 
 // Test valid special cases of bytesPerRow and rowsPerImage (0 or undefined).
 TEST_P(QueueWriteTextureTests, StrideSpecialCases) {
+    // The entire subresource must be copied when the format is a depth/stencil format.
+    DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
+
     TextureSpec textureSpec;
     textureSpec.copyOrigin = {0, 0, 0};
     textureSpec.textureSize = {4, 4, 4};
@@ -830,6 +873,7 @@ DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
                             wgpu::TextureFormat::R8Unorm,
                             wgpu::TextureFormat::RG8Unorm,
                             wgpu::TextureFormat::RGBA8Unorm,
+                            wgpu::TextureFormat::Stencil8,
                         });
 
 }  // anonymous namespace
