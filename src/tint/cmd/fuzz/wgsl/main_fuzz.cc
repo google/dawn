@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     return 0;
 }
 
-extern "C" int LLVMFuzzerInitialize(int* argc, const char*** argv) {
+extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     tint::cli::OptionSet opts;
 
     tint::Vector<std::string_view, 8> arguments;
@@ -64,9 +64,9 @@ extern "C" int LLVMFuzzerInitialize(int* argc, const char*** argv) {
         std::cerr << std::endl;
         // Change args to show libfuzzer help
         std::cerr << "Standard libfuzzer ";  // libfuzzer will print 'Usage:'
-        static const char* help[] = {(*argv)[0], "-help=1"};
+        static char help[] = "-help=1";
         *argc = 2;
-        *argv = help;
+        (*argv)[1] = help;
     };
 
     auto& opt_help = opts.Add<tint::cli::BoolOption>("help", "shows the usage");
