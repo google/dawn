@@ -5,6 +5,7 @@ layout(binding = 0, std140) uniform u_block_std140_ubo {
   f16vec2 inner_0;
   f16vec2 inner_1;
   f16vec2 inner_2;
+  uint pad;
 } u;
 
 void a(f16mat3x2 m) {

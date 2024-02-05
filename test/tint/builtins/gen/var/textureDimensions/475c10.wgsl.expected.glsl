@@ -3,6 +3,7 @@
 layout(rgba8ui) uniform highp readonly uimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_475c10() {
@@ -29,6 +30,7 @@ precision highp float;
 layout(rgba8ui) uniform highp readonly uimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_475c10() {
@@ -49,6 +51,7 @@ void main() {
 layout(rgba8ui) uniform highp readonly uimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_475c10() {

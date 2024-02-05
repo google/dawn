@@ -4,6 +4,8 @@ layout(binding = 0, std140) uniform u_block_std140_ubo {
   vec2 inner_0;
   vec2 inner_1;
   vec2 inner_2;
+  uint pad;
+  uint pad_1;
 } u;
 
 mat3x2 load_u_inner() {

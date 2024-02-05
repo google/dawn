@@ -3,6 +3,8 @@ precision highp float;
 
 layout(binding = 0, std140) uniform weights_block_ubo {
   vec2 inner;
+  uint pad;
+  uint pad_1;
 } weights;
 
 void tint_symbol() {

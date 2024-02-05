@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void clamp_5f0819() {
@@ -30,6 +31,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void clamp_5f0819() {
@@ -52,6 +54,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void clamp_5f0819() {

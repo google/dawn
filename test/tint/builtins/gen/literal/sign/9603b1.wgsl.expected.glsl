@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void sign_9603b1() {
@@ -27,6 +28,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void sign_9603b1() {
@@ -46,6 +48,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void sign_9603b1() {

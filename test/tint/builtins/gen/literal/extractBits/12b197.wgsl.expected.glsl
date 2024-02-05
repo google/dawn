@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void extractBits_12b197() {
@@ -27,6 +28,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void extractBits_12b197() {
@@ -46,6 +48,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void extractBits_12b197() {

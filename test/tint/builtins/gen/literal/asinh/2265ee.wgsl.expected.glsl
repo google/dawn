@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void asinh_2265ee() {
@@ -27,6 +28,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void asinh_2265ee() {
@@ -46,6 +48,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void asinh_2265ee() {

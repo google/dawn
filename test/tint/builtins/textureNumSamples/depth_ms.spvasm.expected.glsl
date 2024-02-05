@@ -4,14 +4,14 @@ struct tint_symbol_3 {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
-  tint_symbol_3 inner;
+layout(binding = 0, std140) uniform tint_symbol_3_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_4;
 
 vec4 tint_symbol_1 = vec4(0.0f);
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(tint_symbol_4.inner.texture_builtin_value_0);
+  res = int(tint_symbol_4.texture_builtin_value_0);
   return;
 }
 
@@ -51,13 +51,13 @@ struct tint_symbol_3 {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
-  tint_symbol_3 inner;
+layout(binding = 0, std140) uniform tint_symbol_3_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_4;
 
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(tint_symbol_4.inner.texture_builtin_value_0);
+  res = int(tint_symbol_4.texture_builtin_value_0);
   return;
 }
 
@@ -84,13 +84,13 @@ struct tint_symbol_3 {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
-  tint_symbol_3 inner;
+layout(binding = 0, std140) uniform tint_symbol_3_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_4;
 
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(tint_symbol_4.inner.texture_builtin_value_0);
+  res = int(tint_symbol_4.texture_builtin_value_0);
   return;
 }
 

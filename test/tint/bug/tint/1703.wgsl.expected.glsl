@@ -7,6 +7,9 @@ void unused_entry_point() {
 vec4 my_global = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(binding = 0, std140) uniform my_uniform_block_ubo {
   float inner;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } my_uniform;
 
 uniform highp sampler2D my_texture_my_sampler;

@@ -22,6 +22,7 @@ ivec3 tint_count_leading_zeros(ivec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void countLeadingZeros_7c38a6() {
@@ -68,6 +69,7 @@ ivec3 tint_count_leading_zeros(ivec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void countLeadingZeros_7c38a6() {
@@ -108,6 +110,7 @@ ivec3 tint_count_leading_zeros(ivec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void countLeadingZeros_7c38a6() {

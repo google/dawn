@@ -3,6 +3,7 @@
 uniform highp usampler3D arg_0_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_e5a203() {
@@ -29,6 +30,7 @@ precision highp float;
 uniform highp usampler3D arg_0_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_e5a203() {
@@ -49,6 +51,7 @@ void main() {
 uniform highp usampler3D arg_0_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
+  uint pad;
 } prevent_dce;
 
 void textureDimensions_e5a203() {

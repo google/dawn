@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void select_78be5f() {
@@ -30,6 +31,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void select_78be5f() {
@@ -52,6 +54,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void select_78be5f() {

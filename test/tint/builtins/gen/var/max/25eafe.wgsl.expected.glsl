@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void max_25eafe() {
@@ -29,6 +30,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void max_25eafe() {
@@ -50,6 +52,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
+  uint pad;
 } prevent_dce;
 
 void max_25eafe() {

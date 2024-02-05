@@ -4,8 +4,8 @@ struct tint_symbol {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
-  tint_symbol inner;
+layout(binding = 0, std140) uniform tint_symbol_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_1;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -13,7 +13,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureNumSamples_c1a777() {
-  uint res = tint_symbol_1.inner.texture_builtin_value_0;
+  uint res = tint_symbol_1.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 
@@ -37,8 +37,8 @@ struct tint_symbol {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
-  tint_symbol inner;
+layout(binding = 0, std140) uniform tint_symbol_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_1;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -46,7 +46,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureNumSamples_c1a777() {
-  uint res = tint_symbol_1.inner.texture_builtin_value_0;
+  uint res = tint_symbol_1.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 
@@ -64,8 +64,8 @@ struct tint_symbol {
   uint texture_builtin_value_0;
 };
 
-layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
-  tint_symbol inner;
+layout(binding = 0, std140) uniform tint_symbol_ubo {
+  uint texture_builtin_value_0;
 } tint_symbol_1;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -73,7 +73,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 } prevent_dce;
 
 void textureNumSamples_c1a777() {
-  uint res = tint_symbol_1.inner.texture_builtin_value_0;
+  uint res = tint_symbol_1.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 

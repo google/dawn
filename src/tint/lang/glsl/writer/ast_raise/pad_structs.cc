@@ -136,10 +136,9 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
                           ctx.dst, struct_size - offset);
         }
 
-        tint::Vector<const ast::Attribute*, 1> struct_attribs;
+        tint::Vector<const ast::Attribute*, 1> struct_attribs = ctx.Clone(ast_str->attributes);
         if (!padding_members.IsEmpty()) {
-            struct_attribs =
-                tint::Vector{b.Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)};
+            struct_attribs.Push(b.Disable(ast::DisabledValidation::kIgnoreStructMemberLimit));
         }
 
         auto* new_struct = b.create<ast::Struct>(ctx.Clone(ast_str->name), std::move(new_members),

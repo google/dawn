@@ -7,6 +7,7 @@ vec3 tint_radians(vec3 param_0) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void radians_f96258() {
@@ -38,6 +39,7 @@ vec3 tint_radians(vec3 param_0) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void radians_f96258() {
@@ -63,6 +65,7 @@ vec3 tint_radians(vec3 param_0) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void radians_f96258() {

@@ -4,10 +4,14 @@
 layout(binding = 0, std140) uniform u_block_std140_ubo {
   f16vec2 inner_0;
   f16vec2 inner_1;
+  uint pad;
+  uint pad_1;
 } u;
 
 layout(binding = 1, std430) buffer u_block_ssbo {
   f16mat2 inner;
+  uint pad;
+  uint pad_1;
 } s;
 
 f16mat2 load_u_inner() {

@@ -2,6 +2,7 @@
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void inverseSqrt_b197b1() {
@@ -28,6 +29,7 @@ precision highp float;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void inverseSqrt_b197b1() {
@@ -48,6 +50,7 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
+  uint pad;
 } prevent_dce;
 
 void inverseSqrt_b197b1() {
