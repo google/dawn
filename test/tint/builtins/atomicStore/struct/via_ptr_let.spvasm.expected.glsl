@@ -6,6 +6,16 @@ struct S_atomic {
   uint y;
 };
 
+shared S_atomic wg;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    wg.x = 0;
+    atomicExchange(wg.a, 0u);
+    wg.y = 0u;
+  }
+  barrier();
+}
+
 struct S {
   int x;
   uint a;
@@ -13,7 +23,6 @@ struct S {
 };
 
 uint local_invocation_index_1 = 0u;
-shared S_atomic wg;
 void compute_main_inner(uint local_invocation_index_2) {
   wg.x = 0;
   atomicExchange(wg.a, 0u);
@@ -30,12 +39,7 @@ void compute_main_1() {
 }
 
 void compute_main(uint local_invocation_index_1_param) {
-  {
-    wg.x = 0;
-    atomicExchange(wg.a, 0u);
-    wg.y = 0u;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 71
+; Bound: 83
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -19,6 +19,12 @@
                OpName %a "a"
                OpName %b "b"
                OpName %c "c"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
+               OpName %tint_zero_workgroup_memory_1 "tint_zero_workgroup_memory_1"
+               OpName %local_idx_1 "local_idx_1"
+               OpName %tint_zero_workgroup_memory_2 "tint_zero_workgroup_memory_2"
+               OpName %local_idx_2 "local_idx_2"
                OpName %uses_a "uses_a"
                OpName %uses_b "uses_b"
                OpName %uses_a_and_b "uses_a_and_b"
@@ -48,96 +54,114 @@
           %b = OpVariable %_ptr_Workgroup_int Workgroup
           %c = OpVariable %_ptr_Workgroup_int Workgroup
        %void = OpTypeVoid
-         %11 = OpTypeFunction %void
-      %int_1 = OpConstant %int 1
-      %int_2 = OpConstant %int 2
-         %30 = OpConstantNull %int
-         %35 = OpTypeFunction %void %uint
+         %11 = OpTypeFunction %void %uint
+         %16 = OpConstantNull %int
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
+         %28 = OpTypeFunction %void
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
      %int_42 = OpConstant %int 42
       %int_7 = OpConstant %int 7
-     %uses_a = OpFunction %void None %11
-         %14 = OpLabel
-         %15 = OpLoad %int %a
-         %17 = OpIAdd %int %15 %int_1
-               OpStore %a %17
-               OpReturn
-               OpFunctionEnd
-     %uses_b = OpFunction %void None %11
-         %19 = OpLabel
-         %20 = OpLoad %int %b
-         %22 = OpIMul %int %20 %int_2
-               OpStore %b %22
-               OpReturn
-               OpFunctionEnd
-%uses_a_and_b = OpFunction %void None %11
-         %24 = OpLabel
-         %25 = OpLoad %int %a
-               OpStore %b %25
-               OpReturn
-               OpFunctionEnd
-    %no_uses = OpFunction %void None %11
-         %27 = OpLabel
-               OpReturn
-               OpFunctionEnd
-      %outer = OpFunction %void None %11
-         %29 = OpLabel
-               OpStore %a %30
-         %31 = OpFunctionCall %void %uses_a
-         %32 = OpFunctionCall %void %uses_a_and_b
-         %33 = OpFunctionCall %void %uses_b
-         %34 = OpFunctionCall %void %no_uses
-               OpReturn
-               OpFunctionEnd
-%main1_inner = OpFunction %void None %35
-%local_invocation_index = OpFunctionParameter %uint
-         %38 = OpLabel
-               OpStore %a %30
+%tint_zero_workgroup_memory = OpFunction %void None %11
+  %local_idx = OpFunctionParameter %uint
+         %15 = OpLabel
+               OpStore %a %16
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %a %int_42
-         %43 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
-      %main1 = OpFunction %void None %11
+%tint_zero_workgroup_memory_1 = OpFunction %void None %11
+%local_idx_1 = OpFunctionParameter %uint
+         %22 = OpLabel
+               OpStore %b %16
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturn
+               OpFunctionEnd
+%tint_zero_workgroup_memory_2 = OpFunction %void None %11
+%local_idx_2 = OpFunctionParameter %uint
+         %26 = OpLabel
+               OpStore %a %16
+               OpStore %b %16
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturn
+               OpFunctionEnd
+     %uses_a = OpFunction %void None %28
+         %30 = OpLabel
+         %31 = OpLoad %int %a
+         %33 = OpIAdd %int %31 %int_1
+               OpStore %a %33
+               OpReturn
+               OpFunctionEnd
+     %uses_b = OpFunction %void None %28
+         %35 = OpLabel
+         %36 = OpLoad %int %b
+         %38 = OpIMul %int %36 %int_2
+               OpStore %b %38
+               OpReturn
+               OpFunctionEnd
+%uses_a_and_b = OpFunction %void None %28
+         %40 = OpLabel
+         %41 = OpLoad %int %a
+               OpStore %b %41
+               OpReturn
+               OpFunctionEnd
+    %no_uses = OpFunction %void None %28
+         %43 = OpLabel
+               OpReturn
+               OpFunctionEnd
+      %outer = OpFunction %void None %28
          %45 = OpLabel
-         %47 = OpLoad %uint %local_invocation_index_3
-         %46 = OpFunctionCall %void %main1_inner %47
+               OpStore %a %16
+         %46 = OpFunctionCall %void %uses_a
+         %47 = OpFunctionCall %void %uses_a_and_b
+         %48 = OpFunctionCall %void %uses_b
+         %49 = OpFunctionCall %void %no_uses
                OpReturn
                OpFunctionEnd
-%main2_inner = OpFunction %void None %35
+%main1_inner = OpFunction %void None %11
+%local_invocation_index = OpFunctionParameter %uint
+         %52 = OpLabel
+         %53 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+               OpStore %a %int_42
+         %55 = OpFunctionCall %void %uses_a
+               OpReturn
+               OpFunctionEnd
+      %main1 = OpFunction %void None %28
+         %57 = OpLabel
+         %59 = OpLoad %uint %local_invocation_index_3
+         %58 = OpFunctionCall %void %main1_inner %59
+               OpReturn
+               OpFunctionEnd
+%main2_inner = OpFunction %void None %11
 %local_invocation_index_1 = OpFunctionParameter %uint
-         %50 = OpLabel
-               OpStore %b %30
-               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %62 = OpLabel
+         %63 = OpFunctionCall %void %tint_zero_workgroup_memory_1 %local_invocation_index_1
                OpStore %b %int_7
-         %53 = OpFunctionCall %void %uses_b
+         %65 = OpFunctionCall %void %uses_b
                OpReturn
                OpFunctionEnd
-      %main2 = OpFunction %void None %11
-         %55 = OpLabel
-         %57 = OpLoad %uint %local_invocation_index_1_1
-         %56 = OpFunctionCall %void %main2_inner %57
+      %main2 = OpFunction %void None %28
+         %67 = OpLabel
+         %69 = OpLoad %uint %local_invocation_index_1_1
+         %68 = OpFunctionCall %void %main2_inner %69
                OpReturn
                OpFunctionEnd
-%main3_inner = OpFunction %void None %35
+%main3_inner = OpFunction %void None %11
 %local_invocation_index_2 = OpFunctionParameter %uint
-         %60 = OpLabel
-               OpStore %a %30
-               OpStore %b %30
-               OpControlBarrier %uint_2 %uint_2 %uint_264
-         %62 = OpFunctionCall %void %outer
-         %63 = OpFunctionCall %void %no_uses
+         %72 = OpLabel
+         %73 = OpFunctionCall %void %tint_zero_workgroup_memory_2 %local_invocation_index_2
+         %74 = OpFunctionCall %void %outer
+         %75 = OpFunctionCall %void %no_uses
                OpReturn
                OpFunctionEnd
-      %main3 = OpFunction %void None %11
-         %65 = OpLabel
-         %67 = OpLoad %uint %local_invocation_index_2_1
-         %66 = OpFunctionCall %void %main3_inner %67
+      %main3 = OpFunction %void None %28
+         %77 = OpLabel
+         %79 = OpLoad %uint %local_invocation_index_2_1
+         %78 = OpFunctionCall %void %main3_inner %79
                OpReturn
                OpFunctionEnd
-      %main4 = OpFunction %void None %11
-         %69 = OpLabel
-         %70 = OpFunctionCall %void %no_uses
+      %main4 = OpFunction %void None %28
+         %81 = OpLabel
+         %82 = OpFunctionCall %void %no_uses
                OpReturn
                OpFunctionEnd

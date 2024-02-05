@@ -1,73 +1,85 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void uses_a(threadgroup int* const tint_symbol) {
-  *(tint_symbol) = as_type<int>((as_type<uint>(*(tint_symbol)) + as_type<uint>(1)));
+void tint_zero_workgroup_memory(uint local_idx, threadgroup int* const tint_symbol) {
+  {
+    *(tint_symbol) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
-void uses_b(threadgroup int* const tint_symbol_1) {
-  *(tint_symbol_1) = as_type<int>((as_type<uint>(*(tint_symbol_1)) * as_type<uint>(2)));
+void tint_zero_workgroup_memory_1(uint local_idx_1, threadgroup int* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
-void uses_a_and_b(threadgroup int* const tint_symbol_2, threadgroup int* const tint_symbol_3) {
-  *(tint_symbol_2) = *(tint_symbol_3);
+void tint_zero_workgroup_memory_2(uint local_idx_2, threadgroup int* const tint_symbol_2, threadgroup int* const tint_symbol_3) {
+  {
+    *(tint_symbol_2) = 0;
+    *(tint_symbol_3) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
+void uses_a(threadgroup int* const tint_symbol_4) {
+  *(tint_symbol_4) = as_type<int>((as_type<uint>(*(tint_symbol_4)) + as_type<uint>(1)));
+}
+
+void uses_b(threadgroup int* const tint_symbol_5) {
+  *(tint_symbol_5) = as_type<int>((as_type<uint>(*(tint_symbol_5)) * as_type<uint>(2)));
+}
+
+void uses_a_and_b(threadgroup int* const tint_symbol_6, threadgroup int* const tint_symbol_7) {
+  *(tint_symbol_6) = *(tint_symbol_7);
 }
 
 void no_uses() {
 }
 
-void outer(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbol_5) {
-  *(tint_symbol_4) = 0;
-  uses_a(tint_symbol_4);
-  uses_a_and_b(tint_symbol_5, tint_symbol_4);
-  uses_b(tint_symbol_5);
+void outer(threadgroup int* const tint_symbol_8, threadgroup int* const tint_symbol_9) {
+  *(tint_symbol_8) = 0;
+  uses_a(tint_symbol_8);
+  uses_a_and_b(tint_symbol_9, tint_symbol_8);
+  uses_b(tint_symbol_9);
   no_uses();
 }
 
-void main1_inner(uint local_invocation_index, threadgroup int* const tint_symbol_6) {
-  {
-    *(tint_symbol_6) = 0;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  *(tint_symbol_6) = 42;
-  uses_a(tint_symbol_6);
+void main1_inner(uint local_invocation_index, threadgroup int* const tint_symbol_10) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_10);
+  *(tint_symbol_10) = 42;
+  uses_a(tint_symbol_10);
 }
 
 kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_7;
-  main1_inner(local_invocation_index, &(tint_symbol_7));
+  threadgroup int tint_symbol_11;
+  main1_inner(local_invocation_index, &(tint_symbol_11));
   return;
 }
 
-void main2_inner(uint local_invocation_index_1, threadgroup int* const tint_symbol_8) {
-  {
-    *(tint_symbol_8) = 0;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  *(tint_symbol_8) = 7;
-  uses_b(tint_symbol_8);
+void main2_inner(uint local_invocation_index_1, threadgroup int* const tint_symbol_12) {
+  tint_zero_workgroup_memory_1(local_invocation_index_1, tint_symbol_12);
+  *(tint_symbol_12) = 7;
+  uses_b(tint_symbol_12);
 }
 
 kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_9;
-  main2_inner(local_invocation_index_1, &(tint_symbol_9));
+  threadgroup int tint_symbol_13;
+  main2_inner(local_invocation_index_1, &(tint_symbol_13));
   return;
 }
 
-void main3_inner(uint local_invocation_index_2, threadgroup int* const tint_symbol_10, threadgroup int* const tint_symbol_11) {
-  {
-    *(tint_symbol_10) = 0;
-    *(tint_symbol_11) = 0;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  outer(tint_symbol_10, tint_symbol_11);
+void main3_inner(uint local_invocation_index_2, threadgroup int* const tint_symbol_14, threadgroup int* const tint_symbol_15) {
+  tint_zero_workgroup_memory_2(local_invocation_index_2, tint_symbol_14, tint_symbol_15);
+  outer(tint_symbol_14, tint_symbol_15);
   no_uses();
 }
 
 kernel void main3(uint local_invocation_index_2 [[thread_index_in_threadgroup]]) {
-  threadgroup int tint_symbol_12;
-  threadgroup int tint_symbol_13;
-  main3_inner(local_invocation_index_2, &(tint_symbol_12), &(tint_symbol_13));
+  threadgroup int tint_symbol_16;
+  threadgroup int tint_symbol_17;
+  main3_inner(local_invocation_index_2, &(tint_symbol_16), &(tint_symbol_17));
   return;
 }
 

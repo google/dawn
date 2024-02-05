@@ -1,5 +1,13 @@
 #version 310 es
 
+shared int g1;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(g1, 0);
+  }
+  barrier();
+}
+
 int tint_ftoi(float v) {
   return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
 }
@@ -8,7 +16,6 @@ layout(binding = 0, std430) buffer s_block_ssbo {
   int inner;
 } s;
 
-shared int g1;
 struct S {
   int a;
   int b;
@@ -49,10 +56,7 @@ int call_builtin_with_mod_scope_ptr() {
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    atomicExchange(g1, 0);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   int v1 = 0;
   S v2 = S(0, 0);
   vec3 v4 = vec3(0.0f);

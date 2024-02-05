@@ -7,6 +7,13 @@ struct atomic_compare_exchange_result_u32 {
 
 
 shared uint arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(arg_0, 0u);
+  }
+  barrier();
+}
+
 void atomicCompareExchangeWeak_83580d() {
   atomic_compare_exchange_result_u32 atomic_compare_result;
   atomic_compare_result.old_value = atomicCompSwap(arg_0, 1u, 1u);
@@ -15,10 +22,7 @@ void atomicCompareExchangeWeak_83580d() {
 }
 
 void compute_main(uint local_invocation_index) {
-  {
-    atomicExchange(arg_0, 0u);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicCompareExchangeWeak_83580d();
 }
 

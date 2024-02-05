@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 59
+; Bound: 63
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -21,9 +21,11 @@
                OpName %S "S"
                OpMemberName %S 0 "data"
                OpName %s "s"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
+               OpName %idx "idx"
                OpName %f_inner "f_inner"
                OpName %local_invocation_index "local_invocation_index"
-               OpName %idx "idx"
                OpName %f "f"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %ubo_block Block
@@ -69,12 +71,12 @@
    %uint_264 = OpConstant %uint 264
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
 %_ptr_Uniform_int = OpTypePointer Uniform %int
-         %54 = OpTypeFunction %void
-    %f_inner = OpFunction %void None %18
-%local_invocation_index = OpFunctionParameter %uint
+         %58 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %18
+  %local_idx = OpFunctionParameter %uint
          %22 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function %25
-               OpStore %idx %local_invocation_index
+               OpStore %idx %local_idx
                OpBranch %26
          %26 = OpLabel
                OpLoopMerge %27 %28 None
@@ -99,17 +101,23 @@
                OpBranch %26
          %27 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %48 = OpAccessChain %_ptr_StorageBuffer_int %result %uint_0 %uint_0
-         %50 = OpAccessChain %_ptr_Uniform_int %ubo %uint_0 %uint_0
-         %51 = OpLoad %int %50
-         %52 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %51
-         %53 = OpLoad %int %52
-               OpStore %48 %53
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %54
-         %56 = OpLabel
-         %58 = OpLoad %uint %local_invocation_index_1
-         %57 = OpFunctionCall %void %f_inner %58
+    %f_inner = OpFunction %void None %18
+%local_invocation_index = OpFunctionParameter %uint
+         %49 = OpLabel
+         %50 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %52 = OpAccessChain %_ptr_StorageBuffer_int %result %uint_0 %uint_0
+         %54 = OpAccessChain %_ptr_Uniform_int %ubo %uint_0 %uint_0
+         %55 = OpLoad %int %54
+         %56 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %55
+         %57 = OpLoad %int %56
+               OpStore %52 %57
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %58
+         %60 = OpLabel
+         %62 = OpLoad %uint %local_invocation_index_1
+         %61 = OpFunctionCall %void %f_inner %62
                OpReturn
                OpFunctionEnd

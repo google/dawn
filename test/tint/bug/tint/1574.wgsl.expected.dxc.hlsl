@@ -6,10 +6,21 @@ struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-RWByteAddressBuffer a_u32 : register(u0);
-RWByteAddressBuffer a_i32 : register(u1);
 groupshared uint b_u32;
 groupshared int b_i32;
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    uint atomic_result = 0u;
+    InterlockedExchange(b_u32, 0u, atomic_result);
+    int atomic_result_1 = 0;
+    InterlockedExchange(b_i32, 0, atomic_result_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
+RWByteAddressBuffer a_u32 : register(u0);
+RWByteAddressBuffer a_i32 : register(u1);
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
@@ -32,13 +43,7 @@ atomic_compare_exchange_result_i32 a_i32atomicCompareExchangeWeak(uint offset, i
 
 
 void main_inner(uint local_invocation_index) {
-  if ((local_invocation_index < 1u)) {
-    uint atomic_result = 0u;
-    InterlockedExchange(b_u32, 0u, atomic_result);
-    int atomic_result_1 = 0;
-    InterlockedExchange(b_i32, 0, atomic_result_1);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   {
     uint value = 42u;
     atomic_compare_exchange_result_u32 r1 = a_u32atomicCompareExchangeWeak(0u, 0u, value);

@@ -1,11 +1,32 @@
 #version 310 es
 
+shared ivec4 dst[4];
+shared ivec4 src_workgroup[4];
+shared int dst_nested[4][3][2];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      dst[i] = ivec4(0);
+      src_workgroup[i] = ivec4(0);
+    }
+  }
+  {
+    for(uint idx_1 = local_idx; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
+      uint i_1 = (idx_1 / 6u);
+      uint i_2 = ((idx_1 % 6u) / 2u);
+      uint i_3 = (idx_1 % 2u);
+      dst_nested[i_1][i_2][i_3] = 0;
+    }
+  }
+  barrier();
+}
+
 struct S {
   ivec4 arr[4];
 };
 
 ivec4 src_private[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
-shared ivec4 src_workgroup[4];
 layout(binding = 0, std140) uniform src_uniform_block_ubo {
   S inner;
 } src_uniform;
@@ -14,8 +35,6 @@ layout(binding = 1, std430) buffer src_uniform_block_ssbo {
   S inner;
 } src_storage;
 
-shared ivec4 dst[4];
-shared int dst_nested[4][3][2];
 ivec4[4] ret_arr() {
   ivec4 tint_symbol_2[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   return tint_symbol_2;
@@ -46,22 +65,7 @@ void foo(ivec4 src_param[4]) {
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      dst[i] = ivec4(0);
-      src_workgroup[i] = ivec4(0);
-    }
-  }
-  {
-    for(uint idx_1 = local_invocation_index; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
-      uint i_1 = (idx_1 / 6u);
-      uint i_2 = ((idx_1 % 6u) / 2u);
-      uint i_3 = (idx_1 % 2u);
-      dst_nested[i_1][i_2][i_3] = 0;
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   ivec4 val[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   foo(val);
 }

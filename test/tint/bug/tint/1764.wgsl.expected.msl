@@ -18,18 +18,22 @@ struct tint_array {
   volatile bool VOLATILE_NAME = true; \
   if (VOLATILE_NAME)
 
-void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<int, 246>* const tint_symbol_1) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 246u); idx = (idx + 1u)) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<int, 246>* const tint_symbol_1) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 246u); idx = (idx + 1u)) {
     uint const i = idx;
     (*(tint_symbol_1))[i] = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (*(tint_symbol_1))[0] = 42;
+}
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<int, 246>* const tint_symbol_2) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_2);
+  (*(tint_symbol_2))[0] = 42;
 }
 
 kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array<int, 246> tint_symbol_2;
-  tint_symbol_inner(local_invocation_index, &(tint_symbol_2));
+  threadgroup tint_array<int, 246> tint_symbol_3;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_3));
   return;
 }
 

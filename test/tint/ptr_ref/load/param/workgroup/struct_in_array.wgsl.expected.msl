@@ -22,23 +22,27 @@ struct str {
   int i;
 };
 
-str func(threadgroup str* const pointer) {
-  return *(pointer);
-}
-
-void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<str, 4>* const tint_symbol_2) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<str, 4>* const tint_symbol_2) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
     uint const i_1 = idx;
     str const tint_symbol_1 = str{};
     (*(tint_symbol_2))[i_1] = tint_symbol_1;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  str const r = func(&((*(tint_symbol_2))[2]));
+}
+
+str func(threadgroup str* const pointer) {
+  return *(pointer);
+}
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array<str, 4>* const tint_symbol_3) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_3);
+  str const r = func(&((*(tint_symbol_3))[2]));
 }
 
 kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array<str, 4> tint_symbol_3;
-  tint_symbol_inner(local_invocation_index, &(tint_symbol_3));
+  threadgroup tint_array<str, 4> tint_symbol_4;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_4));
   return;
 }
 

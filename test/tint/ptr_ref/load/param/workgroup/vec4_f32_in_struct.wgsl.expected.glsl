@@ -5,16 +5,20 @@ struct str {
 };
 
 shared str S;
-vec4 func_S_i() {
-  return S.i;
-}
-
-void tint_symbol(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     str tint_symbol_1 = str(vec4(0.0f));
     S = tint_symbol_1;
   }
   barrier();
+}
+
+vec4 func_S_i() {
+  return S.i;
+}
+
+void tint_symbol(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   vec4 r = func_S_i();
 }
 

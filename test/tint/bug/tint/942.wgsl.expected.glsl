@@ -1,5 +1,17 @@
 #version 310 es
 
+shared vec3 tile[4][256];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 1024u); idx = (idx + 64u)) {
+      uint i_1 = (idx / 256u);
+      uint i_2 = (idx % 256u);
+      tile[i_1][i_2] = vec3(0.0f);
+    }
+  }
+  barrier();
+}
+
 struct Params {
   uint filterDim;
   uint blockDim;
@@ -23,7 +35,6 @@ layout(binding = 3, std140) uniform flip_block_ubo {
   Flip inner;
 } flip;
 
-shared vec3 tile[4][256];
 uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
@@ -31,14 +42,7 @@ uint tint_div(uint lhs, uint rhs) {
 uniform highp sampler2D inputTex_samp;
 
 void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
-      uint i_1 = (idx / 256u);
-      uint i_2 = (idx % 256u);
-      tile[i_1][i_2] = vec3(0.0f);
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint filterOffset = tint_div((params.inner.filterDim - 1u), 2u);
   uvec2 dims = uvec2(textureSize(inputTex_samp, 0));
   uvec2 baseIndex = (((WorkGroupID.xy * uvec2(params.inner.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u))) - uvec2(filterOffset, 0u));

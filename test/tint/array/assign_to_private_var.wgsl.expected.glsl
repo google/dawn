@@ -1,11 +1,21 @@
 #version 310 es
 
+shared ivec4 src_workgroup[4];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      src_workgroup[i] = ivec4(0);
+    }
+  }
+  barrier();
+}
+
 struct S {
   ivec4 arr[4];
 };
 
 ivec4 src_private[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
-shared ivec4 src_workgroup[4];
 layout(binding = 0, std140) uniform src_uniform_block_ubo {
   S inner;
 } src_uniform;
@@ -46,13 +56,7 @@ void foo(ivec4 src_param[4]) {
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      src_workgroup[i] = ivec4(0);
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   ivec4 a[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   foo(a);
 }

@@ -7,18 +7,22 @@ struct S {
 };
 
 shared S wg;
-void compute_main(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     wg.x = 0;
     wg.y = 0u;
   }
   {
-    for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 10u); idx = (idx + 1u)) {
       uint i = idx;
       atomicExchange(wg.a[i], 0u);
     }
   }
   barrier();
+}
+
+void compute_main(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicExchange(wg.a[4], 1u);
 }
 

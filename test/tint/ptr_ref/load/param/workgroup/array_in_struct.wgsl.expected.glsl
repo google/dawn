@@ -5,18 +5,22 @@ struct str {
 };
 
 shared str S;
-int[4] func_S_arr() {
-  return S.arr;
-}
-
-void tint_symbol(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
       uint i = idx;
       S.arr[i] = 0;
     }
   }
   barrier();
+}
+
+int[4] func_S_arr() {
+  return S.arr;
+}
+
+void tint_symbol(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   int r[4] = func_S_arr();
 }
 

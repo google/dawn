@@ -7,6 +7,13 @@ void set_matrix_column(inout float2x2 mat, int col, float2 val) {
 
 groupshared float2x2 S;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = float2x2((0.0f).xx, (0.0f).xx);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 void func_S_X(uint pointer[1]) {
   set_matrix_column(S, pointer[0], (0.0f).xx);
 }
@@ -16,10 +23,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    S = float2x2((0.0f).xx, (0.0f).xx);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint tint_symbol_2[1] = {1u};
   func_S_X(tint_symbol_2);
 }

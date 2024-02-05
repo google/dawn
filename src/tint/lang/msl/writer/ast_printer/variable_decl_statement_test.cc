@@ -556,7 +556,7 @@ TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Workgroup) {
     gen.IncrementIndent();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.Result(), HasSubstr("threadgroup float tint_symbol_2;\n"));
+    EXPECT_THAT(gen.Result(), HasSubstr("threadgroup float tint_symbol_"));
 }
 
 }  // namespace

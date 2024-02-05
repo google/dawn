@@ -1,15 +1,19 @@
 #version 310 es
 
 shared int S;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = 0;
+  }
+  barrier();
+}
+
 void func_S() {
   S = 42;
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    S = 0;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S();
 }
 

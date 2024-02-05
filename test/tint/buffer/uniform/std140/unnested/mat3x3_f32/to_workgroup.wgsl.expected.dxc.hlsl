@@ -1,7 +1,15 @@
+groupshared float3x3 w;
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    w = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[3];
 };
-groupshared float3x3 w;
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
@@ -15,10 +23,7 @@ float3x3 u_load(uint offset) {
 }
 
 void f_inner(uint local_invocation_index) {
-  {
-    w = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = u_load(0u);
   w[1] = asfloat(u[0].xyz);
   w[1] = asfloat(u[0].xyz).zxy;

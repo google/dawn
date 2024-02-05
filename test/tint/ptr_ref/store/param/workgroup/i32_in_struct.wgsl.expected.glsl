@@ -5,16 +5,20 @@ struct str {
 };
 
 shared str S;
-void func_S_i() {
-  S.i = 42;
-}
-
-void tint_symbol(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     str tint_symbol_1 = str(0);
     S = tint_symbol_1;
   }
   barrier();
+}
+
+void func_S_i() {
+  S.i = 42;
+}
+
+void tint_symbol(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S_i();
 }
 

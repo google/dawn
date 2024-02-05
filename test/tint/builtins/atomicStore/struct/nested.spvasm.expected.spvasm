@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 68
+; Bound: 72
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -25,6 +25,8 @@
                OpMemberName %S1_atomic 2 "y"
                OpMemberName %S1_atomic 3 "z"
                OpName %wg "wg"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
                OpName %compute_main_inner "compute_main_inner"
                OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %compute_main_1 "compute_main_1"
@@ -66,9 +68,9 @@
      %uint_3 = OpConstant %uint 3
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
    %uint_264 = OpConstant %uint 264
-         %42 = OpTypeFunction %void
-%compute_main_inner = OpFunction %void None %13
-%local_invocation_index_2 = OpFunctionParameter %uint
+         %58 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %13
+  %local_idx = OpFunctionParameter %uint
          %17 = OpLabel
          %20 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
                OpStore %20 %21
@@ -91,47 +93,53 @@
          %36 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_3
                OpStore %36 %21
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %41 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_3 %uint_1 %uint_1
-               OpAtomicStore %41 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd
-%compute_main_1 = OpFunction %void None %42
-         %44 = OpLabel
-         %45 = OpLoad %uint %local_invocation_index_1
-         %46 = OpFunctionCall %void %compute_main_inner %45
+%compute_main_inner = OpFunction %void None %13
+%local_invocation_index_2 = OpFunctionParameter %uint
+         %41 = OpLabel
+         %42 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
+               OpStore %42 %21
+         %43 = OpAccessChain %_ptr_Workgroup_int %wg %uint_1
+               OpStore %43 %21
+         %44 = OpAccessChain %_ptr_Workgroup_int %wg %uint_2
+               OpStore %44 %21
+         %45 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_0
+               OpStore %45 %21
+         %46 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_0
+               OpStore %46 %21
+         %49 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_3 %uint_1 %uint_1
+               OpAtomicStore %49 %uint_2 %uint_0 %6
+         %50 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_2
+               OpStore %50 %21
+         %51 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_3
+               OpStore %51 %21
+         %52 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_2
+               OpStore %52 %21
+         %53 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_3
+               OpStore %53 %21
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %57 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_3 %uint_1 %uint_1
+               OpAtomicStore %57 %uint_2 %uint_0 %uint_1
+               OpReturn
+               OpFunctionEnd
+%compute_main_1 = OpFunction %void None %58
+         %60 = OpLabel
+         %61 = OpLoad %uint %local_invocation_index_1
+         %62 = OpFunctionCall %void %compute_main_inner %61
                OpReturn
                OpFunctionEnd
 %compute_main_inner_1 = OpFunction %void None %13
 %local_invocation_index_1_param = OpFunctionParameter %uint
-         %49 = OpLabel
-         %50 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %50 %21
-         %51 = OpAccessChain %_ptr_Workgroup_int %wg %uint_1
-               OpStore %51 %21
-         %52 = OpAccessChain %_ptr_Workgroup_int %wg %uint_2
-               OpStore %52 %21
-         %53 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_0
-               OpStore %53 %21
-         %54 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_0
-               OpStore %54 %21
-         %57 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_3 %uint_1 %uint_1
-               OpAtomicStore %57 %uint_2 %uint_0 %6
-         %58 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_2
-               OpStore %58 %21
-         %59 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_1 %uint_3
-               OpStore %59 %21
-         %60 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_2
-               OpStore %60 %21
-         %61 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_3
-               OpStore %61 %21
-               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %65 = OpLabel
+         %66 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index_1_param
                OpStore %local_invocation_index_1 %local_invocation_index_1_param
-         %63 = OpFunctionCall %void %compute_main_1
+         %67 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %42
-         %65 = OpLabel
-         %67 = OpLoad %uint %local_invocation_index_1_param_1
-         %66 = OpFunctionCall %void %compute_main_inner_1 %67
+%compute_main = OpFunction %void None %58
+         %69 = OpLabel
+         %71 = OpLoad %uint %local_invocation_index_1_param_1
+         %70 = OpFunctionCall %void %compute_main_inner_1 %71
                OpReturn
                OpFunctionEnd

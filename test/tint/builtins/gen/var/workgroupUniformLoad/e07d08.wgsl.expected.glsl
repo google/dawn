@@ -2,6 +2,13 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 shared float16_t arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    arg_0 = 0.0hf;
+  }
+  barrier();
+}
+
 float16_t tint_workgroupUniformLoad_arg_0() {
   barrier();
   float16_t result = arg_0;
@@ -19,10 +26,7 @@ void workgroupUniformLoad_e07d08() {
 }
 
 void compute_main(uint local_invocation_index) {
-  {
-    arg_0 = 0.0hf;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   workgroupUniformLoad_e07d08();
 }
 

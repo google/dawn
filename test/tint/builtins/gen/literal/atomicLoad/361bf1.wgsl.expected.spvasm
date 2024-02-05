@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -12,6 +12,8 @@
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
                OpName %atomicLoad_361bf1 "atomicLoad_361bf1"
                OpName %res "res"
                OpName %compute_main_inner "compute_main_inner"
@@ -31,35 +33,41 @@
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
        %void = OpTypeVoid
-          %9 = OpTypeFunction %void
+          %9 = OpTypeFunction %void %uint
      %uint_2 = OpConstant %uint 2
      %uint_0 = OpConstant %uint 0
-%_ptr_Function_uint = OpTypePointer Function %uint
-         %19 = OpConstantNull %uint
-%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-         %23 = OpTypeFunction %void %uint
+         %18 = OpConstantNull %uint
    %uint_264 = OpConstant %uint 264
-%atomicLoad_361bf1 = OpFunction %void None %9
-         %12 = OpLabel
-        %res = OpVariable %_ptr_Function_uint Function %19
-         %13 = OpAtomicLoad %uint %arg_0 %uint_2 %uint_0
-               OpStore %res %13
-         %21 = OpAccessChain %_ptr_StorageBuffer_uint %prevent_dce %uint_0
-         %22 = OpLoad %uint %res
-               OpStore %21 %22
-               OpReturn
-               OpFunctionEnd
-%compute_main_inner = OpFunction %void None %23
-%local_invocation_index = OpFunctionParameter %uint
-         %26 = OpLabel
-               OpAtomicStore %arg_0 %uint_2 %uint_0 %19
+         %21 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%tint_zero_workgroup_memory = OpFunction %void None %9
+  %local_idx = OpFunctionParameter %uint
+         %13 = OpLabel
+               OpAtomicStore %arg_0 %uint_2 %uint_0 %18
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %31 = OpFunctionCall %void %atomicLoad_361bf1
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %9
+%atomicLoad_361bf1 = OpFunction %void None %21
+         %23 = OpLabel
+        %res = OpVariable %_ptr_Function_uint Function %18
+         %24 = OpAtomicLoad %uint %arg_0 %uint_2 %uint_0
+               OpStore %res %24
+         %29 = OpAccessChain %_ptr_StorageBuffer_uint %prevent_dce %uint_0
+         %30 = OpLoad %uint %res
+               OpStore %29 %30
+               OpReturn
+               OpFunctionEnd
+%compute_main_inner = OpFunction %void None %9
+%local_invocation_index = OpFunctionParameter %uint
          %33 = OpLabel
-         %35 = OpLoad %uint %local_invocation_index_1
-         %34 = OpFunctionCall %void %compute_main_inner %35
+         %34 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %35 = OpFunctionCall %void %atomicLoad_361bf1
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %21
+         %37 = OpLabel
+         %39 = OpLoad %uint %local_invocation_index_1
+         %38 = OpFunctionCall %void %compute_main_inner %39
                OpReturn
                OpFunctionEnd

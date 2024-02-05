@@ -1,9 +1,9 @@
 #version 310 es
 
 shared uint wg[3][2][1];
-void compute_main(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
-    for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 6u); idx = (idx + 1u)) {
       uint i = (idx / 2u);
       uint i_1 = (idx % 2u);
       uint i_2 = (idx % 1u);
@@ -11,6 +11,10 @@ void compute_main(uint local_invocation_index) {
     }
   }
   barrier();
+}
+
+void compute_main(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicExchange(wg[2][1][0], 1u);
 }
 

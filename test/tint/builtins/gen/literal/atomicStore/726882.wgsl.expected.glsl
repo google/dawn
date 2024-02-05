@@ -1,15 +1,19 @@
 #version 310 es
 
 shared uint arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(arg_0, 0u);
+  }
+  barrier();
+}
+
 void atomicStore_726882() {
   atomicExchange(arg_0, 1u);
 }
 
 void compute_main(uint local_invocation_index) {
-  {
-    atomicExchange(arg_0, 0u);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicStore_726882();
 }
 

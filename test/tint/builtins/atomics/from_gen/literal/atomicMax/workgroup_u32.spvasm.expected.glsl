@@ -1,7 +1,14 @@
 #version 310 es
 
-uint local_invocation_index_1 = 0u;
 shared uint arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(arg_0, 0u);
+  }
+  barrier();
+}
+
+uint local_invocation_index_1 = 0u;
 void atomicMax_beccfc() {
   uint res = 0u;
   uint x_10 = atomicMax(arg_0, 1u);
@@ -23,10 +30,7 @@ void compute_main_1() {
 }
 
 void compute_main(uint local_invocation_index_1_param) {
-  {
-    atomicExchange(arg_0, 0u);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

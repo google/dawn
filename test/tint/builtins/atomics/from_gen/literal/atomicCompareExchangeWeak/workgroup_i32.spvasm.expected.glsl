@@ -6,13 +6,20 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 
+shared int arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(arg_0, 0);
+  }
+  barrier();
+}
+
 struct tint_symbol {
   int old_value;
   bool exchanged;
 };
 
 uint local_invocation_index_1 = 0u;
-shared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
   tint_symbol res = tint_symbol(0, false);
   atomic_compare_exchange_result_i32 atomic_compare_result;
@@ -40,10 +47,7 @@ void compute_main_1() {
 }
 
 void compute_main(uint local_invocation_index_1_param) {
-  {
-    atomicExchange(arg_0, 0);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

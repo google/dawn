@@ -200,8 +200,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                     // Create a function-scope variable that is a pointer to the member.
                     auto* member_ptr = ctx.dst->AddressOf(
                         ctx.dst->MemberAccessor(ctx.dst->Deref(workgroup_param()), member));
-                    auto* local_var = ctx.dst->Let(
-                        new_var_symbol, ctx.dst->ty.ptr<workgroup>(store_type()), member_ptr);
+                    auto* local_var = ctx.dst->Let(new_var_symbol, member_ptr);
                     ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
                     is_pointer = true;
                 } else {

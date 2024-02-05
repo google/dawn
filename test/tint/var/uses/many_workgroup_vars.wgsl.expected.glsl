@@ -100,7 +100,7 @@ shared mat2 m96;
 shared mat2 m97;
 shared mat2 m98;
 shared mat2 m99;
-void tint_symbol(uint idx) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     m00 = mat2(vec2(0.0f), vec2(0.0f));
     m01 = mat2(vec2(0.0f), vec2(0.0f));
@@ -204,6 +204,10 @@ void tint_symbol(uint idx) {
     m99 = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();
+}
+
+void tint_symbol(uint idx) {
+  tint_zero_workgroup_memory(idx);
   m00[0][0] = 1.0f;
   m01[0][0] = 1.0f;
   m02[0][0] = 1.0f;

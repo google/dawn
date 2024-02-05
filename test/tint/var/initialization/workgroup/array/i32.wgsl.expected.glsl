@@ -1,14 +1,18 @@
 #version 310 es
 
 shared int zero[3];
-void tint_symbol(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
-    for(uint idx = local_invocation_index; (idx < 3u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 3u); idx = (idx + 1u)) {
       uint i = idx;
       zero[i] = 0;
     }
   }
   barrier();
+}
+
+void tint_symbol(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   int v[3] = zero;
 }
 

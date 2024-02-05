@@ -1,3 +1,18 @@
+groupshared float mm_Asub[64][64];
+groupshared float mm_Bsub[64][64];
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4096u); idx = (idx + 256u)) {
+      uint i = (idx / 64u);
+      uint i_1 = (idx % 64u);
+      mm_Asub[i][i_1] = 0.0f;
+      mm_Bsub[i][i_1] = 0.0f;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 ByteAddressBuffer firstMatrix : register(t0);
 ByteAddressBuffer secondMatrix : register(t1);
 RWByteAddressBuffer resultMatrix : register(u2);
@@ -40,9 +55,6 @@ void mm_write(uint row, uint col, float value) {
   }
 }
 
-groupshared float mm_Asub[64][64];
-groupshared float mm_Bsub[64][64];
-
 uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
@@ -54,15 +66,7 @@ struct tint_symbol_5 {
 };
 
 void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
-      uint i = (idx / 64u);
-      uint i_1 = (idx % 64u);
-      mm_Asub[i][i_1] = 0.0f;
-      mm_Bsub[i][i_1] = 0.0f;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint tileRow = (local_id.y * 4u);
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);

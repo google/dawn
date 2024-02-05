@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 31
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -11,6 +11,8 @@
                OpName %str "str"
                OpMemberName %str 0 "i"
                OpName %S "S"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
                OpName %func_S_i "func_S_i"
                OpName %main_inner "main_inner"
                OpName %local_invocation_index "local_invocation_index"
@@ -25,32 +27,38 @@
         %str = OpTypeStruct %v4float
 %_ptr_Workgroup_str = OpTypePointer Workgroup %str
           %S = OpVariable %_ptr_Workgroup_str Workgroup
-          %9 = OpTypeFunction %v4float
-     %uint_0 = OpConstant %uint 0
-%_ptr_Workgroup_v4float = OpTypePointer Workgroup %v4float
        %void = OpTypeVoid
-         %16 = OpTypeFunction %void %uint
-         %21 = OpConstantNull %str
+          %9 = OpTypeFunction %void %uint
+         %14 = OpConstantNull %str
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %26 = OpTypeFunction %void
-   %func_S_i = OpFunction %v4float None %9
-         %11 = OpLabel
-         %14 = OpAccessChain %_ptr_Workgroup_v4float %S %uint_0
-         %15 = OpLoad %v4float %14
-               OpReturnValue %15
-               OpFunctionEnd
- %main_inner = OpFunction %void None %16
-%local_invocation_index = OpFunctionParameter %uint
-         %20 = OpLabel
-               OpStore %S %21
+         %18 = OpTypeFunction %v4float
+     %uint_0 = OpConstant %uint 0
+%_ptr_Workgroup_v4float = OpTypePointer Workgroup %v4float
+         %30 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %9
+  %local_idx = OpFunctionParameter %uint
+         %13 = OpLabel
+               OpStore %S %14
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %25 = OpFunctionCall %v4float %func_S_i
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %26
-         %28 = OpLabel
-         %30 = OpLoad %uint %local_invocation_index_1
-         %29 = OpFunctionCall %void %main_inner %30
+   %func_S_i = OpFunction %v4float None %18
+         %20 = OpLabel
+         %23 = OpAccessChain %_ptr_Workgroup_v4float %S %uint_0
+         %24 = OpLoad %v4float %23
+               OpReturnValue %24
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %9
+%local_invocation_index = OpFunctionParameter %uint
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %29 = OpFunctionCall %v4float %func_S_i
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %30
+         %32 = OpLabel
+         %34 = OpLoad %uint %local_invocation_index_1
+         %33 = OpFunctionCall %void %main_inner %34
                OpReturn
                OpFunctionEnd

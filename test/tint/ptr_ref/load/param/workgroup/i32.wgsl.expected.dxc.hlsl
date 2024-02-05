@@ -1,5 +1,12 @@
 groupshared int S;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 int func_S() {
   return S;
 }
@@ -9,10 +16,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    S = 0;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   int r = func_S();
 }
 

@@ -1,15 +1,19 @@
 #version 310 es
 
 shared vec4 S;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = vec4(0.0f);
+  }
+  barrier();
+}
+
 void func_S() {
   S = vec4(0.0f);
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    S = vec4(0.0f);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S();
 }
 

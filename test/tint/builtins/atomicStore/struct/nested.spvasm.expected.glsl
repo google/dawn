@@ -7,23 +7,9 @@ struct S0_atomic {
   int z;
 };
 
-struct S0 {
-  int x;
-  uint a;
-  int y;
-  int z;
-};
-
 struct S1_atomic {
   int x;
   S0_atomic a;
-  int y;
-  int z;
-};
-
-struct S1 {
-  int x;
-  S0 a;
   int y;
   int z;
 };
@@ -35,6 +21,37 @@ struct S2_atomic {
   S1_atomic a;
 };
 
+shared S2_atomic wg;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    wg.x = 0;
+    wg.y = 0;
+    wg.z = 0;
+    wg.a.x = 0;
+    wg.a.a.x = 0;
+    atomicExchange(wg.a.a.a, 0u);
+    wg.a.a.y = 0;
+    wg.a.a.z = 0;
+    wg.a.y = 0;
+    wg.a.z = 0;
+  }
+  barrier();
+}
+
+struct S0 {
+  int x;
+  uint a;
+  int y;
+  int z;
+};
+
+struct S1 {
+  int x;
+  S0 a;
+  int y;
+  int z;
+};
+
 struct S2 {
   int x;
   int y;
@@ -43,7 +60,6 @@ struct S2 {
 };
 
 uint local_invocation_index_1 = 0u;
-shared S2_atomic wg;
 void compute_main_inner(uint local_invocation_index_2) {
   wg.x = 0;
   wg.y = 0;
@@ -67,19 +83,7 @@ void compute_main_1() {
 }
 
 void compute_main(uint local_invocation_index_1_param) {
-  {
-    wg.x = 0;
-    wg.y = 0;
-    wg.z = 0;
-    wg.a.x = 0;
-    wg.a.a.x = 0;
-    atomicExchange(wg.a.a.a, 0u);
-    wg.a.a.y = 0;
-    wg.a.a.z = 0;
-    wg.a.y = 0;
-    wg.a.z = 0;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

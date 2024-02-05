@@ -18,30 +18,34 @@ struct tint_array {
   volatile bool VOLATILE_NAME = true; \
   if (VOLATILE_NAME)
 
-struct UBO {
-  /* 0x0000 */ int dynamic_idx;
-};
-
 struct S {
   tint_array<int, 64> data;
+};
+
+void tint_zero_workgroup_memory(uint local_idx, threadgroup S* const tint_symbol) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 64u); idx = (idx + 1u)) {
+    uint const i = idx;
+    (*(tint_symbol)).data[i] = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
+struct UBO {
+  /* 0x0000 */ int dynamic_idx;
 };
 
 struct Result {
   /* 0x0000 */ int out;
 };
 
-void f_inner(uint local_invocation_index, threadgroup S* const tint_symbol, device Result* const tint_symbol_1, const constant UBO* const tint_symbol_2) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
-    uint const i = idx;
-    (*(tint_symbol)).data[i] = 0;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  (*(tint_symbol_1)).out = (*(tint_symbol)).data[(*(tint_symbol_2)).dynamic_idx];
+void f_inner(uint local_invocation_index, threadgroup S* const tint_symbol_1, device Result* const tint_symbol_2, const constant UBO* const tint_symbol_3) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_1);
+  (*(tint_symbol_2)).out = (*(tint_symbol_1)).data[(*(tint_symbol_3)).dynamic_idx];
 }
 
-kernel void f(device Result* tint_symbol_4 [[buffer(1)]], const constant UBO* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup S tint_symbol_3;
-  f_inner(local_invocation_index, &(tint_symbol_3), tint_symbol_4, tint_symbol_5);
+kernel void f(device Result* tint_symbol_5 [[buffer(1)]], const constant UBO* tint_symbol_6 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup S tint_symbol_4;
+  f_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5, tint_symbol_6);
   return;
 }
 

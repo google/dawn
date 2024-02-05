@@ -1,20 +1,24 @@
 #version 310 es
 
+shared mat2 w;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    w = mat2(vec2(0.0f), vec2(0.0f));
+  }
+  barrier();
+}
+
 layout(binding = 0, std140) uniform u_block_std140_ubo {
   vec2 inner_0;
   vec2 inner_1;
 } u;
 
-shared mat2 w;
 mat2 load_u_inner() {
   return mat2(u.inner_0, u.inner_1);
 }
 
 void f(uint local_invocation_index) {
-  {
-    w = mat2(vec2(0.0f), vec2(0.0f));
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = load_u_inner();
   w[1] = u.inner_0;
   w[1] = u.inner_0.yx;

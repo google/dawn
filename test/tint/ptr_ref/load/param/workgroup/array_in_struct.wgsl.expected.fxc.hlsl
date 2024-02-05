@@ -4,6 +4,16 @@ struct str {
 
 groupshared str S;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      S.arr[i] = 0;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 typedef int func_S_arr_ret[4];
 func_S_arr_ret func_S_arr() {
   return S.arr;
@@ -14,13 +24,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      S.arr[i] = 0;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   int r[4] = func_S_arr();
 }
 

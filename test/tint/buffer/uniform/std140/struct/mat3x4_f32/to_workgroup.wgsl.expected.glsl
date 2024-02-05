@@ -24,20 +24,24 @@ struct S {
   uint pad_17;
 };
 
-layout(binding = 0, std140) uniform u_block_ubo {
-  S inner[4];
-} u;
-
 shared S w[4];
-void f(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
       uint i = idx;
       S tint_symbol = S(0, 0u, 0u, 0u, mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
       w[i] = tint_symbol;
     }
   }
   barrier();
+}
+
+layout(binding = 0, std140) uniform u_block_ubo {
+  S inner[4];
+} u;
+
+void f(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   w = u.inner;
   w[1] = u.inner[2];
   w[3].m = u.inner[2].m;

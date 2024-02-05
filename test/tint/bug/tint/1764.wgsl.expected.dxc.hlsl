@@ -1,17 +1,21 @@
 groupshared int W[246];
 
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
-    for(uint idx = local_invocation_index; (idx < 246u); idx = (idx + 1u)) {
+    for(uint idx = local_idx; (idx < 246u); idx = (idx + 1u)) {
       uint i = idx;
       W[i] = 0;
     }
   }
   GroupMemoryBarrierWithGroupSync();
+}
+
+struct tint_symbol_1 {
+  uint local_invocation_index : SV_GroupIndex;
+};
+
+void main_inner(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   W[0] = 42;
 }
 

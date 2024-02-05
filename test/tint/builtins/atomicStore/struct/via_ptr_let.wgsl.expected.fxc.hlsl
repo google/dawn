@@ -6,11 +6,7 @@ struct S {
 
 groupshared S wg;
 
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void compute_main_inner(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     wg.x = 0;
     uint atomic_result = 0u;
@@ -18,6 +14,14 @@ void compute_main_inner(uint local_invocation_index) {
     wg.y = 0u;
   }
   GroupMemoryBarrierWithGroupSync();
+}
+
+struct tint_symbol_1 {
+  uint local_invocation_index : SV_GroupIndex;
+};
+
+void compute_main_inner(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   uint atomic_result_1 = 0u;
   InterlockedExchange(wg.a, 1u, atomic_result_1);
 }

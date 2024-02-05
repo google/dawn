@@ -1,6 +1,13 @@
 #version 310 es
 
 shared float arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    arg_0 = 0.0f;
+  }
+  barrier();
+}
+
 float tint_workgroupUniformLoad_arg_0() {
   barrier();
   float result = arg_0;
@@ -18,10 +25,7 @@ void workgroupUniformLoad_7a857c() {
 }
 
 void compute_main(uint local_invocation_index) {
-  {
-    arg_0 = 0.0f;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   workgroupUniformLoad_7a857c();
 }
 

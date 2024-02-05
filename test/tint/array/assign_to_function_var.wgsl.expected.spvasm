@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 96
+; Bound: 100
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,6 +16,9 @@
                OpMemberName %S 0 "arr"
                OpName %src_uniform "src_uniform"
                OpName %src_storage "src_storage"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
+               OpName %idx "idx"
                OpName %ret_arr "ret_arr"
                OpName %ret_struct_arr "ret_struct_arr"
                OpName %foo "foo"
@@ -26,7 +29,6 @@
                OpName %src_nested "src_nested"
                OpName %main_inner "main_inner"
                OpName %local_invocation_index "local_invocation_index"
-               OpName %idx "idx"
                OpName %main "main"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %_arr_v4int_uint_4 ArrayStride 16
@@ -59,112 +61,118 @@
 %src_uniform = OpVariable %_ptr_Uniform_src_uniform_block Uniform
 %_ptr_StorageBuffer_src_uniform_block = OpTypePointer StorageBuffer %src_uniform_block
 %src_storage = OpVariable %_ptr_StorageBuffer_src_uniform_block StorageBuffer
-         %19 = OpTypeFunction %_arr_v4int_uint_4
-         %22 = OpTypeFunction %S
-         %25 = OpConstantNull %S
        %void = OpTypeVoid
-         %26 = OpTypeFunction %void %_arr_v4int_uint_4
+         %19 = OpTypeFunction %void %uint
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %26 = OpConstantNull %uint
+       %bool = OpTypeBool
+%_ptr_Workgroup_v4int = OpTypePointer Workgroup %v4int
+         %40 = OpConstantNull %v4int
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+         %47 = OpTypeFunction %_arr_v4int_uint_4
+         %50 = OpTypeFunction %S
+         %53 = OpConstantNull %S
+         %54 = OpTypeFunction %void %_arr_v4int_uint_4
 %_ptr_Function__arr_v4int_uint_4 = OpTypePointer Function %_arr_v4int_uint_4
       %int_1 = OpConstant %int 1
-         %35 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+         %62 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
       %int_2 = OpConstant %int 2
-         %37 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
+         %64 = OpConstantComposite %v4int %int_2 %int_2 %int_2 %int_2
       %int_3 = OpConstant %int 3
-         %39 = OpConstantComposite %v4int %int_3 %int_3 %int_3 %int_3
-         %40 = OpConstantComposite %_arr_v4int_uint_4 %35 %37 %39 %39
+         %66 = OpConstantComposite %v4int %int_3 %int_3 %int_3 %int_3
+         %67 = OpConstantComposite %_arr_v4int_uint_4 %62 %64 %66 %66
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform__arr_v4int_uint_4 = OpTypePointer Uniform %_arr_v4int_uint_4
 %_ptr_StorageBuffer__arr_v4int_uint_4 = OpTypePointer StorageBuffer %_arr_v4int_uint_4
-     %uint_2 = OpConstant %uint 2
 %_arr_int_uint_2 = OpTypeArray %int %uint_2
      %uint_3 = OpConstant %uint 3
 %_arr__arr_int_uint_2_uint_3 = OpTypeArray %_arr_int_uint_2 %uint_3
 %_arr__arr__arr_int_uint_2_uint_3_uint_4 = OpTypeArray %_arr__arr_int_uint_2_uint_3 %uint_4
 %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 = OpTypePointer Function %_arr__arr__arr_int_uint_2_uint_3_uint_4
-         %61 = OpConstantNull %_arr__arr__arr_int_uint_2_uint_3_uint_4
-         %64 = OpTypeFunction %void %uint
-%_ptr_Function_uint = OpTypePointer Function %uint
-         %70 = OpConstantNull %uint
-       %bool = OpTypeBool
-%_ptr_Workgroup_v4int = OpTypePointer Workgroup %v4int
-         %84 = OpConstantNull %v4int
-     %uint_1 = OpConstant %uint 1
-   %uint_264 = OpConstant %uint 264
-         %91 = OpTypeFunction %void
-    %ret_arr = OpFunction %_arr_v4int_uint_4 None %19
-         %21 = OpLabel
+         %87 = OpConstantNull %_arr__arr__arr_int_uint_2_uint_3_uint_4
+         %95 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %19
+  %local_idx = OpFunctionParameter %uint
+         %23 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function %26
+               OpStore %idx %local_idx
+               OpBranch %27
+         %27 = OpLabel
+               OpLoopMerge %28 %29 None
+               OpBranch %30
+         %30 = OpLabel
+         %32 = OpLoad %uint %idx
+         %33 = OpULessThan %bool %32 %uint_4
+         %31 = OpLogicalNot %bool %33
+               OpSelectionMerge %35 None
+               OpBranchConditional %31 %36 %35
+         %36 = OpLabel
+               OpBranch %28
+         %35 = OpLabel
+         %37 = OpLoad %uint %idx
+         %39 = OpAccessChain %_ptr_Workgroup_v4int %src_workgroup %37
+               OpStore %39 %40
+               OpBranch %29
+         %29 = OpLabel
+         %41 = OpLoad %uint %idx
+         %43 = OpIAdd %uint %41 %uint_1
+               OpStore %idx %43
+               OpBranch %27
+         %28 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpReturn
+               OpFunctionEnd
+    %ret_arr = OpFunction %_arr_v4int_uint_4 None %47
+         %49 = OpLabel
                OpReturnValue %10
                OpFunctionEnd
-%ret_struct_arr = OpFunction %S None %22
-         %24 = OpLabel
-               OpReturnValue %25
+%ret_struct_arr = OpFunction %S None %50
+         %52 = OpLabel
+               OpReturnValue %53
                OpFunctionEnd
-        %foo = OpFunction %void None %26
+        %foo = OpFunction %void None %54
   %src_param = OpFunctionParameter %_arr_v4int_uint_4
-         %30 = OpLabel
+         %57 = OpLabel
 %src_function = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %10
         %dst = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %10
- %dst_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %61
- %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %61
-               OpStore %dst %40
+ %dst_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %87
+ %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %87
+               OpStore %dst %67
                OpStore %dst %src_param
-         %41 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
-               OpStore %dst %41
+         %68 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
+               OpStore %dst %68
                OpStore %dst %10
-         %42 = OpLoad %_arr_v4int_uint_4 %src_function
-               OpStore %dst %42
-         %43 = OpLoad %_arr_v4int_uint_4 %src_private
-               OpStore %dst %43
-         %44 = OpLoad %_arr_v4int_uint_4 %src_workgroup
-               OpStore %dst %44
-         %45 = OpFunctionCall %S %ret_struct_arr
-         %46 = OpCompositeExtract %_arr_v4int_uint_4 %45 0
-               OpStore %dst %46
-         %49 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %src_uniform %uint_0 %uint_0
-         %50 = OpLoad %_arr_v4int_uint_4 %49
-               OpStore %dst %50
-         %52 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %src_storage %uint_0 %uint_0
-         %53 = OpLoad %_arr_v4int_uint_4 %52
-               OpStore %dst %53
-         %63 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %src_nested
-               OpStore %dst_nested %63
+         %69 = OpLoad %_arr_v4int_uint_4 %src_function
+               OpStore %dst %69
+         %70 = OpLoad %_arr_v4int_uint_4 %src_private
+               OpStore %dst %70
+         %71 = OpLoad %_arr_v4int_uint_4 %src_workgroup
+               OpStore %dst %71
+         %72 = OpFunctionCall %S %ret_struct_arr
+         %73 = OpCompositeExtract %_arr_v4int_uint_4 %72 0
+               OpStore %dst %73
+         %76 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %src_uniform %uint_0 %uint_0
+         %77 = OpLoad %_arr_v4int_uint_4 %76
+               OpStore %dst %77
+         %79 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %src_storage %uint_0 %uint_0
+         %80 = OpLoad %_arr_v4int_uint_4 %79
+               OpStore %dst %80
+         %89 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %src_nested
+               OpStore %dst_nested %89
                OpReturn
                OpFunctionEnd
- %main_inner = OpFunction %void None %64
+ %main_inner = OpFunction %void None %19
 %local_invocation_index = OpFunctionParameter %uint
-         %67 = OpLabel
-        %idx = OpVariable %_ptr_Function_uint Function %70
-               OpStore %idx %local_invocation_index
-               OpBranch %71
-         %71 = OpLabel
-               OpLoopMerge %72 %73 None
-               OpBranch %74
-         %74 = OpLabel
-         %76 = OpLoad %uint %idx
-         %77 = OpULessThan %bool %76 %uint_4
-         %75 = OpLogicalNot %bool %77
-               OpSelectionMerge %79 None
-               OpBranchConditional %75 %80 %79
-         %80 = OpLabel
-               OpBranch %72
-         %79 = OpLabel
-         %81 = OpLoad %uint %idx
-         %83 = OpAccessChain %_ptr_Workgroup_v4int %src_workgroup %81
-               OpStore %83 %84
-               OpBranch %73
-         %73 = OpLabel
-         %85 = OpLoad %uint %idx
-         %87 = OpIAdd %uint %85 %uint_1
-               OpStore %idx %87
-               OpBranch %71
-         %72 = OpLabel
-               OpControlBarrier %uint_2 %uint_2 %uint_264
-         %90 = OpFunctionCall %void %foo %10
+         %92 = OpLabel
+         %93 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %94 = OpFunctionCall %void %foo %10
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %91
-         %93 = OpLabel
-         %95 = OpLoad %uint %local_invocation_index_1
-         %94 = OpFunctionCall %void %main_inner %95
+       %main = OpFunction %void None %95
+         %97 = OpLabel
+         %99 = OpLoad %uint %local_invocation_index_1
+         %98 = OpFunctionCall %void %main_inner %99
                OpReturn
                OpFunctionEnd

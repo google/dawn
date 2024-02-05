@@ -4,6 +4,14 @@ struct str {
 
 groupshared str S;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    str tint_symbol_2 = (str)0;
+    S = tint_symbol_2;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 void func_S_i() {
   S.i = (0.0f).xxxx;
 }
@@ -13,11 +21,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    str tint_symbol_2 = (str)0;
-    S = tint_symbol_2;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S_i();
 }
 

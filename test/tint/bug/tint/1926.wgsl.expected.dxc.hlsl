@@ -1,5 +1,12 @@
 groupshared uint sh_atomic_failed;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    sh_atomic_failed = 0u;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 uint tint_workgroupUniformLoad_sh_atomic_failed() {
   GroupMemoryBarrierWithGroupSync();
   uint result = sh_atomic_failed;
@@ -16,10 +23,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint3 global_id, uint3 local_id, uint local_invocation_index) {
-  if ((local_invocation_index < 1u)) {
-    sh_atomic_failed = 0u;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint failed = tint_workgroupUniformLoad_sh_atomic_failed();
   if ((local_id.x == 0u)) {
     output.Store(0u, asuint(failed));

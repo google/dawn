@@ -1,9 +1,31 @@
 #version 310 es
 
+shared uint x_34;
+shared uint x_35;
+shared uint x_36;
+shared uint x_37;
 struct S {
   vec2 field0;
   uint field1;
 };
+
+shared S x_28[4096];
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    atomicExchange(x_34, 0u);
+    atomicExchange(x_35, 0u);
+    atomicExchange(x_36, 0u);
+    atomicExchange(x_37, 0u);
+  }
+  {
+    for(uint idx = local_idx; (idx < 4096u); idx = (idx + 32u)) {
+      uint i = idx;
+      S tint_symbol_1 = S(vec2(0.0f), 0u);
+      x_28[i] = tint_symbol_1;
+    }
+  }
+  barrier();
+}
 
 struct S_1 {
   uint field0;
@@ -16,11 +38,6 @@ struct S_2 {
   S_1 field0;
 };
 
-shared S x_28[4096];
-shared uint x_34;
-shared uint x_35;
-shared uint x_36;
-shared uint x_37;
 uvec3 x_3 = uvec3(0u, 0u, 0u);
 layout(binding = 1, std140) uniform x_6_block_ubo {
   S_2 inner;
@@ -51,8 +68,8 @@ void main_1() {
     uint x_62 = (x_54 + x_52);
     if ((x_62 >= x_58)) {
       vec4 x_67 = x_9.field0[x_62];
-      S tint_symbol_1 = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
-      x_28[x_62] = tint_symbol_1;
+      S tint_symbol_2 = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
+      x_28[x_62] = tint_symbol_2;
     }
     {
       x_55 = (x_54 + 32u);
@@ -117,20 +134,7 @@ void main_1() {
 }
 
 void tint_symbol(uvec3 x_3_param, uint local_invocation_index) {
-  if ((local_invocation_index < 1u)) {
-    atomicExchange(x_34, 0u);
-    atomicExchange(x_35, 0u);
-    atomicExchange(x_36, 0u);
-    atomicExchange(x_37, 0u);
-  }
-  {
-    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 32u)) {
-      uint i = idx;
-      S tint_symbol_2 = S(vec2(0.0f), 0u);
-      x_28[i] = tint_symbol_2;
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   x_3 = x_3_param;
   main_1();
 }

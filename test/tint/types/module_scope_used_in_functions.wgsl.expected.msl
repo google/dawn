@@ -18,9 +18,16 @@ struct tint_private_vars_struct {
   float p;
 };
 
-struct tint_symbol_12 {
+struct tint_symbol_13 {
   /* 0x0000 */ tint_array<float, 1> arr;
 };
+
+void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = 0.0f;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
 
 void no_uses() {
 }
@@ -29,31 +36,28 @@ void zoo(thread tint_private_vars_struct* const tint_private_vars) {
   (*(tint_private_vars)).p = ((*(tint_private_vars)).p * 2.0f);
 }
 
-void bar(float a, float b, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_1, device tint_array<float, 1>* const tint_symbol_2, const device float2* const tint_symbol_3) {
+void bar(float a, float b, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_2, device tint_array<float, 1>* const tint_symbol_3, const device float2* const tint_symbol_4) {
   (*(tint_private_vars)).p = a;
-  *(tint_symbol_1) = b;
-  (*(tint_symbol_2))[0] = (*(tint_symbol_3))[0];
+  *(tint_symbol_2) = b;
+  (*(tint_symbol_3))[0] = (*(tint_symbol_4))[0];
   zoo(tint_private_vars);
 }
 
-void foo(float a, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_4, device tint_array<float, 1>* const tint_symbol_5, const device float2* const tint_symbol_6) {
+void foo(float a, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_5, device tint_array<float, 1>* const tint_symbol_6, const device float2* const tint_symbol_7) {
   float const b = 2.0f;
-  bar(a, b, tint_private_vars, tint_symbol_4, tint_symbol_5, tint_symbol_6);
+  bar(a, b, tint_private_vars, tint_symbol_5, tint_symbol_6, tint_symbol_7);
   no_uses();
 }
 
-void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_7, device tint_array<float, 1>* const tint_symbol_8, const device float2* const tint_symbol_9) {
-  {
-    *(tint_symbol_7) = 0.0f;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  foo(1.0f, tint_private_vars, tint_symbol_7, tint_symbol_8, tint_symbol_9);
+void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_8, device tint_array<float, 1>* const tint_symbol_9, const device float2* const tint_symbol_10) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_8);
+  foo(1.0f, tint_private_vars, tint_symbol_8, tint_symbol_9, tint_symbol_10);
 }
 
-kernel void tint_symbol(device tint_symbol_12* tint_symbol_11 [[buffer(0)]], const device float2* tint_symbol_13 [[buffer(1)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(device tint_symbol_13* tint_symbol_12 [[buffer(0)]], const device float2* tint_symbol_14 [[buffer(1)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  threadgroup float tint_symbol_10;
-  tint_symbol_inner(local_invocation_index, &(tint_private_vars), &(tint_symbol_10), &((*(tint_symbol_11)).arr), tint_symbol_13);
+  threadgroup float tint_symbol_11;
+  tint_symbol_inner(local_invocation_index, &(tint_private_vars), &(tint_symbol_11), &((*(tint_symbol_12)).arr), tint_symbol_14);
   return;
 }
 

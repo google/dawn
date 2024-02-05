@@ -24,22 +24,26 @@ struct S {
   uint y;
 };
 
-void compute_main_inner(uint local_invocation_index, threadgroup S* const tint_symbol) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup S* const tint_symbol) {
   {
     (*(tint_symbol)).x = 0;
     (*(tint_symbol)).y = 0u;
   }
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 10u); idx = (idx + 1u)) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 10u); idx = (idx + 1u)) {
     uint const i = idx;
     atomic_store_explicit(&((*(tint_symbol)).a[i]), 0u, memory_order_relaxed);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomic_store_explicit(&((*(tint_symbol)).a[4]), 1u, memory_order_relaxed);
+}
+
+void compute_main_inner(uint local_invocation_index, threadgroup S* const tint_symbol_1) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_1);
+  atomic_store_explicit(&((*(tint_symbol_1)).a[4]), 1u, memory_order_relaxed);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup S tint_symbol_1;
-  compute_main_inner(local_invocation_index, &(tint_symbol_1));
+  threadgroup S tint_symbol_2;
+  compute_main_inner(local_invocation_index, &(tint_symbol_2));
   return;
 }
 

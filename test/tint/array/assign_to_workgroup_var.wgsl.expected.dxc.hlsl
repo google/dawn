@@ -1,15 +1,35 @@
+groupshared int4 tint_symbol[4];
+groupshared int4 src_workgroup[4];
+groupshared int dst_nested[4][3][2];
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      tint_symbol[i] = (0).xxxx;
+      src_workgroup[i] = (0).xxxx;
+    }
+  }
+  {
+    for(uint idx_1 = local_idx; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
+      uint i_1 = (idx_1 / 6u);
+      uint i_2 = ((idx_1 % 6u) / 2u);
+      uint i_3 = (idx_1 % 2u);
+      dst_nested[i_1][i_2][i_3] = 0;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 struct S {
   int4 arr[4];
 };
 
 static int4 src_private[4] = (int4[4])0;
-groupshared int4 src_workgroup[4];
 cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
 RWByteAddressBuffer src_storage : register(u1);
-groupshared int4 tint_symbol[4];
-groupshared int dst_nested[4][3][2];
 
 typedef int4 ret_arr_ret[4];
 ret_arr_ret ret_arr() {
@@ -69,22 +89,7 @@ struct tint_symbol_3 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      tint_symbol[i] = (0).xxxx;
-      src_workgroup[i] = (0).xxxx;
-    }
-  }
-  {
-    for(uint idx_1 = local_invocation_index; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
-      uint i_1 = (idx_1 / 6u);
-      uint i_2 = ((idx_1 % 6u) / 2u);
-      uint i_3 = (idx_1 % 2u);
-      dst_nested[i_1][i_2][i_3] = 0;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   int4 val[4] = (int4[4])0;
   foo(val);
 }

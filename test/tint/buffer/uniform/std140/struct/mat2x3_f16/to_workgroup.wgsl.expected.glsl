@@ -33,6 +33,18 @@ struct S {
   uint pad_25;
 };
 
+shared S w[4];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      S tint_symbol = S(0, 0u, f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+      w[i] = tint_symbol;
+    }
+  }
+  barrier();
+}
+
 struct S_std140 {
   int before;
   uint pad;
@@ -70,7 +82,6 @@ layout(binding = 0, std140) uniform u_block_std140_ubo {
   S_std140 inner[4];
 } u;
 
-shared S w[4];
 S conv_S(S_std140 val) {
   return S(val.before, val.pad, f16mat2x3(val.m_0, val.m_1), val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.pad_7, val.pad_8, val.pad_9, val.pad_10, val.after, val.pad_11, val.pad_12, val.pad_13, val.pad_14, val.pad_15, val.pad_16, val.pad_17, val.pad_18, val.pad_19, val.pad_20, val.pad_21, val.pad_22, val.pad_23, val.pad_24, val.pad_25);
 }
@@ -90,14 +101,7 @@ f16mat2x3 load_u_inner_2_m() {
 }
 
 void f(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      S tint_symbol = S(0, 0u, f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
-      w[i] = tint_symbol;
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = conv_arr4_S(u.inner);
   w[1] = conv_S(u.inner[2u]);
   w[3].m = load_u_inner_2_m();

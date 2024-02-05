@@ -8,11 +8,21 @@ struct mat4x4_f16 {
   f16vec4 col3;
 };
 
+shared f16mat4 w[4];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      w[i] = f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
+    }
+  }
+  barrier();
+}
+
 layout(binding = 0, std140) uniform u_block_std140_ubo {
   mat4x4_f16 inner[4];
 } u;
 
-shared f16mat4 w[4];
 f16mat4 conv_mat4x4_f16(mat4x4_f16 val) {
   return f16mat4(val.col0, val.col1, val.col2, val.col3);
 }
@@ -28,13 +38,7 @@ f16mat4[4] conv_arr4_mat4x4_f16(mat4x4_f16 val[4]) {
 }
 
 void f(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      w[i] = f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = conv_arr4_mat4x4_f16(u.inner);
   w[1] = conv_mat4x4_f16(u.inner[2u]);
   w[1][0] = u.inner[0u].col1.ywxz;

@@ -1,7 +1,18 @@
+groupshared float3x4 w[4];
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      w[i] = float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[12];
 };
-groupshared float3x4 w[4];
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
@@ -26,13 +37,7 @@ u_load_ret u_load(uint offset) {
 }
 
 void f_inner(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      w[i] = float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = u_load(0u);
   w[1] = u_load_1(96u);
   w[1][0] = asfloat(u[1]).ywxz;

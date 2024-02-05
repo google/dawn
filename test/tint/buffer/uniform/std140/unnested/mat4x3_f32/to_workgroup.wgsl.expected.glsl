@@ -1,15 +1,19 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform u_block_ubo {
-  mat4x3 inner;
-} u;
-
 shared mat4x3 w;
-void f(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     w = mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
   }
   barrier();
+}
+
+layout(binding = 0, std140) uniform u_block_ubo {
+  mat4x3 inner;
+} u;
+
+void f(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   w = u.inner;
   w[1] = u.inner[0];
   w[1] = u.inner[0].zxy;

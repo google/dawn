@@ -1,5 +1,12 @@
 groupshared float4 S;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = (0.0f).xxxx;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 void func_S() {
   S = (0.0f).xxxx;
 }
@@ -9,10 +16,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    S = (0.0f).xxxx;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S();
 }
 

@@ -1,15 +1,19 @@
 #version 310 es
 
 shared mat2 S;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    S = mat2(vec2(0.0f), vec2(0.0f));
+  }
+  barrier();
+}
+
 vec2 func_S_X(uint pointer[1]) {
   return S[pointer[0]];
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    S = mat2(vec2(0.0f), vec2(0.0f));
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint tint_symbol_1[1] = uint[1](1u);
   vec2 r = func_S_X(tint_symbol_1);
 }

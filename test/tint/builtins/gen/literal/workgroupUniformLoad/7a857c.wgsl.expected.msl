@@ -1,6 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
+void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol) {
+  {
+    *(tint_symbol) = 0.0f;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
 float tint_workgroupUniformLoad(threadgroup float* const p) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   float const result = *(p);
@@ -8,22 +15,19 @@ float tint_workgroupUniformLoad(threadgroup float* const p) {
   return result;
 }
 
-void workgroupUniformLoad_7a857c(threadgroup float* const tint_symbol, device float* const tint_symbol_1) {
-  float res = tint_workgroupUniformLoad(tint_symbol);
-  *(tint_symbol_1) = res;
+void workgroupUniformLoad_7a857c(threadgroup float* const tint_symbol_1, device float* const tint_symbol_2) {
+  float res = tint_workgroupUniformLoad(tint_symbol_1);
+  *(tint_symbol_2) = res;
 }
 
-void compute_main_inner(uint local_invocation_index, threadgroup float* const tint_symbol_2, device float* const tint_symbol_3) {
-  {
-    *(tint_symbol_2) = 0.0f;
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  workgroupUniformLoad_7a857c(tint_symbol_2, tint_symbol_3);
+void compute_main_inner(uint local_invocation_index, threadgroup float* const tint_symbol_3, device float* const tint_symbol_4) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_3);
+  workgroupUniformLoad_7a857c(tint_symbol_3, tint_symbol_4);
 }
 
-kernel void compute_main(device float* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup float tint_symbol_4;
-  compute_main_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5);
+kernel void compute_main(device float* tint_symbol_6 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup float tint_symbol_5;
+  compute_main_inner(local_invocation_index, &(tint_symbol_5), tint_symbol_6);
   return;
 }
 

@@ -1,7 +1,14 @@
 #version 310 es
 
-uint local_invocation_index_1 = 0u;
 shared int arg_0;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    atomicExchange(arg_0, 0);
+  }
+  barrier();
+}
+
+uint local_invocation_index_1 = 0u;
 void atomicLoad_afcc03() {
   int res = 0;
   int x_11 = atomicOr(arg_0, 0);
@@ -23,10 +30,7 @@ void compute_main_1() {
 }
 
 void compute_main(uint local_invocation_index_1_param) {
-  {
-    atomicExchange(arg_0, 0);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

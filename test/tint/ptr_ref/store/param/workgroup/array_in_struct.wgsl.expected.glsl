@@ -5,19 +5,23 @@ struct str {
 };
 
 shared str S;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      S.arr[i] = 0;
+    }
+  }
+  barrier();
+}
+
 void func_S_arr() {
   int tint_symbol_1[4] = int[4](0, 0, 0, 0);
   S.arr = tint_symbol_1;
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      S.arr[i] = 0;
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   func_S_arr();
 }
 

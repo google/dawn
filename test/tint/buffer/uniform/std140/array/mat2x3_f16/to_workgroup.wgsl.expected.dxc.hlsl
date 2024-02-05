@@ -1,8 +1,19 @@
+groupshared matrix<float16_t, 2, 3> w[4];
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      w[i] = matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
 RWByteAddressBuffer s : register(u1);
-groupshared matrix<float16_t, 2, 3> w[4];
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
@@ -34,13 +45,7 @@ u_load_ret u_load(uint offset) {
 }
 
 void f_inner(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      w[i] = matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   w = u_load(0u);
   w[1] = u_load_1(32u);
   uint2 ubo_load_4 = u[0].zw;

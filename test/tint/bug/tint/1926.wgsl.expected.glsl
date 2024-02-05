@@ -1,6 +1,13 @@
 #version 310 es
 
 shared uint sh_atomic_failed;
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    sh_atomic_failed = 0u;
+  }
+  barrier();
+}
+
 uint tint_workgroupUniformLoad_sh_atomic_failed() {
   barrier();
   uint result = sh_atomic_failed;
@@ -13,10 +20,7 @@ layout(binding = 4, std430) buffer tint_symbol_block_ssbo {
 } tint_symbol;
 
 void tint_symbol_1(uvec3 global_id, uvec3 local_id, uint local_invocation_index) {
-  if ((local_invocation_index < 1u)) {
-    sh_atomic_failed = 0u;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   uint failed = tint_workgroupUniformLoad_sh_atomic_failed();
   if ((local_id.x == 0u)) {
     tint_symbol.inner = failed;

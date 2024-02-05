@@ -1,9 +1,20 @@
+groupshared int4 src_workgroup[4];
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+      uint i = idx;
+      src_workgroup[i] = (0).xxxx;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 struct S {
   int4 arr[4];
 };
 
 static int4 src_private[4] = (int4[4])0;
-groupshared int4 src_workgroup[4];
 cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
@@ -105,13 +116,7 @@ struct tint_symbol_3 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      src_workgroup[i] = (0).xxxx;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   int4 ary[4] = (int4[4])0;
   foo(ary);
 }

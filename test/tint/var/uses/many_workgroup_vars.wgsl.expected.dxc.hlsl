@@ -99,11 +99,7 @@ groupshared float2x2 m97;
 groupshared float2x2 m98;
 groupshared float2x2 m99;
 
-struct tint_symbol_2 {
-  uint idx : SV_GroupIndex;
-};
-
-void tint_symbol_inner(uint idx) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     m00 = float2x2((0.0f).xx, (0.0f).xx);
     m01 = float2x2((0.0f).xx, (0.0f).xx);
@@ -207,6 +203,14 @@ void tint_symbol_inner(uint idx) {
     m99 = float2x2((0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();
+}
+
+struct tint_symbol_2 {
+  uint idx : SV_GroupIndex;
+};
+
+void tint_symbol_inner(uint idx) {
+  tint_zero_workgroup_memory(idx);
   m00[0][0] = 1.0f;
   m01[0][0] = 1.0f;
   m02[0][0] = 1.0f;

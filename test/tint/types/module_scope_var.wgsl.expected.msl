@@ -31,11 +31,15 @@ struct tint_private_vars_struct {
   S struct_var;
 };
 
-void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_3) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol_3) {
   {
     *(tint_symbol_3) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
+void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_struct* const tint_private_vars, threadgroup float* const tint_symbol_4) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_4);
   (*(tint_private_vars)).bool_var = false;
   (*(tint_private_vars)).i32_var = 0;
   (*(tint_private_vars)).u32_var = 0u;
@@ -48,13 +52,13 @@ void tint_symbol_inner(uint local_invocation_index, thread tint_private_vars_str
   (*(tint_private_vars)).arr_var = tint_symbol_1;
   S const tint_symbol_2 = S{};
   (*(tint_private_vars)).struct_var = tint_symbol_2;
-  *(tint_symbol_3) = 42.0f;
+  *(tint_symbol_4) = 42.0f;
 }
 
 kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  threadgroup float tint_symbol_4;
-  tint_symbol_inner(local_invocation_index, &(tint_private_vars), &(tint_symbol_4));
+  threadgroup float tint_symbol_5;
+  tint_symbol_inner(local_invocation_index, &(tint_private_vars), &(tint_symbol_5));
   return;
 }
 

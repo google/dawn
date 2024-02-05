@@ -11,6 +11,16 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 
+shared uint b_u32;
+shared int b_i32;
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    atomicExchange(b_u32, 0u);
+    atomicExchange(b_i32, 0);
+  }
+  barrier();
+}
+
 layout(binding = 0, std430) buffer a_u32_block_ssbo {
   uint inner;
 } a_u32;
@@ -19,14 +29,8 @@ layout(binding = 1, std430) buffer a_i32_block_ssbo {
   int inner;
 } a_i32;
 
-shared uint b_u32;
-shared int b_i32;
 void tint_symbol(uint local_invocation_index) {
-  if ((local_invocation_index < 1u)) {
-    atomicExchange(b_u32, 0u);
-    atomicExchange(b_i32, 0);
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   {
     uint value = 42u;
     atomic_compare_exchange_result_u32 atomic_compare_result;

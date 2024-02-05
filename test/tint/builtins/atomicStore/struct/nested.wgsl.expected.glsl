@@ -22,7 +22,7 @@ struct S2 {
 };
 
 shared S2 wg;
-void compute_main(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     wg.x = 0;
     wg.y = 0;
@@ -36,6 +36,10 @@ void compute_main(uint local_invocation_index) {
     wg.a.z = 0;
   }
   barrier();
+}
+
+void compute_main(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicExchange(wg.a.a.a, 1u);
 }
 

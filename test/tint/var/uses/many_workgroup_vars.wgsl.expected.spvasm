@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 226
+; Bound: 230
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -108,6 +108,8 @@
                OpName %m97 "m97"
                OpName %m98 "m98"
                OpName %m99 "m99"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
                OpName %tint_symbol_inner "tint_symbol_inner"
                OpName %idx "idx"
                OpName %tint_symbol "tint_symbol"
@@ -225,12 +227,12 @@
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
         %int = OpTypeInt 32 1
-        %118 = OpConstantNull %int
+        %122 = OpConstantNull %int
 %_ptr_Workgroup_float = OpTypePointer Workgroup %float
     %float_1 = OpConstant %float 1
-        %221 = OpTypeFunction %void
-%tint_symbol_inner = OpFunction %void None %108
-        %idx = OpFunctionParameter %uint
+        %225 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %108
+  %local_idx = OpFunctionParameter %uint
         %112 = OpLabel
                OpStore %m00 %113
                OpStore %m01 %113
@@ -333,211 +335,217 @@
                OpStore %m98 %113
                OpStore %m99 %113
                OpControlBarrier %uint_2 %uint_2 %uint_264
-        %120 = OpAccessChain %_ptr_Workgroup_float %m00 %118 %118
-               OpStore %120 %float_1
-        %122 = OpAccessChain %_ptr_Workgroup_float %m01 %118 %118
-               OpStore %122 %float_1
-        %123 = OpAccessChain %_ptr_Workgroup_float %m02 %118 %118
-               OpStore %123 %float_1
-        %124 = OpAccessChain %_ptr_Workgroup_float %m03 %118 %118
-               OpStore %124 %float_1
-        %125 = OpAccessChain %_ptr_Workgroup_float %m04 %118 %118
-               OpStore %125 %float_1
-        %126 = OpAccessChain %_ptr_Workgroup_float %m05 %118 %118
-               OpStore %126 %float_1
-        %127 = OpAccessChain %_ptr_Workgroup_float %m06 %118 %118
-               OpStore %127 %float_1
-        %128 = OpAccessChain %_ptr_Workgroup_float %m07 %118 %118
-               OpStore %128 %float_1
-        %129 = OpAccessChain %_ptr_Workgroup_float %m08 %118 %118
-               OpStore %129 %float_1
-        %130 = OpAccessChain %_ptr_Workgroup_float %m09 %118 %118
-               OpStore %130 %float_1
-        %131 = OpAccessChain %_ptr_Workgroup_float %m10 %118 %118
-               OpStore %131 %float_1
-        %132 = OpAccessChain %_ptr_Workgroup_float %m11 %118 %118
-               OpStore %132 %float_1
-        %133 = OpAccessChain %_ptr_Workgroup_float %m12 %118 %118
-               OpStore %133 %float_1
-        %134 = OpAccessChain %_ptr_Workgroup_float %m13 %118 %118
-               OpStore %134 %float_1
-        %135 = OpAccessChain %_ptr_Workgroup_float %m14 %118 %118
-               OpStore %135 %float_1
-        %136 = OpAccessChain %_ptr_Workgroup_float %m15 %118 %118
-               OpStore %136 %float_1
-        %137 = OpAccessChain %_ptr_Workgroup_float %m16 %118 %118
-               OpStore %137 %float_1
-        %138 = OpAccessChain %_ptr_Workgroup_float %m17 %118 %118
-               OpStore %138 %float_1
-        %139 = OpAccessChain %_ptr_Workgroup_float %m18 %118 %118
-               OpStore %139 %float_1
-        %140 = OpAccessChain %_ptr_Workgroup_float %m19 %118 %118
-               OpStore %140 %float_1
-        %141 = OpAccessChain %_ptr_Workgroup_float %m20 %118 %118
-               OpStore %141 %float_1
-        %142 = OpAccessChain %_ptr_Workgroup_float %m21 %118 %118
-               OpStore %142 %float_1
-        %143 = OpAccessChain %_ptr_Workgroup_float %m22 %118 %118
-               OpStore %143 %float_1
-        %144 = OpAccessChain %_ptr_Workgroup_float %m23 %118 %118
-               OpStore %144 %float_1
-        %145 = OpAccessChain %_ptr_Workgroup_float %m24 %118 %118
-               OpStore %145 %float_1
-        %146 = OpAccessChain %_ptr_Workgroup_float %m25 %118 %118
-               OpStore %146 %float_1
-        %147 = OpAccessChain %_ptr_Workgroup_float %m26 %118 %118
-               OpStore %147 %float_1
-        %148 = OpAccessChain %_ptr_Workgroup_float %m27 %118 %118
-               OpStore %148 %float_1
-        %149 = OpAccessChain %_ptr_Workgroup_float %m28 %118 %118
-               OpStore %149 %float_1
-        %150 = OpAccessChain %_ptr_Workgroup_float %m29 %118 %118
-               OpStore %150 %float_1
-        %151 = OpAccessChain %_ptr_Workgroup_float %m30 %118 %118
-               OpStore %151 %float_1
-        %152 = OpAccessChain %_ptr_Workgroup_float %m31 %118 %118
-               OpStore %152 %float_1
-        %153 = OpAccessChain %_ptr_Workgroup_float %m32 %118 %118
-               OpStore %153 %float_1
-        %154 = OpAccessChain %_ptr_Workgroup_float %m33 %118 %118
-               OpStore %154 %float_1
-        %155 = OpAccessChain %_ptr_Workgroup_float %m34 %118 %118
-               OpStore %155 %float_1
-        %156 = OpAccessChain %_ptr_Workgroup_float %m35 %118 %118
-               OpStore %156 %float_1
-        %157 = OpAccessChain %_ptr_Workgroup_float %m36 %118 %118
-               OpStore %157 %float_1
-        %158 = OpAccessChain %_ptr_Workgroup_float %m37 %118 %118
-               OpStore %158 %float_1
-        %159 = OpAccessChain %_ptr_Workgroup_float %m38 %118 %118
-               OpStore %159 %float_1
-        %160 = OpAccessChain %_ptr_Workgroup_float %m39 %118 %118
-               OpStore %160 %float_1
-        %161 = OpAccessChain %_ptr_Workgroup_float %m40 %118 %118
-               OpStore %161 %float_1
-        %162 = OpAccessChain %_ptr_Workgroup_float %m41 %118 %118
-               OpStore %162 %float_1
-        %163 = OpAccessChain %_ptr_Workgroup_float %m42 %118 %118
-               OpStore %163 %float_1
-        %164 = OpAccessChain %_ptr_Workgroup_float %m43 %118 %118
-               OpStore %164 %float_1
-        %165 = OpAccessChain %_ptr_Workgroup_float %m44 %118 %118
-               OpStore %165 %float_1
-        %166 = OpAccessChain %_ptr_Workgroup_float %m45 %118 %118
-               OpStore %166 %float_1
-        %167 = OpAccessChain %_ptr_Workgroup_float %m46 %118 %118
-               OpStore %167 %float_1
-        %168 = OpAccessChain %_ptr_Workgroup_float %m47 %118 %118
-               OpStore %168 %float_1
-        %169 = OpAccessChain %_ptr_Workgroup_float %m48 %118 %118
-               OpStore %169 %float_1
-        %170 = OpAccessChain %_ptr_Workgroup_float %m49 %118 %118
-               OpStore %170 %float_1
-        %171 = OpAccessChain %_ptr_Workgroup_float %m50 %118 %118
-               OpStore %171 %float_1
-        %172 = OpAccessChain %_ptr_Workgroup_float %m51 %118 %118
-               OpStore %172 %float_1
-        %173 = OpAccessChain %_ptr_Workgroup_float %m52 %118 %118
-               OpStore %173 %float_1
-        %174 = OpAccessChain %_ptr_Workgroup_float %m53 %118 %118
-               OpStore %174 %float_1
-        %175 = OpAccessChain %_ptr_Workgroup_float %m54 %118 %118
-               OpStore %175 %float_1
-        %176 = OpAccessChain %_ptr_Workgroup_float %m55 %118 %118
-               OpStore %176 %float_1
-        %177 = OpAccessChain %_ptr_Workgroup_float %m56 %118 %118
-               OpStore %177 %float_1
-        %178 = OpAccessChain %_ptr_Workgroup_float %m57 %118 %118
-               OpStore %178 %float_1
-        %179 = OpAccessChain %_ptr_Workgroup_float %m58 %118 %118
-               OpStore %179 %float_1
-        %180 = OpAccessChain %_ptr_Workgroup_float %m59 %118 %118
-               OpStore %180 %float_1
-        %181 = OpAccessChain %_ptr_Workgroup_float %m60 %118 %118
-               OpStore %181 %float_1
-        %182 = OpAccessChain %_ptr_Workgroup_float %m61 %118 %118
-               OpStore %182 %float_1
-        %183 = OpAccessChain %_ptr_Workgroup_float %m62 %118 %118
-               OpStore %183 %float_1
-        %184 = OpAccessChain %_ptr_Workgroup_float %m63 %118 %118
-               OpStore %184 %float_1
-        %185 = OpAccessChain %_ptr_Workgroup_float %m64 %118 %118
-               OpStore %185 %float_1
-        %186 = OpAccessChain %_ptr_Workgroup_float %m65 %118 %118
-               OpStore %186 %float_1
-        %187 = OpAccessChain %_ptr_Workgroup_float %m66 %118 %118
-               OpStore %187 %float_1
-        %188 = OpAccessChain %_ptr_Workgroup_float %m67 %118 %118
-               OpStore %188 %float_1
-        %189 = OpAccessChain %_ptr_Workgroup_float %m68 %118 %118
-               OpStore %189 %float_1
-        %190 = OpAccessChain %_ptr_Workgroup_float %m69 %118 %118
-               OpStore %190 %float_1
-        %191 = OpAccessChain %_ptr_Workgroup_float %m70 %118 %118
-               OpStore %191 %float_1
-        %192 = OpAccessChain %_ptr_Workgroup_float %m71 %118 %118
-               OpStore %192 %float_1
-        %193 = OpAccessChain %_ptr_Workgroup_float %m72 %118 %118
-               OpStore %193 %float_1
-        %194 = OpAccessChain %_ptr_Workgroup_float %m73 %118 %118
-               OpStore %194 %float_1
-        %195 = OpAccessChain %_ptr_Workgroup_float %m74 %118 %118
-               OpStore %195 %float_1
-        %196 = OpAccessChain %_ptr_Workgroup_float %m75 %118 %118
-               OpStore %196 %float_1
-        %197 = OpAccessChain %_ptr_Workgroup_float %m76 %118 %118
-               OpStore %197 %float_1
-        %198 = OpAccessChain %_ptr_Workgroup_float %m77 %118 %118
-               OpStore %198 %float_1
-        %199 = OpAccessChain %_ptr_Workgroup_float %m78 %118 %118
-               OpStore %199 %float_1
-        %200 = OpAccessChain %_ptr_Workgroup_float %m79 %118 %118
-               OpStore %200 %float_1
-        %201 = OpAccessChain %_ptr_Workgroup_float %m80 %118 %118
-               OpStore %201 %float_1
-        %202 = OpAccessChain %_ptr_Workgroup_float %m81 %118 %118
-               OpStore %202 %float_1
-        %203 = OpAccessChain %_ptr_Workgroup_float %m82 %118 %118
-               OpStore %203 %float_1
-        %204 = OpAccessChain %_ptr_Workgroup_float %m83 %118 %118
-               OpStore %204 %float_1
-        %205 = OpAccessChain %_ptr_Workgroup_float %m84 %118 %118
-               OpStore %205 %float_1
-        %206 = OpAccessChain %_ptr_Workgroup_float %m85 %118 %118
-               OpStore %206 %float_1
-        %207 = OpAccessChain %_ptr_Workgroup_float %m86 %118 %118
-               OpStore %207 %float_1
-        %208 = OpAccessChain %_ptr_Workgroup_float %m87 %118 %118
-               OpStore %208 %float_1
-        %209 = OpAccessChain %_ptr_Workgroup_float %m88 %118 %118
-               OpStore %209 %float_1
-        %210 = OpAccessChain %_ptr_Workgroup_float %m89 %118 %118
-               OpStore %210 %float_1
-        %211 = OpAccessChain %_ptr_Workgroup_float %m90 %118 %118
-               OpStore %211 %float_1
-        %212 = OpAccessChain %_ptr_Workgroup_float %m91 %118 %118
-               OpStore %212 %float_1
-        %213 = OpAccessChain %_ptr_Workgroup_float %m92 %118 %118
-               OpStore %213 %float_1
-        %214 = OpAccessChain %_ptr_Workgroup_float %m93 %118 %118
-               OpStore %214 %float_1
-        %215 = OpAccessChain %_ptr_Workgroup_float %m94 %118 %118
-               OpStore %215 %float_1
-        %216 = OpAccessChain %_ptr_Workgroup_float %m95 %118 %118
-               OpStore %216 %float_1
-        %217 = OpAccessChain %_ptr_Workgroup_float %m96 %118 %118
-               OpStore %217 %float_1
-        %218 = OpAccessChain %_ptr_Workgroup_float %m97 %118 %118
-               OpStore %218 %float_1
-        %219 = OpAccessChain %_ptr_Workgroup_float %m98 %118 %118
-               OpStore %219 %float_1
-        %220 = OpAccessChain %_ptr_Workgroup_float %m99 %118 %118
-               OpStore %220 %float_1
                OpReturn
                OpFunctionEnd
-%tint_symbol = OpFunction %void None %221
-        %223 = OpLabel
-        %225 = OpLoad %uint %idx_1
-        %224 = OpFunctionCall %void %tint_symbol_inner %225
+%tint_symbol_inner = OpFunction %void None %108
+        %idx = OpFunctionParameter %uint
+        %119 = OpLabel
+        %120 = OpFunctionCall %void %tint_zero_workgroup_memory %idx
+        %124 = OpAccessChain %_ptr_Workgroup_float %m00 %122 %122
+               OpStore %124 %float_1
+        %126 = OpAccessChain %_ptr_Workgroup_float %m01 %122 %122
+               OpStore %126 %float_1
+        %127 = OpAccessChain %_ptr_Workgroup_float %m02 %122 %122
+               OpStore %127 %float_1
+        %128 = OpAccessChain %_ptr_Workgroup_float %m03 %122 %122
+               OpStore %128 %float_1
+        %129 = OpAccessChain %_ptr_Workgroup_float %m04 %122 %122
+               OpStore %129 %float_1
+        %130 = OpAccessChain %_ptr_Workgroup_float %m05 %122 %122
+               OpStore %130 %float_1
+        %131 = OpAccessChain %_ptr_Workgroup_float %m06 %122 %122
+               OpStore %131 %float_1
+        %132 = OpAccessChain %_ptr_Workgroup_float %m07 %122 %122
+               OpStore %132 %float_1
+        %133 = OpAccessChain %_ptr_Workgroup_float %m08 %122 %122
+               OpStore %133 %float_1
+        %134 = OpAccessChain %_ptr_Workgroup_float %m09 %122 %122
+               OpStore %134 %float_1
+        %135 = OpAccessChain %_ptr_Workgroup_float %m10 %122 %122
+               OpStore %135 %float_1
+        %136 = OpAccessChain %_ptr_Workgroup_float %m11 %122 %122
+               OpStore %136 %float_1
+        %137 = OpAccessChain %_ptr_Workgroup_float %m12 %122 %122
+               OpStore %137 %float_1
+        %138 = OpAccessChain %_ptr_Workgroup_float %m13 %122 %122
+               OpStore %138 %float_1
+        %139 = OpAccessChain %_ptr_Workgroup_float %m14 %122 %122
+               OpStore %139 %float_1
+        %140 = OpAccessChain %_ptr_Workgroup_float %m15 %122 %122
+               OpStore %140 %float_1
+        %141 = OpAccessChain %_ptr_Workgroup_float %m16 %122 %122
+               OpStore %141 %float_1
+        %142 = OpAccessChain %_ptr_Workgroup_float %m17 %122 %122
+               OpStore %142 %float_1
+        %143 = OpAccessChain %_ptr_Workgroup_float %m18 %122 %122
+               OpStore %143 %float_1
+        %144 = OpAccessChain %_ptr_Workgroup_float %m19 %122 %122
+               OpStore %144 %float_1
+        %145 = OpAccessChain %_ptr_Workgroup_float %m20 %122 %122
+               OpStore %145 %float_1
+        %146 = OpAccessChain %_ptr_Workgroup_float %m21 %122 %122
+               OpStore %146 %float_1
+        %147 = OpAccessChain %_ptr_Workgroup_float %m22 %122 %122
+               OpStore %147 %float_1
+        %148 = OpAccessChain %_ptr_Workgroup_float %m23 %122 %122
+               OpStore %148 %float_1
+        %149 = OpAccessChain %_ptr_Workgroup_float %m24 %122 %122
+               OpStore %149 %float_1
+        %150 = OpAccessChain %_ptr_Workgroup_float %m25 %122 %122
+               OpStore %150 %float_1
+        %151 = OpAccessChain %_ptr_Workgroup_float %m26 %122 %122
+               OpStore %151 %float_1
+        %152 = OpAccessChain %_ptr_Workgroup_float %m27 %122 %122
+               OpStore %152 %float_1
+        %153 = OpAccessChain %_ptr_Workgroup_float %m28 %122 %122
+               OpStore %153 %float_1
+        %154 = OpAccessChain %_ptr_Workgroup_float %m29 %122 %122
+               OpStore %154 %float_1
+        %155 = OpAccessChain %_ptr_Workgroup_float %m30 %122 %122
+               OpStore %155 %float_1
+        %156 = OpAccessChain %_ptr_Workgroup_float %m31 %122 %122
+               OpStore %156 %float_1
+        %157 = OpAccessChain %_ptr_Workgroup_float %m32 %122 %122
+               OpStore %157 %float_1
+        %158 = OpAccessChain %_ptr_Workgroup_float %m33 %122 %122
+               OpStore %158 %float_1
+        %159 = OpAccessChain %_ptr_Workgroup_float %m34 %122 %122
+               OpStore %159 %float_1
+        %160 = OpAccessChain %_ptr_Workgroup_float %m35 %122 %122
+               OpStore %160 %float_1
+        %161 = OpAccessChain %_ptr_Workgroup_float %m36 %122 %122
+               OpStore %161 %float_1
+        %162 = OpAccessChain %_ptr_Workgroup_float %m37 %122 %122
+               OpStore %162 %float_1
+        %163 = OpAccessChain %_ptr_Workgroup_float %m38 %122 %122
+               OpStore %163 %float_1
+        %164 = OpAccessChain %_ptr_Workgroup_float %m39 %122 %122
+               OpStore %164 %float_1
+        %165 = OpAccessChain %_ptr_Workgroup_float %m40 %122 %122
+               OpStore %165 %float_1
+        %166 = OpAccessChain %_ptr_Workgroup_float %m41 %122 %122
+               OpStore %166 %float_1
+        %167 = OpAccessChain %_ptr_Workgroup_float %m42 %122 %122
+               OpStore %167 %float_1
+        %168 = OpAccessChain %_ptr_Workgroup_float %m43 %122 %122
+               OpStore %168 %float_1
+        %169 = OpAccessChain %_ptr_Workgroup_float %m44 %122 %122
+               OpStore %169 %float_1
+        %170 = OpAccessChain %_ptr_Workgroup_float %m45 %122 %122
+               OpStore %170 %float_1
+        %171 = OpAccessChain %_ptr_Workgroup_float %m46 %122 %122
+               OpStore %171 %float_1
+        %172 = OpAccessChain %_ptr_Workgroup_float %m47 %122 %122
+               OpStore %172 %float_1
+        %173 = OpAccessChain %_ptr_Workgroup_float %m48 %122 %122
+               OpStore %173 %float_1
+        %174 = OpAccessChain %_ptr_Workgroup_float %m49 %122 %122
+               OpStore %174 %float_1
+        %175 = OpAccessChain %_ptr_Workgroup_float %m50 %122 %122
+               OpStore %175 %float_1
+        %176 = OpAccessChain %_ptr_Workgroup_float %m51 %122 %122
+               OpStore %176 %float_1
+        %177 = OpAccessChain %_ptr_Workgroup_float %m52 %122 %122
+               OpStore %177 %float_1
+        %178 = OpAccessChain %_ptr_Workgroup_float %m53 %122 %122
+               OpStore %178 %float_1
+        %179 = OpAccessChain %_ptr_Workgroup_float %m54 %122 %122
+               OpStore %179 %float_1
+        %180 = OpAccessChain %_ptr_Workgroup_float %m55 %122 %122
+               OpStore %180 %float_1
+        %181 = OpAccessChain %_ptr_Workgroup_float %m56 %122 %122
+               OpStore %181 %float_1
+        %182 = OpAccessChain %_ptr_Workgroup_float %m57 %122 %122
+               OpStore %182 %float_1
+        %183 = OpAccessChain %_ptr_Workgroup_float %m58 %122 %122
+               OpStore %183 %float_1
+        %184 = OpAccessChain %_ptr_Workgroup_float %m59 %122 %122
+               OpStore %184 %float_1
+        %185 = OpAccessChain %_ptr_Workgroup_float %m60 %122 %122
+               OpStore %185 %float_1
+        %186 = OpAccessChain %_ptr_Workgroup_float %m61 %122 %122
+               OpStore %186 %float_1
+        %187 = OpAccessChain %_ptr_Workgroup_float %m62 %122 %122
+               OpStore %187 %float_1
+        %188 = OpAccessChain %_ptr_Workgroup_float %m63 %122 %122
+               OpStore %188 %float_1
+        %189 = OpAccessChain %_ptr_Workgroup_float %m64 %122 %122
+               OpStore %189 %float_1
+        %190 = OpAccessChain %_ptr_Workgroup_float %m65 %122 %122
+               OpStore %190 %float_1
+        %191 = OpAccessChain %_ptr_Workgroup_float %m66 %122 %122
+               OpStore %191 %float_1
+        %192 = OpAccessChain %_ptr_Workgroup_float %m67 %122 %122
+               OpStore %192 %float_1
+        %193 = OpAccessChain %_ptr_Workgroup_float %m68 %122 %122
+               OpStore %193 %float_1
+        %194 = OpAccessChain %_ptr_Workgroup_float %m69 %122 %122
+               OpStore %194 %float_1
+        %195 = OpAccessChain %_ptr_Workgroup_float %m70 %122 %122
+               OpStore %195 %float_1
+        %196 = OpAccessChain %_ptr_Workgroup_float %m71 %122 %122
+               OpStore %196 %float_1
+        %197 = OpAccessChain %_ptr_Workgroup_float %m72 %122 %122
+               OpStore %197 %float_1
+        %198 = OpAccessChain %_ptr_Workgroup_float %m73 %122 %122
+               OpStore %198 %float_1
+        %199 = OpAccessChain %_ptr_Workgroup_float %m74 %122 %122
+               OpStore %199 %float_1
+        %200 = OpAccessChain %_ptr_Workgroup_float %m75 %122 %122
+               OpStore %200 %float_1
+        %201 = OpAccessChain %_ptr_Workgroup_float %m76 %122 %122
+               OpStore %201 %float_1
+        %202 = OpAccessChain %_ptr_Workgroup_float %m77 %122 %122
+               OpStore %202 %float_1
+        %203 = OpAccessChain %_ptr_Workgroup_float %m78 %122 %122
+               OpStore %203 %float_1
+        %204 = OpAccessChain %_ptr_Workgroup_float %m79 %122 %122
+               OpStore %204 %float_1
+        %205 = OpAccessChain %_ptr_Workgroup_float %m80 %122 %122
+               OpStore %205 %float_1
+        %206 = OpAccessChain %_ptr_Workgroup_float %m81 %122 %122
+               OpStore %206 %float_1
+        %207 = OpAccessChain %_ptr_Workgroup_float %m82 %122 %122
+               OpStore %207 %float_1
+        %208 = OpAccessChain %_ptr_Workgroup_float %m83 %122 %122
+               OpStore %208 %float_1
+        %209 = OpAccessChain %_ptr_Workgroup_float %m84 %122 %122
+               OpStore %209 %float_1
+        %210 = OpAccessChain %_ptr_Workgroup_float %m85 %122 %122
+               OpStore %210 %float_1
+        %211 = OpAccessChain %_ptr_Workgroup_float %m86 %122 %122
+               OpStore %211 %float_1
+        %212 = OpAccessChain %_ptr_Workgroup_float %m87 %122 %122
+               OpStore %212 %float_1
+        %213 = OpAccessChain %_ptr_Workgroup_float %m88 %122 %122
+               OpStore %213 %float_1
+        %214 = OpAccessChain %_ptr_Workgroup_float %m89 %122 %122
+               OpStore %214 %float_1
+        %215 = OpAccessChain %_ptr_Workgroup_float %m90 %122 %122
+               OpStore %215 %float_1
+        %216 = OpAccessChain %_ptr_Workgroup_float %m91 %122 %122
+               OpStore %216 %float_1
+        %217 = OpAccessChain %_ptr_Workgroup_float %m92 %122 %122
+               OpStore %217 %float_1
+        %218 = OpAccessChain %_ptr_Workgroup_float %m93 %122 %122
+               OpStore %218 %float_1
+        %219 = OpAccessChain %_ptr_Workgroup_float %m94 %122 %122
+               OpStore %219 %float_1
+        %220 = OpAccessChain %_ptr_Workgroup_float %m95 %122 %122
+               OpStore %220 %float_1
+        %221 = OpAccessChain %_ptr_Workgroup_float %m96 %122 %122
+               OpStore %221 %float_1
+        %222 = OpAccessChain %_ptr_Workgroup_float %m97 %122 %122
+               OpStore %222 %float_1
+        %223 = OpAccessChain %_ptr_Workgroup_float %m98 %122 %122
+               OpStore %223 %float_1
+        %224 = OpAccessChain %_ptr_Workgroup_float %m99 %122 %122
+               OpStore %224 %float_1
+               OpReturn
+               OpFunctionEnd
+%tint_symbol = OpFunction %void None %225
+        %227 = OpLabel
+        %229 = OpLoad %uint %idx_1
+        %228 = OpFunctionCall %void %tint_symbol_inner %229
                OpReturn
                OpFunctionEnd

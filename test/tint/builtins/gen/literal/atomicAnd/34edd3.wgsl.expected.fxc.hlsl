@@ -1,10 +1,19 @@
 groupshared uint arg_0;
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    uint atomic_result = 0u;
+    InterlockedExchange(arg_0, 0u, atomic_result);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void atomicAnd_34edd3() {
-  uint atomic_result = 0u;
-  InterlockedAnd(arg_0, 1u, atomic_result);
-  uint res = atomic_result;
+  uint atomic_result_1 = 0u;
+  InterlockedAnd(arg_0, 1u, atomic_result_1);
+  uint res = atomic_result_1;
   prevent_dce.Store(0u, asuint(res));
 }
 
@@ -13,11 +22,7 @@ struct tint_symbol_1 {
 };
 
 void compute_main_inner(uint local_invocation_index) {
-  {
-    uint atomic_result_1 = 0u;
-    InterlockedExchange(arg_0, 0u, atomic_result_1);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   atomicAnd_34edd3();
 }
 

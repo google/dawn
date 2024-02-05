@@ -18,18 +18,22 @@ struct tint_array {
   volatile bool VOLATILE_NAME = true; \
   if (VOLATILE_NAME)
 
-void compute_main_inner(uint local_invocation_index, threadgroup tint_array<atomic_uint, 4>* const tint_symbol) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<atomic_uint, 4>* const tint_symbol) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
     uint const i = idx;
     atomic_store_explicit(&((*(tint_symbol))[i]), 0u, memory_order_relaxed);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomic_store_explicit(&((*(tint_symbol))[1]), 1u, memory_order_relaxed);
+}
+
+void compute_main_inner(uint local_invocation_index, threadgroup tint_array<atomic_uint, 4>* const tint_symbol_1) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_1);
+  atomic_store_explicit(&((*(tint_symbol_1))[1]), 1u, memory_order_relaxed);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array<atomic_uint, 4> tint_symbol_1;
-  compute_main_inner(local_invocation_index, &(tint_symbol_1));
+  threadgroup tint_array<atomic_uint, 4> tint_symbol_2;
+  compute_main_inner(local_invocation_index, &(tint_symbol_2));
   return;
 }
 

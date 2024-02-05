@@ -14,7 +14,7 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_5 {
+struct tint_symbol_6 {
   half4x3 w;
 };
 
@@ -28,20 +28,24 @@ half4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f16_array_elem
   return result;
 }
 
-void f_inner(uint local_invocation_index, threadgroup half4x3* const tint_symbol, const constant tint_array<tint_packed_vec3_f16_array_element, 4>* const tint_symbol_1) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup half4x3* const tint_symbol) {
   {
     *(tint_symbol) = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  *(tint_symbol) = tint_unpack_vec3_in_composite(*(tint_symbol_1));
-  (*(tint_symbol))[1] = half3((*(tint_symbol_1))[0].elements);
-  (*(tint_symbol))[1] = half3((*(tint_symbol_1))[0].elements).zxy;
-  (*(tint_symbol))[0][1] = (*(tint_symbol_1))[1].elements[0];
 }
 
-kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 4>* tint_symbol_4 [[buffer(0)]], threadgroup tint_symbol_5* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup half4x3* const tint_symbol_2 = &((*(tint_symbol_3)).w);
-  f_inner(local_invocation_index, tint_symbol_2, tint_symbol_4);
+void f_inner(uint local_invocation_index, threadgroup half4x3* const tint_symbol_1, const constant tint_array<tint_packed_vec3_f16_array_element, 4>* const tint_symbol_2) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_1);
+  *(tint_symbol_1) = tint_unpack_vec3_in_composite(*(tint_symbol_2));
+  (*(tint_symbol_1))[1] = half3((*(tint_symbol_2))[0].elements);
+  (*(tint_symbol_1))[1] = half3((*(tint_symbol_2))[0].elements).zxy;
+  (*(tint_symbol_1))[0][1] = (*(tint_symbol_2))[1].elements[0];
+}
+
+kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 4>* tint_symbol_5 [[buffer(0)]], threadgroup tint_symbol_6* tint_symbol_4 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup half4x3* const tint_symbol_3 = &((*(tint_symbol_4)).w);
+  f_inner(local_invocation_index, tint_symbol_3, tint_symbol_5);
   return;
 }
 

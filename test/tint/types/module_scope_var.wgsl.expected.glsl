@@ -1,5 +1,13 @@
 #version 310 es
 
+shared float wg_var;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    wg_var = 0.0f;
+  }
+  barrier();
+}
+
 struct S {
   float a;
 };
@@ -14,12 +22,8 @@ vec4 v4f32_var = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 mat2x3 m2x3_var = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 float arr_var[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
 S struct_var = S(0.0f);
-shared float wg_var;
 void tint_symbol(uint local_invocation_index) {
-  {
-    wg_var = 0.0f;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   bool_var = false;
   i32_var = 0;
   u32_var = 0u;

@@ -1,12 +1,16 @@
 #version 310 es
 
-float p = 0.0f;
 shared float w;
-void tint_symbol(uint local_invocation_index) {
+void tint_zero_workgroup_memory(uint local_idx) {
   {
     w = 0.0f;
   }
   barrier();
+}
+
+float p = 0.0f;
+void tint_symbol(uint local_invocation_index) {
+  tint_zero_workgroup_memory(local_invocation_index);
   float x = (p + w);
   p = x;
 }

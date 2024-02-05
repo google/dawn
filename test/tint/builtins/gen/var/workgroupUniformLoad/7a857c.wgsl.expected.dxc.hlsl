@@ -1,5 +1,12 @@
 groupshared float arg_0;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    arg_0 = 0.0f;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 float tint_workgroupUniformLoad_arg_0() {
   GroupMemoryBarrierWithGroupSync();
   float result = arg_0;
@@ -19,10 +26,7 @@ struct tint_symbol_1 {
 };
 
 void compute_main_inner(uint local_invocation_index) {
-  {
-    arg_0 = 0.0f;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   workgroupUniformLoad_7a857c();
 }
 

@@ -1,5 +1,29 @@
 groupshared int a;
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    a = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 groupshared int b;
+
+void tint_zero_workgroup_memory_1(uint local_idx_1) {
+  {
+    b = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
+void tint_zero_workgroup_memory_2(uint local_idx_2) {
+  {
+    a = 0;
+    b = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 groupshared int c;
 
 void uses_a() {
@@ -30,10 +54,7 @@ struct tint_symbol_1 {
 };
 
 void main1_inner(uint local_invocation_index) {
-  {
-    a = 0;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   a = 42;
   uses_a();
 }
@@ -49,10 +70,7 @@ struct tint_symbol_3 {
 };
 
 void main2_inner(uint local_invocation_index_1) {
-  {
-    b = 0;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory_1(local_invocation_index_1);
   b = 7;
   uses_b();
 }
@@ -68,11 +86,7 @@ struct tint_symbol_5 {
 };
 
 void main3_inner(uint local_invocation_index_2) {
-  {
-    a = 0;
-    b = 0;
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory_2(local_invocation_index_2);
   outer();
   no_uses();
 }

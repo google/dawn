@@ -1,7 +1,14 @@
 #version 310 es
 
-float p = 0.0f;
 shared float w;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    w = 0.0f;
+  }
+  barrier();
+}
+
+float p = 0.0f;
 layout(binding = 1, std430) buffer uniforms_block_ssbo {
   vec2 inner;
 } uniforms;
@@ -31,10 +38,7 @@ void foo(float a) {
 }
 
 void tint_symbol(uint local_invocation_index) {
-  {
-    w = 0.0f;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   foo(1.0f);
 }
 

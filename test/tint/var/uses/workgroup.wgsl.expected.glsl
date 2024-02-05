@@ -1,15 +1,19 @@
 #version 310 es
 
 shared int a;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    a = 0;
+  }
+  barrier();
+}
+
 void uses_a() {
   a = (a + 1);
 }
 
 void main1(uint local_invocation_index) {
-  {
-    a = 0;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   a = 42;
   uses_a();
 }
@@ -22,15 +26,19 @@ void main() {
 #version 310 es
 
 shared int b;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    b = 0;
+  }
+  barrier();
+}
+
 void uses_b() {
   b = (b * 2);
 }
 
 void main2(uint local_invocation_index) {
-  {
-    b = 0;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   b = 7;
   uses_b();
 }
@@ -44,6 +52,14 @@ void main() {
 
 shared int a;
 shared int b;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    a = 0;
+    b = 0;
+  }
+  barrier();
+}
+
 void uses_a() {
   a = (a + 1);
 }
@@ -68,11 +84,7 @@ void outer() {
 }
 
 void main3(uint local_invocation_index) {
-  {
-    a = 0;
-    b = 0;
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   outer();
   no_uses();
 }

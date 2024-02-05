@@ -1,9 +1,18 @@
+groupshared int g1;
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    int atomic_result = 0;
+    InterlockedExchange(g1, 0, atomic_result);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 int tint_ftoi(float v) {
   return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
 }
 
 RWByteAddressBuffer s : register(u0);
-groupshared int g1;
 
 struct S {
   int a;
@@ -41,9 +50,9 @@ int accept_ptr_vec_access_elements(inout float3 v1) {
 }
 
 int call_builtin_with_mod_scope_ptr() {
-  int atomic_result = 0;
-  InterlockedOr(g1, 0, atomic_result);
-  return atomic_result;
+  int atomic_result_1 = 0;
+  InterlockedOr(g1, 0, atomic_result_1);
+  return atomic_result_1;
 }
 
 struct tint_symbol_11 {
@@ -51,11 +60,7 @@ struct tint_symbol_11 {
 };
 
 void main_inner(uint local_invocation_index) {
-  {
-    int atomic_result_1 = 0;
-    InterlockedExchange(g1, 0, atomic_result_1);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index);
   int v1 = 0;
   S v2 = (S)0;
   float3 v4 = (0.0f).xxx;

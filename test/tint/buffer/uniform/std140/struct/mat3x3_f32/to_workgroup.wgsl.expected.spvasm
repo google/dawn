@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 72
+; Bound: 76
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,9 +16,11 @@
                OpMemberName %S 2 "after"
                OpName %u "u"
                OpName %w "w"
+               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
+               OpName %local_idx "local_idx"
+               OpName %idx "idx"
                OpName %f_inner "f_inner"
                OpName %local_invocation_index "local_invocation_index"
-               OpName %idx "idx"
                OpName %f "f"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %u_block Block
@@ -65,15 +67,15 @@
       %int_3 = OpConstant %int 3
 %_ptr_Workgroup_mat3v3float = OpTypePointer Workgroup %mat3v3float
 %_ptr_Uniform_mat3v3float = OpTypePointer Uniform %mat3v3float
-         %60 = OpConstantNull %int
+         %64 = OpConstantNull %int
 %_ptr_Workgroup_v3float = OpTypePointer Workgroup %v3float
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
-         %67 = OpTypeFunction %void
-    %f_inner = OpFunction %void None %16
-%local_invocation_index = OpFunctionParameter %uint
+         %71 = OpTypeFunction %void
+%tint_zero_workgroup_memory = OpFunction %void None %16
+  %local_idx = OpFunctionParameter %uint
          %20 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function %23
-               OpStore %idx %local_invocation_index
+               OpStore %idx %local_idx
                OpBranch %24
          %24 = OpLabel
                OpLoopMerge %25 %26 None
@@ -98,27 +100,33 @@
                OpBranch %24
          %25 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %46 = OpAccessChain %_ptr_Uniform__arr_S_uint_4 %u %uint_0
-         %47 = OpLoad %_arr_S_uint_4 %46
-               OpStore %w %47
-         %49 = OpAccessChain %_ptr_Workgroup_S %w %int_1
-         %52 = OpAccessChain %_ptr_Uniform_S %u %uint_0 %int_2
-         %53 = OpLoad %S %52
-               OpStore %49 %53
-         %56 = OpAccessChain %_ptr_Workgroup_mat3v3float %w %int_3 %uint_1
-         %58 = OpAccessChain %_ptr_Uniform_mat3v3float %u %uint_0 %int_2 %uint_1
-         %59 = OpLoad %mat3v3float %58
-               OpStore %56 %59
-         %62 = OpAccessChain %_ptr_Workgroup_v3float %w %int_1 %uint_1 %60
-         %64 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %60 %uint_1 %int_1
-         %65 = OpLoad %v3float %64
-         %66 = OpVectorShuffle %v3float %65 %65 2 0 1
-               OpStore %62 %66
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %67
-         %69 = OpLabel
-         %71 = OpLoad %uint %local_invocation_index_1
-         %70 = OpFunctionCall %void %f_inner %71
+    %f_inner = OpFunction %void None %16
+%local_invocation_index = OpFunctionParameter %uint
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %50 = OpAccessChain %_ptr_Uniform__arr_S_uint_4 %u %uint_0
+         %51 = OpLoad %_arr_S_uint_4 %50
+               OpStore %w %51
+         %53 = OpAccessChain %_ptr_Workgroup_S %w %int_1
+         %56 = OpAccessChain %_ptr_Uniform_S %u %uint_0 %int_2
+         %57 = OpLoad %S %56
+               OpStore %53 %57
+         %60 = OpAccessChain %_ptr_Workgroup_mat3v3float %w %int_3 %uint_1
+         %62 = OpAccessChain %_ptr_Uniform_mat3v3float %u %uint_0 %int_2 %uint_1
+         %63 = OpLoad %mat3v3float %62
+               OpStore %60 %63
+         %66 = OpAccessChain %_ptr_Workgroup_v3float %w %int_1 %uint_1 %64
+         %68 = OpAccessChain %_ptr_Uniform_v3float %u %uint_0 %64 %uint_1 %int_1
+         %69 = OpLoad %v3float %68
+         %70 = OpVectorShuffle %v3float %69 %69 2 0 1
+               OpStore %66 %70
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %71
+         %73 = OpLabel
+         %75 = OpLoad %uint %local_invocation_index_1
+         %74 = OpFunctionCall %void %f_inner %75
                OpReturn
                OpFunctionEnd

@@ -1,15 +1,24 @@
-static uint local_invocation_index_1 = 0u;
 groupshared uint arg_0;
 
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    uint atomic_result = 0u;
+    InterlockedExchange(arg_0, 0u, atomic_result);
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
+static uint local_invocation_index_1 = 0u;
+
 void atomicStore_726882() {
-  uint atomic_result = 0u;
-  InterlockedExchange(arg_0, 1u, atomic_result);
+  uint atomic_result_1 = 0u;
+  InterlockedExchange(arg_0, 1u, atomic_result_1);
   return;
 }
 
 void compute_main_inner(uint local_invocation_index_2) {
-  uint atomic_result_1 = 0u;
-  InterlockedExchange(arg_0, 0u, atomic_result_1);
+  uint atomic_result_2 = 0u;
+  InterlockedExchange(arg_0, 0u, atomic_result_2);
   GroupMemoryBarrierWithGroupSync();
   atomicStore_726882();
   return;
@@ -26,11 +35,7 @@ struct tint_symbol_1 {
 };
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  {
-    uint atomic_result_2 = 0u;
-    InterlockedExchange(arg_0, 0u, atomic_result_2);
-  }
-  GroupMemoryBarrierWithGroupSync();
+  tint_zero_workgroup_memory(local_invocation_index_1_param);
   local_invocation_index_1 = local_invocation_index_1_param;
   compute_main_1();
 }

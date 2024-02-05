@@ -1,5 +1,20 @@
 #version 310 es
 
+struct S {
+  int data[64];
+};
+
+shared S s;
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx = local_idx; (idx < 64u); idx = (idx + 1u)) {
+      uint i = idx;
+      s.data[i] = 0;
+    }
+  }
+  barrier();
+}
+
 struct UBO {
   int dynamic_idx;
   uint pad;
@@ -11,10 +26,6 @@ layout(binding = 0, std140) uniform ubo_block_ubo {
   UBO inner;
 } ubo;
 
-struct S {
-  int data[64];
-};
-
 struct Result {
   int tint_symbol;
 };
@@ -23,15 +34,8 @@ layout(binding = 1, std430) buffer result_block_ssbo {
   Result inner;
 } result;
 
-shared S s;
 void f(uint local_invocation_index) {
-  {
-    for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
-      uint i = idx;
-      s.data[i] = 0;
-    }
-  }
-  barrier();
+  tint_zero_workgroup_memory(local_invocation_index);
   s.data[ubo.inner.dynamic_idx] = 1;
   result.inner.tint_symbol = s.data[3];
 }

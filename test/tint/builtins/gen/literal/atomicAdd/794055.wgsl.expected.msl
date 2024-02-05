@@ -1,22 +1,26 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void atomicAdd_794055(threadgroup atomic_int* const tint_symbol, device int* const tint_symbol_1) {
-  int res = atomic_fetch_add_explicit(tint_symbol, 1, memory_order_relaxed);
-  *(tint_symbol_1) = res;
-}
-
-void compute_main_inner(uint local_invocation_index, threadgroup atomic_int* const tint_symbol_2, device int* const tint_symbol_3) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup atomic_int* const tint_symbol) {
   {
-    atomic_store_explicit(tint_symbol_2, 0, memory_order_relaxed);
+    atomic_store_explicit(tint_symbol, 0, memory_order_relaxed);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomicAdd_794055(tint_symbol_2, tint_symbol_3);
 }
 
-kernel void compute_main(device int* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup atomic_int tint_symbol_4;
-  compute_main_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5);
+void atomicAdd_794055(threadgroup atomic_int* const tint_symbol_1, device int* const tint_symbol_2) {
+  int res = atomic_fetch_add_explicit(tint_symbol_1, 1, memory_order_relaxed);
+  *(tint_symbol_2) = res;
+}
+
+void compute_main_inner(uint local_invocation_index, threadgroup atomic_int* const tint_symbol_3, device int* const tint_symbol_4) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_3);
+  atomicAdd_794055(tint_symbol_3, tint_symbol_4);
+}
+
+kernel void compute_main(device int* tint_symbol_6 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup atomic_int tint_symbol_5;
+  compute_main_inner(local_invocation_index, &(tint_symbol_5), tint_symbol_6);
   return;
 }
 

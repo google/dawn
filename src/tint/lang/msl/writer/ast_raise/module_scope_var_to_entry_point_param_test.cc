@@ -1056,7 +1056,7 @@ struct tint_symbol_2 {
 
 @compute @workgroup_size(1)
 fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
-  let tint_symbol : ptr<workgroup, mat2x2<f32>> = &((*(tint_symbol_1)).m);
+  let tint_symbol = &((*(tint_symbol_1)).m);
   let x = *(tint_symbol);
 }
 )";
@@ -1097,7 +1097,7 @@ struct tint_symbol_2 {
 
 @compute @workgroup_size(1)
 fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
-  let tint_symbol : ptr<workgroup, array<S2, 4u>> = &((*(tint_symbol_1)).m);
+  let tint_symbol = &((*(tint_symbol_1)).m);
   let x = *(tint_symbol);
 }
 )";
@@ -1138,8 +1138,8 @@ struct tint_symbol_3 {
 
 @compute @workgroup_size(1)
 fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
-  let tint_symbol : ptr<workgroup, S> = &((*(tint_symbol_1)).a);
-  let tint_symbol_2 : ptr<workgroup, S> = &((*(tint_symbol_1)).b);
+  let tint_symbol = &((*(tint_symbol_1)).a);
+  let tint_symbol_2 = &((*(tint_symbol_1)).b);
   let x = *(tint_symbol);
   let y = *(tint_symbol_2);
 }
@@ -1180,8 +1180,8 @@ struct tint_symbol_3 {
 
 @compute @workgroup_size(1)
 fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
-  let tint_symbol : ptr<workgroup, S> = &((*(tint_symbol_1)).a);
-  let tint_symbol_2 : ptr<workgroup, S> = &((*(tint_symbol_1)).b);
+  let tint_symbol = &((*(tint_symbol_1)).a);
+  let tint_symbol_2 = &((*(tint_symbol_1)).b);
   let x = *(tint_symbol);
   let y = *(tint_symbol_2);
 }
