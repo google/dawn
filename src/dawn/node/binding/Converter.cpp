@@ -1487,6 +1487,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
 
 #undef CASE
 
+        case wgpu::FeatureName::AdapterPropertiesD3D:
         case wgpu::FeatureName::ANGLETextureSharing:
         case wgpu::FeatureName::D3D11MultithreadProtected:
         case wgpu::FeatureName::DawnInternalUsages:

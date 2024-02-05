@@ -100,14 +100,15 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                     c->promise.Resolve();
                     c->self->mapped_ = true;
                     break;
-                case WGPUBufferMapAsyncStatus_ValidationError:
-                case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
                 case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
+                case WGPUBufferMapAsyncStatus_DeviceLost:
+                case WGPUBufferMapAsyncStatus_InstanceDropped:
                 case WGPUBufferMapAsyncStatus_MappingAlreadyPending:
                 case WGPUBufferMapAsyncStatus_OffsetOutOfRange:
                 case WGPUBufferMapAsyncStatus_SizeOutOfRange:
-                case WGPUBufferMapAsyncStatus_DeviceLost:
                 case WGPUBufferMapAsyncStatus_Unknown:
+                case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
+                case WGPUBufferMapAsyncStatus_ValidationError:
                     c->self->async_->Reject(c->promise, Errors::OperationError(c->env));
                     break;
             }
