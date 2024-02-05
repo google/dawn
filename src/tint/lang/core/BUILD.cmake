@@ -152,6 +152,7 @@ tint_add_target(tint_lang_core_bench bench
 tint_target_add_dependencies(tint_lang_core_bench bench
   tint_lang_core
   tint_utils_macros
+  tint_utils_math
   tint_utils_reflection
   tint_utils_traits
 )

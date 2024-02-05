@@ -88,7 +88,8 @@ struct Options {
     TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(disable_robustness,
+    TINT_REFLECT(Options,
+                 disable_robustness,
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
                  version,
@@ -96,8 +97,12 @@ struct Options {
                  placeholder_binding_point,
                  binding_remapper_options,
                  external_texture_options,
+                 first_instance_offset,
                  texture_builtins_from_uniform);
 };
+
+/// Ensure that all the fields of Options are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
 
 }  // namespace tint::glsl::writer
 

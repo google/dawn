@@ -108,7 +108,8 @@ struct Options {
     PixelLocalOptions pixel_local_options = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(disable_robustness,
+    TINT_REFLECT(Options,
+                 disable_robustness,
                  disable_workgroup_init,
                  truncate_interstage_variables,
                  polyfill_reflect_vec2_f32,
@@ -124,6 +125,9 @@ struct Options {
                  access_controls,
                  pixel_local_options);
 };
+
+/// Ensure that all the fields of Options are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
 
 }  // namespace tint::hlsl::writer
 

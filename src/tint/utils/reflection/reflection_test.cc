@@ -27,6 +27,7 @@
 
 #include "src/tint/utils/reflection/reflection.h"
 #include "gtest/gtest.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint {
 namespace {
@@ -35,7 +36,7 @@ struct S {
     int i;
     unsigned u;
     bool b;
-    TINT_REFLECT(i, u, b);
+    TINT_REFLECT(S, i, u, b);
 };
 
 static_assert(!HasReflection<int>);
@@ -99,6 +100,58 @@ TEST(ReflectionTest, ForeachFieldNonConst) {
     EXPECT_EQ(s.u, 20u);
     EXPECT_EQ(s.b, false);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// TINT_ASSERT_ALL_FIELDS_REFLECTED tests
+////////////////////////////////////////////////////////////////////////////////
+static_assert(detail::CanUseTintAssertAllFieldsReflected<S> == true);
+
+struct VirtualNonCastable {
+    virtual ~VirtualNonCastable() = default;
+};
+static_assert(detail::CanUseTintAssertAllFieldsReflected<VirtualNonCastable> == false);
+
+struct VirtualCastable : Castable<VirtualCastable, CastableBase> {
+    ~VirtualCastable() override = default;
+    int a, b, c;
+    TINT_REFLECT(VirtualCastable, a, b, c);
+};
+static_assert(detail::CanUseTintAssertAllFieldsReflected<VirtualCastable> == true);
+static_assert(detail::CheckAllFieldsReflected<VirtualCastable,
+                                              0,
+                                              0,
+                                              VirtualCastable::Reflection::Fields,
+                                              /* assert */ false>::value == true);
+
+struct MissingFirst {
+    int a, b, c;
+    TINT_REFLECT(MissingFirst, b, c);
+};
+static_assert(detail::CheckAllFieldsReflected<MissingFirst,
+                                              0,
+                                              0,
+                                              MissingFirst::Reflection::Fields,
+                                              /* assert */ false>::value == false);
+
+struct MissingMid {
+    int a, b, c;
+    TINT_REFLECT(MissingMid, a, c);
+};
+static_assert(detail::CheckAllFieldsReflected<MissingMid,
+                                              0,
+                                              0,
+                                              MissingMid::Reflection::Fields,
+                                              /* assert */ false>::value == false);
+
+struct MissingLast {
+    int a, b, c;
+    TINT_REFLECT(MissingLast, a, b);
+};
+static_assert(detail::CheckAllFieldsReflected<MissingLast,
+                                              0,
+                                              0,
+                                              MissingLast::Reflection::Fields,
+                                              /* assert */ false>::value == false);
 
 }  // namespace
 }  // namespace tint

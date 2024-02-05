@@ -114,7 +114,7 @@ struct S {
     uint8_t a;
     uint16_t b;
     uint32_t c;
-    TINT_REFLECT(a, b, c);
+    TINT_REFLECT(S, a, b, c);
 };
 
 TEST(BytesDecoderTest, ReflectedObject) {

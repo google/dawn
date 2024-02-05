@@ -79,8 +79,11 @@ class SubstituteOverride final : public Castable<SubstituteOverride, Transform> 
         std::unordered_map<OverrideId, double> map;
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-        TINT_REFLECT(map);
+        TINT_REFLECT(Config, map);
     };
+
+    /// Ensure that all the fields of Config are reflected.
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(Config);
 
     /// Constructor
     SubstituteOverride();

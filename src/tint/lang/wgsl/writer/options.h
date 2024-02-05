@@ -48,9 +48,14 @@ struct Options {
     /// Set to `true` to use the syntax tree writer
     bool use_syntax_tree_writer = false;
 
-    TINT_REFLECT(use_syntax_tree_writer);
+    TINT_REFLECT(Options, use_syntax_tree_writer);
 #endif
 };
+
+#ifdef TINT_BUILD_SYNTAX_TREE_WRITER
+/// Ensure that all the fields of SamplerTexturePair are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
+#endif
 
 }  // namespace tint::wgsl::writer
 

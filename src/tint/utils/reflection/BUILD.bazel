@@ -46,6 +46,7 @@ cc_library(
   ],
   deps = [
     "//src/tint/utils/macros",
+    "//src/tint/utils/math",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -58,7 +59,10 @@ cc_library(
   ],
   deps = [
     "//src/tint/utils/macros",
+    "//src/tint/utils/math",
     "//src/tint/utils/reflection",
+    "//src/tint/utils/rtti",
+    "//src/tint/utils/traits",
     "@gtest",
   ],
   copts = COPTS,

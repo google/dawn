@@ -89,8 +89,11 @@ struct VertexAttributeDescriptor {
     uint32_t shader_location;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(format, offset, shader_location);
+    TINT_REFLECT(VertexAttributeDescriptor, format, offset, shader_location);
 };
+
+/// Ensure that all the fields of VertexAttributeDescriptor are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(VertexAttributeDescriptor);
 
 /// Describes a buffer containing multiple vertex attributes
 struct VertexBufferLayoutDescriptor {
@@ -122,8 +125,11 @@ struct VertexBufferLayoutDescriptor {
     std::vector<VertexAttributeDescriptor> attributes;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(array_stride, step_mode, attributes);
+    TINT_REFLECT(VertexBufferLayoutDescriptor, array_stride, step_mode, attributes);
 };
+
+/// Ensure that all the fields of VertexBufferLayoutDescriptor are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(VertexBufferLayoutDescriptor);
 
 /// Describes vertex state, which consists of many buffers containing vertex
 /// attributes
@@ -176,8 +182,11 @@ class VertexPulling final : public Castable<VertexPulling, Transform> {
         uint32_t pulling_group = 4u;
 
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-        TINT_REFLECT(vertex_state, pulling_group);
+        TINT_REFLECT(Config, vertex_state, pulling_group);
     };
+
+    /// Ensure that all the fields of Config are reflected.
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(Config);
 
     /// Constructor
     VertexPulling();

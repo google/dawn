@@ -46,7 +46,7 @@ struct BindingPoint {
     uint32_t binding = 0;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(group, binding);
+    TINT_REFLECT(BindingPoint, group, binding);
 
     /// Equality operator
     /// @param rhs the BindingPoint to compare against
@@ -73,6 +73,9 @@ struct BindingPoint {
         return binding < rhs.binding;
     }
 };
+
+/// Ensure that all the fields of BindingPoint are reflected.
+TINT_ASSERT_ALL_FIELDS_REFLECTED(BindingPoint);
 
 /// Prints the BindingPoint @p bp to @p o
 /// @param o the stream to write to

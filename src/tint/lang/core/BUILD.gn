@@ -144,6 +144,7 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}:google_benchmark",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/reflection",
       "${tint_src_dir}/utils/traits",
     ]
