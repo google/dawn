@@ -164,7 +164,7 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
-            const binding::Uniform& dst_binding_point = it.second;
+            const binding::BindingInfo& dst_binding_point = it.second;
 
             // Bindings which go to the same slot in MSL do not need to be re-bound.
             if (src_binding_point.group == 0 &&
@@ -210,19 +210,3 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
 }
 
 }  // namespace tint::msl::writer
-
-namespace std {
-
-/// Custom std::hash specialization for tint::msl::writer::binding::BindingInfo so
-/// they can be used as keys for std::unordered_map and std::unordered_set.
-template <>
-class hash<tint::msl::writer::binding::BindingInfo> {
-  public:
-    /// @param info the binding to create a hash for
-    /// @return the hash value
-    inline std::size_t operator()(const tint::msl::writer::binding::BindingInfo& info) const {
-        return tint::Hash(info.binding);
-    }
-};
-
-}  // namespace std

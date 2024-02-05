@@ -62,6 +62,10 @@
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
+#if TINT_BUILD_HLSL_WRITER
+#include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
+#endif  // TINT_BUILD_MSL_WRITER
+
 namespace tint::fuzzers {
 
 namespace {
@@ -272,6 +276,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_MSL_WRITER
             break;
         case OutputFormat::kHLSL:
+#if TINT_BUILD_HLSL_WRITER
+            options_hlsl_.bindings = tint::hlsl::writer::GenerateBindings(program);
+#endif  // TINT_BUILD_HLSL_WRITER
             break;
         case OutputFormat::kSpv:
 #if TINT_BUILD_SPV_WRITER
@@ -280,51 +287,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             break;
         case OutputFormat::kWGSL:
             break;
-    }
-
-    // For the generates which use MultiPlanar, make sure the configuration options are provided so
-    // that the transformer will execute.
-    if (output_ == OutputFormat::kHLSL) {
-        // Gather external texture binding information
-        // Collect next valid binding number per group
-        std::unordered_map<uint32_t, uint32_t> group_to_next_binding_number;
-        std::vector<BindingPoint> ext_tex_bps;
-        for (auto* var : program.AST().GlobalVariables()) {
-            if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
-                if (auto bp = sem_var->Attributes().binding_point) {
-                    auto& n = group_to_next_binding_number[bp->group];
-                    n = std::max(n, bp->binding + 1);
-
-                    if (sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
-                        ext_tex_bps.emplace_back(*bp);
-                    }
-                }
-            }
-        }
-
-        ExternalTextureOptions::BindingsMap new_bindings_map;
-        for (auto bp : ext_tex_bps) {
-            uint32_t g = bp.group;
-            uint32_t& next_num = group_to_next_binding_number[g];
-            auto new_bps = ExternalTextureOptions::BindingPoints{{g, next_num++}, {g, next_num++}};
-
-            new_bindings_map[bp] = new_bps;
-        }
-
-        switch (output_) {
-            case OutputFormat::kMSL: {
-                break;
-            }
-            case OutputFormat::kHLSL: {
-                options_hlsl_.external_texture_options.bindings_map = new_bindings_map;
-                break;
-            }
-            case OutputFormat::kSpv: {
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     switch (output_) {

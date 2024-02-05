@@ -37,6 +37,7 @@
 #endif  // TINT_BUILD_GLSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
+#include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -282,8 +283,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program) {
 bool GenerateHlsl(const tint::Program& program) {
 #if TINT_BUILD_HLSL_WRITER
     tint::hlsl::writer::Options gen_options;
-    gen_options.external_texture_options.bindings_map =
-        tint::cmd::GenerateExternalTextureBindings(program);
+    gen_options.bindings = tint::hlsl::writer::GenerateBindings(program);
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);

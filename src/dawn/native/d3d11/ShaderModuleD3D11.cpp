@@ -112,44 +112,72 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             break;
     }
 
-    tint::BindingRemapperOptions bindingRemapper;
-
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
 
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* groupLayout = ToBackend(layout->GetBindGroupLayout(group));
-        const auto& indices = layout->GetBindingIndexInfo()[group];
-        const auto& groupBindingInfo = moduleBindingInfo[group];
+    tint::hlsl::writer::Bindings bindings;
 
-        for (const auto& [binding, bindingInfo] : groupBindingInfo) {
-            BindingIndex bindingIndex = groupLayout->GetBindingIndex(binding);
+    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+        const auto& indices = layout->GetBindingIndexInfo()[group];
+        const BindingGroupInfoMap& moduleGroupBindingInfo = moduleBindingInfo[group];
+
+        for (const auto& [binding, shaderBindingInfo] : moduleGroupBindingInfo) {
+            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                                static_cast<uint32_t>(binding)};
             tint::BindingPoint dstBindingPoint{0u, indices[bindingIndex]};
-            if (srcBindingPoint != dstBindingPoint) {
-                bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
-            }
-        }
+            auto* const bufferBindingInfo =
+                std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
 
-        // Tint will add two bindings (plane1, params) for one external texture binding.
-        // We need to remap the binding points for the two bindings.
-        // we cannot specified the final slot of those two bindings in
-        // req.hlsl.externalTextureOptions because the final slots may be conflict with
-        // existing other bindings, and then they will be remapped again with bindingRemapper
-        // incorrectly. So we have to use intermediate binding slots in
-        // req.hlsl.externalTextureOptions, and then map them to the final slots with
-        // bindingRemapper.
-        for (const auto& [_, expansion] : groupLayout->GetExternalTextureBindingExpansionMap()) {
-            uint32_t plane1Slot = indices[groupLayout->GetBindingIndex(expansion.plane1)];
-            uint32_t paramsSlot = indices[groupLayout->GetBindingIndex(expansion.params)];
-            bindingRemapper.binding_points.emplace(
-                tint::BindingPoint{static_cast<uint32_t>(group),
-                                   static_cast<uint32_t>(expansion.plane1)},
-                tint::BindingPoint{0u, plane1Slot});
-            bindingRemapper.binding_points.emplace(
-                tint::BindingPoint{static_cast<uint32_t>(group),
-                                   static_cast<uint32_t>(expansion.params)},
-                tint::BindingPoint{0u, paramsSlot});
+            if (bufferBindingInfo) {
+                switch (bufferBindingInfo->type) {
+                    case wgpu::BufferBindingType::Uniform:
+                        bindings.uniform.emplace(
+                            srcBindingPoint, tint::hlsl::writer::binding::Uniform{
+                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                        break;
+                    case kInternalStorageBufferBinding:
+                    case wgpu::BufferBindingType::Storage:
+                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                        bindings.storage.emplace(
+                            srcBindingPoint, tint::hlsl::writer::binding::Storage{
+                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                        break;
+                    case wgpu::BufferBindingType::Undefined:
+                        DAWN_UNREACHABLE();
+                        break;
+                }
+            } else if (std::holds_alternative<SamplerBindingInfo>(shaderBindingInfo.bindingInfo)) {
+                bindings.sampler.emplace(
+                    srcBindingPoint, tint::hlsl::writer::binding::Sampler{dstBindingPoint.group,
+                                                                          dstBindingPoint.binding});
+            } else if (std::holds_alternative<SampledTextureBindingInfo>(
+                           shaderBindingInfo.bindingInfo)) {
+                bindings.texture.emplace(
+                    srcBindingPoint, tint::hlsl::writer::binding::Texture{dstBindingPoint.group,
+                                                                          dstBindingPoint.binding});
+            } else if (std::holds_alternative<StorageTextureBindingInfo>(
+                           shaderBindingInfo.bindingInfo)) {
+                bindings.storage_texture.emplace(
+                    srcBindingPoint, tint::hlsl::writer::binding::StorageTexture{
+                                         dstBindingPoint.group, dstBindingPoint.binding});
+            } else if (std::holds_alternative<ExternalTextureBindingInfo>(
+                           shaderBindingInfo.bindingInfo)) {
+                const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                const auto& expansion = etBindingMap.find(binding);
+                DAWN_ASSERT(expansion != etBindingMap.end());
+
+                const auto& bindingExpansion = expansion->second;
+                tint::hlsl::writer::binding::BindingInfo plane0{
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane0)]};
+                tint::hlsl::writer::binding::BindingInfo plane1{
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                tint::hlsl::writer::binding::BindingInfo metadata{
+                    0u, indices[bgl->GetBindingIndex(bindingExpansion.params)]};
+                bindings.external_texture.emplace(
+                    srcBindingPoint,
+                    tint::hlsl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+            }
         }
     }
 
@@ -173,7 +201,10 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in the
         // default space(0)
         tint::BindingPoint dstBindingPoint{0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
-        bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
+
+        bindings.uniform.emplace(
+            srcBindingPoint,
+            tint::hlsl::writer::binding::Uniform{dstBindingPoint.group, dstBindingPoint.binding});
     }
 
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
@@ -184,8 +215,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-    req.hlsl.tintOptions.binding_remapper_options = std::move(bindingRemapper);
-    req.hlsl.tintOptions.external_texture_options = BuildExternalTextureTransformBindings(layout);
+    req.hlsl.tintOptions.bindings = std::move(bindings);
 
     if (entryPoint.usesNumWorkgroups) {
         // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the numWorkgroups in the

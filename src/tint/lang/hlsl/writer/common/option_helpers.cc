@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+/// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/common/option_helpers.h"
+#include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 
 #include <utility>
 
 #include "src/tint/utils/containers/hashset.h"
 
-namespace tint::spirv::writer {
+namespace tint::hlsl::writer {
+
+/// binding::BindingInfo to tint::BindingPoint map
+using InfoToPointMap = tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8>;
 
 Result<SuccessType> ValidateBindingOptions(const Options& options) {
     diag::List diagnostics;
 
     tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
-    tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_spirv_bindings{};
+
+    InfoToPointMap seen_hlsl_buffer_bindings{};
+    InfoToPointMap seen_hlsl_texture_bindings{};
+    InfoToPointMap seen_hlsl_sampler_bindings{};
 
     // Both wgsl_seen and spirv_seen check to see if the pair of [src, dst] are unique. If we have
     // multiple entries that map the same [src, dst] pair, that's fine. We treat it as valid as it's
@@ -59,22 +65,21 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         return false;
     };
 
-    auto spirv_seen = [&diagnostics, &seen_spirv_bindings](const binding::BindingInfo& src,
-                                                           const tint::BindingPoint& dst) -> bool {
-        if (auto binding = seen_spirv_bindings.Get(src)) {
+    auto hlsl_seen = [&diagnostics](InfoToPointMap& map, const binding::BindingInfo& src,
+                                    const tint::BindingPoint& dst) -> bool {
+        if (auto binding = map.Get(src)) {
             if (*binding != dst) {
                 std::stringstream str;
-                str << "found duplicate SPIR-V binding point: [group: " << src.group
-                    << ", binding: " << src.binding << "]";
+                str << "found duplicate MSL binding point: [binding: " << src.binding << "]";
                 diagnostics.AddError(diag::System::Writer, str.str());
                 return true;
             }
         }
-        seen_spirv_bindings.Add(src, dst);
+        map.Add(src, dst);
         return false;
     };
 
-    auto valid = [&wgsl_seen, &spirv_seen](const auto& hsh) -> bool {
+    auto valid = [&wgsl_seen, &hlsl_seen](InfoToPointMap& map, const auto& hsh) -> bool {
         for (const auto& it : hsh) {
             const auto& src_binding = it.first;
             const auto& dst_binding = it.second;
@@ -83,31 +88,36 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
                 return false;
             }
 
-            if (spirv_seen(dst_binding, src_binding)) {
+            if (hlsl_seen(map, dst_binding, src_binding)) {
                 return false;
             }
         }
         return true;
     };
 
-    if (!valid(options.bindings.uniform)) {
+    // Storage and uniform are both [[buffer()]]
+    if (!valid(seen_hlsl_buffer_bindings, options.bindings.uniform)) {
         diagnostics.AddNote(diag::System::Writer, "when processing uniform", {});
         return Failure{std::move(diagnostics)};
     }
-    if (!valid(options.bindings.storage)) {
+    if (!valid(seen_hlsl_buffer_bindings, options.bindings.storage)) {
         diagnostics.AddNote(diag::System::Writer, "when processing storage", {});
         return Failure{std::move(diagnostics)};
     }
-    if (!valid(options.bindings.texture)) {
+
+    // Sampler is [[sampler()]]
+    if (!valid(seen_hlsl_sampler_bindings, options.bindings.sampler)) {
+        diagnostics.AddNote(diag::System::Writer, "when processing sampler", {});
+        return Failure{std::move(diagnostics)};
+    }
+
+    // Texture and storage texture are [[texture()]]
+    if (!valid(seen_hlsl_texture_bindings, options.bindings.texture)) {
         diagnostics.AddNote(diag::System::Writer, "when processing texture", {});
         return Failure{std::move(diagnostics)};
     }
-    if (!valid(options.bindings.storage_texture)) {
+    if (!valid(seen_hlsl_texture_bindings, options.bindings.storage_texture)) {
         diagnostics.AddNote(diag::System::Writer, "when processing storage_texture", {});
-        return Failure{std::move(diagnostics)};
-    }
-    if (!valid(options.bindings.sampler)) {
-        diagnostics.AddNote(diag::System::Writer, "when processing sampler", {});
         return Failure{std::move(diagnostics)};
     }
 
@@ -123,15 +133,17 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
             return Failure{std::move(diagnostics)};
         }
 
-        if (spirv_seen(plane0, src_binding)) {
+        // Plane0 & Plane1 are [[texture()]]
+        if (hlsl_seen(seen_hlsl_texture_bindings, plane0, src_binding)) {
             diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
-        if (spirv_seen(plane1, src_binding)) {
+        if (hlsl_seen(seen_hlsl_texture_bindings, plane1, src_binding)) {
             diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
-        if (spirv_seen(metadata, src_binding)) {
+        // Metadata is [[buffer()]]
+        if (hlsl_seen(seen_hlsl_buffer_bindings, metadata, src_binding)) {
             diagnostics.AddNote(diag::System::Writer, "when processing external_texture", {});
             return Failure{std::move(diagnostics)};
         }
@@ -141,62 +153,29 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 }
 
 // The remapped binding data and external texture data need to coordinate in order to put things in
-// the correct place when we're done.
+// the correct place when we're done. The binding remapper is run first, so make sure that the
+// external texture uses the new binding point.
 //
-// When the data comes in we have a list of all WGSL origin (group,binding) pairs to SPIR-V
-// (group,binding) pairs in the `uniform`, `storage`, `texture`, and `sampler` arrays.
-//
-// The `external_texture` array stores a WGSL origin (group,binding) pair for the external textures
-// which provide `plane0`, `plane1`, and `metadata` SPIR-V (group,binding) pairs.
-//
-// If the remapper is run first, then the `external_texture` will end up being moved from the WGSL
-// point, or the SPIR-V point (or the `plane0` value). There will also, possibly, have been bindings
-// moved aside in order to place the `external_texture` bindings.
-//
-// If multiplanar runs first, care needs to be taken that when the texture is split and we create
-// `plane1` and `metadata` that they do not collide with existing bindings. If they would collide
-// then we need to place them elsewhere and have the remapper place them in the correct locations.
-//
-// # Example
-// WGSL:
-//   @group(0) @binding(0) var<uniform> u: Uniforms;
-//   @group(0) @binding(1) var s: sampler;
-//   @group(0) @binding(2) var t: texture_external;
-//
-// Given that program, Dawn may decide to do the remappings such that:
-//   * WGSL u (0, 0) -> SPIR-V (0, 1)
-//   * WGSL s (0, 1) -> SPIR-V (0, 2)
-//   * WGSL t (0, 2):
-//     * plane0 -> SPIR-V (0, 3)
-//     * plane1 -> SPIR-V (0, 4)
-//     * metadata -> SPIR-V (0, 0)
-//
-// In this case, if we run binding remapper first, then tell multiplanar to look for the texture at
-// (0, 3) instead of the original (0, 2).
-//
-// If multiplanar runs first, then metadata (0, 0) needs to be placed elsewhere and then remapped
-// back to (0, 0) by the remapper. (Otherwise, we'll have two `@group(0) @binding(0)` items in the
-// program.)
-//
-// # Status
-// The below method assumes we run binding remapper first. So it will setup the binding data and
-// switch the value used by the multiplanar.
-void PopulateRemapperAndMultiplanarOptions(const Options& options,
-                                           RemapperData& remapper_data,
-                                           ExternalTextureOptions& external_texture) {
+// When the data comes in we have a list of all WGSL origin (group,binding) pairs to HLSL
+// (group,binding) in the `uniform`, `storage`, `texture`, and `sampler` arrays.
+void PopulateBindingRelatedOptions(
+    const Options& options,
+    RemapperData& remapper_data,
+    ExternalTextureOptions& external_texture,
+    ArrayLengthFromUniformOptions& array_length_from_uniform_options) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
-            const binding::BindingInfo& dst_binding_point = it.second;
+            const binding::BindingInfo& dst_binding_info = it.second;
 
-            // Bindings which go to the same slot in SPIR-V do not need to be re-bound.
-            if (src_binding_point.group == dst_binding_point.group &&
-                src_binding_point.binding == dst_binding_point.binding) {
+            BindingPoint dst_binding_point{dst_binding_info.group, dst_binding_info.binding};
+
+            // Skip redundant bindings
+            if (src_binding_point == dst_binding_point) {
                 continue;
             }
 
-            remapper_data.emplace(src_binding_point,
-                                  BindingPoint{dst_binding_point.group, dst_binding_point.binding});
+            remapper_data.emplace(src_binding_point, dst_binding_point);
         }
     };
 
@@ -217,19 +196,36 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
         BindingPoint plane1_binding_point{plane1.group, plane1.binding};
         BindingPoint metadata_binding_point{metadata.group, metadata.binding};
 
-        // Use the re-bound spir-v plane0 value for the lookup key.
+        // Use the re-bound HLSL plane0 value for the lookup key.
         external_texture.bindings_map.emplace(
             plane0_binding_point,
             ExternalTextureOptions::BindingPoints{plane1_binding_point, metadata_binding_point});
 
-        // Bindings which go to the same slot in SPIR-V do not need to be re-bound.
-        if (src_binding_point.group == plane0.group &&
-            src_binding_point.binding == plane0.binding) {
+        // Bindings which go to the same slot in HLSL do not need to be re-bound.
+        if (src_binding_point == plane0_binding_point) {
             continue;
         }
 
-        remapper_data.emplace(src_binding_point, BindingPoint{plane0.group, plane0.binding});
+        remapper_data.emplace(src_binding_point, plane0_binding_point);
+    }
+
+    // ArrayLengthFromUniformOptions bindpoints may need to be remapped
+    {
+        std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+        for (auto& [bindpoint, index] : options.array_length_from_uniform.bindpoint_to_size_index) {
+            auto it = remapper_data.find(bindpoint);
+            if (it != remapper_data.end()) {
+                bindpoint_to_size_index.emplace(it->second, index);
+            } else {
+                bindpoint_to_size_index.emplace(bindpoint, index);
+            }
+        }
+
+        array_length_from_uniform_options.ubo_binding =
+            options.array_length_from_uniform.ubo_binding;
+        array_length_from_uniform_options.bindpoint_to_size_index =
+            std::move(bindpoint_to_size_index);
     }
 }
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::hlsl::writer

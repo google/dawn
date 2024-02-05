@@ -109,10 +109,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     RemapperData remapper_data{};
     PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
 
-    // BindingRemapper must come before MultiplanarExternalTexture. Note, this is flipped to the
-    // other generators which run Multiplanar first and then binding remapper.
     manager.Add<ast::transform::BindingRemapper>();
-
     data.Add<ast::transform::BindingRemapper::Remappings>(
         remapper_data, std::unordered_map<BindingPoint, core::Access>{},
         /* allow_collisions */ false);

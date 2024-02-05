@@ -27,8 +27,9 @@
 
 function(add_tint_regex_fuzzer NAME)
   add_executable(${NAME} ${NAME}.cc ${REGEX_FUZZER_SOURCES})
-  target_link_libraries(${NAME} PRIVATE libtint_regex_fuzzer tint_lang_spirv_writer_helpers)
+  target_link_libraries(${NAME} PRIVATE libtint_regex_fuzzer tint_lang_hlsl_writer_helpers)
   target_link_libraries(${NAME} PRIVATE libtint_regex_fuzzer tint_lang_msl_writer_helpers)
+  target_link_libraries(${NAME} PRIVATE libtint_regex_fuzzer tint_lang_spirv_writer_helpers)
   tint_fuzzer_compile_options(${NAME})
   tint_spvtools_compile_options(${NAME})
   target_compile_definitions(${NAME} PRIVATE CUSTOM_MUTATOR)

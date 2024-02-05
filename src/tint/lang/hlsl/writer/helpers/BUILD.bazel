@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,28 +37,36 @@
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
-  name = "common",
+  name = "helpers",
   srcs = [
-    "option_helpers.cc",
-    "options.cc",
+    "generate_bindings.cc",
   ],
   hdrs = [
-    "option_helpers.h",
-    "options.h",
+    "generate_bindings.h",
   ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/api/options",
     "//src/tint/lang/core",
+    "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/type",
+    "//src/tint/lang/hlsl/writer/common",
+    "//src/tint/lang/wgsl",
+    "//src/tint/lang/wgsl/ast",
+    "//src/tint/lang/wgsl/features",
+    "//src/tint/lang/wgsl/program",
+    "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
+    "//src/tint/utils/id",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
     "//src/tint/utils/reflection",
     "//src/tint/utils/result",
     "//src/tint/utils/rtti",
+    "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ],

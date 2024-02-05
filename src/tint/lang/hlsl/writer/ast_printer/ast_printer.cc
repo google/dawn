@@ -50,6 +50,7 @@
 #include "src/tint/lang/hlsl/writer/ast_raise/pixel_local.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
+#include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
@@ -206,10 +207,9 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         manager.Add<ast::transform::Robustness>();
 
         ast::transform::Robustness::Config config = {};
-
         config.bindings_ignored = std::unordered_set<BindingPoint>(
-            options.binding_points_ignored_in_robustness_transform.cbegin(),
-            options.binding_points_ignored_in_robustness_transform.cend());
+            options.bindings.ignored_by_robustness_transform.cbegin(),
+            options.bindings.ignored_by_robustness_transform.cend());
 
         // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
         // according to the description of the assembly store_uav_typed, out of bounds addressing
@@ -219,20 +219,24 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         data.Add<ast::transform::Robustness::Config>(config);
     }
 
-    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        options.external_texture_options.bindings_map);
-    manager.Add<ast::transform::MultiplanarExternalTexture>();
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
+    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+                                  array_length_from_uniform_options);
 
-    // BindingRemapper must come after MultiplanarExternalTexture
     manager.Add<ast::transform::BindingRemapper>();
-
     // D3D11 and 12 registers like `t3` and `c3` have the same bindingOffset number in
     // the remapping but should not be considered a collision because they have
     // different types.
     data.Add<ast::transform::BindingRemapper::Remappings>(
-        options.binding_remapper_options.binding_points, options.access_controls,
-        /* allow_collisions */ true);
+        remapper_data, options.bindings.access_controls, /* allow_collisions */ true);
+
+    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+    // MultiplanarExternalTexture must come after BindingRemapper
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
+        external_texture_options.bindings_map, /* may_collide */ true);
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills
         ast::transform::BuiltinPolyfill::Builtins polyfills;
@@ -330,11 +334,10 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     manager.Add<ast::transform::RemovePhonies>();
 
     // Build the config for the internal ArrayLengthFromUniform transform.
-    auto& array_length_from_uniform = options.array_length_from_uniform;
     ast::transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
-        array_length_from_uniform.ubo_binding);
+        array_length_from_uniform_options.ubo_binding);
     array_length_from_uniform_cfg.bindpoint_to_size_index =
-        array_length_from_uniform.bindpoint_to_size_index;
+        std::move(array_length_from_uniform_options.bindpoint_to_size_index);
 
     // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
     // ExpandCompoundAssignment.

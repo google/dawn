@@ -85,6 +85,7 @@ if (tint_has_fuzzers) {
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/glsl/writer",
       "${tint_src_dir}/lang/hlsl/writer",
+      "${tint_src_dir}/lang/hlsl/writer/helpers",
       "${tint_src_dir}/lang/msl/writer",
       "${tint_src_dir}/lang/msl/writer/helpers",
       "${tint_src_dir}/lang/spirv/writer",

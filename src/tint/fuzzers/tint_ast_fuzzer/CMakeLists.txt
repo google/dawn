@@ -27,8 +27,9 @@
 
 function(add_tint_ast_fuzzer NAME)
   add_executable(${NAME} ${NAME}.cc ${AST_FUZZER_SOURCES})
-  target_link_libraries(${NAME} PRIVATE libtint_ast_fuzzer tint_lang_spirv_writer_helpers)
+  target_link_libraries(${NAME} PRIVATE libtint_ast_fuzzer tint_lang_hlsl_writer_helpers)
   target_link_libraries(${NAME} PRIVATE libtint_ast_fuzzer tint_lang_msl_writer_helpers)
+  target_link_libraries(${NAME} PRIVATE libtint_ast_fuzzer tint_lang_spirv_writer_helpers)
   tint_fuzzer_compile_options(${NAME})
   if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
     tint_spvheaders_compile_options(${NAME})
