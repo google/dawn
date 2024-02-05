@@ -33,11 +33,8 @@ namespace tint {
 /// @return doxygen-thinks-this-static-field-is-a-function :(
 template <>
 const TypeInfo tint::detail::TypeInfoOf<CastableBase>::info{
-    nullptr,
-    "CastableBase",
-    tint::TypeInfo::HashCodeOf<CastableBase>(),
-    tint::TypeInfo::FullHashCodeOf<CastableBase>(),
-};
+    nullptr, "CastableBase", tint::TypeCode::Of<CastableBase>(),
+    tint::TypeCodeSet::OfHierarchy<CastableBase>()};
 
 CastableBase::CastableBase(const CastableBase&) = default;
 

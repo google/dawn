@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::U32);
 namespace tint::core::type {
 
 U32::U32()
-    : Base(static_cast<size_t>(tint::TypeInfo::Of<U32>().full_hashcode),
+    : Base(static_cast<size_t>(tint::TypeCode::Of<U32>().bits),
            core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,

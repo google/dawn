@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Bool);
 namespace tint::core::type {
 
 Bool::Bool()
-    : Base(static_cast<size_t>(tint::TypeInfo::Of<Bool>().full_hashcode),
+    : Base(static_cast<size_t>(tint::TypeCode::Of<Bool>().bits),
            core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,

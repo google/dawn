@@ -32,8 +32,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::resolver::IncompleteType);
 namespace tint::resolver {
 
 IncompleteType::IncompleteType(core::BuiltinType b)
-    : Base(static_cast<size_t>(tint::TypeInfo::Of<IncompleteType>().full_hashcode),
-           core::type::Flags{}),
+    : Base(static_cast<size_t>(tint::TypeCode::Of<IncompleteType>().bits), core::type::Flags{}),
       builtin(b) {}
 
 IncompleteType::~IncompleteType() = default;

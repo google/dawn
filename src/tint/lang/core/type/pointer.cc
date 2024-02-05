@@ -38,7 +38,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Pointer);
 namespace tint::core::type {
 
 Pointer::Pointer(core::AddressSpace address_space, const Type* store_type, core::Access access)
-    : Base(Hash(tint::TypeInfo::Of<Pointer>().full_hashcode), address_space, store_type, access) {}
+    : Base(Hash(tint::TypeCode::Of<Pointer>().bits), address_space, store_type, access) {}
 
 bool Pointer::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Pointer>()) {

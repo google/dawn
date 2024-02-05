@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::type::SampledImage);
 namespace tint::spirv::type {
 
 SampledImage::SampledImage(const core::type::Type* image)
-    : Base(static_cast<size_t>(Hash(tint::TypeInfo::Of<SampledImage>().full_hashcode, image)),
+    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<SampledImage>().bits, image)),
            core::type::Flags{}),
       image_(image) {}
 

@@ -39,8 +39,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::MultisampledTexture);
 namespace tint::core::type {
 
 MultisampledTexture::MultisampledTexture(TextureDimension dim, const Type* type)
-    : Base(Hash(tint::TypeInfo::Of<MultisampledTexture>().full_hashcode, dim, type), dim),
-      type_(type) {
+    : Base(Hash(tint::TypeCode::Of<MultisampledTexture>().bits, dim, type), dim), type_(type) {
     TINT_ASSERT(type_);
 }
 

@@ -38,7 +38,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Vector);
 namespace tint::core::type {
 
 Vector::Vector(Type const* subtype, uint32_t width, bool packed /* = false */)
-    : Base(Hash(tint::TypeInfo::Of<Vector>().full_hashcode, width, subtype, packed),
+    : Base(Hash(tint::TypeCode::Of<Vector>().bits, width, subtype, packed),
            core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,

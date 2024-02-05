@@ -33,8 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Void);
 
 namespace tint::core::type {
 
-Void::Void()
-    : Base(static_cast<size_t>(tint::TypeInfo::Of<Void>().full_hashcode), core::type::Flags{}) {}
+Void::Void() : Base(static_cast<size_t>(tint::TypeCode::Of<Void>().bits), core::type::Flags{}) {}
 
 Void::~Void() = default;
 

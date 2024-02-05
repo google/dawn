@@ -37,7 +37,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Reference);
 namespace tint::core::type {
 
 Reference::Reference(core::AddressSpace address_space, const Type* store_type, core::Access access)
-    : Base(Hash(tint::TypeInfo::Of<Pointer>().full_hashcode), address_space, store_type, access) {}
+    : Base(Hash(tint::TypeCode::Of<Reference>().bits), address_space, store_type, access) {}
 
 bool Reference::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<Reference>()) {
