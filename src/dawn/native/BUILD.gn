@@ -163,6 +163,11 @@ source_set("sources") {
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/api",
     "${dawn_root}/src/tint/lang/wgsl/features",
+
+    # TODO(dawn:286): These should only be necessary if SPIR-V validation is
+    # enabled with dawn_enable_spirv_validation
+    "${dawn_spirv_tools_dir}:spvtools_opt",
+    "${dawn_spirv_tools_dir}:spvtools_val",
   ]
   defines = []
   libs = []
@@ -674,10 +679,6 @@ source_set("sources") {
     sources += [
       "SpirvValidation.cpp",
       "SpirvValidation.h",
-    ]
-    deps += [
-      "${dawn_spirv_tools_dir}:spvtools_opt",
-      "${dawn_spirv_tools_dir}:spvtools_val",
     ]
   }
 
