@@ -65,7 +65,7 @@ struct BindingInfo {
     inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
 
     /// @returns the hash code of the BindingInfo
-    size_t HashCode() const { return Hash(group, binding); }
+    tint::HashCode HashCode() const { return Hash(group, binding); }
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(BindingInfo, group, binding);
