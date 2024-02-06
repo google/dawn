@@ -737,6 +737,7 @@ fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, writable>
 
 @must_use @stage("compute") fn subgroupBallot() -> vec4<u32>
 @must_use @stage("compute") fn subgroupBroadcast<T: fiu32_f16>(value: T, @const sourceLaneIndex: u32) -> T
+@must_use @stage("compute") fn subgroupBroadcast<N: num, T: fiu32_f16>(value: vec<N, T>, @const sourceLaneIndex: u32) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void subgroupBroadcast_34fa3d(device packed_uint3* const tint_symbol) {
+  uint3 arg_0 = uint3(1u);
+  uint3 res = simd_broadcast(arg_0,ushort(1u));
+  *(tint_symbol) = packed_uint3(res);
+}
+
+kernel void compute_main(device packed_uint3* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_34fa3d(tint_symbol_1);
+  return;
+}
+

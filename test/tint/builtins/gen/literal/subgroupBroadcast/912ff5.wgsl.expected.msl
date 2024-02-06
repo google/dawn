@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void subgroupBroadcast_912ff5(device packed_float3* const tint_symbol) {
+  float3 res = simd_broadcast(float3(1.0f),ushort(1u));
+  *(tint_symbol) = packed_float3(res);
+}
+
+kernel void compute_main(device packed_float3* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_912ff5(tint_symbol_1);
+  return;
+}
+

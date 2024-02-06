@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void subgroupBroadcast_4a4334(device uint2* const tint_symbol) {
+  uint2 arg_0 = uint2(1u);
+  uint2 res = simd_broadcast(arg_0,ushort(1u));
+  *(tint_symbol) = res;
+}
+
+kernel void compute_main(device uint2* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_4a4334(tint_symbol_1);
+  return;
+}
+

@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void subgroupBroadcast_e275c8(device packed_int3* const tint_symbol) {
+  int3 res = simd_broadcast(int3(1),ushort(1u));
+  *(tint_symbol) = packed_int3(res);
+}
+
+kernel void compute_main(device packed_int3* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_e275c8(tint_symbol_1);
+  return;
+}
+

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void subgroupBroadcast_41e5d7(device packed_half3* const tint_symbol) {
+  half3 arg_0 = half3(1.0h);
+  half3 res = simd_broadcast(arg_0,ushort(1u));
+  *(tint_symbol) = packed_half3(res);
+}
+
+kernel void compute_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_41e5d7(tint_symbol_1);
+  return;
+}
+
