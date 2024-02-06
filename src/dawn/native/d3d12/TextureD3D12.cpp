@@ -61,10 +61,12 @@ namespace {
 D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& format) {
     D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
-    if (usage & kPresentTextureUsage) {
+    // D3D12 doesn't need special acquire operations for presentable textures.
+    DAWN_ASSERT(!(usage & kPresentAcquireTextureUsage));
+    if (usage & kPresentReleaseTextureUsage) {
         // The present usage is only used internally by the swapchain and is never used in
         // combination with other usages.
-        DAWN_ASSERT(usage == kPresentTextureUsage);
+        DAWN_ASSERT(usage == kPresentReleaseTextureUsage);
         return D3D12_RESOURCE_STATE_PRESENT;
     }
 

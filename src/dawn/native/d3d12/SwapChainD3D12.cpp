@@ -90,7 +90,7 @@ MaybeError SwapChain::PresentImpl() {
     // presentable texture to present at the end of submits that use them.
     CommandRecordingContext* commandContext;
     DAWN_TRY_ASSIGN(commandContext, queue->GetPendingCommandContext());
-    mApiTexture->TrackUsageAndTransitionNow(commandContext, kPresentTextureUsage,
+    mApiTexture->TrackUsageAndTransitionNow(commandContext, kPresentReleaseTextureUsage,
                                             mApiTexture->GetAllSubresources());
     DAWN_TRY(queue->SubmitPendingCommands());
 

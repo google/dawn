@@ -137,11 +137,6 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "Access info (usage: SYNC_IMAGE_LAYOUT_TRANSITION, prior_usage: SYNC_COPY_TRANSFER_WRITE, "
      "write_barriers: 0, command: vkCmdCopyBufferToImage"},
 
-    // http://crbug.com/1524408
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "Access info (prior_usage: SYNC_PRESENT_ENGINE_SYNCVAL_PRESENT_ACQUIRE_READ_SYNCVAL, "
-     "read_barriers: VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT"},
-
     // http://anglebug.com/7513
     {"VUID-VkGraphicsPipelineCreateInfo-pStages-06896",
      "contains fragment shader state, but stages"},

@@ -61,27 +61,30 @@ static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
 static constexpr wgpu::TextureUsage kReservedTextureUsage =
     static_cast<wgpu::TextureUsage>(1u << 31);
 
-// Add an extra texture usage for textures that will be presented, for use in backends
-// that needs to transition to present usage.
-static constexpr wgpu::TextureUsage kPresentTextureUsage =
+// Extrea texture usages for textures that are used with the presentation engine.
+// Acquire is that Dawn is acquiring the texture from the presentation engine while Release is Dawn
+// releasing is to the presentation engine.
+static constexpr wgpu::TextureUsage kPresentAcquireTextureUsage =
     static_cast<wgpu::TextureUsage>(1u << 30);
+static constexpr wgpu::TextureUsage kPresentReleaseTextureUsage =
+    static_cast<wgpu::TextureUsage>(1u << 29);
 
 // Add an extra texture usage (readonly render attachment usage) for render pass resource
 // tracking
 static constexpr wgpu::TextureUsage kReadOnlyRenderAttachment =
-    static_cast<wgpu::TextureUsage>(1u << 29);
+    static_cast<wgpu::TextureUsage>(1u << 28);
 
 // Add an extra texture usage (readonly storage texture usage) for resource tracking
 static constexpr wgpu::TextureUsage kReadOnlyStorageTexture =
-    static_cast<wgpu::TextureUsage>(1u << 28);
+    static_cast<wgpu::TextureUsage>(1u << 27);
 
 // Add an extra texture usage (writeonly storage texture usage) for resource tracking
 static constexpr wgpu::TextureUsage kWriteOnlyStorageTexture =
-    static_cast<wgpu::TextureUsage>(1u << 27);
+    static_cast<wgpu::TextureUsage>(1u << 26);
 
 // Add an extra texture usage (load resolve texture to MSAA) for render pass resource tracking
 static constexpr wgpu::TextureUsage kResolveAttachmentLoadingUsage =
-    static_cast<wgpu::TextureUsage>(1u << 26);
+    static_cast<wgpu::TextureUsage>(1u << 25);
 
 // Extra BufferBindingType for internal storage buffer binding.
 static constexpr wgpu::BufferBindingType kInternalStorageBufferBinding =

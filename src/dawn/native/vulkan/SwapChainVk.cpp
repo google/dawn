@@ -591,8 +591,8 @@ MaybeError SwapChain::PresentImpl() {
     // TODO(crbug.com/dawn/269): Remove the need for this by eagerly transitioning the
     // presentable texture to present at the end of submits that use them and ideally even
     // folding that in the free layout transition at the end of render passes.
-    mTexture->TransitionUsageNow(recordingContext, kPresentTextureUsage, wgpu::ShaderStage::None,
-                                 mTexture->GetAllSubresources());
+    mTexture->TransitionUsageNow(recordingContext, kPresentReleaseTextureUsage,
+                                 wgpu::ShaderStage::None, mTexture->GetAllSubresources());
 
     // Use a semaphore to make sure all rendering has finished before presenting.
     VkSemaphore currentSemaphore = mSwapChainSemaphores[mLastImageIndex];
