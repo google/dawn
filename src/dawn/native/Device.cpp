@@ -628,15 +628,8 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         // handled by the lost callback.
         bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr.c_str());
         if (!captured && mUncapturedErrorCallback != nullptr) {
-            mCallbackTaskManager->AddCallbackTask([callback = mUncapturedErrorCallback, type,
-                                                   messageStr,
-                                                   userdata = mUncapturedErrorUserdata] {
-                callback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)), messageStr.c_str(),
-                         userdata);
-            });
-            if (IsImmediateErrorHandlingEnabled()) {
-                mCallbackTaskManager->Flush();
-            }
+            mUncapturedErrorCallback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)),
+                                     messageStr.c_str(), mUncapturedErrorUserdata);
         }
     }
 }
