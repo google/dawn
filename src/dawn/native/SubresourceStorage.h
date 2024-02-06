@@ -129,11 +129,15 @@ class SubresourceStorage {
     SubresourceStorage(Aspect aspects,
                        uint32_t arrayLayerCount,
                        uint32_t mipLevelCount,
-                       T initialValue = {});
+                       const T& initialValue = {});
 
     // Returns the data for a single subresource. Note that the reference returned might be the
     // same for multiple subresources.
     const T& Get(Aspect aspect, uint32_t arrayLayer, uint32_t mipLevel) const;
+
+    // Fill the storage with a single value for all subresources, resulting in a fully
+    // compressed storage.
+    void Fill(const T& value);
 
     // Given an iterateFunc that's a function or function-like object that can be called with
     // arguments of type (const SubresourceRange& range, const T& data) and returns either void or
@@ -247,17 +251,22 @@ template <typename T>
 SubresourceStorage<T>::SubresourceStorage(Aspect aspects,
                                           uint32_t arrayLayerCount,
                                           uint32_t mipLevelCount,
-                                          T initialValue)
+                                          const T& initialValue)
     : mAspects(aspects), mMipLevelCount(mipLevelCount), mArrayLayerCount(arrayLayerCount) {
     DAWN_ASSERT(arrayLayerCount <= std::numeric_limits<decltype(mArrayLayerCount)>::max());
     DAWN_ASSERT(mipLevelCount <= std::numeric_limits<decltype(mMipLevelCount)>::max());
 
-    uint32_t aspectCount = GetAspectCount(aspects);
+    Fill(initialValue);
+}
+
+template <typename T>
+void SubresourceStorage<T>::Fill(const T& value) {
+    uint32_t aspectCount = GetAspectCount(mAspects);
     DAWN_ASSERT(aspectCount <= kMaxAspects);
 
     for (uint32_t aspectIndex = 0; aspectIndex < aspectCount; aspectIndex++) {
         mAspectCompressed[aspectIndex] = true;
-        DataInline(aspectIndex) = initialValue;
+        DataInline(aspectIndex) = value;
     }
 }
 

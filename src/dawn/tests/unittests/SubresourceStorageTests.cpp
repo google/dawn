@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -46,11 +47,13 @@ struct FakeStorage {
     FakeStorage(Aspect aspects,
                 uint32_t arrayLayerCount,
                 uint32_t mipLevelCount,
-                T initialValue = {})
+                const T& initialValue = {})
         : mAspects(aspects),
           mArrayLayerCount(arrayLayerCount),
           mMipLevelCount(mipLevelCount),
           mData(GetAspectCount(aspects) * arrayLayerCount * mipLevelCount, initialValue) {}
+
+    void Fill(const T& value) { std::fill(mData.begin(), mData.end(), value); }
 
     template <typename F>
     void Update(const SubresourceRange& range, F&& updateFunc) {
@@ -708,6 +711,44 @@ TEST(SubresourceStorageTest, AspectDecompressionUpdatesLayer0) {
     CheckLayerCompressed(s, Aspect::Color, 0, true);
     EXPECT_EQ(3, s.Get(Aspect::Color, 0, 0));
     EXPECT_EQ(3, s.Get(Aspect::Color, 0, 1));
+}
+
+// Check that fill after creation overwrites whatever was passed as initial value.
+TEST(SubresourceStorageTest, FillAfterInitialization) {
+    const uint32_t kLayers = 2;
+    const uint32_t kLevels = 2;
+    SubresourceStorage<int> s(Aspect::Color, kLayers, kLevels, 3);
+    FakeStorage<int> f(Aspect::Color, kLayers, kLevels, 3);
+
+    s.Fill(42);
+    f.Fill(42);
+
+    f.CheckSameAs(s);
+    CheckAspectCompressed(s, Aspect::Color, true);
+}
+
+// Check that fill after some modification overwrites everything and recompresses.
+TEST(SubresourceStorageTest, FillAfterModificationRecompresses) {
+    const uint32_t kLayers = 2;
+    const uint32_t kLevels = 2;
+    SubresourceStorage<int> s(Aspect::Depth | Aspect::Stencil, kLayers, kLevels, 3);
+    FakeStorage<int> f(Aspect::Depth | Aspect::Stencil, kLayers, kLevels, 3);
+
+    // Cause decompression by writing to a single subresource.
+    {
+        SubresourceRange range = SubresourceRange::MakeSingle(Aspect::Stencil, 1, 1);
+        CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data = 0xCAFE; });
+    }
+    CheckAspectCompressed(s, Aspect::Depth, true);
+    CheckAspectCompressed(s, Aspect::Stencil, false);
+
+    // Fill with 42, aspects should be recompressed entirely.
+    s.Fill(42);
+    f.Fill(42);
+
+    f.CheckSameAs(s);
+    CheckAspectCompressed(s, Aspect::Depth, true);
+    CheckAspectCompressed(s, Aspect::Stencil, true);
 }
 
 // Bugs found while testing:
