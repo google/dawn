@@ -83,6 +83,7 @@ class ShaderModule final : public ShaderModuleBase {
         const ProgrammableStage& programmableStage,
         const PipelineLayout* layout,
         bool clampFragDepth,
+        bool emitPointSize,
         std::optional<uint32_t> maxSubgroupSizeForFullSubgroups);
 
   private:

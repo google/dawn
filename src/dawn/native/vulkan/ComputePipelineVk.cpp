@@ -79,6 +79,7 @@ MaybeError ComputePipeline::InitializeImpl() {
         module->GetHandleAndSpirv(
             SingleShaderStage::Compute, computeStage, layout,
             /*clampFragDepth*/ false,
+            /*emitPointSize*/ false,
             /* maxSubgroupSizeForFullSubgroups */
             IsFullSubgroupsRequired()
                 ? std::make_optional(device->GetLimits().experimentalSubgroupLimits.maxSubgroupSize)
