@@ -174,6 +174,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         }
     }
 
+    entry_point.push_constant_size = ComputePushConstantSize(func);
+
     for (auto* param : sem->Parameters()) {
         AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(),
                                     param->Declaration()->name->symbol.Name(), param->Type(),
@@ -925,6 +927,18 @@ uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const
     }
 
     return total_size;
+}
+
+uint32_t Inspector::ComputePushConstantSize(const ast::Function* func) const {
+    uint32_t size = 0;
+    auto* func_sem = program_.Sem().Get(func);
+    for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
+        if (var->AddressSpace() == core::AddressSpace::kPushConstant) {
+            size += var->Type()->UnwrapRef()->Size();
+        }
+    }
+
+    return size;
 }
 
 std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(

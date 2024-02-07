@@ -154,7 +154,7 @@ fn test(vert_idx : u32) -> u32 {
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  test((vert_idx + push_constants.first_vertex));
+  test((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 )";
@@ -191,7 +191,7 @@ var<push_constant> push_constants : PushConstants;
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  test((vert_idx + push_constants.first_vertex));
+  test((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 
@@ -238,7 +238,7 @@ fn test(inst_idx : u32) -> u32 {
 
 @vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  test((inst_idx + push_constants.first_instance));
+  test((bitcast<u32>(inst_idx) + push_constants.first_instance));
   return vec4<f32>();
 }
 )";
@@ -277,7 +277,7 @@ var<push_constant> push_constants : PushConstants;
 
 @vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  test((inst_idx + push_constants.first_instance));
+  test((bitcast<u32>(inst_idx) + push_constants.first_instance));
   return vec4<f32>();
 }
 
@@ -336,7 +336,7 @@ struct Inputs {
 
 @vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
-  test((inputs.instance_idx + push_constants.first_instance), (inputs.vert_idx + push_constants.first_vertex));
+  test((bitcast<u32>(inputs.instance_idx) + push_constants.first_instance), (bitcast<u32>(inputs.vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 )";
@@ -380,7 +380,7 @@ var<push_constant> push_constants : PushConstants;
 
 @vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
-  test((inputs.instance_idx + push_constants.first_instance), (inputs.vert_idx + push_constants.first_vertex));
+  test((bitcast<u32>(inputs.instance_idx) + push_constants.first_instance), (bitcast<u32>(inputs.vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 
@@ -444,7 +444,7 @@ struct Inputs {
 
 @vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
-  test((inputs.instance_idx + push_constants.first_instance), inputs.vert_idx);
+  test((bitcast<u32>(inputs.instance_idx) + push_constants.first_instance), inputs.vert_idx);
   return vec4<f32>();
 }
 )";
@@ -497,7 +497,7 @@ struct Inputs {
 
 @vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
-  test(inputs.instance_idx, (inputs.vert_idx + push_constants.first_vertex));
+  test(inputs.instance_idx, (bitcast<u32>(inputs.vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 )";
@@ -572,7 +572,7 @@ struct PushConstants {
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  return vec4<f32>((f32((vert_idx + push_constants.first_vertex)) + p.f));
+  return vec4<f32>((f32((bitcast<u32>(vert_idx) + push_constants.first_vertex)) + p.f));
 }
 )";
 
@@ -609,7 +609,7 @@ var<push_constant> push_constants_1 : PushConstants;
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  return vec4<f32>(f32((vert_idx + push_constants_1.first_vertex)));
+  return vec4<f32>(f32((bitcast<u32>(vert_idx) + push_constants_1.first_vertex)));
 }
 )";
 
@@ -657,7 +657,7 @@ fn func2(vert_idx : u32) -> u32 {
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  func2((vert_idx + push_constants.first_vertex));
+  func2((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 )";
@@ -698,7 +698,7 @@ var<push_constant> push_constants : PushConstants;
 
 @vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  func2((vert_idx + push_constants.first_vertex));
+  func2((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 
@@ -761,19 +761,19 @@ fn func(i : u32) -> u32 {
 
 @vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  func((vert_idx + push_constants.first_vertex));
+  func((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 
 @vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  func(((vert_idx + push_constants.first_vertex) + (inst_idx + push_constants.first_instance)));
+  func(((bitcast<u32>(vert_idx) + push_constants.first_vertex) + (bitcast<u32>(inst_idx) + push_constants.first_instance)));
   return vec4<f32>();
 }
 
 @vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  func((inst_idx + push_constants.first_instance));
+  func((bitcast<u32>(inst_idx) + push_constants.first_instance));
   return vec4<f32>();
 }
 )";
@@ -824,19 +824,19 @@ var<push_constant> push_constants : PushConstants;
 
 @vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
-  func((vert_idx + push_constants.first_vertex));
+  func((bitcast<u32>(vert_idx) + push_constants.first_vertex));
   return vec4<f32>();
 }
 
 @vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  func(((vert_idx + push_constants.first_vertex) + (inst_idx + push_constants.first_instance)));
+  func(((bitcast<u32>(vert_idx) + push_constants.first_vertex) + (bitcast<u32>(inst_idx) + push_constants.first_instance)));
   return vec4<f32>();
 }
 
 @vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
-  func((inst_idx + push_constants.first_instance));
+  func((bitcast<u32>(inst_idx) + push_constants.first_instance));
   return vec4<f32>();
 }
 

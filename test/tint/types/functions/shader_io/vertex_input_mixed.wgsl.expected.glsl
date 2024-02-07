@@ -4,6 +4,11 @@ layout(location = 0) in int loc0_1;
 layout(location = 1) in uint loc1_1;
 layout(location = 2) in float loc2_1;
 layout(location = 3) in vec4 loc3_1;
+struct PushConstants {
+  uint first_instance;
+};
+
+layout(location=0) uniform PushConstants push_constants;
 struct VertexInputs0 {
   uint vertex_index;
   int loc0;
@@ -15,7 +20,7 @@ struct VertexInputs1 {
 };
 
 vec4 tint_symbol(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexInputs1 inputs1) {
-  uint foo = (inputs0.vertex_index + instance_index);
+  uint foo = (inputs0.vertex_index + (instance_index + push_constants.first_instance));
   int i = inputs0.loc0;
   uint u = loc1;
   float f = inputs1.loc2;

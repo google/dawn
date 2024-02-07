@@ -43,6 +43,3 @@ fn main4() {
 Failed to generate: error: unhandled module-scope address space (push_constant)
 error: unhandled module-scope address space (push_constant)
 error: unhandled module-scope address space (push_constant)
-error: unhandled module-scope address space (push_constant)
-error: unhandled module-scope address space (push_constant)
-error: unhandled module-scope address space (push_constant)

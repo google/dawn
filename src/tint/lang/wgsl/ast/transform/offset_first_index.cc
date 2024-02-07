@@ -136,23 +136,29 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
         return SkipTransform;
     }
 
-    // Abort on any use of push constants in the module.
+    Vector<const ast::StructMember*, 8> members;
+
+    const ast::Variable* push_constants_var = nullptr;
+
+    // Find first push_constant.
     for (auto* global : src.AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
             auto* v = src.Sem().Get(var);
-            if (TINT_UNLIKELY(v->AddressSpace() == core::AddressSpace::kPushConstant)) {
-                TINT_ICE()
-                    << "OffsetFirstIndex doesn't know how to handle module that already use push "
-                       "constants (yet)";
-                return resolver::Resolve(b);
+            if (v->AddressSpace() == core::AddressSpace::kPushConstant) {
+                push_constants_var = var;
+                auto* str = v->Type()->UnwrapRef()->As<sem::Struct>();
+                if (!str) {
+                    TINT_ICE() << "expected var<push_constant> type to be struct. Was "
+                                  "AddBlockAttribute run?";
+                }
+                for (auto* member : str->Members()) {
+                    members.Push(ctx.CloneWithoutTransform(member->Declaration()));
+                }
             }
         }
     }
 
-    b.Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
-
     // Add push constant members and calculate byte offsets
-    tint::Vector<const StructMember*, 8> members;
     if (has_vertex_index) {
         members.Push(b.Member(kFirstVertexName, b.ty.u32(),
                               Vector{b.MemberOffset(AInt(*cfg->first_vertex_offset))}));
@@ -161,10 +167,37 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
         members.Push(b.Member(kFirstInstanceName, b.ty.u32(),
                               Vector{b.MemberOffset(AInt(*cfg->first_instance_offset))}));
     }
-    auto struct_ = b.Structure(b.Symbols().New("PushConstants"), std::move(members));
-    // Create a global to hold the uniform buffer
-    Symbol buffer_name = b.Symbols().New("push_constants");
-    b.GlobalVar(buffer_name, b.ty.Of(struct_), core::AddressSpace::kPushConstant);
+
+    auto new_struct = b.Structure(b.Symbols().New("PushConstants"), std::move(members));
+
+    Symbol buffer_name;
+
+    // If this is the first use of push constants, create a global to hold them.
+    if (!push_constants_var) {
+        b.Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+
+        buffer_name = b.Symbols().New("push_constants");
+        b.GlobalVar(buffer_name, b.ty.Of(new_struct), core::AddressSpace::kPushConstant);
+    } else {
+        buffer_name = ctx.Clone(push_constants_var->name->symbol);
+    }
+
+    // Replace all variable users of the old struct with the new struct.
+    if (push_constants_var) {
+        ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
+            if (var->type == push_constants_var->type) {
+                if (var->As<ast::Parameter>()) {
+                    return ctx.dst->Param(ctx.Clone(var->name->symbol), b.ty.Of(new_struct),
+                                          ctx.Clone(var->attributes));
+                } else {
+                    return ctx.dst->Var(ctx.Clone(var->name->symbol), b.ty.Of(new_struct),
+                                        ctx.Clone(var->attributes),
+                                        core::AddressSpace::kPushConstant);
+                }
+            }
+            return nullptr;
+        });
+    }
 
     // Fix up all references to the builtins with the offsets
     ctx.ReplaceAll([&](const Expression* expr) -> const Expression* {
@@ -172,14 +205,14 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
             if (auto* user = sem->UnwrapLoad()->As<sem::VariableUser>()) {
                 auto it = builtin_vars.find(user->Variable());
                 if (it != builtin_vars.end()) {
-                    return ctx.dst->Add(ctx.CloneWithoutTransform(expr),
+                    return ctx.dst->Add(b.Bitcast(b.ty.u32(), ctx.CloneWithoutTransform(expr)),
                                         ctx.dst->MemberAccessor(buffer_name, it->second));
                 }
             }
             if (auto* access = sem->As<sem::StructMemberAccess>()) {
                 auto it = builtin_members.find(access->Member());
                 if (it != builtin_members.end()) {
-                    return ctx.dst->Add(ctx.CloneWithoutTransform(expr),
+                    return ctx.dst->Add(b.Bitcast(b.ty.u32(), ctx.CloneWithoutTransform(expr)),
                                         ctx.dst->MemberAccessor(buffer_name, it->second));
                 }
             }

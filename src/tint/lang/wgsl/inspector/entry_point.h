@@ -165,6 +165,8 @@ struct EntryPoint {
     std::optional<WorkgroupSize> workgroup_size;
     /// The total size in bytes of all Workgroup storage-class storage accessed via the entry point.
     uint32_t workgroup_storage_size = 0;
+    /// The total size in bytes of all push_constant variables accessed by the entry point.
+    uint32_t push_constant_size = 0;
     /// List of the input variable accessed via this entry point.
     std::vector<StageVariable> input_variables;
     /// List of the output variable accessed via this entry point.

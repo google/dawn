@@ -35,7 +35,7 @@ namespace tint::ast::transform {
 /// Adds firstVertex/Instance (injected via push constants) to
 /// vertex/instance index builtins.
 ///
-/// This transform assumes that Name transform has been run before.
+/// This transform assumes that the Name and AddBlockAttribute transforms have been run before.
 ///
 /// Some shading languages start vertex and instance numbering at 0,
 /// regardless of the firstVertex/firstInstance value specified. This transform

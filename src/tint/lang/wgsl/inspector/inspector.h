@@ -264,6 +264,10 @@ class Inspector {
     /// @returns the total size in bytes of all Workgroup storage-class storage accessed via func.
     uint32_t ComputeWorkgroupStorageSize(const ast::Function* func) const;
 
+    /// @param func the root function of the callgraph to consider for the computation.
+    /// @returns the total size in bytes of all push_constant variables accessed via func.
+    uint32_t ComputePushConstantSize(const ast::Function* func) const;
+
     /// @param func the root function of the callgraph to consider for the computation
     /// @returns the list of member types for the `pixel_local` variable accessed via func, if any.
     std::vector<PixelLocalMemberType> ComputePixelLocalMemberTypes(const ast::Function* func) const;
