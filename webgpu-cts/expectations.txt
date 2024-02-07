@@ -145,7 +145,6 @@ crbug.com/dawn/1903 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mas
 # KEEP
 ################################################################################
 crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
 
 ################################################################################
 # Android failures
