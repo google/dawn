@@ -215,13 +215,39 @@
             {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggle count"}
         ]
     },
+    "dawn load cache data function": {
+        "tags": ["dawn", "native"],
+        "category": "function pointer",
+        "returns": "size_t",
+        "args": [
+            {"name": "key", "type": "void const *"},
+            {"name": "key size", "type": "size_t"},
+            {"name": "value", "type": "void *"},
+            {"name": "value size", "type": "size_t"},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "dawn store cache data function": {
+        "tags": ["dawn", "native"],
+        "category": "function pointer",
+        "args": [
+            {"name": "key", "type": "void const *"},
+            {"name": "key size", "type": "size_t"},
+            {"name": "value", "type": "void const *"},
+            {"name": "value size", "type": "size_t"},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
     "dawn cache device descriptor" : {
         "tags": ["dawn", "native"],
         "category": "structure",
         "chained": "in",
         "chain roots": ["device descriptor"],
         "members": [
-            {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""}
+            {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""},
+            {"name": "load data function", "type": "dawn load cache data function", "default": "nullptr"},
+            {"name": "store data function", "type": "dawn store cache data function", "default": "nullptr"},
+            {"name": "function userdata", "type": "void *", "default": "nullptr"}
         ]
     },
     "dawn WGSL blocklist": {

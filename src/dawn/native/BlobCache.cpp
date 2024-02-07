@@ -37,8 +37,10 @@
 
 namespace dawn::native {
 
-BlobCache::BlobCache(dawn::platform::CachingInterface* cachingInterface)
-    : mCache(cachingInterface) {}
+BlobCache::BlobCache(const dawn::native::DawnCacheDeviceDescriptor& desc)
+    : mLoadFunction(desc.loadDataFunction),
+      mStoreFunction(desc.storeDataFunction),
+      mFunctionUserdata(desc.functionUserdata) {}
 
 Blob BlobCache::Load(const CacheKey& key) {
     std::lock_guard<std::mutex> lock(mMutex);
@@ -56,15 +58,16 @@ void BlobCache::Store(const CacheKey& key, const Blob& value) {
 
 Blob BlobCache::LoadInternal(const CacheKey& key) {
     DAWN_ASSERT(ValidateCacheKey(key));
-    if (mCache == nullptr) {
+    if (mLoadFunction == nullptr) {
         return Blob();
     }
-    const size_t expectedSize = mCache->LoadData(key.data(), key.size(), nullptr, 0);
+    const size_t expectedSize =
+        mLoadFunction(key.data(), key.size(), nullptr, 0, mFunctionUserdata);
     if (expectedSize > 0) {
         // Need to put this inside to trigger copy elision.
         Blob result = CreateBlob(expectedSize);
         const size_t actualSize =
-            mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
+            mLoadFunction(key.data(), key.size(), result.Data(), expectedSize, mFunctionUserdata);
         DAWN_ASSERT(expectedSize == actualSize);
         return result;
     }
@@ -75,10 +78,10 @@ void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void*
     DAWN_ASSERT(ValidateCacheKey(key));
     DAWN_ASSERT(value != nullptr);
     DAWN_ASSERT(valueSize > 0);
-    if (mCache == nullptr) {
+    if (mStoreFunction == nullptr) {
         return;
     }
-    mCache->StoreData(key.data(), key.size(), value, valueSize);
+    mStoreFunction(key.data(), key.size(), value, valueSize, mFunctionUserdata);
 }
 
 bool BlobCache::ValidateCacheKey(const CacheKey& key) {

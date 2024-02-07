@@ -221,11 +221,42 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
     ApplyFeatures(descriptor);
 
-    DawnCacheDeviceDescriptor defaultCacheDesc = {};
-    auto* cacheDesc = descriptor.Get<DawnCacheDeviceDescriptor>();
-    if (cacheDesc == nullptr) {
-        cacheDesc = &defaultCacheDesc;
+    DawnCacheDeviceDescriptor cacheDesc = {};
+    const auto* cacheDescIn = descriptor.Get<DawnCacheDeviceDescriptor>();
+    if (cacheDescIn != nullptr) {
+        cacheDesc = *cacheDescIn;
     }
+
+    if (cacheDesc.loadDataFunction == nullptr && cacheDesc.storeDataFunction == nullptr &&
+        cacheDesc.functionUserdata == nullptr && GetPlatform()->GetCachingInterface() != nullptr) {
+        // Populate cache functions and userdata from legacy cachingInterface.
+        cacheDesc.loadDataFunction = [](const void* key, size_t keySize, void* value,
+                                        size_t valueSize, void* userdata) {
+            auto* cachingInterface = static_cast<dawn::platform::CachingInterface*>(userdata);
+            return cachingInterface->LoadData(key, keySize, value, valueSize);
+        };
+        cacheDesc.storeDataFunction = [](const void* key, size_t keySize, const void* value,
+                                         size_t valueSize, void* userdata) {
+            auto* cachingInterface = static_cast<dawn::platform::CachingInterface*>(userdata);
+            return cachingInterface->StoreData(key, keySize, value, valueSize);
+        };
+        cacheDesc.functionUserdata = GetPlatform()->GetCachingInterface();
+    }
+
+    // Disable caching if the toggle is passed, or the WGSL writer is not enabled.
+    // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
+    // generate cache keys. We can lift the dependency once we also cache frontend parsing,
+    // transformations, and reflection.
+#if TINT_BUILD_WGSL_WRITER
+    if (IsToggleEnabled(Toggle::DisableBlobCache)) {
+#else
+    {
+#endif
+        cacheDesc.loadDataFunction = nullptr;
+        cacheDesc.storeDataFunction = nullptr;
+        cacheDesc.functionUserdata = nullptr;
+    }
+    mBlobCache = std::make_unique<BlobCache>(cacheDesc);
 
     if (descriptor->requiredLimits != nullptr) {
         mLimits.v1 =
@@ -716,16 +747,8 @@ void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
          userdata] { callback(errorType, message.c_str(), userdata); });
 }
 
-BlobCache* DeviceBase::GetBlobCache() {
-#if TINT_BUILD_WGSL_WRITER
-    // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
-    // generate cache keys. We can lift the dependency once we also cache frontend parsing,
-    // transformations, and reflection.
-    return mAdapter->GetPhysicalDevice()->GetInstance()->GetBlobCache(
-        !IsToggleEnabled(Toggle::DisableBlobCache));
-#else
-    return mAdapter->GetPhysicalDevice()->GetInstance()->GetBlobCache(false);
-#endif
+BlobCache* DeviceBase::GetBlobCache() const {
+    return mBlobCache.get();
 }
 
 Blob DeviceBase::LoadCachedBlob(const CacheKey& key) {

@@ -106,7 +106,8 @@ void stream::Stream<{{BoolCppType}}>::Write(stream::Sink* sink, const {{BoolCppT
 {% call render_streaming_impl("adapter properties", true, false) %}
 {% endcall %}
 
-{% call render_streaming_impl("dawn cache device descriptor", true, false) %}
+{% call render_streaming_impl("dawn cache device descriptor", true, false,
+                              omits=["load data function", "store data function", "function userdata"]) %}
 {% endcall %}
 
 {% call render_streaming_impl("extent 3D", true, true) %}

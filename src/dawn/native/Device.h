@@ -332,7 +332,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     MaybeError ValidateIsAlive() const;
 
-    BlobCache* GetBlobCache();
+    BlobCache* GetBlobCache() const;
     Blob LoadCachedBlob(const CacheKey& key);
     void StoreCachedBlob(const CacheKey& key, const Blob& blob);
 
@@ -621,7 +621,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     Ref<CallbackTaskManager> mCallbackTaskManager;
     std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
     std::string mLabel;
+
     CacheKey mDeviceCacheKey;
+    std::unique_ptr<BlobCache> mBlobCache;
 
     // We cache this toggle so that we can check it without locking the device.
     bool mIsImmediateErrorHandlingEnabled = false;

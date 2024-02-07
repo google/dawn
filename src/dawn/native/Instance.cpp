@@ -106,13 +106,6 @@ BackendConnection* Connect(InstanceBase* instance);
 
 namespace {
 
-dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* platform) {
-    if (platform != nullptr) {
-        return platform->GetCachingInterface();
-    }
-    return nullptr;
-}
-
 wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
     switch (f) {
 #define CASE(WgslName, WgpuName)                \
@@ -514,7 +507,6 @@ void InstanceBase::SetPlatform(dawn::platform::Platform* platform) {
     } else {
         mPlatform = platform;
     }
-    mBlobCache = std::make_unique<BlobCache>(GetCachingInterface(platform));
 }
 
 void InstanceBase::SetPlatformForTesting(dawn::platform::Platform* platform) {
@@ -523,13 +515,6 @@ void InstanceBase::SetPlatformForTesting(dawn::platform::Platform* platform) {
 
 dawn::platform::Platform* InstanceBase::GetPlatform() {
     return mPlatform;
-}
-
-BlobCache* InstanceBase::GetBlobCache(bool enabled) {
-    if (enabled) {
-        return mBlobCache.get();
-    }
-    return &mPassthroughBlobCache;
 }
 
 uint64_t InstanceBase::GetDeviceCountForTesting() const {

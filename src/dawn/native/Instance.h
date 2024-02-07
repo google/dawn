@@ -42,7 +42,6 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
-#include "dawn/native/BlobCache.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Forward.h"
@@ -147,7 +146,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // Testing only API that is NOT thread-safe.
     void SetPlatformForTesting(dawn::platform::Platform* platform);
     dawn::platform::Platform* GetPlatform();
-    BlobCache* GetBlobCache(bool enabled = true);
 
     uint64_t GetDeviceCountForTesting() const;
     void AddDevice(DeviceBase* device);
@@ -219,8 +217,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
     raw_ptr<dawn::platform::Platform, DanglingUntriaged> mPlatform = nullptr;
     std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
-    std::unique_ptr<BlobCache> mBlobCache;
-    BlobCache mPassthroughBlobCache;
 
     BackendsArray mBackends;
     BackendsBitset mBackendsTried;
