@@ -35,11 +35,12 @@ import (
 
 // DefaultAuthOptions returns the default authentication options for use by
 // command line arguments.
-func DefaultAuthOptions() auth.Options {
+func DefaultAuthOptions(additionalScopes ...string) auth.Options {
 	def := chromeinfra.DefaultAuthOptions()
 	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts")
 	def.Scopes = append(def.Scopes,
 		"https://www.googleapis.com/auth/gerritcodereview",
 		auth.OAuthScopeEmail)
+	def.Scopes = append(def.Scopes, additionalScopes...)
 	return def
 }
