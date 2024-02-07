@@ -1242,6 +1242,15 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Type) {
 12:34 note: are you missing '()'?)");
 }
 
+TEST_F(ResolverTest, Expr_MemberAccessor_NonCompoundType) {
+    GlobalConst("depth", ty.i32(), Expr(3_i));
+    auto* mem = MemberAccessor(Ident(Source{{12, 34}}, "depth"), "x");
+    WrapInFunction(mem);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot index into expression of type 'i32')");
+}
+
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     auto* st =
         Structure("S", Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});

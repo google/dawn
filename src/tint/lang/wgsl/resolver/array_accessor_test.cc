@@ -27,9 +27,8 @@
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 

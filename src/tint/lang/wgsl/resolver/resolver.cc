@@ -3584,9 +3584,8 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
         },
 
         [&](Default) {
-            AddError("invalid member accessor expression. Expected vector or struct, got '" +
-                         sem_.TypeNameOf(storage_ty) + "'",
-                     expr->member->source);
+            AddError("cannot index into expression of type '" + sem_.TypeNameOf(storage_ty) + "'",
+                     expr->object->source);
             return nullptr;
         });
 }
