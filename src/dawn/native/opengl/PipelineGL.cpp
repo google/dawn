@@ -52,7 +52,8 @@ PipelineGL::~PipelineGL() = default;
 
 MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                                       const PipelineLayout* layout,
-                                      const PerStage<ProgrammableStage>& stages) {
+                                      const PerStage<ProgrammableStage>& stages,
+                                      bool usesInstanceIndex) {
     mProgram = gl.CreateProgram();
 
     // Compute the set of active stages.
@@ -70,10 +71,11 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     for (SingleShaderStage stage : IterateStages(activeStages)) {
         const ShaderModule* module = ToBackend(stages[stage].module.Get());
         GLuint shader;
-        DAWN_TRY_ASSIGN(shader, module->CompileShader(
-                                    gl, stages[stage], stage, &combinedSamplers[stage], layout,
-                                    &needsPlaceholderSampler, &mNeedsTextureBuiltinUniformBuffer,
-                                    &mBindingPointEmulatedBuiltins));
+        DAWN_TRY_ASSIGN(shader, module->CompileShader(gl, stages[stage], stage, usesInstanceIndex,
+                                                      &combinedSamplers[stage], layout,
+                                                      &needsPlaceholderSampler,
+                                                      &mNeedsTextureBuiltinUniformBuffer,
+                                                      &mBindingPointEmulatedBuiltins));
         gl.AttachShader(mProgram, shader);
         glShaders.push_back(shader);
     }

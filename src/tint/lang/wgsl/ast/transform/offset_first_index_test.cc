@@ -41,12 +41,49 @@ using OffsetFirstIndexTest = TransformTest;
 TEST_F(OffsetFirstIndexTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
-    EXPECT_FALSE(ShouldRun<OffsetFirstIndex>(src, config));
+    EXPECT_FALSE(ShouldRun<OffsetFirstIndex>(src));
 }
 
-TEST_F(OffsetFirstIndexTest, ShouldRunFragmentStage) {
+TEST_F(OffsetFirstIndexTest, ShouldRunNoVertexIndexNoInstanceIndex) {
+    auto* src = R"(
+@fragment
+fn entry() {
+  return;
+}
+)";
+
+    DataMap config;
+    config.Add<OffsetFirstIndex::Config>(std::nullopt, std::nullopt);
+    EXPECT_FALSE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
+}
+
+TEST_F(OffsetFirstIndexTest, ShouldRunNoVertexIndex) {
+    auto* src = R"(
+@fragment
+fn entry() {
+  return;
+}
+)";
+
+    DataMap config;
+    config.Add<OffsetFirstIndex::Config>(std::nullopt, 0);
+    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
+}
+
+TEST_F(OffsetFirstIndexTest, ShouldRunNoInstanceIndex) {
+    auto* src = R"(
+@fragment
+fn entry() {
+  return;
+}
+)";
+
+    DataMap config;
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
+    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
+}
+
+TEST_F(OffsetFirstIndexTest, ShouldRun) {
     auto* src = R"(
 @fragment
 fn entry() {
@@ -56,20 +93,7 @@ fn entry() {
 
     DataMap config;
     config.Add<OffsetFirstIndex::Config>(0, 4);
-    EXPECT_FALSE(ShouldRun<OffsetFirstIndex>(src, config));
-}
-
-TEST_F(OffsetFirstIndexTest, ShouldRunVertexStage) {
-    auto* src = R"(
-@vertex
-fn entry() -> @builtin(position) vec4<f32> {
-  return vec4<f32>();
-}
-)";
-
-    DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
-    EXPECT_FALSE(ShouldRun<OffsetFirstIndex>(src, config));
+    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
 }
 
 TEST_F(OffsetFirstIndexTest, ShouldRunVertexStageWithVertexIndex) {
@@ -82,7 +106,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 
     DataMap config;
     config.Add<OffsetFirstIndex::Config>(0, 4);
-    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, config));
+    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
 }
 
 TEST_F(OffsetFirstIndexTest, ShouldRunVertexStageWithInstanceIndex) {
@@ -95,16 +119,14 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 
     DataMap config;
     config.Add<OffsetFirstIndex::Config>(0, 4);
-    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, config));
+    EXPECT_TRUE(ShouldRun<OffsetFirstIndex>(src, std::move(config)));
 }
 
 TEST_F(OffsetFirstIndexTest, EmptyModule) {
     auto* src = "";
     auto* expect = "";
 
-    DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
-    auto got = Run<OffsetFirstIndex>(src, std::move(config));
+    auto got = Run<OffsetFirstIndex>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -118,9 +140,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 )";
     auto* expect = src;
 
-    DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
-    auto got = Run<OffsetFirstIndex>(src, std::move(config));
+    auto got = Run<OffsetFirstIndex>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -160,7 +180,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -201,7 +221,7 @@ fn test(vert_idx : u32) -> u32 {
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -244,7 +264,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(std::nullopt, 4);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -287,7 +307,7 @@ fn test(inst_idx : u32) -> u32 {
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(std::nullopt, 4);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -577,7 +597,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -614,7 +634,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -663,7 +683,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));
@@ -712,7 +732,7 @@ fn func1(vert_idx : u32) -> u32 {
 )";
 
     DataMap config;
-    config.Add<OffsetFirstIndex::Config>(0, 4);
+    config.Add<OffsetFirstIndex::Config>(0, std::nullopt);
     auto got = Run<OffsetFirstIndex>(src, std::move(config));
 
     EXPECT_EQ(expect, str(got));

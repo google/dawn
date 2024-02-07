@@ -53,15 +53,6 @@ namespace {
 constexpr char kFirstVertexName[] = "first_vertex";
 constexpr char kFirstInstanceName[] = "first_instance";
 
-bool ShouldRun(const Program& program) {
-    for (auto* fn : program.AST().Functions()) {
-        if (fn->PipelineStage() == PipelineStage::kVertex) {
-            return true;
-        }
-    }
-    return false;
-}
-
 }  // namespace
 
 OffsetFirstIndex::OffsetFirstIndex() = default;
@@ -70,12 +61,11 @@ OffsetFirstIndex::~OffsetFirstIndex() = default;
 Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
                                                const DataMap& inputs,
                                                DataMap&) const {
-    if (!ShouldRun(src)) {
-        return SkipTransform;
-    }
-
     const Config* cfg = inputs.Get<Config>();
     if (!cfg) {
+        return SkipTransform;
+    }
+    if (!cfg->first_vertex_offset.has_value() && !cfg->first_instance_offset.has_value()) {
         return SkipTransform;
     }
 
@@ -85,9 +75,6 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
     // Map of builtin usages
     std::unordered_map<const sem::Variable*, const char*> builtin_vars;
     std::unordered_map<const core::type::StructMember*, const char*> builtin_members;
-
-    bool has_vertex_index = false;
-    bool has_instance_index = false;
 
     // Traverse the AST scanning for builtin accesses via variables (includes
     // parameters) or structure member accesses.
@@ -100,13 +87,11 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
                         cfg->first_vertex_offset.has_value()) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
-                        has_vertex_index = true;
                     }
                     if (builtin == core::BuiltinValue::kInstanceIndex && cfg &&
                         cfg->first_instance_offset.has_value()) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstInstanceName);
-                        has_instance_index = true;
                     }
                 }
             }
@@ -119,21 +104,15 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
                         cfg->first_vertex_offset.has_value()) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);
-                        has_vertex_index = true;
                     }
                     if (builtin == core::BuiltinValue::kInstanceIndex && cfg &&
                         cfg->first_instance_offset.has_value()) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstInstanceName);
-                        has_instance_index = true;
                     }
                 }
             }
         }
-    }
-
-    if (!has_vertex_index && !has_instance_index) {
-        return SkipTransform;
     }
 
     Vector<const ast::StructMember*, 8> members;
@@ -159,11 +138,11 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
     }
 
     // Add push constant members and calculate byte offsets
-    if (has_vertex_index) {
+    if (cfg->first_vertex_offset.has_value()) {
         members.Push(b.Member(kFirstVertexName, b.ty.u32(),
                               Vector{b.MemberOffset(AInt(*cfg->first_vertex_offset))}));
     }
-    if (has_instance_index) {
+    if (cfg->first_instance_offset.has_value()) {
         members.Push(b.Member(kFirstInstanceName, b.ty.u32(),
                               Vector{b.MemberOffset(AInt(*cfg->first_instance_offset))}));
     }

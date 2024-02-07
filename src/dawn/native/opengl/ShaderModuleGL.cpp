@@ -167,6 +167,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
+    bool usesInstanceIndex,
     CombinedSamplerInfo* combinedSamplers,
     const PipelineLayout* layout,
     bool* needsPlaceholderSampler,
@@ -287,6 +288,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                                           version.GetMajor(), version.GetMinor());
 
     req.tintOptions.disable_robustness = false;
+
+    if (usesInstanceIndex) {
+        req.tintOptions.first_instance_offset =
+            4 * PipelineLayout::PushConstantLocation::FirstInstance;
+    }
+
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
 
     req.interstageVariables = {};
@@ -417,9 +424,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                        program, remappedEntryPoint.c_str(), r.limits,
                                        /* fullSubgroups */ {}));
             }
-
-            r.tintOptions.first_instance_offset =
-                4 * PipelineLayout::PushConstantLocation::FirstInstance;
 
             auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",

@@ -1067,9 +1067,13 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
         gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
 
-        // Place the first_instance push constant member after user-defined push constants (if any).
-        gen_options.first_instance_offset =
-            inspector.GetEntryPoint(entry_point_name).push_constant_size;
+        auto entry_point = inspector.GetEntryPoint(entry_point_name);
+
+        if (entry_point.instance_index_used) {
+            // Place the first_instance push constant member after user-defined push constants (if
+            // any).
+            gen_options.first_instance_offset = entry_point.push_constant_size;
+        }
 
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
         if (result != tint::Success) {
