@@ -387,10 +387,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     // OpenGL ES only supports either binding a layer or the entire
                     // texture in glBindImageTexture().
                     GLboolean isLayered;
-                    if (view->GetLayerCount() == 1) {
-                        isLayered = GL_FALSE;
-                    } else if (texture->GetArrayLayers() == view->GetLayerCount()) {
+                    if (texture->GetArrayLayers() == view->GetLayerCount()) {
                         isLayered = GL_TRUE;
+                    } else if (view->GetLayerCount() == 1) {
+                        isLayered = GL_FALSE;
                     } else {
                         DAWN_UNREACHABLE();
                     }
