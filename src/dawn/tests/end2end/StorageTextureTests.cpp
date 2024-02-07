@@ -754,9 +754,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
 // Verify 2D array and 3D write-only storage textures work correctly.
 TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
-    // TODO(crbug.com/dawn/547): implement 3D storage texture on OpenGL and OpenGLES.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
-
     constexpr uint32_t kSliceCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -1198,9 +1195,6 @@ fn main() {
 
 // Verify read-only storage texture can work correctly in vertex shaders.
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
-    // TODO(dawn:1972): Implement read-only storage texture as sampled texture in vertex shader.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
     wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
