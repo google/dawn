@@ -63,10 +63,10 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
           mUserdata(callbackInfo.userdata),
           mBuffer(buffer) {
         DAWN_ASSERT(buffer != nullptr);
-        GetProcs().bufferReference(ToAPI(mBuffer));
+        mBuffer->Reference();
     }
 
-    ~MapAsyncEvent() override { GetProcs().bufferRelease(ToAPI(mBuffer)); }
+    ~MapAsyncEvent() override { mBuffer->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -316,6 +316,10 @@ Buffer::Buffer(const ObjectBaseParams& params,
 
 Buffer::~Buffer() {
     FreeMappedData();
+}
+
+ObjectType Buffer::GetObjectType() const {
+    return ObjectType::Buffer;
 }
 
 void Buffer::SetFutureStatus(WGPUBufferMapAsyncStatus status) {

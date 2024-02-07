@@ -145,6 +145,10 @@ Instance::~Instance() {
     GetEventManager().TransitionTo(EventManager::State::InstanceDropped);
 }
 
+ObjectType Instance::GetObjectType() const {
+    return ObjectType::Instance;
+}
+
 WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
     if (descriptor == nullptr) {
         return WireResult::Success;

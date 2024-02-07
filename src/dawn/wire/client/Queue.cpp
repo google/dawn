@@ -77,6 +77,10 @@ class WorkDoneEvent : public TrackedEvent {
 
 Queue::~Queue() = default;
 
+ObjectType Queue::GetObjectType() const {
+    return ObjectType::Queue;
+}
+
 bool Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
                                      WGPUFuture future,
                                      WGPUQueueWorkDoneStatus status) {

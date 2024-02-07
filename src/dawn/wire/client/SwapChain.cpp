@@ -48,6 +48,10 @@ SwapChain::SwapChain(const ObjectBaseParams& params,
 
 SwapChain::~SwapChain() = default;
 
+ObjectType SwapChain::GetObjectType() const {
+    return ObjectType::SwapChain;
+}
+
 WGPUTexture SwapChain::GetCurrentTexture() {
     Client* wireClient = GetClient();
     Texture* texture = wireClient->Make<Texture>(&mTextureDescriptor);

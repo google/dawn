@@ -43,6 +43,10 @@ Texture::Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* de
 
 Texture::~Texture() = default;
 
+ObjectType Texture::GetObjectType() const {
+    return ObjectType::Texture;
+}
+
 uint32_t Texture::GetWidth() const {
     return mSize.width;
 }

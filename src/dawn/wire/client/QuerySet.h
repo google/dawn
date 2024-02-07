@@ -41,6 +41,8 @@ class QuerySet final : public ObjectBase {
     QuerySet(const ObjectBaseParams& params, const WGPUQuerySetDescriptor* descriptor);
     ~QuerySet() override;
 
+    ObjectType GetObjectType() const override;
+
     // Note that these values can be arbitrary since they aren't validated in the wire client.
     WGPUQueryType GetType() const;
     uint32_t GetCount() const;

@@ -41,6 +41,8 @@ class Queue final : public ObjectWithEventsBase {
     using ObjectWithEventsBase::ObjectWithEventsBase;
     ~Queue() override;
 
+    ObjectType GetObjectType() const override;
+
     // Dawn API
     void OnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata);
     WGPUFuture OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);

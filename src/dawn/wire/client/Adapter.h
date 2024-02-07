@@ -46,6 +46,7 @@ class Adapter final : public ObjectWithEventsBase {
     ~Adapter() override;
 
     void CancelCallbacksForDisconnect() override;
+    ObjectType GetObjectType() const override;
 
     bool GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;

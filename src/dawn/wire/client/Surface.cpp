@@ -35,6 +35,10 @@ Surface::Surface(const ObjectBaseParams& params) : ObjectBase(params) {}
 
 Surface::~Surface() = default;
 
+ObjectType Surface::GetObjectType() const {
+    return ObjectType::Surface;
+}
+
 WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
     // This is the only supported format in native mode (see crbug.com/dawn/160).
     return WGPUTextureFormat_BGRA8Unorm;

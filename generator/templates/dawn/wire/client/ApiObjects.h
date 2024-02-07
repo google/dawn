@@ -43,6 +43,10 @@ namespace dawn::wire::client {
         {% else %}
             struct {{type.name.CamelCase()}} final : ObjectBase {
                 using ObjectBase::ObjectBase;
+
+                ObjectType GetObjectType() const override {
+                    return ObjectType::{{type.name.CamelCase()}};
+                }
             };
         {% endif %}
 

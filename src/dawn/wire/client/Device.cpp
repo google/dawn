@@ -160,6 +160,10 @@ Device::~Device() {
     }
 }
 
+ObjectType Device::GetObjectType() const {
+    return ObjectType::Device;
+}
+
 bool Device::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }

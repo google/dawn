@@ -45,6 +45,8 @@ class Instance final : public ObjectWithEventsBase {
     explicit Instance(const ObjectBaseParams& params);
     ~Instance() override;
 
+    ObjectType GetObjectType() const override;
+
     WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
     void RequestAdapter(const WGPURequestAdapterOptions* options,

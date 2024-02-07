@@ -117,18 +117,7 @@ namespace dawn::wire::client {
         //* When an object's refcount reaches 0, notify the server side of it and delete it.
         void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
             {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-
-            if (!obj->Release()) {
-                return;
-            }
-
-            DestroyObjectCmd cmd;
-            cmd.objectType = ObjectType::{{type.name.CamelCase()}};
-            cmd.objectId = obj->GetWireId();
-
-            Client* client = obj->GetClient();
-            client->SerializeCommand(cmd);
-            client->Free(obj);
+            obj->Release();
         }
 
         void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {

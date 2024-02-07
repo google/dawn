@@ -37,6 +37,10 @@ QuerySet::QuerySet(const ObjectBaseParams& params, const WGPUQuerySetDescriptor*
 
 QuerySet::~QuerySet() = default;
 
+ObjectType QuerySet::GetObjectType() const {
+    return ObjectType::QuerySet;
+}
+
 WGPUQueryType QuerySet::GetType() const {
     return mType;
 }

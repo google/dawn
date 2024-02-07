@@ -43,6 +43,8 @@ class SwapChain final : public ObjectBase {
               const WGPUSwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
+    ObjectType GetObjectType() const override;
+
     WGPUTexture GetCurrentTexture();
 
   private:

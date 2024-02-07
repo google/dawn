@@ -117,6 +117,10 @@ void Adapter::CancelCallbacksForDisconnect() {
     });
 }
 
+ObjectType Adapter::GetObjectType() const {
+    return ObjectType::Adapter;
+}
+
 bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }

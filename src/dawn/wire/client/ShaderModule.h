@@ -41,6 +41,8 @@ class ShaderModule final : public ObjectBase {
     using ObjectBase::ObjectBase;
     ~ShaderModule() override;
 
+    ObjectType GetObjectType() const override;
+
     void GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata);
     bool GetCompilationInfoCallback(uint64_t requestSerial,
                                     WGPUCompilationInfoRequestStatus status,

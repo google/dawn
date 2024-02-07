@@ -35,6 +35,10 @@ ShaderModule::~ShaderModule() {
     ClearAllCallbacks(WGPUCompilationInfoRequestStatus_Unknown);
 }
 
+ObjectType ShaderModule::GetObjectType() const {
+    return ObjectType::ShaderModule;
+}
+
 void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
     Client* client = GetClient();
     if (client->IsDisconnected()) {

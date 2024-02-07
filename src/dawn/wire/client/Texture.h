@@ -41,6 +41,8 @@ class Texture final : public ObjectBase {
     Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* descriptor);
     ~Texture() override;
 
+    ObjectType GetObjectType() const override;
+
     // Note that these values can be arbitrary since they aren't validated in the wire client.
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;

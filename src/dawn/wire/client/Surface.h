@@ -41,6 +41,8 @@ class Surface final : public ObjectBase {
     explicit Surface(const ObjectBaseParams& params);
     ~Surface() override;
 
+    ObjectType GetObjectType() const override;
+
     WGPUTextureFormat GetPreferredFormat(WGPUAdapter adapter) const;
 };
 

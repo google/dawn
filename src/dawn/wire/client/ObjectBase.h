@@ -33,6 +33,7 @@
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/wire/ObjectHandle.h"
+#include "dawn/wire/ObjectType_autogen.h"
 #include "dawn/wire/client/EventManager.h"
 
 namespace dawn::wire::client {
@@ -55,6 +56,7 @@ class ObjectBase : public LinkNode<ObjectBase> {
     virtual ~ObjectBase();
 
     virtual void CancelCallbacksForDisconnect() {}
+    virtual ObjectType GetObjectType() const = 0;
 
     const ObjectHandle& GetWireHandle() const;
     ObjectId GetWireId() const;
@@ -62,9 +64,7 @@ class ObjectBase : public LinkNode<ObjectBase> {
     Client* GetClient() const;
 
     void Reference();
-    // Returns true if it was the last reference, indicating that the caller must destroy the
-    // object.
-    [[nodiscard]] bool Release();
+    void Release();
 
   protected:
     uint32_t GetRefcount() const { return mRefcount; }

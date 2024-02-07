@@ -51,6 +51,8 @@ class Device final : public ObjectWithEventsBase {
                     const WGPUDeviceDescriptor* descriptor);
     ~Device() override;
 
+    ObjectType GetObjectType() const override;
+
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
     void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
     void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);

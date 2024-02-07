@@ -52,6 +52,8 @@ class Buffer final : public ObjectWithEventsBase {
            const WGPUBufferDescriptor* descriptor);
     ~Buffer() override;
 
+    ObjectType GetObjectType() const override;
+
     void MapAsync(WGPUMapModeFlags mode,
                   size_t offset,
                   size_t size,
