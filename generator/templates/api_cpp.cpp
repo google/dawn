@@ -177,20 +177,6 @@ namespace {{metadata.namespace}} {
 
         {% macro render_cpp_method_declaration(type, method) -%}
             {% set CppType = as_cppType(type.name) %}
-            {{as_cppType(method.return_type.name)}} {{CppType}}::{{method.name.CamelCase()}}(
-                {%- for arg in method.arguments -%}
-                    {%- if not loop.first %}, {% endif -%}
-                    {%- if arg.type.category == "object" and arg.annotation == "value" -%}
-                        {{as_cppType(arg.type.name)}} const& {{as_varName(arg.name)}}
-                    {%- else -%}
-                        {{as_annotated_cppType(arg)}}
-                    {%- endif -%}
-                {%- endfor -%}
-            ) const
-        {%- endmacro -%}
-
-        {% macro render_cpp_method_future_overrides_definition(type, method) -%}
-            {% set CppType = as_cppType(type.name) %}
             {% set OriginalMethodName = method.name.CamelCase() %}
             {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" else OriginalMethodName %}
             {{as_cppType(method.return_type.name)}} {{CppType}}::{{MethodName}}(
@@ -202,13 +188,7 @@ namespace {{metadata.namespace}} {
                         {{as_annotated_cppType(arg)}}
                     {%- endif -%}
                 {%- endfor -%}
-            ) const {
-                return {{OriginalMethodName}}(
-                    {%- for arg in method.arguments -%}
-                        {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
-                    {%- endfor -%}
-                );
-            }
+            ) const
         {%- endmacro -%}
 
         {%- macro render_cpp_to_c_method_call(type, method) -%}
@@ -230,9 +210,6 @@ namespace {{metadata.namespace}} {
                     return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
                 {% endif %}
             }
-            {% if method.return_type.dict_name == "future" -%}
-                {{render_cpp_method_future_overrides_definition(type, method)}}
-            {% endif %}
         {% endfor %}
         void {{CppType}}::{{c_prefix}}Reference({{CType}} handle) {
             if (handle != nullptr) {
