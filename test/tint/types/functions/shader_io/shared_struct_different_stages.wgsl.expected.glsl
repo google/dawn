@@ -25,6 +25,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 1) in float col1_1;
 layout(location = 2) in float col2_1;

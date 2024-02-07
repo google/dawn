@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void exp_49e4c5() {
   float res = 2.71828174591064453125f;

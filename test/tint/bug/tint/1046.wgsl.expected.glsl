@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 0) in vec4 view_position_1;
 layout(location = 1) in vec4 normal_1;

@@ -32,6 +32,7 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 precision highp float;
+precision highp int;
 
 f16vec2 tint_degrees(f16vec2 param_0) {
   return param_0 * 57.29577951308232286465hf;

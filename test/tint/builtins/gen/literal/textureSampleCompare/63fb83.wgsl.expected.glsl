@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp samplerCubeShadow arg_0_arg_1;
 

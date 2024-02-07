@@ -32,6 +32,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 bvec3 tint_select(bvec3 param_0, bvec3 param_1, bvec3 param_2) {
     return bvec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);

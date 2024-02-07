@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void radians_524a91() {
   vec4 res = vec4(0.01745329238474369049f);

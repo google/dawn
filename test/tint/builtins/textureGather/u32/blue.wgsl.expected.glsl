@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp usampler2D t_s;
 

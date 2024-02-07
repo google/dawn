@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void ceil_bb2ca2() {
   vec2 res = vec2(2.0f);

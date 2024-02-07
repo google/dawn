@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void normalize_584e47() {
   vec2 res = vec2(0.70710676908493041992f);

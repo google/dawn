@@ -25,6 +25,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct modf_result_vec3_f32 {
   vec3 fract;

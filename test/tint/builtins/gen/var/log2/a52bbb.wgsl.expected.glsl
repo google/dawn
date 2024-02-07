@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void log2_a52bbb() {
   vec4 res = vec4(0.0f);

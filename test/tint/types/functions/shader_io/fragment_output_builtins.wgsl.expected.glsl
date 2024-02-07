@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 float main1() {
   return 1.0f;
@@ -13,6 +14,7 @@ void main() {
 #version 310 es
 #extension GL_OES_sample_variables : require
 precision highp float;
+precision highp int;
 
 uint main2() {
   return 1u;

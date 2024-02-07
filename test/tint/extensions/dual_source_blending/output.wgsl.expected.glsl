@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_EXT_blend_func_extended : require
 precision highp float;
+precision highp int;
 
 layout(location = 0, index = 0) out vec4 color_1;
 layout(location = 0, index = 1) out vec4 blend_1;

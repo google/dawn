@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void refract_8c192a() {
   vec4 res = vec4(-7.0f);

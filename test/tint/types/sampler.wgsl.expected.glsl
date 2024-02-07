@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp sampler2D t_s;
 uniform highp sampler2DShadow d_sc;

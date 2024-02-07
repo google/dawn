@@ -347,6 +347,7 @@ bool ASTPrinter::Generate() {
 
     if (version_.IsES() && requires_default_precision_qualifier_) {
         current_buffer_->Insert("precision highp float;", helpers_insertion_point++, indent);
+        current_buffer_->Insert("precision highp int;", helpers_insertion_point++, indent);
     }
 
     if (!helpers_.lines.empty()) {

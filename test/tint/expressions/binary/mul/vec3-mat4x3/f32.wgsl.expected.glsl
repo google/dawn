@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct S {
   mat4x3 matrix;

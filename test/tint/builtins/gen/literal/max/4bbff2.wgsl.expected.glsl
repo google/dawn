@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void max_4bbff2() {
   vec4 res = vec4(1.0f);

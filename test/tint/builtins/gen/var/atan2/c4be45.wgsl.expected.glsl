@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void atan2_c4be45() {
   vec4 res = vec4(0.78539818525314331055f);

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void clamp_23aa4f() {
   float res = 1.0f;

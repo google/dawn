@@ -31,6 +31,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 ivec4 tint_unpack_4xi8(uint a) {
   uvec4 a_vec4u = uvec4(a);

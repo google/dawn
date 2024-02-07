@@ -20,6 +20,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(rgba16i) uniform highp writeonly iimage3D arg_0;
 void textureStore_07548b() {

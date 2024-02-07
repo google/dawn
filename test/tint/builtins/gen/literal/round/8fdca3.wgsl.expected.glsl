@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void round_8fdca3() {
   vec2 res = vec2(4.0f);

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void max_067f3a() {
   ivec2 res = ivec2(1);

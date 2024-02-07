@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void asin_0bac07() {
   vec3 res = vec3(0.5f);

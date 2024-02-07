@@ -25,6 +25,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(rgba8i) uniform highp writeonly iimage2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

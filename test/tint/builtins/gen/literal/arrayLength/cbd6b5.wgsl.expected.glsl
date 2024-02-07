@@ -30,6 +30,7 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 precision highp float;
+precision highp int;
 
 layout(binding = 0, std430) buffer SB_RW_ssbo {
   float16_t arg_0[];

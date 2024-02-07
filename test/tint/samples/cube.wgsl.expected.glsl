@@ -40,6 +40,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 0) in vec4 fragColor_1;
 layout(location = 0) out vec4 value;

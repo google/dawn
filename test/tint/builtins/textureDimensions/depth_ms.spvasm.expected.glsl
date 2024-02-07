@@ -39,6 +39,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp sampler2DMS arg_0_1;
 void textureDimensions_f60bdb() {

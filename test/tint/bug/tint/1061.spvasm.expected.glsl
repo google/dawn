@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct buf0 {

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void faceForward_b42ef3() {
   vec2 res = vec2(-1.0f);

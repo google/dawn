@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void pow_a8f6b2() {
   vec4 res = vec4(1.0f);

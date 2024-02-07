@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void min_af364e() {
   ivec4 res = ivec4(1);

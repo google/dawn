@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void inverseSqrt_07a6fe() {
   vec4 res = vec4(1.0f);

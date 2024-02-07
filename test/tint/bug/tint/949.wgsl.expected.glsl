@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 1) in vec2 vMainuv_param_1;
 layout(location = 0) in vec4 v_output1_param_1;

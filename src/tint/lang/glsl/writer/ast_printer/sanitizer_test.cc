@@ -60,6 +60,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 layout(binding = 1, std430) buffer my_struct_ssbo {
   float a[];
@@ -100,6 +101,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 layout(binding = 1, std430) buffer my_struct_ssbo {
   float z;
@@ -144,6 +146,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 layout(binding = 1, std430) buffer my_struct_ssbo {
   float a[];
@@ -181,6 +184,7 @@ TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 void tint_symbol() {
   int idx = 3;
@@ -223,6 +227,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct S {
   int a;
@@ -269,6 +274,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersBasic) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 void tint_symbol() {
   int v = 0;
@@ -314,6 +320,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersComplexChain) {
     auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
+precision highp int;
 
 void tint_symbol() {
   mat4 a[4] = mat4[4](mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));

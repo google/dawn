@@ -29,6 +29,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 

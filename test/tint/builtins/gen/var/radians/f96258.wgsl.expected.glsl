@@ -31,6 +31,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 vec3 tint_radians(vec3 param_0) {
   return param_0 * 0.01745329251994329547f;

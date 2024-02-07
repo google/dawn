@@ -30,6 +30,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uint tint_int_dot(uvec2 a, uvec2 b) {
   return a[0]*b[0] + a[1]*b[1];

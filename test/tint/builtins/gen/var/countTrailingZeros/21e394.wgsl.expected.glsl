@@ -40,6 +40,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uint tint_count_trailing_zeros(uint v) {
   uint x = uint(v);

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void select_17441a() {
   vec4 res = vec4(1.0f);

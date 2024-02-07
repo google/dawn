@@ -34,6 +34,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
   uint s = min(offset, 32u);

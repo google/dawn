@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void sign_55339e() {
   ivec3 res = ivec3(1);

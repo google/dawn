@@ -31,6 +31,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 vec3 tint_degrees(vec3 param_0) {
   return param_0 * 57.29577951308232286465f;

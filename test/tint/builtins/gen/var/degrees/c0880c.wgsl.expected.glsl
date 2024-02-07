@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void degrees_c0880c() {
   vec3 res = vec3(57.295780181884765625f);

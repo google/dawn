@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct sspp962805860buildInformationS {
   vec4 footprint;

@@ -31,6 +31,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 0) flat in int i_1;
 layout(location = 1) flat in uint u_1;

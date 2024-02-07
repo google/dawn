@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void atan2_034ace() {
   float res = 0.78539818525314331055f;

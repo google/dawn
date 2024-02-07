@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 precision highp float;
+precision highp int;
 
 layout(location = 0) out vec4 value;
 vec4 tint_symbol() {

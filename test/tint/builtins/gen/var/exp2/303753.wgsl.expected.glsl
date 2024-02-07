@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void exp2_303753() {
   vec3 res = vec3(2.0f);

@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp sampler2DArray arg_0_arg_1;
 

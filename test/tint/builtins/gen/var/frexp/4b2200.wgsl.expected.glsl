@@ -32,6 +32,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct frexp_result_f32 {
   float fract;

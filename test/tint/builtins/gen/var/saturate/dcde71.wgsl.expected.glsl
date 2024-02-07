@@ -31,6 +31,7 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 precision highp float;
+precision highp int;
 
 f16vec4 tint_saturate(f16vec4 v) {
   return clamp(v, f16vec4(0.0hf), f16vec4(1.0hf));

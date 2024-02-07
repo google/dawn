@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void tan_311400() {
   float res = 1.55740773677825927734f;

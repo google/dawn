@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void ldexp_fdbc7b() {
   float res = 2.0f;

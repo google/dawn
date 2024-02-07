@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void refract_cf1629() {
   vec2 res = vec2(-3.0f);

@@ -32,6 +32,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct frexp_result_vec4_f32 {
   vec4 fract;

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void transpose_ace596() {
   mat2x3 res = mat2x3(vec3(1.0f), vec3(1.0f));

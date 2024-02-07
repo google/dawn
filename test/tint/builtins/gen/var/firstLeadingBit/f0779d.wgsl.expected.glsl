@@ -40,6 +40,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uint tint_first_leading_bit(uint v) {
   uint x = v;

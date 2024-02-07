@@ -113,6 +113,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_NoReturn_Void) {
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 void func() {
   return;
@@ -160,6 +161,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) {
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 0) in float foo_1;
 layout(location = 1) out float value;
@@ -200,6 +202,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_WithInOut_Builtins
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 float frag_main(vec4 coord) {
   return coord.x;
@@ -252,6 +255,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Diffe
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 1) out float col1_1;
 layout(location = 2) out float col2_1;
@@ -391,6 +395,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct UBO {
   vec4 coord;
@@ -432,6 +437,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_UniformStruct
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct Uniforms {
   vec4 coord;
@@ -473,6 +479,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_RW_StorageBuf
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct Data {
   int a;
@@ -521,6 +528,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_RO_StorageBuf
     EXPECT_EQ(gen.Result(),
               R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct Data {
   int a;
@@ -566,6 +574,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_WO_StorageBuf
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct Data {
   int a;
@@ -611,6 +620,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_StorageBuffer
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct Data {
   int a;
@@ -658,6 +668,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_Called_By_EntryPoint_With_Uni
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct S {
   float x;
@@ -705,6 +716,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_Called_By_EntryPoint_With_Sto
     EXPECT_EQ(gen.Result(),
               R"(#version 310 es
 precision highp float;
+precision highp int;
 
 struct S {
   float x;
@@ -741,6 +753,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_WithNameCollision)
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
+precision highp int;
 
 void tint_symbol() {
 }

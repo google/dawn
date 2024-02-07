@@ -32,6 +32,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct tint_symbol {
   uint texture_builtin_value_0;

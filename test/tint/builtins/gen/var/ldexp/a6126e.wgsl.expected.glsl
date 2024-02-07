@@ -20,6 +20,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void ldexp_a6126e() {
   ivec3 arg_1 = ivec3(1);

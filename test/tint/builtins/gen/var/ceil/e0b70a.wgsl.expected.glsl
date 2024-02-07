@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void ceil_e0b70a() {
   float res = 2.0f;

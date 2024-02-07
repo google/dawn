@@ -23,6 +23,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(r32f) uniform highp image2DArray arg_0;
 void textureStore_0ff97a() {

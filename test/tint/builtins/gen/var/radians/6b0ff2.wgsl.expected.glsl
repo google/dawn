@@ -30,6 +30,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 float tint_radians(float param_0) {
   return param_0 * 0.01745329251994329547f;

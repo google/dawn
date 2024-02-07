@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void smoothstep_a80fff() {
   float res = 0.5f;

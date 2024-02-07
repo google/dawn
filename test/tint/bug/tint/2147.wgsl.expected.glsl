@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 struct atomic_compare_exchange_result_i32 {
   int old_value;

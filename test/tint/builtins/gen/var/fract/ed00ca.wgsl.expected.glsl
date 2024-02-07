@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void fract_ed00ca() {
   vec2 res = vec2(0.25f);

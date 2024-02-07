@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void select_431dfb() {
   ivec2 res = ivec2(1);

@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 bool tint_discarded = false;
 layout(location = 1) flat in ivec3 x_1;

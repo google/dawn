@@ -34,6 +34,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uvec2 tint_insert_bits(uvec2 v, uvec2 n, uint offset, uint count) {
   uint s = min(offset, 32u);

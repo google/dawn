@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_OES_sample_variables : require
 precision highp float;
+precision highp int;
 
 void tint_symbol(vec4 position, bool front_facing, uint sample_index, uint sample_mask) {
   if (front_facing) {

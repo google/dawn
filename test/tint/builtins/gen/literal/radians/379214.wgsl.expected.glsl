@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void radians_379214() {
   vec3 res = vec3(0.01745329238474369049f);

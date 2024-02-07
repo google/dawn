@@ -29,6 +29,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 float tint_saturate(float v) {
   return clamp(v, 0.0f, 1.0f);

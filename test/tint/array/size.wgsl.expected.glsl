@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(binding = 0, std430) buffer s_block_ssbo {
   float inner;

@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 bool tint_discarded = false;
 layout(location = 2) in float fClipDistance3_param_1;

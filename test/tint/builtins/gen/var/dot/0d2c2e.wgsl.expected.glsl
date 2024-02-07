@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void dot_0d2c2e() {
   float res = 2.0f;

@@ -45,6 +45,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
     return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);

@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void cosh_f67ff1() {
   vec3 res = vec3(1.0f);

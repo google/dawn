@@ -28,6 +28,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp usampler2DArray arg_1_arg_2;
 

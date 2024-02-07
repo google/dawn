@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void sqrt_4ac2c5() {
   vec4 res = vec4(1.0f);

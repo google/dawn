@@ -27,6 +27,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(r32f) uniform highp image2DArray arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

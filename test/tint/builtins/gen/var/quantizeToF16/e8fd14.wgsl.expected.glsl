@@ -33,6 +33,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 vec3 tint_quantizeToF16(vec3 param_0) {
   return vec3(

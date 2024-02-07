@@ -30,6 +30,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 vec2 tint_quantizeToF16(vec2 param_0) {
   return unpackHalf2x16(packHalf2x16(param_0));

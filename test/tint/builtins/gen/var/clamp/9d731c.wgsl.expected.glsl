@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void clamp_9d731c() {
   vec2 res = vec2(1.0f);

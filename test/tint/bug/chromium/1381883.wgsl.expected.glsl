@@ -1,5 +1,6 @@
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(location = 2) in float none_1;
 void tint_symbol(float none) {

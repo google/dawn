@@ -26,6 +26,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp samplerCube arg_0_arg_1;
 

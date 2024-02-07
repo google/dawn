@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 precision highp float;
+precision highp int;
 
 layout(location = 0) flat in int loc0_1;
 layout(location = 1) flat in uint loc1_1;

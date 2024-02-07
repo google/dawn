@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void floor_dcd5a2() {
   float res = 1.0f;

@@ -22,6 +22,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(r32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_6cff2e() {

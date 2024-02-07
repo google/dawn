@@ -20,6 +20,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_fd350c() {

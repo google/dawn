@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void atanh_7f2874() {
   vec3 res = vec3(0.54930615425109863281f);

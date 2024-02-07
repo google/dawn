@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void exp_dad791() {
   vec4 res = vec4(2.71828174591064453125f);

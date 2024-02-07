@@ -19,6 +19,7 @@ void main() {
 }
 #version 310 es
 precision highp float;
+precision highp int;
 
 void distance_f9c9ee() {
   float res = 0.0f;
