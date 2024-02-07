@@ -101,10 +101,12 @@ MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
 
 bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 
-MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture& src,
+MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
+                                                          const ImageCopyTexture& src,
                                                           const ImageCopyTexture& dst,
                                                           const Extent3D& copySize);
-MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
+MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
+                                                    const ImageCopyTexture& src,
                                                     const ImageCopyTexture& dst,
                                                     const Extent3D& copySize);
 

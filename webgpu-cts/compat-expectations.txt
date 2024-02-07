@@ -550,6 +550,10 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="uniform";vectorize=3 [ Failure ]
 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="uniform";vectorize=4 [ Failure ]
 
+# Multisample textures are not copyable. Should be fixed in pendng cts roll.
+crbug.com/dawn/0000 webgpu:api,validation,encoding,cmds,copyTextureToTexture:multisampled_copy_restrictions:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,cmds,copyTextureToTexture:sample_count:* [ Failure ]
+
 ################################################################################
 # New flakes. Please triage:
 ################################################################################

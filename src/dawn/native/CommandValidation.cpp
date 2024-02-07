@@ -483,7 +483,8 @@ MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& 
     return {};
 }
 
-MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture& src,
+MaybeError ValidateTextureToTextureCopyCommonRestrictions(DeviceBase const* device,
+                                                          const ImageCopyTexture& src,
                                                           const ImageCopyTexture& dst,
                                                           const Extent3D& copySize) {
     const uint32_t srcSamples = src.texture->GetSampleCount();
@@ -493,6 +494,11 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
         srcSamples != dstSamples,
         "Source %s sample count (%u) and destination %s sample count (%u) does not match.",
         src.texture, srcSamples, dst.texture, dstSamples);
+
+    DAWN_INVALID_IF(device->IsCompatibilityMode() && srcSamples != 1,
+                    "Source %s and destination %s with sample count (%u) > 1 cannot be copied in "
+                    "compatibility mode.",
+                    src.texture, dst.texture, srcSamples);
 
     // Metal cannot select a single aspect for texture-to-texture copies.
     const Format& format = src.texture->GetFormat();
@@ -537,7 +543,8 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
     return {};
 }
 
-MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
+MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
+                                                    const ImageCopyTexture& src,
                                                     const ImageCopyTexture& dst,
                                                     const Extent3D& copySize) {
     // Metal requires texture-to-texture copies happens between texture formats that equal to
@@ -547,7 +554,7 @@ MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
                     src.texture, src.texture->GetFormat().format, dst.texture,
                     dst.texture->GetFormat().format);
 
-    return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
+    return ValidateTextureToTextureCopyCommonRestrictions(device, src, dst, copySize);
 }
 
 MaybeError ValidateCanUseAs(const TextureBase* texture,

@@ -1109,6 +1109,32 @@ TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormTextureWithBGRA8UnormSrgbView
                         testing::HasSubstr("not supported in compatibility mode"));
 }
 
+TEST_F(CompatValidationTest, CanNotCopyMultisampleTextureToTexture) {
+    wgpu::TextureDescriptor srcDescriptor;
+    srcDescriptor.size = {4, 4, 1};
+    srcDescriptor.dimension = wgpu::TextureDimension::e2D;
+    srcDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    srcDescriptor.sampleCount = 4;
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+
+    wgpu::TextureDescriptor dstDescriptor;
+    dstDescriptor.size = {4, 4, 1};
+    dstDescriptor.dimension = wgpu::TextureDimension::e2D;
+    dstDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment;
+    dstDescriptor.sampleCount = 4;
+    wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+
+    wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(srcTexture);
+    wgpu::ImageCopyTexture destination = utils::CreateImageCopyTexture(dstTexture);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&source, &destination, &srcDescriptor.size);
+    ASSERT_DEVICE_ERROR(encoder.Finish(),
+                        testing::HasSubstr("cannot be copied in compatibility mode"));
+}
+
 class CompatTextureViewDimensionValidationTests : public CompatValidationTest {
   protected:
     void TestBindingTextureViewDimensions(

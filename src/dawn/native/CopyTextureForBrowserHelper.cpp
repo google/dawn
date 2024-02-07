@@ -687,7 +687,8 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
     // Validate copy common rules and copySize.
     DAWN_INVALID_IF(copySize->depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
                     copySize->depthOrArrayLayers);
-    DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
+    DAWN_TRY(
+        ValidateTextureToTextureCopyCommonRestrictions(device, *source, *destination, *copySize));
 
     // Validate options
     DAWN_TRY(ValidateCopyForBrowserOptions(*options));
