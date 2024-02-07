@@ -206,9 +206,9 @@ type Diff struct {
 	TestName           string
 	Delta              time.Duration // Δ (A → B)
 	PercentChangeAB    float64       // % (A → B)
-	PercentChangeBA    float64       // % (A → B)
+	PercentChangeBA    float64       // % (B → A)
 	MultiplierChangeAB float64       // × (A → B)
-	MultiplierChangeBA float64       // × (A → B)
+	MultiplierChangeBA float64       // × (B → A)
 	TimeA              time.Duration // A
 	TimeB              time.Duration // B
 }
