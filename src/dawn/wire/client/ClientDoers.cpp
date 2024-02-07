@@ -33,9 +33,9 @@
 
 namespace dawn::wire::client {
 
-bool Client::DoDeviceUncapturedErrorCallback(Device* device,
-                                             WGPUErrorType errorType,
-                                             const char* message) {
+WireResult Client::DoDeviceUncapturedErrorCallback(Device* device,
+                                                   WGPUErrorType errorType,
+                                                   const char* message) {
     switch (errorType) {
         case WGPUErrorType_NoError:
         case WGPUErrorType_Validation:
@@ -45,58 +45,64 @@ bool Client::DoDeviceUncapturedErrorCallback(Device* device,
         case WGPUErrorType_DeviceLost:
             break;
         default:
-            return false;
+            return WireResult::FatalError;
     }
     if (device == nullptr) {
         // The device might have been deleted or recreated so this isn't an error.
-        return true;
+        return WireResult::Success;
     }
     device->HandleError(errorType, message);
-    return true;
+    return WireResult::Success;
 }
 
-bool Client::DoDeviceLoggingCallback(Device* device,
-                                     WGPULoggingType loggingType,
-                                     const char* message) {
-    if (device == nullptr) {
-        // The device might have been deleted or recreated so this isn't an error.
-        return true;
-    }
-    device->HandleLogging(loggingType, message);
-    return true;
-}
-
-bool Client::DoDeviceLostCallback(Device* device,
-                                  WGPUDeviceLostReason reason,
-                                  char const* message) {
-    if (device == nullptr) {
-        // The device might have been deleted or recreated so this isn't an error.
-        return true;
-    }
-    device->HandleDeviceLost(reason, message);
-    return true;
-}
-
-bool Client::DoDevicePopErrorScopeCallback(Device* device,
-                                           uint64_t requestSerial,
-                                           WGPUErrorType errorType,
+WireResult Client::DoDeviceLoggingCallback(Device* device,
+                                           WGPULoggingType loggingType,
                                            const char* message) {
     if (device == nullptr) {
         // The device might have been deleted or recreated so this isn't an error.
-        return true;
+        return WireResult::Success;
     }
-    return device->OnPopErrorScopeCallback(requestSerial, errorType, message);
+    device->HandleLogging(loggingType, message);
+    return WireResult::Success;
 }
 
-bool Client::DoShaderModuleGetCompilationInfoCallback(ShaderModule* shaderModule,
-                                                      uint64_t requestSerial,
-                                                      WGPUCompilationInfoRequestStatus status,
-                                                      const WGPUCompilationInfo* info) {
+WireResult Client::DoDeviceLostCallback(Device* device,
+                                        WGPUDeviceLostReason reason,
+                                        char const* message) {
+    if (device == nullptr) {
+        // The device might have been deleted or recreated so this isn't an error.
+        return WireResult::Success;
+    }
+    device->HandleDeviceLost(reason, message);
+    return WireResult::Success;
+}
+
+WireResult Client::DoDevicePopErrorScopeCallback(Device* device,
+                                                 uint64_t requestSerial,
+                                                 WGPUErrorType errorType,
+                                                 const char* message) {
+    if (device == nullptr) {
+        // The device might have been deleted or recreated so this isn't an error.
+        return WireResult::Success;
+    }
+    if (device->OnPopErrorScopeCallback(requestSerial, errorType, message)) {
+        return WireResult::Success;
+    }
+    return WireResult::FatalError;
+}
+
+WireResult Client::DoShaderModuleGetCompilationInfoCallback(ShaderModule* shaderModule,
+                                                            uint64_t requestSerial,
+                                                            WGPUCompilationInfoRequestStatus status,
+                                                            const WGPUCompilationInfo* info) {
     // The shader module might have been deleted or recreated so this isn't an error.
     if (shaderModule == nullptr) {
-        return true;
+        return WireResult::Success;
     }
-    return shaderModule->GetCompilationInfoCallback(requestSerial, status, info);
+    if (shaderModule->GetCompilationInfoCallback(requestSerial, status, info)) {
+        return WireResult::Success;
+    }
+    return WireResult::FatalError;
 }
 
 }  // namespace dawn::wire::client

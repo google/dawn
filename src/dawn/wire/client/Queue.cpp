@@ -81,11 +81,10 @@ ObjectType Queue::GetObjectType() const {
     return ObjectType::Queue;
 }
 
-bool Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
-                                     WGPUFuture future,
-                                     WGPUQueueWorkDoneStatus status) {
-    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status) ==
-           WireResult::Success;
+WireResult Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
+                                           WGPUFuture future,
+                                           WGPUQueueWorkDoneStatus status) {
+    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status);
 }
 
 void Queue::OnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {

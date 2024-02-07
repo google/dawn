@@ -27,12 +27,12 @@
 
 //* Return command handlers
 {% for command in cmd_records["return command"] %}
-    bool Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer);
+    WireResult Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer);
 {% endfor %}
 
 //* Return command doers
 {% for command in cmd_records["return command"] %}
-    bool Do{{command.name.CamelCase()}}(
+    WireResult Do{{command.name.CamelCase()}}(
         {%- for member in command.members -%}
             {%- if member.handle_type -%}
                 {{as_wireType(member.handle_type)}} {{as_varName(member.name)}}

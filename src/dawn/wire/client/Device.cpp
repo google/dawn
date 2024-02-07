@@ -341,13 +341,12 @@ WGPUFuture Device::CreateComputePipelineAsyncF(
         descriptor, callbackInfo);
 }
 
-bool Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectHandle eventManager,
-                                                        WGPUFuture future,
-                                                        WGPUCreatePipelineAsyncStatus status,
-                                                        const char* message) {
+WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectHandle eventManager,
+                                                              WGPUFuture future,
+                                                              WGPUCreatePipelineAsyncStatus status,
+                                                              const char* message) {
     return GetEventManager(eventManager)
-               .SetFutureReady<CreateComputePipelineEvent>(future.id, status, message) ==
-           WireResult::Success;
+        .SetFutureReady<CreateComputePipelineEvent>(future.id, status, message);
 }
 
 void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
@@ -367,13 +366,12 @@ WGPUFuture Device::CreateRenderPipelineAsyncF(
         descriptor, callbackInfo);
 }
 
-bool Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectHandle eventManager,
-                                                       WGPUFuture future,
-                                                       WGPUCreatePipelineAsyncStatus status,
-                                                       const char* message) {
+WireResult Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectHandle eventManager,
+                                                             WGPUFuture future,
+                                                             WGPUCreatePipelineAsyncStatus status,
+                                                             const char* message) {
     return GetEventManager(eventManager)
-               .SetFutureReady<CreateRenderPipelineEvent>(future.id, status, message) ==
-           WireResult::Success;
+        .SetFutureReady<CreateRenderPipelineEvent>(future.id, status, message);
 }
 
 }  // namespace dawn::wire::client

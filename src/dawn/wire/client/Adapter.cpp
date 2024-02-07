@@ -277,16 +277,16 @@ WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
     return {futureIDInternal};
 }
 
-bool Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
-                                            WGPUFuture future,
-                                            WGPURequestDeviceStatus status,
-                                            const char* message,
-                                            const WGPUSupportedLimits* limits,
-                                            uint32_t featuresCount,
-                                            const WGPUFeatureName* features) {
+WireResult Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
+                                                  WGPUFuture future,
+                                                  WGPURequestDeviceStatus status,
+                                                  const char* message,
+                                                  const WGPUSupportedLimits* limits,
+                                                  uint32_t featuresCount,
+                                                  const WGPUFeatureName* features) {
     return GetEventManager(eventManager)
-               .SetFutureReady<RequestDeviceEvent>(future.id, status, message, limits,
-                                                   featuresCount, features) == WireResult::Success;
+        .SetFutureReady<RequestDeviceEvent>(future.id, status, message, limits, featuresCount,
+                                            features);
 }
 
 WGPUInstance Adapter::GetInstance() const {

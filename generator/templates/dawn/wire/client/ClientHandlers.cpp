@@ -32,13 +32,9 @@
 
 namespace dawn::wire::client {
     {% for command in cmd_records["return command"] %}
-        bool Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
+        WireResult Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
             Return{{command.name.CamelCase()}}Cmd cmd;
-            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mWireCommandAllocator);
-
-            if (deserializeResult == WireResult::FatalError) {
-                return false;
-            }
+            WIRE_TRY(cmd.Deserialize(deserializeBuffer, &mWireCommandAllocator));
 
             {% for member in command.members if member.handle_type %}
                 {% set Type = member.handle_type.name.CamelCase() %}
@@ -82,19 +78,17 @@ namespace dawn::wire::client {
 
             ReturnWireCmd cmdId = *static_cast<const volatile ReturnWireCmd*>(static_cast<const volatile void*>(
                 deserializeBuffer.Buffer() + sizeof(CmdHeader)));
-            bool success = false;
+            WireResult result = WireResult::FatalError;
             switch (cmdId) {
                 {% for command in cmd_records["return command"] %}
                     {% set Suffix = command.name.CamelCase() %}
                     case ReturnWireCmd::{{Suffix}}:
-                        success = Handle{{Suffix}}(&deserializeBuffer);
+                        result = Handle{{Suffix}}(&deserializeBuffer);
                         break;
                 {% endfor %}
-                default:
-                    success = false;
             }
 
-            if (!success) {
+            if (result != WireResult::Success) {
                 return nullptr;
             }
             mWireCommandAllocator.Reset();

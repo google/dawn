@@ -389,14 +389,14 @@ WGPUFuture Buffer::MapAsyncF(WGPUMapModeFlags mode,
     return {futureIDInternal};
 }
 
-bool Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
-                                      WGPUFuture future,
-                                      WGPUBufferMapAsyncStatus status,
-                                      uint64_t readDataUpdateInfoLength,
-                                      const uint8_t* readDataUpdateInfo) {
+WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
+                                            WGPUFuture future,
+                                            WGPUBufferMapAsyncStatus status,
+                                            uint64_t readDataUpdateInfoLength,
+                                            const uint8_t* readDataUpdateInfo) {
     return GetEventManager(eventManager)
-               .SetFutureReady<Buffer::MapAsyncEvent>(future.id, status, readDataUpdateInfoLength,
-                                                      readDataUpdateInfo) == WireResult::Success;
+        .SetFutureReady<Buffer::MapAsyncEvent>(future.id, status, readDataUpdateInfoLength,
+                                               readDataUpdateInfo);
 }
 
 void* Buffer::GetMappedRange(size_t offset, size_t size) {
