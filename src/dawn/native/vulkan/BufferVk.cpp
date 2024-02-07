@@ -572,7 +572,7 @@ void Buffer::DestroyImpl() {
             void HandleShutDownImpl() override { callback(userdata); }
 
             wgpu::Callback callback;
-            raw_ptr<void> userdata;
+            raw_ptr<void, DisableDanglingPtrDetection> userdata;
         };
         std::unique_ptr<DisposeTask> request =
             std::make_unique<DisposeTask>(mHostMappedDisposeCallback, mHostMappedDisposeUserdata);

@@ -104,7 +104,7 @@ class Buffer final : public BufferBase {
     VkDeviceMemory mDedicatedDeviceMemory = VK_NULL_HANDLE;
 
     wgpu::Callback mHostMappedDisposeCallback = nullptr;
-    raw_ptr<void> mHostMappedDisposeUserdata = nullptr;
+    raw_ptr<void, DisableDanglingPtrDetection> mHostMappedDisposeUserdata = nullptr;
 
     // Track which usage was the last to write to the buffer.
     wgpu::BufferUsage mLastWriteUsage = wgpu::BufferUsage::None;

@@ -516,7 +516,7 @@ void Buffer::DestroyImpl() {
 
             std::unique_ptr<Heap> heap;
             wgpu::Callback callback;
-            raw_ptr<void> userdata;
+            raw_ptr<void, DisableDanglingPtrDetection> userdata;
         };
         std::unique_ptr<DisposeTask> request = std::make_unique<DisposeTask>(
             std::move(mHostMappedHeap), mHostMappedDisposeCallback, mHostMappedDisposeUserdata);

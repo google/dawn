@@ -100,7 +100,7 @@ class Buffer final : public BufferBase {
 
     std::unique_ptr<Heap> mHostMappedHeap;
     wgpu::Callback mHostMappedDisposeCallback = nullptr;
-    raw_ptr<void> mHostMappedDisposeUserdata = nullptr;
+    raw_ptr<void, DisableDanglingPtrDetection> mHostMappedDisposeUserdata = nullptr;
 };
 
 }  // namespace dawn::native::d3d12
