@@ -350,7 +350,6 @@ bool Builder::GenerateExtension(wgsl::Extension extension) {
             module_.PushCapability(SpvCapabilityFloat16);
             module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
             module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
-            module_.PushCapability(SpvCapabilityStorageInputOutput16);
             break;
         default:
             return false;
@@ -737,6 +736,13 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     auto type_id = GenerateTypeIfNeeded(sem->Type());
     if (type_id == 0) {
         return false;
+    }
+
+    // Emit the StorageInputOutput16 capability if needed.
+    if (sc == core::AddressSpace::kIn || sc == core::AddressSpace::kOut) {
+        if (type->DeepestElement()->Is<core::type::F16>()) {
+            module_.PushCapability(SpvCapabilityStorageInputOutput16);
+        }
     }
 
     module_.PushDebug(spv::Op::OpName, {Operand(var_id), Operand(v->name->symbol.Name())});

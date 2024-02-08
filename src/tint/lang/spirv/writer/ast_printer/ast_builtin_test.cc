@@ -1722,7 +1722,6 @@ TEST_F(BuiltinSpirvASTPrinterTest, Runtime_Call_Modf_f16) {
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
 OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16
 %15 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
@@ -1822,7 +1821,6 @@ TEST_F(BuiltinSpirvASTPrinterTest, Const_Call_Modf_f16) {
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
 OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
@@ -1928,7 +1926,6 @@ TEST_F(BuiltinSpirvASTPrinterTest, Runtime_Call_Frexp_f16) {
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
 OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16
 %17 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
@@ -2031,7 +2028,6 @@ TEST_F(BuiltinSpirvASTPrinterTest, Const_Call_Frexp_f16) {
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
 OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft

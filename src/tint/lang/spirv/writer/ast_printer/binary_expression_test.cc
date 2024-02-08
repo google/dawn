@@ -1344,8 +1344,7 @@ static std::string CapabilityDecl(Type type) {
             return R"(OpCapability Shader
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
-OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16)";
+OpCapability StorageBuffer16BitAccess)";
     }
     return {};
 }
@@ -1639,8 +1638,7 @@ static std::string CapabilityDecl(Type type) {
             return R"(OpCapability Shader
 OpCapability Float16
 OpCapability UniformAndStorageBuffer16BitAccess
-OpCapability StorageBuffer16BitAccess
-OpCapability StorageInputOutput16)";
+OpCapability StorageBuffer16BitAccess)";
     }
     return {};
 }
