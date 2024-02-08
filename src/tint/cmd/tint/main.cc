@@ -178,6 +178,10 @@ struct Options {
 
     tint::Vector<std::string, 4> transforms;
 
+#if TINT_BUILD_SPV_WRITER
+    bool use_storage_input_output_16 = true;
+#endif  // TINT_BULD_SPV_WRITER
+
 #if TINT_BUILD_HLSL_WRITER
     std::string fxc_path;
     std::string dxc_path;
@@ -343,6 +347,13 @@ violations that may be produced)",
             opts->spirv_reader_options.allow_non_uniform_derivatives = true;
         }
     });
+#endif
+
+#if TINT_BUILD_SPV_WRITER
+    auto& use_storage_input_output_16 =
+        options.Add<BoolOption>("use-storage-input-output-16",
+                                "Use the StorageInputOutput16 SPIR-V capability", Default{true});
+    TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
 #endif
 
     auto& disable_wg_init = options.Add<BoolOption>(
@@ -687,6 +698,7 @@ bool GenerateSpirv(const tint::Program& program, const Options& options) {
     tint::spirv::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
+    gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
     gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
 
     tint::Result<tint::spirv::writer::Output> result;

@@ -1,0 +1,31 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Outputs {
+  half a;
+  half4 b;
+};
+
+struct tint_symbol_1 {
+  half loc1 [[user(locn1)]];
+  half4 loc2 [[user(locn2)]];
+};
+
+struct tint_symbol_2 {
+  half a [[color(1)]];
+  half4 b [[color(2)]];
+};
+
+Outputs frag_main_inner(half loc1, half4 loc2) {
+  Outputs const tint_symbol_3 = {.a=(loc1 * 2.0h), .b=(loc2 * 3.0h)};
+  return tint_symbol_3;
+}
+
+fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  Outputs const inner_result = frag_main_inner(tint_symbol.loc1, tint_symbol.loc2);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.a = inner_result.a;
+  wrapper_result.b = inner_result.b;
+  return wrapper_result;
+}
+
