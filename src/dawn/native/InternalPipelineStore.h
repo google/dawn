@@ -77,26 +77,29 @@ struct InternalPipelineStore {
 
     Ref<RenderPipelineBase> blitRG8ToDepth16UnormPipeline;
 
-    using BlitTextureToBufferComputePipelineKeyType =
+    using TextureFormatAndViewDimensionKeyType =
         std::pair<wgpu::TextureFormat, wgpu::TextureViewDimension>;
-    struct BlitTextureToBufferComputePipelineHash {
-        std::size_t operator()(const BlitTextureToBufferComputePipelineKeyType& k) const {
+    struct TextureFormatAndViewDimensionHash {
+        std::size_t operator()(const TextureFormatAndViewDimensionKeyType& k) const {
             size_t hash = 0;
             HashCombine(&hash, k.first);
             HashCombine(&hash, k.second);
             return hash;
         }
     };
-    absl::flat_hash_map<BlitTextureToBufferComputePipelineKeyType,
+    absl::flat_hash_map<TextureFormatAndViewDimensionKeyType,
                         Ref<ComputePipelineBase>,
-                        BlitTextureToBufferComputePipelineHash>
+                        TextureFormatAndViewDimensionHash>
         blitTextureToBufferComputePipelines;
 
     struct BlitR8ToStencilPipelines {
         Ref<RenderPipelineBase> clearPipeline;
         std::array<Ref<RenderPipelineBase>, 8> setStencilPipelines;
     };
-    absl::flat_hash_map<wgpu::TextureFormat, BlitR8ToStencilPipelines> blitR8ToStencilPipelines;
+    absl::flat_hash_map<TextureFormatAndViewDimensionKeyType,
+                        BlitR8ToStencilPipelines,
+                        TextureFormatAndViewDimensionHash>
+        blitR8ToStencilPipelines;
 
     absl::flat_hash_map<wgpu::TextureFormat, Ref<RenderPipelineBase>> depthBlitPipelines;
 
