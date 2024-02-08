@@ -65,7 +65,7 @@ func (cmd) Name() string {
 }
 
 func (cmd) Desc() string {
-	return "updates a CTS expectations file"
+	return "updates a CTS test list file"
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
