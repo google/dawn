@@ -493,7 +493,6 @@ class Printer {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
                     module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
-                    module_.PushCapability(SpvCapabilityStorageInputOutput16);
                     module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
                 },
                 [&](const core::type::Vector* vec) {
@@ -2065,6 +2064,9 @@ class Printer {
             }
             case core::AddressSpace::kIn: {
                 TINT_ASSERT(!current_function_);
+                if (store_ty->DeepestElement()->Is<core::type::F16>()) {
+                    module_.PushCapability(SpvCapabilityStorageInputOutput16);
+                }
                 module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassInput)});
                 EmitIOAttributes(id, var->Attributes(), core::AddressSpace::kIn);
                 break;
@@ -2089,6 +2091,9 @@ class Printer {
             }
             case core::AddressSpace::kOut: {
                 TINT_ASSERT(!current_function_);
+                if (store_ty->DeepestElement()->Is<core::type::F16>()) {
+                    module_.PushCapability(SpvCapabilityStorageInputOutput16);
+                }
                 module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassOutput)});
                 EmitIOAttributes(id, var->Attributes(), core::AddressSpace::kOut);
                 break;

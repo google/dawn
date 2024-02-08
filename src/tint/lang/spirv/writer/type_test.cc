@@ -98,7 +98,6 @@ TEST_F(SpirvWriterTest, Type_F16) {
     EXPECT_INST("OpCapability Float16");
     EXPECT_INST("OpCapability UniformAndStorageBuffer16BitAccess");
     EXPECT_INST("OpCapability StorageBuffer16BitAccess");
-    EXPECT_INST("OpCapability StorageInputOutput16");
     EXPECT_INST("%half = OpTypeFloat 16");
 }
 
