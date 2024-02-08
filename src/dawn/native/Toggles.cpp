@@ -224,9 +224,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/dawn/1016", ToggleStage::Device}},
     {Toggle::UseUserDefinedLabelsInBackend,
      {"use_user_defined_labels_in_backend",
-      "Enables setting labels on backend-specific APIs that label objects. The labels used will be "
-      "those of the corresponding frontend objects if non-empty and default labels otherwise. "
-      "Defaults to true if validation is enabled and false otherwise.",
+      "Enables calls to SetLabel to be forwarded to backend-specific APIs that label objects.",
       "https://crbug.com/dawn/840", ToggleStage::Device}},
     {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
      {"use_placeholder_fragment_in_vertex_only_pipeline",
