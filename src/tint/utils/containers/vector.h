@@ -41,6 +41,7 @@
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/memory/bitcast.h"
 
 #ifndef TINT_VECTOR_MUTATION_CHECKS_ENABLED
@@ -912,26 +913,18 @@ class Vector {
     constexpr static bool HasSmallArray = N > 0;
 
     /// A structure that has the same size and alignment as T.
-    /// Replacement for std::aligned_storage as this is broken on earlier versions of MSVC.
-    struct alignas(alignof(T)) TStorage {
-        /// @returns the storage reinterpreted as a T*
-        T* Get() { return Bitcast<T*>(&data[0]); }
-        /// @returns the storage reinterpreted as a T*
-        const T* Get() const { return Bitcast<const T*>(&data[0]); }
-        /// Byte array of length sizeof(T)
-        uint8_t data[sizeof(T)];
-    };
+    using TStorage = AlignedStorage<T>;
 
     /// The internal structure for the vector with a small array.
     struct ImplWithSmallArray {
         TStorage small_arr[N];
-        tint::Slice<T> slice = {small_arr[0].Get(), 0, N};
+        tint::Slice<T> slice = {&small_arr[0].Get(), 0, N};
 
         /// Allocates a new vector of `T` either from #small_arr, or from the heap, then assigns the
         /// pointer it to #slice.data, and updates #slice.cap.
         void Allocate(size_t new_cap) {
             if (new_cap < N) {
-                slice.data = small_arr[0].Get();
+                slice.data = &small_arr[0].Get();
                 slice.cap = N;
             } else {
                 slice.data = Bitcast<T*>(new TStorage[new_cap]);
@@ -941,14 +934,14 @@ class Vector {
 
         /// Frees `data`, if isn't a pointer to #small_arr
         void Free(T* data) const {
-            if (data != small_arr[0].Get()) {
+            if (data != &small_arr[0].Get()) {
                 delete[] Bitcast<TStorage*>(data);
             }
         }
 
         /// Indicates whether the slice structure can be std::move()d.
         /// @returns true if #slice.data does not point to #small_arr
-        bool CanMove() const { return slice.data != small_arr[0].Get(); }
+        bool CanMove() const { return slice.data != &small_arr[0].Get(); }
     };
 
     /// The internal structure for the vector without a small array.

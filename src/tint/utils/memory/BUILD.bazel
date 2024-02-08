@@ -42,6 +42,7 @@ cc_library(
     "memory.cc",
   ],
   hdrs = [
+    "aligned_storage.h",
     "bitcast.h",
     "block_allocator.h",
     "bump_allocator.h",

@@ -39,6 +39,7 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_memory lib
+  utils/memory/aligned_storage.h
   utils/memory/bitcast.h
   utils/memory/block_allocator.h
   utils/memory/bump_allocator.h

@@ -44,6 +44,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("memory") {
   sources = [
+    "aligned_storage.h",
     "bitcast.h",
     "block_allocator.h",
     "bump_allocator.h",

@@ -38,6 +38,7 @@
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/math/math.h"
+#include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint {
@@ -418,21 +419,14 @@ class HashmapBase {
   protected:
     /// Node holds an Entry in a linked list.
     struct Node {
-        /// A structure that has the same size and alignment as Entry.
-        /// Replacement for std::aligned_storage as this is broken on earlier versions of MSVC.
-        struct alignas(alignof(ENTRY)) Storage {
-            /// Byte array of length sizeof(ENTRY)
-            uint8_t data[sizeof(ENTRY)];
-        };
-
         /// Destructs the entry.
         void Destroy() { Entry().~ENTRY(); }
 
         /// @returns the storage reinterpreted as an `Entry&`
-        ENTRY& Entry() { return *Bitcast<ENTRY*>(&storage.data[0]); }
+        ENTRY& Entry() { return storage.Get(); }
 
         /// @returns the storage reinterpreted as a `const Entry&`
-        const ENTRY& Entry() const { return *Bitcast<const ENTRY*>(&storage.data[0]); }
+        const ENTRY& Entry() const { return storage.Get(); }
 
         /// @returns a reference to the Entry's HashmapKey
         const HashmapBase::Key& Key() const { return HashmapBase::Entry::KeyOf(Entry()); }
@@ -450,7 +444,7 @@ class HashmapBase {
         /// storage is a buffer that has the same size and alignment as Entry.
         /// The storage holds a constructed Entry when linked in the slots, and is destructed when
         /// removed from slots.
-        Storage storage;
+        AlignedStorage<ENTRY> storage;
 
         /// next is the next Node in the slot, or in the free list.
         Node* next;

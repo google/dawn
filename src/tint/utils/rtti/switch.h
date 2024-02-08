@@ -33,7 +33,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
-#include "src/tint/utils/memory/bitcast.h"
+#include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/rtti/ignore.h"
 
@@ -300,13 +300,8 @@ inline auto Switch(T* object, ARGS&&... args) {
         }
     }
 
-    // Replacement for std::aligned_storage as this is broken on earlier versions of MSVC.
-    using ReturnTypeOrU8 = std::conditional_t<kHasReturnType, ReturnType, uint8_t>;
-    struct alignas(alignof(ReturnTypeOrU8)) ReturnStorage {
-        uint8_t data[sizeof(ReturnTypeOrU8)];
-    };
-    ReturnStorage return_storage;
-    auto* result = tint::Bitcast<ReturnTypeOrU8*>(&return_storage);
+    AlignedStorage<std::conditional_t<kHasReturnType, ReturnType, uint8_t>> return_storage;
+    auto* result = &return_storage.Get();
 
     const tint::TypeInfo& type_info = object->TypeInfo();
 
