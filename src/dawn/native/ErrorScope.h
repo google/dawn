@@ -37,8 +37,6 @@ namespace dawn::native {
 
 class ErrorScope {
   public:
-    ErrorScope(wgpu::ErrorType error, std::string_view message);
-
     wgpu::ErrorType GetErrorType() const;
     const std::string& GetErrorMessage() const;
 

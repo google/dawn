@@ -46,7 +46,7 @@ class WGSLFeatureValidationTest : public ValidationTest {
         std::vector<const char*> blocklist = {};
     };
 
-    void ReinitializeInstances(InstanceSpec spec) {
+    wgpu::Instance CreateInstance(InstanceSpec spec) {
         // The blocklist that will be shared between both the native and wire descriptors.
         wgpu::DawnWGSLBlocklist blocklist;
         blocklist.blocklistedFeatureCount = spec.blocklist.size();
@@ -82,7 +82,45 @@ class WGSLFeatureValidationTest : public ValidationTest {
         wgpu::InstanceDescriptor wireDesc;
         wireDesc.nextInChain = &wgslControl;
 
-        ValidationTest::ReinitializeInstances(&nativeDesc, &wireDesc);
+        return GetWireHelper()->CreateInstances(&nativeDesc, &wireDesc).first;
+    }
+
+    wgpu::Device CreateDeviceOnInstance(wgpu::Instance instance) {
+        // Get the adapter
+        wgpu::Adapter adapter;
+        instance.RequestAdapter(
+            nullptr,
+            [](WGPURequestAdapterStatus status, WGPUAdapter a, const char* message,
+               void* userdata) {
+                ASSERT_EQ(status, WGPURequestAdapterStatus_Success);
+                ASSERT_NE(a, nullptr);
+                *reinterpret_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(a);
+            },
+            &adapter);
+
+        while (!adapter) {
+            FlushWire();
+        }
+        EXPECT_NE(nullptr, adapter.Get());
+
+        // Get the device
+        wgpu::Device device;
+        adapter.RequestDevice(
+            nullptr,
+            [](WGPURequestDeviceStatus status, WGPUDevice d, const char* message, void* userdata) {
+                ASSERT_EQ(status, WGPURequestDeviceStatus_Success);
+                ASSERT_NE(d, nullptr);
+                *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(d);
+            },
+            &device);
+
+        while (!device) {
+            FlushWire();
+        }
+        EXPECT_NE(nullptr, device.Get());
+
+        device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
+        return device;
     }
 };
 
@@ -90,7 +128,7 @@ wgpu::WGSLFeatureName kNonExistentFeature = static_cast<wgpu::WGSLFeatureName>(0
 
 // Check HasFeature for an Instance that doesn't have unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureDefaultInstance) {
-    ReinitializeInstances({});
+    wgpu::Instance instance = CreateInstance({});
 
     // Shipped features are present.
     ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
@@ -111,7 +149,7 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureDefaultInstance) {
 
 // Check HasFeature for an Instance that has unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureExposeExperimental) {
-    ReinitializeInstances({.exposeExperimental = true});
+    wgpu::Instance instance = CreateInstance({.exposeExperimental = true});
 
     // Shipped and experimental features are present.
     ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
@@ -132,7 +170,7 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureExposeExperimental) {
 
 // Check HasFeature for an Instance that has unsafe APIs.
 TEST_F(WGSLFeatureValidationTest, HasFeatureAllowUnsafeInstance) {
-    ReinitializeInstances({.allowUnsafeAPIs = true});
+    wgpu::Instance instance = CreateInstance({.allowUnsafeAPIs = true});
 
     // Shipped and experimental features are present.
     ASSERT_TRUE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
@@ -153,7 +191,7 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureAllowUnsafeInstance) {
 
 // Check HasFeature for an Instance that doesn't have the expose_wgsl_testing_features toggle.
 TEST_F(WGSLFeatureValidationTest, HasFeatureWithoutExposeWGSLTestingFeatures) {
-    ReinitializeInstances({.useTestingFeatures = false});
+    wgpu::Instance instance = CreateInstance({.useTestingFeatures = false});
 
     // None of the testing features are present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
@@ -169,7 +207,7 @@ TEST_F(WGSLFeatureValidationTest, HasFeatureWithoutExposeWGSLTestingFeatures) {
 
 // Tests for the behavior of WGSL feature enumeration.
 TEST_F(WGSLFeatureValidationTest, EnumerateFeatures) {
-    ReinitializeInstances({});
+    wgpu::Instance instance = CreateInstance({});
 
     size_t featureCount = instance.EnumerateWGSLLanguageFeatures(nullptr);
 
@@ -205,7 +243,8 @@ TEST_F(WGSLFeatureValidationTest, EnumerateFeatures) {
 
 // Check that the enabled / disabled features are used to validate the WGSL shaders.
 TEST_F(WGSLFeatureValidationTest, UsingFeatureInShaderModule) {
-    ReinitializeInstances({});
+    wgpu::Instance instance = CreateInstance({});
+    wgpu::Device device = CreateDeviceOnInstance(instance);
 
     utils::CreateShaderModule(device, R"(
         requires chromium_testing_shipped;
@@ -227,7 +266,7 @@ TEST_F(WGSLFeatureValidationTest, UsingFeatureInShaderModule) {
 
 // Test using DawnWGSLBlocklist to block features with a killswitch by name.
 TEST_F(WGSLFeatureValidationTest, BlockListOfKillswitchedFeatures) {
-    ReinitializeInstances(
+    wgpu::Instance instance = CreateInstance(
         {.allowUnsafeAPIs = true, .blocklist = {"chromium_testing_shipped_with_killswitch"}});
 
     // The blocklisted feature is not present.
@@ -242,6 +281,7 @@ TEST_F(WGSLFeatureValidationTest, BlockListOfKillswitchedFeatures) {
         instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental));
 
     // Using the blocklisted extension fails.
+    wgpu::Device device = CreateDeviceOnInstance(instance);
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         requires chromium_testing_shipped_with_killswitch;
     )"));
@@ -249,10 +289,10 @@ TEST_F(WGSLFeatureValidationTest, BlockListOfKillswitchedFeatures) {
 
 // Test that DawnWGSLBlocklist can block any feature name (even without a killswitch).
 TEST_F(WGSLFeatureValidationTest, BlockListOfAnyFeature) {
-    ReinitializeInstances(
-        {.allowUnsafeAPIs = true,
-         .blocklist = {"chromium_testing_shipped", "chromium_testing_experimental",
-                       "chromium_testing_unsafe_experimental"}});
+    wgpu::Instance instance =
+        CreateInstance({.allowUnsafeAPIs = true,
+                        .blocklist = {"chromium_testing_shipped", "chromium_testing_experimental",
+                                      "chromium_testing_unsafe_experimental"}});
 
     // All blocklisted features aren't present.
     ASSERT_FALSE(instance.HasWGSLLanguageFeature(wgpu::WGSLFeatureName::ChromiumTestingShipped));
@@ -264,7 +304,7 @@ TEST_F(WGSLFeatureValidationTest, BlockListOfAnyFeature) {
 
 // Test that DawnWGSLBlocklist can contain garbage names without causing problems.
 TEST_F(WGSLFeatureValidationTest, BlockListGarbageName) {
-    ReinitializeInstances({.blocklist = {"LE_GARBAGE"}});
+    wgpu::Instance instance = CreateInstance({.blocklist = {"LE_GARBAGE"}});
     ASSERT_NE(instance, nullptr);
 }
 

@@ -117,8 +117,7 @@ struct ErrorScopeUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
     ObjectHandle device;
-    ObjectHandle eventManager;
-    WGPUFuture future;
+    uint64_t requestSerial;
 };
 
 struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {

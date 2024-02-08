@@ -1144,7 +1144,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
                 *error = true;
             },
             &errorThrown);
-        instance.ProcessEvents();
+        device.Tick();
         EXPECT_TRUE(errorThrown.load());
 
         // Second copy is valid.

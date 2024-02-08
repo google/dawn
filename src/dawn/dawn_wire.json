@@ -71,8 +71,7 @@
         ],
         "device pop error scope": [
             { "name": "device id", "type": "ObjectId", "id_type": "device" },
-            { "name": "event manager handle", "type": "ObjectHandle" },
-            { "name": "future", "type": "future" }
+            { "name": "request serial", "type": "uint64_t" }
         ],
         "destroy object": [
             { "name": "object type", "type": "ObjectType" },
@@ -153,8 +152,8 @@
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device pop error scope callback": [
-            { "name": "event manager", "type": "ObjectHandle" },
-            { "name": "future", "type": "future" },
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
+            { "name": "request serial", "type": "uint64_t" },
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
@@ -223,7 +222,6 @@
             "DeviceHasFeature",
             "DeviceEnumerateFeatures",
             "DevicePopErrorScope",
-            "DevicePopErrorScopeF",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "DeviceSetLoggingCallback",
