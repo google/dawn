@@ -188,7 +188,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
         ast::transform::CanonicalizeEntryPointIO::Config(
             ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
-            options.emit_vertex_point_size));
+            options.emit_vertex_point_size, !options.use_storage_input_output_16));
 
     SanitizedResult result;
     ast::transform::DataMap outputs;

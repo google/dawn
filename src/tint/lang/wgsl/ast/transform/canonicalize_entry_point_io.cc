@@ -339,6 +339,17 @@ struct CanonicalizeEntryPointIO::State {
                     value = b.IndexAccessor(value, 0_i);
                 }
             }
+
+            // Replace f16 types with f32 types if necessary.
+            if (cfg.polyfill_f16_io && type->DeepestElement()->Is<core::type::F16>()) {
+                value = b.Call(ast_type, value);
+
+                ast_type = b.ty.f32();
+                if (auto* vec = type->As<core::type::Vector>()) {
+                    ast_type = b.ty.vec(ast_type, vec->Width());
+                }
+            }
+
             b.GlobalVar(symbol, ast_type, core::AddressSpace::kIn, std::move(attrs));
             return value;
         } else if (cfg.shader_style == ShaderStyle::kMsl &&
@@ -406,9 +417,27 @@ struct CanonicalizeEntryPointIO::State {
             }
         }
 
+        ast::Type ast_type;
+
+        // Replace f16 types with f32 types if necessary.
+        if (cfg.shader_style == ShaderStyle::kSpirv && cfg.polyfill_f16_io &&
+            type->DeepestElement()->Is<core::type::F16>()) {
+            auto make_ast_type = [&] {
+                auto ty = b.ty.f32();
+                if (auto* vec = type->As<core::type::Vector>()) {
+                    ty = b.ty.vec(ty, vec->Width());
+                }
+                return ty;
+            };
+            ast_type = make_ast_type();
+            value = b.Call(make_ast_type(), value);
+        } else {
+            ast_type = CreateASTTypeFor(ctx, type);
+        }
+
         OutputValue output;
         output.name = name;
-        output.type = CreateASTTypeFor(ctx, type);
+        output.type = ast_type;
         output.attributes = std::move(attrs);
         output.value = value;
         output.location = location;
@@ -984,10 +1013,12 @@ Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program& src,
 
 CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
                                          uint32_t sample_mask,
-                                         bool emit_point_size)
+                                         bool emit_point_size,
+                                         bool polyfill_f16)
     : shader_style(style),
       fixed_sample_mask(sample_mask),
-      emit_vertex_point_size(emit_point_size) {}
+      emit_vertex_point_size(emit_point_size),
+      polyfill_f16_io(polyfill_f16) {}
 
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;

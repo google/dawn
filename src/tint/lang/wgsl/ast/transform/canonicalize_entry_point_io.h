@@ -118,9 +118,11 @@ class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO,
         /// @param style the approach to use for emitting shader IO.
         /// @param sample_mask an optional sample mask to combine with shader masks
         /// @param emit_vertex_point_size `true` to generate a pointsize builtin
+        /// @param polyfill_f16_io `true` to replace f16 types with f32 types
         explicit Config(ShaderStyle style,
                         uint32_t sample_mask = 0xFFFFFFFF,
-                        bool emit_vertex_point_size = false);
+                        bool emit_vertex_point_size = false,
+                        bool polyfill_f16_io = false);
 
         /// Copy constructor
         Config(const Config&);
@@ -137,6 +139,9 @@ class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO,
         /// Set to `true` to generate a pointsize builtin and have it set to 1.0
         /// from all vertex shaders in the module.
         const bool emit_vertex_point_size;
+
+        /// Set to `true` to replace f16 IO types with f32 types and convert them.
+        const bool polyfill_f16_io = false;
     };
 
     /// HLSLWaveIntrinsic is an InternalAttribute that is used to decorate a stub function so that
