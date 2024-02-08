@@ -146,6 +146,8 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"UNASSIGNED-CoreValidation-Shader-OutputNotConsumed",
      "fragment shader writes to output location 0 with no matching attachment"},
 
+    // There are various VVL (and other) errors in dawn::native::vulkan::ExternalImage*. Suppress
+    // them for now as everything *should* be fixed by using SharedTextureMemory in the future.
     // http://crbug.com/1499919
     {"VUID-VkMemoryAllocateInfo-allocationSize-01742",
      "vkAllocateMemory(): pAllocateInfo->allocationSize allocationSize (4096) "
@@ -158,6 +160,8 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "does not match pAllocateInfo->pNext<VkImportMemoryFdInfoKHR>"},
     {"VUID-VkMemoryDedicatedAllocateInfo-image-01878",
      "vkAllocateMemory(): pAllocateInfo->pNext<VkMemoryDedicatedAllocateInfo>"},
+    // crbug.com/324282958
+    {"NVIDIA", "vkBindImageMemory: memoryTypeIndex"},
 };
 
 namespace dawn::native::vulkan {
