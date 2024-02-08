@@ -82,9 +82,6 @@ class SubstituteOverride final : public Castable<SubstituteOverride, Transform> 
         TINT_REFLECT(Config, map);
     };
 
-    /// Ensure that all the fields of Config are reflected.
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Config);
-
     /// Constructor
     SubstituteOverride();
 

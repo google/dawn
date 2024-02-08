@@ -66,9 +66,6 @@ struct AllowedFeatures {
     TINT_REFLECT(AllowedFeatures, extensions, features);
 };
 
-/// Ensure that all the fields of AllowedFeatures are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(AllowedFeatures);
-
 }  // namespace tint::wgsl
 
 #endif  // SRC_TINT_LANG_WGSL_COMMON_ALLOWED_FEATURES_H_

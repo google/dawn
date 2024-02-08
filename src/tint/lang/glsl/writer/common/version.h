@@ -71,9 +71,6 @@ struct Version {
     TINT_REFLECT(Version, standard, major_version, minor_version);
 };
 
-/// Ensure that all the fields of Version are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Version);
-
 }  // namespace tint::glsl::writer
 
 namespace tint {

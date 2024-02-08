@@ -62,12 +62,6 @@ struct ExternalTextureOptions {
     TINT_REFLECT(ExternalTextureOptions, bindings_map);
 };
 
-/// Ensure that all the fields of ExternalTextureOptions::BindingPoints are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(ExternalTextureOptions::BindingPoints);
-
-/// Ensure that all the fields of ExternalTextureOptions are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(ExternalTextureOptions);
-
 }  // namespace tint
 
 #endif  // SRC_TINT_API_OPTIONS_EXTERNAL_TEXTURE_H_

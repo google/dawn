@@ -46,9 +46,6 @@ struct BindingRemapperOptions {
     TINT_REFLECT(BindingRemapperOptions, binding_points);
 };
 
-/// Ensure that all the fields of BindingRemapperOptions are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(BindingRemapperOptions);
-
 }  // namespace tint
 
 #endif  // SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_

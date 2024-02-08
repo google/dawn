@@ -139,6 +139,7 @@ tint_add_target(tint_lang_wgsl_sem_test test
   lang/wgsl/sem/builtin_fn_test.cc
   lang/wgsl/sem/diagnostic_severity_test.cc
   lang/wgsl/sem/helper_test.h
+  lang/wgsl/sem/sampler_texture_pair_test.cc
   lang/wgsl/sem/struct_test.cc
   lang/wgsl/sem/value_expression_test.cc
 )

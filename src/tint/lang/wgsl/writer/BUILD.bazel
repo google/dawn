@@ -87,6 +87,34 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 cc_library(
+  name = "test",
+  alwayslink = True,
+  srcs = [
+    "options_test.cc",
+  ],
+  deps = [
+    "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
+    "//src/tint/utils/ice",
+    "//src/tint/utils/macros",
+    "//src/tint/utils/math",
+    "//src/tint/utils/memory",
+    "//src/tint/utils/reflection",
+    "//src/tint/utils/result",
+    "//src/tint/utils/rtti",
+    "//src/tint/utils/text",
+    "//src/tint/utils/traits",
+    "@gtest",
+  ] + select({
+    ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
+    ],
+    "//conditions:default": [],
+  }),
+  copts = COPTS,
+  visibility = ["//visibility:public"],
+)
+cc_library(
   name = "bench",
   alwayslink = True,
   srcs = [

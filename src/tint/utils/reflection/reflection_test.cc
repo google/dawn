@@ -26,7 +26,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/utils/reflection/reflection.h"
-#include "gtest/gtest.h"
+
+#include "gmock/gmock.h"
+
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint {
@@ -104,54 +106,57 @@ TEST(ReflectionTest, ForeachFieldNonConst) {
 ////////////////////////////////////////////////////////////////////////////////
 // TINT_ASSERT_ALL_FIELDS_REFLECTED tests
 ////////////////////////////////////////////////////////////////////////////////
-static_assert(detail::CanUseTintAssertAllFieldsReflected<S> == true);
-
 struct VirtualNonCastable {
     virtual ~VirtualNonCastable() = default;
 };
-static_assert(detail::CanUseTintAssertAllFieldsReflected<VirtualNonCastable> == false);
 
 struct VirtualCastable : Castable<VirtualCastable, CastableBase> {
     ~VirtualCastable() override = default;
     int a, b, c;
     TINT_REFLECT(VirtualCastable, a, b, c);
 };
-static_assert(detail::CanUseTintAssertAllFieldsReflected<VirtualCastable> == true);
-static_assert(detail::CheckAllFieldsReflected<VirtualCastable,
-                                              0,
-                                              0,
-                                              VirtualCastable::Reflection::Fields,
-                                              /* assert */ false>::value == true);
 
 struct MissingFirst {
     int a, b, c;
     TINT_REFLECT(MissingFirst, b, c);
 };
-static_assert(detail::CheckAllFieldsReflected<MissingFirst,
-                                              0,
-                                              0,
-                                              MissingFirst::Reflection::Fields,
-                                              /* assert */ false>::value == false);
 
 struct MissingMid {
     int a, b, c;
     TINT_REFLECT(MissingMid, a, c);
 };
-static_assert(detail::CheckAllFieldsReflected<MissingMid,
-                                              0,
-                                              0,
-                                              MissingMid::Reflection::Fields,
-                                              /* assert */ false>::value == false);
 
 struct MissingLast {
     int a, b, c;
     TINT_REFLECT(MissingLast, a, b);
 };
-static_assert(detail::CheckAllFieldsReflected<MissingLast,
-                                              0,
-                                              0,
-                                              MissingLast::Reflection::Fields,
-                                              /* assert */ false>::value == false);
+
+TEST(TintCheckAllFieldsReflected, Tests) {
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(S);
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(VirtualCastable);
+
+    auto missing_first = reflection::detail::CheckAllFieldsReflected<MissingFirst>();
+    ASSERT_NE(missing_first, Success);
+    EXPECT_THAT(missing_first.Failure().reason.Str(), testing::HasSubstr("reflection_test.cc"));
+    EXPECT_THAT(missing_first.Failure().reason.Str(),
+                testing::HasSubstr(R"(error: TINT_REFLECT(MissingFirst, ...) field mismatch at 'b'.
+Expected field offset of 0 bytes, but field was at 4 bytes)"));
+
+    auto missing_mid = reflection::detail::CheckAllFieldsReflected<MissingMid>();
+    ASSERT_NE(missing_mid, Success);
+    EXPECT_THAT(missing_mid.Failure().reason.Str(), testing::HasSubstr("reflection_test.cc"));
+    EXPECT_THAT(missing_mid.Failure().reason.Str(),
+                testing::HasSubstr(R"(error: TINT_REFLECT(MissingMid, ...) field mismatch at 'c'.
+Expected field offset of 4 bytes, but field was at 8 bytes)"));
+
+    auto missing_last = reflection::detail::CheckAllFieldsReflected<MissingLast>();
+    ASSERT_NE(missing_last, Success);
+    EXPECT_THAT(missing_last.Failure().reason.Str(), testing::HasSubstr("reflection_test.cc"));
+    EXPECT_THAT(
+        missing_last.Failure().reason.Str(),
+        testing::HasSubstr(R"(error: TINT_REFLECT(MissingLast, ...) missing fields at end of class
+Expected class size of 8 bytes, but class is 12 bytes)"));
+}
 
 }  // namespace
 }  // namespace tint

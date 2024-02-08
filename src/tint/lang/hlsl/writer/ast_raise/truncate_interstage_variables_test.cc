@@ -38,6 +38,10 @@ using ::testing::ContainerEq;
 
 using TruncateInterstageVariablesTest = ast::transform::TransformTest;
 
+TEST(TintCheckAllFieldsReflected, HlslWriterAstRaiseTruncateInterstageVariablesTest) {
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(TruncateInterstageVariables::Config);
+}
+
 TEST_F(TruncateInterstageVariablesTest, ShouldRunVertex) {
     auto* src = R"(
 struct ShaderIO {

@@ -48,9 +48,6 @@ struct OverrideId {
     tint::HashCode HashCode() const { return Hash(value); }
 };
 
-/// Ensure that all the fields of OverrideId are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(OverrideId);
-
 /// Equality operator for OverrideId
 /// @param lhs the OverrideId on the left of the '=' operator
 /// @param rhs the OverrideId on the right of the '=' operator

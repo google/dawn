@@ -52,11 +52,6 @@ struct Options {
 #endif
 };
 
-#ifdef TINT_BUILD_SYNTAX_TREE_WRITER
-/// Ensure that all the fields of SamplerTexturePair are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
-#endif
-
 }  // namespace tint::wgsl::writer
 
 #endif  // SRC_TINT_LANG_WGSL_WRITER_OPTIONS_H_

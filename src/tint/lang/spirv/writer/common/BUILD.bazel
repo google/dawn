@@ -87,6 +87,7 @@ cc_library(
     "instruction_test.cc",
     "module_test.cc",
     "operand_test.cc",
+    "options_test.cc",
     "spv_dump_test.cc",
     "spv_dump_test.h",
   ],

@@ -70,8 +70,6 @@ struct BindingInfo {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(BindingInfo, group, binding);
 };
-/// Ensure that all the fields of BindingInfo are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(BindingInfo);
 
 using Uniform = BindingInfo;
 using Storage = BindingInfo;
@@ -91,9 +89,6 @@ struct ExternalTexture {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
 };
-
-/// Ensure that all the fields of ExternalTexture are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(ExternalTexture);
 
 }  // namespace binding
 
@@ -140,9 +135,6 @@ struct Bindings {
                  access_controls,
                  ignored_by_robustness_transform);
 };
-
-/// Ensure that all the fields of Bindings are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Bindings);
 
 /// kMaxInterStageLocations == D3D11_PS_INPUT_REGISTER_COUNT - 2
 /// D3D11_PS_INPUT_REGISTER_COUNT == D3D12_PS_INPUT_REGISTER_COUNT
@@ -214,9 +206,6 @@ struct Options {
                  bindings,
                  pixel_local_options);
 };
-
-/// Ensure that all the fields of Options are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
 
 }  // namespace tint::hlsl::writer
 

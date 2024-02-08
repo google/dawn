@@ -48,9 +48,6 @@ struct ArrayLengthFromUniformOptions {
     TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
 };
 
-/// Ensure that all the fields of ArrayLengthFromUniformOptions are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(ArrayLengthFromUniformOptions);
-
 }  // namespace tint
 
 #endif  // SRC_TINT_API_OPTIONS_ARRAY_LENGTH_FROM_UNIFORM_H_

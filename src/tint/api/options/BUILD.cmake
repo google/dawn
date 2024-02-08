@@ -49,8 +49,47 @@ tint_add_target(tint_api_options lib
 
 tint_target_add_dependencies(tint_api_options lib
   tint_api_common
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
   tint_utils_macros
   tint_utils_math
+  tint_utils_memory
   tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
   tint_utils_traits
+)
+
+################################################################################
+# Target:    tint_api_options_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_api_options_test test
+  api/options/array_length_from_uniform_test.cc
+  api/options/binding_remapper_test.cc
+  api/options/external_texture_test.cc
+  api/options/pixel_local_test.cc
+  api/options/texture_builtins_from_uniform_test.cc
+)
+
+tint_target_add_dependencies(tint_api_options_test test
+  tint_api_common
+  tint_api_options
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_api_options_test test
+  "gtest"
 )

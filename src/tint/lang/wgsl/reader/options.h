@@ -42,9 +42,6 @@ struct Options {
     TINT_REFLECT(Options, allowed_features);
 };
 
-/// Ensure that all the fields of Options are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
-
 }  // namespace tint::wgsl::reader
 
 #endif  // SRC_TINT_LANG_WGSL_READER_OPTIONS_H_

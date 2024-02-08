@@ -52,12 +52,57 @@ tint_target_add_dependencies(tint_lang_glsl_writer_common lib
   tint_api_common
   tint_api_options
   tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
   tint_utils_macros
   tint_utils_math
+  tint_utils_memory
   tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
   tint_utils_strconv
   tint_utils_text
   tint_utils_traits
 )
+
+endif(TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# Target:    tint_lang_glsl_writer_common_test
+# Kind:      test
+# Condition: TINT_BUILD_GLSL_WRITER
+################################################################################
+tint_add_target(tint_lang_glsl_writer_common_test test
+  lang/glsl/writer/common/options_test.cc
+  lang/glsl/writer/common/version_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_glsl_writer_common_test test
+  tint_api_common
+  tint_api_options
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_glsl_writer_common_test test
+  "gtest"
+)
+
+if(TINT_BUILD_GLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_glsl_writer_common_test test
+    tint_lang_glsl_writer_common
+  )
+endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER)

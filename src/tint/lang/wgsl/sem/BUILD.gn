@@ -141,6 +141,7 @@ if (tint_build_unittests) {
       "builtin_fn_test.cc",
       "diagnostic_severity_test.cc",
       "helper_test.h",
+      "sampler_texture_pair_test.cc",
       "struct_test.cc",
       "value_expression_test.cc",
     ]

@@ -101,9 +101,6 @@ struct Options {
                  texture_builtins_from_uniform);
 };
 
-/// Ensure that all the fields of Options are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(Options);
-
 }  // namespace tint::glsl::writer
 
 #endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_

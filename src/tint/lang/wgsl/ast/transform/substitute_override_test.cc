@@ -32,6 +32,10 @@
 namespace tint::ast::transform {
 namespace {
 
+TEST(TintCheckAllFieldsReflected, WgslAstTransformSubstituteOverrideTest) {
+    TINT_ASSERT_ALL_FIELDS_REFLECTED(SubstituteOverride::Config);
+}
+
 using SubstituteOverrideTest = TransformTest;
 
 TEST_F(SubstituteOverrideTest, Error_NoData) {

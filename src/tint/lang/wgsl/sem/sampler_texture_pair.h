@@ -71,9 +71,6 @@ struct SamplerTexturePair {
     TINT_REFLECT(SamplerTexturePair, sampler_binding_point, texture_binding_point);
 };
 
-/// Ensure that all the fields of SamplerTexturePair are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(SamplerTexturePair);
-
 /// Prints the SamplerTexturePair @p stp to @p o
 /// @param o the stream to write to
 /// @param stp the SamplerTexturePair

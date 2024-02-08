@@ -91,6 +91,7 @@ tint_add_target(tint_lang_spirv_writer_common_test test
   lang/spirv/writer/common/instruction_test.cc
   lang/spirv/writer/common/module_test.cc
   lang/spirv/writer/common/operand_test.cc
+  lang/spirv/writer/common/options_test.cc
   lang/spirv/writer/common/spv_dump_test.cc
   lang/spirv/writer/common/spv_dump_test.h
 )

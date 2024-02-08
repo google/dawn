@@ -77,9 +77,6 @@ struct BindingPoint {
     }
 };
 
-/// Ensure that all the fields of BindingPoint are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(BindingPoint);
-
 /// Prints the BindingPoint @p bp to @p o
 /// @param o the stream to write to
 /// @param bp the BindingPoint

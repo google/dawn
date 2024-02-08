@@ -127,9 +127,6 @@ class TruncateInterstageVariables final
         TINT_REFLECT(Config, interstage_locations);
     };
 
-    /// Ensure that all the fields of Config are reflected.
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(Config);
-
     /// Constructor using a the configuration provided in the input Data
     TruncateInterstageVariables();
 

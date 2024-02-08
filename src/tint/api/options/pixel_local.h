@@ -57,9 +57,6 @@ struct PixelLocalOptions {
     TINT_REFLECT(PixelLocalOptions, attachments, attachment_formats, pixel_local_group_index);
 };
 
-/// Ensure that all the fields of PixelLocalOptions are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(PixelLocalOptions);
-
 /// Reflect valid value ranges for the PixelLocalOptions::TexelFormat enum.
 TINT_REFLECT_ENUM_RANGE(PixelLocalOptions::TexelFormat, kR32Sint, kR32Float);
 

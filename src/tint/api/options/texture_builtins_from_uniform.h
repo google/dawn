@@ -50,9 +50,6 @@ struct TextureBuiltinsFromUniformOptions {
     TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_bindingpoint_ordering);
 };
 
-/// Ensure that all the fields of TextureBuiltinsFromUniformOptions are reflected.
-TINT_ASSERT_ALL_FIELDS_REFLECTED(TextureBuiltinsFromUniformOptions);
-
 }  // namespace tint
 
 #endif  // SRC_TINT_API_OPTIONS_TEXTURE_BUILTINS_FROM_UNIFORM_H_
