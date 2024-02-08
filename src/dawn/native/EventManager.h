@@ -73,6 +73,7 @@ class EventManager final : NonMovable {
     class TrackedEvent;
     // Track a TrackedEvent and give it a FutureID.
     [[nodiscard]] FutureID TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&&);
+    // Returns true if future ProcessEvents is needed.
     bool ProcessPollEvents();
     [[nodiscard]] wgpu::WaitStatus WaitAny(size_t count,
                                            FutureWaitInfo* infos,
@@ -160,38 +161,6 @@ class EventManager::TrackedEvent : public RefCounted {
     CompletionData mCompletionData;
     // Callback has been called.
     std::atomic<bool> mCompleted = false;
-};
-
-// A Ref<TrackedEvent>, but ASSERTing that a future isn't used concurrently in multiple
-// WaitAny/ProcessEvents call (by checking that there's never more than one WaitRef for a
-// TrackedEvent). While concurrent calls on the same futures are not explicitly disallowed, they are
-// generally unintentional, and hence this can help to identify potential bugs. Note that for
-// WaitAny, this checks the embedder's behavior, but for ProcessEvents this is only an internal
-// DAWN_ASSERT (it's supposed to be synchronized so that this never happens).
-class EventManager::TrackedEvent::WaitRef : dawn::NonCopyable {
-  public:
-    WaitRef(WaitRef&& rhs) = default;
-    WaitRef& operator=(WaitRef&& rhs) = default;
-
-    explicit WaitRef(TrackedEvent* future);
-    ~WaitRef();
-
-    TrackedEvent* operator->();
-    const TrackedEvent* operator->() const;
-
-  private:
-    Ref<TrackedEvent> mRef;
-};
-
-// TrackedEvent::WaitRef plus a few extra fields needed for some implementations.
-// Sometimes they'll be unused, but that's OK; it simplifies code reuse.
-struct TrackedFutureWaitInfo {
-    FutureID futureID;
-    EventManager::TrackedEvent::WaitRef event;
-    // Used by EventManager::ProcessPollEvents
-    size_t indexInInfos;
-    // Used by EventManager::ProcessPollEvents and ::WaitAny
-    bool ready;
 };
 
 }  // namespace dawn::native

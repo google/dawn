@@ -43,7 +43,54 @@
 
 namespace dawn::native {
 
+// EventManager::TrackedEvent::WaitRef
+
+// A Ref<TrackedEvent>, but ASSERTing that a future isn't used concurrently in multiple
+// WaitAny/ProcessEvents call (by checking that there's never more than one WaitRef for a
+// TrackedEvent). While concurrent calls on the same futures are not explicitly disallowed, they are
+// generally unintentional, and hence this can help to identify potential bugs. Note that for
+// WaitAny, this checks the embedder's behavior, but for ProcessEvents this is only an internal
+// DAWN_ASSERT (it's supposed to be synchronized so that this never happens).
+class EventManager::TrackedEvent::WaitRef : dawn::NonCopyable {
+  public:
+    WaitRef(WaitRef&& rhs) = default;
+    WaitRef& operator=(WaitRef&& rhs) = default;
+
+    explicit WaitRef(TrackedEvent* event) : mRef(event) {
+#if DAWN_ENABLE_ASSERTS
+        bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(true);
+        DAWN_ASSERT(!wasAlreadyWaited);
+#endif
+    }
+
+    ~WaitRef() {
+#if DAWN_ENABLE_ASSERTS
+        if (mRef.Get() != nullptr) {
+            bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(false);
+            DAWN_ASSERT(wasAlreadyWaited);
+        }
+#endif
+    }
+
+    TrackedEvent* operator->() { return mRef.Get(); }
+    const TrackedEvent* operator->() const { return mRef.Get(); }
+
+  private:
+    Ref<TrackedEvent> mRef;
+};
+
 namespace {
+
+// TrackedEvent::WaitRef plus a few extra fields needed for some implementations.
+// Sometimes they'll be unused, but that's OK; it simplifies code reuse.
+struct TrackedFutureWaitInfo {
+    FutureID futureID;
+    EventManager::TrackedEvent::WaitRef event;
+    // Used by EventManager::ProcessPollEvents
+    size_t indexInInfos;
+    // Used by EventManager::ProcessPollEvents and ::WaitAny
+    bool ready;
+};
 
 // Wrapper around an iterator to yield system event receiver and a pointer
 // to the ready bool. We pass this into WaitAnySystemEvent so it can extract
@@ -305,7 +352,8 @@ bool EventManager::ProcessPollEvents() {
     DAWN_ASSERT(mEvents.has_value());
 
     std::vector<TrackedFutureWaitInfo> futures;
-    mEvents->Use([&](auto events) {
+    wgpu::WaitStatus waitStatus;
+    auto readyEnd = mEvents->Use([&](auto events) {
         // Iterate all events and record poll events and spontaneous events since they are both
         // allowed to be completed in the ProcessPoll call. Note that spontaneous events are allowed
         // to trigger anywhere which is why we include them in the call.
@@ -316,27 +364,27 @@ bool EventManager::ProcessPollEvents() {
                     TrackedFutureWaitInfo{futureID, TrackedEvent::WaitRef{event.Get()}, 0, false});
             }
         }
-    });
 
-    {
-        // There cannot be two competing ProcessEvent calls, so we use a lock to prevent it.
-        std::lock_guard<std::mutex> lock(mProcessEventLock);
-        wgpu::WaitStatus waitStatus = WaitImpl(futures, Nanoseconds(0));
+        // If there wasn't anything to wait on, we can skip the wait and just return the end.
+        if (futures.size() == 0) {
+            return futures.end();
+        }
+
+        waitStatus = WaitImpl(futures, Nanoseconds(0));
         if (waitStatus == wgpu::WaitStatus::TimedOut) {
-            return false;
+            // Return the beginning to indicate that nothing completed.
+            return futures.begin();
         }
         DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
-    }
 
-    // Enforce callback ordering.
-    auto readyEnd = PrepareReadyCallbacks(futures);
+        // Enforce callback ordering.
+        auto readyEnd = PrepareReadyCallbacks(futures);
 
-    // For all the futures we are about to complete, first ensure they're untracked. It's OK if
-    // something actually isn't tracked anymore (because it completed elsewhere while waiting.)
-    mEvents->Use([&](auto events) {
+        // For all the futures we are about to complete, first ensure they're untracked.
         for (auto it = futures.begin(); it != readyEnd; ++it) {
             events->erase(it->futureID);
         }
+        return readyEnd;
     });
 
     // Finally, call callbacks.
@@ -465,32 +513,6 @@ void EventManager::TrackedEvent::CompleteIfSpontaneous() {
         DAWN_ASSERT(!alreadyComplete);
         Complete(EventCompletionType::Ready);
     }
-}
-
-// EventManager::TrackedEvent::WaitRef
-
-EventManager::TrackedEvent::WaitRef::WaitRef(TrackedEvent* event) : mRef(event) {
-#if DAWN_ENABLE_ASSERTS
-    bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(true);
-    DAWN_ASSERT(!wasAlreadyWaited);
-#endif
-}
-
-EventManager::TrackedEvent::WaitRef::~WaitRef() {
-#if DAWN_ENABLE_ASSERTS
-    if (mRef.Get() != nullptr) {
-        bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(false);
-        DAWN_ASSERT(wasAlreadyWaited);
-    }
-#endif
-}
-
-EventManager::TrackedEvent* EventManager::TrackedEvent::WaitRef::operator->() {
-    return mRef.Get();
-}
-
-const EventManager::TrackedEvent* EventManager::TrackedEvent::WaitRef::operator->() const {
-    return mRef.Get();
 }
 
 }  // namespace dawn::native

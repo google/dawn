@@ -40,7 +40,6 @@
 
 namespace dawn::native {
 
-struct TrackedFutureWaitInfo;
 class SystemEventPipeSender;
 
 // SystemEventReceiver holds an OS event primitive (Win32 Event Object or POSIX file descriptor (fd)

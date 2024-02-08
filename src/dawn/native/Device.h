@@ -73,7 +73,6 @@ class OwnedCompilationMessages;
 struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
-struct TrackedFutureWaitInfo;
 
 class DeviceBase : public RefCountedWithExternalCount {
   public:
