@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-02-07 05:46:21PM
+# Last rolled: 2024-02-08 07:09:59AM
 
 # Flaky on all platforms
 # KEEP
@@ -272,14 +272,6 @@ crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:p
 crbug.com/dawn/2086 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-
-# read/write storage texture failures
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="compute";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="compute";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="compute";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
-crbug.com/dawn/2372 webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
