@@ -726,25 +726,70 @@ void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
 }
 
 void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
-    if (callback == nullptr) {
-        static wgpu::ErrorCallback defaultCallback = [](WGPUErrorType, char const*, void*) {};
-        callback = defaultCallback;
-    }
+    static wgpu::ErrorCallback kDefaultCallback = [](WGPUErrorType, char const*, void*) {};
+
+    PopErrorScopeCallbackInfo callbackInfo = {};
+    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+    callbackInfo.oldCallback = callback != nullptr ? callback : kDefaultCallback;
+    callbackInfo.userdata = userdata;
+    APIPopErrorScopeF(callbackInfo);
+}
+
+Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo) {
+    struct PopErrorScopeEvent final : public EventManager::TrackedEvent {
+        // TODO(crbug.com/dawn/2021) Remove the old callback type.
+        WGPUPopErrorScopeCallback mCallback;
+        WGPUErrorCallback mOldCallback;
+        void* mUserdata;
+        std::optional<ErrorScope> mScope;
+
+        PopErrorScopeEvent(const PopErrorScopeCallbackInfo& callbackInfo,
+                           std::optional<ErrorScope>&& scope)
+            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+              mCallback(callbackInfo.callback),
+              mOldCallback(callbackInfo.oldCallback),
+              mUserdata(callbackInfo.userdata),
+              mScope(scope) {
+            // Exactly 1 callback should be set.
+            DAWN_ASSERT((mCallback != nullptr && mOldCallback == nullptr) ||
+                        (mCallback == nullptr && mOldCallback != nullptr));
+            CompleteIfSpontaneous();
+        }
+
+        ~PopErrorScopeEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
+
+        void Complete(EventCompletionType completionType) override {
+            WGPUPopErrorScopeStatus status = completionType == EventCompletionType::Ready
+                                                 ? WGPUPopErrorScopeStatus_Success
+                                                 : WGPUPopErrorScopeStatus_InstanceDropped;
+            WGPUErrorType type;
+            const char* message;
+            if (mScope) {
+                type = static_cast<WGPUErrorType>(mScope->GetErrorType());
+                message = mScope->GetErrorMessage().c_str();
+            } else {
+                type = WGPUErrorType_Unknown;
+                message = "No error scopes to pop";
+            }
+
+            if (mCallback) {
+                mCallback(status, type, message, mUserdata);
+            } else {
+                mOldCallback(type, message, mUserdata);
+            }
+        }
+    };
+
+    std::optional<ErrorScope> scope;
     if (IsLost()) {
-        mCallbackTaskManager->AddCallbackTask(
-            std::bind(callback, WGPUErrorType_DeviceLost, "GPU device disconnected", userdata));
-        return;
+        scope = ErrorScope(wgpu::ErrorType::DeviceLost, "GPU device disconnected");
+    } else if (!mErrorScopeStack->Empty()) {
+        scope = mErrorScopeStack->Pop();
     }
-    if (mErrorScopeStack->Empty()) {
-        mCallbackTaskManager->AddCallbackTask(
-            std::bind(callback, WGPUErrorType_Unknown, "No error scopes to pop", userdata));
-        return;
-    }
-    ErrorScope scope = mErrorScopeStack->Pop();
-    mCallbackTaskManager->AddCallbackTask(
-        [callback, errorType = static_cast<WGPUErrorType>(scope.GetErrorType()),
-         message = scope.GetErrorMessage(),
-         userdata] { callback(errorType, message.c_str(), userdata); });
+
+    FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(
+        callbackInfo.mode, AcquireRef(new PopErrorScopeEvent(callbackInfo, std::move(scope))));
+    return {futureID};
 }
 
 BlobCache* DeviceBase::GetBlobCache() const {
@@ -1362,6 +1407,8 @@ TextureBase* DeviceBase::APICreateErrorTexture(const TextureDescriptor* desc) {
 
 // Returns true if future ticking is needed.
 bool DeviceBase::APITick() {
+    // TODO(dawn:1987) Add deprecation warning when Instance.ProcessEvents no longer calls this.
+
     // Tick may trigger callbacks which drop a ref to the device itself. Hold a Ref to ourselves
     // to avoid deleting |this| in the middle of this function call.
     Ref<DeviceBase> self(this);

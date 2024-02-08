@@ -164,11 +164,18 @@ class ValidationTest : public testing::Test {
 
   protected:
     dawn::native::Adapter& GetBackendAdapter();
-    // Helper function to create testing adapter and store into ValidationTest::adapter during
-    // SetUp. Override this function to change the adapter creation behavior.
-    virtual void CreateTestAdapter(wgpu::Instance instance, wgpu::RequestAdapterOptions options);
+    // Helper function to create testing adapter and device during SetUp. Override these functions
+    // to change the creation behavior.
+    virtual void CreateTestAdapter(wgpu::RequestAdapterOptions options);
     virtual WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
                                         wgpu::DeviceDescriptor descriptor);
+
+    // Reinitializes the ValidationTest internal members given the instance descriptors.
+    // Particularly useful when writing tests that may need to pass different toggles to the
+    // instance. Note that this also reinitializes the adapter and device on the new instances via
+    // potentially overriden CreateTest[Adapter|Device] functions above.
+    void ReinitializeInstances(const wgpu::InstanceDescriptor* nativeDesc,
+                               const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
     wgpu::Device RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc);
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
@@ -179,12 +186,12 @@ class ValidationTest : public testing::Test {
     wgpu::Device device;
     wgpu::Adapter adapter;
     WGPUDevice backendDevice;
+    wgpu::Instance instance;
 
     size_t mLastWarningCount = 0;
 
   private:
     std::unique_ptr<dawn::native::Instance> mDawnInstance;
-    wgpu::Instance mInstance;
     dawn::native::Adapter mBackendAdapter;
     std::unique_ptr<dawn::utils::WireHelper> mWireHelper;
     WGPUDevice mLastCreatedBackendDevice;

@@ -49,6 +49,7 @@ enum class EventType {
     CreateComputePipeline,
     CreateRenderPipeline,
     MapAsync,
+    PopErrorScope,
     RequestAdapter,
     RequestDevice,
     WorkDone,

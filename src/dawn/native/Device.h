@@ -328,6 +328,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     void APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata);
     void APIPushErrorScope(wgpu::ErrorFilter filter);
     void APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata);
+    Future APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo);
 
     MaybeError ValidateIsAlive() const;
 

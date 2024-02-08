@@ -41,6 +41,55 @@
 namespace dawn::wire::client {
 namespace {
 
+class PopErrorScopeEvent final : public TrackedEvent {
+  public:
+    static constexpr EventType kType = EventType::PopErrorScope;
+
+    explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo& callbackInfo)
+        : TrackedEvent(callbackInfo.mode),
+          mCallback(callbackInfo.callback),
+          mOldCallback(callbackInfo.oldCallback),
+          mUserdata(callbackInfo.userdata) {
+        // Exactly 1 callback should be set.
+        DAWN_ASSERT((mCallback != nullptr && mOldCallback == nullptr) ||
+                    (mCallback == nullptr && mOldCallback != nullptr));
+    }
+
+    EventType GetType() override { return kType; }
+
+    WireResult ReadyHook(FutureID futureID, WGPUErrorType errorType, const char* message) {
+        mType = errorType;
+        if (message != nullptr) {
+            mMessage = message;
+        }
+        return WireResult::Success;
+    }
+
+  private:
+    void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        if (completionType == EventCompletionType::Shutdown) {
+            mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
+            mMessage = std::nullopt;
+        }
+        if (mOldCallback) {
+            mOldCallback(mType, mMessage ? mMessage->c_str() : nullptr, mUserdata);
+        }
+        if (mCallback) {
+            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, mUserdata);
+        }
+    }
+
+    // TODO(crbug.com/dawn/2021) Remove the old callback type.
+    WGPUPopErrorScopeCallback mCallback;
+    WGPUErrorCallback mOldCallback;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
+
+    WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
+    WGPUErrorType mType = WGPUErrorType_Unknown;
+    std::optional<std::string> mMessage;
+};
+
 template <typename PipelineT, EventType Type, typename CallbackInfoT>
 class CreatePipelineEventBase : public TrackedEvent {
   public:
@@ -150,11 +199,6 @@ Device::Device(const ObjectBaseParams& params,
 }
 
 Device::~Device() {
-    mErrorScopes.CloseAll([](ErrorScopeData* request) {
-        request->callback(WGPUErrorType_Unknown, "Device destroyed before callback",
-                          request->userdata);
-    });
-
     if (mQueue != nullptr) {
         GetProcs().queueRelease(ToAPI(mQueue));
     }
@@ -204,12 +248,6 @@ void Device::HandleDeviceLost(WGPUDeviceLostReason reason, const char* message) 
     }
 }
 
-void Device::CancelCallbacksForDisconnect() {
-    mErrorScopes.CloseAll([](ErrorScopeData* request) {
-        request->callback(WGPUErrorType_DeviceLost, "Device lost", request->userdata);
-    });
-}
-
 std::weak_ptr<bool> Device::GetAliveWeakPtr() {
     return mIsAlive;
 }
@@ -230,41 +268,35 @@ void Device::SetDeviceLostCallback(WGPUDeviceLostCallback callback, void* userda
 }
 
 void Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
-    Client* client = GetClient();
-    if (client->IsDisconnected()) {
-        callback(WGPUErrorType_DeviceLost, "GPU device disconnected", userdata);
-        return;
-    }
-
-    uint64_t serial = mErrorScopes.Add({callback, userdata});
-    DevicePopErrorScopeCmd cmd;
-    cmd.deviceId = GetWireId();
-    cmd.requestSerial = serial;
-    client->SerializeCommand(cmd);
+    WGPUPopErrorScopeCallbackInfo callbackInfo = {};
+    callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+    callbackInfo.oldCallback = callback;
+    callbackInfo.userdata = userdata;
+    PopErrorScopeF(callbackInfo);
 }
 
-bool Device::OnPopErrorScopeCallback(uint64_t requestSerial,
-                                     WGPUErrorType type,
-                                     const char* message) {
-    switch (type) {
-        case WGPUErrorType_NoError:
-        case WGPUErrorType_Validation:
-        case WGPUErrorType_OutOfMemory:
-        case WGPUErrorType_Internal:
-        case WGPUErrorType_Unknown:
-        case WGPUErrorType_DeviceLost:
-            break;
-        default:
-            return false;
+WGPUFuture Device::PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
+    Client* client = GetClient();
+    auto [futureIDInternal, tracked] =
+        GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(callbackInfo));
+    if (!tracked) {
+        return {futureIDInternal};
     }
 
-    ErrorScopeData request;
-    if (!mErrorScopes.Acquire(requestSerial, &request)) {
-        return false;
-    }
+    DevicePopErrorScopeCmd cmd;
+    cmd.deviceId = GetWireId();
+    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.future = {futureIDInternal};
+    client->SerializeCommand(cmd);
+    return {futureIDInternal};
+}
 
-    request.callback(type, message, request.userdata);
-    return true;
+WireResult Client::DoDevicePopErrorScopeCallback(ObjectHandle eventManager,
+                                                 WGPUFuture future,
+                                                 WGPUErrorType errorType,
+                                                 const char* message) {
+    return GetEventManager(eventManager)
+        .SetFutureReady<PopErrorScopeEvent>(future.id, errorType, message);
 }
 
 void Device::InjectError(WGPUErrorType type, const char* message) {

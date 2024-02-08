@@ -60,9 +60,9 @@ static void ToMockQueueWorkDone(WGPUQueueWorkDoneStatus status, void* userdata) 
 
 class ErrorScopeValidationTest : public ValidationTest {
   protected:
-    void FlushWireAndTick() {
+    void FlushWireAndProcessEvents() {
         FlushWire();
-        device.Tick();
+        instance.ProcessEvents();
     }
 
     // Generate new void* pointer for use as `userdata` in callback. The pointer
@@ -99,7 +99,7 @@ TEST_F(ErrorScopeValidationTest, Success) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Test the simple case where the error scope catches an error.
@@ -114,7 +114,7 @@ TEST_F(ErrorScopeValidationTest, CatchesError) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Test that errors bubble to the parent scope if not handled by the current scope.
@@ -131,14 +131,14 @@ TEST_F(ErrorScopeValidationTest, ErrorBubbles) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_1))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 
     // Parent validation error scope captures the error.
     void* userdata_2 = CreateUserData();
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata_2))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Test that if an error scope matches an error, it does not bubble to the parent scope.
@@ -155,14 +155,14 @@ TEST_F(ErrorScopeValidationTest, HandledErrorsStopBubbling) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, userdata_1))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 
     // Parent scope does not see the error.
     void* userdata_2 = CreateUserData();
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_2))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Test that if no error scope handles an error, it goes to the device UncapturedError callback
@@ -177,7 +177,7 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Check that push/popping error scopes must be balanced.
@@ -188,7 +188,7 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-        FlushWireAndTick();
+        FlushWireAndProcessEvents();
     }
     // Too many pops
     {
@@ -198,13 +198,13 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata_1))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_1);
-        FlushWireAndTick();
+        FlushWireAndProcessEvents();
 
         void* userdata_2 = CreateUserData();
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata_2))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata_2);
-        FlushWireAndTick();
+        FlushWireAndProcessEvents();
     }
 }
 
@@ -234,8 +234,7 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
     device.PopErrorScope(errorScopeCallback1.Callback(),
                          errorScopeCallback1.MakeUserdata(userdata_3));
 
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, userdata_1))
-        .InSequence(seq);
+    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, userdata_1));
     WaitForAllOperations(device);
 }
 
@@ -250,22 +249,14 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
         queue.Submit(0, nullptr);
     }
 
-    if (UsesWire()) {
-        void* userdata = CreateUserData();
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, userdata))
-            .Times(1);
-        ExpectDeviceDestruction();
-        device = nullptr;
-    } else {
         void* userdata = CreateUserData();
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
         ExpectDeviceDestruction();
         device = nullptr;
-    }
+
+        FlushWireAndProcessEvents();
 }
 
 // If the device is destroyed, pop error scope should callback with device lost.
@@ -273,13 +264,13 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforePop) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
     ExpectDeviceDestruction();
     device.Destroy();
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 
     void* userdata = CreateUserData();
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_DeviceLost, _, userdata))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-    FlushWireAndTick();
+    FlushWireAndProcessEvents();
 }
 
 // Regression test that on device shutdown, we don't get a recursion in O(pushed error scope) that

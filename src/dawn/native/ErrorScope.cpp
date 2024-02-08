@@ -52,6 +52,9 @@ wgpu::ErrorType ErrorFilterToErrorType(wgpu::ErrorFilter filter) {
 ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter)
     : mMatchedErrorType(ErrorFilterToErrorType(errorFilter)) {}
 
+ErrorScope::ErrorScope(wgpu::ErrorType error, std::string_view message)
+    : mMatchedErrorType(error), mCapturedError(error), mErrorMessage(message) {}
+
 wgpu::ErrorType ErrorScope::GetErrorType() const {
     return mCapturedError;
 }

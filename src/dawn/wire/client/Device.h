@@ -58,6 +58,7 @@ class Device final : public ObjectWithEventsBase {
     void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
     void InjectError(WGPUErrorType type, const char* message);
     void PopErrorScope(WGPUErrorCallback callback, void* userdata);
+    WGPUFuture PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
     WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
     void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                     WGPUCreateComputePipelineAsyncCallback callback,
@@ -75,7 +76,6 @@ class Device final : public ObjectWithEventsBase {
     void HandleError(WGPUErrorType errorType, const char* message);
     void HandleLogging(WGPULoggingType loggingType, const char* message);
     void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
-    bool OnPopErrorScopeCallback(uint64_t requestSerial, WGPUErrorType type, const char* message);
 
     bool GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
@@ -84,8 +84,6 @@ class Device final : public ObjectWithEventsBase {
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
     WGPUQueue GetQueue();
-
-    void CancelCallbacksForDisconnect() override;
 
     std::weak_ptr<bool> GetAliveWeakPtr();
 
@@ -97,12 +95,6 @@ class Device final : public ObjectWithEventsBase {
     WGPUFuture CreatePipelineAsyncF(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
 
     LimitsAndFeatures mLimitsAndFeatures;
-    struct ErrorScopeData {
-        WGPUErrorCallback callback = nullptr;
-        // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-        raw_ptr<void, DanglingUntriaged> userdata = nullptr;
-    };
-    RequestTracker<ErrorScopeData> mErrorScopes;
 
     WGPUErrorCallback mErrorCallback = nullptr;
     WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
