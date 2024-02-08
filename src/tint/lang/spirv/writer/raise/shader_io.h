@@ -46,6 +46,8 @@ struct ShaderIOConfig {
     bool clamp_frag_depth = false;
     /// true if a vertex point size builtin output should be added
     bool emit_vertex_point_size = false;
+    /// true if f16 IO types should be replaced with f32 types and converted
+    bool polyfill_f16_io = false;
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to

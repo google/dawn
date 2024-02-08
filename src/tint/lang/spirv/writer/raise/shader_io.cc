@@ -112,8 +112,19 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             }
             name << name_suffix;
 
+            // Replace f16 types with f32 types if necessary.
+            auto* store_type = io.type;
+            if (config.polyfill_f16_io) {
+                if (store_type->DeepestElement()->Is<core::type::F16>()) {
+                    store_type = ty.f32();
+                    if (auto* vec = io.type->As<core::type::Vector>()) {
+                        store_type = ty.vec(store_type, vec->Width());
+                    }
+                }
+            }
+
             // Create an IO variable and add it to the root block.
-            auto* ptr = ty.ptr(addrspace, io.type, access);
+            auto* ptr = ty.ptr(addrspace, store_type, access);
             auto* var = b.Var(name.str(), ptr);
             var->SetAttributes(core::ir::IOAttributes{
                 io.attributes.location,
@@ -150,7 +161,15 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 from = builder.Access(ptr, input_vars[idx], 0_u)->Result(0);
             }
         }
-        return builder.Load(from)->Result(0);
+
+        auto* value = builder.Load(from)->Result(0);
+
+        // Convert f32 values to f16 values if needed.
+        if (config.polyfill_f16_io && inputs[idx].type->DeepestElement()->Is<core::type::F16>()) {
+            value = builder.Convert(inputs[idx].type, value)->Result(0);
+        }
+
+        return value;
     }
 
     /// @copydoc ShaderIO::BackendState::SetOutput
@@ -169,6 +188,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 value = ClampFragDepth(builder, value);
             }
         }
+
+        // Convert f16 values to f32 values if needed.
+        if (config.polyfill_f16_io && value->Type()->DeepestElement()->Is<core::type::F16>()) {
+            value = builder.Convert(to->Type()->UnwrapPtr(), value)->Result(0);
+        }
+
         builder.Store(to, value);
     }
 

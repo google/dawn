@@ -346,7 +346,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
 )");
 }
 
-TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input) {
+TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f16>());
     input->SetLocation(1, std::nullopt);
     auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
@@ -356,7 +356,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input) {
         b.Return(func, b.Convert(ty.vec4<f32>(), input));
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.use_storage_input_output_16 = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability StorageInputOutput16");
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
     EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4half Input");
@@ -372,7 +374,35 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input) {
 )");
 }
 
-TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output) {
+TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
+    auto* input = b.FunctionParam("input", ty.vec4<f16>());
+    input->SetLocation(1, std::nullopt);
+    auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(2, std::nullopt);
+    func->SetParams({input});
+    b.Append(func->Block(), [&] {  //
+        b.Return(func, b.Convert(ty.vec4<f32>(), input));
+    });
+
+    Options options;
+    options.use_storage_input_output_16 = false;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
+    EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4float Input");
+    EXPECT_INST("%main_loc2_Output = OpVariable %_ptr_Output_v4float Output");
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpLoad %v4float %main_loc1_Input
+         %19 = OpFConvert %v4half %18
+         %20 = OpFunctionCall %v4float %main_inner %19
+               OpStore %main_loc2_Output %20
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f32>());
     input->SetLocation(1, std::nullopt);
     auto* func = b.Function("main", ty.vec4<f16>(), core::ir::Function::PipelineStage::kFragment);
@@ -382,7 +412,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output) {
         b.Return(func, b.Convert(ty.vec4<f16>(), input));
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.use_storage_input_output_16 = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability StorageInputOutput16");
     EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
     EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4float Input");
@@ -393,6 +425,34 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output) {
          %18 = OpLoad %v4float %main_loc1_Input
          %19 = OpFunctionCall %v4half %main_inner %18
                OpStore %main_loc2_Output %19
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithoutCapability) {
+    auto* input = b.FunctionParam("input", ty.vec4<f32>());
+    input->SetLocation(1, std::nullopt);
+    auto* func = b.Function("main", ty.vec4<f16>(), core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(2, std::nullopt);
+    func->SetParams({input});
+    b.Append(func->Block(), [&] {  //
+        b.Return(func, b.Convert(ty.vec4<f16>(), input));
+    });
+
+    Options options;
+    options.use_storage_input_output_16 = false;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(R"(OpEntryPoint Fragment %main "main" %main_loc1_Input %main_loc2_Output)");
+    EXPECT_INST("%main_loc1_Input = OpVariable %_ptr_Input_v4float Input");
+    EXPECT_INST("%main_loc2_Output = OpVariable %_ptr_Output_v4float Output");
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpLoad %v4float %main_loc1_Input
+         %19 = OpFunctionCall %v4half %main_inner %18
+         %20 = OpFConvert %v4float %19
+               OpStore %main_loc2_Output %20
                OpReturn
                OpFunctionEnd
 )");

@@ -144,7 +144,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
     RUN_TRANSFORM(raise::MergeReturn, module);
     RUN_TRANSFORM(raise::ShaderIO, module,
-                  raise::ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size});
+                  raise::ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size,
+                                        !options.use_storage_input_output_16});
     RUN_TRANSFORM(core::ir::transform::Std140, module);
     RUN_TRANSFORM(raise::VarForDynamicIndex, module);
 
