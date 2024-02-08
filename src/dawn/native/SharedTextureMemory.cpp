@@ -31,6 +31,7 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/SharedFence.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -367,6 +368,8 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemoryBase::EndAccessInternal(
     EndAccessState* rawState) {
     UnpackedPtr<EndAccessState> state;
     DAWN_TRY_ASSIGN(state, ValidateAndUnpack(rawState));
+    // Ensure that commands are submitted before exporting fences with the last usage serial.
+    DAWN_TRY(GetDevice()->GetQueue()->EnsureCommandsFlushed(mContents->GetLastUsageSerial()));
     return EndAccessImpl(texture, state);
 }
 

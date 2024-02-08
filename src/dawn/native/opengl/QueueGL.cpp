@@ -147,6 +147,11 @@ bool Queue::HasPendingCommands() const {
     return mHasPendingCommands;
 }
 
+MaybeError Queue::SubmitPendingCommands() {
+    SubmitFenceSync();
+    return {};
+}
+
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     const Device* device = ToBackend(GetDevice());
     const OpenGLFunctions& gl = device->GetGL();

@@ -172,6 +172,7 @@ class SharedTextureMemoryTests : public DawnTestWithParams<SharedTextureMemoryTe
                                                          wgpu::Texture& texture);
     wgpu::CommandBuffer MakeFourColorsComputeCommandBuffer(wgpu::Device& deviceObj,
                                                            wgpu::Texture& texture);
+    void WriteFourColorsToRGBA8Texture(wgpu::Device& deviceObj, wgpu::Texture& texture);
     std::pair<wgpu::CommandBuffer, wgpu::Texture> MakeCheckBySamplingCommandBuffer(
         wgpu::Device& deviceObj,
         wgpu::Texture& texture);

@@ -85,7 +85,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
     }
 
     for (Texture* texture : mSharedTextures) {
-        DAWN_TRY(texture->SynchronizeImportedTextureBeforeUse());
+        DAWN_TRY(texture->SynchronizeTextureBeforeUse());
     }
 
     MaybeError error =
@@ -134,10 +134,6 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
 
     ID3D12CommandList* d3d12CommandList = GetCommandList();
     commandQueue->ExecuteCommandLists(1, &d3d12CommandList);
-
-    for (Texture* texture : mSharedTextures) {
-        DAWN_TRY(texture->SynchronizeImportedTextureAfterUse());
-    }
 
     mIsOpen = false;
     mNeedsSubmit = false;

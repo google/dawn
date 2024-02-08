@@ -28,6 +28,7 @@
 #include "dawn/native/d3d12/TextureD3D12.h"
 
 #include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include "absl/numeric/bits.h"
@@ -369,22 +370,28 @@ void Texture::DestroyImpl() {
 ResultOrError<ExecutionSerial> Texture::EndAccess() {
     DAWN_ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
 
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    NotifySwapChainPresentToPIX();
 
-    // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists.
-    if (!mSignalFenceValue.has_value()) {
-        // If there were pending commands that used this texture mSignalFenceValue will be set,
-        // but if it's still not set, generate a signal fence after waiting on wait fences.
-        if (!mSignalFenceValue.has_value()) {
-            DAWN_TRY(SynchronizeImportedTextureBeforeUse());
-            DAWN_TRY(SynchronizeImportedTextureAfterUse());
-        }
-        // Make the queue signal the fence in finite time.
-        DAWN_TRY(queue->NextSerial());
+    // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists. If
+    // there were pending commands that used this texture mSignalFenceValue will be set, but if it's
+    // still not set, generate a signal fence after waiting on wait fences.
+    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    if (!mSignalFenceValue) {
+        // Even though we aren't recording any commands here, asking for a command context ensures
+        // that the device fence is signaled eventually even if no commands were recorded before
+        // EndAccess. This is a little sub-optimal, but shouldn't occur often in practice.
+        CommandRecordingContext* context;
+        DAWN_TRY_ASSIGN(context,
+                        queue->GetPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive));
+        DAWN_UNUSED(context);
+
+        DAWN_TRY(SynchronizeTextureBeforeUse());
+        DAWN_ASSERT(mSignalFenceValue);
     }
+    // Make the queue signal the fence in finite time.
+    DAWN_TRY(queue->EnsureCommandsFlushed(*mSignalFenceValue));
 
     ExecutionSerial ret = mSignalFenceValue.value();
-    DAWN_ASSERT(ret <= queue->GetLastSubmittedCommandSerial());
     // Explicitly call reset() since std::move() on optional doesn't make it std::nullopt.
     mSignalFenceValue.reset();
     return ret;
@@ -423,54 +430,48 @@ DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
     }
 }
 
-MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
-    // Perform the wait only on the first call.
+MaybeError Texture::SynchronizeTextureBeforeUse() {
     Device* device = ToBackend(GetDevice());
-    ID3D12CommandQueue* commandQueue = ToBackend(device->GetQueue())->GetCommandQueue();
+    Queue* queue = ToBackend(device->GetQueue());
 
-    for (const auto& fence : mWaitFences) {
+    // Perform the wait only on the first call.
+    std::vector<FenceAndSignalValue> waitFences = std::move(mWaitFences);
+
+    if (SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents()) {
+        SharedTextureMemoryBase::PendingFenceList fences;
+        contents->AcquirePendingFences(&fences);
+        waitFences.insert(waitFences.end(), std::make_move_iterator(fences->begin()),
+                          std::make_move_iterator(fences->end()));
+        contents->SetLastUsageSerial(queue->GetPendingCommandSerial());
+    }
+
+    ID3D12CommandQueue* commandQueue = queue->GetCommandQueue();
+    for (const auto& fence : waitFences) {
         DAWN_TRY(CheckHRESULT(commandQueue->Wait(ToBackend(fence.object)->GetD3DFence(),
                                                  fence.signaledValue),
                               "D3D12 fence wait"););
-        // Keep D3D12 fence alive since we'll clear the waitFences list below.
-        device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
-    }
-    mWaitFences.clear();
-
-    SharedTextureMemoryBase::PendingFenceList fences;
-    SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents();
-    if (contents != nullptr) {
-        contents->AcquirePendingFences(&fences);
-        contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());
-    }
-
-    for (const auto& fence : fences) {
-        DAWN_TRY(CheckHRESULT(
-            commandQueue->Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
-            "D3D12 fence wait"));
         // Keep D3D12 fence alive until commands complete.
         device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
     }
+
+    mSignalFenceValue = queue->GetPendingCommandSerial();
     return {};
 }
 
-MaybeError Texture::SynchronizeImportedTextureAfterUse() {
+void Texture::NotifySwapChainPresentToPIX() {
     // In PIX's D3D12-only mode, there is no way to determine frame boundaries
     // for WebGPU since Dawn does not manage DXGI swap chains. Without assistance,
     // PIX will wait forever for a present that never happens.
     // If we know we're dealing with a swapbuffer texture, inform PIX we've
     // "presented" the texture so it can determine frame boundaries and use its
     // contents for the UI.
-    Queue* queue = ToBackend(GetDevice()->GetQueue());
     if (mSwapChainTexture) {
-        ID3D12SharingContract* d3dSharingContract = queue->GetSharingContract();
+        ID3D12SharingContract* d3dSharingContract =
+            ToBackend(GetDevice()->GetQueue())->GetSharingContract();
         if (d3dSharingContract != nullptr) {
             d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource(), 0, 0);
         }
     }
-    // NextSerial() will be called after this - this is also checked in EndAccess().
-    mSignalFenceValue = queue->GetPendingCommandSerial();
-    return {};
 }
 
 void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,

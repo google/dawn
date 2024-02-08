@@ -131,7 +131,7 @@ MaybeError SwapChain::DetachAndWaitForDeallocation() {
     // before it is finished being used. Flush the commands and wait for that serial to be
     // passed, then Tick the device to make sure the reference to the D3D12 texture is removed.
     Queue* queue = ToBackend(GetDevice()->GetQueue());
-    DAWN_TRY(queue->NextSerial());
+    DAWN_TRY(queue->EnsureCommandsFlushed(queue->GetPendingCommandSerial()));
     DAWN_TRY(queue->WaitForSerial(queue->GetLastSubmittedCommandSerial()));
     return ToBackend(GetDevice())->TickImpl();
 }

@@ -435,6 +435,56 @@ wgpu::CommandBuffer SharedTextureMemoryTests::MakeFourColorsComputeCommandBuffer
     return encoder.Finish();
 }
 
+// Use queue.writeTexture to write four different colors in each quadrant to the texture.
+void SharedTextureMemoryTests::WriteFourColorsToRGBA8Texture(wgpu::Device& deviceObj,
+                                                             wgpu::Texture& texture) {
+    DAWN_ASSERT(texture.GetFormat() == wgpu::TextureFormat::RGBA8Unorm);
+
+    uint32_t width = texture.GetWidth();
+    uint32_t height = texture.GetHeight();
+
+    uint32_t bytesPerBlock = utils::GetTexelBlockSizeInBytes(texture.GetFormat());
+    uint32_t bytesPerRow = width * bytesPerBlock;
+    uint32_t size = bytesPerRow * height;
+
+    std::vector<uint8_t> pixels(size);
+
+    constexpr utils::RGBA8 kTopLeft(0, 0xFF, 0, 0x80);
+    constexpr utils::RGBA8 kBottomLeft(0xFF, 0, 0, 0x80);
+    constexpr utils::RGBA8 kTopRight(0, 0, 0xFF, 0x80);
+    constexpr utils::RGBA8 kBottomRight(0xFF, 0xFF, 0, 0x80);
+
+    for (uint32_t y = 0; y < height; y++) {
+        for (uint32_t x = 0; x < width; x++) {
+            utils::RGBA8* pixel =
+                reinterpret_cast<utils::RGBA8*>(&pixels[y * bytesPerRow + x * bytesPerBlock]);
+            if (x < width / 2) {
+                if (y < height / 2) {
+                    *pixel = kTopLeft;
+                } else {
+                    *pixel = kBottomLeft;
+                }
+            } else {
+                if (y < height / 2) {
+                    *pixel = kTopRight;
+                } else {
+                    *pixel = kBottomRight;
+                }
+            }
+        }
+    }
+
+    wgpu::Extent3D writeSize = {width, height, 1};
+
+    wgpu::ImageCopyTexture dest;
+    dest.texture = texture;
+
+    wgpu::TextureDataLayout dataLayout = {
+        .offset = 0, .bytesPerRow = bytesPerRow, .rowsPerImage = height};
+
+    device.GetQueue().WriteTexture(&dest, pixels.data(), pixels.size(), &dataLayout, &writeSize);
+}
+
 // Make a command buffer that samples the contents of the input texture into an RGBA8Unorm texture.
 std::pair<wgpu::CommandBuffer, wgpu::Texture>
 SharedTextureMemoryTests::MakeCheckBySamplingCommandBuffer(wgpu::Device& deviceObj,
@@ -2185,6 +2235,62 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
         beginDesc.fences = sharedFences.data();
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        // Begin access on memory 1, check the contents, end access.
+        memories[1].BeginAccess(texture1, &beginDesc);
+        devices[1].GetQueue().Submit(1, &commandBuffer1);
+        memories[1].EndAccess(texture1, &endState);
+
+        // Check all the sampled colors are correct.
+        CheckFourColors(devices[1], texture1.GetFormat(), resultTarget);
+    }
+}
+
+// Test writing to texture memory using queue.writeTexture, then sampling it using another device.
+TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memories[0].GetProperties(&properties);
+
+        if (properties.format != wgpu::TextureFormat::RGBA8Unorm) {
+            continue;
+        }
+
+        // Create the textures on each SharedTextureMemory.
+        wgpu::Texture texture0 = memories[0].CreateTexture();
+        wgpu::Texture texture1 = memories[1].CreateTexture();
+
+        // Make a command buffer to sample and check the texture contents.
+        wgpu::Texture resultTarget;
+        wgpu::CommandBuffer commandBuffer1;
+        std::tie(commandBuffer1, resultTarget) =
+            MakeCheckBySamplingCommandBuffer(devices[1], texture1);
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+
+        // Begin access on memory 0, use queue.writeTexture to populate the contents, end access.
+        memories[0].BeginAccess(texture0, &beginDesc);
+        WriteFourColorsToRGBA8Texture(devices[0], texture0);
+        memories[0].EndAccess(texture0, &endState);
+
+        // Import fences to device 1.
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
         beginDesc.initialized = endState.initialized;
         backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
 

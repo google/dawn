@@ -58,6 +58,16 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
     return {};
 }
 
+MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
+    DAWN_ASSERT(serial <= GetPendingCommandSerial());
+    if (serial > GetLastSubmittedCommandSerial()) {
+        ForceEventualFlushOfCommands();
+        DAWN_TRY(SubmitPendingCommands());
+        DAWN_ASSERT(serial <= GetLastSubmittedCommandSerial());
+    }
+    return {};
+}
+
 void ExecutionQueueBase::AssumeCommandsComplete() {
     // Bump serials so any pending callbacks can be fired.
     uint64_t prev = mLastSubmittedSerial.fetch_add(1u, std::memory_order_release);

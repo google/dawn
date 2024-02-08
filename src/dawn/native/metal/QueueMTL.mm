@@ -190,16 +190,6 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
 }
 
 void Queue::ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc) {
-    // Ensure commands are submitted before getting the last submited serial.
-    // Ignore the error since we still want to export the serial of the last successful
-    // submission - that was the last serial that was actually signaled.
-    ForceEventualFlushOfCommands();
-
-    if (GetDevice()->ConsumedError(SubmitPendingCommandBuffer())) {
-        desc->sharedEvent = nullptr;
-        return;
-    }
-
     desc->sharedEvent = *mMtlSharedEvent;
     desc->signaledValue = static_cast<uint64_t>(GetLastSubmittedCommandSerial());
 }
@@ -222,6 +212,10 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
 
 bool Queue::HasPendingCommands() const {
     return mCommandContext.NeedsSubmit();
+}
+
+MaybeError Queue::SubmitPendingCommands() {
+    return SubmitPendingCommandBuffer();
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {

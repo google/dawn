@@ -141,16 +141,16 @@ MaybeError Queue::SubmitPendingCommands() {
     }
 
     DAWN_TRY(mCommandAllocatorManager->Tick(GetCompletedCommandSerial()));
-    DAWN_TRY(mPendingCommands.ExecuteCommandList(device, mCommandQueue.Get()););
+    DAWN_TRY(mPendingCommands.ExecuteCommandList(device, mCommandQueue.Get()));
     return NextSerial();
 }
 
 MaybeError Queue::NextSerial() {
     Device* device = ToBackend(GetDevice());
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
-
-    ForceEventualFlushOfCommands();
-    DAWN_TRY(SubmitPendingCommands());
+    // NextSerial should not ever be called with an open command list since the underlying command
+    // allocator could be recycled after the serial completes on the GPU.
+    DAWN_ASSERT(!mPendingCommands.IsOpen());
 
     IncrementLastSubmittedCommandSerial();
 

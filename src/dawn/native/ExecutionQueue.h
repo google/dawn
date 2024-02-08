@@ -60,6 +60,9 @@ class ExecutionQueueBase {
     // method makes them to be submitted as soon as possible in next ticks.
     virtual void ForceEventualFlushOfCommands() = 0;
 
+    // Ensures that all commands which were recorded are flushed upto the given serial.
+    MaybeError EnsureCommandsFlushed(ExecutionSerial serial);
+
     // During shut down of device, some operations might have been started since the last submit
     // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
     // make all commands look completed.
@@ -96,6 +99,9 @@ class ExecutionQueueBase {
 
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;
+
+    // Submit any pending commands that are enqueued.
+    virtual MaybeError SubmitPendingCommands() = 0;
 };
 
 }  // namespace dawn::native

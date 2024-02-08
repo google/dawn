@@ -59,6 +59,9 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
     MaybeError BeginAccessImpl(TextureBase* texture,
                                const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
 
+    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
+                                                     UnpackedPtr<EndAccessState>& state) override;
+
     ComPtr<ID3D12Resource> mResource;
 };
 

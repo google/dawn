@@ -48,7 +48,7 @@ class Queue final : public d3d::Queue {
     ScopedCommandRecordingContext GetScopedPendingCommandContext(SubmitMode submitMode);
     ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
         SubmitMode submitMode);
-    MaybeError SubmitPendingCommands();
+    MaybeError SubmitPendingCommands() override;
     MaybeError NextSerial();
     MaybeError WaitForSerial(ExecutionSerial serial);
 

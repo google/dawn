@@ -93,8 +93,9 @@ class Texture final : public d3d::Texture {
     MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                    const SubresourceRange& range);
 
-    MaybeError SynchronizeImportedTextureBeforeUse();
-    MaybeError SynchronizeImportedTextureAfterUse();
+    MaybeError SynchronizeTextureBeforeUse();
+
+    void NotifySwapChainPresentToPIX();
 
     void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                 std::vector<D3D12_RESOURCE_BARRIER>* barrier,
@@ -160,9 +161,10 @@ class Texture final : public d3d::Texture {
     D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
     ResourceHeapAllocation mResourceAllocation;
 
-    // TODO(dawn:1460): Encapsulate imported image fields e.g. std::unique_ptr<ExternalImportInfo>.
+    // TODO(crbug.com/1515640): Remove these once Chromium has migrated to SharedTextureMemory.
     std::vector<FenceAndSignalValue> mWaitFences;
     std::optional<ExecutionSerial> mSignalFenceValue;
+
     bool mSwapChainTexture = false;
 
     SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;

@@ -135,4 +135,11 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     return {};
 }
 
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+    TextureBase* texture,
+    UnpackedPtr<EndAccessState>& state) {
+    ToBackend(texture)->NotifySwapChainPresentToPIX();
+    return d3d::SharedTextureMemory::EndAccessImpl(texture, state);
+}
+
 }  // namespace dawn::native::d3d12
