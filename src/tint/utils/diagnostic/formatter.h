@@ -69,8 +69,6 @@ class Formatter {
     /// @return the list of diagnostics `list` formatted to a string.
     /// @param list the list of diagnostic messages to format
     std::string Format(const List& list) const;
-    /// deprecated, use `Format`
-    std::string format(const List& list) const { return Format(list); }
 
   private:
     struct State;

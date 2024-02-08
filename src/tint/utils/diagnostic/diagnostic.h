@@ -252,8 +252,6 @@ class List {
     /// @returns true iff the diagnostic list contains errors diagnostics (or of
     /// higher severity).
     bool ContainsErrors() const { return error_count_ > 0; }
-    /// deprecated, use `ContainsErrors`
-    bool contains_errors() const { return ContainsErrors(); }
     /// @returns the number of error diagnostics (or of higher severity).
     size_t NumErrors() const { return error_count_; }
     /// @returns the number of entries in the list.
