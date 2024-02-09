@@ -30,7 +30,7 @@ import("../../../scripts/dawn_overrides_with_defaults.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
 config("absl_config") {
-  if (dawn_standalone && is_clang) {
+  if (!build_with_chromium && is_clang) {
     cflags = [
       # Allow the use of enable_if()
       "-Wno-gcc-compat",
