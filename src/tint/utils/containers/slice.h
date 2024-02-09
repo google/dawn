@@ -276,14 +276,14 @@ struct Slice {
     /// Equality operator.
     /// @param other the other slice to compare against
     /// @returns true if all fields of this slice are equal to the fields of @p other
-    bool operator==(const Slice& other) {
+    bool operator==(const Slice& other) const {
         return data == other.data && len == other.len && cap == other.cap;
     }
 
     /// Inequality operator.
     /// @param other the other slice to compare against
     /// @returns false if any fields of this slice are not equal to the fields of @p other
-    bool operator!=(const Slice& other) { return !(*this == other); }
+    bool operator!=(const Slice& other) const { return !(*this == other); }
 };
 
 /// Deduction guide for Slice from c-array

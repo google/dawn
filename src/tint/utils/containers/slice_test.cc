@@ -206,7 +206,7 @@ TEST(TintSliceTest, Truncate_PastEnd) {
 
 TEST(TintSliceTest, Equality) {
     int elements[] = {1, 2, 3};
-    auto a = Slice{elements};
+    const auto a = Slice{elements};
     {
         auto b = a;
         EXPECT_TRUE(a == b);
