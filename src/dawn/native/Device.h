@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_DEVICE_H_
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
+#include <shared_mutex>
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -568,6 +570,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
     raw_ptr<void, DanglingUntriaged> mUncapturedErrorUserdata = nullptr;
 
+    std::shared_mutex mLoggingMutex;
     wgpu::LoggingCallback mLoggingCallback = nullptr;
     // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
     raw_ptr<void, DanglingUntriaged> mLoggingUserdata = nullptr;
