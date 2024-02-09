@@ -38,9 +38,9 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
-	"unicode"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/text"
 )
 
 // The template function binding table
@@ -89,11 +89,12 @@ func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 		"Iterate":    iterate,
 		"List":       list,
 		"Map":        newMap,
-		"PascalCase": pascalCase,
+		"PascalCase": text.PascalCase,
 		"ToUpper":    strings.ToUpper,
 		"ToLower":    strings.ToLower,
 		"Repeat":     strings.Repeat,
 		"Split":      strings.Split,
+		"Join":       strings.Join,
 		"Title":      strings.Title,
 		"TrimLeft":   strings.TrimLeft,
 		"TrimPrefix": strings.TrimPrefix,
@@ -102,7 +103,7 @@ func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 		"Replace":    replace,
 		"Index":      index,
 		"Sum":        sum,
-		"Error":      func(err any) string { panic(err) },
+		"Error":      func(err string, args ...any) string { panic(fmt.Errorf(err, args...)) },
 	}
 
 	// Append custom functions
@@ -205,6 +206,9 @@ func (m Map) Get(key any) any {
 
 // is returns true if the type of object is ty
 func is(object any, ty string) bool {
+	if object == nil {
+		return false
+	}
 	val := reflect.ValueOf(object)
 	for val.Kind() == reflect.Pointer {
 		val = val.Elem()
@@ -234,33 +238,6 @@ func iterate(n int) []int {
 // list returns a new slice of elements from the argument list
 // Useful for: {{- range Slice "a" "b" "c" -}}{{.}}{{end}}
 func list(elements ...any) []any { return elements }
-
-// pascalCase returns the snake-case string s transformed into 'PascalCase',
-// Rules:
-// * The first letter of the string is capitalized
-// * Characters following an underscore or number are capitalized
-// * Underscores are removed from the returned string
-// See: https://en.wikipedia.org/wiki/Camel_case
-func pascalCase(s string) string {
-	b := strings.Builder{}
-	upper := true
-	for _, r := range s {
-		if r == '_' || r == ' ' {
-			upper = true
-			continue
-		}
-		if upper {
-			b.WriteRune(unicode.ToUpper(r))
-			upper = false
-		} else {
-			b.WriteRune(r)
-		}
-		if unicode.IsNumber(r) {
-			upper = true
-		}
-	}
-	return b.String()
-}
 
 func index(obj any, indices ...any) (any, error) {
 	v := reflect.ValueOf(obj)

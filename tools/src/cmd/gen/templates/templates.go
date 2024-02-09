@@ -34,10 +34,8 @@ import (
 	"io"
 	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
@@ -73,12 +71,6 @@ func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, 
 func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot()
-
-	// Find clang-format
-	clangFormatPath := findClangFormat(projectRoot)
-	if clangFormatPath == "" {
-		return fmt.Errorf("cannot find clang-format in <dawn>/buildtools nor PATH")
-	}
 
 	files := flag.Args()
 	if len(files) == 0 {
@@ -174,7 +166,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 			switch filepath.Ext(outFileName) {
 			case ".cc", ".h", ".inl":
 				var err error
-				body, err = clangFormat(body, clangFormatPath)
+				body, err = common.ClangFormat(body)
 				if err != nil {
 					return err
 				}
@@ -388,38 +380,4 @@ func isLastIn(v, slice any) bool {
 		return false
 	}
 	return s.Index(count-1).Interface() == v
-}
-
-// Invokes the clang-format executable at 'exe' to format the file content 'in'.
-// Returns the formatted file.
-func clangFormat(in, exe string) (string, error) {
-	cmd := exec.Command(exe)
-	cmd.Stdin = strings.NewReader(in)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("clang-format failed:\n%v\n%v", string(out), err)
-	}
-	return string(out), nil
-}
-
-// Looks for clang-format in the 'buildtools' directory, falling back to PATH
-func findClangFormat(projectRoot string) string {
-	var path string
-	switch runtime.GOOS {
-	case "linux":
-		path = filepath.Join(projectRoot, "buildtools/linux64/clang-format")
-	case "darwin":
-		path = filepath.Join(projectRoot, "buildtools/mac/clang-format")
-	case "windows":
-		path = filepath.Join(projectRoot, "buildtools/win/clang-format.exe")
-	}
-	if fileutils.IsExe(path) {
-		return path
-	}
-	var err error
-	path, err = exec.LookPath("clang-format")
-	if err == nil {
-		return path
-	}
-	return ""
 }
