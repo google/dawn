@@ -45,7 +45,7 @@ TEST(DiagListTest, CtorVectorRef) {
     Diagnostic err_a, err_b;
     err_a.severity = Severity::Error;
     err_b.severity = Severity::Fatal;
-    List list(Vector{err_a, err_b});
+    List list{Vector{err_a, err_b}};
     EXPECT_EQ(list.Count(), 2u);
 }
 
