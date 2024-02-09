@@ -38,12 +38,35 @@
 #include <string>
 
 #include "src/tint/lang/core/intrinsic/type_matchers.h"
+#include "src/tint/lang/core/type/abstract_float.h"
+#include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::wgsl::intrinsic {
 
 using namespace tint::core::intrinsic;  // NOLINT(build/namespaces)
+
+inline const core::type::AbstractFloat* BuildFa(intrinsic::MatchState& state,
+                                                const core::type::Type*) {
+    return state.types.AFloat();
+}
+
+inline bool MatchFa(intrinsic::MatchState& state, const core::type::Type* ty) {
+    return (state.earliest_eval_stage <= core::EvaluationStage::kConstant) &&
+           ty->IsAnyOf<intrinsic::Any, core::type::AbstractNumeric>();
+}
+
+inline const core::type::AbstractInt* BuildIa(intrinsic::MatchState& state,
+                                              const core::type::Type*) {
+    return state.types.AInt();
+}
+
+inline bool MatchIa(intrinsic::MatchState& state, const core::type::Type* ty) {
+    return (state.earliest_eval_stage <= core::EvaluationStage::kConstant) &&
+           ty->IsAnyOf<intrinsic::Any, core::type::AbstractInt>();
+}
 
 namespace {
 

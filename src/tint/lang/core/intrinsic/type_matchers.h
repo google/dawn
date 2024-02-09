@@ -61,24 +61,6 @@ inline bool MatchBool(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::Bool>();
 }
 
-inline const type::AbstractFloat* BuildFa(intrinsic::MatchState& state, const type::Type*) {
-    return state.types.AFloat();
-}
-
-inline bool MatchFa(intrinsic::MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
-           ty->IsAnyOf<intrinsic::Any, type::AbstractNumeric>();
-}
-
-inline const type::AbstractInt* BuildIa(intrinsic::MatchState& state, const type::Type*) {
-    return state.types.AInt();
-}
-
-inline bool MatchIa(intrinsic::MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
-           ty->IsAnyOf<intrinsic::Any, type::AbstractInt>();
-}
-
 inline const type::Bool* BuildBool(intrinsic::MatchState& state, const type::Type*) {
     return state.types.bool_();
 }
