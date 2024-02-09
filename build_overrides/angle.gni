@@ -33,7 +33,6 @@ angle_has_build = true
 
 # Paths to ANGLE dependencies in Dawn
 angle_glslang_dir = "//third_party/vulkan-deps/glslang/src"
-angle_spirv_cross_dir = "//third_party/vulkan-deps/spirv-cross/src"
 angle_spirv_headers_dir = "//third_party/vulkan-deps/spirv-headers/src"
 angle_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
 angle_vulkan_memory_allocator_dir = "//third_party/vulkan_memory_allocator"
