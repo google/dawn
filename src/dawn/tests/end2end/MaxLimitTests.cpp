@@ -1091,6 +1091,8 @@ TEST_P(MaxInterStageLimitTests, NoBuiltins) {
 // pipeline with @builtin(sample_mask). On D3D SV_Coverage doesn't consume an independent float4
 // register.
 TEST_P(MaxInterStageLimitTests, SampleMask) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleMask = true;
     DoTest(spec);
@@ -1100,6 +1102,8 @@ TEST_P(MaxInterStageLimitTests, SampleMask) {
 // pipeline with @builtin(sample_index). On D3D SV_SampleIndex consumes an independent float4
 // register.
 TEST_P(MaxInterStageLimitTests, SampleIndex) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleIndex = true;
     DoTest(spec);
@@ -1109,6 +1113,8 @@ TEST_P(MaxInterStageLimitTests, SampleIndex) {
 // pipeline with @builtin(front_facing). On D3D SV_IsFrontFace consumes an independent float4
 // register.
 TEST_P(MaxInterStageLimitTests, FrontFacing) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasFrontFacing = true;
     DoTest(spec);
@@ -1118,6 +1124,8 @@ TEST_P(MaxInterStageLimitTests, FrontFacing) {
 // pipeline with @builtin(front_facing). On D3D SV_IsFrontFace and SV_SampleIndex consume one
 // independent float4 register.
 TEST_P(MaxInterStageLimitTests, SampleIndex_FrontFacing) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleIndex = true;
     spec.hasFrontFacing = true;
@@ -1128,6 +1136,8 @@ TEST_P(MaxInterStageLimitTests, SampleIndex_FrontFacing) {
 // pipeline with @builtin(sample_mask),
 // @builtin(sample_index) and @builtin(front_facing).
 TEST_P(MaxInterStageLimitTests, SampleMask_SampleIndex_FrontFacing) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleMask = true;
     spec.hasSampleIndex = true;
@@ -1140,6 +1150,8 @@ TEST_P(MaxInterStageLimitTests, SampleMask_SampleIndex_FrontFacing) {
 // the SPIR-V builtin PointSize must be declared in vertex shader, which will consume 1 inter-stage
 // shader component.
 TEST_P(MaxInterStageLimitTests, RenderPointList) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.renderPointLists = true;
     DoTest(spec);
@@ -1149,6 +1161,8 @@ TEST_P(MaxInterStageLimitTests, RenderPointList) {
 // pipeline with PointList primitive topology, @builtin(sample_mask),
 // @builtin(sample_index) and @builtin(front_facing).
 TEST_P(MaxInterStageLimitTests, RenderPointList_SampleMask_SampleIndex_FrontFacing) {
+    // TODO(dawn:2398): The spec is too permissive and needs fixing, suppress the VVL error for now
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
     MaxInterStageLimitTestsSpec spec = {};
     spec.renderPointLists = true;
     spec.hasSampleMask = true;
