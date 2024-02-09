@@ -113,17 +113,17 @@ class SystemEventAndReadyStateIterator {
 
     explicit SystemEventAndReadyStateIterator(WrappedIter wrappedIt) : mWrappedIt(wrappedIt) {}
 
-    bool operator!=(const SystemEventAndReadyStateIterator& rhs) {
+    bool operator!=(const SystemEventAndReadyStateIterator& rhs) const {
         return rhs.mWrappedIt != mWrappedIt;
     }
-    bool operator==(const SystemEventAndReadyStateIterator& rhs) {
+    bool operator==(const SystemEventAndReadyStateIterator& rhs) const {
         return rhs.mWrappedIt == mWrappedIt;
     }
-    difference_type operator-(const SystemEventAndReadyStateIterator& rhs) {
+    difference_type operator-(const SystemEventAndReadyStateIterator& rhs) const {
         return mWrappedIt - rhs.mWrappedIt;
     }
 
-    SystemEventAndReadyStateIterator operator+(difference_type rhs) {
+    SystemEventAndReadyStateIterator operator+(difference_type rhs) const {
         return SystemEventAndReadyStateIterator{mWrappedIt + rhs};
     }
 
