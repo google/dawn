@@ -81,6 +81,8 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/promote_initializers_to_let.h
   lang/wgsl/ast/transform/promote_side_effects_to_decl.cc
   lang/wgsl/ast/transform/promote_side_effects_to_decl.h
+  lang/wgsl/ast/transform/push_constant_helper.cc
+  lang/wgsl/ast/transform/push_constant_helper.h
   lang/wgsl/ast/transform/remove_phonies.cc
   lang/wgsl/ast/transform/remove_phonies.h
   lang/wgsl/ast/transform/remove_unreachable_statements.cc
@@ -165,6 +167,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/preserve_padding_test.cc
   lang/wgsl/ast/transform/promote_initializers_to_let_test.cc
   lang/wgsl/ast/transform/promote_side_effects_to_decl_test.cc
+  lang/wgsl/ast/transform/push_constant_helper_test.cc
   lang/wgsl/ast/transform/remove_phonies_test.cc
   lang/wgsl/ast/transform/remove_unreachable_statements_test.cc
   lang/wgsl/ast/transform/renamer_test.cc

@@ -33,6 +33,7 @@
 
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/wgsl/ast/transform/push_constant_helper.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -78,19 +79,19 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
 
     // Traverse the AST scanning for builtin accesses via variables (includes
     // parameters) or structure member accesses.
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* var = node->As<Variable>()) {
             for (auto* attr : var->attributes) {
                 if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
                     core::BuiltinValue builtin = src.Sem().Get(builtin_attr)->Value();
                     if (builtin == core::BuiltinValue::kVertexIndex && cfg &&
                         cfg->first_vertex_offset.has_value()) {
-                        auto* sem_var = ctx.src->Sem().Get(var);
+                        auto* sem_var = src.Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
                     }
                     if (builtin == core::BuiltinValue::kInstanceIndex && cfg &&
                         cfg->first_instance_offset.has_value()) {
-                        auto* sem_var = ctx.src->Sem().Get(var);
+                        auto* sem_var = src.Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstInstanceName);
                     }
                 }
@@ -102,12 +103,12 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
                     core::BuiltinValue builtin = src.Sem().Get(builtin_attr)->Value();
                     if (builtin == core::BuiltinValue::kVertexIndex && cfg &&
                         cfg->first_vertex_offset.has_value()) {
-                        auto* sem_mem = ctx.src->Sem().Get(member);
+                        auto* sem_mem = src.Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);
                     }
                     if (builtin == core::BuiltinValue::kInstanceIndex && cfg &&
                         cfg->first_instance_offset.has_value()) {
-                        auto* sem_mem = ctx.src->Sem().Get(member);
+                        auto* sem_mem = src.Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstInstanceName);
                     }
                 }
@@ -117,66 +118,17 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
 
     Vector<const ast::StructMember*, 8> members;
 
-    const ast::Variable* push_constants_var = nullptr;
-
-    // Find first push_constant.
-    for (auto* global : src.AST().GlobalVariables()) {
-        if (auto* var = global->As<ast::Var>()) {
-            auto* v = src.Sem().Get(var);
-            if (v->AddressSpace() == core::AddressSpace::kPushConstant) {
-                push_constants_var = var;
-                auto* str = v->Type()->UnwrapRef()->As<sem::Struct>();
-                if (!str) {
-                    TINT_ICE() << "expected var<push_constant> type to be struct. Was "
-                                  "AddBlockAttribute run?";
-                }
-                for (auto* member : str->Members()) {
-                    members.Push(ctx.CloneWithoutTransform(member->Declaration()));
-                }
-            }
-        }
-    }
+    PushConstantHelper helper(ctx);
 
     // Add push constant members and calculate byte offsets
     if (cfg->first_vertex_offset.has_value()) {
-        members.Push(b.Member(kFirstVertexName, b.ty.u32(),
-                              Vector{b.MemberOffset(AInt(*cfg->first_vertex_offset))}));
+        helper.InsertMember(kFirstVertexName, b.ty.u32(), *cfg->first_vertex_offset);
     }
     if (cfg->first_instance_offset.has_value()) {
-        members.Push(b.Member(kFirstInstanceName, b.ty.u32(),
-                              Vector{b.MemberOffset(AInt(*cfg->first_instance_offset))}));
+        helper.InsertMember(kFirstInstanceName, b.ty.u32(), *cfg->first_instance_offset);
     }
 
-    auto new_struct = b.Structure(b.Symbols().New("PushConstants"), std::move(members));
-
-    Symbol buffer_name;
-
-    // If this is the first use of push constants, create a global to hold them.
-    if (!push_constants_var) {
-        b.Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
-
-        buffer_name = b.Symbols().New("push_constants");
-        b.GlobalVar(buffer_name, b.ty.Of(new_struct), core::AddressSpace::kPushConstant);
-    } else {
-        buffer_name = ctx.Clone(push_constants_var->name->symbol);
-    }
-
-    // Replace all variable users of the old struct with the new struct.
-    if (push_constants_var) {
-        ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
-            if (var->type == push_constants_var->type) {
-                if (var->As<ast::Parameter>()) {
-                    return ctx.dst->Param(ctx.Clone(var->name->symbol), b.ty.Of(new_struct),
-                                          ctx.Clone(var->attributes));
-                } else {
-                    return ctx.dst->Var(ctx.Clone(var->name->symbol), b.ty.Of(new_struct),
-                                        ctx.Clone(var->attributes),
-                                        core::AddressSpace::kPushConstant);
-                }
-            }
-            return nullptr;
-        });
-    }
+    Symbol buffer_name = helper.Run();
 
     // Fix up all references to the builtins with the offsets
     ctx.ReplaceAll([&](const Expression* expr) -> const Expression* {

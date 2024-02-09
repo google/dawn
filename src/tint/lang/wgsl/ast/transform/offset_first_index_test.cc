@@ -423,6 +423,61 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(OffsetFirstIndexTest, BasicModuleBothIndexes_OffsetsOutOfOrder) {
+    auto* src = R"(
+@vertex
+fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
+  test(inputs.instance_idx, inputs.vert_idx);
+  return vec4<f32>();
+}
+
+struct Inputs {
+  @builtin(vertex_index) vert_idx : u32,
+  @builtin(instance_index) instance_idx : u32,
+};
+
+fn test(instance_idx : u32, vert_idx : u32) -> u32 {
+  return instance_idx + vert_idx;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_push_constant;
+
+struct PushConstants {
+  /* @offset(0) */
+  first_instance : u32,
+  /* @offset(4) */
+  first_vertex : u32,
+}
+
+var<push_constant> push_constants : PushConstants;
+
+@vertex
+fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
+  test((bitcast<u32>(inputs.instance_idx) + push_constants.first_instance), (bitcast<u32>(inputs.vert_idx) + push_constants.first_vertex));
+  return vec4<f32>();
+}
+
+struct Inputs {
+  @builtin(vertex_index)
+  vert_idx : u32,
+  @builtin(instance_index)
+  instance_idx : u32,
+}
+
+fn test(instance_idx : u32, vert_idx : u32) -> u32 {
+  return (instance_idx + vert_idx);
+}
+)";
+
+    DataMap config;
+    config.Add<OffsetFirstIndex::Config>(4, 0);
+    auto got = Run<OffsetFirstIndex>(src, std::move(config));
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(OffsetFirstIndexTest, BasicModuleBothIndexesVertexDisabled) {
     auto* src = R"(
 fn test(instance_idx : u32, vert_idx : u32) -> u32 {
