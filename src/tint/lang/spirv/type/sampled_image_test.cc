@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -27,31 +27,30 @@
 
 #include "src/tint/lang/spirv/type/sampled_image.h"
 
-#include "src/tint/lang/core/type/manager.h"
+#include <gtest/gtest.h>
 
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::type::SampledImage);
+#include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/u32.h"
 
 namespace tint::spirv::type {
+namespace {
 
-SampledImage::SampledImage(const core::type::Type* image)
-    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<SampledImage>().bits, image)),
-           core::type::Flags{}),
-      image_(image) {}
+TEST(SampledImageTest, Equals) {
+    core::type::I32 i32;
+    core::type::U32 u32;
+    SampledImage a{&i32};
+    SampledImage b{&i32};
+    SampledImage c{&u32};
 
-bool SampledImage::Equals(const UniqueNode& other) const {
-    if (auto* o = other.As<SampledImage>()) {
-        return o->image_ == image_;
-    }
-    return false;
+    EXPECT_TRUE(a.Equals(b));
+    EXPECT_FALSE(a.Equals(c));
 }
 
-std::string SampledImage::FriendlyName() const {
-    return "spirv.sampled_image<" + image_->FriendlyName() + ">";
+TEST(SampledImageTest, FriendlyName) {
+    core::type::I32 i32;
+    SampledImage s{&i32};
+    EXPECT_EQ(s.FriendlyName(), "spirv.sampled_image<i32>");
 }
 
-SampledImage* SampledImage::Clone(core::type::CloneContext& ctx) const {
-    auto* image = image_->Clone(ctx);
-    return ctx.dst.mgr->Get<SampledImage>(image);
-}
-
+}  // namespace
 }  // namespace tint::spirv::type

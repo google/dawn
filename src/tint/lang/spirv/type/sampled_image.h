@@ -45,10 +45,10 @@ class SampledImage final : public Castable<SampledImage, core::type::Type> {
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
-    bool Equals(const UniqueNode& other) const override { return &other.TypeInfo() == &TypeInfo(); }
+    bool Equals(const UniqueNode& other) const override;
 
     /// @returns the friendly name for this type
-    std::string FriendlyName() const override { return "spirv.sampled_image"; }
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
