@@ -338,7 +338,7 @@ void EventManager::ShutDown() {
     mEvents.reset();
 }
 
-FutureID EventManager::TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&& future) {
+FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& future) {
     FutureID futureID = mNextFutureID++;
     if (!mEvents.has_value()) {
         return futureID;

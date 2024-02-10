@@ -314,7 +314,6 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
     }
 
     FutureID futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(
-        callbackInfo.mode,
         AcquireRef(new RequestDeviceEvent(callbackInfo, CreateDevice(descriptor))));
     return {futureID};
 }

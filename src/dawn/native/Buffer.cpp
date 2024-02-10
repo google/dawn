@@ -630,8 +630,7 @@ Future BufferBase::APIMapAsyncF(wgpu::MapMode mode,
         event = mPendingMapEvent;
     }
 
-    FutureID futureID =
-        GetInstance()->GetEventManager()->TrackEvent(callbackInfo.mode, std::move(event));
+    FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
     return {futureID};
 }
 
