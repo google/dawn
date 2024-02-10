@@ -151,7 +151,7 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
                     Call(WGPUDeviceLostReason_Undefined, testing::_, testing::_))
             .Times(1);
         testDevice.ForceLoss(wgpu::DeviceLostReason::Undefined, "Device lost for testing");
-        testDevice.Tick();
+        testInstance.ProcessEvents();
     }
 
     void TrivialSubmit() {
@@ -283,7 +283,6 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
                     uint64_t oldCompletionCount = mCallbacksCompletedCount;
                     FlushWire();
-                    testDevice.Tick();
                     auto status = testInstance.WaitAny(mFutures.size(), mFutures.data(), 0);
                     if (status == wgpu::WaitStatus::TimedOut) {
                         continue;
@@ -305,7 +304,6 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
                     ASSERT_FALSE(testTimeExceeded());
 
                     FlushWire();
-                    testDevice.Tick();
                     testInstance.ProcessEvents();
 
                     if (loopOnlyOnce) {
@@ -358,9 +356,14 @@ TEST_P(EventCompletionTests, WorkDoneAcrossDeviceLoss) {
 TEST_P(EventCompletionTests, WorkDoneAfterDeviceLoss) {
     TrivialSubmit();
     LoseTestDevice();
-    ASSERT_DEVICE_ERROR_ON(testDevice,
-                           TrackForTest(OnSubmittedWorkDone(WGPUQueueWorkDoneStatus_Success)));
-    TestWaitAll();
+    // Tracking and waiting need to be done together w.r.t the device error assertion because error
+    // assertion in DawnTest.h currently calls ProcessEvents which will cause the work done event to
+    // trigger before the TestWaitAll call.
+    auto TestF = [&]() {
+        TrackForTest(OnSubmittedWorkDone(WGPUQueueWorkDoneStatus_Success));
+        TestWaitAll();
+    };
+    ASSERT_DEVICE_ERROR_ON(testDevice, TestF());
 }
 
 // WorkDone event twice after submitting some trivial work.

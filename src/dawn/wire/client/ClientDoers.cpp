@@ -77,20 +77,6 @@ WireResult Client::DoDeviceLostCallback(Device* device,
     return WireResult::Success;
 }
 
-WireResult Client::DoDevicePopErrorScopeCallback(Device* device,
-                                                 uint64_t requestSerial,
-                                                 WGPUErrorType errorType,
-                                                 const char* message) {
-    if (device == nullptr) {
-        // The device might have been deleted or recreated so this isn't an error.
-        return WireResult::Success;
-    }
-    if (device->OnPopErrorScopeCallback(requestSerial, errorType, message)) {
-        return WireResult::Success;
-    }
-    return WireResult::FatalError;
-}
-
 WireResult Client::DoShaderModuleGetCompilationInfoCallback(ShaderModule* shaderModule,
                                                             uint64_t requestSerial,
                                                             WGPUCompilationInfoRequestStatus status,

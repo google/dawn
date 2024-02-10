@@ -74,10 +74,13 @@ void Server::OnLogging(ObjectHandle device, WGPULoggingType type, const char* me
     SerializeCommand(cmd);
 }
 
-WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device, uint64_t requestSerial) {
+WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
+                                         ObjectHandle eventManager,
+                                         WGPUFuture future) {
     auto userdata = MakeUserdata<ErrorScopeUserdata>();
-    userdata->requestSerial = requestSerial;
     userdata->device = device.AsHandle();
+    userdata->eventManager = eventManager;
+    userdata->future = future;
 
     mProcs.devicePopErrorScope(device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>,
                                userdata.release());
@@ -88,8 +91,8 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
                                    WGPUErrorType type,
                                    const char* message) {
     ReturnDevicePopErrorScopeCallbackCmd cmd;
-    cmd.device = userdata->device;
-    cmd.requestSerial = userdata->requestSerial;
+    cmd.eventManager = userdata->eventManager;
+    cmd.future = userdata->future;
     cmd.type = type;
     cmd.message = message;
 

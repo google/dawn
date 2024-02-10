@@ -85,33 +85,10 @@ auto MakeParamGenerator(std::initializer_list<Params>&&... params) {
         , testName, testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
         &TestParamToString<testName::ParamType>)
 
-template <typename Callback,
-          typename CallbackInfo,
-          auto& AsyncF,
-          auto& FutureF,
-          typename Params = WireFutureTestParam,
-          typename AsyncFT = decltype(AsyncF),
-          typename FutureFT = decltype(FutureF)>
-class WireFutureTestWithParams : public WireTest, public testing::WithParamInterface<Params> {
+template <typename Params = WireFutureTestParam>
+class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamInterface<Params> {
   protected:
     using testing::WithParamInterface<Params>::GetParam;
-
-    // Calls the actual API that the test suite is exercising given the callback mode. This should
-    // be used in favor of directly calling the API because the Async mode actually calls a
-    // different entry point.
-    template <typename... Args>
-    void CallImpl(void* userdata, Args&&... args) {
-        if (GetParam().mCallbackMode == CallbackMode::Async) {
-            mAsyncF(std::forward<Args>(args)..., mMockCb.Callback(),
-                    mMockCb.MakeUserdata(userdata));
-        } else {
-            CallbackInfo callbackInfo = {};
-            callbackInfo.mode = ToWGPUCallbackMode(GetParam().mCallbackMode);
-            callbackInfo.callback = mMockCb.Callback();
-            callbackInfo.userdata = mMockCb.MakeUserdata(userdata);
-            mFutureIDs.push_back(mFutureF(std::forward<Args>(args)..., callbackInfo).id);
-        }
-    }
 
     // Events are considered spontaneous if either we are using the legacy Async or the new
     // Spontaneous modes.
@@ -120,24 +97,8 @@ class WireFutureTestWithParams : public WireTest, public testing::WithParamInter
         return callbackMode == CallbackMode::Async || callbackMode == CallbackMode::Spontaneous;
     }
 
-    // In order to tightly bound when callbacks are expected to occur, test writers only have access
-    // to the mock callback via the argument passed usually via a lamdba. The 'exp' lambda should
-    // generally be a block of expectations on the mock callback followed by one statement where we
-    // expect the callbacks to be called from. If the callbacks do not occur in the scope of the
-    // lambda, the mock will fail the test.
-    //
-    // Usage:
-    //   ExpectWireCallbackWhen([&](auto& mockCb) {
-    //       // Set scoped expectations on the mock callback.
-    //       EXPECT_CALL(mockCb, Call).Times(1);
-    //
-    //       // Call the statement where we want to ensure the callbacks occur.
-    //       FlushCallbacks();
-    //   });
-    void ExpectWireCallbacksWhen(std::function<void(testing::MockCallback<Callback>&)> exp) {
-        exp(mMockCb);
-        ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&mMockCb));
-    }
+    // Returns true iff testing older Async entry points, i.e. not Future related entry points.
+    bool IsAsync() { return GetParam().mCallbackMode == CallbackMode::Async; }
 
     // Future suite adds the following flush mechanics for test writers so that they can have fine
     // grained control over when expectations should be set and verified.
@@ -189,11 +150,57 @@ class WireFutureTestWithParams : public WireTest, public testing::WithParamInter
         }
     }
 
+    std::vector<FutureID> mFutureIDs;
+};
+
+template <typename Callback,
+          typename CallbackInfo,
+          auto& AsyncF,
+          auto& FutureF,
+          typename Params = WireFutureTestParam,
+          typename AsyncFT = decltype(AsyncF),
+          typename FutureFT = decltype(FutureF)>
+class WireFutureTestWithParams : public WireFutureTestWithParamsBase<Params> {
+  protected:
+    // Calls the actual API that the test suite is exercising given the callback mode. This should
+    // be used in favor of directly calling the API because the Async mode actually calls a
+    // different entry point.
+    template <typename... Args>
+    void CallImpl(void* userdata, Args&&... args) {
+        if (this->IsAsync()) {
+            mAsyncF(std::forward<Args>(args)..., mMockCb.Callback(),
+                    mMockCb.MakeUserdata(userdata));
+        } else {
+            CallbackInfo callbackInfo = {};
+            callbackInfo.mode = ToWGPUCallbackMode(this->GetParam().mCallbackMode);
+            callbackInfo.callback = mMockCb.Callback();
+            callbackInfo.userdata = mMockCb.MakeUserdata(userdata);
+            this->mFutureIDs.push_back(mFutureF(std::forward<Args>(args)..., callbackInfo).id);
+        }
+    }
+
+    // In order to tightly bound when callbacks are expected to occur, test writers only have access
+    // to the mock callback via the argument passed usually via a lamdba. The 'exp' lambda should
+    // generally be a block of expectations on the mock callback followed by one statement where we
+    // expect the callbacks to be called from. If the callbacks do not occur in the scope of the
+    // lambda, the mock will fail the test.
+    //
+    // Usage:
+    //   ExpectWireCallbackWhen([&](auto& mockCb) {
+    //       // Set scoped expectations on the mock callback.
+    //       EXPECT_CALL(mockCb, Call).Times(1);
+    //
+    //       // Call the statement where we want to ensure the callbacks occur.
+    //       FlushCallbacks();
+    //   });
+    void ExpectWireCallbacksWhen(std::function<void(testing::MockCallback<Callback>&)> exp) {
+        exp(mMockCb);
+        ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&mMockCb));
+    }
+
   private:
     AsyncFT mAsyncF = AsyncF;
     FutureFT mFutureF = FutureF;
-    std::vector<FutureID> mFutureIDs;
-
     testing::MockCallback<Callback> mMockCb;
 };
 

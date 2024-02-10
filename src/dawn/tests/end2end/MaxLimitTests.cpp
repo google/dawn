@@ -221,7 +221,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         device.PopErrorScope([](WGPUErrorType type, const char*,
                                 void* userdata) { *static_cast<WGPUErrorType*>(userdata) = type; },
                              &oomResult);
-        device.Tick();
+        instance.ProcessEvents();
         FlushWire();
         // Max buffer size is smaller than the max buffer binding size.
         DAWN_TEST_UNSUPPORTED_IF(oomResult == WGPUErrorType_OutOfMemory);
