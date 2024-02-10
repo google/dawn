@@ -32,12 +32,12 @@
 
 namespace wgpu::binding {
 
-AsyncRunner::AsyncRunner(Napi::Env env, wgpu::Device device) : env_(env), device_(device) {}
+AsyncRunner::AsyncRunner(dawn::native::Instance* instance) : instance_(instance) {}
 
-void AsyncRunner::Begin() {
+void AsyncRunner::Begin(Napi::Env env) {
     assert(count_ != std::numeric_limits<decltype(count_)>::max());
     if (count_++ == 0) {
-        QueueTick();
+        QueueTick(env);
     }
 }
 
@@ -46,35 +46,36 @@ void AsyncRunner::End() {
     count_--;
 }
 
-void AsyncRunner::QueueTick() {
+void AsyncRunner::QueueTick(Napi::Env env) {
     // TODO(crbug.com/dawn/1127): We probably want to reduce the frequency at which this gets
     // called.
     if (tick_queued_) {
         return;
     }
     tick_queued_ = true;
-    env_.Global()
+    env.Global()
         .Get("setImmediate")
         .As<Napi::Function>()
         .Call({
             // TODO(crbug.com/dawn/1127): Create once, reuse.
-            Napi::Function::New(env_,
-                                [this](const Napi::CallbackInfo&) {
+            Napi::Function::New(env,
+                                [this, env](const Napi::CallbackInfo&) {
                                     tick_queued_ = false;
                                     if (count_ > 0) {
-                                        device_.Tick();
-                                        QueueTick();
+                                        wgpu::Instance instance = instance_->Get();
+                                        instance.ProcessEvents();
+                                        QueueTick(env);
                                     }
                                 }),
         });
 }
 
-void AsyncRunner::Reject(interop::Promise<void> promise, Napi::Error error) {
-    env_.Global()
+void AsyncRunner::Reject(Napi::Env env, interop::Promise<void> promise, Napi::Error error) {
+    env.Global()
         .Get("setImmediate")
         .As<Napi::Function>()
         .Call({Napi::Function::New(
-            env_, [promise, error](const Napi::CallbackInfo&) { promise.Reject(error); })});
+            env, [promise, error](const Napi::CallbackInfo&) { promise.Reject(error); })});
 }
 
 }  // namespace wgpu::binding

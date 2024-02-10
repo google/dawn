@@ -78,7 +78,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
         AsyncTask task;
         interop::Promise<void> promise;
     };
-    auto ctx = new Context{env, this, AsyncTask(async_), *pending_map_};
+    auto ctx = new Context{env, this, AsyncTask(env, async_), *pending_map_};
 
     buffer_.MapAsync(
         mode, offset, rangeSize,
@@ -109,7 +109,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                 case WGPUBufferMapAsyncStatus_Unknown:
                 case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
                 case WGPUBufferMapAsyncStatus_ValidationError:
-                    c->self->async_->Reject(c->promise, Errors::OperationError(c->env));
+                    c->self->async_->Reject(c->env, c->promise, Errors::OperationError(c->env));
                     break;
             }
 

@@ -33,6 +33,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 
+#include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
@@ -53,6 +54,7 @@ class GPU final : public interop::GPU {
   private:
     const Flags flags_;
     std::unique_ptr<dawn::native::Instance> instance_;
+    std::shared_ptr<AsyncRunner> async_;
 };
 
 }  // namespace wgpu::binding

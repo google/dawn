@@ -132,6 +132,7 @@ GPU::GPU(Flags flags) : flags_(std::move(flags)) {
     desc.nextInChain = &togglesDesc;
     instance_ = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&desc));
+    async_ = std::make_shared<AsyncRunner>(instance_.get());
 }
 
 interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::requestAdapter(
@@ -260,7 +261,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         printf("using GPU adapter: %s\n", props.name);
     }
 
-    auto gpuAdapter = GPUAdapter::Create<GPUAdapter>(env, *adapter, flags_);
+    auto gpuAdapter = GPUAdapter::Create<GPUAdapter>(env, *adapter, flags_, async_);
     promise.Resolve(std::optional<interop::Interface<interop::GPUAdapter>>(gpuAdapter));
     return promise;
 }

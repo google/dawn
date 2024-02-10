@@ -149,10 +149,13 @@ class InternalError : public interop::GPUInternalError {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUDevice
 ////////////////////////////////////////////////////////////////////////////////
-GPUDevice::GPUDevice(Napi::Env env, const wgpu::DeviceDescriptor& desc, wgpu::Device device)
+GPUDevice::GPUDevice(Napi::Env env,
+                     const wgpu::DeviceDescriptor& desc,
+                     wgpu::Device device,
+                     std::shared_ptr<AsyncRunner> async)
     : env_(env),
       device_(device),
-      async_(std::make_shared<AsyncRunner>(env, device)),
+      async_(async),
       lost_promise_(env, PROMISE_INFO),
       label_(desc.label ? desc.label : "") {
     device_.SetLoggingCallback(
@@ -419,7 +422,7 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
         AsyncTask task;
         std::string label;
     };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_),
+    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(env, async_),
                            desc.label ? desc.label : ""};
     auto promise = ctx->promise;
 
@@ -462,7 +465,7 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
         AsyncTask task;
         std::string label;
     };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_),
+    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(env, async_),
                            desc.label ? desc.label : ""};
     auto promise = ctx->promise;
 
@@ -563,7 +566,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
         Promise promise;
         AsyncTask task;
     };
-    auto* ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
+    auto* ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(env, async_)};
     auto promise = ctx->promise;
 
     device_.PopErrorScope(

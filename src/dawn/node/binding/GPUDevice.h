@@ -40,7 +40,10 @@ namespace wgpu::binding {
 // GPUDevice is an implementation of interop::GPUDevice that wraps a wgpu::Device.
 class GPUDevice final : public interop::GPUDevice {
   public:
-    GPUDevice(Napi::Env env, const wgpu::DeviceDescriptor& desc, wgpu::Device device);
+    GPUDevice(Napi::Env env,
+              const wgpu::DeviceDescriptor& desc,
+              wgpu::Device device,
+              std::shared_ptr<AsyncRunner> async);
     ~GPUDevice();
 
     void ForceLoss(interop::GPUDeviceLostReason reason, const char* message);

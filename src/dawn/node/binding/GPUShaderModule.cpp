@@ -96,7 +96,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
         Promise promise;
         AsyncTask task;
     };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
+    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(env, async_)};
     auto promise = ctx->promise;
 
     shader_.GetCompilationInfo(

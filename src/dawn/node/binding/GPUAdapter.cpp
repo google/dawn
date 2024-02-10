@@ -82,7 +82,10 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUAdapter
 // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
 ////////////////////////////////////////////////////////////////////////////////
-GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags) : adapter_(a), flags_(flags) {}
+GPUAdapter::GPUAdapter(dawn::native::Adapter a,
+                       const Flags& flags,
+                       std::shared_ptr<AsyncRunner> async)
+    : adapter_(a), flags_(flags), async_(async) {}
 
 // TODO(dawn:1133): Avoid the extra copy by making the generator make a virtual method with const
 // std::string&
@@ -183,7 +186,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         return promise;
     }
 
-    auto gpu_device = std::make_unique<GPUDevice>(env, desc, wgpu_device);
+    auto gpu_device = std::make_unique<GPUDevice>(env, desc, wgpu_device, async_);
     if (!valid_) {
         gpu_device->ForceLoss(interop::GPUDeviceLostReason::kUnknown,
                               "Device was marked as lost due to a stale adapter.");

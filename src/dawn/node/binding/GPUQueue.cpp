@@ -65,7 +65,7 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
         interop::Promise<void> promise;
         AsyncTask task;
     };
-    auto ctx = new Context{env, interop::Promise<void>(env, PROMISE_INFO), AsyncTask(async_)};
+    auto ctx = new Context{env, interop::Promise<void>(env, PROMISE_INFO), AsyncTask(env, async_)};
     auto promise = ctx->promise;
 
     queue_.OnSubmittedWorkDone(

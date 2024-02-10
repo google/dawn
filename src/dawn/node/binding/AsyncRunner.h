@@ -32,6 +32,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/interop/Core.h"
 #include "src/dawn/node/interop/NodeAPI.h"
@@ -42,14 +43,14 @@ namespace wgpu::binding {
 // tasks in flight.
 class AsyncRunner {
   public:
-    AsyncRunner(Napi::Env env, wgpu::Device device);
+    explicit AsyncRunner(dawn::native::Instance* instance);
 
     // Begin() should be called when a new asynchronous task is started.
     // If the number of executing asynchronous tasks transitions from 0 to 1, then a function
     // will be scheduled on the main JavaScript thread to call wgpu::Device::Tick() whenever the
     // thread is idle. This will be repeatedly called until the number of executing asynchronous
     // tasks reaches 0 again.
-    void Begin();
+    void Begin(Napi::Env env);
 
     // End() should be called once the asynchronous task has finished.
     // Every call to Begin() should eventually result in a call to End().
@@ -59,12 +60,12 @@ class AsyncRunner {
     // some of the semantics of WebGPU w.r.t. the JavaScript event loop. Reject() can be called
     // any time, but callers need to make sure that the Promise is (rejected or resolved) only
     // once.
-    void Reject(interop::Promise<void> promise, Napi::Error error);
+    void Reject(Napi::Env env, interop::Promise<void> promise, Napi::Error error);
 
   private:
-    void QueueTick();
-    Napi::Env env_;
-    wgpu::Device const device_;
+    void QueueTick(Napi::Env env);
+
+    const dawn::native::Instance* const instance_;
     uint64_t count_ = 0;
     bool tick_queued_ = false;
 };
@@ -77,8 +78,9 @@ class AsyncTask {
 
     // Constructor.
     // Calls AsyncRunner::Begin()
-    explicit inline AsyncTask(std::shared_ptr<AsyncRunner> runner) : runner_(std::move(runner)) {
-        runner_->Begin();
+    explicit inline AsyncTask(Napi::Env env, std::shared_ptr<AsyncRunner> runner)
+        : runner_(std::move(runner)) {
+        runner_->Begin(env);
     }
 
     // Destructor.
