@@ -257,7 +257,7 @@ RenderPipeline::RenderPipeline(Device* device,
 
 MaybeError RenderPipeline::InitializeImpl() {
     DAWN_TRY(InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages(),
-                            UsesInstanceIndex()));
+                            UsesInstanceIndex(), UsesFragDepth()));
     CreateVAOForVertexState();
     return {};
 }

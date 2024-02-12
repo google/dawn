@@ -2,8 +2,18 @@
 precision highp float;
 precision highp int;
 
+struct PushConstants {
+  float min_depth;
+  float max_depth;
+};
+
+layout(location=0) uniform PushConstants push_constants;
+float clamp_frag_depth(float v) {
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
+}
+
 float main1() {
-  return 1.0f;
+  return clamp_frag_depth(1.0f);
 }
 
 void main() {

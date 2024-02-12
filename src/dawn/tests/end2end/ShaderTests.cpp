@@ -2160,6 +2160,32 @@ TEST_P(ShaderTests, UniformAcrossStagesSeparateModuleMismatchWithCustomSize) {
     device.CreateRenderPipeline(&desc);
 }
 
+// Test that accessing instance_index in the vert shader and assigning to frag_depth in the frag
+// shader works.
+TEST_P(ShaderTests, FragDepthAndInstanceIndex) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<uniform> a : f32;
+
+        @fragment fn fragment() -> @builtin(frag_depth) f32 {
+          return a;
+        }
+
+        @vertex fn vertex(@builtin(instance_index) instance : u32) -> @builtin(position) vec4f {
+          return vec4f(f32(instance));
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 0;
+    wgpu::DepthStencilState* dsState = desc.EnableDepthStencil();
+    dsState->depthWriteEnabled = true;
+    dsState->depthCompare = wgpu::CompareFunction::Always;
+
+    device.CreateRenderPipeline(&desc);
+}
+
 // Having different block contents at the same binding point used in different stages is allowed.
 TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollide) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(

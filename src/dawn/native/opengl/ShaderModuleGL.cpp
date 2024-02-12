@@ -168,6 +168,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
     bool usesInstanceIndex,
+    bool usesFragDepth,
     CombinedSamplerInfo* combinedSamplers,
     const PipelineLayout* layout,
     bool* needsPlaceholderSampler,
@@ -292,6 +293,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     if (usesInstanceIndex) {
         req.tintOptions.first_instance_offset =
             4 * PipelineLayout::PushConstantLocation::FirstInstance;
+    }
+
+    if (usesFragDepth) {
+        req.tintOptions.min_depth_offset = 4 * PipelineLayout::PushConstantLocation::MinDepth;
+
+        req.tintOptions.max_depth_offset = 4 * PipelineLayout::PushConstantLocation::MaxDepth;
     }
 
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);

@@ -61,6 +61,7 @@
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/lang/wgsl/ast/transform/builtin_polyfill.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
+#include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
 #include "src/tint/lang/wgsl/ast/transform/demote_to_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/direct_variable_access.h"
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
@@ -206,6 +207,10 @@ SanitizedResult Sanitize(const Program& in,
 
     manager.Add<ast::transform::OffsetFirstIndex>();
 
+    // ClampFragDepth must come before CanonicalizeEntryPointIO, or the assignments to FragDepth are
+    // lost
+    manager.Add<ast::transform::ClampFragDepth>();
+
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<ast::transform::CanonicalizeEntryPointIO>();
 
@@ -249,6 +254,8 @@ SanitizedResult Sanitize(const Program& in,
 
     data.Add<ast::transform::OffsetFirstIndex::Config>(std::nullopt, options.first_instance_offset);
 
+    data.Add<ast::transform::ClampFragDepth::Config>(options.min_depth_offset,
+                                                     options.max_depth_offset);
     SanitizedResult result;
     ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);

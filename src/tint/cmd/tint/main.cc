@@ -1080,11 +1080,18 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
 
         auto entry_point = inspector.GetEntryPoint(entry_point_name);
+        uint32_t offset = entry_point.push_constant_size;
 
         if (entry_point.instance_index_used) {
             // Place the first_instance push constant member after user-defined push constants (if
             // any).
-            gen_options.first_instance_offset = entry_point.push_constant_size;
+            gen_options.first_instance_offset = offset;
+            offset += 4;
+        }
+        if (entry_point.frag_depth_used) {
+            gen_options.min_depth_offset = offset + 0;
+            gen_options.max_depth_offset = offset + 4;
+            offset += 8;
         }
 
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);

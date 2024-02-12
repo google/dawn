@@ -1025,7 +1025,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
     persistentPipelineState.SetDefaultState(gl);
     gl.BlendColor(0, 0, 0, 0);
     gl.Viewport(0, 0, renderPass->width, renderPass->height);
-    gl.DepthRangef(0.0, 1.0);
+    float minDepth = 0.0f;
+    float maxDepth = 1.0f;
+    gl.DepthRangef(minDepth, maxDepth);
+
     gl.Scissor(0, 0, renderPass->width, renderPass->height);
 
     // Clear framebuffer attachments as needed
@@ -1230,6 +1233,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 
                 vertexStateBufferBindingTracker.OnSetPipeline(lastPipeline);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
+                if (lastPipeline->UsesFragDepth()) {
+                    gl.Uniform1f(PipelineLayout::PushConstantLocation::MinDepth, minDepth);
+                    gl.Uniform1f(PipelineLayout::PushConstantLocation::MaxDepth, maxDepth);
+                }
                 break;
             }
 
@@ -1310,7 +1317,13 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                     gl.Viewport(static_cast<int>(cmd->x), static_cast<int>(cmd->y),
                                 static_cast<int>(cmd->width), static_cast<int>(cmd->height));
                 }
-                gl.DepthRangef(cmd->minDepth, cmd->maxDepth);
+                minDepth = cmd->minDepth;
+                maxDepth = cmd->maxDepth;
+                gl.DepthRangef(minDepth, maxDepth);
+                if (lastPipeline && lastPipeline->UsesFragDepth()) {
+                    gl.Uniform1f(PipelineLayout::PushConstantLocation::MinDepth, minDepth);
+                    gl.Uniform1f(PipelineLayout::PushConstantLocation::MaxDepth, maxDepth);
+                }
                 break;
             }
 

@@ -35,6 +35,7 @@
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
+#include "src/tint/lang/wgsl/ast/transform/push_constant_helper.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -45,6 +46,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth::Config);
 
 namespace tint::ast::transform {
 
@@ -63,49 +65,37 @@ struct ClampFragDepth::State {
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
-    Transform::ApplyResult Run() {
-        // Abort on any use of push constants in the module.
-        for (auto* global : src.AST().GlobalVariables()) {
-            if (auto* var = global->As<ast::Var>()) {
-                auto* v = src.Sem().Get(var);
-                if (TINT_UNLIKELY(v->AddressSpace() == core::AddressSpace::kPushConstant)) {
-                    TINT_ICE()
-                        << "ClampFragDepth doesn't know how to handle module that already use push "
-                           "constants";
-                    return resolver::Resolve(b);
-                }
-            }
-        }
-
-        if (!ShouldRun()) {
+    Transform::ApplyResult Run(const DataMap& inputs) {
+        const Config* cfg = inputs.Get<Config>();
+        if (!cfg || !cfg->min_depth_offset.has_value() || !cfg->max_depth_offset.has_value()) {
             return SkipTransform;
         }
+
+        PushConstantHelper push_constant_helper(ctx);
 
         // At least one entry-point needs clamping. Add the following to the module:
         //
         //   enable chromium_experimental_push_constant;
         //
-        //   struct FragDepthClampArgs {
-        //       min : f32,
-        //       max : f32,
+        //   struct PushConstants {
+        //       min_depth : f32,
+        //       max_depth : f32,
         //   }
-        //   var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+        //   var<push_constant> push_constants : PushConstants;
         //
         //   fn clamp_frag_depth(v : f32) -> f32 {
-        //       return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+        //       return clamp(v, push_constants.min, push_constants.max_depth);
         //   }
-        b.Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
 
-        b.Structure(b.Symbols().New("FragDepthClampArgs"),
-                    Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
+        push_constant_helper.InsertMember("min_depth", b.ty.f32(), *cfg->min_depth_offset);
+        push_constant_helper.InsertMember("max_depth", b.ty.f32(), *cfg->max_depth_offset);
 
-        auto args_sym = b.Symbols().New("frag_depth_clamp_args");
-        b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), core::AddressSpace::kPushConstant);
+        Symbol buffer_name = push_constant_helper.Run();
 
         auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
         b.Func(base_fn_sym, Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
-               Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(args_sym, "min"),
-                                      b.MemberAccessor(args_sym, "max")))});
+               Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(buffer_name, "min_depth"),
+                                      b.MemberAccessor(buffer_name, "max_depth")))});
 
         // If true, the currently cloned function returns frag depth directly as a scalar
         bool returns_frag_depth_as_value = false;
@@ -185,17 +175,6 @@ struct ClampFragDepth::State {
     }
 
   private:
-    /// @returns true if the transform should run
-    bool ShouldRun() {
-        for (auto* fn : src.AST().Functions()) {
-            if (fn->PipelineStage() == ast::PipelineStage::kFragment &&
-                (ReturnsFragDepthAsValue(fn) || ReturnsFragDepthInStruct(fn))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
     /// @param attrs the attributes to examine
     /// @returns true if @p attrs contains a `@builtin(frag_depth)` attribute
     bool ContainsFragDepth(VectorRef<const ast::Attribute*> attrs) {
@@ -237,9 +216,15 @@ ClampFragDepth::ClampFragDepth() = default;
 ClampFragDepth::~ClampFragDepth() = default;
 
 ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program& src,
-                                                             const ast::transform::DataMap&,
+                                                             const ast::transform::DataMap& inputs,
                                                              ast::transform::DataMap&) const {
-    return State{src}.Run();
+    return State{src}.Run(inputs);
 }
+
+ClampFragDepth::Config::Config(std::optional<uint32_t> min_depth_off,
+                               std::optional<uint32_t> max_depth_off)
+    : min_depth_offset(min_depth_off), max_depth_offset(max_depth_off) {}
+
+ClampFragDepth::Config::~Config() = default;
 
 }  // namespace tint::ast::transform

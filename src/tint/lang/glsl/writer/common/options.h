@@ -82,6 +82,12 @@ struct Options {
     /// Offset of the firstInstance push constant.
     std::optional<int32_t> first_instance_offset;
 
+    /// Offset of the minDepth push constant.
+    std::optional<uint32_t> min_depth_offset;
+
+    /// Offset of the maxDepth push constant.
+    std::optional<uint32_t> max_depth_offset;
+
     /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
     /// buffer values. If not specified, emits corresponding GLSL builtins
     /// textureQueryLevels/textureSamples directly.
@@ -98,6 +104,8 @@ struct Options {
                  binding_remapper_options,
                  external_texture_options,
                  first_instance_offset,
+                 min_depth_offset,
+                 max_depth_offset,
                  texture_builtins_from_uniform);
 };
 

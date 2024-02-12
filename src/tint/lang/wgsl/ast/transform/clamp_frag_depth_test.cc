@@ -40,48 +40,102 @@ TEST_F(ClampFragDepthTest, ShouldRunEmptyModule) {
     EXPECT_FALSE(ShouldRun<ClampFragDepth>(src));
 }
 
-TEST_F(ClampFragDepthTest, ShouldRunNoFragmentShader) {
+TEST_F(ClampFragDepthTest, ShouldRunNoConfig) {
     auto* src = R"(
-        fn f() -> f32 {
+        @fragment fn main() -> @builtin(frag_depth) f32 {
             return 0.0;
-        }
-
-        @compute @workgroup_size(1) fn cs() {
-        }
-
-        @vertex fn vs() -> @builtin(position) vec4<f32> {
-            return vec4<f32>();
         }
     )";
 
     EXPECT_FALSE(ShouldRun<ClampFragDepth>(src));
 }
 
-TEST_F(ClampFragDepthTest, ShouldRunFragmentShaderNoReturnType) {
+TEST_F(ClampFragDepthTest, ShouldRunNoMin) {
     auto* src = R"(
-        @fragment fn main() {
-        }
-    )";
-
-    EXPECT_FALSE(ShouldRun<ClampFragDepth>(src));
-}
-
-TEST_F(ClampFragDepthTest, ShouldRunFragmentShaderNoFragDepth) {
-    auto* src = R"(
-        @fragment fn main() -> @location(0) f32 {
+        @fragment fn main() -> @builtin(frag_depth) f32 {
             return 0.0;
         }
+    )";
 
-        struct S {
-            @location(0) a : f32,
-            @builtin(sample_mask) b : u32,
-        }
-        @fragment fn main2() -> S {
-            return S();
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(std::nullopt, 4);
+
+    EXPECT_FALSE(ShouldRun<ClampFragDepth>(src, config));
+}
+
+TEST_F(ClampFragDepthTest, ShouldRunNoMinNoMax) {
+    auto* src = R"(
+        @fragment fn main() -> @builtin(frag_depth) f32 {
+            return 0.0;
         }
     )";
 
-    EXPECT_FALSE(ShouldRun<ClampFragDepth>(src));
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, std::nullopt);
+
+    EXPECT_FALSE(ShouldRun<ClampFragDepth>(src, config));
+}
+
+TEST_F(ClampFragDepthTest, ShouldRun) {
+    auto* src = R"(
+        @fragment fn main() -> @builtin(frag_depth) f32 {
+            return 0.0;
+        }
+    )";
+
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+
+    EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
+}
+
+TEST_F(ClampFragDepthTest, ExistingPushConstant) {
+    auto* src = R"(
+        enable chromium_experimental_push_constant;
+
+        struct PushConstants {
+          a : f32,
+        }
+
+        var<push_constant> push_constants : PushConstants;
+        @fragment fn main() -> @builtin(frag_depth) f32 {
+            return push_constants.a;
+        }
+
+    )";
+
+    auto* expect = R"(
+enable chromium_experimental_push_constant;
+
+struct PushConstants_1 {
+  a : f32,
+  /* @offset(4) */
+  min_depth : f32,
+  /* @offset(8) */
+  max_depth : f32,
+}
+
+fn clamp_frag_depth(v : f32) -> f32 {
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
+}
+
+struct PushConstants {
+  a : f32,
+}
+
+var<push_constant> push_constants : PushConstants_1;
+
+@fragment
+fn main() -> @builtin(frag_depth) f32 {
+  return clamp_frag_depth(push_constants.a);
+}
+)";
+
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(4, 8);
+
+    auto got = Run<ClampFragDepth>(src, config);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ClampFragDepthTest, ShouldRunFragDepthAsDirectReturn) {
@@ -91,7 +145,10 @@ TEST_F(ClampFragDepthTest, ShouldRunFragDepthAsDirectReturn) {
         }
     )";
 
-    EXPECT_TRUE(ShouldRun<ClampFragDepth>(src));
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+
+    EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
 }
 
 TEST_F(ClampFragDepthTest, ShouldRunFragDepthInStruct) {
@@ -106,7 +163,10 @@ TEST_F(ClampFragDepthTest, ShouldRunFragDepthInStruct) {
         }
     )";
 
-    EXPECT_TRUE(ShouldRun<ClampFragDepth>(src));
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+
+    EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
 }
 
 TEST_F(ClampFragDepthTest, SingleReturnOfFragDepth) {
@@ -119,15 +179,17 @@ TEST_F(ClampFragDepthTest, SingleReturnOfFragDepth) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 @fragment
@@ -136,7 +198,9 @@ fn main() -> @builtin(frag_depth) f32 {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -153,15 +217,17 @@ TEST_F(ClampFragDepthTest, MultipleReturnOfFragDepth) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 @fragment
@@ -173,7 +239,9 @@ fn main() -> @builtin(frag_depth) f32 {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -190,15 +258,17 @@ TEST_F(ClampFragDepthTest, OtherFunctionWithoutFragDepth) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 @fragment
@@ -212,7 +282,9 @@ fn other() -> @location(0) f32 {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -230,15 +302,17 @@ TEST_F(ClampFragDepthTest, SimpleReturnOfStruct) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 struct S {
@@ -256,7 +330,9 @@ fn main() -> S {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -285,15 +361,17 @@ TEST_F(ClampFragDepthTest, MixOfFunctionReturningStruct) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 struct S {
@@ -330,7 +408,9 @@ fn returnS2() -> S2 {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 
@@ -352,15 +432,17 @@ TEST_F(ClampFragDepthTest, ComplexIOStruct) {
     auto* expect = R"(
 enable chromium_experimental_push_constant;
 
-struct FragDepthClampArgs {
-  min : f32,
-  max : f32,
+struct PushConstants {
+  /* @offset(0) */
+  min_depth : f32,
+  /* @offset(4) */
+  max_depth : f32,
 }
 
-var<push_constant> frag_depth_clamp_args : FragDepthClampArgs;
+var<push_constant> push_constants : PushConstants;
 
 fn clamp_frag_depth(v : f32) -> f32 {
-  return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
+  return clamp(v, push_constants.min_depth, push_constants.max_depth);
 }
 
 struct S {
@@ -386,7 +468,9 @@ fn main() -> S {
 }
 )";
 
-    auto got = Run<ClampFragDepth>(src);
+    DataMap config;
+    config.Add<ClampFragDepth::Config>(0, 4);
+    auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
 

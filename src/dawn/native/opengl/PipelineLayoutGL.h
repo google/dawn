@@ -57,6 +57,8 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     enum PushConstantLocation {
         FirstInstance = 0,
+        MinDepth = 1,
+        MaxDepth = 2,
     };
 
   private:
