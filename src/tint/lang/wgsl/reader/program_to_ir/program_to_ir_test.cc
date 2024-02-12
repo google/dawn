@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/block.h"
@@ -1157,6 +1158,28 @@ TEST_F(IR_FromProgramTest, Requires) {
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Bugs
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IR_FromProgramTest, BugChromium324466107) {
+    Func("f", Empty, ty.void_(),
+         Vector{
+             // Abstract type on the RHS - cannot be emitted.
+             Assign(Phony(), Call(core::BuiltinFn::kFrexp, Call(ty.vec2<Infer>(), 2.0_a))),
+         });
+
+    auto m = Build();
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%f = func():void -> %b1 {
   %b1 = block {
     ret
   }

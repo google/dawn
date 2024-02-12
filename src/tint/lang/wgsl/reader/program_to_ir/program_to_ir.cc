@@ -450,13 +450,24 @@ class Impl {
     }
 
     void EmitAssignment(const ast::AssignmentStatement* stmt) {
-        // If assigning to a phony, just generate the RHS and we're done. Note that, because
-        // this isn't used, a subsequent transform could remove it due to it being dead code.
-        // This could then change the interface for the program (i.e. a global var no longer
-        // used). If that happens we have to either fix this to store to a phony value, or make
-        // sure we pull the interface before doing the dead code elimination.
+        // If assigning to a phony, and the expression evaluation stage is runtime or override, just
+        // generate the RHS and we're done. Note that, because this isn't used, a subsequent
+        // transform could remove it due to it being dead code. This could then change the interface
+        // for the program (i.e. a global var no longer used). If that happens we have to either fix
+        // this to store to a phony value, or make sure we pull the interface before doing the dead
+        // code elimination.
         if (stmt->lhs->Is<ast::PhonyExpression>()) {
-            (void)EmitValueExpression(stmt->rhs);
+            const auto* sem = program_.Sem().GetVal(stmt->rhs);
+            switch (sem->Stage()) {
+                case core::EvaluationStage::kRuntime:
+                case core::EvaluationStage::kOverride:
+                    EmitValueExpression(stmt->rhs);
+                    break;
+                case core::EvaluationStage::kNotEvaluated:
+                case core::EvaluationStage::kConstant:
+                    // Don't emit.
+                    break;
+            }
             return;
         }
 
