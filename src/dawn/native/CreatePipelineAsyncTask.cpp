@@ -73,6 +73,9 @@ void CreateComputePipelineAsyncTask::Run() {
         device->AddComputePipelineAsyncCallbackTask(
             maybeError.AcquireError(), mComputePipeline->GetLabel().c_str(), mCallback, mUserdata);
     } else {
+        if (device->GetState() == DeviceBase::State::Alive) {
+            mComputePipeline = device->AddOrGetCachedComputePipeline(std::move(mComputePipeline));
+        }
         device->AddComputePipelineAsyncCallbackTask(mComputePipeline, mCallback, mUserdata);
     }
 }
@@ -131,6 +134,9 @@ void CreateRenderPipelineAsyncTask::Run() {
         device->AddRenderPipelineAsyncCallbackTask(
             maybeError.AcquireError(), mRenderPipeline->GetLabel().c_str(), mCallback, mUserdata);
     } else {
+        if (device->GetState() == DeviceBase::State::Alive) {
+            mRenderPipeline = device->AddOrGetCachedRenderPipeline(std::move(mRenderPipeline));
+        }
         device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback, mUserdata);
     }
 }
