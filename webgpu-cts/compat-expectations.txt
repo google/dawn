@@ -95,14 +95,10 @@ crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,sa
 ### This section represents things that are probably fixable in Dawn.
 
 # snorm / stencil8 issues
-crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
 crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/667 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
@@ -227,13 +223,6 @@ crbug.com/dawn/2121 webgpu:api,operation,vertex_state,index_format:primitive_res
 crbug.com/dawn/2121 webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="line-list" [ Failure ]
 crbug.com/dawn/2121 webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="point-list" [ Failure ]
 crbug.com/dawn/2121 webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
-
-# textureBindingViewDimension validation failures
-crbug.com/dawn/2131 webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="depth24plus-stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
-crbug.com/dawn/2131 webgpu:api,validation,image_copy,buffer_texture_copies:depth_stencil_format,copy_buffer_size:format="stencil8";aspect="stencil-only";copyType="CopyB2T" [ Failure ]
-crbug.com/dawn/2131 webgpu:api,validation,image_copy,layout_related:bound_on_bytes_per_row:method="CopyB2T";format="stencil8";dimension="2d" [ Failure ]
-crbug.com/dawn/2131 webgpu:api,validation,image_copy,layout_related:required_bytes_in_copy:method="CopyB2T";format="stencil8";dimension="2d" [ Failure ]
-crbug.com/dawn/2131 webgpu:api,validation,image_copy,texture_related:format:method="CopyB2T";depthOrArrayLayers=3;dimension="2d";format="stencil8" [ Failure ]
 
 # bitcast i32_to_f32 inputSource="const" shader execution failures
 crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
