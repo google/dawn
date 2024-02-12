@@ -94,4 +94,8 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
 
 VariableUser::~VariableUser() = default;
 
+const ast::IdentifierExpression* VariableUser::Declaration() const {
+    return static_cast<const ast::IdentifierExpression*>(Base::Declaration());
+}
+
 }  // namespace tint::sem

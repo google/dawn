@@ -48,6 +48,10 @@ MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpr
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
+const ast::MemberAccessorExpression* MemberAccessorExpression::Declaration() const {
+    return static_cast<const ast::MemberAccessorExpression*>(declaration_);
+}
+
 StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                                        const core::type::Type* type,
                                        const Statement* statement,

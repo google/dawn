@@ -292,6 +292,9 @@ class VariableUser final : public Castable<VariableUser, ValueExpression> {
                  sem::Variable* variable);
     ~VariableUser() override;
 
+    /// @returns the AST node
+    const ast::IdentifierExpression* Declaration() const;
+
     /// @returns the variable that this expression refers to
     const sem::Variable* Variable() const { return variable_; }
 

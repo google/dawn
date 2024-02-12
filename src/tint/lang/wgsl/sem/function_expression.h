@@ -31,6 +31,9 @@
 #include "src/tint/lang/wgsl/sem/expression.h"
 
 // Forward declarations
+namespace tint::ast {
+class IdentifierExpression;
+}  // namespace tint::ast
 namespace tint::sem {
 class Function;
 }  // namespace tint::sem
@@ -45,12 +48,15 @@ class FunctionExpression : public Castable<FunctionExpression, Expression> {
     /// @param declaration the AST node
     /// @param statement the statement that owns this expression
     /// @param function the function that the expression resolved to
-    FunctionExpression(const ast::Expression* declaration,
+    FunctionExpression(const ast::IdentifierExpression* declaration,
                        const Statement* statement,
                        const sem::Function* function);
 
     /// Destructor
     ~FunctionExpression() override;
+
+    /// @returns the AST node
+    const ast::IdentifierExpression* Declaration() const;
 
     /// @return the function that the expression resolved to
     const sem::Function* Function() const { return function_; }

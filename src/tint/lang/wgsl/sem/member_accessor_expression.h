@@ -48,6 +48,9 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Acces
     /// Destructor
     ~MemberAccessorExpression() override;
 
+    /// @returns the AST node
+    const ast::MemberAccessorExpression* Declaration() const;
+
   protected:
     /// Constructor
     /// @param declaration the AST node
