@@ -61,11 +61,15 @@ void SetDebugName(Device* device,
                   ID3D11DeviceChild* object,
                   const char* prefix,
                   std::string label) {
+    if (!device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+        return;
+    }
+
     if (!object) {
         return;
     }
 
-    if (label.empty() || !device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+    if (label.empty()) {
         object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
         return;
     }

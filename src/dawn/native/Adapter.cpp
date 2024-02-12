@@ -211,6 +211,9 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     // Default toggles for all backend
     deviceToggles.Default(Toggle::LazyClearResourceOnFirstUse, true);
     deviceToggles.Default(Toggle::TimestampQuantization, true);
+    if (mPhysicalDevice->GetInstance()->IsBackendValidationEnabled()) {
+        deviceToggles.Default(Toggle::UseUserDefinedLabelsInBackend, true);
+    }
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(&deviceToggles);
