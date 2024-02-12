@@ -523,6 +523,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "waiting for the next Tick. This enables using the stack trace in which the uncaptured error "
       "occured when breaking into the uncaptured error callback.",
       "https://crbug.com/dawn/1789", ToggleStage::Device}},
+    {Toggle::VulkanUseStorageInputOutput16,
+     {"vulkan_use_storage_input_output_16",
+      "Use the StorageInputOutput16 SPIR-V capability for f16 shader IO types when the device "
+      "supports it.",
+      "https://crbug.com/tint/2161", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

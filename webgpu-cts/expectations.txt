@@ -734,6 +734,54 @@ crbug.com/tint/2057 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,exec
 crbug.com/dawn/2389 webgpu:shader,validation,parse,continuing:placement:stmt="continuing_switch_break" [ Failure ]
 
 ################################################################################
+# Intel F16 failures with Vulkan
+################################################################################
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=2;rows=3 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=2;rows=4 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=3;rows=2 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=3;rows=3 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=3;rows=4 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=4;rows=2 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=4;rows=3 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:matrix_vector:inputSource="uniform";cols=4;rows=4 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:vector_matrix:inputSource="uniform";cols=3;rows=4 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:vector_matrix:inputSource="uniform";cols=4;rows=4 [ Failure ]
+crbug.com/tint/2165 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_matrix_vector_multiplication:vector_matrix_compound:inputSource="uniform";dim=4 [ Failure ]
+crbug.com/tint/2166 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_remainder:scalar_compound:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/tint/2166 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,f16_remainder:vector:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/tint/2167 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,determinant:f16:inputSource="uniform";dim=2 [ Failure ]
+crbug.com/tint/2167 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,determinant:f16:inputSource="uniform";dim=3 [ Failure ]
+crbug.com/tint/2167 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,determinant:f16:inputSource="uniform";dim=4 [ Failure ]
+crbug.com/tint/2168 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,fma:f16:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/tint/2168 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,fma:f16:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/tint/2168 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,fma:f16:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/tint/2169 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/tint/2170 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,mix:f16_nonmatching_vec2:inputSource="uniform" [ Failure ]
+crbug.com/tint/2170 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,mix:f16_nonmatching_vec3:inputSource="uniform" [ Failure ]
+crbug.com/tint/2170 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,mix:f16_nonmatching_vec4:inputSource="uniform" [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/tint/2171 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,saturate:f16:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/tint/2172 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,memory_layout:read_layout:case="mat2x3h_size";aspace="uniform" [ Failure ]
+crbug.com/tint/2172 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,memory_layout:read_layout:case="mat3x3h_size";aspace="uniform" [ Failure ]
+crbug.com/tint/2172 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:shader,execution,memory_layout:read_layout:case="mat4x3h_size";aspace="uniform" [ Failure ]
+
+
+################################################################################
 # Flip video tests failing
 # Related PRs:
 #   - https://github.com/gpuweb/cts/pull/3278

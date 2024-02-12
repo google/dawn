@@ -449,21 +449,20 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.depthClamp = VK_TRUE;
     }
 
-    // TODO(dawn:1510, tint:1473): After implementing a transform to handle the pipeline input /
-    // output if necessary, relax the requirement of storageInputOutput16.
     if (HasFeature(Feature::ShaderF16)) {
         const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
         DAWN_ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
                     deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                     deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
                     deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
-                    deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
                     deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
 
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
-        usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
+        if (deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE) {
+            usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
+        }
 
         featuresChain.Add(&usedKnobs.shaderFloat16Int8Features,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
