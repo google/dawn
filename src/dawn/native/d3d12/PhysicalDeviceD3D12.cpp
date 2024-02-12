@@ -423,11 +423,6 @@ MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
         // WebGPU allows empty scissors without empty viewports.
         D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE,
 
-        // Backend textures can be reused across different frontend textures,
-        // which can result in changes to the label of the backend texture if
-        // the user has assigned distinct labels to the different frontend textures.
-        D3D12_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-
         //
         // Temporary IDs: list of warnings that should be fixed or promoted
         //
