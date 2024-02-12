@@ -136,7 +136,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     serverDesc.serializer = &devNull;
 
     std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
-    wireServer->InjectInstance(sInstance->Get(), 1, 0);
+    wireServer->InjectInstance(sInstance->Get(), {1, 0});
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
     // Flush remaining callbacks to avoid memory leaks.

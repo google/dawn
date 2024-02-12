@@ -140,10 +140,10 @@ class WireHelperProxy : public WireHelper {
                                     const WGPUInstanceDescriptor* wireDesc) override {
         DAWN_ASSERT(backendInstance != nullptr);
 
-        auto reservation = mWireClient->ReserveInstance(wireDesc);
-        mWireServer->InjectInstance(backendInstance, reservation.id, reservation.generation);
+        auto reserved = mWireClient->ReserveInstance(wireDesc);
+        mWireServer->InjectInstance(backendInstance, reserved.reservation);
 
-        return wgpu::Instance::Acquire(reservation.instance);
+        return wgpu::Instance::Acquire(reserved.instance);
     }
 
     void BeginWireTrace(const char* name) override {

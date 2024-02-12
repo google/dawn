@@ -99,6 +99,11 @@ ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescr
 
     ReservedTexture result;
     result.texture = ToAPI(texture);
+    result.reservation.id = texture->GetWireId();
+    result.reservation.generation = texture->GetWireGeneration();
+    result.reservation.deviceId = FromAPI(device)->GetWireId();
+    result.reservation.deviceGeneration = FromAPI(device)->GetWireGeneration();
+    // TODO(dawn:2021) Remove setting of deprecated fields once Chromium is updated.
     result.id = texture->GetWireId();
     result.generation = texture->GetWireGeneration();
     result.deviceId = FromAPI(device)->GetWireId();
@@ -112,10 +117,10 @@ ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device,
 
     ReservedSwapChain result;
     result.swapchain = ToAPI(swapChain);
-    result.id = swapChain->GetWireId();
-    result.generation = swapChain->GetWireGeneration();
-    result.deviceId = FromAPI(device)->GetWireId();
-    result.deviceGeneration = FromAPI(device)->GetWireGeneration();
+    result.reservation.id = swapChain->GetWireId();
+    result.reservation.generation = swapChain->GetWireGeneration();
+    result.reservation.deviceId = FromAPI(device)->GetWireId();
+    result.reservation.deviceGeneration = FromAPI(device)->GetWireGeneration();
     return result;
 }
 
@@ -124,8 +129,8 @@ ReservedDevice Client::ReserveDevice(WGPUInstance instance) {
 
     ReservedDevice result;
     result.device = ToAPI(device);
-    result.id = device->GetWireId();
-    result.generation = device->GetWireGeneration();
+    result.reservation.id = device->GetWireId();
+    result.reservation.generation = device->GetWireGeneration();
     return result;
 }
 
@@ -134,7 +139,7 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
 
     if (instance->Initialize(descriptor) != WireResult::Success) {
         Free(instance);
-        return {nullptr, 0, 0};
+        return {nullptr, {0, 0}};
     }
 
     // Reserve an EventManager for the given instance and make the association in the map.
@@ -143,8 +148,8 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
 
     ReservedInstance result;
     result.instance = ToAPI(instance);
-    result.id = instance->GetWireId();
-    result.generation = instance->GetWireGeneration();
+    result.reservation.id = instance->GetWireId();
+    result.reservation.generation = instance->GetWireGeneration();
     return result;
 }
 

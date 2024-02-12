@@ -80,18 +80,17 @@ void WireTest::SetUp() {
 
     dawnProcSetProcs(&dawn::wire::client::GetProcs());
 
-    auto instanceReservation = GetWireClient()->ReserveInstance();
-    instance = instanceReservation.instance;
+    auto reservedInstance = GetWireClient()->ReserveInstance();
+    instance = reservedInstance.instance;
     apiInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(apiInstance));
-    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, instanceReservation.id,
-                                                instanceReservation.generation));
+    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reservedInstance.reservation));
 
-    auto deviceReservation = mWireClient->ReserveDevice(instance);
-    device = deviceReservation.device;
+    auto reservedDevice = mWireClient->ReserveDevice(instance);
+    device = reservedDevice.device;
     apiDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(apiDevice));
-    mWireServer->InjectDevice(apiDevice, deviceReservation.id, deviceReservation.generation);
+    mWireServer->InjectDevice(apiDevice, reservedDevice.reservation);
 
     // The GetQueue is done on WireClient startup so we expect it now.
     queue = wgpuDeviceGetQueue(device);

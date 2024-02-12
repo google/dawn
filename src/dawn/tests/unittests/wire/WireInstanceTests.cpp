@@ -55,13 +55,12 @@ class WireInstanceBasicTest : public WireTest {};
 
 // Test that an Instance can be reserved and injected into the wire.
 TEST_F(WireInstanceBasicTest, ReserveAndInject) {
-    auto reservation = GetWireClient()->ReserveInstance();
-    wgpu::Instance instance = wgpu::Instance::Acquire(reservation.instance);
+    auto reserved = GetWireClient()->ReserveInstance();
+    wgpu::Instance instance = wgpu::Instance::Acquire(reserved.instance);
 
     WGPUInstance apiInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(apiInstance));
-    EXPECT_TRUE(
-        GetWireServer()->InjectInstance(apiInstance, reservation.id, reservation.generation));
+    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reserved.reservation));
 
     instance = nullptr;
 

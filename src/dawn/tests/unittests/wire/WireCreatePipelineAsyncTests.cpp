@@ -298,10 +298,10 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
 
     dawnProcSetProcs(&dawn::wire::client::GetProcs());
 
-    auto reservation = wireClient->ReserveInstance();
-    WGPUInstance instance = reservation.instance;
-    wireServer->InjectInstance(dawn::native::GetProcs().createInstance(nullptr), reservation.id,
-                               reservation.generation);
+    auto reserved = wireClient->ReserveInstance();
+    WGPUInstance instance = reserved.instance;
+    wireServer->InjectInstance(dawn::native::GetProcs().createInstance(nullptr),
+                               reserved.reservation);
 
     WGPURequestAdapterOptions adapterOptions = {};
     adapterOptions.backendType = WGPUBackendType_Null;

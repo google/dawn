@@ -63,6 +63,31 @@ class DAWN_WIRE_EXPORT CommandHandler {
     virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
 };
 
+// Reservation structs used between the client and the server.
+struct TextureReservation {
+    uint32_t id;
+    uint32_t generation;
+    uint32_t deviceId;
+    uint32_t deviceGeneration;
+};
+
+struct SwapChainReservation {
+    uint32_t id;
+    uint32_t generation;
+    uint32_t deviceId;
+    uint32_t deviceGeneration;
+};
+
+struct DeviceReservation {
+    uint32_t id;
+    uint32_t generation;
+};
+
+struct InstanceReservation {
+    uint32_t id;
+    uint32_t generation;
+};
+
 }  // namespace dawn::wire
 
 #endif  // INCLUDE_DAWN_WIRE_WIRE_H_
