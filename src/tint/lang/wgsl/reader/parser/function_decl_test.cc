@@ -45,6 +45,9 @@ TEST_F(WGSLParserTest, FunctionDecl) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
+    EXPECT_EQ(f->source.range.begin, (Source::Location{1, 1}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{1, 38}));
+
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
 
@@ -88,6 +91,9 @@ TEST_F(WGSLParserTest, FunctionDecl_Unicode) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
+    EXPECT_EQ(f->source.range.begin, (Source::Location{1, 1}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{1, 114}));
+
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get(function_ident));
     EXPECT_EQ(f->return_type, nullptr);
 
@@ -113,6 +119,9 @@ TEST_F(WGSLParserTest, FunctionDecl_AttributeList) {
     EXPECT_FALSE(f.errored);
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
+
+    EXPECT_EQ(f->source.range.begin, (Source::Location{1, 26}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{1, 47}));
 
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
@@ -157,6 +166,9 @@ fn main() { return; })");
     EXPECT_FALSE(f.errored);
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
+
+    EXPECT_EQ(f->source.range.begin, (Source::Location{3, 1}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{3, 22}));
 
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
@@ -206,6 +218,9 @@ fn main() { return; })");
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
+    EXPECT_EQ(f->source.range.begin, (Source::Location{4, 1}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{4, 22}));
+
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     EXPECT_EQ(f->return_type, nullptr);
     ASSERT_EQ(f->params.Length(), 0u);
@@ -251,6 +266,9 @@ TEST_F(WGSLParserTest, FunctionDecl_ReturnTypeAttributeList) {
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
 
+    EXPECT_EQ(f->source.range.begin, (Source::Location{1, 1}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{1, 46}));
+
     EXPECT_EQ(f->name->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
 
@@ -286,6 +304,9 @@ TEST_F(WGSLParserTest, FunctionDecl_MustUse) {
     EXPECT_FALSE(f.errored);
     EXPECT_TRUE(f.matched);
     ASSERT_NE(f.value, nullptr);
+
+    EXPECT_EQ(f->source.range.begin, (Source::Location{1, 11}));
+    EXPECT_EQ(f->source.range.end, (Source::Location{1, 32}));
 
     auto& attributes = f->attributes;
     ASSERT_EQ(attributes.Length(), 1u);

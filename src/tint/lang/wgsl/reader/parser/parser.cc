@@ -1060,6 +1060,8 @@ Maybe<const ast::ConstAssert*> Parser::const_assert_statement() {
 // function_decl
 //   : function_header compound_statement
 Maybe<const ast::Function*> Parser::function_decl(AttributeList& attrs) {
+    MultiTokenSource source(this);
+
     auto header = function_header();
     if (header.errored) {
         if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
@@ -1090,8 +1092,8 @@ Maybe<const ast::Function*> Parser::function_decl(AttributeList& attrs) {
 
     TINT_DEFER(attrs.Clear());
 
-    return builder_.Func(header->source, header->name, header->params, header->return_type,
-                         body.value, std::move(attrs), header->return_type_attributes);
+    return builder_.Func(source, header->name, header->params, header->return_type, body.value,
+                         std::move(attrs), header->return_type_attributes);
 }
 
 // function_header
