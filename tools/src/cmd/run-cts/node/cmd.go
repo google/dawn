@@ -243,6 +243,9 @@ func (c *cmd) processFlags() error {
 		return fmt.Errorf("only a single query can be provided")
 	}
 
+	// For Windows, set the DLL directory to bin so that Dawn loads dxcompiler.dll from there.
+	c.flags.dawn.Set("dlldir=" + c.flags.bin)
+
 	// Forward the backend and adapter to use, if specified.
 	if c.flags.backend != "default" {
 		fmt.Println("Forcing backend to", c.flags.backend)
