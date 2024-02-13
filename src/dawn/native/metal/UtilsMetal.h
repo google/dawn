@@ -58,6 +58,9 @@ NSRef<NSString> MakeDebugName(DeviceBase* device, const char* prefix, std::strin
 // backend resources.
 template <typename T>
 void SetDebugName(DeviceBase* device, T* mtlObj, const char* prefix, std::string label = "") {
+    if (!device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+        return;
+    }
     if (mtlObj == nullptr) {
         return;
     }

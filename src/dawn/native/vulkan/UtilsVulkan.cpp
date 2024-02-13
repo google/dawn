@@ -242,6 +242,12 @@ void SetDebugNameInternal(Device* device,
         // Prefix with the device's message ID so that if this label appears in a validation
         // message it can be parsed out and the message can be associated with the right device.
         objectNameStream << device->GetDebugPrefix() << kDeviceDebugSeparator << prefix;
+
+        // NOTE: Whereas other platforms set backend labels *only* if the
+        // `UseUserDefinedLabelsInBackend` toggle is enabled, on Vulkan these
+        // labels must always be set as they currently provide the only way to
+        // map Vulkan errors that include backend objects back to the device
+        // with which the backend objects are associated.
         if (!label.empty() && device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
             objectNameStream << "_" << label;
         }
