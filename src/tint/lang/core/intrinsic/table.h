@@ -106,6 +106,12 @@ struct Context {
     SymbolTable& symbols;
 };
 
+// Prints the overload for emitting diagnostics
+void PrintOverload(StringStream& ss,
+                   Context& context,
+                   const OverloadInfo& overload,
+                   std::string_view intrinsic_name);
+
 /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
 /// if the builtin was not found.
 /// @param context the intrinsic context

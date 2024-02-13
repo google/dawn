@@ -161,12 +161,6 @@ MatchState Match(Context& context,
                  const NumberMatcherIndex* number_matcher_indices,
                  EvaluationStage earliest_eval_stage);
 
-// Prints the overload for emitting diagnostics
-void PrintOverload(StringStream& ss,
-                   Context& context,
-                   const OverloadInfo& overload,
-                   std::string_view intrinsic_name);
-
 // Prints the list of candidates for emitting diagnostics
 void PrintCandidates(StringStream& ss,
                      Context& context,
@@ -464,6 +458,57 @@ MatchState Match(Context& context,
                       number_matcher_indices, earliest_eval_stage};
 }
 
+void PrintCandidates(StringStream& ss,
+                     Context& context,
+                     VectorRef<Candidate> candidates,
+                     std::string_view intrinsic_name) {
+    for (auto& candidate : candidates) {
+        ss << "  ";
+        PrintOverload(ss, context, *candidate.overload, intrinsic_name);
+        ss << std::endl;
+    }
+}
+
+std::string ErrAmbiguousOverload(Context& context,
+                                 std::string_view intrinsic_name,
+                                 VectorRef<const core::type::Type*> args,
+                                 TemplateState templates,
+                                 VectorRef<Candidate> candidates) {
+    StringStream ss;
+    ss << "ambiguous overload while attempting to match " << intrinsic_name;
+    for (size_t i = 0; i < std::numeric_limits<size_t>::max(); i++) {
+        if (auto* ty = templates.Type(i)) {
+            ss << ((i == 0) ? "<" : ", ") << ty->FriendlyName();
+        } else {
+            if (i > 0) {
+                ss << ">";
+            }
+            break;
+        }
+    }
+    ss << "(";
+    bool first = true;
+    for (auto* arg : args) {
+        if (!first) {
+            ss << ", ";
+        }
+        first = false;
+        ss << arg->FriendlyName();
+    }
+    ss << "):\n";
+    for (auto& candidate : candidates) {
+        if (candidate.score == 0) {
+            ss << "  ";
+            PrintOverload(ss, context, *candidate.overload, intrinsic_name);
+            ss << std::endl;
+        }
+    }
+    TINT_ICE() << ss.str();
+    return ss.str();
+}
+
+}  // namespace
+
 void PrintOverload(StringStream& ss,
                    Context& context,
                    const OverloadInfo& overload,
@@ -544,57 +589,6 @@ void PrintOverload(StringStream& ss,
         }
     }
 }
-
-void PrintCandidates(StringStream& ss,
-                     Context& context,
-                     VectorRef<Candidate> candidates,
-                     std::string_view intrinsic_name) {
-    for (auto& candidate : candidates) {
-        ss << "  ";
-        PrintOverload(ss, context, *candidate.overload, intrinsic_name);
-        ss << std::endl;
-    }
-}
-
-std::string ErrAmbiguousOverload(Context& context,
-                                 std::string_view intrinsic_name,
-                                 VectorRef<const core::type::Type*> args,
-                                 TemplateState templates,
-                                 VectorRef<Candidate> candidates) {
-    StringStream ss;
-    ss << "ambiguous overload while attempting to match " << intrinsic_name;
-    for (size_t i = 0; i < std::numeric_limits<size_t>::max(); i++) {
-        if (auto* ty = templates.Type(i)) {
-            ss << ((i == 0) ? "<" : ", ") << ty->FriendlyName();
-        } else {
-            if (i > 0) {
-                ss << ">";
-            }
-            break;
-        }
-    }
-    ss << "(";
-    bool first = true;
-    for (auto* arg : args) {
-        if (!first) {
-            ss << ", ";
-        }
-        first = false;
-        ss << arg->FriendlyName();
-    }
-    ss << "):\n";
-    for (auto& candidate : candidates) {
-        if (candidate.score == 0) {
-            ss << "  ";
-            PrintOverload(ss, context, *candidate.overload, intrinsic_name);
-            ss << std::endl;
-        }
-    }
-    TINT_ICE() << ss.str();
-    return ss.str();
-}
-
-}  // namespace
 
 Result<Overload, std::string> LookupFn(Context& context,
                                        std::string_view intrinsic_name,
