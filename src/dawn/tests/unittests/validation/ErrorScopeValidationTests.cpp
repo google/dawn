@@ -249,14 +249,14 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
         queue.Submit(0, nullptr);
     }
 
-        void* userdata = CreateUserData();
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
-            .Times(1);
-        device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
-        ExpectDeviceDestruction();
-        device = nullptr;
+    void* userdata = CreateUserData();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, userdata))
+        .Times(1);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, userdata);
+    ExpectDeviceDestruction();
+    device = nullptr;
 
-        FlushWireAndProcessEvents();
+    FlushWireAndProcessEvents();
 }
 
 // If the device is destroyed, pop error scope should callback with device lost.
