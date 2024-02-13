@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/utils/containers/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinFn);
@@ -48,14 +49,20 @@ BuiltinFn::BuiltinFn(wgsl::BuiltinFn type,
                      VectorRef<Parameter*> parameters,
                      core::EvaluationStage eval_stage,
                      PipelineStageSet supported_stages,
-                     bool is_deprecated,
-                     bool must_use)
-    : Base(return_type, std::move(parameters), eval_stage, must_use),
+                     const core::intrinsic::OverloadInfo& overload)
+    : Base(return_type,
+           std::move(parameters),
+           eval_stage,
+           overload.flags.Contains(core::intrinsic::OverloadFlag::kMustUse)),
       fn_(type),
       supported_stages_(supported_stages),
-      is_deprecated_(is_deprecated) {}
+      overload_(overload) {}
 
 BuiltinFn::~BuiltinFn() = default;
+
+bool BuiltinFn::IsDeprecated() const {
+    return overload_.flags.Contains(core::intrinsic::OverloadFlag::kIsDeprecated);
+}
 
 bool BuiltinFn::IsCoarseDerivative() const {
     return wgsl::IsCoarseDerivative(fn_);

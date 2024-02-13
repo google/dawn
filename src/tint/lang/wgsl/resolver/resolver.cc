@@ -2415,9 +2415,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
         auto eval_stage = overload->const_eval_fn ? core::EvaluationStage::kConstant
                                                   : core::EvaluationStage::kRuntime;
-        return b.create<sem::BuiltinFn>(
-            fn, overload->return_type, std::move(params), eval_stage, supported_stages,
-            flags.Contains(OverloadFlag::kIsDeprecated), flags.Contains(OverloadFlag::kMustUse));
+        return b.create<sem::BuiltinFn>(fn, overload->return_type, std::move(params), eval_stage,
+                                        supported_stages, *overload->info);
     });
 
     if (fn == wgsl::BuiltinFn::kTintMaterialize) {
