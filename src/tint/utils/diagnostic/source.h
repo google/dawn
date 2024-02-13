@@ -97,8 +97,29 @@ class Source {
         /// Returns true if `this` location is lexicographically less than `rhs`
         /// @param rhs location to compare against
         /// @returns true if `this` < `rhs`
-        inline bool operator<(const Source::Location& rhs) {
+        inline bool operator<(const Source::Location& rhs) const {
             return std::tie(line, column) < std::tie(rhs.line, rhs.column);
+        }
+
+        /// Returns true if `this` location is lexicographically less than or equal to `rhs`
+        /// @param rhs location to compare against
+        /// @returns true if `this` <= `rhs`
+        inline bool operator<=(const Source::Location& rhs) const {
+            return std::tie(line, column) <= std::tie(rhs.line, rhs.column);
+        }
+
+        /// Returns true if `this` location is lexicographically greater than `rhs`
+        /// @param rhs location to compare against
+        /// @returns true if `this` > `rhs`
+        inline bool operator>(const Source::Location& rhs) const {
+            return std::tie(line, column) > std::tie(rhs.line, rhs.column);
+        }
+
+        /// Returns true if `this` location is lexicographically greater than or equal to `rhs`
+        /// @param rhs location to compare against
+        /// @returns true if `this` >= `rhs`
+        inline bool operator>=(const Source::Location& rhs) const {
+            return std::tie(line, column) >= std::tie(rhs.line, rhs.column);
         }
 
         /// Returns true of `this` location is equal to `rhs`
