@@ -54,7 +54,8 @@
 #         renderer-software ]
 # Driver
 # tags: [ mesa_lt_19.1
-#         mesa_ge_21.0 ]
+#         mesa_ge_21.0
+#         nvidia_ge_31.0.15.4601 nvidia_lt_31.0.15.4601 ]
 # ASan
 # tags: [ asan no-asan ]
 # Display Server
@@ -803,6 +804,13 @@ crbug.com/dawn/2407 [ win intel ] webgpu:web_platform,canvas,readbackFromWebGPUC
 # KEEP
 ################################################################################
 crbug.com/dawn/0000 [ mac ] webgpu:util,texture,color_space_conversions:* [ Failure ]
+
+################################################################################
+# Failures due to Windows/NVIDIA driver upgrade
+# The keep can be removed once this config is promoted to stable.
+# KEEP
+################################################################################
+crbug.com/dawn/2408 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
 
 ################################################################################
 # Flip video tests failing
