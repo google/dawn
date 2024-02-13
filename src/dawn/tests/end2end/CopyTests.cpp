@@ -1381,6 +1381,10 @@ TEST_P(CopyTests_T2B, Texture1D) {
 
     // TODO(dawn:1705): support 1d texture.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
+    // TODO(crbug.com/dawn/2408): Re-enable on this configuration.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
     struct Param {
         uint32_t textureWidth;
         uint32_t copyWidth;
