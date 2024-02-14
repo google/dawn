@@ -103,9 +103,6 @@ crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_z
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 crbug.com/dawn/667 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
-# precision issues
-crbug.com/dawn/2076 webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-
 # failures with 1-bit LSB errors on shader expression tests (ANGLE/GL only)
 crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;y_cols=2 [ Failure ]
 crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;y_cols=3 [ Failure ]
