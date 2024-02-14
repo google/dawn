@@ -82,8 +82,8 @@ MaybeError Queue::Initialize() {
 
 void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
     mWaitingEvents.Use([&](auto events) {
-        for (auto& [sender, _] : events->IterateUpTo(completedSerial)) {
-            std::move(sender).Signal();
+        for (auto& s : events->IterateUpTo(completedSerial)) {
+            std::move(s)->Signal();
         }
         events->ClearUpTo(completedSerial);
     });
@@ -241,36 +241,31 @@ void Queue::ForceEventualFlushOfCommands() {
     }
 }
 
-Ref<SharedSystemEventReceiver> Queue::GetOrCreateSystemEventReceiver(ExecutionSerial serial) {
-    return mWaitingEvents.Use([&](auto events) {
-        if (auto* ev = events->FindOne(serial)) {
-            return ev->second;
-        }
-
+Ref<SystemEvent> Queue::CreateWorkDoneSystemEvent(ExecutionSerial serial) {
+    Ref<SystemEvent> completionEvent = AcquireRef(new SystemEvent());
+    mWaitingEvents.Use([&](auto events) {
+        SystemEventReceiver receiver;
         // Now that we hold the lock, check against mCompletedSerial before inserting.
         // This serial may have just completed. If it did, mark the event complete.
         // Also check for device loss. Otherwise, we could enqueue the event
         // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
         if (GetDevice()->IsLost() ||
             serial <= ExecutionSerial(mCompletedSerial.load(std::memory_order_acquire))) {
-            return AcquireRef(
-                new SharedSystemEventReceiver(SystemEventReceiver::CreateAlreadySignaled()));
+            completionEvent->Signal();
+        } else {
+            // Insert the event into the list which will be signaled inside Metal's queue
+            // completion handler.
+            events->Enqueue(completionEvent, serial);
         }
-
-        auto [sender, receiver] = CreateSystemEventPipe();
-        Ref<SharedSystemEventReceiver> sharedReceiver =
-            AcquireRef(new SharedSystemEventReceiver(std::move(receiver)));
-        events->Enqueue({std::move(sender), sharedReceiver}, serial);
-
-        return sharedReceiver;
     });
+    return completionEvent;
 }
 
 ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
-    Ref<SharedSystemEventReceiver> sharedReceiver = GetOrCreateSystemEventReceiver(serial);
+    Ref<SystemEvent> event = CreateWorkDoneSystemEvent(serial);
     bool ready = false;
     std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
-        {{sharedReceiver->receiver, &ready}}};
+        {{event->GetOrCreateSystemEventReceiver(), &ready}}};
     return WaitAnySystemEvent(events.begin(), events.end(), timeout);
 }
 

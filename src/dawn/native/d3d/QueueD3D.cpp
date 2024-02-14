@@ -41,43 +41,31 @@ ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanosecond
         return true;
     }
 
-    auto sharedReceiver = GetOrCreateSystemEventReceiver(serial);
-
-    bool ready = false;
-    std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
-        {{sharedReceiver->receiver, &ready}}};
-    DAWN_ASSERT(serial <= GetLastSubmittedCommandSerial());
-    bool didComplete = WaitAnySystemEvent(events.begin(), events.end(), timeout);
-    if (didComplete) {
-        // Clear out everything up to this serial since they are all complete now.
-        mSystemEventReceivers->ClearUpTo(serial);
-    }
-    return didComplete;
-}
-
-Ref<SharedSystemEventReceiver> Queue::GetOrCreateSystemEventReceiver(
-    ExecutionSerial completionSerial) {
-    return mSystemEventReceivers.Use([&](auto receivers) {
-        if (auto* receiver = receivers->FindOne(completionSerial)) {
-            return *receiver;
-        }
-
-        if (completionSerial <= GetCompletedCommandSerial()) {
-            return AcquireRef(
-                new SharedSystemEventReceiver(SystemEventReceiver::CreateAlreadySignaled()));
-        }
+    auto receiver = mSystemEventReceivers->TakeOne(serial);
+    if (!receiver) {
+        // Anytime we may create an event, clear out any completed receivers so the list doesn't
+        // grow forever.
+        mSystemEventReceivers->ClearUpTo(completedSerial);
 
         HANDLE fenceEvent =
             ::CreateEvent(nullptr, /*bManualReset=*/true, /*bInitialState=*/false, nullptr);
-        DAWN_CHECK(fenceEvent != nullptr);
-        SetEventOnCompletion(completionSerial, fenceEvent);
+        DAWN_INVALID_IF(fenceEvent == nullptr, "CreateEvent failed");
+        SetEventOnCompletion(serial, fenceEvent);
 
-        // Make a boxed SystemEventReceiver and enqueue it into the list of receivers.
-        auto sharedReceiver = AcquireRef(
-            new SharedSystemEventReceiver(SystemEventReceiver(SystemHandle::Acquire(fenceEvent))));
-        receivers->Enqueue(sharedReceiver, completionSerial);
-        return sharedReceiver;
-    });
+        receiver = SystemEventReceiver(SystemHandle::Acquire(fenceEvent));
+    }
+
+    bool ready = false;
+    std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
+        {{*receiver, &ready}}};
+    DAWN_ASSERT(serial <= GetLastSubmittedCommandSerial());
+    bool didComplete = WaitAnySystemEvent(events.begin(), events.end(), timeout);
+    if (!didComplete) {
+        // Return the SystemEventReceiver to the pool of receivers so it can be re-waited in the
+        // future.
+        mSystemEventReceivers->Enqueue(std::move(*receiver), serial);
+    }
+    return didComplete;
 }
 
 }  // namespace dawn::native::d3d

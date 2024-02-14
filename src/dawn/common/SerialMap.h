@@ -61,7 +61,7 @@ class SerialMap : public SerialStorage<SerialMap<Serial, Value>> {
     void Enqueue(const std::vector<Value>& values, Serial serial);
     void Enqueue(std::vector<Value>&& values, Serial serial);
 
-    Value* FindOne(Serial serial);
+    std::optional<Value> TakeOne(Serial serial);
 };
 
 // SerialMap
@@ -93,16 +93,21 @@ void SerialMap<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial seria
 }
 
 template <typename Serial, typename Value>
-Value* SerialMap<Serial, Value>::FindOne(Serial serial) {
+std::optional<Value> SerialMap<Serial, Value>::TakeOne(Serial serial) {
     auto it = this->mStorage.find(serial);
     if (it == this->mStorage.end()) {
-        return nullptr;
+        return std::nullopt;
     }
     auto& vec = it->second;
     if (vec.empty()) {
-        return nullptr;
+        return std::nullopt;
     }
-    return &vec.back();
+    Value value = std::move(vec.back());
+    vec.pop_back();
+    if (vec.empty()) {
+        this->mStorage.erase(it);
+    }
+    return value;
 }
 
 }  // namespace dawn
