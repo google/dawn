@@ -622,6 +622,117 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
     }
 }
 
+// Test waiting on futures with many threads when all the futures refer to the
+// same point in time. Some threads will poll, some will wait. The main thread
+// will do ProcessEvents.
+TEST_P(WaitAnyTests, ProcessEventsWhileManyThreadsWaitAnySameFutureSerial) {
+    // Timed wait any is not available on the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(dawn:2397): GL backend needs to use EGL syncs to allow cross-thread waiting.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    std::mutex mutex;
+    std::condition_variable cv;
+    bool run = false;
+
+    constexpr size_t kCount = 50;
+    std::vector<wgpu::Future> waitFutures(kCount);
+    std::vector<wgpu::Future> pollFutures(kCount);
+
+    // Create threads. They will each wait on a future after they are unblocked
+    // by the condition variable.
+    std::vector<std::thread> threads;
+    for (uint32_t i = 0; i < kCount; ++i) {
+        // Create threads that will wait on the future with an infinite timeout.
+        threads.emplace_back(
+            [&](uint32_t i) {
+                // Wait for the `run` flag to be set.
+                {
+                    std::unique_lock<std::mutex> lg(mutex);
+                    cv.wait(lg, [&]() { return run; });
+                }
+
+                wgpu::FutureWaitInfo waitInfo{waitFutures[i], false};
+                wgpu::WaitStatus status = instance.WaitAny(1, &waitInfo, UINT64_MAX);
+                EXPECT_EQ(status, wgpu::WaitStatus::Success);
+                EXPECT_TRUE(waitInfo.completed);
+            },
+            i);
+
+        // Create threads that will poll the future with no timeout.
+        threads.emplace_back(
+            [&](uint32_t i) {
+                // Wait for the `run` flag to be set.
+                {
+                    std::unique_lock<std::mutex> lg(mutex);
+                    cv.wait(lg, [&]() { return run; });
+                }
+
+                wgpu::FutureWaitInfo waitInfo{pollFutures[i], false};
+                wgpu::WaitStatus status;
+                do {
+                    status = instance.WaitAny(1, &waitInfo, 0);
+                } while (status == wgpu::WaitStatus::TimedOut);
+                EXPECT_EQ(status, wgpu::WaitStatus::Success);
+                EXPECT_TRUE(waitInfo.completed);
+            },
+            i);
+    }
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = 4 * 1024 * 1024;
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+
+    // Encode a buffer to buffer copy so we have some work to wait on.
+    wgpu::Buffer b1 = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer b2 = device.CreateBuffer(&bufferDesc);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(b1, 0, b2, 0, bufferDesc.size);
+    wgpu::CommandBuffer cb = encoder.Finish();
+
+    // Set the `run` flag and wake all threads.
+    {
+        std::unique_lock<std::mutex> lg(mutex);
+
+        // Submit a command buffer and set the submitted work done futures.
+        queue.Submit(1, &cb);
+        for (uint32_t i = 0; i < kCount; ++i) {
+            waitFutures[i] = queue.OnSubmittedWorkDone({
+                nullptr,
+                wgpu::CallbackMode::WaitAnyOnly,
+                [](WGPUQueueWorkDoneStatus status, void* userdata) {},
+                nullptr,
+            });
+            pollFutures[i] = queue.OnSubmittedWorkDone({
+                nullptr,
+                wgpu::CallbackMode::WaitAnyOnly,
+                [](WGPUQueueWorkDoneStatus status, void* userdata) {},
+                nullptr,
+            });
+        }
+        run = true;
+        cv.notify_all();
+    }
+
+    bool done = false;
+    queue.OnSubmittedWorkDone({
+        nullptr,
+        wgpu::CallbackMode::AllowProcessEvents,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            *static_cast<bool*>(userdata) = true;
+        },
+        &done,
+    });
+
+    while (!done) {
+        instance.ProcessEvents();
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+}
+
 DAWN_INSTANTIATE_TEST(WaitAnyTests,
                       D3D11Backend(),
                       D3D12Backend(),

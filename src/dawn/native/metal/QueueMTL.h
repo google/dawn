@@ -29,7 +29,7 @@
 #define SRC_DAWN_NATIVE_METAL_QUEUEMTL_H_
 
 #import <Metal/Metal.h>
-#include <map>
+#include <utility>
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
@@ -52,7 +52,6 @@ class Queue final : public QueueBase {
     void WaitForCommandsToBeScheduled();
     void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
 
-    Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
   private:
@@ -61,6 +60,8 @@ class Queue final : public QueueBase {
 
     MaybeError Initialize();
     void UpdateWaitingEvents(ExecutionSerial completedSerial);
+
+    Ref<SharedSystemEventReceiver> GetOrCreateSystemEventReceiver(ExecutionSerial serial);
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
@@ -87,7 +88,9 @@ class Queue final : public QueueBase {
     // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
     // mWaitingEvents serials, we could avoid taking this lock sometimes. Optimize if needed.
     // See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
-    MutexProtected<SerialMap<ExecutionSerial, Ref<SystemEvent>>> mWaitingEvents;
+    MutexProtected<SerialMap<ExecutionSerial,
+                             std::pair<SystemEventPipeSender, Ref<SharedSystemEventReceiver>>>>
+        mWaitingEvents;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

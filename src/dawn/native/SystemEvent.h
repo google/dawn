@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_SYSTEMEVENT_H_
 #define SRC_DAWN_NATIVE_SYSTEMEVENT_H_
 
-#include <optional>
 #include <utility>
 
 #include "dawn/common/MutexProtected.h"
@@ -100,6 +99,12 @@ class SystemEventPipeSender final : NonCopyable {
 // - On POSIX, SystemEventReceiver is a file descriptor (fd), so we can create one with pipe(), and
 //   signal it by write()ing into the pipe (to make it become readable, though we won't read() it).
 std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe();
+
+struct SharedSystemEventReceiver : public RefCounted {
+    explicit SharedSystemEventReceiver(SystemEventReceiver&& rhs) : receiver(std::move(rhs)) {}
+
+    const SystemEventReceiver receiver;
+};
 
 class SystemEvent : public RefCounted {
   public:
