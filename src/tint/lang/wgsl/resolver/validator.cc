@@ -266,9 +266,13 @@ bool Validator::IsStorable(const core::type::Type* type) const {
 }
 
 const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
+                                                   bool stop_at_switch,
                                                    sem::Statement* current_statement) const {
     for (const auto* s = current_statement; s != nullptr; s = s->Parent()) {
         if (stop_at_loop && s->Is<sem::LoopStatement>()) {
+            break;
+        }
+        if (stop_at_switch && s->Is<sem::SwitchStatement>()) {
             break;
         }
         if (s->Is<sem::LoopContinuingBlockStatement>()) {
@@ -1583,7 +1587,8 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
         AddError("break statement must be in a loop or switch case", stmt->Declaration()->source);
         return false;
     }
-    if (ClosestContinuing(/*stop_at_loop*/ true, current_statement) != nullptr) {
+    if (ClosestContinuing(/*stop_at_loop*/ true, /* stop_at_switch */ true, current_statement) !=
+        nullptr) {
         AddError(
             "`break` must not be used to exit from a continuing block. Use `break-if` instead.",
             stmt->Declaration()->source);
@@ -1594,7 +1599,8 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
 
 bool Validator::ContinueStatement(const sem::Statement* stmt,
                                   sem::Statement* current_statement) const {
-    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true, current_statement)) {
+    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true, /* stop_at_switch */ false,
+                                             current_statement)) {
         AddError("continuing blocks must not contain a continue statement",
                  stmt->Declaration()->source);
         if (continuing != stmt->Declaration() && continuing != stmt->Parent()->Declaration()) {
@@ -2463,7 +2469,8 @@ bool Validator::Return(const ast::ReturnStatement* ret,
     }
 
     auto* sem = sem_.Get(ret);
-    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
+    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false, /* stop_at_switch */ false,
+                                             current_statement)) {
         AddError("continuing blocks must not contain a return statement", ret->source);
         if (continuing != sem->Declaration() && continuing != sem->Parent()->Declaration()) {
             AddNote("see continuing block here", continuing->source);

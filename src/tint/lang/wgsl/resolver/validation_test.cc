@@ -994,6 +994,22 @@ TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverValidationTest, Stmt_BreakInSwitchInContinuing) {
+    // loop {
+    //   continuing {
+    //     switch(1) {
+    //       default:
+    //         break;
+    //     }
+    //   }
+    // }
+
+    auto* cont = Block(Switch(1_i, DefaultCase(Block(Break()))));
+
+    WrapInFunction(Loop(Block(Break()), cont));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueInContinuing) {
     auto* cont = Block(                           // continuing {
         If(true, Block(                           //   if(true) {

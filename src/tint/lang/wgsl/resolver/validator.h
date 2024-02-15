@@ -579,8 +579,11 @@ class Validator {
     /// (transitively) owns the current statement.
     /// @param stop_at_loop if true then the function will return nullptr if a
     /// loop or for-loop was found before the continuing.
+    /// @param stop_at_switch if true then the function will return nullptr if a switch was found
+    /// before continuing.
     /// @param current_statement the current statement being resolved
     const ast::Statement* ClosestContinuing(bool stop_at_loop,
+                                            bool stop_at_switch,
                                             sem::Statement* current_statement) const;
 
     /// Returns a human-readable string representation of the vector type name
