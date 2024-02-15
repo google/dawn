@@ -296,9 +296,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     }
 
     if (usesFragDepth) {
-        req.tintOptions.min_depth_offset = 4 * PipelineLayout::PushConstantLocation::MinDepth;
-
-        req.tintOptions.max_depth_offset = 4 * PipelineLayout::PushConstantLocation::MaxDepth;
+        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::PushConstantLocation::MinDepth,
+                                               4 * PipelineLayout::PushConstantLocation::MaxDepth};
     }
 
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);

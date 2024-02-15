@@ -33,6 +33,7 @@
 #include <unordered_map>
 
 #include "src/tint/api/options/binding_remapper.h"
+#include "src/tint/api/options/depth_range_offsets.h"
 #include "src/tint/api/options/external_texture.h"
 #include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
@@ -82,11 +83,8 @@ struct Options {
     /// Offset of the firstInstance push constant.
     std::optional<int32_t> first_instance_offset;
 
-    /// Offset of the minDepth push constant.
-    std::optional<uint32_t> min_depth_offset;
-
-    /// Offset of the maxDepth push constant.
-    std::optional<uint32_t> max_depth_offset;
+    /// Offsets of the minDepth and maxDepth push constants.
+    std::optional<DepthRangeOffsets> depth_range_offsets;
 
     /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
     /// buffer values. If not specified, emits corresponding GLSL builtins
@@ -104,8 +102,7 @@ struct Options {
                  binding_remapper_options,
                  external_texture_options,
                  first_instance_offset,
-                 min_depth_offset,
-                 max_depth_offset,
+                 depth_range_offsets,
                  texture_builtins_from_uniform);
 };
 

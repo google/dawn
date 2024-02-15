@@ -44,6 +44,7 @@ cc_library(
   hdrs = [
     "array_length_from_uniform.h",
     "binding_remapper.h",
+    "depth_range_offsets.h",
     "external_texture.h",
     "pixel_local.h",
     "texture_builtins_from_uniform.h",

@@ -46,6 +46,7 @@ libtint_source_set("options") {
   sources = [
     "array_length_from_uniform.h",
     "binding_remapper.h",
+    "depth_range_offsets.h",
     "external_texture.h",
     "options.cc",
     "pixel_local.h",

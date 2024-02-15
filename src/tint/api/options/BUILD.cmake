@@ -41,6 +41,7 @@
 tint_add_target(tint_api_options lib
   api/options/array_length_from_uniform.h
   api/options/binding_remapper.h
+  api/options/depth_range_offsets.h
   api/options/external_texture.h
   api/options/options.cc
   api/options/pixel_local.h

@@ -254,8 +254,8 @@ SanitizedResult Sanitize(const Program& in,
 
     data.Add<ast::transform::OffsetFirstIndex::Config>(std::nullopt, options.first_instance_offset);
 
-    data.Add<ast::transform::ClampFragDepth::Config>(options.min_depth_offset,
-                                                     options.max_depth_offset);
+    data.Add<ast::transform::ClampFragDepth::Config>(options.depth_range_offsets);
+
     SanitizedResult result;
     ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);

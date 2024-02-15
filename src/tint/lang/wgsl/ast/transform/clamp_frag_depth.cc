@@ -67,7 +67,7 @@ struct ClampFragDepth::State {
     /// @returns the new program or SkipTransform if the transform is not required
     Transform::ApplyResult Run(const DataMap& inputs) {
         const Config* cfg = inputs.Get<Config>();
-        if (!cfg || !cfg->min_depth_offset.has_value() || !cfg->max_depth_offset.has_value()) {
+        if (!cfg || !cfg->offsets.has_value()) {
             return SkipTransform;
         }
 
@@ -87,8 +87,8 @@ struct ClampFragDepth::State {
         //       return clamp(v, push_constants.min, push_constants.max_depth);
         //   }
 
-        push_constant_helper.InsertMember("min_depth", b.ty.f32(), *cfg->min_depth_offset);
-        push_constant_helper.InsertMember("max_depth", b.ty.f32(), *cfg->max_depth_offset);
+        push_constant_helper.InsertMember("min_depth", b.ty.f32(), cfg->offsets->min);
+        push_constant_helper.InsertMember("max_depth", b.ty.f32(), cfg->offsets->max);
 
         Symbol buffer_name = push_constant_helper.Run();
 
@@ -221,9 +221,7 @@ ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program& src,
     return State{src}.Run(inputs);
 }
 
-ClampFragDepth::Config::Config(std::optional<uint32_t> min_depth_off,
-                               std::optional<uint32_t> max_depth_off)
-    : min_depth_offset(min_depth_off), max_depth_offset(max_depth_off) {}
+ClampFragDepth::Config::Config(std::optional<tint::DepthRangeOffsets> off) : offsets(off) {}
 
 ClampFragDepth::Config::~Config() = default;
 

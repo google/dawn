@@ -1089,8 +1089,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
             offset += 4;
         }
         if (entry_point.frag_depth_used) {
-            gen_options.min_depth_offset = offset + 0;
-            gen_options.max_depth_offset = offset + 4;
+            gen_options.depth_range_offsets = {offset + 0, offset + 4};
             offset += 8;
         }
 
