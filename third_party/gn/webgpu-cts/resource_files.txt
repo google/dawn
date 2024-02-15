@@ -16,6 +16,7 @@ cache/webgpu/shader/execution/binary/af_matrix_subtraction.bin
 cache/webgpu/shader/execution/binary/af_multiplication.bin
 cache/webgpu/shader/execution/binary/af_remainder.bin
 cache/webgpu/shader/execution/binary/af_subtraction.bin
+cache/webgpu/shader/execution/binary/ai_arithmetic.bin
 cache/webgpu/shader/execution/binary/f16_addition.bin
 cache/webgpu/shader/execution/binary/f16_division.bin
 cache/webgpu/shader/execution/binary/f16_logical.bin
@@ -89,6 +90,7 @@ cache/webgpu/shader/execution/transpose.bin
 cache/webgpu/shader/execution/trunc.bin
 cache/webgpu/shader/execution/unary/af_arithmetic.bin
 cache/webgpu/shader/execution/unary/af_assignment.bin
+cache/webgpu/shader/execution/unary/ai_arithmetic.bin
 cache/webgpu/shader/execution/unary/ai_assignment.bin
 cache/webgpu/shader/execution/unary/bool_conversion.bin
 cache/webgpu/shader/execution/unary/f16_arithmetic.bin
