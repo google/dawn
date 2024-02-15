@@ -2158,10 +2158,10 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
                 // AddOrGetCachedComputePipeline() to avoid deadlock because many places calling
                 // that method might already have the lock held. For example,
                 // APICreateComputePipeline()
-                auto deviceLock(pipeline->GetDevice()->GetScopedLock());
-                if (pipeline->GetDevice()->GetState() == State::Alive) {
-                    pipeline =
-                        pipeline->GetDevice()->AddOrGetCachedComputePipeline(std::move(pipeline));
+                DeviceBase* device = pipeline->GetDevice();
+                auto deviceLock(device->GetScopedLock());
+                if (device->GetState() == State::Alive) {
+                    pipeline = device->AddOrGetCachedComputePipeline(std::move(pipeline));
                 }
             }
             callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
@@ -2205,9 +2205,10 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipe
             // Note: we don't lock inside AddOrGetCachedRenderPipeline() to avoid deadlock
             // because many places calling that method might already have the lock held. For
             // example, APICreateRenderPipeline()
-            auto deviceLock(pipeline->GetDevice()->GetScopedLock());
-            if (pipeline->GetDevice()->GetState() == State::Alive) {
-                pipeline = pipeline->GetDevice()->AddOrGetCachedRenderPipeline(std::move(pipeline));
+            DeviceBase* device = pipeline->GetDevice();
+            auto deviceLock(device->GetScopedLock());
+            if (device->GetState() == State::Alive) {
+                pipeline = device->AddOrGetCachedRenderPipeline(std::move(pipeline));
             }
         }
         callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))), "",
