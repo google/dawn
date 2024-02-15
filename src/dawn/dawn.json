@@ -1280,7 +1280,6 @@
             },
             {
                 "name": "create shader module",
-                "no autolock": true,
                 "returns": "shader module",
                 "args": [
                     {"name": "descriptor", "type": "shader module descriptor", "annotation": "const*"}

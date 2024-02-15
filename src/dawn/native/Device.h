@@ -601,7 +601,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     struct DeprecationWarnings;
     std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
-    std::atomic<uint32_t> mEmittedCompilationLogCount = 0;
+    uint32_t mEmittedCompilationLogCount = 0;
 
     absl::flat_hash_set<std::string> mWarnings;
 

@@ -1614,12 +1614,12 @@ void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
 
     // Limit the number of compilation error emitted to avoid spamming the devtools console hard.
     constexpr uint32_t kCompilationLogSpamLimit = 20;
-    if (mEmittedCompilationLogCount.load(std::memory_order_acquire) > kCompilationLogSpamLimit) {
+    if (mEmittedCompilationLogCount > kCompilationLogSpamLimit) {
         return;
     }
 
-    if (mEmittedCompilationLogCount.fetch_add(1, std::memory_order_acq_rel) ==
-        kCompilationLogSpamLimit - 1) {
+    mEmittedCompilationLogCount++;
+    if (mEmittedCompilationLogCount == kCompilationLogSpamLimit) {
         return EmitLog(WGPULoggingType_Warning,
                        "Reached the WGSL compilation log warning limit. To see all the compilation "
                        "logs, query them directly on the ShaderModule objects.");
