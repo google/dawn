@@ -965,12 +965,14 @@ Ref<RenderPipelineBase> DeviceBase::GetCachedRenderPipeline(
 
 Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
     Ref<ComputePipelineBase> computePipeline) {
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [pipeline, _] = mCaches->computePipelines.Insert(computePipeline.Get());
     return std::move(pipeline);
 }
 
 Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     Ref<RenderPipelineBase> renderPipeline) {
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [pipeline, _] = mCaches->renderPipelines.Insert(renderPipeline.Get());
     return std::move(pipeline);
 }
@@ -1837,8 +1839,7 @@ void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> com
         AddComputePipelineAsyncCallbackTask(
             maybeError.AcquireError(), computePipeline->GetLabel().c_str(), callback, userdata);
     } else {
-        AddComputePipelineAsyncCallbackTask(
-            AddOrGetCachedComputePipeline(std::move(computePipeline)), callback, userdata);
+        AddComputePipelineAsyncCallbackTask(std::move(computePipeline), callback, userdata);
     }
 }
 
@@ -1858,8 +1859,7 @@ void DeviceBase::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> rende
         AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(),
                                            renderPipeline->GetLabel().c_str(), callback, userdata);
     } else {
-        AddRenderPipelineAsyncCallbackTask(AddOrGetCachedRenderPipeline(std::move(renderPipeline)),
-                                           callback, userdata);
+        AddRenderPipelineAsyncCallbackTask(std::move(renderPipeline), callback, userdata);
     }
 }
 
@@ -2148,6 +2148,22 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
     void* userdata) {
     mCallbackTaskManager->AddCallbackTask(
         [callback, pipeline = std::move(pipeline), userdata]() mutable {
+            // TODO(dawn:529): call AddOrGetCachedComputePipeline() asynchronously in
+            // CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+            // thread-safe.
+            DAWN_ASSERT(pipeline != nullptr);
+            {
+                // This is called inside a callback, and no lock will be held by default so we
+                // have to lock now to protect the cache. Note: we don't lock inside
+                // AddOrGetCachedComputePipeline() to avoid deadlock because many places calling
+                // that method might already have the lock held. For example,
+                // APICreateComputePipeline()
+                auto deviceLock(pipeline->GetDevice()->GetScopedLock());
+                if (pipeline->GetDevice()->GetState() == State::Alive) {
+                    pipeline =
+                        pipeline->GetDevice()->AddOrGetCachedComputePipeline(std::move(pipeline));
+                }
+            }
             callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
                      "", userdata);
         });
@@ -2177,11 +2193,26 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> e
 void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
                                                     WGPUCreateRenderPipelineAsyncCallback callback,
                                                     void* userdata) {
-    mCallbackTaskManager->AddCallbackTask(
-        [callback, pipeline = std::move(pipeline), userdata]() mutable {
-            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
-                     "", userdata);
-        });
+    mCallbackTaskManager->AddCallbackTask([callback, pipeline = std::move(pipeline),
+                                           userdata]() mutable {
+        // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
+        // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+        // thread-safe.
+        DAWN_ASSERT(pipeline != nullptr);
+        {
+            // This is called inside a callback, and no lock will be held by default so we have
+            // to lock now to protect the cache.
+            // Note: we don't lock inside AddOrGetCachedRenderPipeline() to avoid deadlock
+            // because many places calling that method might already have the lock held. For
+            // example, APICreateRenderPipeline()
+            auto deviceLock(pipeline->GetDevice()->GetScopedLock());
+            if (pipeline->GetDevice()->GetState() == State::Alive) {
+                pipeline = pipeline->GetDevice()->AddOrGetCachedRenderPipeline(std::move(pipeline));
+            }
+        }
+        callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))), "",
+                 userdata);
+    });
 }
 
 PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {
