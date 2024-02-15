@@ -672,7 +672,7 @@ void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error,
 }
 
 void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata) {
-    std::lock_guard lock(mLoggingMutex);
+    std::lock_guard<std::shared_mutex> lock(mLoggingMutex);
     mLoggingCallback = callback;
     mLoggingUserdata = userdata;
 }

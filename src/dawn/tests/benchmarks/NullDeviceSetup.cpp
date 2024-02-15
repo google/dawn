@@ -48,7 +48,7 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
     if (state.thread_index() == 0) {
         // Only thread 0 is responsible for initializing the device on each iteration.
         {
-            std::lock_guard lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex);
 
             // Get an adapter to create the device with.
             wgpu::RequestAdapterOptions options = {};
@@ -104,7 +104,7 @@ void NullDeviceBenchmarkFixture::TearDown(const benchmark::State& state) {
     } else {
         bool isDone = false;
         {
-            std::lock_guard lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex);
             mNumDoneThreads += 1;
             isDone = mNumDoneThreads == state.threads() - 1;
         }
