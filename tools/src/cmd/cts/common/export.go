@@ -36,6 +36,7 @@ import (
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"go.chromium.org/luci/auth"
 	"google.golang.org/api/option"
@@ -64,8 +65,8 @@ func Export(ctx context.Context,
 		return fmt.Errorf("failed to get spreadsheet: %w", err)
 	}
 
-	// Grab the CTS revision to count the number of unimplemented tests
-	numUnimplemented, err := CountUnimplementedTests(ctx, ctsDir, node, npmPath)
+	// Get the unimplemented tests
+	unimplemented, err := GetUnimplementedTests(ctx, ctsDir, node, npmPath)
 	if err != nil {
 		return fmt.Errorf("failed to obtain number of unimplemented tests: %w", err)
 	}
@@ -90,7 +91,16 @@ func Export(ctx context.Context,
 
 		counts := container.NewMap[string, int]()
 		for _, r := range results {
-			counts[string(r.Status)] = counts[string(r.Status)] + 1
+			if r.Status == "Skip" {
+				// Unimplemented tests are marked as 'Skip' by the CTS runner.
+				// Check the unimplemented query tree to see if this should be classed as
+				// 'Unimplemented' instead.
+				if node := unimplemented.Get(r.Query); node != nil && node.Data != nil {
+					counts[string("Unimplemented")]++
+					continue
+				}
+			}
+			counts[string(r.Status)]++
 		}
 
 		{ // Report statuses that have no column
@@ -107,8 +117,6 @@ func Export(ctx context.Context,
 			switch strings.ToLower(column) {
 			case "date":
 				data = append(data, time.Now().UTC().Format("2006-01-02"))
-			case "unimplemented":
-				data = append(data, numUnimplemented)
 			default:
 				count, ok := counts[column]
 				if !ok {
@@ -194,11 +202,11 @@ func insertBlankRows(srv *sheets.Service, spreadsheet *sheets.Spreadsheet, sheet
 	return nil
 }
 
-// CountUnimplementedTests returns the number of unimplemented tests in the CTS.
+// GetUnimplementedTests returns the unimplemented tests in the CTS.
 // It does this by running the cmdline.ts CTS command with '--list-unimplemented webgpu:*'.
-func CountUnimplementedTests(ctx context.Context, ctsDir, node, npmPath string) (int, error) {
+func GetUnimplementedTests(ctx context.Context, ctsDir, node, npmPath string) (*query.Tree[struct{}], error) {
 	if err := InstallCTSDeps(ctx, ctsDir, npmPath); err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	// Run 'src/common/runtime/cmdline.ts' to obtain the full test list
@@ -216,15 +224,16 @@ func CountUnimplementedTests(ctx context.Context, ctsDir, node, npmPath string) 
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return 0, fmt.Errorf("failed to gather unimplemented tests: %w", err)
+		return nil, fmt.Errorf("failed to gather unimplemented tests: %w", err)
 	}
 
-	lines := strings.Split(string(out), "\n")
-	count := 0
-	for _, line := range lines {
-		if strings.TrimSpace(line) != "" {
-			count++
+	tree, _ := query.NewTree[struct{}]()
+	for _, line := range strings.Split(string(out), "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			q := query.Parse(line)
+			tree.Add(q, struct{}{})
 		}
 	}
-	return count, nil
+	return &tree, nil
 }

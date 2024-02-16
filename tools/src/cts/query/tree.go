@@ -28,6 +28,7 @@
 package query
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -308,6 +309,22 @@ func (t *Tree[Data]) GetOrCreate(q Query, create func() Data) *Data {
 		node.Data = &data
 	}
 	return node.Data
+}
+
+// errStop is an error used to stop traversal of Query.Walk
+var errStop = errors.New("stop")
+
+// Get returns the closest existing tree node for the given query
+func (t *Tree[Data]) Get(q Query) *TreeNode[Data] {
+	node := &t.TreeNode
+	q.Walk(func(q Query, t Target, n string) error {
+		if n := node.Children[TreeNodeChildKey{n, t}]; n != nil {
+			node = n
+			return nil
+		}
+		return errStop
+	})
+	return node
 }
 
 // Reduce reduces the tree using the Merger function f.

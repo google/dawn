@@ -65,7 +65,7 @@ func ParseHash(s string) (Hash, error) {
 }
 
 // The timeout for git operations if no other timeout is specified
-var DefaultTimeout = time.Minute
+var DefaultTimeout = 5 * time.Minute
 
 // Git wraps the 'git' executable
 type Git struct {
