@@ -544,9 +544,12 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
 
 Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
+                                                  ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
                                                   std::vector<FenceAndSignalValue> waitFences,
                                                   bool isSwapChainTexture,
                                                   bool isInitialized) {
+    // TODO(sunnyps): Reintroduce keyed mutex support.
+    DAWN_ASSERT(dxgiKeyedMutex == nullptr);
     Ref<Texture> dawnTexture;
     if (ConsumedError(
             Texture::CreateExternalImage(this, descriptor, std::move(d3dTexture),

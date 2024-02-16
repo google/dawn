@@ -91,7 +91,7 @@ void Queue::DestroyImpl() {
     mSharedFence = nullptr;
 
     mPendingCommands.Use([&](auto pendingCommands) {
-        pendingCommands->Release();
+        pendingCommands->Destroy();
         mPendingCommandsNeedSubmit.store(false, std::memory_order_release);
     });
 }
@@ -124,10 +124,14 @@ ScopedSwapStateCommandRecordingContext Queue::GetScopedSwapStatePendingCommandCo
 }
 
 MaybeError Queue::SubmitPendingCommands() {
-    if (!mPendingCommandsNeedSubmit.exchange(false, std::memory_order_acq_rel)) {
-        return {};
+    bool needsSubmit = mPendingCommands.Use([&](auto pendingCommands) {
+        pendingCommands->ReleaseKeyedMutexes();
+        return mPendingCommandsNeedSubmit.exchange(false, std::memory_order_acq_rel);
+    });
+    if (needsSubmit) {
+        return NextSerial();
     }
-    return NextSerial();
+    return {};
 }
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {

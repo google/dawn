@@ -245,6 +245,9 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 }
                 for (const SyncScopeResourceUsage& scope :
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
+                    for (TextureBase* texture : scope.textures) {
+                        DAWN_TRY(ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext));
+                    }
                     DAWN_TRY(LazyClearSyncScope(scope));
                 }
                 DAWN_TRY(ExecuteComputePass(commandContext));

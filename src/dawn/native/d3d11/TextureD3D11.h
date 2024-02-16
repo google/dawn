@@ -67,6 +67,7 @@ class Texture final : public d3d::Texture {
         Device* device,
         const UnpackedPtr<TextureDescriptor>& descriptor,
         ComPtr<IUnknown> d3dTexture,
+        ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
         std::vector<FenceAndSignalValue> waitFences,
         bool isSwapChainTexture,
         bool isInitialized);
@@ -141,8 +142,7 @@ class Texture final : public d3d::Texture {
     MaybeError InitializeAsInternalTexture();
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Texture);
     MaybeError InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
-                                           std::vector<FenceAndSignalValue> waitFences,
-                                           bool isSwapChainTexture);
+                                           ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
     void SetLabelHelper(const char* prefix);
 
     // Dawn API
@@ -195,6 +195,7 @@ class Texture final : public d3d::Texture {
 
     const Kind mKind = Kind::Normal;
     ComPtr<ID3D11Resource> mD3d11Resource;
+    ComPtr<IDXGIKeyedMutex> mDxgiKeyedMutex;
 
     // TODO(crbug.com/1515640): Remove this once Chromium has migrated to SharedTextureMemory.
     std::optional<ExecutionSerial> mLastUsageSerial;

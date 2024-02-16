@@ -44,6 +44,17 @@
 #include <DXProgrammableCapture.h>  // NOLINT(build/include_order)
 #include <dxgidebug.h>              // NOLINT(build/include_order)
 
+#include <functional>  // NOLINT(build/include_order)
+#include <utility>     // NOLINT(build/include_order)
+
 using Microsoft::WRL::ComPtr;
+template <typename T>
+struct std::hash<ComPtr<T>> {
+    std::size_t operator()(const ComPtr<T>& v) const noexcept { return std::hash<T*>{}(v.Get()); }
+};
+template <typename T, typename H>
+H AbslHashValue(H state, const ComPtr<T>& v) {
+    return H::combine(std::move(state), v.Get());
+}
 
 #endif  // SRC_DAWN_NATIVE_D3D_D3D_PLATFORM_H_

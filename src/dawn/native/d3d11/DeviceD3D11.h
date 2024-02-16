@@ -57,6 +57,7 @@ class Device final : public d3d::Device {
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
     Ref<TextureBase> CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                               ComPtr<IUnknown> d3dTexture,
+                                              ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
                                               std::vector<FenceAndSignalValue> waitFences,
                                               bool isSwapChainTexture,
                                               bool isInitialized) override;

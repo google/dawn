@@ -51,6 +51,9 @@ struct DAWN_NATIVE_EXPORT RequestAdapterOptionsLUID : wgpu::ChainedStruct {
     ::LUID adapterLUID;
 };
 
+// Chrome uses 0 as acquire key.
+static constexpr UINT64 kDXGIKeyedMutexAcquireKey = 0;
+
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
   public:
     ExternalImageDescriptorDXGISharedHandle();

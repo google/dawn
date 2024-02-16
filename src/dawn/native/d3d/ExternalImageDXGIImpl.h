@@ -47,6 +47,7 @@
 namespace dawn::native::d3d {
 
 class Device;
+class KeyedMutex;
 struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDXGIFenceDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
@@ -86,20 +87,6 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
     std::vector<wgpu::TextureFormat> mViewFormats;
-    uint32_t mAccessCount = 0;
-
-    // Chrome uses 0 as acquire key.
-    static constexpr UINT64 kDXGIKeyedMutexAcquireKey = 0;
-    class KeyedMutexReleaser : public NonCopyable {
-      public:
-        explicit KeyedMutexReleaser(ComPtr<IDXGIKeyedMutex> keyedMutex)
-            : mDXGIKeyedMutex(std::move(keyedMutex)) {}
-        ~KeyedMutexReleaser() { mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireKey); }
-
-      private:
-        const ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
-    };
-    std::optional<KeyedMutexReleaser> mDXGIKeyedMutexReleaser;
 };
 
 }  // namespace dawn::native::d3d

@@ -43,6 +43,7 @@
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/UtilsD3D.h"
+#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
 #include "dawn/native/d3d11/QueueD3D11.h"
@@ -229,12 +230,22 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
     Device* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     ComPtr<IUnknown> d3dTexture,
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
     std::vector<FenceAndSignalValue> waitFences,
     bool isSwapChainTexture,
     bool isInitialized) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
-    DAWN_TRY(dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(waitFences),
-                                                      isSwapChainTexture));
+    DAWN_TRY(
+        dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(dxgiKeyedMutex)));
+
+    auto commandContext =
+        ToBackend(device->GetQueue())
+            ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Normal);
+    for (const auto& fence : waitFences) {
+        DAWN_TRY(CheckHRESULT(
+            commandContext.Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
+            "ID3D11DeviceContext4::Wait"));
+    }
 
     // Importing a multi-planar format must be initialized. This is required because
     // a shared multi-planar format cannot be initialized by Dawn.
@@ -254,7 +265,8 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
-    DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
+    DAWN_TRY(
+        texture->InitializeAsExternalTexture(memory->GetD3DResource(), memory->GetKeyedMutex()));
     texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
@@ -367,19 +379,11 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Tex
 }
 
 MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
-                                                std::vector<FenceAndSignalValue> waitFences,
-                                                bool isSwapChainTexture) {
+                                                ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
     ComPtr<ID3D11Resource> d3d11Texture;
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
-
-    auto commandContext = ToBackend(GetDevice()->GetQueue())
-                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-    for (const auto& fence : waitFences) {
-        DAWN_TRY(CheckHRESULT(
-            commandContext.Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
-            "ID3D11DeviceContext4::Wait"));
-    }
     mD3d11Resource = std::move(d3d11Texture);
+    mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
     SetLabelHelper("Dawn_ExternalTexture");
     return {};
 }
@@ -498,16 +502,18 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilVi
 
 MaybeError Texture::SynchronizeTextureBeforeUse(
     const ScopedCommandRecordingContext* commandContext) {
-    if (SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents()) {
+    if (auto* contents = GetSharedTextureMemoryContents()) {
         SharedTextureMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
         contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());
-
-        for (auto& fence : fences) {
+        for (const auto& fence : fences) {
             DAWN_TRY(CheckHRESULT(
                 commandContext->Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
                 "ID3D11DeviceContext4::Wait"));
         }
+    }
+    if (mDxgiKeyedMutex) {
+        DAWN_TRY(commandContext->AcquireKeyedMutex(mDxgiKeyedMutex));
     }
     mLastUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
     return {};
