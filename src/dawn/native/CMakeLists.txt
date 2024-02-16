@@ -209,6 +209,8 @@ target_sources(dawn_native
     "Serializable.h"
     "ShaderModule.cpp"
     "ShaderModule.h"
+    "SharedBufferMemory.cpp"
+    "SharedBufferMemory.h"
     "SharedFence.cpp"
     "SharedFence.h"
     "SharedTextureMemory.cpp"

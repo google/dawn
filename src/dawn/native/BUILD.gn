@@ -355,6 +355,8 @@ source_set("sources") {
     "Serializable.h",
     "ShaderModule.cpp",
     "ShaderModule.h",
+    "SharedBufferMemory.cpp",
+    "SharedBufferMemory.h",
     "SharedFence.cpp",
     "SharedFence.h",
     "SharedTextureMemory.cpp",

@@ -44,6 +44,7 @@ class BindGroupBase;
 class BindGroupLayoutBase;
 class BindGroupLayoutInternalBase;
 class BufferBase;
+class SharedBufferMemoryBase;
 class ComputePipelineBase;
 class CommandBufferBase;
 class CommandEncoder;
