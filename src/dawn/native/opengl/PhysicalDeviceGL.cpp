@@ -343,6 +343,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     bool supportsSampleVariables = gl.IsAtLeastGL(4, 0) || gl.IsAtLeastGLES(3, 2) ||
                                    gl.IsGLExtensionSupported("GL_OES_sample_variables");
 
+    // Decide whether glTexSubImage2D/3D accepts GL_STENCIL_INDEX or not.
+    bool supportsStencilWriteTexture =
+        gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
+
     // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
     // procs without the extension suffix.
     // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
@@ -397,6 +401,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
 
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
+
+    // Use a blit to emulate write to stencil textures.
+    deviceToggles->Default(Toggle::UseBlitForStencilTextureWrite, !supportsStencilWriteTexture);
 
     // Use T2B and B2T copies to emulate a T2T copy between sRGB and non-sRGB textures.
     deviceToggles->Default(Toggle::UseT2B2TForSRGBTextureCopy, true);

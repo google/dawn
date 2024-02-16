@@ -70,6 +70,7 @@ class Queue final : public d3d::Queue {
                                size_t size) override;
     MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
                                 const void* data,
+                                size_t dataSize,
                                 const TextureDataLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 

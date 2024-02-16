@@ -352,6 +352,8 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
     return {};
 }
 
+}  // anonymous namespace
+
 MaybeError BlitR8ToStencil(DeviceBase* device,
                            CommandEncoder* commandEncoder,
                            TextureBase* dataTexture,
@@ -493,8 +495,6 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
     }
     return {};
 }
-
-}  // anonymous namespace
 
 MaybeError BlitStagingBufferToDepth(DeviceBase* device,
                                     BufferBase* buffer,

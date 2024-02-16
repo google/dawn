@@ -1470,9 +1470,12 @@ void DoTexSubImage(const OpenGLFunctions& gl,
     } else {
         uint32_t width = copySize.width;
         uint32_t height = copySize.height;
-        DAWN_ASSERT(gl.GetVersion().IsDesktop() ||
-                    gl.IsGLExtensionSupported("GL_OES_texture_stencil8"));
-        GLenum adjustedFormat = format.format == GL_STENCIL ? GL_STENCIL_INDEX : format.format;
+        GLenum adjustedFormat = format.format;
+        if (format.format == GL_STENCIL) {
+            DAWN_ASSERT(gl.GetVersion().IsDesktop() ||
+                        gl.IsGLExtensionSupported("GL_OES_texture_stencil8"));
+            adjustedFormat = GL_STENCIL_INDEX;
+        }
         if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
             // Valid values for GL_UNPACK_ALIGNMENT are 1, 2, 4, 8
             gl.PixelStorei(GL_UNPACK_ALIGNMENT, std::min(8u, blockInfo.byteSize));

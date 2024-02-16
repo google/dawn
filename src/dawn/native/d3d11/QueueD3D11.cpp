@@ -168,6 +168,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
 
 MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
                                    const void* data,
+                                   size_t dataSize,
                                    const TextureDataLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     if (writeSizePixel.width == 0 || writeSizePixel.height == 0 ||

@@ -35,6 +35,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandEncoder.h"
@@ -465,11 +466,12 @@ MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOr
         destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
     TextureDataLayout layout = dataLayout;
     ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
-    return WriteTextureImpl(destination, data, layout, *writeSize);
+    return WriteTextureImpl(destination, data, dataSize, layout, *writeSize);
 }
 
 MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
                                        const void* data,
+                                       size_t dataSize,
                                        const TextureDataLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
     const Format& format = destination.texture->GetFormat();

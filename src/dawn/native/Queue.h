@@ -136,6 +136,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
                                        size_t size);
     virtual MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
                                         const void* data,
+                                        size_t dataSize,
                                         const TextureDataLayout& dataLayout,
                                         const Extent3D& writeSize);
 

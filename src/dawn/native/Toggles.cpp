@@ -394,6 +394,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "texture. Works around an issue where stencil writes by copy commands are not visible "
       "to a render or compute pass.",
       "https://crbug.com/dawn/1389", ToggleStage::Device}},
+    {Toggle::UseBlitForStencilTextureWrite,
+     {"use_blit_for_stencil_texture_write",
+      "Use a blit instead of a write texture command to upload data to the stencil aspect of a "
+      "texture. Works around for OpenGLES when glTexSubImage doesn't support GL_STENCIL_INDEX, "
+      "and when the texture format is depth-stencil-combined.",
+      "https://crbug.com/dawn/2391", ToggleStage::Device}},
     {Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
      {"use_blit_for_depth_texture_to_texture_copy_to_nonzero_subresource",
       "Use a blit to copy from a depth texture to the nonzero subresource of a depth texture. "

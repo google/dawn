@@ -230,22 +230,55 @@ constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
 namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(WriteTextureFormatParams, TextureFormat);
+
+struct TextureSpec {
+    wgpu::Origin3D copyOrigin;
+    wgpu::Extent3D textureSize;
+    uint32_t level;
+};
+
+struct DataSpec {
+    uint64_t size;
+    uint64_t offset;
+    uint32_t bytesPerRow;
+    uint32_t rowsPerImage;
+};
+
+void PackTextureData(const uint8_t* srcData,
+                     uint32_t width,
+                     uint32_t height,
+                     uint32_t srcBytesPerRow,
+                     uint8_t* dstData,
+                     uint32_t dstBytesPerRow,
+                     uint32_t bytesPerTexel) {
+    for (uint64_t y = 0; y < height; ++y) {
+        for (uint64_t x = 0; x < width; ++x) {
+            uint64_t src = x * bytesPerTexel + y * srcBytesPerRow;
+            uint64_t dst = x * bytesPerTexel + y * dstBytesPerRow;
+
+            for (uint64_t i = 0; i < bytesPerTexel; i++) {
+                dstData[dst + i] = srcData[src + i];
+            }
+        }
+    }
+}
+
+void FillData(uint8_t* data, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        data[i] = static_cast<uint8_t>(i % 253);
+    }
+}
 }  // namespace
 
 class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParams> {
   protected:
-    struct TextureSpec {
-        wgpu::Origin3D copyOrigin;
-        wgpu::Extent3D textureSize;
-        uint32_t level;
-    };
-
-    struct DataSpec {
-        uint64_t size;
-        uint64_t offset;
-        uint32_t bytesPerRow;
-        uint32_t rowsPerImage;
-    };
+    void SetUp() override {
+        DawnTestWithParams::SetUp();
+        // TODO(crbug.com/dawn/2391): Stencil format is failing on ANGLE + SwiftShader, needs
+        // investigation.
+        DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader() &&
+                              utils::IsDepthOrStencilFormat(GetParam().mTextureFormat));
+    }
 
     static DataSpec MinimumDataSpec(wgpu::Extent3D writeSize,
                                     uint32_t overrideBytesPerRow = kStrideComputeDefault,
@@ -263,31 +296,6 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
         uint32_t totalDataSize = utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, writeSize,
                                                             GetParam().mTextureFormat);
         return {totalDataSize, 0, bytesPerRow, rowsPerImage};
-    }
-
-    static void PackTextureData(const uint8_t* srcData,
-                                uint32_t width,
-                                uint32_t height,
-                                uint32_t srcBytesPerRow,
-                                uint8_t* dstData,
-                                uint32_t dstBytesPerRow,
-                                uint32_t bytesPerTexel) {
-        for (uint64_t y = 0; y < height; ++y) {
-            for (uint64_t x = 0; x < width; ++x) {
-                uint64_t src = x * bytesPerTexel + y * srcBytesPerRow;
-                uint64_t dst = x * bytesPerTexel + y * dstBytesPerRow;
-
-                for (uint64_t i = 0; i < bytesPerTexel; i++) {
-                    dstData[dst + i] = srcData[src + i];
-                }
-            }
-        }
-    }
-
-    static void FillData(uint8_t* data, size_t count) {
-        for (size_t i = 0; i < count; ++i) {
-            data[i] = static_cast<uint8_t>(i % 253);
-        }
     }
 
     void DoTest(const TextureSpec& textureSpec,
@@ -356,32 +364,6 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
 
             dataOffset += bytesPerImage;
         }
-    }
-
-    void DoSimpleWriteTextureTest(uint32_t width, uint32_t height) {
-        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
-        constexpr uint32_t kPixelSize = 4;
-
-        std::vector<uint32_t> data(width * height);
-        for (size_t i = 0; i < data.size(); i++) {
-            data[i] = 0xFFFFFFFF;
-        }
-
-        wgpu::TextureDescriptor descriptor = {};
-        descriptor.size = {width, height, 1};
-        descriptor.format = kFormat;
-        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-        wgpu::Texture texture = device.CreateTexture(&descriptor);
-
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, width * kPixelSize);
-        wgpu::Extent3D copyExtent = {width, height, 1};
-        device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), width * height * kPixelSize,
-                                       &textureDataLayout, &copyExtent);
-
-        EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
     }
 };
 
@@ -709,10 +691,55 @@ TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
     DoTest(textureSpec, MinimumDataSpec(size), size);
 }
 
+DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
+                        {D3D11Backend(), D3D12Backend(),
+                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                       "copy_with_non_zero_buffer_offset"}),
+                         MetalBackend(),
+                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
+                                       "use_blit_for_buffer_to_stencil_texture_copy"}),
+                         OpenGLBackend(), OpenGLESBackend(),
+                         OpenGLESBackend({"use_blit_for_stencil_texture_write"}), VulkanBackend()},
+                        {
+                            wgpu::TextureFormat::R8Unorm,
+                            wgpu::TextureFormat::RG8Unorm,
+                            wgpu::TextureFormat::RGBA8Unorm,
+                            wgpu::TextureFormat::Stencil8,
+                        });
+
+class QueueWriteTextureSimpleTests : public DawnTest {
+  protected:
+    void DoSimpleWriteTextureTest(uint32_t width, uint32_t height) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kPixelSize = 4;
+
+        std::vector<uint32_t> data(width * height);
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] = 0xFFFFFFFF;
+        }
+
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.size = {width, height, 1};
+        descriptor.format = kFormat;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::TextureDataLayout textureDataLayout =
+            utils::CreateTextureDataLayout(0, width * kPixelSize);
+        wgpu::Extent3D copyExtent = {width, height, 1};
+        device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), width * height * kPixelSize,
+                                       &textureDataLayout, &copyExtent);
+
+        EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
+    }
+};
+
 // This tests for a bug that occurred within the D3D12 CopyTextureSplitter, which incorrectly copied
 // data when the internal offset was larger than 256, but less than 512 and the copy size was 64
 // width or less with a height of 1.
-TEST_P(QueueWriteTextureTests, WriteTo64x1TextureFromUnalignedDynamicUploader) {
+TEST_P(QueueWriteTextureSimpleTests, WriteTo64x1TextureFromUnalignedDynamicUploader) {
     // First, WriteTexture with 96 pixels, or 384 bytes to create an offset in the dynamic uploader.
     DoSimpleWriteTextureTest(96, 1);
 
@@ -724,9 +751,9 @@ TEST_P(QueueWriteTextureTests, WriteTo64x1TextureFromUnalignedDynamicUploader) {
 
 // This tests for a bug in the allocation of internal staging buffer, which incorrectly copied depth
 // stencil data to the internal offset that is not a multiple of 4.
-TEST_P(QueueWriteTextureTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
-    // Copies to a single aspect are unsupported on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
+    // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -796,10 +823,7 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
 // Tests calling queue.writeTexture() to a depth texture after calling queue.writeTexture() on
 // another texture always works. On some D3D12 backends the buffer offset of buffer-to-texture
 // copies must be a multiple of 512 when the destination texture is a depth stencil texture.
-TEST_P(QueueWriteTextureTests, WriteDepthAspectAfterOtherQueueWriteTextureCalls) {
-    // Copies to a single aspect are unsupported on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
+TEST_P(QueueWriteTextureSimpleTests, WriteDepthAspectAfterOtherQueueWriteTextureCalls) {
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth16Unorm;
     textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -830,9 +854,9 @@ TEST_P(QueueWriteTextureTests, WriteDepthAspectAfterOtherQueueWriteTextureCalls)
 // Tests calling queue.writeTexture() to the stencil aspect after calling queue.writeTexture() on
 // another texture always works. On some D3D12 backends the buffer offset of buffer-to-texture
 // copies must be a multiple of 512 when the destination texture is a depth stencil texture.
-TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCalls) {
-    // Copies to a single aspect are unsupported on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextureCalls) {
+    // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -861,20 +885,13 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCall
                       wgpu::TextureAspect::StencilOnly);
 }
 
-DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
-                                       "copy_with_non_zero_buffer_offset"}),
-                         MetalBackend(),
-                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
-                                       "use_blit_for_buffer_to_stencil_texture_copy"}),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-                        {
-                            wgpu::TextureFormat::R8Unorm,
-                            wgpu::TextureFormat::RG8Unorm,
-                            wgpu::TextureFormat::RGBA8Unorm,
-                            wgpu::TextureFormat::Stencil8,
-                        });
+DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

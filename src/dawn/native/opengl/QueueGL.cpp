@@ -27,6 +27,9 @@
 
 #include "dawn/native/opengl/QueueGL.h"
 
+#include "dawn/native/BlitBufferToDepthStencil.h"
+#include "dawn/native/CommandBuffer.h"
+#include "dawn/native/CommandEncoder.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/CommandBufferGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -67,6 +70,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
 
 MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
                                    const void* data,
+                                   size_t dataSize,
                                    const TextureDataLayout& dataLayout,
                                    const Extent3D& writeSizePixel) {
     TextureCopy textureCopy;
@@ -74,6 +78,50 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     textureCopy.mipLevel = destination.mipLevel;
     textureCopy.origin = destination.origin;
     textureCopy.aspect = SelectFormatAspects(destination.texture->GetFormat(), destination.aspect);
+
+    DeviceBase* device = GetDevice();
+    if (textureCopy.aspect == Aspect::Stencil &&
+        (textureCopy.texture->GetFormat().aspects & Aspect::Depth ||
+         device->IsToggleEnabled(Toggle::UseBlitForStencilTextureWrite))) {
+        // Workaround when write to stencil is unsupported:
+        // - when the texture is stencil-only but OES_texture_stencil8 is unavailable.
+        // - when the texture is depth-stencil-combined and writing to the stencil aspect.
+
+        // Call WriteTexture to upload data to an intermediate R8Uint texture.
+        TextureDescriptor dataTextureDesc = {};
+        dataTextureDesc.format = wgpu::TextureFormat::R8Uint;
+        dataTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
+        dataTextureDesc.size = writeSizePixel;
+        dataTextureDesc.mipLevelCount = 1;
+        Ref<TextureBase> dataTexture;
+        DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
+        {
+            ImageCopyTexture destinationDataTexture;
+            destinationDataTexture.texture = dataTexture.Get();
+            destinationDataTexture.aspect = wgpu::TextureAspect::All;
+            destinationDataTexture.mipLevel = 0;
+            destinationDataTexture.origin = destination.origin;
+            DAWN_TRY_CONTEXT(WriteTextureImpl(destinationDataTexture, data, dataSize, dataLayout,
+                                              writeSizePixel),
+                             "writing to stencil aspect of %s using blit workaround when writing "
+                             "to an intermediate r8uint texture.",
+                             textureCopy.texture.Get());
+        }
+
+        // Blit from R8Uint texture to the stencil texture.
+        Ref<CommandEncoderBase> commandEncoder;
+        DAWN_TRY_ASSIGN(commandEncoder, device->CreateCommandEncoder());
+        DAWN_TRY_CONTEXT(BlitR8ToStencil(device, commandEncoder.Get(), dataTexture.Get(),
+                                         textureCopy, writeSizePixel),
+                         "writing to stencil aspect of %s using blit workaround.",
+                         textureCopy.texture.Get());
+
+        Ref<CommandBufferBase> commandBuffer;
+        DAWN_TRY_ASSIGN(commandBuffer, commandEncoder->Finish());
+        CommandBufferBase* commands = commandBuffer.Get();
+        APISubmit(1, &commands);
+        return {};
+    }
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(textureCopy, writeSizePixel);
     if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel,
