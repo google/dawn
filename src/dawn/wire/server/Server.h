@@ -125,8 +125,8 @@ struct ErrorScopeUserdata : CallbackUserdata {
 struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
 
-    ObjectHandle shaderModule;
-    uint64_t requestSerial;
+    ObjectHandle eventManager;
+    WGPUFuture future;
 };
 
 struct QueueWorkDoneUserdata : CallbackUserdata {

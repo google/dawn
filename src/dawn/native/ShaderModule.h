@@ -355,9 +355,9 @@ class ShaderModuleBase : public RefCountedWithExternalCountBase<ApiObjectBase>,
     int GetTintProgramRecreateCountForTesting() const;
 
     void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
+    Future APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo);
 
     void InjectCompilationMessages(std::unique_ptr<OwnedCompilationMessages> compilationMessages);
-
     OwnedCompilationMessages* GetCompilationMessages() const;
 
   protected:

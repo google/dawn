@@ -100,7 +100,8 @@
         ],
         "shader module get compilation info": [
             { "name": "shader module id", "type": "ObjectId", "id_type": "shader module" },
-            { "name": "request serial", "type": "uint64_t" }
+            { "name": "event manager handle", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" }
         ],
         "instance request adapter": [
             { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
@@ -164,8 +165,8 @@
             { "name": "status", "type": "queue work done status" }
         ],
         "shader module get compilation info callback": [
-            { "name": "shader module", "type": "ObjectHandle", "handle_type": "shader module" },
-            { "name": "request serial", "type": "uint64_t" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "status", "type": "compilation info request status" },
             { "name": "info", "type": "compilation info", "annotation": "const*", "optional": true }
         ],
@@ -232,6 +233,7 @@
             "InstanceRequestAdapter",
             "InstanceRequestAdapterF",
             "ShaderModuleGetCompilationInfo",
+            "ShaderModuleGetCompilationInfoF",
             "QuerySetGetType",
             "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",

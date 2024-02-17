@@ -77,18 +77,4 @@ WireResult Client::DoDeviceLostCallback(Device* device,
     return WireResult::Success;
 }
 
-WireResult Client::DoShaderModuleGetCompilationInfoCallback(ShaderModule* shaderModule,
-                                                            uint64_t requestSerial,
-                                                            WGPUCompilationInfoRequestStatus status,
-                                                            const WGPUCompilationInfo* info) {
-    // The shader module might have been deleted or recreated so this isn't an error.
-    if (shaderModule == nullptr) {
-        return WireResult::Success;
-    }
-    if (shaderModule->GetCompilationInfoCallback(requestSerial, status, info)) {
-        return WireResult::Success;
-    }
-    return WireResult::FatalError;
-}
-
 }  // namespace dawn::wire::client

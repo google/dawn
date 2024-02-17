@@ -37,6 +37,7 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
@@ -1387,9 +1388,47 @@ void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callb
     if (callback == nullptr) {
         return;
     }
+    CompilationInfoCallbackInfo callbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
+                                                callback, userdata};
+    APIGetCompilationInfoF(callbackInfo);
+}
 
-    callback(WGPUCompilationInfoRequestStatus_Success, mCompilationMessages->GetCompilationInfo(),
-             userdata);
+Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo) {
+    struct CompilationInfoEvent final : public EventManager::TrackedEvent {
+        WGPUCompilationInfoCallback mCallback;
+        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+        raw_ptr<void, DanglingUntriaged> mUserdata;
+        // Need to keep a Ref of the compilation messages in case the ShaderModule goes away before
+        // the callback happens.
+        Ref<ShaderModuleBase> mShaderModule;
+
+        CompilationInfoEvent(const CompilationInfoCallbackInfo& callbackInfo,
+                             Ref<ShaderModuleBase> shaderModule)
+            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+              mCallback(callbackInfo.callback),
+              mUserdata(callbackInfo.userdata),
+              mShaderModule(std::move(shaderModule)) {
+            CompleteIfSpontaneous();
+        }
+
+        ~CompilationInfoEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
+
+        void Complete(EventCompletionType completionType) override {
+            WGPUCompilationInfoRequestStatus status =
+                WGPUCompilationInfoRequestStatus_InstanceDropped;
+            const WGPUCompilationInfo* compilationInfo = nullptr;
+            if (completionType == EventCompletionType::Ready) {
+                status = WGPUCompilationInfoRequestStatus_Success;
+                compilationInfo = mShaderModule->mCompilationMessages->GetCompilationInfo();
+            }
+            if (mCallback) {
+                mCallback(status, compilationInfo, mUserdata);
+            }
+        }
+    };
+    FutureID futureID = GetDevice()->GetInstance()->GetEventManager()->TrackEvent(
+        AcquireRef(new CompilationInfoEvent(callbackInfo, this)));
+    return {futureID};
 }
 
 void ShaderModuleBase::InjectCompilationMessages(

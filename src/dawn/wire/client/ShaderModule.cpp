@@ -27,56 +27,127 @@
 
 #include "dawn/wire/client/ShaderModule.h"
 
+#include <memory>
+
 #include "dawn/wire/client/Client.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
 
-ShaderModule::~ShaderModule() {
-    ClearAllCallbacks(WGPUCompilationInfoRequestStatus_Unknown);
-}
+class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
+  public:
+    static constexpr EventType kType = EventType::CompilationInfo;
+
+    CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo& callbackInfo, ShaderModule* shader)
+        : TrackedEvent(callbackInfo.mode),
+          mCallback(callbackInfo.callback),
+          mUserdata(callbackInfo.userdata),
+          mShader(shader) {
+        DAWN_ASSERT(mShader != nullptr);
+        mShader->Reference();
+    }
+
+    ~CompilationInfoEvent() override { mShader->Release(); }
+
+    EventType GetType() override { return kType; }
+
+    WireResult ReadyHook(FutureID futureId,
+                         WGPUCompilationInfoRequestStatus status,
+                         const WGPUCompilationInfo* info) {
+        if (mShader->mCompilationInfo) {
+            // If we already cached the compilation info on the shader, we don't need to do it
+            // again. This can happen if we were to call GetCompilationInfo multiple times before
+            // the wire flushes.
+            return ReadyHook(futureId);
+        }
+
+        mStatus = status;
+        mShader->mMessageStrings.reserve(info->messageCount);
+        mShader->mMessages.reserve(info->messageCount);
+        for (size_t i = 0; i < info->messageCount; i++) {
+            mShader->mMessageStrings.push_back(info->messages[i].message);
+            mShader->mMessages.push_back(info->messages[i]);
+            mShader->mMessages[i].message = mShader->mMessageStrings[i].c_str();
+        }
+        mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
+
+        mCompilationInfo = &*mShader->mCompilationInfo;
+        return WireResult::Success;
+    }
+
+    WireResult ReadyHook(FutureID futureId) {
+        // We call this ReadyHook when we already have a cached compilation on the shader (usually
+        // from a previous GetCompilationInfo call).
+        DAWN_ASSERT(mShader->mCompilationInfo);
+        mStatus = WGPUCompilationInfoRequestStatus_Success;
+        mCompilationInfo = &(*mShader->mCompilationInfo);
+        return WireResult::Success;
+    }
+
+  private:
+    void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        if (completionType == EventCompletionType::Shutdown) {
+            mStatus = WGPUCompilationInfoRequestStatus_InstanceDropped;
+            mCompilationInfo = nullptr;
+        }
+        if (mCallback) {
+            mCallback(mStatus, mCompilationInfo, mUserdata);
+        }
+    }
+
+    WGPUCompilationInfoCallback mCallback;
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    raw_ptr<void, DanglingUntriaged> mUserdata;
+
+    WGPUCompilationInfoRequestStatus mStatus;
+    const WGPUCompilationInfo* mCompilationInfo = nullptr;
+
+    // Strong reference to the buffer so that when we call the callback we can pass the buffer.
+    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
+    const raw_ptr<ShaderModule, DanglingUntriaged> mShader;
+};
 
 ObjectType ShaderModule::GetObjectType() const {
     return ObjectType::ShaderModule;
 }
 
 void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
-    Client* client = GetClient();
-    if (client->IsDisconnected()) {
-        callback(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, userdata);
-        return;
+    WGPUCompilationInfoCallbackInfo callbackInfo = {};
+    callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+    callbackInfo.callback = callback;
+    callbackInfo.userdata = userdata;
+    GetCompilationInfoF(callbackInfo);
+}
+
+WGPUFuture ShaderModule::GetCompilationInfoF(const WGPUCompilationInfoCallbackInfo& callbackInfo) {
+    auto [futureIDInternal, tracked] =
+        GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(callbackInfo, this));
+    if (!tracked) {
+        return {futureIDInternal};
     }
 
-    uint64_t serial = mCompilationInfoRequests.Add({callback, userdata});
+    // If we already have a cached compilation info object, we can set it ready now.
+    if (mCompilationInfo) {
+        DAWN_CHECK(GetEventManager().SetFutureReady<CompilationInfoEvent>(futureIDInternal) ==
+                   WireResult::Success);
+        return {futureIDInternal};
+    }
 
     ShaderModuleGetCompilationInfoCmd cmd;
     cmd.shaderModuleId = GetWireId();
-    cmd.requestSerial = serial;
+    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.future = {futureIDInternal};
 
-    client->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(cmd);
+    return {futureIDInternal};
 }
 
-bool ShaderModule::GetCompilationInfoCallback(uint64_t requestSerial,
-                                              WGPUCompilationInfoRequestStatus status,
-                                              const WGPUCompilationInfo* info) {
-    CompilationInfoRequest request;
-    if (!mCompilationInfoRequests.Acquire(requestSerial, &request)) {
-        return false;
-    }
-
-    request.callback(status, info, request.userdata);
-    return true;
-}
-
-void ShaderModule::CancelCallbacksForDisconnect() {
-    ClearAllCallbacks(WGPUCompilationInfoRequestStatus_DeviceLost);
-}
-
-void ShaderModule::ClearAllCallbacks(WGPUCompilationInfoRequestStatus status) {
-    mCompilationInfoRequests.CloseAll([status](CompilationInfoRequest* request) {
-        if (request->callback != nullptr) {
-            request->callback(status, nullptr, request->userdata);
-        }
-    });
+WireResult Client::DoShaderModuleGetCompilationInfoCallback(ObjectHandle eventManager,
+                                                            WGPUFuture future,
+                                                            WGPUCompilationInfoRequestStatus status,
+                                                            const WGPUCompilationInfo* info) {
+    return GetEventManager(eventManager)
+        .SetFutureReady<ShaderModule::CompilationInfoEvent>(future.id, status, info);
 }
 
 }  // namespace dawn::wire::client

@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace dawn::wire::client {
@@ -44,7 +45,11 @@ namespace dawn::wire::client {
         } else if constexpr (std::is_constructible_v<Child, const ObjectBaseParams&, const ObjectHandle&, decltype(args)...>) {
             return p->GetClient()->template Make<Child>(p->GetEventManagerHandle(), args...);
         } else {
-            return p->GetClient()->template Make<Child>();
+            if constexpr (std::is_base_of_v<ObjectWithEventsBase, Child>) {
+                return p->GetClient()->template Make<Child>(p->GetEventManagerHandle());
+            } else {
+                return p->GetClient()->template Make<Child>();
+            }
         }
     }
 

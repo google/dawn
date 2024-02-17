@@ -116,6 +116,8 @@ void EventManager::TransitionTo(EventManager::State state) {
                         if (event->GetCallbackMode() != WGPUCallbackMode_AllowSpontaneous) {
                             events.emplace(it->first, std::move(event));
                             it = trackedEvents->erase(it);
+                        } else {
+                            ++it;
                         }
                     }
                 });
