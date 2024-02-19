@@ -91,8 +91,9 @@ class ScopedRawPtrExpectation {
     ~ScopedRawPtrExpectation() { Mock::VerifyAndClearExpectations(mPtr); }
 
   private:
-    // TODO(https://crbug.com/dawn/2346): Investigate `DanglingUntriaged` pointers in dawn/test.
-    raw_ptr<void, DanglingUntriaged> mPtr = nullptr;
+    // This pointer is explicitely meant to test expectations against a deleted
+    // object. So it is allowed to dangle.
+    raw_ptr<void, DisableDanglingPtrDetection> mPtr = nullptr;
 };
 
 class DestroyObjectTests : public DawnMockTest {
