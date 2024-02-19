@@ -1666,7 +1666,7 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
     // or even logs to be emitted re-entrantly. It will block if there is a call
     // to SetLoggingCallback. Applications should not call SetLoggingCallback inside
     // the logging callback or they will deadlock.
-    std::shared_lock lock(mLoggingMutex);
+    std::shared_lock<std::shared_mutex> lock(mLoggingMutex);
     if (mLoggingCallback) {
         mLoggingCallback(loggingType, message, mLoggingUserdata);
     }
