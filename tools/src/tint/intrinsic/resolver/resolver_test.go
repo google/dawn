@@ -73,29 +73,29 @@ match y: e.c | e.a | e.b`,
 			`fn f()`,
 			success,
 		}, {
-			`fn f<T>()`,
+			`fn f[T]()`,
 			success,
 		}, {
 			`
 type f32
-fn f<N: num>()`,
+fn f[N: num]()`,
 			success,
 		}, {
 			`
 enum e { a b c }
-fn f<N: e>()`,
+fn f[N: e]()`,
 			success,
 		}, {
 			`
 type f32
-fn f<T>(T) -> f32`,
+fn f[T](T) -> f32`,
 			success,
 		}, {
 			`
 type f32
 type P<T>
 match m: f32
-fn f<T: m>(P<T>) -> T`,
+fn f[T: m](P<T>) -> T`,
 			success,
 		}, {
 			`
@@ -108,7 +108,7 @@ fn f(m)`,
 enum e { a b }
 type T<E: e>
 match m: e.a
-fn f<E: m>(T<E>)`,
+fn f[E: m](T<E>)`,
 			success,
 		}, {
 			`
@@ -134,21 +134,21 @@ fn f(T<a>)`,
 		}, {
 			`
 type T<E: num>
-fn f<E: num>(T<E>)`,
+fn f[E: num](T<E>)`,
 			success,
 		}, {
-			`fn f<T>(T)`,
+			`fn f[T](T)`,
 			success,
 		}, {
 			`
 enum e { a b }
-fn f<E: e>()`,
+fn f[E: e]()`,
 			success,
 		}, {
 			`
 enum e { a b }
 match m: e.a | e.b
-fn f<E: m>()`,
+fn f[E: m]()`,
 			success,
 		}, {
 			`
@@ -300,7 +300,7 @@ file.txt:3:10 'x' resolves to type matcher 'x' but type is expected
 			`fn f() -> u`,
 			`file.txt:1:11 cannot resolve 'u'`,
 		}, {
-			`fn f<T: u>()`,
+			`fn f[T: u]()`,
 			`file.txt:1:9 cannot resolve 'u'`,
 		}, {
 			`
@@ -315,7 +315,7 @@ fn f(T<u>)`,
 		}, {
 			`
 type x
-fn f<T>(T<x>)`,
+fn f[T](T<x>)`,
 			`file.txt:2:9 'T' template parameters do not accept template arguments`,
 		}, {
 			`
@@ -348,7 +348,7 @@ fn f(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-fn f<M: m>(P<M>)`,
+fn f[M: m](P<M>)`,
 			`file.txt:4:14 cannot use template enum 'E' as template number`,
 		}, {
 			`
@@ -373,7 +373,7 @@ op << (i, i, i)`,
 		}, {
 			`
 type x
-op << <T>(T<x>)`,
+op << [T](T<x>)`,
 			`file.txt:2:11 'T' template parameters do not accept template arguments`,
 		}, {
 			`
@@ -413,7 +413,7 @@ op << (P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-op << <M: m>(P<M>)`,
+op << [M: m](P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`
@@ -429,7 +429,7 @@ ctor F(T<u>)`,
 		}, {
 			`
 type x
-ctor F<T>(T<x>)`,
+ctor F[T](T<x>)`,
 			`file.txt:2:11 'T' template parameters do not accept template arguments`,
 		}, {
 			`
@@ -469,7 +469,7 @@ ctor F(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-ctor F<M: m>(P<M>)`,
+ctor F[M: m](P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`
@@ -494,7 +494,7 @@ conv F(T<u>)`,
 		}, {
 			`
 type x
-conv F<T>(T<x>)`,
+conv F[T](T<x>)`,
 			`file.txt:2:11 'T' template parameters do not accept template arguments`,
 		}, {
 			`
@@ -534,7 +534,7 @@ conv F(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-conv F<M: m>(P<M>)`,
+conv F[M: m](P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`

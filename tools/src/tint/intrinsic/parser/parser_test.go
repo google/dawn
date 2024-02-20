@@ -251,7 +251,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F<A : B<C> >()",
+			"fn F[A : B<C> ]()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -271,7 +271,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F<T>(a: X, b: Y<T>)",
+			"fn F[T](a: X, b: Y<T>)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -389,7 +389,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"op F<A : B<C> >()",
+			"op F[A : B<C> ]()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,
@@ -409,7 +409,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"op F<T>(a: X, b: Y<T>)",
+			"op F[T](a: X, b: Y<T>)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,
@@ -513,7 +513,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"ctor F<A : B<C> >()",
+			"ctor F[A : B<C> ]()",
 			ast.AST{
 				Constructors: []ast.IntrinsicDecl{{
 					Kind: ast.Constructor,
@@ -533,7 +533,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"ctor F<T>(a: X, b: Y<T>)",
+			"ctor F[T](a: X, b: Y<T>)",
 			ast.AST{
 				Constructors: []ast.IntrinsicDecl{{
 					Kind: ast.Constructor,
@@ -637,7 +637,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"conv F<A : B<C> >()",
+			"conv F[A : B<C> ]()",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
 					Kind: ast.Converter,
@@ -657,7 +657,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"conv F<T>(a: X, b: Y<T>)",
+			"conv F[T](a: X, b: Y<T>)",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
 					Kind: ast.Converter,

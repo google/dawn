@@ -123,191 +123,191 @@ match writable
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
-fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I) -> u32
+fn array_length[I: u32, A: access](ptr<storage, struct_with_runtime_array, A>, I) -> u32
 
-@stage("fragment", "compute") fn atomic_and<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_compare_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
-@stage("fragment", "compute") fn atomic_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_iadd<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_isub<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_load<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U) -> T
-@stage("fragment", "compute") fn atomic_or<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_smax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_smin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_store<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T)
-@stage("fragment", "compute") fn atomic_umax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_umin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_xor<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_and[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_compare_exchange[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
+@stage("fragment", "compute") fn atomic_exchange[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_iadd[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_isub[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_load[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U) -> T
+@stage("fragment", "compute") fn atomic_or[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_smax[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_smin[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_store[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T)
+@stage("fragment", "compute") fn atomic_umax[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_umin[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_xor[T: iu32, U: u32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, U, U, T) -> T
 
-fn dot<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
+fn dot[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 
-fn image_dref_gather<A: f32, B: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, A, B) -> vec4<f32>
-fn image_dref_gather<A: f32, B: iu32, C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, A, B, vec2<C>) -> vec4<f32>
-fn image_dref_gather<A: f32, B: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, A, B) -> vec4<f32>
-fn image_dref_gather<A: f32, B: iu32, C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, A, B, vec2<C>) -> vec4<f32>
-fn image_dref_gather<A: f32, B: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, A, B) -> vec4<f32>
-fn image_dref_gather<A: f32, B: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, A, B) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32](sampled_image<texture_depth_2d>, vec2<f32>, A, B) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32, C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, A, B, vec2<C>) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, A, B) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32, C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, A, B, vec2<C>) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32](sampled_image<texture_depth_cube>, vec3<f32>, A, B) -> vec4<f32>
+fn image_dref_gather[A: f32, B: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, A, B) -> vec4<f32>
 
-fn image_fetch<T: fiu32, C: iu32, I: iu32, S: iu32>(texture_1d<T>, C, I, S) -> vec4<T>
-fn image_fetch<T: fiu32, C: iu32, I: iu32, S: iu32>(texture_2d<T>, vec2<C>, I, S) -> vec4<T>
-fn image_fetch<T: fiu32, C: iu32, I: iu32, S: iu32>(texture_2d_array<T>, vec3<C>, I, S) -> vec4<T>
-fn image_fetch<T: fiu32, C: iu32, I: iu32, S: iu32>(texture_3d<T>, vec3<C>, I, S) -> vec4<T>
-fn image_fetch<T: fiu32, C: iu32, I: iu32, S: iu32>(texture_multisampled_2d<T>, vec2<C>, I, S) -> vec4<T>
-fn image_fetch<I: iu32, C: iu32, S: iu32>(texture_depth_2d, vec2<C>, I, S) -> vec4<f32>
-fn image_fetch<I: iu32, C: iu32, S: iu32>(texture_depth_2d_array, vec3<C>, I, S) -> vec4<f32>
-fn image_fetch<I: iu32, C: iu32, S: iu32>(texture_depth_multisampled_2d, vec2<C>, I, S) -> vec4<f32>
+fn image_fetch[T: fiu32, C: iu32, I: iu32, S: iu32](texture_1d<T>, C, I, S) -> vec4<T>
+fn image_fetch[T: fiu32, C: iu32, I: iu32, S: iu32](texture_2d<T>, vec2<C>, I, S) -> vec4<T>
+fn image_fetch[T: fiu32, C: iu32, I: iu32, S: iu32](texture_2d_array<T>, vec3<C>, I, S) -> vec4<T>
+fn image_fetch[T: fiu32, C: iu32, I: iu32, S: iu32](texture_3d<T>, vec3<C>, I, S) -> vec4<T>
+fn image_fetch[T: fiu32, C: iu32, I: iu32, S: iu32](texture_multisampled_2d<T>, vec2<C>, I, S) -> vec4<T>
+fn image_fetch[I: iu32, C: iu32, S: iu32](texture_depth_2d, vec2<C>, I, S) -> vec4<f32>
+fn image_fetch[I: iu32, C: iu32, S: iu32](texture_depth_2d_array, vec3<C>, I, S) -> vec4<f32>
+fn image_fetch[I: iu32, C: iu32, S: iu32](texture_depth_multisampled_2d, vec2<C>, I, S) -> vec4<f32>
 
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_1d<T> >, vec2<f32>, A, B) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, A, B) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, A, B, vec2<i32>) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, A, B) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32, C: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, A, B, vec2<C>) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_3d<T> >, vec2<f32>, A, B) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_cube<T> >, vec3<f32>, A, B) -> vec4<T>
-fn image_gather<T: fiu32, A: iu32, B: iu32>(sampled_image<texture_cube_array<T> >, vec4<f32>, A, B) -> vec4<T>
-fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, A, B) -> vec4<f32>
-fn image_gather<A: iu32, B: iu32, C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, A, B, vec2<C>) -> vec4<f32>
-fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, A, B) -> vec4<f32>
-fn image_gather<A: iu32, B: iu32, C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, A, B, vec2<C>) -> vec4<f32>
-fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, A, B) -> vec4<f32>
-fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, A, B) -> vec4<f32>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_1d<T> >, vec2<f32>, A, B) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_2d<T> >, vec2<f32>, A, B) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_2d<T> >, vec2<f32>, A, B, vec2<i32>) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, A, B) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32, C: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, A, B, vec2<C>) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_3d<T> >, vec2<f32>, A, B) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_cube<T> >, vec3<f32>, A, B) -> vec4<T>
+fn image_gather[T: fiu32, A: iu32, B: iu32](sampled_image<texture_cube_array<T> >, vec4<f32>, A, B) -> vec4<T>
+fn image_gather[A: iu32, B: iu32](sampled_image<texture_depth_2d>, vec2<f32>, A, B) -> vec4<f32>
+fn image_gather[A: iu32, B: iu32, C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, A, B, vec2<C>) -> vec4<f32>
+fn image_gather[A: iu32, B: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, A, B) -> vec4<f32>
+fn image_gather[A: iu32, B: iu32, C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, A, B, vec2<C>) -> vec4<f32>
+fn image_gather[A: iu32, B: iu32](sampled_image<texture_depth_cube>, vec3<f32>, A, B) -> vec4<f32>
+fn image_gather[A: iu32, B: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, A, B) -> vec4<f32>
 
-fn image_query_size<T: fiu32>(texture_1d<T>) -> u32
-fn image_query_size<T: fiu32>(texture_2d<T>) -> vec2<u32>
-fn image_query_size<T: fiu32>(texture_2d_array<T>) -> vec3<u32>
-fn image_query_size<T: fiu32>(texture_3d<T>) -> vec3<u32>
-fn image_query_size<T: fiu32>(texture_cube<T>) -> vec2<u32>
-fn image_query_size<T: fiu32>(texture_cube_array<T>) -> vec3<u32>
-fn image_query_size<T: fiu32>(texture_multisampled_2d<T>) -> vec2<u32>
+fn image_query_size[T: fiu32](texture_1d<T>) -> u32
+fn image_query_size[T: fiu32](texture_2d<T>) -> vec2<u32>
+fn image_query_size[T: fiu32](texture_2d_array<T>) -> vec3<u32>
+fn image_query_size[T: fiu32](texture_3d<T>) -> vec3<u32>
+fn image_query_size[T: fiu32](texture_cube<T>) -> vec2<u32>
+fn image_query_size[T: fiu32](texture_cube_array<T>) -> vec3<u32>
+fn image_query_size[T: fiu32](texture_multisampled_2d<T>) -> vec2<u32>
 fn image_query_size(texture_depth_2d) -> vec2<u32>
 fn image_query_size(texture_depth_2d_array) -> vec3<u32>
 fn image_query_size(texture_depth_cube) -> vec2<u32>
 fn image_query_size(texture_depth_cube_array) -> vec3<u32>
 fn image_query_size(texture_depth_multisampled_2d) -> vec2<u32>
-fn image_query_size<F: texel_format, A: access>(texture_storage_1d<F, A>) -> u32
-fn image_query_size<F: texel_format, A: access>(texture_storage_2d<F, A>) -> vec2<u32>
-fn image_query_size<F: texel_format, A: access>(texture_storage_2d_array<F, A>) -> vec3<u32>
-fn image_query_size<F: texel_format, A: access>(texture_storage_3d<F, A>) -> vec3<u32>
+fn image_query_size[F: texel_format, A: access](texture_storage_1d<F, A>) -> u32
+fn image_query_size[F: texel_format, A: access](texture_storage_2d<F, A>) -> vec2<u32>
+fn image_query_size[F: texel_format, A: access](texture_storage_2d_array<F, A>) -> vec3<u32>
+fn image_query_size[F: texel_format, A: access](texture_storage_3d<F, A>) -> vec3<u32>
 
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_1d<T>, A) -> u32
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_2d<T>, A) -> vec2<u32>
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_2d_array<T>, A) -> vec3<u32>
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_3d<T>, A) -> vec3<u32>
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_cube<T>, A) -> vec2<u32>
-fn image_query_size_lod<T: fiu32, A: iu32>(texture_cube_array<T>, A) -> vec3<u32>
-fn image_query_size_lod<A: iu32>(texture_depth_2d, A) -> vec2<u32>
-fn image_query_size_lod<A: iu32>(texture_depth_2d_array, A) -> vec3<u32>
-fn image_query_size_lod<A: iu32>(texture_depth_cube, A) -> vec2<u32>
-fn image_query_size_lod<A: iu32>(texture_depth_cube_array, A) -> vec3<u32>
+fn image_query_size_lod[T: fiu32, A: iu32](texture_1d<T>, A) -> u32
+fn image_query_size_lod[T: fiu32, A: iu32](texture_2d<T>, A) -> vec2<u32>
+fn image_query_size_lod[T: fiu32, A: iu32](texture_2d_array<T>, A) -> vec3<u32>
+fn image_query_size_lod[T: fiu32, A: iu32](texture_3d<T>, A) -> vec3<u32>
+fn image_query_size_lod[T: fiu32, A: iu32](texture_cube<T>, A) -> vec2<u32>
+fn image_query_size_lod[T: fiu32, A: iu32](texture_cube_array<T>, A) -> vec3<u32>
+fn image_query_size_lod[A: iu32](texture_depth_2d, A) -> vec2<u32>
+fn image_query_size_lod[A: iu32](texture_depth_2d_array, A) -> vec3<u32>
+fn image_query_size_lod[A: iu32](texture_depth_cube, A) -> vec2<u32>
+fn image_query_size_lod[A: iu32](texture_depth_cube_array, A) -> vec3<u32>
 
-fn image_read<F: f32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_1d<F, A>, C, S) -> vec4<f32>
-fn image_read<F: i32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_1d<F, A>, C, S) -> vec4<i32>
-fn image_read<F: u32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_1d<F, A>, C, S) -> vec4<u32>
-fn image_read<F: f32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d<F, A>, vec2<C>, S) -> vec4<f32>
-fn image_read<F: i32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d<F, A>, vec2<C>, S) -> vec4<i32>
-fn image_read<F: u32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d<F, A>, vec2<C>, S) -> vec4<u32>
-fn image_read<F: f32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<f32>
-fn image_read<F: i32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<i32>
-fn image_read<F: u32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<u32>
-fn image_read<F: f32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_3d<F, A>, vec3<C>, S) -> vec4<f32>
-fn image_read<F: i32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_3d<F, A>, vec3<C>, S) -> vec4<i32>
-fn image_read<F: u32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_3d<F, A>, vec3<C>, S) -> vec4<u32>
+fn image_read[F: f32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_1d<F, A>, C, S) -> vec4<f32>
+fn image_read[F: i32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_1d<F, A>, C, S) -> vec4<i32>
+fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_1d<F, A>, C, S) -> vec4<u32>
+fn image_read[F: f32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d<F, A>, vec2<C>, S) -> vec4<f32>
+fn image_read[F: i32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d<F, A>, vec2<C>, S) -> vec4<i32>
+fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d<F, A>, vec2<C>, S) -> vec4<u32>
+fn image_read[F: f32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<f32>
+fn image_read[F: i32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<i32>
+fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_2d_array<F, A>, vec3<C>, S) -> vec4<u32>
+fn image_read[F: f32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<f32>
+fn image_read[F: i32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<i32>
+fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<u32>
 
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_1d<T> >, f32, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, f32) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, f32, vec3<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<D>) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube<T> >, vec3<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube_array<T> >, vec4<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube_array<T> >, vec4<f32>, C, f32) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, C, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, C) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, C, vec2<D>) -> vec4<f32>
-fn image_sample_implicit_lod<C: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_1d<T> >, f32, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, f32) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, f32, vec3<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<D>) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube<T> >, vec3<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube_array<T> >, vec4<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube_array<T> >, vec4<f32>, C, f32) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d>, vec2<f32>, C, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32](sampled_image<texture_depth_cube>, vec3<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, C) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, C, vec2<D>) -> vec4<f32>
+fn image_sample_implicit_lod[C: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, C) -> vec4<f32>
 
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<f32>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<f32>, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<f32>, vec2<f32>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<f32>, vec2<f32>, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, f32, vec3<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32, D: iu32>(sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>, vec3<D>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube<T> >, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube_array<T> >, vec4<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<T: fiu32, C: iu32>(sampled_image<texture_cube_array<T> >, vec4<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, C, f32) -> vec4<f32>
-fn image_sample_explicit_lod<C: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<f32>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C, vec2<f32>, vec2<f32>, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<f32>, vec2<f32>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_2d_array<T> >, vec3<f32>, C, vec2<f32>, vec2<f32>, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, f32, vec3<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32, D: iu32](sampled_image<texture_3d<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>, vec3<D>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube<T> >, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube<T> >, vec3<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube_array<T> >, vec4<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[T: fiu32, C: iu32](sampled_image<texture_cube_array<T> >, vec4<f32>, C, vec3<f32>, vec3<f32>) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d>, vec2<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, C, f32, vec2<D>) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32](sampled_image<texture_depth_cube>, vec3<f32>, C, f32) -> vec4<f32>
+fn image_sample_explicit_lod[C: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, C, f32) -> vec4<f32>
 
-fn image_sample_dref_implicit_lod<C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, f32, C) -> f32
-fn image_sample_dref_implicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, f32, C, vec2<D>) -> f32
-fn image_sample_dref_implicit_lod<C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C) -> f32
-fn image_sample_dref_implicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, vec2<D>) -> f32
-fn image_sample_dref_implicit_lod<C: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, f32, C) -> f32
-fn image_sample_dref_implicit_lod<C: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, f32, C) -> f32
+fn image_sample_dref_implicit_lod[C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, f32, C) -> f32
+fn image_sample_dref_implicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d>, vec2<f32>, f32, C, vec2<D>) -> f32
+fn image_sample_dref_implicit_lod[C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C) -> f32
+fn image_sample_dref_implicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, vec2<D>) -> f32
+fn image_sample_dref_implicit_lod[C: iu32](sampled_image<texture_depth_cube>, vec3<f32>, f32, C) -> f32
+fn image_sample_dref_implicit_lod[C: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, f32, C) -> f32
 
-fn image_sample_dref_explicit_lod<C: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, f32, C, f32) -> f32
-fn image_sample_dref_explicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d>, vec2<f32>, f32, C, f32, vec2<D>) -> f32
-fn image_sample_dref_explicit_lod<C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, f32) -> f32
-fn image_sample_dref_explicit_lod<C: iu32, D: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, f32, vec2<D>) -> f32
-fn image_sample_dref_explicit_lod<C: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, f32, C, f32) -> f32
-fn image_sample_dref_explicit_lod<C: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, f32, C, f32) -> f32
+fn image_sample_dref_explicit_lod[C: iu32](sampled_image<texture_depth_2d>, vec2<f32>, f32, C, f32) -> f32
+fn image_sample_dref_explicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d>, vec2<f32>, f32, C, f32, vec2<D>) -> f32
+fn image_sample_dref_explicit_lod[C: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, f32) -> f32
+fn image_sample_dref_explicit_lod[C: iu32, D: iu32](sampled_image<texture_depth_2d_array>, vec3<f32>, f32, C, f32, vec2<D>) -> f32
+fn image_sample_dref_explicit_lod[C: iu32](sampled_image<texture_depth_cube>, vec3<f32>, f32, C, f32) -> f32
+fn image_sample_dref_explicit_lod[C: iu32](sampled_image<texture_depth_cube_array>, vec4<f32>, f32, C, f32) -> f32
 
-fn image_write<C: iu32, D: iu32>(texture_storage_1d<f32_texel_format, writable>, C, vec4<f32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_1d<i32_texel_format, writable>, C, vec4<i32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_1d<u32_texel_format, writable>, C, vec4<u32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d<f32_texel_format, writable>, vec2<C>, vec4<f32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d<i32_texel_format, writable>, vec2<C>, vec4<i32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d<u32_texel_format, writable>, vec2<C>, vec4<u32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d_array<f32_texel_format, writable>, vec3<C>, vec4<f32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d_array<i32_texel_format, writable>, vec3<C>, vec4<i32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_2d_array<u32_texel_format, writable>, vec3<C>, vec4<u32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_3d<f32_texel_format, writable>, vec3<C>, vec4<f32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_3d<i32_texel_format, writable>, vec3<C>, vec4<i32>, D)
-fn image_write<C: iu32, D: iu32>(texture_storage_3d<u32_texel_format, writable>, vec3<C>, vec4<u32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_1d<f32_texel_format, writable>, C, vec4<f32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_1d<i32_texel_format, writable>, C, vec4<i32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_1d<u32_texel_format, writable>, C, vec4<u32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d<f32_texel_format, writable>, vec2<C>, vec4<f32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d<i32_texel_format, writable>, vec2<C>, vec4<i32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d<u32_texel_format, writable>, vec2<C>, vec4<u32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d_array<f32_texel_format, writable>, vec3<C>, vec4<f32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d_array<i32_texel_format, writable>, vec3<C>, vec4<i32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_2d_array<u32_texel_format, writable>, vec3<C>, vec4<u32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_3d<f32_texel_format, writable>, vec3<C>, vec4<f32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_3d<i32_texel_format, writable>, vec3<C>, vec4<i32>, D)
+fn image_write[C: iu32, D: iu32](texture_storage_3d<u32_texel_format, writable>, vec3<C>, vec4<u32>, D)
 
-fn matrix_times_matrix<T: f32_f16, K: num, C: num, R: num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
-fn matrix_times_scalar<T: f32_f16, N: num, M: num>(mat<N, M, T>, T) -> mat<N, M, T>
-fn matrix_times_vector<T: f32_f16, N: num, M: num>(mat<N, M, T>, vec<N, T>) -> vec<M, T>
+fn matrix_times_matrix[T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+fn matrix_times_scalar[T: f32_f16, N: num, M: num](mat<N, M, T>, T) -> mat<N, M, T>
+fn matrix_times_vector[T: f32_f16, N: num, M: num](mat<N, M, T>, vec<N, T>) -> vec<M, T>
 
-fn sampled_image<T: fiu32, S: samplers>(texture_1d<T>, S) -> sampled_image<texture_1d<T> >
-fn sampled_image<T: fiu32, S: samplers>(texture_2d<T>, S) -> sampled_image<texture_2d<T> >
-fn sampled_image<T: fiu32, S: samplers>(texture_2d_array<T>, S) -> sampled_image<texture_2d_array<T> >
-fn sampled_image<T: fiu32, S: samplers>(texture_3d<T>, S) -> sampled_image<texture_3d<T> >
-fn sampled_image<T: fiu32, S: samplers>(texture_cube<T>, S) -> sampled_image<texture_cube<T> >
-fn sampled_image<T: fiu32, S: samplers>(texture_cube_array<T>, S) -> sampled_image<texture_cube_array<T> >
-fn sampled_image<S: samplers>(texture_depth_2d, S) -> sampled_image<texture_depth_2d>
-fn sampled_image<S: samplers>(texture_depth_2d_array, S) -> sampled_image<texture_depth_2d_array>
-fn sampled_image<S: samplers>(texture_depth_cube, S) -> sampled_image<texture_depth_cube>
-fn sampled_image<S: samplers>(texture_depth_cube_array, S) -> sampled_image<texture_depth_cube_array>
+fn sampled_image[T: fiu32, S: samplers](texture_1d<T>, S) -> sampled_image<texture_1d<T> >
+fn sampled_image[T: fiu32, S: samplers](texture_2d<T>, S) -> sampled_image<texture_2d<T> >
+fn sampled_image[T: fiu32, S: samplers](texture_2d_array<T>, S) -> sampled_image<texture_2d_array<T> >
+fn sampled_image[T: fiu32, S: samplers](texture_3d<T>, S) -> sampled_image<texture_3d<T> >
+fn sampled_image[T: fiu32, S: samplers](texture_cube<T>, S) -> sampled_image<texture_cube<T> >
+fn sampled_image[T: fiu32, S: samplers](texture_cube_array<T>, S) -> sampled_image<texture_cube_array<T> >
+fn sampled_image[S: samplers](texture_depth_2d, S) -> sampled_image<texture_depth_2d>
+fn sampled_image[S: samplers](texture_depth_2d_array, S) -> sampled_image<texture_depth_2d_array>
+fn sampled_image[S: samplers](texture_depth_cube, S) -> sampled_image<texture_depth_cube>
+fn sampled_image[S: samplers](texture_depth_cube_array, S) -> sampled_image<texture_depth_cube_array>
 
-fn select<T: scalar>(bool, T, T) -> T
-fn select<N: num, T: scalar>(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn select[T: scalar](bool, T, T) -> T
+fn select[N: num, T: scalar](vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
 
-fn vector_times_matrix<T: f32_f16, N: num, M: num>(vec<N, T>, mat<M, N, T>) -> vec<M, T>
-fn vector_times_scalar<T: f32_f16, N: num>(vec<N, T>, T) -> vec<N, T>
+fn vector_times_matrix[T: f32_f16, N: num, M: num](vec<N, T>, mat<M, N, T>) -> vec<M, T>
+fn vector_times_scalar[T: f32_f16, N: num](vec<N, T>, T) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions

@@ -172,6 +172,8 @@ func (l *lexer) lex() error {
 			case l.match(">=", tok.Ge):
 			case l.match(">>", tok.Shr):
 			case l.match(">", tok.Gt):
+			case l.match("[", tok.Lbracket):
+			case l.match("]", tok.Rbracket):
 			default:
 				return fmt.Errorf("%v: unexpected '%v'", l.loc, string(l.runes[0]))
 			}

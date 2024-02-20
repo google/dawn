@@ -79,6 +79,8 @@ const (
 	Shr          Kind = ">>"
 	Star         Kind = "*"
 	Xor          Kind = "^"
+	Lbracket     Kind = "["
+	Rbracket     Kind = "]"
 )
 
 // Invalid represents an invalid token
