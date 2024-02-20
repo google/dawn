@@ -249,7 +249,11 @@ func (i *intrinsicCache) Permute(overload *sem.Overload) ([]gen.Permutation, err
 			return nil, err
 		}
 	}
-	return i.cachedPermuter.Permute(overload)
+	out, err := i.cachedPermuter.Permute(overload)
+	if err != nil {
+		return nil, fmt.Errorf("while permuting '%v'\n%w", overload, err)
+	}
+	return out, nil
 }
 
 // Cache for objects that are expensive to build, and can be reused between templates.

@@ -54,35 +54,30 @@ type IntrinsicTable struct {
 	NMatchers     []sem.Named
 	NMatcherIndex map[sem.Named]int // [object -> index] in NMatchers
 
-	TypeMatcherIndices        []int            // kTypeMatcherIndices table content
-	NumberMatcherIndices      []int            // kNumberMatcherIndices table content
-	TemplateTypes             []TemplateType   // kTemplateTypes table content
-	TemplateNumbers           []TemplateNumber // kTemplateNumbers table content
-	Parameters                []Parameter      // kParameters table content
-	Overloads                 []Overload       // kOverloads table content
-	Builtins                  []Intrinsic      // kBuiltins table content
-	UnaryOperators            []Intrinsic      // kUnaryOperators table content
-	BinaryOperators           []Intrinsic      // kBinaryOperators table content
-	ConstructorsAndConverters []Intrinsic      // kInitializersAndConverters table content
-	ConstEvalFunctions        []string         // kConstEvalFunctions table content
+	MatcherIndices            []int       // kMatcherIndices table content
+	Templates                 []Template  // kTemplates table content
+	Parameters                []Parameter // kParameters table content
+	Overloads                 []Overload  // kOverloads table content
+	Builtins                  []Intrinsic // kBuiltins table content
+	UnaryOperators            []Intrinsic // kUnaryOperators table content
+	BinaryOperators           []Intrinsic // kBinaryOperators table content
+	ConstructorsAndConverters []Intrinsic // kInitializersAndConverters table content
+	ConstEvalFunctions        []string    // kConstEvalFunctions table content
 }
 
-// TemplateType is used to create the C++ TemplateTypeInfo structure
-type TemplateType struct {
+// Template is used to create the C++ TemplateInfo structure
+type Template struct {
 	// Name of the template type (e.g. 'T')
 	Name string
-	// Optional type matcher constraint.
-	// Either an index in Matchers::type, or -1
-	MatcherIndex int
-}
 
-// TemplateNumber is used to create the C++ TemplateNumberInfo structure
-type TemplateNumber struct {
-	// Name of the template number (e.g. 'N')
-	Name string
-	// Optional type matcher constraint.
-	// Either an index in Matchers::type, or -1
-	MatcherIndex int
+	// Kind of the template
+	Kind sem.TemplateKind
+
+	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers required to match
+	// the parameter type.
+	// The matcher indices index into IntrinsicTable::TMatchers and IntrinsicTable::NMatchers.
+	// These indices are consumed by the matchers themselves.
+	MatcherIndicesOffset int
 }
 
 // Parameter is used to create the C++ ParameterInfo structure
@@ -90,41 +85,28 @@ type Parameter struct {
 	// The parameter usage (parameter name)
 	Usage string
 
-	// Index into IntrinsicTable.TypeMatcherIndices, beginning the list of matchers
-	// required to match the parameter type.
-	// The matcher indices index into IntrinsicTable::TMatchers.
+	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers required to match
+	// the parameter type.
+	// The matcher indices index into IntrinsicTable::TMatchers and IntrinsicTable::NMatchers.
 	// These indices are consumed by the matchers themselves.
-	TypeMatcherIndicesOffset int
-
-	// Index into IntrinsicTable.NumberMatcherIndices.
-	// The matcher indices index into IntrinsicTable::NMatchers.
-	// These indices are consumed by the matchers themselves.
-	NumberMatcherIndicesOffset int
+	MatcherIndicesOffset int
 }
 
 // Overload is used to create the C++ OverloadInfo structure
 type Overload struct {
 	// Total number of parameters for the overload
 	NumParameters int
-	// Total number of template types for the overload
-	NumTemplateTypes int
-	// Total number of template numbers for the overload
-	NumTemplateNumbers int
-	// Index to the first template type in IntrinsicTable.TemplateTypes
-	TemplateTypesOffset int
-	// Index to the first template number in IntrinsicTable.TemplateNumbers
-	TemplateNumbersOffset int
+	// Total number of templates for the overload
+	NumTemplates int
+	// Index to the first template in IntrinsicTable.Templates
+	TemplatesOffset int
 	// Index to the first parameter in IntrinsicTable.Parameters
 	ParametersOffset int
-	// Index into IntrinsicTable.TypeMatcherIndices, beginning the list of matchers
+	// Index into IntrinsicTable.matcherIndices, beginning the list of matchers
 	// required to match the return type.
 	// The matcher indices index into IntrinsicTable::TMatchers.
 	// These indices are consumed by the matchers themselves.
-	ReturnTypeMatcherIndicesOffset int
-	// Index into IntrinsicTable.NumberMatcherIndices.
-	// The matcher indices index into IntrinsicTable::NMatchers.
-	// These indices are consumed by the matchers themselves.
-	ReturnNumberMatcherIndicesOffset int
+	ReturnMatcherIndicesOffset int
 	// Index into IntrinsicTable.ConstEvalFunctions.
 	ConstEvalFunctionOffset int
 	// StageUses describes the stages an overload can be used in
@@ -153,10 +135,8 @@ type IntrinsicTableBuilder struct {
 	// Lookup tables.
 	// These are packed (compressed) once all the entries have been added.
 	lut struct {
-		typeMatcherIndices       lut.LUT[int]
-		numberMatcherIndices     lut.LUT[int]
-		templateTypes            lut.LUT[TemplateType]
-		templateNumbers          lut.LUT[TemplateNumber]
+		matcherIndices           lut.LUT[int]
+		templates                lut.LUT[Template]
 		constEvalFunctionIndices lut.LUT[string]
 		parameters               lut.LUT[Parameter]
 		overloads                lut.LUT[Overload]
@@ -164,9 +144,15 @@ type IntrinsicTableBuilder struct {
 }
 
 type parameterBuilder struct {
-	usage                      string
-	typeMatcherIndicesOffset   *int
-	numberMatcherIndicesOffset *int
+	usage                string
+	matcherIndicesOffset *int
+}
+
+type templateBuilder struct {
+	// The index of the template in kTypeMatchers / kNumberMatchers
+	matcherIndex int
+	// The matcher indices for this template type / number
+	constraintIndicesOffset *int
 }
 
 // Helper for building a single overload
@@ -174,39 +160,31 @@ type overloadBuilder struct {
 	*IntrinsicTableBuilder
 	// The overload being built
 	overload *sem.Overload
-	// Maps TemplateParam to index in templateTypes
-	templateTypeIndex map[sem.TemplateParam]int
-	// Maps TemplateParam to index in templateNumbers
-	templateNumberIndex map[sem.TemplateParam]int
-	// Template types used by the overload
-	templateTypes []TemplateType
-	// Index to the first template type in IntrinsicTable.TemplateTypes
-	templateTypesOffset *int
-	// Template numbers used by the overload
-	templateNumbers []TemplateNumber
-	// Index to the first template number in IntrinsicTable.TemplateNumbers
-	templateNumbersOffset *int
+	// Map of TemplateParam to templatesBuilder
+	templateBuilders map[sem.TemplateParam]*templateBuilder
+	// Templates used by the overload
+	templates []Template
+	// Index to the first template in IntrinsicTable.Templates
+	templateOffset *int
 	// Builders for all parameters
 	parameterBuilders []parameterBuilder
 	// Index to the first parameter in IntrinsicTable.Parameters
 	parametersOffset *int
 	// Index into IntrinsicTable.ConstEvalFunctions
 	constEvalFunctionOffset *int
-	// Index into IntrinsicTable.TypeMatcherIndices, beginning the list of
+	// Index into IntrinsicTable.matcherIndices, beginning the list of
 	// matchers required to match the return type.
 	// The matcher indices index into IntrinsicTable::TMatchers.
 	// These indices are consumed by the matchers themselves.
-	returnTypeMatcherIndicesOffset *int
-	// Index into IntrinsicTable.NumberMatcherIndices.
-	// The matcher indices index into IntrinsicTable::NMatchers.
-	// These indices are consumed by the matchers themselves.
-	returnNumberMatcherIndicesOffset *int
+	returnMatcherIndicesOffset *int
 }
 
 // layoutMatchers assigns each of the TMatchers and NMatchers a unique index.
 func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
-	// First MaxTemplateTypes of TMatchers are template types
-	b.TMatchers = make([]sem.Named, s.MaxTemplateTypes)
+	// First MaxTemplates of TMatchers and NMatchers are template types
+	b.TMatchers = make([]sem.Named, s.MaxTemplates)
+	b.NMatchers = make([]sem.Named, s.MaxTemplates)
+
 	for _, m := range s.Types {
 		b.TMatcherIndex[m] = len(b.TMatchers)
 		b.TMatchers = append(b.TMatchers, m)
@@ -215,9 +193,6 @@ func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
 		b.TMatcherIndex[m] = len(b.TMatchers)
 		b.TMatchers = append(b.TMatchers, m)
 	}
-
-	// First MaxTemplateNumbers of NMatchers are template numbers
-	b.NMatchers = make([]sem.Named, s.MaxTemplateNumbers)
 	for _, m := range s.EnumMatchers {
 		b.NMatcherIndex[m] = len(b.NMatchers)
 		b.NMatchers = append(b.NMatchers, m)
@@ -228,8 +203,7 @@ func (b *IntrinsicTableBuilder) newOverloadBuilder(o *sem.Overload) *overloadBui
 	return &overloadBuilder{
 		IntrinsicTableBuilder: b,
 		overload:              o,
-		templateTypeIndex:     map[sem.TemplateParam]int{},
-		templateNumberIndex:   map[sem.TemplateParam]int{},
+		templateBuilders:      map[sem.TemplateParam]*templateBuilder{},
 	}
 }
 
@@ -237,77 +211,55 @@ func (b *IntrinsicTableBuilder) newOverloadBuilder(o *sem.Overload) *overloadBui
 // Preconditions:
 // - Must be called before any LUTs are compacted.
 // Populates:
-// - b.templateTypes
-// - b.templateTypesOffset
-// - b.templateNumbers
-// - b.templateNumbersOffset
+// - b.templateBuilders
 // - b.parameterBuilders
-// - b.returnTypeMatcherIndicesOffset
-// - b.returnNumberMatcherIndicesOffset
+// - b.returnMatcherIndicesOffset
 // - b.constEvalFunctionOffset
 func (b *overloadBuilder) processStage0() error {
-	b.templateTypes = make([]TemplateType, len(b.overload.TemplateTypes))
-	for i, t := range b.overload.TemplateTypes {
-		b.templateTypeIndex[t] = i
-		matcherIndex := -1
-		if t.Type != nil {
-			tys, nums, err := b.matcherIndices(t.Type)
-			if err != nil {
-				return err
-			}
-			if len(tys) != 1 || len(nums) != 0 {
-				panic("unexpected result of matcherIndices()")
-			}
-			matcherIndex = tys[0]
-		}
-		b.templateTypes[i] = TemplateType{
-			Name:         t.Name,
-			MatcherIndex: matcherIndex,
-		}
+	// Calculate the template matcher indices
+	for _, t := range b.overload.Templates {
+		b.templateBuilders[t] = &templateBuilder{matcherIndex: len(b.templateBuilders)}
 	}
-	b.templateTypesOffset = b.lut.templateTypes.Add(b.templateTypes)
 
-	b.templateNumbers = make([]TemplateNumber, len(b.overload.TemplateNumbers))
-	for i, t := range b.overload.TemplateNumbers {
-		b.templateNumberIndex[t] = i
-		matcherIndex := -1
-		if e, ok := t.(*sem.TemplateEnumParam); ok && e.Matcher != nil {
-			tys, nums, err := b.matcherIndices(e.Matcher)
-			if err != nil {
-				return err
+	for _, t := range b.overload.Templates {
+		switch t := t.(type) {
+		case *sem.TemplateTypeParam:
+			if t.Type != nil {
+				indices, err := b.collectMatcherIndices(*t.Type)
+				if err != nil {
+					return err
+				}
+				b.templateBuilders[t].constraintIndicesOffset = b.lut.matcherIndices.Add(indices)
 			}
-			if len(tys) != 0 || len(nums) != 1 {
-				panic("unexpected result of matcherIndices()")
+		case *sem.TemplateEnumParam:
+			if t.Matcher != nil {
+				index, err := b.matcherIndex(t.Matcher)
+				if err != nil {
+					return err
+				}
+				b.templateBuilders[t].constraintIndicesOffset = b.lut.matcherIndices.Add([]int{index})
 			}
-			matcherIndex = nums[0]
-		}
-		b.templateNumbers[i] = TemplateNumber{
-			Name:         t.GetName(),
-			MatcherIndex: matcherIndex,
 		}
 	}
-	b.templateNumbersOffset = b.lut.templateNumbers.Add(b.templateNumbers)
 
 	if b.overload.ReturnType != nil {
-		typeIndices, numberIndices, err := b.collectMatcherIndices(*b.overload.ReturnType)
+		indices, err := b.collectMatcherIndices(*b.overload.ReturnType)
 		if err != nil {
 			return err
 		}
-		b.returnTypeMatcherIndicesOffset = b.lut.typeMatcherIndices.Add(typeIndices)
-		b.returnNumberMatcherIndicesOffset = b.lut.numberMatcherIndices.Add(numberIndices)
+		b.returnMatcherIndicesOffset = b.lut.matcherIndices.Add(indices)
 	}
 
 	b.parameterBuilders = make([]parameterBuilder, len(b.overload.Parameters))
 	for i, p := range b.overload.Parameters {
-		typeIndices, numberIndices, err := b.collectMatcherIndices(p.Type)
+		matcherIndices, err := b.collectMatcherIndices(p.Type)
 		if err != nil {
 			return err
 		}
 
 		b.parameterBuilders[i] = parameterBuilder{
-			usage:                      p.Name,
-			typeMatcherIndicesOffset:   b.lut.typeMatcherIndices.Add(typeIndices),
-			numberMatcherIndicesOffset: b.lut.numberMatcherIndices.Add(numberIndices),
+			usage:                p.Name,
+			matcherIndicesOffset: b.lut.matcherIndices.Add(matcherIndices),
 		}
 	}
 
@@ -320,19 +272,27 @@ func (b *overloadBuilder) processStage0() error {
 
 // processStage1 builds the Parameters  used by the overload
 // Must only be called after the following LUTs have been compacted:
-// - b.lut.typeMatcherIndices
-// - b.lut.numberMatcherIndices
-// - b.lut.templateTypes
-// - b.lut.templateNumbers
+// - b.lut.matcherIndices
 // Populates:
+// - b.templates
+// - b.templateOffset
 // - b.parametersOffset
 func (b *overloadBuilder) processStage1() error {
+	b.templates = []Template{}
+	for _, t := range b.overload.Templates {
+		b.templates = append(b.templates, Template{
+			Name:                 t.GetName(),
+			Kind:                 t.TemplateKind(),
+			MatcherIndicesOffset: loadOrMinusOne(b.templateBuilders[t].constraintIndicesOffset),
+		})
+	}
+	b.templateOffset = b.lut.templates.Add(b.templates)
+
 	parameters := make([]Parameter, len(b.parameterBuilders))
 	for i, pb := range b.parameterBuilders {
 		parameters[i] = Parameter{
-			Usage:                      pb.usage,
-			TypeMatcherIndicesOffset:   loadOrMinusOne(pb.typeMatcherIndicesOffset),
-			NumberMatcherIndicesOffset: loadOrMinusOne(pb.numberMatcherIndicesOffset),
+			Usage:                pb.usage,
+			MatcherIndicesOffset: loadOrMinusOne(pb.matcherIndicesOffset),
 		}
 	}
 	b.parametersOffset = b.lut.parameters.Add(parameters)
@@ -341,53 +301,40 @@ func (b *overloadBuilder) processStage1() error {
 
 func (b *overloadBuilder) build() (Overload, error) {
 	return Overload{
-		NumParameters:                    len(b.parameterBuilders),
-		NumTemplateTypes:                 len(b.templateTypes),
-		NumTemplateNumbers:               len(b.templateNumbers),
-		TemplateTypesOffset:              loadOrMinusOne(b.templateTypesOffset),
-		TemplateNumbersOffset:            loadOrMinusOne(b.templateNumbersOffset),
-		ParametersOffset:                 loadOrMinusOne(b.parametersOffset),
-		ConstEvalFunctionOffset:          loadOrMinusOne(b.constEvalFunctionOffset),
-		ReturnTypeMatcherIndicesOffset:   loadOrMinusOne(b.returnTypeMatcherIndicesOffset),
-		ReturnNumberMatcherIndicesOffset: loadOrMinusOne(b.returnNumberMatcherIndicesOffset),
-		CanBeUsedInStage:                 b.overload.CanBeUsedInStage,
-		MustUse:                          b.overload.MustUse,
-		IsDeprecated:                     b.overload.IsDeprecated,
-		Kind:                             string(b.overload.Decl.Kind),
+		NumParameters:              len(b.parameterBuilders),
+		NumTemplates:               len(b.overload.Templates),
+		TemplatesOffset:            loadOrMinusOne(b.templateOffset),
+		ParametersOffset:           loadOrMinusOne(b.parametersOffset),
+		ConstEvalFunctionOffset:    loadOrMinusOne(b.constEvalFunctionOffset),
+		ReturnMatcherIndicesOffset: loadOrMinusOne(b.returnMatcherIndicesOffset),
+		CanBeUsedInStage:           b.overload.CanBeUsedInStage,
+		MustUse:                    b.overload.MustUse,
+		IsDeprecated:               b.overload.IsDeprecated,
+		Kind:                       string(b.overload.Decl.Kind),
 	}, nil
 }
 
 // matcherIndex returns the matcher indices into IntrinsicTable.TMatcher and
 // IntrinsicTable.NMatcher, respectively for the given named entity.
-func (b *overloadBuilder) matcherIndices(n sem.Named) (types, numbers []int, err error) {
+func (b *overloadBuilder) matcherIndex(n sem.Named) (int, error) {
 	switch n := n.(type) {
 	case *sem.Type, *sem.TypeMatcher:
 		if i, ok := b.TMatcherIndex[n]; ok {
-			return []int{i}, nil, nil
+			return i, nil
 		}
-		return nil, nil, fmt.Errorf("matcherIndex missing entry for %v %T", n.GetName(), n)
-	case *sem.TemplateTypeParam:
-		if i, ok := b.templateTypeIndex[n]; ok {
-			return []int{i}, nil, nil
-		}
-		return nil, nil, fmt.Errorf("templateTypeIndex missing entry for %v %T", n.Name, n)
+		return -1, fmt.Errorf("TMatcherIndex missing entry for %v %T", n.GetName(), n)
 	case *sem.EnumMatcher:
 		if i, ok := b.NMatcherIndex[n]; ok {
-			return nil, []int{i}, nil
+			return i, nil
 		}
-		return nil, nil, fmt.Errorf("matcherIndex missing entry for %v %T", n.GetName(), n)
-	case *sem.TemplateEnumParam:
-		if i, ok := b.templateNumberIndex[n]; ok {
-			return nil, []int{i}, nil
+		return -1, fmt.Errorf("NMatcherIndex missing entry for %v %T", n.GetName(), n)
+	case sem.TemplateParam:
+		if b, ok := b.templateBuilders[n]; ok {
+			return b.matcherIndex, nil
 		}
-		return nil, nil, fmt.Errorf("templateNumberIndex missing entry for %v %T", n, n)
-	case *sem.TemplateNumberParam:
-		if i, ok := b.templateNumberIndex[n]; ok {
-			return nil, []int{i}, nil
-		}
-		return nil, nil, fmt.Errorf("templateNumberIndex missing entry for %v %T", n, n)
+		return -1, fmt.Errorf("templatesBuilders missing entry for %v %T", n.GetName(), n)
 	default:
-		return nil, nil, fmt.Errorf("overload.matcherIndices() does not handle %v %T", n, n)
+		return -1, fmt.Errorf("overload.matcherIndices() does not handle %v %T", n, n)
 	}
 }
 
@@ -408,25 +355,24 @@ func (b *overloadBuilder) matcherIndices(n sem.Named) (types, numbers []int, err
 // Would return the matcher indices:
 //
 //	A, B, C, D, E, F, G, H, I
-func (b *overloadBuilder) collectMatcherIndices(fqn sem.FullyQualifiedName) (tys, nums []int, err error) {
-	tys, nums, err = b.matcherIndices(fqn.Target)
+func (b *overloadBuilder) collectMatcherIndices(fqn sem.FullyQualifiedName) ([]int, error) {
+	base, err := b.matcherIndex(fqn.Target)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
+	indices := []int{base}
 	for _, arg := range fqn.TemplateArguments {
-		typeIndices, numberIndices, err := b.collectMatcherIndices(arg.(sem.FullyQualifiedName))
+		subIndices, err := b.collectMatcherIndices(arg.(sem.FullyQualifiedName))
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		tys = append(tys, typeIndices...)
-		nums = append(nums, numberIndices...)
+		indices = append(indices, subIndices...)
 	}
-	return tys, nums, nil
+	return indices, nil
 }
 
 // BuildIntrinsicTable builds the IntrinsicTable from the semantic info
 func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
-
 	b := IntrinsicTableBuilder{
 		IntrinsicTable: IntrinsicTable{
 			Sem:           s,
@@ -460,35 +406,32 @@ func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	}
 
 	// Perform the 'stage-0' processing of the overloads
-	b.lut.typeMatcherIndices = lut.New[int]()
-	b.lut.numberMatcherIndices = lut.New[int]()
-	b.lut.templateTypes = lut.New[TemplateType]()
-	b.lut.templateNumbers = lut.New[TemplateNumber]()
+	b.lut.matcherIndices = lut.New[int]()
 	b.lut.constEvalFunctionIndices = lut.New[string]()
 	for _, b := range overloadBuilders {
-		b.processStage0()
+		if err := b.processStage0(); err != nil {
+			return nil, fmt.Errorf("while processing stage 0 of '%v'\n%w", b.overload, err)
+		}
 	}
 
-	// Compact type and number LUTs
-	b.TypeMatcherIndices = b.lut.typeMatcherIndices.Compact()
-	b.NumberMatcherIndices = b.lut.numberMatcherIndices.Compact()
-	b.TemplateTypes = b.lut.templateTypes.Compact()
-	b.TemplateNumbers = b.lut.templateNumbers.Compact()
-	b.ConstEvalFunctions = b.lut.constEvalFunctionIndices.Compact()
 	// Clear the compacted LUTs to prevent use-after-compaction
-	b.lut.typeMatcherIndices = nil
-	b.lut.numberMatcherIndices = nil
-	b.lut.templateTypes = nil
-	b.lut.templateNumbers = nil
+	b.MatcherIndices = b.lut.matcherIndices.Compact()
+	b.ConstEvalFunctions = b.lut.constEvalFunctionIndices.Compact()
+	b.lut.matcherIndices = nil
 	b.lut.constEvalFunctionIndices = nil
+	b.lut.templates = lut.New[Template]()
 
 	// Perform the 'stage-1' processing of the overloads
 	b.lut.parameters = lut.New[Parameter]()
 	for _, b := range overloadBuilders {
-		b.processStage1()
+		if err := b.processStage1(); err != nil {
+			return nil, fmt.Errorf("while processing stage 1 of '%v'\n%w", b.overload, err)
+		}
 	}
 	b.Parameters = b.lut.parameters.Compact()
+	b.Templates = b.lut.templates.Compact()
 	b.lut.parameters = nil
+	b.lut.templates = nil
 
 	// Build the Intrinsics
 	b.lut.overloads = lut.New[Overload]()

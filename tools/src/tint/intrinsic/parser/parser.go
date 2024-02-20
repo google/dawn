@@ -368,8 +368,8 @@ func (p *parser) templatedName() ast.TemplatedName {
 	return m
 }
 
-func (p *parser) templateParams() ast.TemplateParams {
-	t := ast.TemplateParams{}
+func (p *parser) templateParams() []ast.TemplateParam {
+	t := []ast.TemplateParam{}
 	p.expect(tok.Lt, "template parameter list")
 	for p.err == nil && p.peekIs(0, tok.Identifier) {
 		t = append(t, p.templateParam())

@@ -159,7 +159,7 @@ func (g *generator) eval(template string, args ...any) (string, error) {
 	}
 
 	if err != nil {
-		return "", fmt.Errorf("while evaluating '%v': %v", template, err)
+		return "", fmt.Errorf("while evaluating '%v' with args '%v'\n%v", template, args, err)
 	}
 	return sb.String(), nil
 }

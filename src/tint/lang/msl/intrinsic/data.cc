@@ -49,11 +49,11 @@ namespace {
 
 using ConstEvalFunctionIndex = tint::core::intrinsic::ConstEvalFunctionIndex;
 using IntrinsicInfo = tint::core::intrinsic::IntrinsicInfo;
+using MatcherIndicesIndex = tint::core::intrinsic::MatcherIndicesIndex;
 using MatchState = tint::core::intrinsic::MatchState;
 using Number = tint::core::intrinsic::Number;
 using NumberMatcher = tint::core::intrinsic::NumberMatcher;
 using NumberMatcherIndex = tint::core::intrinsic::NumberMatcherIndex;
-using NumberMatcherIndicesIndex = tint::core::intrinsic::NumberMatcherIndicesIndex;
 using OverloadFlag = tint::core::intrinsic::OverloadFlag;
 using OverloadFlags = tint::core::intrinsic::OverloadFlags;
 using OverloadIndex = tint::core::intrinsic::OverloadIndex;
@@ -61,14 +61,10 @@ using OverloadInfo = tint::core::intrinsic::OverloadInfo;
 using ParameterIndex = tint::core::intrinsic::ParameterIndex;
 using ParameterInfo = tint::core::intrinsic::ParameterInfo;
 using StringStream = tint::StringStream;
-using TemplateNumberIndex = tint::core::intrinsic::TemplateNumberIndex;
-using TemplateNumberInfo = tint::core::intrinsic::TemplateNumberInfo;
-using TemplateTypeIndex = tint::core::intrinsic::TemplateTypeIndex;
-using TemplateTypeInfo = tint::core::intrinsic::TemplateTypeInfo;
+using TemplateIndex = tint::core::intrinsic::TemplateIndex;
 using Type = tint::core::type::Type;
 using TypeMatcher = tint::core::intrinsic::TypeMatcher;
 using TypeMatcherIndex = tint::core::intrinsic::TypeMatcherIndex;
-using TypeMatcherIndicesIndex = tint::core::intrinsic::TypeMatcherIndicesIndex;
 
 template <size_t N>
 using TemplateNumberMatcher = tint::core::intrinsic::TemplateNumberMatcher<N>;
@@ -99,19 +95,18 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [0] */ kU32Matcher,
 };
 
-constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
-  /* [0] */ TypeMatcherIndex(0),
+constexpr MatcherIndex kMatcherIndices[] = {
+  /* [0] */ MatcherIndex(0),
 };
 
-static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
-              "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
+static_assert(MatcherIndicesIndex::CanIndex(kMatcherIndices),
+              "MatcherIndicesIndex is not large enough to index kMatcherIndices");
 
 constexpr ParameterInfo kParameters[] = {
   {
     /* [0] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
+    /* matcher_indices */ MatcherIndicesIndex(0),
   },
 };
 
@@ -123,13 +118,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* [0] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 1,
-    /* num_template_types */ 0,
-    /* num_template_numbers */ 0,
-    /* template_types */ TemplateTypeIndex(/* invalid */),
-    /* template_numbers */ TemplateNumberIndex(/* invalid */),
+    /* num_templates   */ 0,
+    /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(0),
-    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(/* invalid */),
-    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
+    /* return_matcher_indices */ MatcherIndicesIndex(/* invalid */),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
 };
@@ -151,10 +143,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
 }  // anonymous namespace
 
 const core::intrinsic::TableData Dialect::kData{
-    /* template_types */ Empty,
-    /* template_numbers */ Empty,
-    /* type_matcher_indices */ kTypeMatcherIndices,
-    /* number_matcher_indices */ Empty,
+    /* templates */ Empty,
+    /* type_matcher_indices */ kMatcherIndices,
     /* type_matchers */ kTypeMatchers,
     /* number_matchers */ Empty,
     /* parameters */ kParameters,

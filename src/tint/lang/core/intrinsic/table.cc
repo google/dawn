@@ -35,12 +35,7 @@
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/utils/containers/hashmap.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/math/math.h"
-#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::core::intrinsic {
@@ -152,13 +147,11 @@ Result<Candidate, std::string> ResolveCandidate(Context& context,
 /// @param context the intrinsic context
 /// @param templates the template state used for matcher evaluation
 /// @param overload the overload being evaluated
-/// @param type_matcher_indices pointer to a list of type matcher indices
-/// @param number_matcher_indices pointer to a list of number matcher indices
+/// @param matcher_indices pointer to a list of matcher indices
 MatchState Match(Context& context,
                  TemplateState& templates,
                  const OverloadInfo& overload,
-                 const TypeMatcherIndex* type_matcher_indices,
-                 const NumberMatcherIndex* number_matcher_indices,
+                 const MatcherIndex* matcher_indices,
                  EvaluationStage earliest_eval_stage);
 
 // Prints the list of candidates for emitting diagnostics
@@ -244,12 +237,11 @@ Result<Overload, std::string> MatchIntrinsic(Context& context,
 
     // Build the return type
     const core::type::Type* return_type = nullptr;
-    if (auto* type_indices = context.data[match.overload->return_type_matcher_indices]) {
-        auto* number_indices = context.data[match.overload->return_number_matcher_indices];
+    if (auto* matcher_indices = context.data[match.overload->return_matcher_indices]) {
         Any any;
-        return_type = Match(context, match.templates, *match.overload, type_indices, number_indices,
-                            earliest_eval_stage)
-                          .Type(&any);
+        return_type =
+            Match(context, match.templates, *match.overload, matcher_indices, earliest_eval_stage)
+                .Type(&any);
         if (TINT_UNLIKELY(!return_type)) {
             std::string err = "MatchState.Match() returned null";
             TINT_ICE() << err;
@@ -278,8 +270,8 @@ Candidate ScoreOverload(Context& context,
     constexpr int kMismatchedTemplateTypePenalty = 1;
     constexpr int kMismatchedTemplateNumberPenalty = 1;
 
-    size_t num_parameters = static_cast<size_t>(overload.num_parameters);
-    size_t num_arguments = static_cast<size_t>(args.Length());
+    const size_t num_parameters = static_cast<size_t>(overload.num_parameters);
+    const size_t num_arguments = static_cast<size_t>(args.Length());
 
     size_t score = 0;
 
@@ -290,8 +282,8 @@ Candidate ScoreOverload(Context& context,
 
     if (score == 0) {
         // Check that all of the template arguments provided are actually expected by the overload.
-        size_t expected_templates = overload.num_template_types + overload.num_template_numbers;
-        size_t provided_templates = in_templates.Count();
+        const size_t expected_templates = overload.num_templates;
+        const size_t provided_templates = in_templates.Count();
         if (provided_templates > expected_templates) {
             score += kMismatchedTemplateCountPenalty * (provided_templates - expected_templates);
         }
@@ -312,53 +304,53 @@ Candidate ScoreOverload(Context& context,
     auto num_params = std::min(num_parameters, num_arguments);
     for (size_t p = 0; p < num_params; p++) {
         auto& parameter = context.data[overload.parameters + p];
-        auto* type_indices = context.data[parameter.type_matcher_indices];
-        auto* number_indices = context.data[parameter.number_matcher_indices];
-        if (!Match(context, templates, overload, type_indices, number_indices, earliest_eval_stage)
+        auto* matcher_indices = context.data[parameter.matcher_indices];
+        if (!Match(context, templates, overload, matcher_indices, earliest_eval_stage)
                  .Type(args[p])) {
             score += kMismatchedParamTypePenalty;
         }
     }
 
     if (score == 0) {
-        // Check all constrained template types matched their constraint matchers.
-        // If the template type *does not* match any of the types in the constraint matcher, then
-        // `score` is incremented. If the template type *does* match a type, then the template type
-        // is replaced with the first matching type. The order of types in the template matcher is
-        // important here, which can be controlled with the [[precedence(N)]] decorations on the
-        // types in intrinsics.def.
-        for (size_t ot = 0; ot < overload.num_template_types; ot++) {
-            auto* matcher_idx = &context.data[overload.template_types + ot].matcher_index;
-            if (matcher_idx->IsValid()) {
-                if (auto* type = templates.Type(ot)) {
-                    if (auto* ty = Match(context, templates, overload, matcher_idx, nullptr,
-                                         earliest_eval_stage)
-                                       .Type(type)) {
-                        // Template type matched one of the types in the template type's matcher.
-                        // Replace the template type with this type.
-                        templates.SetType(ot, ty);
-                        continue;
-                    }
-                }
-                score += kMismatchedTemplateTypePenalty;
+        for (size_t i = 0; i < overload.num_templates; i++) {
+            auto& tmpl = context.data[overload.templates + i];
+            auto* matcher_indices = context.data[tmpl.matcher_indices];
+            if (!matcher_indices) {
+                continue;
             }
-        }
-    }
 
-    if (score == 0) {
-        // Check all constrained open numbers matched.
-        // Unlike template types, numbers are not constrained, so we're just checking that the
-        // inferred number matches the constraints on the overload. Increments `score` if the
-        // template numbers do not match their constraint matchers.
-        for (size_t on = 0; on < overload.num_template_numbers; on++) {
-            auto* matcher_idx = &context.data[overload.template_numbers + on].matcher_index;
-            if (matcher_idx->IsValid()) {
-                auto number = templates.Num(on);
-                if (!number.IsValid() ||
-                    !Match(context, templates, overload, nullptr, matcher_idx, earliest_eval_stage)
-                         .Num(number)
-                         .IsValid()) {
-                    score += kMismatchedTemplateNumberPenalty;
+            auto matcher =
+                Match(context, templates, overload, matcher_indices, earliest_eval_stage);
+
+            switch (tmpl.kind) {
+                case TemplateInfo::Kind::kType: {
+                    // Check all constrained template types matched their constraint matchers.
+                    // If the template type *does not* match any of the types in the constraint
+                    // matcher, then `score` is incremented. If the template type *does* match a
+                    // type, then the template type is replaced with the first matching type.
+                    // The order of types in the template matcher is important here, which can
+                    // be controlled with the [[precedence(N)]] decorations on the types in the
+                    // def file.
+                    if (auto* type = templates.Type(i)) {
+                        if (auto* ty = matcher.Type(type)) {
+                            // Template type matched one of the types in the template type's
+                            // matcher. Replace the template type with this type.
+                            templates.SetType(i, ty);
+                            continue;
+                        }
+                    }
+                    score += kMismatchedTemplateTypePenalty;
+                    break;
+                }
+
+                case TemplateInfo::Kind::kNumber: {
+                    // Checking that the inferred number matches the constraints on the
+                    // template. Increments `score` if the template numbers do not match their
+                    // constraint matchers.
+                    auto number = templates.Num(i);
+                    if (!number.IsValid() || !matcher.Num(number).IsValid()) {
+                        score += kMismatchedTemplateNumberPenalty;
+                    }
                 }
             }
         }
@@ -370,10 +362,8 @@ Candidate ScoreOverload(Context& context,
         parameters.Reserve(num_params);
         for (size_t p = 0; p < num_params; p++) {
             auto& parameter = context.data[overload.parameters + p];
-            auto* type_indices = context.data[parameter.type_matcher_indices];
-            auto* number_indices = context.data[parameter.number_matcher_indices];
-            auto* ty = Match(context, templates, overload, type_indices, number_indices,
-                             earliest_eval_stage)
+            auto* matcher_indices = context.data[parameter.matcher_indices];
+            auto* ty = Match(context, templates, overload, matcher_indices, earliest_eval_stage)
                            .Type(args[p]);
             parameters.Emplace(ty, parameter.usage);
         }
@@ -450,12 +440,10 @@ Result<Candidate, std::string> ResolveCandidate(Context& context,
 MatchState Match(Context& context,
                  TemplateState& templates,
                  const OverloadInfo& overload,
-                 const TypeMatcherIndex* type_matcher_indices,
-                 const NumberMatcherIndex* number_matcher_indices,
+                 const MatcherIndex* matcher_indices,
                  EvaluationStage earliest_eval_stage) {
-    return MatchState{context.types,          context.symbols,    templates,
-                      context.data,           overload,           type_matcher_indices,
-                      number_matcher_indices, earliest_eval_stage};
+    return MatchState{context.types, context.symbols, templates,          context.data,
+                      overload,      matcher_indices, earliest_eval_stage};
 }
 
 void PrintCandidates(StringStream& ss,
@@ -521,7 +509,7 @@ void PrintOverload(StringStream& ss,
     ss << intrinsic_name;
 
     bool print_template_type = false;
-    if (overload.num_template_types > 0) {
+    if (overload.num_templates > 0) {
         if (overload.flags.Contains(OverloadFlag::kIsConverter)) {
             // Print for conversions
             // e.g. vec3<T>(vec3<U>) -> vec3<f32>
@@ -535,7 +523,7 @@ void PrintOverload(StringStream& ss,
     }
     if (print_template_type) {
         ss << "<";
-        ss << context.data[overload.template_types].name;
+        ss << context.data[overload.templates].name;
         ss << ">";
     }
     ss << "(";
@@ -547,18 +535,14 @@ void PrintOverload(StringStream& ss,
         if (parameter.usage != ParameterUsage::kNone) {
             ss << ToString(parameter.usage) << ": ";
         }
-        auto* type_indices = context.data[parameter.type_matcher_indices];
-        auto* number_indices = context.data[parameter.number_matcher_indices];
-        ss << Match(context, templates, overload, type_indices, number_indices, earliest_eval_stage)
-                  .TypeName();
+        auto* matcher_indices = context.data[parameter.matcher_indices];
+        ss << Match(context, templates, overload, matcher_indices, earliest_eval_stage).TypeName();
     }
     ss << ")";
-    if (overload.return_type_matcher_indices.IsValid()) {
+    if (overload.return_matcher_indices.IsValid()) {
         ss << " -> ";
-        auto* type_indices = context.data[overload.return_type_matcher_indices];
-        auto* number_indices = context.data[overload.return_number_matcher_indices];
-        ss << Match(context, templates, overload, type_indices, number_indices, earliest_eval_stage)
-                  .TypeName();
+        auto* matcher_indices = context.data[overload.return_matcher_indices];
+        ss << Match(context, templates, overload, matcher_indices, earliest_eval_stage).TypeName();
     }
 
     bool first = true;
@@ -566,26 +550,21 @@ void PrintOverload(StringStream& ss,
         ss << (first ? "  where: " : ", ");
         first = false;
     };
-    for (size_t i = 0; i < overload.num_template_types; i++) {
-        auto& template_type = context.data[overload.template_types + i];
-        if (template_type.matcher_index.IsValid()) {
+
+    for (size_t i = 0; i < overload.num_templates; i++) {
+        auto& tmpl = context.data[overload.templates + i];
+        if (auto* matcher_indices = context.data[tmpl.matcher_indices]) {
+            auto matcher =
+                Match(context, templates, overload, matcher_indices, earliest_eval_stage);
+
             separator();
-            ss << template_type.name;
-            auto* index = &template_type.matcher_index;
-            ss << " is "
-               << Match(context, templates, overload, index, nullptr, earliest_eval_stage)
-                      .TypeName();
-        }
-    }
-    for (size_t i = 0; i < overload.num_template_numbers; i++) {
-        auto& template_number = context.data[overload.template_numbers + i];
-        if (template_number.matcher_index.IsValid()) {
-            separator();
-            ss << template_number.name;
-            auto* index = &template_number.matcher_index;
-            ss << " is "
-               << Match(context, templates, overload, nullptr, index, earliest_eval_stage)
-                      .NumName();
+            ss << tmpl.name;
+            ss << " is ";
+            if (tmpl.kind == TemplateInfo::Kind::kType) {
+                ss << matcher.TypeName();
+            } else {
+                ss << matcher.NumName();
+            }
         }
     }
 }

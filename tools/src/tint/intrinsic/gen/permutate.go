@@ -63,7 +63,7 @@ func NewPermuter(s *sem.Sem) (*Permuter, error) {
 
 // Permutation describes a single permutation of an overload
 type Permutation struct {
-	sem.Overload        // The permutated overload signature
+	sem.Overload        // The permuted overload signature
 	Desc         string // Description of the overload
 	Hash         string // Hash of the overload
 }
@@ -82,9 +82,10 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 	// Map of hash to permutation description. Used to detect collisions.
 	hashes := map[string]string{}
 
-	// permutate appends a permutation to out.
-	// permutate may be chained to generate N-dimensional permutations.
-	permutate := func() error {
+	// permute appends a permutation to out.
+	// permute may be chained to generate N-dimensional permutations.
+	permute := func() error {
+		// Generate an overload with the templated types replaced with the permuted types.
 		o := sem.Overload{
 			Decl:             overload.Decl,
 			Intrinsic:        overload.Intrinsic,
@@ -103,15 +104,16 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 			})
 		}
 		if overload.ReturnType != nil {
-			retTys, err := state.permutateFQN(*overload.ReturnType)
+			retTys, err := state.permuteFQN(*overload.ReturnType)
 			if err != nil {
-				return fmt.Errorf("while permutating return type: %w", err)
+				return fmt.Errorf("while permuting return type: %w", err)
 			}
 			if len(retTys) != 1 {
 				return fmt.Errorf("result type not pinned")
 			}
 			o.ReturnType = &retTys[0]
 		}
+
 		desc := fmt.Sprint(o)
 		hash := sha256.Sum256([]byte(desc))
 		const hashLength = 6
@@ -136,9 +138,9 @@ Increase hashLength in %v`,
 	}
 	for i, param := range overload.Parameters {
 		i, param := i, param // Capture iterator values for anonymous function
-		next := permutate    // Permutation chaining
-		permutate = func() error {
-			permutations, err := state.permutateFQN(param.Type)
+		next := permute      // Permutation chaining
+		permute = func() error {
+			permutations, err := state.permuteFQN(param.Type)
 			if err != nil {
 				return fmt.Errorf("while processing parameter %v: %w", i, err)
 			}
@@ -154,22 +156,24 @@ Increase hashLength in %v`,
 			return nil
 		}
 	}
-	for _, t := range overload.TemplateParams {
-		next := permutate // Permutation chaining
+
+	for _, t := range overload.Templates {
+		t := t          // Capture iterator values for anonymous function
+		next := permute // Permutation chaining
 		switch t := t.(type) {
 		case *sem.TemplateTypeParam:
-			types := p.allTypes
-			if t.Type != nil {
-				var err error
-				types, err = state.permutateFQN(sem.FullyQualifiedName{Target: t.Type})
-				if err != nil {
-					return nil, fmt.Errorf("while permutating template types: %w", err)
+			permute = func() error {
+				types := p.allTypes
+				if t.Type != nil {
+					var err error
+					types, err = state.permuteFQN(*t.Type)
+					if err != nil {
+						return fmt.Errorf("while permuting template types: %w", err)
+					}
 				}
-			}
-			if len(types) == 0 {
-				return nil, fmt.Errorf("template type %v has no permutations", t.Name)
-			}
-			permutate = func() error {
+				if len(types) == 0 {
+					return fmt.Errorf("template type %v has no permutations", t.Name)
+				}
 				for _, ty := range types {
 					state.templateTypes[t] = ty
 					if err := next(); err != nil {
@@ -182,17 +186,17 @@ Increase hashLength in %v`,
 			var permutations []sem.FullyQualifiedName
 			var err error
 			if t.Matcher != nil {
-				permutations, err = state.permutateFQN(sem.FullyQualifiedName{Target: t.Matcher})
+				permutations, err = state.permuteFQN(sem.FullyQualifiedName{Target: t.Matcher})
 			} else {
-				permutations, err = state.permutateFQN(sem.FullyQualifiedName{Target: t.Enum})
+				permutations, err = state.permuteFQN(sem.FullyQualifiedName{Target: t.Enum})
 			}
 			if err != nil {
-				return nil, fmt.Errorf("while permutating template numbers: %w", err)
+				return nil, fmt.Errorf("while permuting template numbers: %w", err)
 			}
 			if len(permutations) == 0 {
 				return nil, fmt.Errorf("template type %v has no permutations", t.Name)
 			}
-			permutate = func() error {
+			permute = func() error {
 				for _, n := range permutations {
 					state.templateNumbers[t] = n
 					if err := next(); err != nil {
@@ -204,7 +208,7 @@ Increase hashLength in %v`,
 		case *sem.TemplateNumberParam:
 			// Currently all open numbers are used for vector / matrices
 			permutations := []int{2, 3, 4}
-			permutate = func() error {
+			permute = func() error {
 				for _, n := range permutations {
 					state.templateNumbers[t] = n
 					if err := next(); err != nil {
@@ -216,7 +220,7 @@ Increase hashLength in %v`,
 		}
 	}
 
-	if err := permutate(); err != nil {
+	if err := permute(); err != nil {
 		return nil, fmt.Errorf("%v %v %w\nState: %v", overload.Decl.Source, overload.Decl, err, state)
 	}
 
@@ -243,18 +247,18 @@ func (s permutationState) String() string {
 	return sb.String()
 }
 
-func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQualifiedName, error) {
+func (s *permutationState) permuteFQN(in sem.FullyQualifiedName) ([]sem.FullyQualifiedName, error) {
 	args := append([]any{}, in.TemplateArguments...)
 	out := []sem.FullyQualifiedName{}
 
-	// permutate appends a permutation to out.
-	// permutate may be chained to generate N-dimensional permutations.
-	var permutate func() error
+	// permute appends a permutation to out.
+	// permute may be chained to generate N-dimensional permutations.
+	var permute func() error
 
 	switch target := in.Target.(type) {
 	case *sem.Type:
-		permutate = func() error {
-			// Inner-most permutate lambda.
+		permute = func() error {
+			// Inner-most permute lambda.
 			// Append a the current permutation to out
 			out = append(out, sem.FullyQualifiedName{Target: in.Target, TemplateArguments: args})
 			// Clone the argument list, for the next permutation to use.
@@ -263,7 +267,7 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 		}
 	case sem.TemplateParam:
 		if ty, ok := s.templateTypes[target]; ok {
-			permutate = func() error {
+			permute = func() error {
 				out = append(out, ty)
 				return nil
 			}
@@ -271,14 +275,14 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 			return nil, fmt.Errorf("'%v' was not found in templateTypes", target.GetName())
 		}
 	case *sem.TypeMatcher:
-		permutate = func() error {
+		permute = func() error {
 			for _, ty := range target.Types {
 				out = append(out, sem.FullyQualifiedName{Target: ty})
 			}
 			return nil
 		}
 	case *sem.EnumMatcher:
-		permutate = func() error {
+		permute = func() error {
 			for _, o := range target.Options {
 				if !o.IsInternal {
 					out = append(out, sem.FullyQualifiedName{Target: o})
@@ -287,7 +291,7 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 			return nil
 		}
 	case *sem.Enum:
-		permutate = func() error {
+		permute = func() error {
 			for _, e := range target.Entries {
 				if !e.IsInternal {
 					out = append(out, sem.FullyQualifiedName{Target: e})
@@ -300,8 +304,8 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 	}
 
 	for i, arg := range in.TemplateArguments {
-		i := i            // Capture iterator value for anonymous functions
-		next := permutate // Permutation chaining
+		i := i          // Capture iterator value for anonymous functions
+		next := permute // Permutation chaining
 		switch arg := arg.(type) {
 		case sem.FullyQualifiedName:
 			switch target := arg.Target.(type) {
@@ -314,14 +318,14 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 					return nil, fmt.Errorf("'%v' was not found in templateTypes or templateNumbers", target.GetName())
 				}
 			default:
-				perms, err := s.permutateFQN(arg)
+				perms, err := s.permuteFQN(arg)
 				if err != nil {
 					return nil, fmt.Errorf("while processing template argument %v: %v", i, err)
 				}
 				if len(perms) == 0 {
 					return nil, fmt.Errorf("template argument %v has no permutations", i)
 				}
-				permutate = func() error {
+				permute = func() error {
 					for _, f := range perms {
 						args[i] = f
 						if err := next(); err != nil {
@@ -332,11 +336,11 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 				}
 			}
 		default:
-			return nil, fmt.Errorf("permutateFQN() unhandled template argument type: %T", arg)
+			return nil, fmt.Errorf("permuteFQN() unhandled template argument type: %T", arg)
 		}
 	}
 
-	if err := permutate(); err != nil {
+	if err := permute(); err != nil {
 		return nil, fmt.Errorf("while processing fully qualified name '%v': %w", in.Target.GetName(), err)
 	}
 

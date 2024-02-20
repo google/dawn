@@ -46,13 +46,12 @@ struct TableData;
 namespace tint::core::intrinsic {
 
 /// An enumerator of index namespaces.
-enum class TableIndexNamespace {
-    kTemplateType,
-    kTemplateNumber,
+enum class TableIndexNamespace : uint8_t {
+    kTemplate,
+    kMatcher,
+    kMatcherIndices,
     kTypeMatcher,
     kNumberMatcher,
-    kTypeMatcherIndices,
-    kNumberMatcherIndices,
     kParameter,
     kOverload,
     kConstEvalFunction,
@@ -95,7 +94,8 @@ struct TableIndex {
     auto operator+(U offset) const {
         static_assert(std::is_integral_v<U> && std::is_unsigned_v<U>,
                       "T must be an unsigned integer type");
-        auto new_value = value + offset;
+        using C = std::conditional_t<(sizeof(U) > sizeof(T)), U, T>;
+        C new_value = static_cast<C>(value) + static_cast<C>(offset);
         return TableIndex<N, decltype(new_value)>(new_value);
     }
 
@@ -114,22 +114,19 @@ struct TableIndex {
 };
 
 /// Index type used to index TableData::template_types
-using TemplateTypeIndex = TableIndex<TableIndexNamespace::kTemplateType, uint8_t>;
+using TemplateIndex = TableIndex<TableIndexNamespace::kTemplate, uint8_t>;
 
-/// Index type used to index TableData::template_numbers
-using TemplateNumberIndex = TableIndex<TableIndexNamespace::kTemplateNumber, uint8_t>;
+/// Index type used to index TableData::type_matchers or TableData::number_matchers
+using MatcherIndex = TableIndex<TableIndexNamespace::kMatcher, uint8_t>;
+
+/// Index type used to index TableData::matcher_indices
+using MatcherIndicesIndex = TableIndex<TableIndexNamespace::kMatcherIndices, uint16_t>;
 
 /// Index type used to index TableData::type_matchers
 using TypeMatcherIndex = TableIndex<TableIndexNamespace::kTypeMatcher, uint8_t>;
 
 /// Index type used to index TableData::number_matchers
 using NumberMatcherIndex = TableIndex<TableIndexNamespace::kNumberMatcher, uint8_t>;
-
-/// Index type used to index TableData::type_matcher_indices
-using TypeMatcherIndicesIndex = TableIndex<TableIndexNamespace::kTypeMatcherIndices, uint8_t>;
-
-/// Index type used to index TableData::number_matcher_indices
-using NumberMatcherIndicesIndex = TableIndex<TableIndexNamespace::kNumberMatcherIndices, uint8_t>;
 
 /// Index type used to index TableData::parameters
 using ParameterIndex = TableIndex<TableIndexNamespace::kParameter, uint16_t>;
@@ -141,7 +138,7 @@ using OverloadIndex = TableIndex<TableIndexNamespace::kOverload, uint16_t>;
 using ConstEvalFunctionIndex = TableIndex<TableIndexNamespace::kConstEvalFunction, uint8_t>;
 
 /// Unique flag bits for overloads
-enum class OverloadFlag {
+enum class OverloadFlag : uint8_t {
     kIsBuiltin,                 // The overload is a builtin ('fn')
     kIsOperator,                // The overload is an operator ('op')
     kIsConstructor,             // The overload is a value constructor ('ctor')
@@ -161,29 +158,25 @@ struct ParameterInfo {
     /// The parameter usage (parameter name in definition file)
     const ParameterUsage usage;
 
-    /// Pointer to a list of type matcher indices that are used to match the parameter types.
+    /// Index of the matcher indices that are used to match the parameter types.
     /// These indices are consumed by the matchers themselves.
-    const TypeMatcherIndicesIndex type_matcher_indices;
-
-    /// Pointer to a list of number matcher indices that are used to match the parameter types.
-    /// These indices are consumed by the matchers themselves.
-    const NumberMatcherIndicesIndex number_matcher_indices;
+    const MatcherIndicesIndex matcher_indices;
 };
 
-/// TemplateTypeInfo describes an template type
-struct TemplateTypeInfo {
+/// TemplateInfo describes an template
+struct TemplateInfo {
+    /// An enumerator of template kind
+    enum class Kind : uint8_t { kType, kNumber };
+
     /// Name of the template type (e.g. 'T')
     const char* name;
-    /// Optional type matcher constraint.
-    const TypeMatcherIndex matcher_index;
-};
 
-/// TemplateNumberInfo describes a template number
-struct TemplateNumberInfo {
-    /// Name of the template number (e.g. 'N')
-    const char* name;
-    /// Optional number matcher constraint.
-    const NumberMatcherIndex matcher_index;
+    /// Index of the type matcher indices that are used to match the template types.
+    /// These indices are consumed by the matchers themselves.
+    const MatcherIndicesIndex matcher_indices;
+
+    /// The template kind
+    const Kind kind;
 };
 
 /// OverloadInfo describes a single function overload
@@ -192,20 +185,14 @@ struct OverloadInfo {
     const OverloadFlags flags;
     /// Total number of parameters for the overload
     const uint8_t num_parameters;
-    /// Total number of template types for the overload
-    const uint8_t num_template_types;
-    /// Total number of template numbers for the overload
-    const uint8_t num_template_numbers;
+    /// Total number of templates for the overload
+    const uint8_t num_templates;
     /// Index of the first template type in TableData::type_matchers
-    const TemplateTypeIndex template_types;
-    /// Index of the first template number in TableData::number_matchers
-    const TemplateNumberIndex template_numbers;
+    const TemplateIndex templates;
     /// Index of the first parameter in TableData::parameters
     const ParameterIndex parameters;
     /// Index of a list of type matcher indices that are used to build the return type.
-    const TypeMatcherIndicesIndex return_type_matcher_indices;
-    /// Index of a list of number matcher indices that are used to build the return type.
-    const NumberMatcherIndicesIndex return_number_matcher_indices;
+    const MatcherIndicesIndex return_matcher_indices;
     /// The function used to evaluate the overload at shader-creation time.
     const ConstEvalFunctionIndex const_eval_fn;
 };
@@ -376,16 +363,14 @@ class MatchState {
     /// @param t the template state
     /// @param d the table data
     /// @param o the current overload
-    /// @param type_matcher_indices the remaining type matcher indices
-    /// @param number_matcher_indices the remaining number matcher indices
+    /// @param matcher_indices the remaining matcher indices
     /// @param s the required evaluation stage of the overload
     MatchState(core::type::Manager& ty_mgr,
                SymbolTable& syms,
                TemplateState& t,
                const TableData& d,
                const OverloadInfo& o,
-               const TypeMatcherIndex* type_matcher_indices,
-               const NumberMatcherIndex* number_matcher_indices,
+               const MatcherIndex* matcher_indices,
                EvaluationStage s)
         : types(ty_mgr),
           symbols(syms),
@@ -393,8 +378,7 @@ class MatchState {
           data(d),
           overload(o),
           earliest_eval_stage(s),
-          type_matcher_indices_(type_matcher_indices),
-          number_matcher_indices_(number_matcher_indices) {}
+          matcher_indices_(matcher_indices) {}
 
     /// The type manager
     core::type::Manager& types;
@@ -436,8 +420,7 @@ class MatchState {
     inline std::string NumName();
 
   private:
-    const TypeMatcherIndex* type_matcher_indices_ = nullptr;
-    const NumberMatcherIndex* number_matcher_indices_ = nullptr;
+    const MatcherIndex* matcher_indices_ = nullptr;
 };
 
 /// A TypeMatcher is the interface used to match an type used as part of an
@@ -483,36 +466,21 @@ struct NumberMatcher {
 
 /// TableData holds the immutable data that holds the intrinsic data for a language.
 struct TableData {
-    /// @param idx the index of the TemplateTypeInfo in the table data
-    /// @returns the TemplateTypeInfo with the given index
+    /// @param idx the index of the TemplateInfo in the table data
+    /// @returns the TemplateInfo with the given index
     template <typename T>
-    const TemplateTypeInfo& operator[](
-        TableIndex<TableIndexNamespace::kTemplateType, T> idx) const {
-        return template_types[idx.value];
+    const TemplateInfo& operator[](TableIndex<TableIndexNamespace::kTemplate, T> idx) const {
+        return templates[idx.value];
     }
 
-    /// @param idx the index of the TemplateNumberInfo in the table data
-    /// @returns the TemplateNumberInfo with the given index
+    /// @param idx the index of the MatcherIndices in the table data
+    /// @returns the MatcherIndices with the given index
     template <typename T>
-    const TemplateNumberInfo& operator[](
-        TableIndex<TableIndexNamespace::kTemplateNumber, T> idx) const {
-        return template_numbers[idx.value];
-    }
-
-    /// @param idx the index of the TypeMatcherIndex in the table data
-    /// @returns the TypeMatcherIndex with the given index
-    template <typename T>
-    const TypeMatcherIndex* operator[](
-        TableIndex<TableIndexNamespace::kTypeMatcherIndices, T> idx) const {
-        return idx.IsValid() ? &type_matcher_indices[idx.value] : nullptr;
-    }
-
-    /// @param idx the index of the NumberMatcherIndex in the table data
-    /// @returns the NumberMatcherIndex with the given index
-    template <typename T>
-    const NumberMatcherIndex* operator[](
-        TableIndex<TableIndexNamespace::kNumberMatcherIndices, T> idx) const {
-        return idx.IsValid() ? &number_matcher_indices[idx.value] : nullptr;
+    const MatcherIndex* operator[](TableIndex<TableIndexNamespace::kMatcherIndices, T> idx) const {
+        if (idx.IsValid()) {
+            return &matcher_indices[idx.value];
+        }
+        return nullptr;
     }
 
     /// @param idx the index of the TypeMatcher in the table data
@@ -551,14 +519,10 @@ struct TableData {
         return idx.IsValid() ? const_eval_functions[idx.value] : nullptr;
     }
 
-    /// The list of type infos used by the intrinsic overloads
-    const Slice<const TemplateTypeInfo> template_types;
-    /// The list of number infos used by the intrinsic overloads
-    const Slice<const TemplateNumberInfo> template_numbers;
+    /// The list of templates used by the intrinsic overloads
+    const Slice<const TemplateInfo> templates;
     /// The list of type matcher indices
-    const Slice<const TypeMatcherIndex> type_matcher_indices;
-    /// The list of number matcher indices
-    const Slice<const NumberMatcherIndex> number_matcher_indices;
+    const Slice<const MatcherIndex> matcher_indices;
     /// The list of type matchers used by the intrinsic overloads
     const Slice<const TypeMatcher> type_matchers;
     /// The list of number matchers used by the intrinsic overloads
@@ -622,25 +586,25 @@ struct TableData {
 };
 
 const core::type::Type* MatchState::Type(const core::type::Type* ty) {
-    TypeMatcherIndex matcher_index{(*type_matcher_indices_++).value};
+    TypeMatcherIndex matcher_index{(*matcher_indices_++).value};
     auto& matcher = data[matcher_index];
     return matcher.match(*this, ty);
 }
 
 Number MatchState::Num(Number number) {
-    NumberMatcherIndex matcher_index{(*number_matcher_indices_++).value};
+    NumberMatcherIndex matcher_index{(*matcher_indices_++).value};
     auto& matcher = data[matcher_index];
     return matcher.match(*this, number);
 }
 
 std::string MatchState::TypeName() {
-    TypeMatcherIndex matcher_index{(*type_matcher_indices_++).value};
+    TypeMatcherIndex matcher_index{(*matcher_indices_++).value};
     auto& matcher = data[matcher_index];
     return matcher.string(this);
 }
 
 std::string MatchState::NumName() {
-    NumberMatcherIndex matcher_index{(*number_matcher_indices_++).value};
+    NumberMatcherIndex matcher_index{(*matcher_indices_++).value};
     auto& matcher = data[matcher_index];
     return matcher.string(this);
 }
@@ -665,7 +629,7 @@ struct TemplateTypeMatcher {
         },
         /* string */
         [](MatchState* state) -> std::string {
-            return state->data[state->overload.template_types + INDEX].name;
+            return state->data[state->overload.templates + INDEX].name;
         },
     };
 };
@@ -686,7 +650,7 @@ struct TemplateNumberMatcher {
         },
         /* string */
         [](MatchState* state) -> std::string {
-            return state->data[state->overload.template_numbers + INDEX].name;
+            return state->data[state->overload.templates + INDEX].name;
         },
     };
 };
