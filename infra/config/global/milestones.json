@@ -107,5 +107,15 @@
             "mac",
             "win"
         ]
+    },
+    "123": {
+        "name": "m123",
+        "chromium_project": "chromium-m123",
+        "ref": "refs/heads/chromium/6312",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
