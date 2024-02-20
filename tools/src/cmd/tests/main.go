@@ -1112,12 +1112,7 @@ func saveValidationCache(vc validationCache) {
 	}
 }
 
-// defaultRootPath returns the default path to the root of the test tree
-func defaultRootPath() string {
-	return filepath.Join(fileutils.DawnRoot(), "test/tint")
-}
-
 // defaultTintPath returns the default path to the tint executable
 func defaultTintPath() string {
-	return filepath.Join(fileutils.DawnRoot(), "out/active/tint")
+	return filepath.Join(fileutils.DawnRoot(), "out", "active", "tint"+fileutils.ExeExt)
 }
