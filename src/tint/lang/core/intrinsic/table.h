@@ -39,7 +39,7 @@
 #include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/unary_op.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 // Forward declarations
 namespace tint::diag {

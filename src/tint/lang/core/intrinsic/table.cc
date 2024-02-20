@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <ostream>
 #include <utility>
 
 #include "src/tint/lang/core/evaluation_stage.h"
