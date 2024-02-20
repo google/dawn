@@ -145,7 +145,7 @@ fn {{$permutation}}() {
 {{-   if $overload.ReturnType -}}
   var res{{if IsDeclarable $overload.ReturnType}}: {{template "Type" $overload.ReturnType}}{{end}} = {{/* preserve space after = */ -}}
 {{-   end -}}
-  {{$builtin}}(
+  {{$builtin}}{{Eval "TemplateArguments" $overload.ExplicitTemplateArgs}}(
 {{-   range $i, $p := $overload.Parameters -}}
 {{-     if $i -}}, {{end}}{{$args.Get $i -}}
 {{-   end -}}
@@ -358,8 +358,8 @@ enable f16;
 {{-     else if eq .Target.Name "mat"        -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
-{{-     else                             -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
-{{-     end                              -}}
+{{-     else                                 -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
+{{-     end                                  -}}
 {{-   else if IsEnumEntry   .Target -}}{{.Target.Name}}
 {{-   else if IsEnumMatcher .Target -}}{{(index .Target.Options 0).Name}}
 {{-   else                          -}}<unhandled-fully-qualified-name-target={{- printf "%T" .Target -}}>

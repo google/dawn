@@ -117,6 +117,7 @@ void PrintOverload(StringStream& ss,
 /// @param context the intrinsic context
 /// @param function_name the name of the function
 /// @param function_id the function identifier
+/// @param template_args the optional template arguments
 /// @param args the argument types passed to the builtin function
 /// @param earliest_eval_stage the the earliest evaluation stage that a call to
 ///        the builtin can be made. This can alter the overloads considered.
@@ -128,6 +129,7 @@ void PrintOverload(StringStream& ss,
 Result<Overload, std::string> LookupFn(Context& context,
                                        std::string_view function_name,
                                        size_t function_id,
+                                       VectorRef<const core::type::Type*> template_args,
                                        VectorRef<const core::type::Type*> args,
                                        EvaluationStage earliest_eval_stage);
 
@@ -173,7 +175,7 @@ Result<Overload, std::string> LookupBinary(Context& context,
 /// @param context the intrinsic context
 /// @param type_name the name of the type being constructed or converted
 /// @param type_id the type identifier
-/// @param template_arg the optional template argument
+/// @param template_args the optional template arguments
 /// @param args the argument types passed to the constructor / conversion call
 /// @param earliest_eval_stage the the earliest evaluation stage that a call to
 ///        the constructor or conversion can be made. This can alter the overloads considered.
@@ -185,7 +187,7 @@ Result<Overload, std::string> LookupBinary(Context& context,
 Result<Overload, std::string> LookupCtorConv(Context& context,
                                              std::string_view type_name,
                                              size_t type_id,
-                                             const core::type::Type* template_arg,
+                                             VectorRef<const core::type::Type*> template_args,
                                              VectorRef<const core::type::Type*> args,
                                              EvaluationStage earliest_eval_stage);
 
@@ -209,6 +211,7 @@ struct Table {
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
     /// if the builtin was not found.
     /// @param builtin_fn the builtin function
+    /// @param template_args the optional template arguments
     /// @param args the argument types passed to the builtin function
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the builtin can be made. This can alter the overloads considered.
@@ -219,11 +222,13 @@ struct Table {
 
     /// @return the resolved builtin function overload
     Result<Overload, std::string> Lookup(BuiltinFn builtin_fn,
+                                         VectorRef<const core::type::Type*> template_args,
                                          VectorRef<const core::type::Type*> args,
                                          EvaluationStage earliest_eval_stage) {
         std::string_view name = DIALECT::ToString(builtin_fn);
         size_t id = static_cast<size_t>(builtin_fn);
-        return LookupFn(context, name, id, std::move(args), earliest_eval_stage);
+        return LookupFn(context, name, id, std::move(template_args), std::move(args),
+                        earliest_eval_stage);
     }
 
     /// Lookup looks for the unary op overload with the given signature, raising an error
@@ -268,7 +273,7 @@ struct Table {
 
     /// Lookup looks for the value constructor or conversion overload for the given CtorConv.
     /// @param type the type being constructed or converted
-    /// @param template_arg the optional template argument
+    /// @param template_args the optional template arguments
     /// @param args the argument types passed to the constructor / conversion call
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the constructor or conversion can be made. This can alter the overloads considered.
@@ -279,12 +284,12 @@ struct Table {
 
     /// @return the resolved type constructor or conversion function overload
     Result<Overload, std::string> Lookup(CtorConv type,
-                                         const core::type::Type* template_arg,
+                                         VectorRef<const core::type::Type*> template_args,
                                          VectorRef<const core::type::Type*> args,
                                          EvaluationStage earliest_eval_stage) {
         std::string_view name = DIALECT::ToString(type);
         size_t id = static_cast<size_t>(type);
-        return LookupCtorConv(context, name, id, template_arg, std::move(args),
+        return LookupCtorConv(context, name, id, std::move(template_args), std::move(args),
                               earliest_eval_stage);
     }
 

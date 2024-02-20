@@ -96,9 +96,12 @@ type Parameter struct {
 type Overload struct {
 	// Total number of parameters for the overload
 	NumParameters int
-	// Total number of templates for the overload
+	// Total number of explicit templates for the overload
+	NumExplicitTemplates int
+	// Total number of explicit and implicit templates for the overload
 	NumTemplates int
 	// Index to the first template in IntrinsicTable.Templates
+	// This is a list of template starting with the explicit templates, then the implicit templates.
 	TemplatesOffset int
 	// Index to the first parameter in IntrinsicTable.Parameters
 	ParametersOffset int
@@ -163,8 +166,10 @@ type overloadBuilder struct {
 	// Map of TemplateParam to templatesBuilder
 	templateBuilders map[sem.TemplateParam]*templateBuilder
 	// Templates used by the overload
+	// This is a list of explicit template types followed by the implicit template types.
 	templates []Template
 	// Index to the first template in IntrinsicTable.Templates
+	// This is a list of template starting with the explicit templates, then the implicit templates.
 	templateOffset *int
 	// Builders for all parameters
 	parameterBuilders []parameterBuilder
@@ -217,11 +222,11 @@ func (b *IntrinsicTableBuilder) newOverloadBuilder(o *sem.Overload) *overloadBui
 // - b.constEvalFunctionOffset
 func (b *overloadBuilder) processStage0() error {
 	// Calculate the template matcher indices
-	for _, t := range b.overload.Templates {
+	for _, t := range b.overload.AllTemplates() {
 		b.templateBuilders[t] = &templateBuilder{matcherIndex: len(b.templateBuilders)}
 	}
 
-	for _, t := range b.overload.Templates {
+	for _, t := range b.overload.AllTemplates() {
 		switch t := t.(type) {
 		case *sem.TemplateTypeParam:
 			if t.Type != nil {
@@ -279,7 +284,7 @@ func (b *overloadBuilder) processStage0() error {
 // - b.parametersOffset
 func (b *overloadBuilder) processStage1() error {
 	b.templates = []Template{}
-	for _, t := range b.overload.Templates {
+	for _, t := range b.overload.AllTemplates() {
 		b.templates = append(b.templates, Template{
 			Name:                 t.GetName(),
 			Kind:                 t.TemplateKind(),
@@ -302,7 +307,8 @@ func (b *overloadBuilder) processStage1() error {
 func (b *overloadBuilder) build() (Overload, error) {
 	return Overload{
 		NumParameters:              len(b.parameterBuilders),
-		NumTemplates:               len(b.overload.Templates),
+		NumExplicitTemplates:       len(b.overload.ExplicitTemplates),
+		NumTemplates:               len(b.overload.ExplicitTemplates) + len(b.overload.ImplicitTemplates),
 		TemplatesOffset:            loadOrMinusOne(b.templateOffset),
 		ParametersOffset:           loadOrMinusOne(b.parametersOffset),
 		ConstEvalFunctionOffset:    loadOrMinusOne(b.constEvalFunctionOffset),

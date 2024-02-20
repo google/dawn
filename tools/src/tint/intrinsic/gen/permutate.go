@@ -63,9 +63,10 @@ func NewPermuter(s *sem.Sem) (*Permuter, error) {
 
 // Permutation describes a single permutation of an overload
 type Permutation struct {
-	sem.Overload        // The permuted overload signature
-	Desc         string // Description of the overload
-	Hash         string // Hash of the overload
+	sem.Overload         // The permuted overload signature
+	ExplicitTemplateArgs []sem.FullyQualifiedName
+	Desc                 string // Description of the overload
+	Hash                 string // Hash of the overload
 }
 
 // Permute generates a set of permutations for the given intrinsic overload
@@ -114,14 +115,25 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 			o.ReturnType = &retTys[0]
 		}
 
+		explicitTemplateArgs := make([]sem.FullyQualifiedName, len(overload.ExplicitTemplates))
+		for i, t := range overload.ExplicitTemplates {
+			ty := state.templateTypes[t]
+			explicitTemplateArgs[i] = ty
+			o.ExplicitTemplates = append(o.ExplicitTemplates, &sem.TemplateTypeParam{
+				Name: t.GetName(),
+				Type: &ty,
+			})
+		}
+
 		desc := fmt.Sprint(o)
 		hash := sha256.Sum256([]byte(desc))
 		const hashLength = 6
 		shortHash := hex.EncodeToString(hash[:])[:hashLength]
 		out = append(out, Permutation{
-			Overload: o,
-			Desc:     desc,
-			Hash:     shortHash,
+			Overload:             o,
+			ExplicitTemplateArgs: explicitTemplateArgs,
+			Desc:                 desc,
+			Hash:                 shortHash,
 		})
 
 		// Check for hash collisions
@@ -157,7 +169,7 @@ Increase hashLength in %v`,
 		}
 	}
 
-	for _, t := range overload.Templates {
+	for _, t := range overload.AllTemplates() {
 		t := t          // Capture iterator values for anonymous function
 		next := permute // Permutation chaining
 		switch t := t.(type) {

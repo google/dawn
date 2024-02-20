@@ -258,13 +258,19 @@ func (t IntrinsicTemplates) Numbers() []TemplateParam {
 type Overload struct {
 	Decl              ast.IntrinsicDecl
 	Intrinsic         *Intrinsic
-	Templates         IntrinsicTemplates
+	ExplicitTemplates IntrinsicTemplates
+	ImplicitTemplates IntrinsicTemplates
 	ReturnType        *FullyQualifiedName
 	Parameters        []Parameter
 	CanBeUsedInStage  StageUses
 	MustUse           bool   // True if function cannot be used as a statement
 	IsDeprecated      bool   // True if this overload is deprecated
 	ConstEvalFunction string // Name of the function used to evaluate the intrinsic at shader creation time
+}
+
+// AllTemplates returns the combined list of explicit and implicit templates
+func (o *Overload) AllTemplates() IntrinsicTemplates {
+	return append(append([]TemplateParam{}, o.ExplicitTemplates...), o.ImplicitTemplates...)
 }
 
 // StageUses describes the stages an overload can be used in
@@ -298,10 +304,15 @@ func (o Overload) Format(w fmt.State, verb rune) {
 		fmt.Fprintf(w, "op ")
 	}
 	fmt.Fprintf(w, "%v", o.Intrinsic.Name)
-	if len(o.Templates) > 0 {
+	if len(o.ExplicitTemplates) > 0 {
 		fmt.Fprintf(w, "<")
-		formatList(w, o.Templates)
+		formatList(w, o.ExplicitTemplates)
 		fmt.Fprintf(w, ">")
+	}
+	if len(o.ImplicitTemplates) > 0 {
+		fmt.Fprintf(w, "[")
+		formatList(w, o.ImplicitTemplates)
+		fmt.Fprintf(w, "]")
 	}
 	fmt.Fprint(w, "(")
 	for i, p := range o.Parameters {
@@ -407,7 +418,6 @@ func (t *TemplateEnumParam) GetName() string { return t.Name }
 // GetName returns the name of the TemplateNumberParam
 func (t *TemplateNumberParam) GetName() string { return t.Name }
 
-// formatList writes the comma separated list to w.
 func formatList[T any](w fmt.State, list []T) {
 	for i, v := range list {
 		if i > 0 {

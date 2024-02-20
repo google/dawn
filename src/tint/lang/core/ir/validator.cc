@@ -585,7 +585,7 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     };
 
     auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                            args, core::EvaluationStage::kRuntime);
+                                            Empty, args, core::EvaluationStage::kRuntime);
     if (result != Success) {
         AddError(call, InstError(call, result.Failure()));
         return;

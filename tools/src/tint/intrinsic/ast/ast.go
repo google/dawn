@@ -146,13 +146,14 @@ const (
 
 // IntrinsicDecl describes a builtin or operator declaration
 type IntrinsicDecl struct {
-	Source         tok.Source
-	Kind           IntrinsicKind
-	Name           string
-	Attributes     Attributes
-	TemplateParams []TemplateParam
-	Parameters     Parameters
-	ReturnType     *TemplatedName
+	Source                 tok.Source
+	Kind                   IntrinsicKind
+	Name                   string
+	Attributes             Attributes
+	ImplicitTemplateParams []TemplateParam
+	ExplicitTemplateParams []TemplateParam
+	Parameters             Parameters
+	ReturnType             *TemplatedName
 }
 
 // Format implements the fmt.Formatter interface
@@ -169,10 +170,15 @@ func (i IntrinsicDecl) Format(w fmt.State, verb rune) {
 	}
 
 	fmt.Fprintf(w, "%v", i.Name)
-	if len(i.TemplateParams) > 0 {
+	if len(i.ExplicitTemplateParams) > 0 {
 		fmt.Fprintf(w, "<")
-		formatList(w, i.TemplateParams)
+		formatList(w, i.ExplicitTemplateParams)
 		fmt.Fprintf(w, ">")
+	}
+	if len(i.ImplicitTemplateParams) > 0 {
+		fmt.Fprintf(w, "[")
+		formatList(w, i.ImplicitTemplateParams)
+		fmt.Fprintf(w, "]")
 	}
 	i.Parameters.Format(w, verb)
 	if i.ReturnType != nil {
@@ -379,7 +385,6 @@ func (d Attribute) Format(w fmt.State, verb rune) {
 	}
 }
 
-// formatList writes the comma separated list to w.
 func formatList[T any](w fmt.State, list []T) {
 	for i, v := range list {
 		if i > 0 {

@@ -171,7 +171,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
   i32() -> i32
 
 1 candidate conversion:
-  i32<T>(T) -> i32  where: T is abstract-int, abstract-float, f32, f16, u32 or bool
+  i32(T) -> i32  where: T is abstract-int, abstract-float, f32, f16, u32 or bool
 )");
 }
 

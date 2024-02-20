@@ -1973,19 +1973,22 @@ TEST_F(ConstEvalTest, ShortCircuit_And_Error_Init) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-5 candidate constructors:
-  vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+8 candidate constructors:
+  vec2<T>(x: T, y: T) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
+  vec2<T>(T) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec2<T>(vec2<T>) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2() -> vec2<abstract-int>
   vec2<T>() -> vec2<T>  where: T is f32, f16, i32, u32 or bool
+  vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
 
 5 candidate conversions:
-  vec2<T>(vec2<U>) -> vec2<f32>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<f16>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<i32>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<u32>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
-  vec2<T>(vec2<U>) -> vec2<bool>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
 )");
 }
 
@@ -2002,19 +2005,22 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Init) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-5 candidate constructors:
-  vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+8 candidate constructors:
+  vec2<T>(x: T, y: T) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
+  vec2<T>(T) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec2<T>(vec2<T>) -> vec2<T>  where: T is f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2() -> vec2<abstract-int>
   vec2<T>() -> vec2<T>  where: T is f32, f16, i32, u32 or bool
+  vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
 
 5 candidate conversions:
-  vec2<T>(vec2<U>) -> vec2<f32>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<f16>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<i32>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
-  vec2<T>(vec2<U>) -> vec2<u32>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
-  vec2<T>(vec2<U>) -> vec2<bool>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
+  vec2<T>(vec2<U>) -> vec2<T>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
 )");
 }
 
