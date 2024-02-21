@@ -27,6 +27,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Spirv builtin definition file                                              //
+//                                                                            //
+// After modifying this file, run:                                            //
+//    tools/run gen                                                           //
+// from the Dawn source directory.                                            //
+//                                                                            //
+// See docs/tint/intrinsic_definition_files.md for syntax                     //
 ////////////////////////////////////////////////////////////////////////////////
 
 import "src/tint/lang/core/address_space.def"

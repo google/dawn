@@ -34,6 +34,8 @@
 // After modifying this file, run:                                            //
 //    tools/run gen                                                           //
 // from the Dawn source directory.                                            //
+//                                                                            //
+// See docs/tint/intrinsic_definition_files.md for syntax                     //
 ////////////////////////////////////////////////////////////////////////////////
 
 import "src/tint/lang/core/access.def"
@@ -103,11 +105,6 @@ enum language_feature {
 
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
-// Types may be decorated with @precedence(N) to prioritize which type        //
-// will be picked when multiple types of a matcher match.                     //
-// This is used to ensure that abstract numerical types materialize to the    //
-// concrete type with the lowest conversion rank.                             //
-// Types with higher the precedence values will be matched first.             //
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
@@ -165,8 +162,6 @@ type __atomic_compare_exchange_result<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
-//                                                                            //
-// A type matcher that can match one or more types.                           //
 ////////////////////////////////////////////////////////////////////////////////
 
 match scalar: ia | fa | f32 | f16 | i32 | u32 | bool
@@ -244,167 +239,12 @@ match workgroup
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 //                                                                            //
-// The builtin function declarations below declare all the built-in           //
-// functions supported by the WGSL language. This builtin definition          //
-// language supports simple static-type function declarations, as well as     //
-// single overload declarations that can match a number of different          //
-// argument types via the use of template types and template numbers          //
-//                                                                            //
-// * Basic example:                                                           //
-//                                                                            //
-//    fn isInf(f32) -> bool                                                   //
-//                                                                            //
-//   Declares an overload of the function 'isInf' that accepts a single       //
-//   parameter of type 'f32' and returns a 'bool'.                            //
-//                                                                            //
-// A template type is a type determined by the arguments to the builtin.      //
-//                                                                            //
-// * Template type example without constraint:                                //
-//                                                                            //
-//    fn arrayLength[T](array<T>) -> u32                                      //
-//                                                                            //
-//    Declares an overload of the function 'arrayLength' that accepts a       //
-//    single argument of an array type with no constraints on the array       //
-//    element type. This overload will always return a value of the same type //
-//    as its single argument.                                                 //
-//                                                                            //
-// * Template type example with constraint:                                   //
-//                                                                            //
-//    fn abs[T: fiu32](T) -> T                                                //
-//                                                                            //
-//    Declares an overload of the function 'abs' that accepts a single        //
-//    argument of type 'f32', 'i32' or 'u32', which returns a value of the    //
-//    same argument type.                                                     //
-//                                                                            //
-// Similarly a template number is a number or enumerator that is determined   //
-// by the arguments to the builtin.                                           //
-//                                                                            //
-// * Template number example:                                                 //
-//                                                                            //
-//    fn dpdx[N: num](vec<N, f32>) -> vec<N, f32>                             //
-//                                                                            //
-//    Declares an overload of the function 'dpdx' that accepts a single       //
-//    argument of a variable-sized vector of 'f32', which returns a value of  //
-//    the same argument type.                                                 //
-//                                                                            //
-//                                                                            //
-// Matching algorithm for a single overload:                                  //
-// -----------------------------------------                                  //
-//                                                                            //
-// The goal of matching is to compare a function call's arguments and any     //
-// explicitly provided template types in the program source against an        //
-// overload declaration in this file, and determine if the call satisfies     //
-// the form and type constraints of the overload. If the call matches an      //
-// overload, then the overload is added to the list of 'overload candidates'  //
-// used for overload resolution (described below).                            //
-//                                                                            //
-// Prior to matching an overload, all template types are undefined.           //
-//                                                                            //
-// Template types are first defined with the type of the leftmost argument    //
-// that matches against that template type name. Subsequent arguments that    //
-// attempt to match against the template type name will either reject the     //
-// overload or refine the template, in one of 3 ways:                         //
-// (a) Fail to match, causing the overload to be immediately rejected.        //
-// (b) Match the existing template type, either exactly or via implicit       //
-//     conversion, and overload resolution continues.                         //
-// (c) Match via implicit conversion of the currently defined template type   //
-//     to the argument type. In this situation, the template type is refined  //
-//     with the more constrained argument type, and overload resolution       //
-//     continues.                                                             //
-//                                                                            //
-// To better understand, let's consider the following hypothetical overload   //
-// declaration:                                                               //
-//                                                                            //
-//    fn foo[T: scalar](T, T);                                                //
-//                                                                            //
-//    T           - is the template type name                                 //
-//    scalar      - is a matcher for the types 'f32', 'i32', 'u32' or 'bool'  //
-//                  (declared above)                                          //
-//    <T: scalar> - declares the template type T, with the constraint that T  //
-//                  must match one of 'f32', 'i32', 'u32' or 'bool'.          //
-//                                                                            //
-// The process for resolving this overload is as follows:                     //
-//                                                                            //
-//   (1) The overload resolver begins by attempting to match the argument     //
-//       types from left to right.                                            //
-//       The first parameter type is compared against the argument type T.    //
-//       As the template type T has not been defined yet, T is defined as the //
-//       type of the first argument.                                          //
-//       There's no verification that the T type is a scalar at this stage.   //
-//   (2) The second parameter is then compared against the second argument.   //
-//       As the template type T is now defined the argument type is compared  //
-//       against the value of the defined type of T. Depending on the         //
-//       comparison of the argument type to the template type, either the     //
-//       actions of (a), (b) or (c) from above will occur.                    //
-//   (3) If all the parameters matched, constraints on the template types     //
-//       need to be checked next. If the defined type does not match the      //
-//       'match' constraint, then the overload is no longer considered.       //
-//                                                                            //
-// This algorithm for matching a single overload is less general than the     //
-// algorithm described in the WGSL spec.  But it makes the same decisions     //
-// because the overloads defined by WGSL are monotonic in the sense that once //
-// a template parameter has been refined, there is never a need to backtrack  //
-// and un-refine it to match a later argument.                                //
-//                                                                            //
-// The algorithm for matching template numbers is similar to matching         //
-// template types, except numbers need to exactly match across all uses -     //
-// there is no implicit conversion. Template numbers may match integer        //
-// numbers or enumerators.                                                    //
-//                                                                            //
-//                                                                            //
-// Overload resolution for candidate overloads                                //
-// -------------------------------------------                                //
-//                                                                            //
-// If multiple candidate overloads match a given set of arguments, then a     //
-// final overload resolution pass needs to be performed. The arguments and    //
-// overload parameter types for each candidate overload are compared,         //
-// following the algorithm described at:                                      //
-//   https://www.w3.org/TR/WGSL/#overload-resolution-section                  //
-//                                                                            //
-// If the candidate list contains a single entry, then that single candidate  //
-// is picked, and no overload resolution needs to be performed.               //
-//                                                                            //
-// If the candidate list is empty, then the call fails to resolve and an      //
-// error diagnostic is raised.                                                //
-//                                                                            //
-//                                                                            //
-// More examples                                                              //
-// -------------                                                              //
-//                                                                            //
-//   fn F()                                                                   //
-//     - Function called F.                                                   //
-//       No template types or numbers, no parameters, no return value         //
-//                                                                            //
-//   fn F() -> RETURN_TYPE                                                    //
-//     - Function with RETURN_TYPE as the return type value                   //
-//                                                                            //
-//   fn F(f32, i32)                                                           //
-//     - Two fixed-type, anonymous parameters                                 //
-//                                                                            //
-//   fn F(USAGE : f32)                                                        //
-//     - Single parameter with name USAGE.                                    //
-//       Note: Parameter names are used by Tint to infer parameter order for  //
-//       some builtin functions                                               //
-//                                                                            //
-//   fn F[T](T)                                                               //
-//     - Single parameter of unconstrained template type T (any type)         //
-//                                                                            //
-//   fn F[T: scalar](T)                                                       //
-//     - Single parameter of constrained template type T (must be a scalar)   //
-//                                                                            //
-//   fn F[T: fiu32](T) -> T                                                   //
-//     - Single parameter of constrained template type T (must be a one of    //
-//       fiu32) Return type matches parameter type                            //
-//                                                                            //
-//   fn F[T, N: num](vec<N, T>)                                               //
-//     - Single parameter of vector type with template number size N and      //
-//       element template type T                                              //
-//                                                                            //
-//   fn F[A: access](texture_storage_1d<f32_texel_format, A>)                 //
-//     - Single parameter of texture_storage_1d type with template number     //
-//       access-control C, and of a texel format that is listed in            //
-//       f32_texel_format                                                     //
-//                                                                            //
+// Note: To help improve diagnostic messages, do not use type-matchers        //
+// directly as parameter constraints. Instead use the constraint on an        //
+// implicit template parameter. For example, instead of:                      //
+//   fn F(scalar)                                                             //
+// use:                                                                       //
+//   fn F[S: scalar](S)                                                       //
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#builtin-functions
@@ -991,19 +831,6 @@ ctor mat4x4[T: fa_f32_f16](T, T, T, T,
 // Conversion from vec3 to internal __packed_vec3 type.
 @must_use @const conv packedVec3<T: concrete_scalar>(vec3<T>) -> packedVec3<T>
 @must_use @const conv packedVec3[T: concrete_scalar](vec3<T>) -> packedVec3<T>
-
-////////////////////////////////////////////////////////////////////////////////
-// Operators                                                                  //
-//                                                                            //
-// The operator declarations below declare all the unary and binary operators //
-// supported by the WGSL language (with exception for address-of and          //
-// dereference unary operators).                                              //
-//                                                                            //
-// The syntax is almost identical to builtin functions, except we use 'op'    //
-// instead of 'fn'. The resolving rules are identical to builtins, which is   //
-// described in detail above.                                                 //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //

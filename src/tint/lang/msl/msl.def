@@ -27,6 +27,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // MSL builtin definition file                                                //
+//
+// After modifying this file, run:                                            //
+//    tools/run gen                                                           //
+// from the Dawn source directory.                                            //
+//                                                                            //
+// See docs/tint/intrinsic_definition_files.md for syntax                     //
 ////////////////////////////////////////////////////////////////////////////////
 
 type u32
