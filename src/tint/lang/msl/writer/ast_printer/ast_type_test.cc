@@ -443,7 +443,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
     FIELD(0x0600, float, 0, c)           \
     FIELD(0x0604, inner_y, 0, d)         \
     FIELD(0x0808, float, 0, e)           \
-    FIELD(0x080c, int8_t, 500, tint_pad_1)
+    FIELD(0x080c, int8_t, 500, tint_pad_4)
 
     // Check that the generated string is as expected.
     StringStream expect;
@@ -537,7 +537,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     FIELD(0x0200, inner, 4, d)           \
     FIELD(0x1200, float, 0, e)           \
     FIELD(0x1204, float, 1, f)           \
-    FIELD(0x1208, int8_t, 504, tint_pad_1)
+    FIELD(0x1208, int8_t, 504, tint_pad_3)
 
     // Check that the generated string is as expected.
     StringStream expect;

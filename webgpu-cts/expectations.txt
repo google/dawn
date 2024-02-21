@@ -201,33 +201,6 @@ crbug.com/dawn/1550 [ android arm ] webgpu:api,operation,render_pipeline,sample_
 # KEEP
 ################################################################################
 crbug.com/tint/2030 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f16" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f32" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ amd-0x67ef target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f16" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f32" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ apple-angle-metal-renderer:-apple-m2 target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf32%3E" [ Failure ]
-crbug.com/tint/2072 [ dawn-no-backend-validation intel-0x9bc5 no-asan target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,call,builtin,log2:values:stage="constant";type="abstract-float" [ Failure ]
-crbug.com/tint/2072 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,call,builtin,log2:values:stage="constant";type="abstract-float" [ Failure ]
-crbug.com/tint/2072 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,call,builtin,log2:values:stage="constant";type="abstract-float" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f16" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="f32" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec2%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec3%3Cf32%3E" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/tint/2069 [ intel-0x3e9b target-cpu-64 ventura webgpu-adapter-default ] webgpu:shader,validation,expression,call,builtin,modf:values:stage="override";type="vec4%3Cf32%3E" [ Failure ]
 
 ################################################################################
 # Some copyTextureToTexture tests fail on Qualcomm Android R (Pixel 4), don't appear to repro on Android T
