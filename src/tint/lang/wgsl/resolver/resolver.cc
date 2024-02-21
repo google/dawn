@@ -2068,7 +2068,7 @@ sem::ValueExpression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
 
     const core::constant::Value* value = nullptr;
     if (stage == core::EvaluationStage::kConstant) {
-        auto r = const_eval_.Bitcast(ty, inner->ConstantValue(), expr->source);
+        auto r = const_eval_.bitcast(ty, Vector{inner->ConstantValue()}, expr->source);
         if (r != Success) {
             return nullptr;
         }

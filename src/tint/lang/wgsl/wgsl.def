@@ -429,6 +429,16 @@ match workgroup
 @must_use @const fn atan2[T: fa_f32_f16, N: num](vec<N, T>, vec<N, T>) -> vec<N, T>
 @must_use @const fn atanh[T: fa_f32_f16](@test_value(0.5) T) -> T
 @must_use @const fn atanh[N: num, T: fa_f32_f16](@test_value(0.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn bitcast<T: fiu32>[U: fiu32](U) -> T
+@must_use @const fn bitcast<T: f16>(f16) -> T
+@must_use @const fn bitcast<T: vec<N, fiu32> >[N: num, U: fiu32](vec<N, U>) -> T
+@must_use @const fn bitcast<T: vec<N, f16> >[N: num](vec<N, f16>) -> T
+@must_use @const fn bitcast<T: u32>(ia) -> T
+@must_use @const fn bitcast<T: vec<N, u32> >[N: num](vec<N, ia>) -> T
+@must_use @const fn bitcast<T: fiu32>(vec2<f16>) -> T
+@must_use @const fn bitcast<T: vec2<fiu32> >(vec4<f16>) -> T
+@must_use @const fn bitcast<T: vec2<f16> >[S: fiu32](S) -> T
+@must_use @const fn bitcast<T: vec4<f16> >[S: fiu32](vec2<S>) -> T
 @must_use @const fn ceil[T: fa_f32_f16](@test_value(1.5) T) -> T
 @must_use @const fn ceil[N: num, T: fa_f32_f16](@test_value(1.5) vec<N, T>) -> vec<N, T>
 @must_use @const fn clamp[T: fia_fiu32_f16](T, T, T) -> T
@@ -980,6 +990,7 @@ ctor mat4x4[T: fa_f32_f16](T, T, T, T,
 
 // Conversion from vec3 to internal __packed_vec3 type.
 @must_use @const conv packedVec3<T: concrete_scalar>(vec3<T>) -> packedVec3<T>
+@must_use @const conv packedVec3[T: concrete_scalar](vec3<T>) -> packedVec3<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operators                                                                  //

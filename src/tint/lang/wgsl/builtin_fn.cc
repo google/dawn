@@ -72,6 +72,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "atanh") {
         return BuiltinFn::kAtanh;
     }
+    if (name == "bitcast") {
+        return BuiltinFn::kBitcast;
+    }
     if (name == "ceil") {
         return BuiltinFn::kCeil;
     }
@@ -437,6 +440,8 @@ const char* str(BuiltinFn i) {
             return "atan2";
         case BuiltinFn::kAtanh:
             return "atanh";
+        case BuiltinFn::kBitcast:
+            return "bitcast";
         case BuiltinFn::kCeil:
             return "ceil";
         case BuiltinFn::kClamp:

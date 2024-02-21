@@ -516,7 +516,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Clamp_F32_LowGreaterThanHigh) {
 
 TEST_F(ConstEvalRuntimeSemanticsTest, Bitcast_Infinity) {
     auto* a = constants.Get(u32(0x7F800000));
-    auto result = eval.Bitcast(create<core::type::F32>(), a, {});
+    auto result = eval.bitcast(create<core::type::F32>(), Vector{a}, {});
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(error(), R"(warning: value inf cannot be represented as 'f32')");
@@ -524,7 +524,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Bitcast_Infinity) {
 
 TEST_F(ConstEvalRuntimeSemanticsTest, Bitcast_NaN) {
     auto* a = constants.Get(u32(0x7FC00000));
-    auto result = eval.Bitcast(create<core::type::F32>(), a, {});
+    auto result = eval.bitcast(create<core::type::F32>(), Vector{a}, {});
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(error(), R"(warning: value nan cannot be represented as 'f32')");

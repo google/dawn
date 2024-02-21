@@ -93,13 +93,6 @@ class Eval {
     /// @return the constructed value, or null if the value cannot be calculated
     Result ArrayOrStructCtor(const core::type::Type* ty, VectorRef<const Value*> args);
 
-    /// @param ty the target type
-    /// @param value the value being converted
-    /// @param source the source location
-    /// @return the bit-cast of the given expression to the given type, or null if the value cannot
-    ///         be calculated
-    Result Bitcast(const core::type::Type* ty, const Value* value, const Source& source);
-
     /// @param obj the object being indexed. May be null, in which case Index() will still validate
     /// the index is in bounds for the type.
     /// @param obj_ty the type of the object being indexed.
@@ -457,6 +450,13 @@ class Eval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result atan2(const core::type::Type* ty, VectorRef<const Value*> args, const Source& source);
+
+    /// bitcast builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location
+    /// @return the result value, or null if the value cannot be calculated
+    Result bitcast(const core::type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// ceil builtin
     /// @param ty the expression type

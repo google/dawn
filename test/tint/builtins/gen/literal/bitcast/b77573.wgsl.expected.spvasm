@@ -1,0 +1,83 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
+               OpName %bitcast_b77573 "bitcast_b77573"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+    %v2float = OpTypeVector %float 2
+%prevent_dce_block = OpTypeStruct %v2float
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+%float_0x1pn149 = OpConstant %float 0x1p-149
+         %18 = OpConstantComposite %v2float %float_0x1pn149 %float_0x1pn149
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+         %21 = OpConstantNull %v2float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v2float = OpTypePointer StorageBuffer %v2float
+         %27 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
+%bitcast_b77573 = OpFunction %void None %13
+         %16 = OpLabel
+        %res = OpVariable %_ptr_Function_v2float Function %21
+               OpStore %res %18
+         %25 = OpAccessChain %_ptr_StorageBuffer_v2float %prevent_dce %uint_0
+         %26 = OpLoad %v2float %res
+               OpStore %25 %26
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %27
+         %29 = OpLabel
+         %30 = OpFunctionCall %void %bitcast_b77573
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %13
+         %32 = OpLabel
+         %33 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %33
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %13
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %bitcast_b77573
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %13
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %bitcast_b77573
+               OpReturn
+               OpFunctionEnd

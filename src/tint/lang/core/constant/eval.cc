@@ -1429,7 +1429,11 @@ Eval::Result Eval::Swizzle(const core::type::Type* ty,
     return mgr.Composite(ty, std::move(values));
 }
 
-Eval::Result Eval::Bitcast(const core::type::Type* ty, const Value* value, const Source& source) {
+Eval::Result Eval::bitcast(const core::type::Type* ty,
+                           VectorRef<const Value*> args,
+                           const Source& source) {
+    auto* value = args[0];
+
     // Target type
     auto dst_elements = ty->Elements(ty->DeepestElement(), 1u);
     auto dst_el_ty = dst_elements.type;
