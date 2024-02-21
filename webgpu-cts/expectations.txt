@@ -812,7 +812,9 @@ crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader
 crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/2425 [ android-u android-pixel-6 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-hflip.mp4"* [ Failure ]
+crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601* [ Failure ]
+crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";dstColorSpace="display-p3" [ Failure ]
+crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt709.webm";dstColorSpace="srgb" [ Failure ]
 
 ################################################################################
 # Transformed video external texture failures with compute
