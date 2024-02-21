@@ -320,20 +320,27 @@ class PhysicalDevice : public PhysicalDeviceBase {
             haveStoreAndMSAAResolve =
                 [*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
 #elif DAWN_PLATFORM_IS(IOS)
+#if !defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0
             haveStoreAndMSAAResolve = [*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
+#else
+            // iOS 16 is A11 Bionic and later.
+            haveStoreAndMSAAResolve = true;
+#endif
 #endif
             // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
             deviceToggles->Default(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
 
             bool haveSamplerCompare = true;
-#if DAWN_PLATFORM_IS(IOS)
+#if DAWN_PLATFORM_IS(IOS) && \
+    (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
             haveSamplerCompare = [*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
             // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
             deviceToggles->Default(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
 
             bool haveBaseVertexBaseInstance = true;
-#if DAWN_PLATFORM_IS(IOS)
+#if DAWN_PLATFORM_IS(IOS) && \
+    (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
             haveBaseVertexBaseInstance =
                 [*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
@@ -448,18 +455,42 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError InitializeImpl() override { return {}; }
 
     void InitializeSupportedFeaturesImpl() override {
-        // Check texture formats with deprecated MTLFeatureSet way.
-#if DAWN_PLATFORM_IS(MACOS)
-        if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
-            EnableFeature(Feature::TextureCompressionBC);
+#if (defined(__MAC_11_0) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_11_0) || \
+    (defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_14_0)
+        if ([*mDevice supports32BitFloatFiltering]) {
+            EnableFeature(Feature::Float32Filterable);
         }
-        if (@available(macOS 10.14, *)) {
+#elif DAWN_PLATFORM_IS(MACOS)
+        if (@available(macOS 10.15, *)) {
+            if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
+                EnableFeature(Feature::Float32Filterable);
+            }
+        } else if (@available(macOS 10.14, *)) {
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
                 EnableFeature(Feature::Float32Filterable);
             }
         }
 #endif
-#if DAWN_PLATFORM_IS(IOS)
+
+#if (defined(__MAC_11_0) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_11_0) || \
+    (defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_4)
+        if ([*mDevice supportsBCTextureCompression]) {
+            EnableFeature(Feature::TextureCompressionBC);
+        }
+#elif DAWN_PLATFORM_IS(MACOS)
+        if (@available(macOS 10.15, *)) {
+            if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
+                EnableFeature(Feature::TextureCompressionBC);
+            }
+        } else {
+            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
+                EnableFeature(Feature::TextureCompressionBC);
+            }
+        }
+#endif
+
+#if DAWN_PLATFORM_IS(IOS) && \
+    (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v1]) {
             EnableFeature(Feature::TextureCompressionETC2);
         }
@@ -470,12 +501,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
         // Check texture formats with MTLGPUFamily
         if (@available(macOS 10.15, iOS 13.0, *)) {
-            if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
-                EnableFeature(Feature::TextureCompressionBC);
-            }
-            if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
-                EnableFeature(Feature::Float32Filterable);
-            }
             if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
                 EnableFeature(Feature::TextureCompressionETC2);
             }
@@ -670,12 +695,14 @@ class PhysicalDevice : public PhysicalDeviceBase {
         // https://developer.apple.com/documentation/metal/mtldevice/detecting_gpu_features_and_metal_software_versions?language=objc
 
         if (@available(macOS 10.15, iOS 10.13, *)) {
+#if !DAWN_PLATFORM_IS(IOS)
             if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
                 return MTLGPUFamily::Mac2;
             }
             if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
                 return MTLGPUFamily::Mac1;
             }
+#endif
             if ([*mDevice supportsFamily:MTLGPUFamilyApple7]) {
                 return MTLGPUFamily::Apple7;
             }
@@ -708,7 +735,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
             return MTLGPUFamily::Mac1;
         }
-#elif DAWN_PLATFORM_IS(IOS)
+#elif DAWN_PLATFORM_IS(IOS) && \
+    (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
         if (@available(iOS 10.11, *)) {
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily4_v1]) {
                 return MTLGPUFamily::Apple4;
