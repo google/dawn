@@ -26,6 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
+import("../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${dawn_root}/scripts/dawn_features.gni")
 
@@ -66,11 +67,14 @@ static_library("utils") {
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:headers",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_spirv_tools_dir}:spvtools_opt",
   ]
 
   libs = []
   frameworks = []
+
+  if (tint_build_spv_reader) {
+    deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
+  }
 
   if (is_win && !dawn_is_winuwp) {
     sources += [ "WindowsDebugLogger.cpp" ]
