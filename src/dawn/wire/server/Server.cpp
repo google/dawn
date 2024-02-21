@@ -56,20 +56,21 @@ Server::~Server() {
     DestroyAllObjects(mProcs);
 }
 
-WireResult Server::InjectTexture(WGPUTexture texture, const TextureReservation& reservation) {
+WireResult Server::InjectTexture(WGPUTexture texture,
+                                 const Handle& handle,
+                                 const Handle& deviceHandle) {
     DAWN_ASSERT(texture != nullptr);
     Known<WGPUDevice> device;
-    WIRE_TRY(DeviceObjects().Get(reservation.deviceId, &device));
-    if (device->generation != reservation.deviceGeneration) {
+    WIRE_TRY(DeviceObjects().Get(deviceHandle.id, &device));
+    if (device->generation != deviceHandle.generation) {
         return WireResult::FatalError;
     }
 
     Known<WGPUTexture> data;
-    WIRE_TRY(
-        TextureObjects().Allocate(&data, ObjectHandle{reservation.id, reservation.generation}));
+    WIRE_TRY(TextureObjects().Allocate(&data, handle));
 
     data->handle = texture;
-    data->generation = reservation.generation;
+    data->generation = handle.generation;
     data->state = AllocationState::Allocated;
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
@@ -80,20 +81,20 @@ WireResult Server::InjectTexture(WGPUTexture texture, const TextureReservation& 
 }
 
 WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
-                                   const SwapChainReservation& reservation) {
+                                   const Handle& handle,
+                                   const Handle& deviceHandle) {
     DAWN_ASSERT(swapchain != nullptr);
     Known<WGPUDevice> device;
-    WIRE_TRY(DeviceObjects().Get(reservation.deviceId, &device));
-    if (device->generation != reservation.deviceGeneration) {
+    WIRE_TRY(DeviceObjects().Get(deviceHandle.id, &device));
+    if (device->generation != deviceHandle.generation) {
         return WireResult::FatalError;
     }
 
     Known<WGPUSwapChain> data;
-    WIRE_TRY(
-        SwapChainObjects().Allocate(&data, ObjectHandle{reservation.id, reservation.generation}));
+    WIRE_TRY(SwapChainObjects().Allocate(&data, handle));
 
     data->handle = swapchain;
-    data->generation = reservation.generation;
+    data->generation = handle.generation;
     data->state = AllocationState::Allocated;
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
@@ -103,13 +104,13 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
     return WireResult::Success;
 }
 
-WireResult Server::InjectDevice(WGPUDevice device, const DeviceReservation& reservation) {
+WireResult Server::InjectDevice(WGPUDevice device, const Handle& handle) {
     DAWN_ASSERT(device != nullptr);
     Known<WGPUDevice> data;
-    WIRE_TRY(DeviceObjects().Allocate(&data, ObjectHandle{reservation.id, reservation.generation}));
+    WIRE_TRY(DeviceObjects().Allocate(&data, handle));
 
     data->handle = device;
-    data->generation = reservation.generation;
+    data->generation = handle.generation;
     data->state = AllocationState::Allocated;
     data->info->server = this;
     data->info->self = data.AsHandle();
@@ -123,14 +124,13 @@ WireResult Server::InjectDevice(WGPUDevice device, const DeviceReservation& rese
     return WireResult::Success;
 }
 
-WireResult Server::InjectInstance(WGPUInstance instance, const InstanceReservation& reservation) {
+WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
     DAWN_ASSERT(instance != nullptr);
     Known<WGPUInstance> data;
-    WIRE_TRY(
-        InstanceObjects().Allocate(&data, ObjectHandle{reservation.id, reservation.generation}));
+    WIRE_TRY(InstanceObjects().Allocate(&data, handle));
 
     data->handle = instance;
-    data->generation = reservation.generation;
+    data->generation = handle.generation;
     data->state = AllocationState::Allocated;
 
     // The instance is externally owned so it shouldn't be destroyed when we receive a destroy

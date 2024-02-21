@@ -60,7 +60,7 @@ TEST_F(WireInstanceBasicTest, ReserveAndInject) {
 
     WGPUInstance apiInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(apiInstance));
-    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reserved.reservation));
+    EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reserved.handle));
 
     instance = nullptr;
 

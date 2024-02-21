@@ -54,7 +54,7 @@ TEST_F(WireInjectDeviceTests, CallAfterReserveInject) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.handle));
 
     WGPUBufferDescriptor bufferDesc = {};
     wgpuDeviceCreateBuffer(reserved.device, &bufferDesc);
@@ -75,7 +75,7 @@ TEST_F(WireInjectDeviceTests, ReserveDifferentIDs) {
     auto reserved1 = GetWireClient()->ReserveDevice(instance);
     auto reserved2 = GetWireClient()->ReserveDevice(instance);
 
-    ASSERT_NE(reserved1.reservation.id, reserved2.reservation.id);
+    ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
     ASSERT_NE(reserved1.device, reserved2.device);
 }
 
@@ -88,10 +88,10 @@ TEST_F(WireInjectDeviceTests, InjectExistingID) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.handle));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(GetWireServer()->InjectDevice(serverDevice, reserved.reservation));
+    ASSERT_FALSE(GetWireServer()->InjectDevice(serverDevice, reserved.handle));
 
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, nullptr, nullptr))
@@ -111,7 +111,7 @@ TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.handle));
 
     // Releasing the device removes a single reference and clears its error callbacks.
     wgpuDeviceRelease(reserved.device);
@@ -145,7 +145,7 @@ TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice, reserved.handle));
 
     wgpuDeviceGetQueue(reserved.device);
 
@@ -174,20 +174,20 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice1, reserved1.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice1, reserved1.handle));
 
     WGPUDevice serverDevice2 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice2));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice2, reserved2.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice2, reserved2.handle));
 
     // Test that both devices can be reflected.
-    ASSERT_EQ(serverDevice1, GetWireServer()->GetDevice(reserved1.reservation.id,
-                                                        reserved1.reservation.generation));
-    ASSERT_EQ(serverDevice2, GetWireServer()->GetDevice(reserved2.reservation.id,
-                                                        reserved2.reservation.generation));
+    ASSERT_EQ(serverDevice1,
+              GetWireServer()->GetDevice(reserved1.handle.id, reserved1.handle.generation));
+    ASSERT_EQ(serverDevice2,
+              GetWireServer()->GetDevice(reserved2.handle.id, reserved2.handle.generation));
 
     // Release the first device
     wgpuDeviceRelease(reserved1.device);
@@ -198,10 +198,10 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     FlushClient();
 
     // The first device should no longer reflect, but the second should
-    ASSERT_EQ(nullptr, GetWireServer()->GetDevice(reserved1.reservation.id,
-                                                  reserved1.reservation.generation));
-    ASSERT_EQ(serverDevice2, GetWireServer()->GetDevice(reserved2.reservation.id,
-                                                        reserved2.reservation.generation));
+    ASSERT_EQ(nullptr,
+              GetWireServer()->GetDevice(reserved1.handle.id, reserved1.handle.generation));
+    ASSERT_EQ(serverDevice2,
+              GetWireServer()->GetDevice(reserved2.handle.id, reserved2.handle.generation));
 
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
@@ -221,7 +221,7 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice1, reserved1.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice1, reserved1.handle));
 
     WGPUCommandEncoder commandEncoder = wgpuDeviceCreateCommandEncoder(reserved1.device, nullptr);
 
@@ -238,7 +238,7 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, _, _));
-    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice2, reserved2.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectDevice(serverDevice2, reserved2.handle));
 
     // Release the encoder. This should work without error because it stores a stable
     // pointer to its device's list of child objects. On destruction, it removes itself from the
@@ -274,8 +274,8 @@ TEST_F(WireInjectDeviceTests, ReclaimDeviceReservation) {
         auto reserved2 = GetWireClient()->ReserveDevice(instance);
 
         // The ID is the same, but the generation is still different.
-        ASSERT_EQ(reserved1.reservation.id, reserved2.reservation.id);
-        ASSERT_NE(reserved1.reservation.generation, reserved2.reservation.generation);
+        ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
+        ASSERT_NE(reserved1.handle.generation, reserved2.handle.generation);
 
         // No errors should occur.
         FlushClient();

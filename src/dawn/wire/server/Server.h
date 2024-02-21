@@ -172,10 +172,12 @@ class Server : public ServerBase {
     // ChunkedCommandHandler implementation
     const volatile char* HandleCommandsImpl(const volatile char* commands, size_t size) override;
 
-    WireResult InjectTexture(WGPUTexture texture, const TextureReservation& reservation);
-    WireResult InjectSwapChain(WGPUSwapChain swapchain, const SwapChainReservation& reservation);
-    WireResult InjectDevice(WGPUDevice device, const DeviceReservation& reservation);
-    WireResult InjectInstance(WGPUInstance instance, const InstanceReservation& reservation);
+    WireResult InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
+    WireResult InjectSwapChain(WGPUSwapChain swapchain,
+                               const Handle& handle,
+                               const Handle& deviceHandle);
+    WireResult InjectDevice(WGPUDevice device, const Handle& handle);
+    WireResult InjectInstance(WGPUInstance instance, const Handle& handle);
 
     WGPUDevice GetDevice(uint32_t id, uint32_t generation);
     bool IsDeviceKnown(WGPUDevice device) const;

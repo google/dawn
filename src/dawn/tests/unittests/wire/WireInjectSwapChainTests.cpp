@@ -58,7 +58,8 @@ TEST_F(WireInjectSwapChainTests, CallAfterReserveInject) {
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
-    ASSERT_TRUE(GetWireServer()->InjectSwapChain(apiSwapchain, reserved.reservation));
+    ASSERT_TRUE(
+        GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
     wgpuSwapChainPresent(reserved.swapchain);
     EXPECT_CALL(api, SwapChainPresent(apiSwapchain));
@@ -70,7 +71,7 @@ TEST_F(WireInjectSwapChainTests, ReserveDifferentIDs) {
     auto reserved1 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
     auto reserved2 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
-    ASSERT_NE(reserved1.reservation.id, reserved2.reservation.id);
+    ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
     ASSERT_NE(reserved1.swapchain, reserved2.swapchain);
 }
 
@@ -80,10 +81,12 @@ TEST_F(WireInjectSwapChainTests, InjectExistingID) {
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
-    ASSERT_TRUE(GetWireServer()->InjectSwapChain(apiSwapchain, reserved.reservation));
+    ASSERT_TRUE(
+        GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(GetWireServer()->InjectSwapChain(apiSwapchain, reserved.reservation));
+    ASSERT_FALSE(
+        GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 }
 
 // Test that the server only borrows the swapchain and does a single reference-release
@@ -93,7 +96,8 @@ TEST_F(WireInjectSwapChainTests, InjectedSwapChainLifetime) {
     // Injecting the swapchain adds a reference
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
-    ASSERT_TRUE(GetWireServer()->InjectSwapChain(apiSwapchain, reserved.reservation));
+    ASSERT_TRUE(
+        GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
     // Releasing the swapchain removes a single reference.
     wgpuSwapChainRelease(reserved.swapchain);
@@ -123,8 +127,8 @@ TEST_F(WireInjectSwapChainTests, ReclaimSwapChainReservation) {
         auto reserved2 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
         // The ID is the same, but the generation is still different.
-        ASSERT_EQ(reserved1.reservation.id, reserved2.reservation.id);
-        ASSERT_NE(reserved1.reservation.generation, reserved2.reservation.generation);
+        ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
+        ASSERT_NE(reserved1.handle.generation, reserved2.handle.generation);
 
         // No errors should occur.
         FlushClient();
@@ -137,7 +141,8 @@ TEST_F(WireInjectSwapChainTests, SwapChainTextureReflection) {
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
-    ASSERT_TRUE(GetWireServer()->InjectSwapChain(apiSwapchain, reserved.reservation));
+    ASSERT_TRUE(
+        GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
     WGPUTexture tex = wgpuSwapChainGetCurrentTexture(reserved.swapchain);
     WGPUTexture apiTex = api.GetNewTexture();

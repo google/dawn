@@ -50,7 +50,7 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
 
     WGPUInstance serverInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(serverInstance));
-    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     WGPUSurfaceDescriptor surfaceDesc = {};
     wgpuInstanceCreateSurface(reserved.instance, &surfaceDesc);
@@ -65,7 +65,7 @@ TEST_F(WireInjectInstanceTests, ReserveDifferentIDs) {
     auto reserved1 = GetWireClient()->ReserveInstance();
     auto reserved2 = GetWireClient()->ReserveInstance();
 
-    ASSERT_NE(reserved1.reservation.id, reserved2.reservation.id);
+    ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
     ASSERT_NE(reserved1.instance, reserved2.instance);
 }
 
@@ -75,10 +75,10 @@ TEST_F(WireInjectInstanceTests, InjectExistingID) {
 
     WGPUInstance serverInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(serverInstance));
-    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(GetWireServer()->InjectInstance(serverInstance, reserved.reservation));
+    ASSERT_FALSE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 }
 
 // Test that the server only borrows the instance and does a single reference-release
@@ -88,7 +88,7 @@ TEST_F(WireInjectInstanceTests, InjectedInstanceLifetime) {
     // Injecting the instance adds a reference
     WGPUInstance serverInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceReference(serverInstance));
-    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     // Releasing the instance removes a single reference.
     wgpuInstanceRelease(reserved.instance);
@@ -118,8 +118,8 @@ TEST_F(WireInjectInstanceTests, ReclaimInstanceReservation) {
         auto reserved2 = GetWireClient()->ReserveInstance();
 
         // The ID is the same, but the generation is still different.
-        ASSERT_EQ(reserved1.reservation.id, reserved2.reservation.id);
-        ASSERT_NE(reserved1.reservation.generation, reserved2.reservation.generation);
+        ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
+        ASSERT_NE(reserved1.handle.generation, reserved2.handle.generation);
 
         // No errors should occur.
         FlushClient();

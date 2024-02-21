@@ -53,7 +53,7 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     wgpuTextureCreateView(reserved.texture, nullptr);
     WGPUTextureView apiPlaceholderView = api.GetNewTextureView();
@@ -66,7 +66,7 @@ TEST_F(WireInjectTextureTests, ReserveDifferentIDs) {
     auto reserved1 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
     auto reserved2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
-    ASSERT_NE(reserved1.reservation.id, reserved2.reservation.id);
+    ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
     ASSERT_NE(reserved1.texture, reserved2.texture);
 }
 
@@ -76,10 +76,11 @@ TEST_F(WireInjectTextureTests, InjectExistingID) {
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+    ASSERT_FALSE(
+        GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 }
 
 // Test that injecting the same id without a destroy first fails.
@@ -93,7 +94,8 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
 
         apiTexture = api.GetNewTexture();
         EXPECT_CALL(api, TextureReference(apiTexture));
-        ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+        ASSERT_TRUE(
+            GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
         // Release the texture. It should be possible to reuse the ID now, but not the generation
         wgpuTextureRelease(reserved.texture);
@@ -101,20 +103,22 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
         FlushClient();
 
         // Invalid to inject with the same ID and generation.
-        ASSERT_FALSE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+        ASSERT_FALSE(
+            GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
         if (i > 0) {
-            EXPECT_GE(reserved.reservation.generation, 1u);
+            EXPECT_GE(reserved.handle.generation, 1u);
 
             // Invalid to inject with the same ID and lesser generation.
-            reserved.reservation.generation -= 1;
-            ASSERT_FALSE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+            reserved.handle.generation -= 1;
+            ASSERT_FALSE(
+                GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
         }
     }
 
     // Valid to inject with the same ID and greater generation.
     EXPECT_CALL(api, TextureReference(apiTexture));
-    reserved.reservation.generation += 2;
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+    reserved.handle.generation += 2;
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 }
 
 // Test that the server only borrows the texture and does a single reference-release
@@ -124,7 +128,7 @@ TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
     // Injecting the texture adds a reference
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.reservation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     // Releasing the texture removes a single reference.
     wgpuTextureRelease(reserved.texture);
@@ -154,8 +158,8 @@ TEST_F(WireInjectTextureTests, ReclaimTextureReservation) {
         auto reserved2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
         // The ID is the same, but the generation is still different.
-        ASSERT_EQ(reserved1.reservation.id, reserved2.reservation.id);
-        ASSERT_NE(reserved1.reservation.generation, reserved2.reservation.generation);
+        ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
+        ASSERT_NE(reserved1.handle.generation, reserved2.handle.generation);
 
         // No errors should occur.
         FlushClient();

@@ -32,6 +32,7 @@
 #include <cstdint>
 
 #include "dawn/common/HashUtils.h"
+#include "dawn/wire/Wire.h"
 
 namespace dawn::wire {
 
@@ -40,18 +41,19 @@ using ObjectGeneration = uint32_t;
 
 // ObjectHandle identifies some WebGPU object in the wire.
 // An ObjectHandle will never be reused, so can be used to uniquely identify an object forever.
-struct ObjectHandle {
-    ObjectId id = 0;
-    ObjectGeneration generation = 0;
-
+struct ObjectHandle : public Handle {
     ObjectHandle();
-    ObjectHandle(ObjectId id, ObjectGeneration generation);
+    ObjectHandle(ObjectId objId, ObjectGeneration objGeneration);
 
     explicit ObjectHandle(const volatile ObjectHandle& rhs);
     ObjectHandle& operator=(const volatile ObjectHandle& rhs);
 
     ObjectHandle(const ObjectHandle& rhs);
     ObjectHandle& operator=(const ObjectHandle& rhs);
+
+    // Allow direct conversion from the base Handle type.
+    // NOLINTNEXTLINE(runtime/explicit)
+    ObjectHandle(const Handle& rhs);
 
     // MSVC has a bug where it thinks the volatile copy assignment is a duplicate.
     // Workaround this by forwarding to a different function AssignFrom.

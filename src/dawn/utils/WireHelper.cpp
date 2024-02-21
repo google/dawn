@@ -141,7 +141,7 @@ class WireHelperProxy : public WireHelper {
         DAWN_ASSERT(backendInstance != nullptr);
 
         auto reserved = mWireClient->ReserveInstance(wireDesc);
-        mWireServer->InjectInstance(backendInstance, reserved.reservation);
+        mWireServer->InjectInstance(backendInstance, reserved.handle);
 
         return wgpu::Instance::Acquire(reserved.instance);
     }

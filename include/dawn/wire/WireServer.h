@@ -67,10 +67,10 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
     bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
     bool InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation);
 
-    bool InjectTexture(WGPUTexture texture, const TextureReservation& reservation);
-    bool InjectSwapChain(WGPUSwapChain texture, const SwapChainReservation& reservation);
-    bool InjectDevice(WGPUDevice device, const DeviceReservation& reservation);
-    bool InjectInstance(WGPUInstance instance, const InstanceReservation& reservation);
+    bool InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
+    bool InjectSwapChain(WGPUSwapChain swapchain, const Handle& handle, const Handle& deviceHandle);
+    bool InjectDevice(WGPUDevice device, const Handle& handle);
+    bool InjectInstance(WGPUInstance instance, const Handle& handle);
 
     // Look up a device by (id, generation) pair. Returns nullptr if the generation
     // has expired or the id is not found.
