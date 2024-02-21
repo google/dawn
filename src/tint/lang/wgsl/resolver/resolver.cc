@@ -54,7 +54,6 @@
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
@@ -1523,7 +1522,6 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             expr,  //
             [&](const ast::IndexAccessorExpression* array) { return IndexAccessor(array); },
             [&](const ast::BinaryExpression* bin_op) { return Binary(bin_op); },
-            [&](const ast::BitcastExpression* bitcast) { return Bitcast(bitcast); },
             [&](const ast::CallExpression* call) { return Call(call); },
             [&](const ast::IdentifierExpression* ident) { return Identifier(ident); },
             [&](const ast::LiteralExpression* literal) { return Literal(literal); },
@@ -2048,39 +2046,6 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     return sem;
 }
 
-sem::ValueExpression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
-    auto* inner = Load(Materialize(sem_.GetVal(expr->expr)));
-    if (!inner) {
-        return nullptr;
-    }
-    auto* ty = Type(expr->type);
-    if (!ty) {
-        return nullptr;
-    }
-    if (!validator_.Bitcast(expr, ty)) {
-        return nullptr;
-    }
-
-    auto stage = inner->Stage();
-    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-        stage = core::EvaluationStage::kNotEvaluated;
-    }
-
-    const core::constant::Value* value = nullptr;
-    if (stage == core::EvaluationStage::kConstant) {
-        auto r = const_eval_.bitcast(ty, Vector{inner->ConstantValue()}, expr->source);
-        if (r != Success) {
-            return nullptr;
-        }
-        value = r.Get();
-    }
-
-    auto* sem = b.create<sem::ValueExpression>(expr, ty, stage, current_statement_,
-                                               std::move(value), inner->HasSideEffects());
-    sem->Behaviors() = inner->Behaviors();
-    return sem;
-}
-
 sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // A CallExpression can resolve to one of:
     // * A function call.
@@ -2388,8 +2353,19 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         arg_stage = core::EarliestStage(arg_stage, arg->Stage());
     }
 
+    Vector<const core::type::Type*, 1> tmpl_args;
+    if (auto* tmpl = expr->target->identifier->As<ast::TemplatedIdentifier>()) {
+        for (auto* arg : tmpl->arguments) {
+            auto* arg_ty = sem_.AsTypeExpression(sem_.Get(arg));
+            if (TINT_UNLIKELY(!arg_ty)) {
+                return nullptr;
+            }
+            tmpl_args.Push(arg_ty->Type());
+        }
+    }
+
     auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-    auto overload = intrinsic_table_.Lookup(fn, Empty, arg_tys, arg_stage);
+    auto overload = intrinsic_table_.Lookup(fn, tmpl_args, arg_tys, arg_stage);
     if (overload != Success) {
         AddError(overload.Failure(), expr->source);
         return nullptr;
@@ -3376,10 +3352,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     }
 
     if (auto fn = resolved->BuiltinFn(); fn != wgsl::BuiltinFn::kNone) {
-        return CheckNotTemplated("builtin function", ident)
-                   ? b.create<sem::BuiltinEnumExpression<wgsl::BuiltinFn>>(expr, current_statement_,
-                                                                           fn)
-                   : nullptr;
+        return b.create<sem::BuiltinEnumExpression<wgsl::BuiltinFn>>(expr, current_statement_, fn);
     }
 
     if (auto access = resolved->Access(); access != core::Access::kUndefined) {

@@ -1353,8 +1353,6 @@ class UniformityGraph {
                 }
             },
 
-            [&](const ast::BitcastExpression* e) { return ProcessExpression(cf, e->expr); },
-
             [&](const ast::CallExpression* c) { return ProcessCall(cf, c); },
 
             [&](const ast::IdentifierExpression* i) {

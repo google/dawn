@@ -223,12 +223,6 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Assignment(const ast::Statement* a, const core::type::Type* rhs_ty) const;
 
-    /// Validates a bitcase
-    /// @param cast the bitcast expression
-    /// @param to the destination type
-    /// @returns true on success, false otherwise
-    bool Bitcast(const ast::BitcastExpression* cast, const core::type::Type* to) const;
-
     /// Validates a break statement
     /// @param stmt the break statement to validate
     /// @param current_statement the current statement being resolved

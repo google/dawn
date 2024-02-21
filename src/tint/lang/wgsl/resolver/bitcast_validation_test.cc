@@ -27,7 +27,6 @@
 
 #include <type_traits>
 
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
@@ -156,101 +155,10 @@ INSTANTIATE_TEST_SUITE_P(128Bits,
                                           testing::ValuesIn(k128BitsNumericTypes)));
 
 ////////////////////////////////////////////////////////////////////////////////
-// Invalid source type for bitcasts
+// Invalid bitcast tests
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverBitcastValidationTestInvalidSrcTy = ResolverBitcastValidationTest;
-TEST_P(ResolverBitcastValidationTestInvalidSrcTy, Test) {
-    auto src = std::get<0>(GetParam());
-    auto dst = std::get<1>(GetParam());
-
-    if (src.used_f16 || dst.used_f16) {
-        Enable(wgsl::Extension::kF16);
-    }
-
-    auto* cast = Bitcast(dst.ast(*this), Expr(Source{{12, 34}}, "src"));
-    WrapInFunction(Let("src", src.expr(*this, 0)), cast);
-
-    auto expected = "12:34 error: '" + src.sem(*this)->FriendlyName() + "' cannot be bitcast";
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), expected);
-}
-INSTANTIATE_TEST_SUITE_P(16Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k96BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128Bits,
-                         ResolverBitcastValidationTestInvalidSrcTy,
-                         testing::Combine(testing::ValuesIn(kInvalid),
-                                          testing::ValuesIn(k128BitsNumericTypes)));
-
-////////////////////////////////////////////////////////////////////////////////
-// Invalid target type for bitcasts
-////////////////////////////////////////////////////////////////////////////////
-using ResolverBitcastValidationTestInvalidDstTy = ResolverBitcastValidationTest;
-TEST_P(ResolverBitcastValidationTestInvalidDstTy, Test) {
-    auto src = std::get<0>(GetParam());
-    auto dst = std::get<1>(GetParam());
-
-    if (src.used_f16 || dst.used_f16) {
-        Enable(wgsl::Extension::kF16);
-    }
-
-    // Use an alias so we can put a Source on the bitcast type
-    Alias("T", dst.ast(*this));
-    WrapInFunction(Bitcast(ty(Source{{12, 34}}, "T"), src.expr(*this, 0)));
-
-    auto expected = "12:34 error: cannot bitcast to '" + dst.sem(*this)->FriendlyName() + "'";
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), expected);
-}
-INSTANTIATE_TEST_SUITE_P(16Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-INSTANTIATE_TEST_SUITE_P(32Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-INSTANTIATE_TEST_SUITE_P(48Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-INSTANTIATE_TEST_SUITE_P(64Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-INSTANTIATE_TEST_SUITE_P(96Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-INSTANTIATE_TEST_SUITE_P(128Bits,
-                         ResolverBitcastValidationTestInvalidDstTy,
-                         testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
-                                          testing::ValuesIn(kInvalid)));
-
-////////////////////////////////////////////////////////////////////////////////
-// Incompatible bitcast, but both src and dst types are valid
-////////////////////////////////////////////////////////////////////////////////
-using ResolverBitcastValidationTestIncompatible = ResolverBitcastValidationTest;
-TEST_P(ResolverBitcastValidationTestIncompatible, Test) {
+using ResolverInvalidBitcastTest = ResolverBitcastValidationTest;
+TEST_P(ResolverInvalidBitcastTest, Test) {
     auto src = std::get<0>(GetParam());
     auto dst = std::get<1>(GetParam());
 
@@ -260,130 +168,181 @@ TEST_P(ResolverBitcastValidationTestIncompatible, Test) {
 
     WrapInFunction(Bitcast(Source{{12, 34}}, dst.ast(*this), src.expr(*this, 0)));
 
-    auto expected = "12:34 error: cannot bitcast from '" + src.sem(*this)->FriendlyName() +
-                    "' to '" + dst.sem(*this)->FriendlyName() + "'";
+    std::string expected = "12:34 error: no matching call to bitcast<${TO}>(${FROM})";
+    expected = ReplaceAll(expected, "${FROM}", src.sem(*this)->FriendlyName());
+    expected = ReplaceAll(expected, "${TO}", dst.sem(*this)->FriendlyName());
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), expected);
+    EXPECT_THAT(r()->error(), testing::StartsWith(expected));
 }
-INSTANTIATE_TEST_SUITE_P(16BitsTo32Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_16Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k16BitsNumericTypes)));
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_32Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k32BitsNumericTypes)));
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_48Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k48BitsNumericTypes)));
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_64Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k64BitsNumericTypes)));
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_96Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k96BitsNumericTypes)));
+INSTANTIATE_TEST_SUITE_P(InvalidSrcType_128Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(kInvalid),
+                                          testing::ValuesIn(k128BitsNumericTypes)));
+
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_16Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_32Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_48Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_64Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_96Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+INSTANTIATE_TEST_SUITE_P(InvalidDstType_128Bits,
+                         ResolverInvalidBitcastTest,
+                         testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
+                                          testing::ValuesIn(kInvalid)));
+
+INSTANTIATE_TEST_SUITE_P(Incompatible_16BitsTo32Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
                                           testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(16BitsTo48Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_16BitsTo48Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
                                           testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(16BitsTo64Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_16BitsTo64Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
                                           testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(16BitsTo96Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_16BitsTo96Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
                                           testing::ValuesIn(k96BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(16BitsTo128Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_16BitsTo128Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k16BitsNumericTypes),
                                           testing::ValuesIn(k128BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32BitsTo16Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_32BitsTo16Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
                                           testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32BitsTo48Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_32BitsTo48Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
                                           testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32BitsTo64Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_32BitsTo64Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
                                           testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32BitsTo96Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_32BitsTo96Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
                                           testing::ValuesIn(k96BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(32BitsTo128Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_32BitsTo128Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k32BitsNumericTypes),
                                           testing::ValuesIn(k128BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48BitsTo16Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_48BitsTo16Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
                                           testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48BitsTo32Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_48BitsTo32Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
                                           testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48BitsTo64Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_48BitsTo64Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
                                           testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48BitsTo96Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_48BitsTo96Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
                                           testing::ValuesIn(k96BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(48BitsTo128Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_48BitsTo128Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k48BitsNumericTypes),
                                           testing::ValuesIn(k128BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64BitsTo16Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_64BitsTo16Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
                                           testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64BitsTo32Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_64BitsTo32Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
                                           testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64BitsTo48Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_64BitsTo48Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
                                           testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64BitsTo96Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_64BitsTo96Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
                                           testing::ValuesIn(k96BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(64BitsTo128Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_64BitsTo128Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k64BitsNumericTypes),
                                           testing::ValuesIn(k128BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96BitsTo16Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_96BitsTo16Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
                                           testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96BitsTo32Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_96BitsTo32Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
                                           testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96BitsTo48Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_96BitsTo48Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
                                           testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96BitsTo64Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_96BitsTo64Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
                                           testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(96BitsTo128Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_96BitsTo128Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k96BitsNumericTypes),
                                           testing::ValuesIn(k128BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128BitsTo16Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_128BitsTo16Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
                                           testing::ValuesIn(k16BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128BitsTo32Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_128BitsTo32Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
                                           testing::ValuesIn(k32BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128BitsTo48Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_128BitsTo48Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
                                           testing::ValuesIn(k48BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128BitsTo64Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_128BitsTo64Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
                                           testing::ValuesIn(k64BitsNumericTypes)));
-INSTANTIATE_TEST_SUITE_P(128BitsTo96Bits,
-                         ResolverBitcastValidationTestIncompatible,
+INSTANTIATE_TEST_SUITE_P(Incompatible_128BitsTo96Bits,
+                         ResolverInvalidBitcastTest,
                          testing::Combine(testing::ValuesIn(k128BitsNumericTypes),
                                           testing::ValuesIn(k96BitsNumericTypes)));
 

@@ -105,7 +105,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output stream
     /// @param expr the as expression
     /// @returns true if the bitcast was emitted
-    bool EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
+    bool EmitBitcastCall(StringStream& out, const ast::CallExpression* expr);
     /// Emits a list of statements
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully

@@ -117,10 +117,10 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression
     void EmitVectorRelational(StringStream& out, const ast::BinaryExpression* expr);
-    /// Handles generating a vector relational expression
+    /// Handles a bitcast call expression
     /// @param out the output of the expression stream
     /// @param expr the expression
-    void EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
+    void EmitBitcastCall(StringStream& out, const ast::CallExpression* expr);
     /// Emits a list of statements
     /// @param stmts the statement list
     void EmitStatements(VectorRef<const ast::Statement*> stmts);

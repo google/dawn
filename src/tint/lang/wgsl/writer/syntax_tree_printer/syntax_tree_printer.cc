@@ -31,7 +31,6 @@
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
@@ -153,7 +152,6 @@ void SyntaxTreePrinter::EmitExpression(const ast::Expression* expr) {
         expr,  //
         [&](const ast::IndexAccessorExpression* a) { EmitIndexAccessor(a); },
         [&](const ast::BinaryExpression* b) { EmitBinary(b); },
-        [&](const ast::BitcastExpression* b) { EmitBitcast(b); },
         [&](const ast::CallExpression* c) { EmitCall(c); },
         [&](const ast::IdentifierExpression* i) { EmitIdentifier(i); },
         [&](const ast::LiteralExpression* l) { EmitLiteral(l); },
@@ -193,24 +191,6 @@ void SyntaxTreePrinter::EmitMemberAccessor(const ast::MemberAccessorExpression* 
             EmitExpression(expr->object);
         }
         Line() << "member: " << expr->member->symbol.Name();
-    }
-    Line() << "]";
-}
-
-void SyntaxTreePrinter::EmitBitcast(const ast::BitcastExpression* expr) {
-    Line() << "BitcastExpression [";
-    {
-        ScopedIndent bc(this);
-        {
-            Line() << "type: ";
-            ScopedIndent ty(this);
-            EmitExpression(expr->type);
-        }
-        {
-            Line() << "expr: ";
-            ScopedIndent exp(this);
-            EmitExpression(expr->expr);
-        }
     }
     Line() << "]";
 }

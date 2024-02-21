@@ -400,14 +400,17 @@ bool ASTPrinter::EmitIndexAccessor(StringStream& out, const ast::IndexAccessorEx
     return true;
 }
 
-bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* expr) {
+bool ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* call) {
+    auto* arg = call->args[0];
+    auto* dst_type = TypeOf(call);
+
     out << "as_type<";
-    if (!EmitType(out, TypeOf(expr)->UnwrapRef())) {
+    if (!EmitType(out, dst_type)) {
         return false;
     }
 
     out << ">(";
-    if (!EmitExpression(out, expr->expr)) {
+    if (!EmitExpression(out, arg)) {
         return false;
     }
 
@@ -694,6 +697,8 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     auto name = generate_builtin_name(builtin);
 
     switch (builtin->Fn()) {
+        case wgsl::BuiltinFn::kBitcast:
+            return EmitBitcastCall(out, expr);
         case wgsl::BuiltinFn::kDot:
             return EmitDotCall(out, expr, builtin);
         case wgsl::BuiltinFn::kModf:
@@ -1889,7 +1894,6 @@ bool ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) 
         expr,  //
         [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(out, a); },
         [&](const ast::BinaryExpression* b) { return EmitBinary(out, b); },
-        [&](const ast::BitcastExpression* b) { return EmitBitcast(out, b); },
         [&](const ast::CallExpression* c) { return EmitCall(out, c); },
         [&](const ast::IdentifierExpression* i) { return EmitIdentifier(out, i); },
         [&](const ast::LiteralExpression* l) { return EmitLiteral(out, l); },

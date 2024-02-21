@@ -41,7 +41,6 @@
 #include "src/tint/lang/spirv/writer/common/function.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
@@ -291,7 +290,7 @@ class Builder {
     /// Generates a bitcast expression
     /// @param expr the expression to generate
     /// @returns the expression ID on success or 0 otherwise
-    uint32_t GenerateBitcastExpression(const ast::BitcastExpression* expr);
+    uint32_t GenerateBitcastExpression(const ast::CallExpression* expr);
     /// Generates a short circuting binary expression
     /// @param expr the expression to generate
     /// @returns teh expression ID on success or 0 otherwise

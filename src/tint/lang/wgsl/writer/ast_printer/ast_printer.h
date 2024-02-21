@@ -123,10 +123,6 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output stream
     /// @param op the binary operator
     void EmitBinaryOp(StringStream& out, const core::BinaryOp op);
-    /// Handles generating a bitcast expression
-    /// @param out the output stream
-    /// @param expr the bitcast expression
-    void EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
     void EmitBlock(const ast::BlockStatement* stmt);

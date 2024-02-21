@@ -350,13 +350,8 @@ class DependencyScanner {
         Vector<const ast::Expression*, 8> pending{root_expr};
         while (!pending.IsEmpty()) {
             auto* next = pending.Pop();
-            bool ok = ast::TraverseExpressions(next, [&](const ast::Expression* expr) {
-                Switch(
-                    expr,
-                    [&](const ast::IdentifierExpression* e) {
-                        AddDependency(e->identifier, e->identifier->symbol);
-                    },
-                    [&](const ast::BitcastExpression* cast) { TraverseExpression(cast->type); });
+            bool ok = ast::TraverseExpressions(next, [&](const ast::IdentifierExpression* e) {
+                AddDependency(e->identifier, e->identifier->symbol);
                 return ast::TraverseAction::Descend;
             });
             if (!ok) {

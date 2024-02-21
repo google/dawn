@@ -39,7 +39,6 @@
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
@@ -134,7 +133,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the bitcast expression
     /// @returns true if the bitcast was emitted
-    bool EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
+    bool EmitBitcastCall(StringStream& out, const ast::CallExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully

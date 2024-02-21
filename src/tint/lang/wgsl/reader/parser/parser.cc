@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -2057,32 +2056,13 @@ Maybe<const ast::BlockStatement*> Parser::continuing_statement() {
 }
 
 // primary_expression
-//   : BITCAST LESS_THAN type_specifier GREATER_THAN paren_expression
-//   | const_literal
+//   : const_literal
 //   | IDENT argument_expression_list?
 //   | paren_expression
 //
 // Note, PAREN_LEFT ( expression ( COMMA expression ) * COMMA? )? PAREN_RIGHT is replaced
 // with `argument_expression_list`.
 Maybe<const ast::Expression*> Parser::primary_expression() {
-    auto& t = peek();
-
-    if (match(Token::Type::kBitcast)) {
-        const char* use = "bitcast expression";
-
-        auto type = expect_template_arg_block(use, [&] { return expect_type(use); });
-        if (type.errored) {
-            return Failure::kErrored;
-        }
-
-        auto params = expect_paren_expression();
-        if (params.errored) {
-            return Failure::kErrored;
-        }
-
-        return builder_.Bitcast(t.source(), type.value, params.value);
-    }
-
     auto lit = const_literal();
     if (lit.errored) {
         return Failure::kErrored;
@@ -2091,6 +2071,7 @@ Maybe<const ast::Expression*> Parser::primary_expression() {
         return lit.value;
     }
 
+    auto& t = peek();
     if (t.IsIdentifier()) {
         MultiTokenSource source(this);
         next();

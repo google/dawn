@@ -38,7 +38,6 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/reader/ast_lower/atomics.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"

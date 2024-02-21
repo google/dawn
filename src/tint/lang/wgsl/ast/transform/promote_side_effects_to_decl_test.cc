@@ -2099,7 +2099,8 @@ fn f() {
   if (tint_symbol) {
     tint_symbol = a(1);
   }
-  let r = bitcast<u32>(i32(tint_symbol));
+  let tint_symbol_1 : i32 = i32(tint_symbol);
+  let r = bitcast<u32>(tint_symbol_1);
 }
 )";
 

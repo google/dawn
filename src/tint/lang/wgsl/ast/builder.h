@@ -60,7 +60,6 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/binding_attribute.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
@@ -114,6 +113,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/utils/id/generation_id.h"
 #include "src/tint/utils/text/string.h"
@@ -1548,30 +1548,28 @@ class Builder {
     }
 
     /// @param expr the expression for the bitcast
-    /// @return an `ast::BitcastExpression` of type `ty`, with the values of
-    /// `expr` converted to `ast::Expression`s using `Expr()`
+    /// @return a bitcast call of type `ty`, with the values of `expr` converted to
+    /// `ast::Expression`s using `Expr()`
     template <typename T, typename EXPR>
-    const ast::BitcastExpression* Bitcast(EXPR&& expr) {
+    const ast::CallExpression* Bitcast(EXPR&& expr) {
         return Bitcast(ty.Of<T>(), std::forward<EXPR>(expr));
     }
 
     /// @param type the type to cast to
     /// @param expr the expression for the bitcast
-    /// @return an `ast::BitcastExpression` of @p type constructed with the values
-    /// `expr`.
+    /// @return a bitcast call of @p type constructed with the values `expr`.
     template <typename EXPR>
-    const ast::BitcastExpression* Bitcast(ast::Type type, EXPR&& expr) {
+    const ast::CallExpression* Bitcast(ast::Type type, EXPR&& expr) {
         return Bitcast(source_, type, Expr(std::forward<EXPR>(expr)));
     }
 
     /// @param source the source information
     /// @param type the type to cast to
     /// @param expr the expression for the bitcast
-    /// @return an `ast::BitcastExpression` of @p type constructed with the values
-    /// `expr`.
+    /// @return a bitcast call of @p type constructed with the values `expr`.
     template <typename EXPR>
-    const ast::BitcastExpression* Bitcast(const Source& source, ast::Type type, EXPR&& expr) {
-        return create<ast::BitcastExpression>(source, type, Expr(std::forward<EXPR>(expr)));
+    const ast::CallExpression* Bitcast(const Source& source, ast::Type type, EXPR&& expr) {
+        return Call(source, Ident(wgsl::BuiltinFn::kBitcast, type), Expr(std::forward<EXPR>(expr)));
     }
 
     /// @param type the vector type

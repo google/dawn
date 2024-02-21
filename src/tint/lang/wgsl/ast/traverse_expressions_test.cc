@@ -135,7 +135,16 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
             l2r.Push(expr);
             return TraverseAction::Descend;
         });
-        EXPECT_THAT(l2r, ElementsAre(root, b2, b1, b0, e));
+        EXPECT_THAT(
+            l2r,
+            ElementsAre(root, root->target,
+                        root->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], b2,
+                        b2->target,
+                        b2->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], b1,
+                        b1->target,
+                        b1->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], b0,
+                        b0->target,
+                        b0->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], e));
     }
     {
         Vector<const Expression*, 8> r2l;
@@ -143,7 +152,14 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
             r2l.Push(expr);
             return TraverseAction::Descend;
         });
-        EXPECT_THAT(r2l, ElementsAre(root, b2, b1, b0, e));
+        EXPECT_THAT(
+            r2l,
+            ElementsAre(
+                root, b2, b1, b0, e, b0->target,
+                b0->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], b1->target,
+                b1->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], b2->target,
+                b2->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0], root->target,
+                root->target->identifier->As<ast::TemplatedIdentifier>()->arguments[0]));
     }
 }
 

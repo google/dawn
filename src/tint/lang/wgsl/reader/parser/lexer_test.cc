@@ -1123,7 +1123,6 @@ TEST_P(KeywordTest, Parses) {
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          KeywordTest,
                          testing::Values(TokenData{"alias", Token::Type::kAlias},
-                                         TokenData{"bitcast", Token::Type::kBitcast},
                                          TokenData{"break", Token::Type::kBreak},
                                          TokenData{"case", Token::Type::kCase},
                                          TokenData{"const", Token::Type::kConst},

@@ -100,12 +100,17 @@ struct PassWorkgroupIdAsArgument::State {
         auto& stmts =
             sem.Get(assign)->Parent()->Declaration()->As<ast::BlockStatement>()->statements;
         auto* rhs = assign->rhs;
-        if (auto* bitcast = rhs->As<ast::BitcastExpression>()) {
-            // The RHS may be bitcast to a signed integer, so we capture that bitcast.
-            auto let = b.Symbols().New("tint_wgid_bitcast");
-            ctx.InsertBefore(stmts, assign, b.Decl(b.Let(let, ctx.Clone(bitcast))));
-            func_to_param.Replace(ep, let);
-            rhs = bitcast->expr;
+        if (auto* call = sem.Get<sem::Call>(rhs)) {
+            if (auto* builtin_fn = call->Target()->As<sem::BuiltinFn>()) {
+                if (builtin_fn->Fn() == wgsl::BuiltinFn::kBitcast) {
+                    // The RHS may be bitcast to a signed integer, so we capture that bitcast.
+                    auto let = b.Symbols().New("tint_wgid_bitcast");
+                    auto* val = call->Arguments()[0]->Declaration();
+                    ctx.InsertBefore(stmts, assign, b.Decl(b.Let(let, ctx.Clone(rhs))));
+                    func_to_param.Replace(ep, let);
+                    rhs = val;
+                }
+            }
         }
         TINT_ASSERT_OR_RETURN(assign && rhs == users[0]->Declaration());
         auto* lhs = sem.GetVal(assign->lhs)->As<sem::VariableUser>();

@@ -1215,9 +1215,6 @@ std::optional<Token::Type> Lexer::parse_keyword(std::string_view str) {
     if (str == "alias") {
         return Token::Type::kAlias;
     }
-    if (str == "bitcast") {
-        return Token::Type::kBitcast;
-    }
     if (str == "break") {
         return Token::Type::kBreak;
     }

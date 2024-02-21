@@ -54,7 +54,6 @@
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/block_statement.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
@@ -998,18 +997,6 @@ class Impl {
                 Bind(expr, inst->Result(0));
             }
 
-            void EmitBitcast(const ast::BitcastExpression* b) {
-                auto val = GetValue(b->expr);
-                if (!val) {
-                    return;
-                }
-                auto* sem = impl.program_.Sem().Get(b);
-                auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
-                auto* inst = impl.builder_.Bitcast(ty, val);
-                impl.current_block_->Append(inst);
-                Bind(b, inst->Result(0));
-            }
-
             void EmitCall(const ast::CallExpression* expr) {
                 // If this is a materialized semantic node, just use the constant value.
                 if (auto* mat = impl.program_.Sem().Get(expr)) {
@@ -1045,9 +1032,13 @@ class Impl {
                 core::ir::Instruction* inst = nullptr;
                 // If this is a builtin function, emit the specific builtin value
                 if (auto* b = sem->Target()->As<sem::BuiltinFn>()) {
-                    auto* res = impl.builder_.InstructionResult(ty);
-                    inst = impl.builder_.ir.instructions.Create<wgsl::ir::BuiltinCall>(
-                        res, b->Fn(), std::move(args));
+                    if (b->Fn() == wgsl::BuiltinFn::kBitcast) {
+                        inst = impl.builder_.Bitcast(ty, args[0]);
+                    } else {
+                        auto* res = impl.builder_.InstructionResult(ty);
+                        inst = impl.builder_.ir.instructions.Create<wgsl::ir::BuiltinCall>(
+                            res, b->Fn(), std::move(args));
+                    }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args));
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {
@@ -1214,10 +1205,6 @@ class Impl {
                         for (auto* arg : tint::Reverse(e->args)) {
                             tasks.Push([=] { Process(arg); });
                         }
-                    },
-                    [&](const ast::BitcastExpression* e) {
-                        tasks.Push([=] { EmitBitcast(e); });
-                        tasks.Push([=] { Process(e->expr); });
                     },
                     [&](const ast::LiteralExpression* e) { EmitLiteral(e); },
                     [&](const ast::IdentifierExpression* e) { EmitIdentifier(e); },  //

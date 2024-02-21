@@ -385,9 +385,10 @@ void ASTPrinter::EmitIndexAccessor(StringStream& out, const ast::IndexAccessorEx
     out << "]";
 }
 
-void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* expr) {
-    auto* src_type = TypeOf(expr->expr)->UnwrapRef();
-    auto* dst_type = TypeOf(expr)->UnwrapRef();
+void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* call) {
+    auto* arg = call->args[0];
+    auto* src_type = TypeOf(arg)->UnwrapRef();
+    auto* dst_type = TypeOf(call);
 
     if (!dst_type->is_integer_scalar_or_vector() && !dst_type->is_float_scalar_or_vector()) {
         diagnostics_.AddError(diag::System::Writer,
@@ -397,7 +398,7 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
 
     // Handle identity bitcast.
     if (src_type == dst_type) {
-        return EmitExpression(out, expr->expr);
+        return EmitExpression(out, arg);
     }
 
     // Use packFloat2x16 and unpackFloat2x16 for f16 types.
@@ -454,7 +455,7 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
         out << fn;
         {
             ScopedParen sp(out);
-            EmitExpression(out, expr->expr);
+            EmitExpression(out, arg);
         }
     } else if (dst_type->DeepestElement()->Is<core::type::F16>()) {
         // Destination type must be vec2<f16> or vec4<f16>.
@@ -524,7 +525,7 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
         out << fn;
         {
             ScopedParen sp(out);
-            EmitExpression(out, expr->expr);
+            EmitExpression(out, arg);
         }
     } else {
         if (src_type->is_float_scalar_or_vector() &&
@@ -543,7 +544,7 @@ void ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
             EmitType(out, dst_type, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
         }
         ScopedParen sp(out);
-        EmitExpression(out, expr->expr);
+        EmitExpression(out, arg);
     }
 }
 
@@ -847,6 +848,8 @@ void ASTPrinter::EmitBuiltinCall(StringStream& out,
         EmitCountOneBitsCall(out, expr);
     } else if (builtin->Fn() == wgsl::BuiltinFn::kSelect) {
         EmitSelectCall(out, expr, builtin);
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kBitcast) {
+        EmitBitcastCall(out, expr);
     } else if (builtin->Fn() == wgsl::BuiltinFn::kDot) {
         EmitDotCall(out, expr, builtin);
     } else if (builtin->Fn() == wgsl::BuiltinFn::kModf) {
@@ -1796,7 +1799,6 @@ void ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) 
         expr,  //
         [&](const ast::IndexAccessorExpression* a) { EmitIndexAccessor(out, a); },
         [&](const ast::BinaryExpression* b) { EmitBinary(out, b); },
-        [&](const ast::BitcastExpression* b) { EmitBitcast(out, b); },
         [&](const ast::CallExpression* c) { EmitCall(out, c); },
         [&](const ast::IdentifierExpression* i) { EmitIdentifier(out, i); },
         [&](const ast::LiteralExpression* l) { EmitLiteral(out, l); },

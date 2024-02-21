@@ -514,12 +514,17 @@ TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
     // }
     Func("f", tint::Empty, ty.void_(),
          Vector{
-             Decl(Var("v", Call(Ident(Source{{12, 34}}, "min", "i32"), 1_a, 2_a))),
+             Decl(Var("v", Call(Source{{12, 34}}, Ident("min", "i32"), 1_a, 2_a))),
          });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: builtin function 'min' does not take template arguments)");
+              R"(12:34 error: no matching call to min<i32>(abstract-int, abstract-int)
+
+2 candidate functions:
+  min(T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  min(vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+)");
 }
 
 }  // namespace

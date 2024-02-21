@@ -137,30 +137,6 @@ fn f() { a = >; }
 )");
 }
 
-TEST_F(ParserImplErrorTest, BitcastExprMissingLessThan) {
-    EXPECT("fn f() { x = bitcast(y); }",
-           R"(test.wgsl:1:21 error: expected '<' for bitcast expression
-fn f() { x = bitcast(y); }
-                    ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, BitcastExprMissingGreaterThan) {
-    EXPECT("fn f() { x = bitcast<u32(y); }",
-           R"(test.wgsl:1:21 error: missing closing '>' for bitcast expression
-fn f() { x = bitcast<u32(y); }
-                    ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, BitcastExprMissingType) {
-    EXPECT("fn f() { x = bitcast<>(y); }",
-           R"(test.wgsl:1:22 error: invalid type for bitcast expression
-fn f() { x = bitcast<>(y); }
-                     ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
     EXPECT("fn f() { loop { break } }",
            R"(test.wgsl:1:23 error: expected ';' for break statement

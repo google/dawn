@@ -294,7 +294,6 @@ class Resolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     sem::ValueExpression* IndexAccessor(const ast::IndexAccessorExpression*);
     sem::ValueExpression* Binary(const ast::BinaryExpression*);
-    sem::ValueExpression* Bitcast(const ast::BitcastExpression*);
     sem::Call* Call(const ast::CallExpression*);
     sem::Function* Function(const ast::Function*);
     sem::Call* FunctionCall(const ast::CallExpression*,

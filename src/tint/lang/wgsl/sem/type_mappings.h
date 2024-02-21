@@ -110,7 +110,6 @@ struct TypeMappings {
     core::type::Type* operator()(ast::TypeDecl*);
     ValueExpression* operator()(ast::AccessorExpression*);
     ValueExpression* operator()(ast::BinaryExpression*);
-    ValueExpression* operator()(ast::BitcastExpression*);
     ValueExpression* operator()(ast::CallExpression*);
     ValueExpression* operator()(ast::LiteralExpression*);
     ValueExpression* operator()(ast::PhonyExpression*);

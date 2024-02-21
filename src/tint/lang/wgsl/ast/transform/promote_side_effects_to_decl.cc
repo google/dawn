@@ -132,7 +132,8 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
         }
 
         return Switch(
-            expr, [&](const CallExpression* e) -> bool { return sem.Get(e)->HasSideEffects(); },
+            expr,  //
+            [&](const CallExpression* e) -> bool { return sem.Get(e)->HasSideEffects(); },
             [&](const BinaryExpression* e) {
                 if (HasSideEffects(e->lhs) || HasSideEffects(e->rhs)) {
                     return true;
@@ -154,15 +155,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 no_side_effects.insert(e);
                 return false;
             },
-            [&](const BitcastExpression* e) {  //
-                if (HasSideEffects(e->expr)) {
-                    return true;
-                }
-                no_side_effects.insert(e);
-                return false;
-            },
-
-            [&](const UnaryOpExpression* e) {  //
+            [&](const UnaryOpExpression* e) {
                 if (HasSideEffects(e->expr)) {
                     return true;
                 }
@@ -319,9 +312,6 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                     return false;
                 }
                 return binary_process(e->lhs, e->rhs);
-            },
-            [&](const BitcastExpression* e) {  //
-                return process(e->expr);
             },
             [&](const UnaryOpExpression* e) {  //
                 auto r = process(e->expr);
@@ -494,10 +484,6 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 ctx.Replace(idx->object, decompose(idx->object));
                 ctx.Replace(idx->index, decompose(idx->index));
                 return clone_maybe_hoisted(idx);
-            },
-            [&](const BitcastExpression* bitcast) {
-                ctx.Replace(bitcast->expr, decompose(bitcast->expr));
-                return clone_maybe_hoisted(bitcast);
             },
             [&](const CallExpression* call) {
                 for (auto* a : call->args) {

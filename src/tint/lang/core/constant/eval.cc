@@ -1433,6 +1433,7 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
                            VectorRef<const Value*> args,
                            const Source& source) {
     auto* value = args[0];
+    bool is_abstract = value->Type()->is_abstract_integer_scalar_or_vector();
 
     // Target type
     auto dst_elements = ty->Elements(ty->DeepestElement(), 1u);
@@ -1443,15 +1444,12 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
     auto src_el_ty = src_elements.type;
     auto src_count = src_elements.count;
 
-    TINT_ASSERT(dst_count * dst_el_ty->Size() == src_count * src_el_ty->Size());
+    TINT_ASSERT(is_abstract || (dst_count * dst_el_ty->Size() == src_count * src_el_ty->Size()));
     uint32_t total_bitwidth = dst_count * dst_el_ty->Size();
     // Buffer holding the bits from source value, result value reinterpreted from it.
     Vector<std::byte, 16> buffer;
     buffer.Reserve(total_bitwidth);
 
-    // Ensure elements are of 32-bit or 16-bit numerical scalar type.
-    TINT_ASSERT(
-        (src_el_ty->IsAnyOf<core::type::F32, core::type::I32, core::type::U32, core::type::F16>()));
     // Pushes bits from source value into the buffer.
     auto push_src_element_bits = [&](const Value* element) {
         auto push_32_bits = [&](uint32_t v) {
@@ -1459,35 +1457,53 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
             buffer.Push(std::byte((v >> 8) & 0xffu));
             buffer.Push(std::byte((v >> 16) & 0xffu));
             buffer.Push(std::byte((v >> 24) & 0xffu));
+            return Success;
         };
         auto push_16_bits = [&](uint16_t v) {
             buffer.Push(std::byte(v & 0xffu));
             buffer.Push(std::byte((v >> 8) & 0xffu));
+            return Success;
         };
-        Switch(
+        return Switch(
             src_el_ty,
-            [&](const core::type::U32*) {  //
-                uint32_t r = element->ValueAs<u32>();
-                push_32_bits(r);
+            [&](const core::type::AbstractInt*) -> tint::Result<SuccessType, Error> {
+                if (element->ValueAs<AInt>() < 0) {
+                    auto res = Conv(mgr.types.i32(), Vector{element}, source);
+                    if (res != Success) {
+                        return res.Failure();
+                    }
+                    return push_32_bits(tint::Bitcast<u32>(res.Get()->ValueAs<i32>()));
+                } else {
+                    auto res = Conv(mgr.types.u32(), Vector{element}, source);
+                    if (res != Success) {
+                        return res.Failure();
+                    }
+                    return push_32_bits(res.Get()->ValueAs<u32>());
+                }
             },
-            [&](const core::type::I32*) {  //
-                uint32_t r = tint::Bitcast<u32>(element->ValueAs<i32>());
-                push_32_bits(r);
+            [&](const core::type::U32*) -> tint::Result<SuccessType, Error> {
+                return push_32_bits(element->ValueAs<u32>());
             },
-            [&](const core::type::F32*) {  //
-                uint32_t r = tint::Bitcast<u32>(element->ValueAs<f32>());
-                push_32_bits(r);
+            [&](const core::type::I32*) -> tint::Result<SuccessType, Error> {
+                return push_32_bits(tint::Bitcast<u32>(element->ValueAs<i32>()));
             },
-            [&](const core::type::F16*) {  //
-                uint16_t r = element->ValueAs<f16>().BitsRepresentation();
-                push_16_bits(r);
-            });
+            [&](const core::type::F32*) -> tint::Result<SuccessType, Error> {
+                return push_32_bits(tint::Bitcast<u32>(element->ValueAs<f32>()));
+            },
+            [&](const core::type::F16*) -> tint::Result<SuccessType, Error> {
+                return push_16_bits(element->ValueAs<f16>().BitsRepresentation());
+            },
+            TINT_ICE_ON_NO_MATCH);
     };
     if (src_count == 1) {
-        push_src_element_bits(value);
+        if (auto res = push_src_element_bits(value); res != Success) {
+            return res.Failure();
+        }
     } else {
         for (size_t i = 0; i < src_count; i++) {
-            push_src_element_bits(value->Index(i));
+            if (auto res = push_src_element_bits(value->Index(i)); res != Success) {
+                return res.Failure();
+            }
         }
     }
 
@@ -1541,7 +1557,8 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
                 }
                 els.Push(r.Get());
                 return true;
-            });
+            },
+            TINT_ICE_ON_NO_MATCH);
     };
 
     TINT_ASSERT((buffer.Length() == total_bitwidth));

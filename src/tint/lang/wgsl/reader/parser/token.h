@@ -164,8 +164,6 @@ class Token {
 
         /// A 'alias'
         kAlias,
-        /// A 'bitcast'
-        kBitcast,
         /// A 'break'
         kBreak,
         /// A 'case'

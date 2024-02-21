@@ -46,7 +46,6 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -1556,28 +1555,6 @@ bool Validator::Statements(VectorRef<const ast::Statement*> stmts) const {
             break;
         }
     }
-    return true;
-}
-
-bool Validator::Bitcast(const ast::BitcastExpression* cast, const core::type::Type* to) const {
-    auto* from = sem_.TypeOf(cast->expr)->UnwrapRef();
-    if (!from->is_numeric_scalar_or_vector()) {
-        AddError("'" + sem_.TypeNameOf(from) + "' cannot be bitcast", cast->expr->source);
-        return false;
-    }
-    if (!to->is_numeric_scalar_or_vector()) {
-        AddError("cannot bitcast to '" + sem_.TypeNameOf(to) + "'", cast->type->source);
-        return false;
-    }
-
-    // Only bitcasts between scalar/vector types of the same bit width are allowed.
-    if (from->Size() != to->Size()) {
-        AddError(
-            "cannot bitcast from '" + sem_.TypeNameOf(from) + "' to '" + sem_.TypeNameOf(to) + "'",
-            cast->source);
-        return false;
-    }
-
     return true;
 }
 
