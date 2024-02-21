@@ -708,92 +708,53 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use @const("Identity") ctor f16(f16) -> f16
 @must_use @const("Identity") ctor bool(bool) -> bool
 @must_use @const("Identity") ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
-@must_use @const("Identity") ctor vec2[T: scalar](vec2<T>) -> vec2<T>
 @must_use @const("Identity") ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
-@must_use @const("Identity") ctor vec3[T: scalar](vec3<T>) -> vec3<T>
 @must_use @const("Identity") ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
-@must_use @const("Identity") ctor vec4[T: scalar](vec4<T>) -> vec4<T>
 @must_use @const("Identity") ctor mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
-@must_use @const("Identity") ctor mat2x2[T: f32_f16](mat2x2<T>) -> mat2x2<T>
 @must_use @const("Identity") ctor mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
-@must_use @const("Identity") ctor mat2x3[T: f32_f16](mat2x3<T>) -> mat2x3<T>
 @must_use @const("Identity") ctor mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
-@must_use @const("Identity") ctor mat2x4[T: f32_f16](mat2x4<T>) -> mat2x4<T>
 @must_use @const("Identity") ctor mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
-@must_use @const("Identity") ctor mat3x2[T: f32_f16](mat3x2<T>) -> mat3x2<T>
 @must_use @const("Identity") ctor mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
-@must_use @const("Identity") ctor mat3x3[T: f32_f16](mat3x3<T>) -> mat3x3<T>
 @must_use @const("Identity") ctor mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
-@must_use @const("Identity") ctor mat3x4[T: f32_f16](mat3x4<T>) -> mat3x4<T>
 @must_use @const("Identity") ctor mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
-@must_use @const("Identity") ctor mat4x2[T: f32_f16](mat4x2<T>) -> mat4x2<T>
 @must_use @const("Identity") ctor mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
-@must_use @const("Identity") ctor mat4x3[T: f32_f16](mat4x3<T>) -> mat4x3<T>
 @must_use @const("Identity") ctor mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
-@must_use @const("Identity") ctor mat4x4[T: f32_f16](mat4x4<T>) -> mat4x4<T>
 
 // Vector constructors (splat)
 @must_use @const("VecSplat") ctor vec2<T: scalar>(T) -> vec2<T>
-@must_use @const("VecSplat") ctor vec2[T: scalar](T) -> vec2<T>
 @must_use @const("VecSplat") ctor vec3<T: scalar>(T) -> vec3<T>
-@must_use @const("VecSplat") ctor vec3[T: scalar](T) -> vec3<T>
 @must_use @const("VecSplat") ctor vec4<T: scalar>(T) -> vec4<T>
-@must_use @const("VecSplat") ctor vec4[T: scalar](T) -> vec4<T>
 
 // Vector constructors (scalar)
 @must_use @const("VecInitS") ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
-@must_use @const("VecInitS") ctor vec2[T: scalar](x: T, y: T) -> vec2<T>
 @must_use @const("VecInitS") ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
-@must_use @const("VecInitS") ctor vec3[T: scalar](x: T, y: T, z: T) -> vec3<T>
 @must_use @const("VecInitS") ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
-@must_use @const("VecInitS") ctor vec4[T: scalar](x: T, y: T, z: T, w: T) -> vec4<T>
 
 // Vector constructors (mixed)
 @must_use @const("VecInitM") ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
-@must_use @const("VecInitM") ctor vec3[T: scalar](xy: vec2<T>, z: T) -> vec3<T>
 @must_use @const("VecInitM") ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
-@must_use @const("VecInitM") ctor vec3[T: scalar](x: T, yz: vec2<T>) -> vec3<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](xy: vec2<T>, z: T, w: T) -> vec4<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](x: T, yz: vec2<T>, w: T) -> vec4<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](x: T, y: T, zw: vec2<T>) -> vec4<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](xy: vec2<T>, zw: vec2<T>) -> vec4<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](xyz: vec3<T>, w: T) -> vec4<T>
 @must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
-@must_use @const("VecInitM") ctor vec4[T: scalar](x: T, zyw: vec3<T>) -> vec4<T>
 
 // Matrix constructors (scalar)
 @must_use @const("MatInitS")
 ctor mat2x2<T: f32_f16>(T, T,
                         T, T) -> mat2x2<T>
-@must_use @const("MatInitS")
-ctor mat2x2[T: f32_f16](T, T,
-                        T, T) -> mat2x2<T>
 
 @must_use @const("MatInitS")
 ctor mat2x3<T: f32_f16>(T, T, T,
-                        T, T, T) -> mat2x3<T>
-@must_use @const("MatInitS")
-ctor mat2x3[T: f32_f16](T, T, T,
                         T, T, T) -> mat2x3<T>
 
 @must_use @const("MatInitS")
 ctor mat2x4<T: f32_f16>(T, T, T, T,
                         T, T, T, T) -> mat2x4<T>
-@must_use @const("MatInitS")
-ctor mat2x4[T: f32_f16](T, T, T, T,
-                        T, T, T, T) -> mat2x4<T>
 
 @must_use @const("MatInitS")
 ctor mat3x2<T: f32_f16>(T, T,
-                        T, T,
-                        T, T) -> mat3x2<T>
-@must_use @const("MatInitS")
-ctor mat3x2[T: f32_f16](T, T,
                         T, T,
                         T, T) -> mat3x2<T>
 
@@ -801,17 +762,9 @@ ctor mat3x2[T: f32_f16](T, T,
 ctor mat3x3<T: f32_f16>(T, T, T,
                         T, T, T,
                         T, T, T) -> mat3x3<T>
-@must_use @const("MatInitS")
-ctor mat3x3[T: f32_f16](T, T, T,
-                        T, T, T,
-                        T, T, T) -> mat3x3<T>
 
 @must_use @const("MatInitS")
 ctor mat3x4<T: f32_f16>(T, T, T, T,
-                        T, T, T, T,
-                        T, T, T, T) -> mat3x4<T>
-@must_use @const("MatInitS")
-ctor mat3x4[T: f32_f16](T, T, T, T,
                         T, T, T, T,
                         T, T, T, T) -> mat3x4<T>
 
@@ -820,19 +773,9 @@ ctor mat4x2<T: f32_f16>(T, T,
                         T, T,
                         T, T,
                         T, T) -> mat4x2<T>
-@must_use @const("MatInitS")
-ctor mat4x2[T: f32_f16](T, T,
-                        T, T,
-                        T, T,
-                        T, T) -> mat4x2<T>
 
 @must_use @const("MatInitS")
 ctor mat4x3<T: f32_f16>(T, T, T,
-                        T, T, T,
-                        T, T, T,
-                        T, T, T) -> mat4x3<T>
-@must_use @const("MatInitS")
-ctor mat4x3[T: f32_f16](T, T, T,
                         T, T, T,
                         T, T, T,
                         T, T, T) -> mat4x3<T>
@@ -843,31 +786,16 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
                         T, T, T, T,
                         T, T, T, T) -> mat4x4<T>
 
-@must_use @const("MatInitS")
-ctor mat4x4[T: f32_f16](T, T, T, T,
-                        T, T, T, T,
-                        T, T, T, T,
-                        T, T, T, T) -> mat4x4<T>
-
 // Matrix constructors (column vectors)
 @must_use @const("MatInitV") ctor mat2x2<T: f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
-@must_use @const("MatInitV") ctor mat2x2[T: f32_f16](vec2<T>, vec2<T>) -> mat2x2<T>
 @must_use @const("MatInitV") ctor mat2x3<T: f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
-@must_use @const("MatInitV") ctor mat2x3[T: f32_f16](vec3<T>, vec3<T>) -> mat2x3<T>
 @must_use @const("MatInitV") ctor mat2x4<T: f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
-@must_use @const("MatInitV") ctor mat2x4[T: f32_f16](vec4<T>, vec4<T>) -> mat2x4<T>
 @must_use @const("MatInitV") ctor mat3x2<T: f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
-@must_use @const("MatInitV") ctor mat3x2[T: f32_f16](vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
 @must_use @const("MatInitV") ctor mat3x3<T: f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
-@must_use @const("MatInitV") ctor mat3x3[T: f32_f16](vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
 @must_use @const("MatInitV") ctor mat3x4<T: f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
-@must_use @const("MatInitV") ctor mat3x4[T: f32_f16](vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
 @must_use @const("MatInitV") ctor mat4x2<T: f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
-@must_use @const("MatInitV") ctor mat4x2[T: f32_f16](vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
 @must_use @const("MatInitV") ctor mat4x3<T: f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
-@must_use @const("MatInitV") ctor mat4x3[T: f32_f16](vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
 @must_use @const("MatInitV") ctor mat4x4<T: f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
-@must_use @const("MatInitV") ctor mat4x4[T: f32_f16](vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value conversions                                                          //

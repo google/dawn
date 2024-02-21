@@ -696,22 +696,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchCompoundOp) {
 )");
 }
 
-TEST_F(CoreIntrinsicTableTest, MatchTypeInitializerImplicit) {
-    auto* i32 = create<type::I32>();
-    auto* vec3i = create<type::Vector>(i32, 3u);
-    auto result =
-        table.Lookup(CtorConv::kVec3, Empty, Vector{i32, i32, i32}, EvaluationStage::kConstant);
-    ASSERT_EQ(result, Success);
-    EXPECT_EQ(result->return_type, vec3i);
-    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
-    ASSERT_EQ(result->parameters.Length(), 3u);
-    EXPECT_EQ(result->parameters[0].type, i32);
-    EXPECT_EQ(result->parameters[1].type, i32);
-    EXPECT_EQ(result->parameters[2].type, i32);
-    EXPECT_NE(result->const_eval_fn, nullptr);
-}
-
-TEST_F(CoreIntrinsicTableTest, MatchTypeInitializerExplicit) {
+TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer) {
     auto* i32 = create<type::I32>();
     auto* vec3i = create<type::Vector>(i32, 3u);
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
@@ -726,38 +711,7 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializerExplicit) {
     EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
-TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializerImplicit) {
-    auto* i32 = create<type::I32>();
-    auto* f32 = create<type::F32>();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Empty, Vector{i32, f32, i32}, EvaluationStage::kConstant);
-    ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(),
-              R"(no matching constructor for vec3(i32, f32, i32)
-
-11 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-
-5 candidate conversions:
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is i32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f16, U is f32, i32, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is i32, U is f32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is u32, U is f32, f16, i32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is bool, U is f32, f16, i32 or u32
-)");
-}
-
-TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializerExplicit) {
+TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
     auto* i32 = create<type::I32>();
     auto* f32 = create<type::F32>();
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, f32, i32},
@@ -766,18 +720,13 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializerExplicit) {
     EXPECT_EQ(result.Failure(),
               R"(no matching constructor for vec3<i32>(i32, f32, i32)
 
-11 candidate constructors:
+6 candidate constructors:
   vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
   vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is i32, f16, u32 or bool
@@ -788,38 +737,11 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializerExplicit) {
 )");
 }
 
-TEST_F(CoreIntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
-    auto* i32 = create<type::I32>();
-    auto* vec3i = create<type::Vector>(i32, 3u);
-    auto result = table.Lookup(CtorConv::kVec3, Empty, Vector{vec3i}, EvaluationStage::kConstant);
-    ASSERT_EQ(result, Success);
-    EXPECT_EQ(result->return_type, vec3i);
-    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
-    ASSERT_EQ(result->parameters.Length(), 1u);
-    EXPECT_EQ(result->parameters[0].type, vec3i);
-    EXPECT_NE(result->const_eval_fn, nullptr);
-}
-
-TEST_F(CoreIntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
-    auto* f32 = create<type::F32>();
-    auto* vec2f = create<type::Vector>(f32, 2u);
-    auto* mat2x2_af = create<type::Matrix>(vec2f, 2u);
-    auto result =
-        table.Lookup(CtorConv::kMat2x2, Empty, Vector{vec2f, vec2f}, EvaluationStage::kConstant);
-    ASSERT_EQ(result, Success);
-    EXPECT_TYPE(result->return_type, mat2x2_af);
-    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
-    ASSERT_EQ(result->parameters.Length(), 2u);
-    EXPECT_TYPE(result->parameters[0].type, vec2f);
-    EXPECT_TYPE(result->parameters[1].type, vec2f);
-    EXPECT_NE(result->const_eval_fn, nullptr);
-}
-
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* i32 = create<type::I32>();
     auto* vec3i = create<type::Vector>(i32, 3u);
-    auto result =
-        table.Lookup(CtorConv::kVec3, Empty, Vector{i32, i32, i32}, EvaluationStage::kConstant);
+    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
+                               EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3i);
@@ -833,8 +755,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* i32 = create<type::I32>();
-    auto result =
-        table.Lookup(CtorConv::kVec3, Empty, Vector{i32, i32, i32}, EvaluationStage::kRuntime);
+    auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
+                               EvaluationStage::kRuntime);
     auto* vec3i = create<type::Vector>(i32, 3u);
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
@@ -871,18 +793,13 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeConversion) {
     EXPECT_EQ(result.Failure(),
               R"(no matching constructor for vec3<f32>(array<u32>)
 
-11 candidate constructors:
+6 candidate constructors:
   vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
   vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is i32, f16, u32 or bool
