@@ -673,6 +673,26 @@ luci.cq_tryjob_verifier(
     includable_only = True,
 )
 
+# Experimental builders that usually don't actually run any tests, but will when
+# qualifying a new configuration.
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/android-dawn-arm64-exp-rel",
+    includable_only = True,
+)
+
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-win-x64-intel-exp",
+    includable_only = True,
+)
+
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-win-x64-nvidia-exp",
+    includable_only = True,
+)
+
 # Views
 
 luci.milo(
