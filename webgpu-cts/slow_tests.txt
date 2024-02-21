@@ -105,3 +105,9 @@ crbug.com/dawn/1933 [ android arm ] webgpu:shader,execution,zero_init:compute,ze
 # Some atan2 tests are slow but passing on Pixel 4
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,builtin,atan2:values:* [ Slow ]
+
+################################################################################
+# Frequently times out on Dawn Win10 x64 ASAN Release (Intel)
+################################################################################
+crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf16%3E" [ Slow ]
+crbug.com/dawn/2432 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expression,call,builtin,length:vec4:stage="override";type="vec4%3Cf32%3E" [ Slow ]
