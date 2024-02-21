@@ -213,6 +213,11 @@ MaybeError CommandRecordingContext::Initialize(Device* device) {
 }
 
 void CommandRecordingContext::Destroy() {
+    // mDevice could be null due to failure of initialization.
+    if (!mDevice) {
+        return;
+    }
+
     DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     mIsOpen = false;
     mUniformBuffer = nullptr;

@@ -66,9 +66,11 @@ MaybeError Queue::Initialize() {
 MaybeError Queue::InitializePendingContext() {
     // Initialize mPendingCommands. After this, calls to the use the command context
     // are thread safe.
-    CommandRecordingContext commands;
-    DAWN_TRY(commands.Initialize(ToBackend(GetDevice())));
-    mPendingCommands.Use([&](auto pendingCommands) { *pendingCommands = std::move(commands); });
+    CommandRecordingContext commandContext;
+    DAWN_TRY(commandContext.Initialize(ToBackend(GetDevice())));
+
+    mPendingCommands.Use(
+        [&](auto pendingCommandContext) { *pendingCommandContext = std::move(commandContext); });
 
     // Configure the command context's uniform buffer. This is used to emulate builtins.
     // Creating the buffer is done outside of Initialize because it requires mPendingCommands
@@ -77,6 +79,7 @@ MaybeError Queue::InitializePendingContext() {
     DAWN_TRY_ASSIGN(uniformBuffer,
                     CommandRecordingContext::CreateInternalUniformBuffer(GetDevice()));
     mPendingCommands->SetInternalUniformBuffer(std::move(uniformBuffer));
+
     return {};
 }
 
