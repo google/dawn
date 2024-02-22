@@ -215,9 +215,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
-    // If the shader was destroyed, we should never call this function.
-    DAWN_ASSERT(IsAlive());
-
     ScopedTintICEHandler scopedICEHandler(GetDevice());
 
     // Check to see if we have the handle and spirv cached already.
