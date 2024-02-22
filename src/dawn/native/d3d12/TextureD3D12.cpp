@@ -326,8 +326,8 @@ MaybeError Texture::InitializeAsInternalTexture() {
 
     if (applyForceClearCopyableDepthStencilTextureOnCreationToggle ||
         device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        CommandRecordingContext* commandContext;
-        DAWN_TRY_ASSIGN(commandContext, ToBackend(device->GetQueue())->GetPendingCommandContext());
+        CommandRecordingContext* commandContext =
+            ToBackend(device->GetQueue())->GetPendingCommandContext();
         ClearValue clearValue =
             device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)
                 ? ClearValue::NonZero
@@ -380,9 +380,8 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
         // Even though we aren't recording any commands here, asking for a command context ensures
         // that the device fence is signaled eventually even if no commands were recorded before
         // EndAccess. This is a little sub-optimal, but shouldn't occur often in practice.
-        CommandRecordingContext* context;
-        DAWN_TRY_ASSIGN(context,
-                        queue->GetPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive));
+        CommandRecordingContext* context =
+            queue->GetPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
         DAWN_UNUSED(context);
 
         DAWN_TRY(SynchronizeTextureBeforeUse());

@@ -36,7 +36,6 @@
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
-class CommandAllocatorManager;
 class Device;
 class Heap;
 class Texture;
@@ -44,12 +43,11 @@ class Texture;
 class CommandRecordingContext {
   public:
     void AddToSharedTextureList(Texture* texture);
-    MaybeError Open(ID3D12Device* d3d12Device, CommandAllocatorManager* commandAllocationManager);
+    void Open(ComPtr<ID3D12GraphicsCommandList> commandList);
 
     ID3D12GraphicsCommandList* GetCommandList() const;
     ID3D12GraphicsCommandList4* GetCommandList4() const;
     void Release();
-    bool IsOpen() const;
     bool NeedsSubmit() const;
     void SetNeedsSubmit();
 
@@ -62,7 +60,6 @@ class CommandRecordingContext {
   private:
     ComPtr<ID3D12GraphicsCommandList> mD3d12CommandList;
     ComPtr<ID3D12GraphicsCommandList4> mD3d12CommandList4;
-    bool mIsOpen = false;
     bool mNeedsSubmit = false;
     absl::flat_hash_set<Texture*> mSharedTextures;
     std::vector<Heap*> mHeapsPendingUsage;

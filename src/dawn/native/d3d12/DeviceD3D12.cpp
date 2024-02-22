@@ -42,7 +42,6 @@
 #include "dawn/native/d3d12/BackendD3D12.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
-#include "dawn/native/d3d12/CommandAllocatorManager.h"
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
 #include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
@@ -411,10 +410,8 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-    CommandRecordingContext* commandRecordingContext;
-    DAWN_TRY_ASSIGN(
-        commandRecordingContext,
-        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive));
+    CommandRecordingContext* commandRecordingContext =
+        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
 
     Buffer* dstBuffer = ToBackend(destination);
 
@@ -449,10 +446,8 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    CommandRecordingContext* commandContext;
-    DAWN_TRY_ASSIGN(
-        commandContext,
-        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive));
+    CommandRecordingContext* commandContext =
+        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
 
     Texture* texture = ToBackend(dst.texture.Get());
     DAWN_TRY(texture->SynchronizeTextureBeforeUse());

@@ -404,8 +404,6 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/BufferD3D12.h"
         "d3d12/CPUDescriptorHeapAllocationD3D12.cpp"
         "d3d12/CPUDescriptorHeapAllocationD3D12.h"
-        "d3d12/CommandAllocatorManager.cpp"
-        "d3d12/CommandAllocatorManager.h"
         "d3d12/CommandBufferD3D12.cpp"
         "d3d12/CommandBufferD3D12.h"
         "d3d12/CommandRecordingContext.cpp"

@@ -88,8 +88,7 @@ MaybeError SwapChain::PresentImpl() {
     // Transition the texture to the present state as required by IDXGISwapChain1::Present()
     // TODO(crbug.com/dawn/269): Remove the need for this by eagerly transitioning the
     // presentable texture to present at the end of submits that use them.
-    CommandRecordingContext* commandContext;
-    DAWN_TRY_ASSIGN(commandContext, queue->GetPendingCommandContext());
+    CommandRecordingContext* commandContext = queue->GetPendingCommandContext();
     mApiTexture->TrackUsageAndTransitionNow(commandContext, kPresentReleaseTextureUsage,
                                             mApiTexture->GetAllSubresources());
     DAWN_TRY(queue->SubmitPendingCommands());

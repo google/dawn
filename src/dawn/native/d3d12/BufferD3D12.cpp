@@ -192,10 +192,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // BufferBase::MapAtCreation().
     if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
         !mappedAtCreation) {
-        CommandRecordingContext* commandRecordingContext;
-        DAWN_TRY_ASSIGN(commandRecordingContext,
-                        ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext());
-
+        CommandRecordingContext* commandRecordingContext =
+            ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
         DAWN_TRY(ClearBuffer(commandRecordingContext, uint8_t(1u)));
     }
 
@@ -203,9 +201,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     if (GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) && !mappedAtCreation) {
         uint32_t paddingBytes = GetAllocatedSize() - GetSize();
         if (paddingBytes > 0) {
-            CommandRecordingContext* commandRecordingContext;
-            DAWN_TRY_ASSIGN(commandRecordingContext,
-                            ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext());
+            CommandRecordingContext* commandRecordingContext =
+                ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
 
             uint32_t clearSize = paddingBytes;
             uint64_t clearOffset = GetSize();
@@ -448,9 +445,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // it in Tick() by execute the commandList and signal a fence for it even it is empty.
     // Skip the unnecessary GetPendingCommandContext() call saves an extra fence.
     if (NeedsInitialization()) {
-        CommandRecordingContext* commandContext;
-        DAWN_TRY_ASSIGN(commandContext,
-                        ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext());
+        CommandRecordingContext* commandContext =
+            ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
         DAWN_TRY(EnsureDataInitialized(commandContext));
     }
 

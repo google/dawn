@@ -45,7 +45,6 @@ class ExternalImageDXGIImpl;
 
 namespace dawn::native::d3d12 {
 
-class CommandAllocatorManager;
 class PlatformFunctions;
 class ResidencyManager;
 class ResourceAllocatorManager;

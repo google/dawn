@@ -794,35 +794,39 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionAndThenMap) {
     WaitAll(done, {f1, f2});
 }
 
-TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
+// Test the spec's promise ordering guarantee that a buffer mapping promise created before a
+// onSubmittedWorkDone promise must resolve in that order.
+TEST_P(BufferMappingCallbackTests, MapThenWaitWorkDone) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
     buffer.Unmap();
 
     std::vector<bool> done = {false, false};
 
-    // 1. Submit a command buffer which uses the buffer
+    // 0. Submit a command buffer which uses the buffer
     SubmitCommandBuffer(buffer);
-    wgpu::Future f1 = DoOnSubmittedWorkDone(
-        queue,
-        [](WGPUQueueWorkDoneStatus status, void* userdata) {
-            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
+
+    // 1. Map the buffer.
+    wgpu::Future f1 = DoMapAsync(
+        buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
             auto& done = *static_cast<std::vector<bool>*>(userdata);
             done[0] = true;
-            // This callback should be called first
+            // This callback must be called first.
             const std::vector<bool> kExpected = {true, false};
             EXPECT_EQ(done, kExpected);
         },
         &done);
 
-    // 2.
-    wgpu::Future f2 = DoMapAsync(
-        buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
+    // 2. Wait for command completion.
+    wgpu::Future f2 = DoOnSubmittedWorkDone(
+        queue,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
             auto& done = *static_cast<std::vector<bool>*>(userdata);
             done[1] = true;
-            // The buffer is used by step 1, so this callback is called second.
+            // The buffer mapping callback must have been called before this one.
             const std::vector<bool> kExpected = {true, true};
             EXPECT_EQ(done, kExpected);
         },
