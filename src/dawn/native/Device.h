@@ -416,6 +416,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     virtual bool ShouldDuplicateParametersForDrawIndirect(
         const RenderPipelineBase* renderPipelineBase) const;
 
+    // For OpenGL/OpenGL ES, we must apply the index buffer offset from SetIndexBuffer to the
+    // firstIndex parameter in indirect buffers. This happens in the validation since it
+    // copies the indirect buffers and updates them while validating.
+    // See https://crbug.com/dawn/161
+    virtual bool ShouldApplyIndexBufferOffsetToFirstIndex() const;
+
     // Whether the backend supports blitting the resolve texture with draw calls in the same render
     // pass that it will be resolved into.
     virtual bool IsResolveTextureBlitWithDrawSupported() const;

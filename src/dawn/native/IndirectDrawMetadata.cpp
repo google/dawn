@@ -170,17 +170,21 @@ void IndirectDrawMetadata::AddBundle(RenderBundleBase* bundle) {
 
 void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
                                                   uint64_t indexBufferSize,
+                                                  uint64_t indexBufferOffset,
                                                   BufferBase* indirectBuffer,
                                                   uint64_t indirectOffset,
                                                   bool duplicateBaseVertexInstance,
                                                   DrawIndexedIndirectCmd* cmd) {
     uint64_t numIndexBufferElements;
+    uint64_t indexBufferOffsetInElements;
     switch (indexFormat) {
         case wgpu::IndexFormat::Uint16:
             numIndexBufferElements = indexBufferSize / 2;
+            indexBufferOffsetInElements = indexBufferOffset / 2;
             break;
         case wgpu::IndexFormat::Uint32:
             numIndexBufferElements = indexBufferSize / 4;
+            indexBufferOffsetInElements = indexBufferOffset / 4;
             break;
         case wgpu::IndexFormat::Undefined:
             DAWN_UNREACHABLE();
@@ -198,6 +202,7 @@ void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
     IndirectDraw draw{};
     draw.inputBufferOffset = indirectOffset;
     draw.numIndexBufferElements = numIndexBufferElements;
+    draw.indexBufferOffsetInElements = indexBufferOffsetInElements;
     draw.cmd = cmd;
     it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
 }

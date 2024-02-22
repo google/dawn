@@ -68,7 +68,7 @@ class CommandBufferStateTracker {
                       BindGroupBase* bindgroup,
                       uint32_t dynamicOffsetCount,
                       const uint32_t* dynamicOffsets);
-    void SetIndexBuffer(wgpu::IndexFormat format, uint64_t size);
+    void SetIndexBuffer(wgpu::IndexFormat format, uint64_t offset, uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
 
@@ -83,6 +83,7 @@ class CommandBufferStateTracker {
     PipelineLayoutBase* GetPipelineLayout() const;
     wgpu::IndexFormat GetIndexFormat() const;
     uint64_t GetIndexBufferSize() const;
+    uint64_t GetIndexBufferOffset() const;
 
   private:
     MaybeError ValidateOperation(ValidationAspects requiredAspects);
@@ -102,6 +103,7 @@ class CommandBufferStateTracker {
     bool mIndexBufferSet = false;
     wgpu::IndexFormat mIndexFormat;
     uint64_t mIndexBufferSize = 0;
+    uint64_t mIndexBufferOffset = 0;
 
     // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
     raw_ptr<PipelineLayoutBase, DanglingUntriaged> mLastPipelineLayout = nullptr;

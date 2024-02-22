@@ -169,11 +169,6 @@ TEST_P(DrawIndexedIndirectTest, Uint32) {
 
 // Test the parameter 'baseVertex' of DrawIndexed() works.
 TEST_P(DrawIndexedIndirectTest, BaseVertex) {
-    // TODO(crbug.com/dawn/161): add workaround for OpenGL index buffer offset (could be compute
-    // shader that adds it to the draw calls)
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
@@ -197,6 +192,10 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
 
     // Test a draw with only the last 3 indices of the first quad (top right triangle)
     Test({3, 1, 3, unsignedNegFour, 0}, 6 * sizeof(uint32_t), 0, notFilled, filled);
+
+    // Test a draw with only the last 3 indices of the first quad (top right triangle) and offset
+    Test({0, 3, 1, 3, unsignedNegFour, 0}, 6 * sizeof(uint32_t), 1 * sizeof(uint32_t), notFilled,
+         filled);
 }
 
 TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
@@ -248,10 +247,6 @@ TEST_P(DrawIndexedIndirectTest, BasicValidation) {
 }
 
 TEST_P(DrawIndexedIndirectTest, ValidateWithOffsets) {
-    // TODO(crbug.com/dawn/161): The GL/GLES backend doesn't support indirect index buffer offsets
-    // yet.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());

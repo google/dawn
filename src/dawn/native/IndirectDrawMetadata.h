@@ -59,6 +59,7 @@ class IndirectDrawMetadata : public NonCopyable {
     struct IndirectDraw {
         uint64_t inputBufferOffset;
         uint64_t numIndexBufferElements;
+        uint64_t indexBufferOffsetInElements;
         // This is a pointer to the command that should be populated with the validated
         // indirect scratch buffer. It is only valid up until the encoded command buffer
         // is submitted.
@@ -136,6 +137,7 @@ class IndirectDrawMetadata : public NonCopyable {
     void AddBundle(RenderBundleBase* bundle);
     void AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
                                 uint64_t indexBufferSize,
+                                uint64_t indexBufferOffset,
                                 BufferBase* indirectBuffer,
                                 uint64_t indirectOffset,
                                 bool duplicateBaseVertexInstance,

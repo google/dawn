@@ -421,6 +421,14 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
+bool Device::MayRequireDuplicationOfIndirectParameters() const {
+    return true;
+}
+
+bool Device::ShouldApplyIndexBufferOffsetToFirstIndex() const {
+    return true;
+}
+
 const OpenGLFunctions& Device::GetGL() const {
     mContext->MakeCurrent();
     ToBackend(GetQueue())->OnGLUsed();

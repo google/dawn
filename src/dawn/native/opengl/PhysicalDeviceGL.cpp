@@ -292,6 +292,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.minStorageBufferOffsetAlignment = Get(gl, GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
     limits->v1.maxVertexBuffers = Get(gl, GL_MAX_VERTEX_ATTRIB_BINDINGS);
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
+    // The code that handles adding the index buffer offset to first_index
+    // used in drawIndexedIndirect can not handle a max buffer size larger than 4gig.
+    // See IndirectDrawValidationEncoder.cpp
+    static_assert(kAssumedMaxBufferSize < 0x100000000u);
+
     limits->v1.maxVertexAttributes = Get(gl, GL_MAX_VERTEX_ATTRIBS);
     limits->v1.maxVertexBufferArrayStride = Get(gl, GL_MAX_VERTEX_ATTRIB_STRIDE);
     limits->v1.maxInterStageShaderComponents = Get(gl, GL_MAX_VARYING_COMPONENTS);
