@@ -632,7 +632,6 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         type = InternalErrorType::DeviceLost;
     }
 
-    // TODO(lokokung) Update call sites that take the c-string to take string_view.
     const std::string messageStr = error->GetFormattedMessage();
     if (type == InternalErrorType::DeviceLost) {
         // The device was lost, schedule the application callback's executation.
@@ -653,12 +652,12 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         mCallbackTaskManager->HandleDeviceLoss();
 
         // Still forward device loss errors to the error scopes so they all reject.
-        mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr.c_str());
+        mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
     } else {
         // Pass the error to the error scope stack and call the uncaptured error callback
         // if it isn't handled. DeviceLost is not handled here because it should be
         // handled by the lost callback.
-        bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr.c_str());
+        bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
         if (!captured && mUncapturedErrorCallback != nullptr) {
             mUncapturedErrorCallback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)),
                                      messageStr.c_str(), mUncapturedErrorUserdata);
