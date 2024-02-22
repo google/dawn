@@ -386,12 +386,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     desc.bindGroupLayouts = bgls.data();
     desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
 
-    UnpackedPtr<PipelineLayoutDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked,
-                    ValidatePipelineLayoutDescriptor(device, &desc, pipelineCompatibilityToken));
-
     Ref<PipelineLayoutBase> result;
-    DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(unpacked));
+    DAWN_TRY_ASSIGN(result, device->CreatePipelineLayout(&desc, pipelineCompatibilityToken));
     DAWN_ASSERT(!result->IsError());
 
     // Check in debug that the pipeline layout is compatible with the current pipeline.

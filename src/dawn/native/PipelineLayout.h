@@ -51,7 +51,7 @@ namespace dawn::native {
 ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescriptor(
     DeviceBase*,
     const PipelineLayoutDescriptor* descriptor,
-    PipelineCompatibilityToken pipelineCompatibilityToken = PipelineCompatibilityToken(0));
+    PipelineCompatibilityToken pipelineCompatibilityToken = kExplicitPCT);
 
 struct StageAndDescriptor {
     StageAndDescriptor(SingleShaderStage shaderStage,

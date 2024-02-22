@@ -316,6 +316,7 @@ TEST_F(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
     EXPECT_EQ(module.Get(), sameModule.Get());
 
     utils::ComboRenderPipelineDescriptor desc;
+    desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
     desc.cFragment.module = utils::CreateShaderModule(device, R"(
             @fragment fn main() {
@@ -351,6 +352,7 @@ TEST_F(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
     EXPECT_EQ(module.Get(), sameModule.Get());
 
     utils::ComboRenderPipelineDescriptor desc;
+    desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.vertex.module = utils::CreateShaderModule(device, R"(
         @vertex fn main() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.0, 0.0);
@@ -382,6 +384,7 @@ TEST_F(ObjectCachingTest, RenderPipelineDeduplicationOnOverrides) {
         })");
 
     utils::ComboRenderPipelineDescriptor desc;
+    desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.vertex.module = module;
     desc.cFragment.module = module;
     desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;

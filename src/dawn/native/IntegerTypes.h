@@ -122,6 +122,7 @@ constexpr ExecutionSerial kBeginningOfGPUTime = ExecutionSerial(0);
 // token, which prevents them (and any BindGroups created with them) from being used with any
 // other pipelines.
 using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
+constexpr PipelineCompatibilityToken kExplicitPCT = PipelineCompatibilityToken(0);
 
 using Nanoseconds = TypedInteger<struct NanosecondsT, uint64_t>;
 

@@ -159,6 +159,7 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineNoCache) {
 // Tests that pipeline creation on the same device uses frontend cache when possible.
 TEST_P(SinglePipelineCachingTests, ComputePipelineFrontedCache) {
     wgpu::ComputePipelineDescriptor desc;
+    desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
     desc.compute.entryPoint = "main";
 
@@ -318,6 +319,7 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineNoCache) {
 // Tests that pipeline creation on the same device uses frontend cache when possible.
 TEST_P(SinglePipelineCachingTests, RenderPipelineFrontedCache) {
     utils::ComboRenderPipelineDescriptor desc;
+    desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
     desc.vertex.entryPoint = "main";
     desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());

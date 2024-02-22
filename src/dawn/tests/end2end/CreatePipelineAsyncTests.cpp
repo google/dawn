@@ -611,6 +611,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameRenderPipelineTwiceAtSameTime) {
         @fragment fn main() -> @location(0) vec4f {
             return vec4f(0.0, 1.0, 0.0, 1.0);
         })");
+    renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     renderPipelineDescriptor.vertex.module = vsModule;
     renderPipelineDescriptor.cFragment.module = fsModule;
     renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
