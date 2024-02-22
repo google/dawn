@@ -48,7 +48,6 @@
 #include "src/tint/lang/hlsl/writer/ast_raise/localize_struct_array_assignment.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/num_workgroups_from_uniform.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/pixel_local.h"
-#include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -67,6 +66,7 @@
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
+#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_phonies.h"
 #include "src/tint/lang/wgsl/ast/transform/robustness.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
@@ -362,7 +362,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     manager.Add<CalculateArrayLength>();
     manager.Add<ast::transform::PromoteInitializersToLet>();
 
-    manager.Add<RemoveContinueInSwitch>();
+    manager.Add<ast::transform::RemoveContinueInSwitch>();
 
     manager.Add<ast::transform::AddEmptyEntryPoint>();
 

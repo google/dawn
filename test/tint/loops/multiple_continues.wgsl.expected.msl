@@ -7,23 +7,28 @@ using namespace metal;
   if (VOLATILE_NAME)
 
 kernel void tint_symbol() {
+  bool tint_continue = false;
   TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    tint_continue = false;
     switch(i) {
       case 0: {
-        continue;
+        tint_continue = true;
         break;
       }
       case 1: {
-        continue;
+        tint_continue = true;
         break;
       }
       case 2: {
-        continue;
+        tint_continue = true;
         break;
       }
       default: {
         break;
       }
+    }
+    if (tint_continue) {
+      continue;
     }
   }
   return;

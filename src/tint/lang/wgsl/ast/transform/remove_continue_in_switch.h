@@ -25,17 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_
-#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::hlsl::writer {
+namespace tint::ast::transform {
 
 /// This transform replaces continue statements in switch cases with setting a
 /// bool variable, and checking if the variable is set after the switch to
-/// continue. It is necessary to work around FXC "error X3708: continue cannot
-/// be used in a switch". See crbug.com/tint/1080.
+/// continue. It is necessary to work around various issues including:
+///  * FXC "error X3708: continue cannot be used in a switch". See crbug.com/tint/1080.
+///  * MSL and GLSL invalid code-gen. See crbug.com/tint/2039.
 class RemoveContinueInSwitch final
     : public Castable<RemoveContinueInSwitch, ast::transform::Transform> {
   public:
@@ -54,6 +55,6 @@ class RemoveContinueInSwitch final
     struct State;
 };
 
-}  // namespace tint::hlsl::writer
+}  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_

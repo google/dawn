@@ -76,6 +76,7 @@
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
+#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_phonies.h"
 #include "src/tint/lang/wgsl/ast/transform/robustness.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
@@ -223,6 +224,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
 
     manager.Add<ast::transform::PromoteInitializersToLet>();
+    manager.Add<ast::transform::RemoveContinueInSwitch>();
 
     // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
     // TODO(crbug.com/tint/1752): This is only necessary for Metal versions older than 2.3.

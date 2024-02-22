@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
+#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
 
 #include <string>
 #include <utility>
@@ -42,9 +42,9 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::RemoveContinueInSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveContinueInSwitch);
 
-namespace tint::hlsl::writer {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct RemoveContinueInSwitch::State {
@@ -197,4 +197,4 @@ ast::transform::Transform::ApplyResult RemoveContinueInSwitch::Apply(
     return state.Run();
 }
 
-}  // namespace tint::hlsl::writer
+}  // namespace tint::ast::transform

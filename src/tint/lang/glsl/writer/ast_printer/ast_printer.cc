@@ -72,6 +72,7 @@
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
+#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_phonies.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/ast/transform/robustness.h"
@@ -240,6 +241,7 @@ SanitizedResult Sanitize(const Program& in,
     manager.Add<ast::transform::BindingRemapper>();
 
     manager.Add<ast::transform::PromoteInitializersToLet>();
+    manager.Add<ast::transform::RemoveContinueInSwitch>();
     manager.Add<ast::transform::AddEmptyEntryPoint>();
 
     // Std140 must come after PromoteSideEffectsToDecl and before SimplifyPointers.
