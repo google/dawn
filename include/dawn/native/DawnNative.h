@@ -141,6 +141,9 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     bool beginCaptureOnStartup = false;
     bool enableAdapterBlocklist = false;
 
+    WGPULoggingCallback loggingCallback = nullptr;
+    void* loggingCallbackUserdata = nullptr;
+
     // Equality operators, mostly for testing. Note that this tests
     // strict pointer-pointer equality if the struct contains member pointers.
     bool operator==(const DawnInstanceDescriptor& rhs) const;

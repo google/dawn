@@ -205,6 +205,9 @@ void InstanceBase::WillDropLastExternalRef() {
             backend->ClearPhysicalDevices();
         }
     }
+
+    mLoggingCallback = nullptr;
+    mLoggingCallbackUserdata = nullptr;
 }
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
@@ -223,6 +226,29 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
         mBackendValidationLevel = dawnDesc->backendValidationLevel;
         mBeginCaptureOnStartup = dawnDesc->beginCaptureOnStartup;
         mEnableAdapterBlocklist = dawnDesc->enableAdapterBlocklist;
+
+        mLoggingCallback = dawnDesc->loggingCallback;
+        mLoggingCallbackUserdata = dawnDesc->loggingCallbackUserdata;
+    }
+
+    if (!mLoggingCallback) {
+        mLoggingCallback = [](WGPULoggingType type, char const* message, void*) {
+            switch (static_cast<wgpu::LoggingType>(type)) {
+                case wgpu::LoggingType::Verbose:
+                    dawn::DebugLog() << message;
+                    break;
+                case wgpu::LoggingType::Info:
+                    dawn::InfoLog() << message;
+                    break;
+                case wgpu::LoggingType::Warning:
+                    dawn::WarningLog() << message;
+                    break;
+                case wgpu::LoggingType::Error:
+                    dawn::ErrorLog() << message;
+                    break;
+            }
+        };
+        mLoggingCallbackUserdata = nullptr;
     }
 
     // Default paths to search are next to the shared library, next to the executable, and
@@ -466,8 +492,8 @@ bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
         return false;
     }
     std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (mWarningMessages.insert(message).second) {
-        dawn::WarningLog() << message;
+    if (mWarningMessages.insert(message).second && mLoggingCallback) {
+        mLoggingCallback(WGPULoggingType_Warning, message.c_str(), mLoggingCallbackUserdata);
     }
     return true;
 }
@@ -570,7 +596,10 @@ EventManager* InstanceBase::GetEventManager() {
 
 void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
     DAWN_ASSERT(error != nullptr);
-    dawn::ErrorLog() << error->GetFormattedMessage();
+    if (mLoggingCallback) {
+        std::string messageStr = error->GetFormattedMessage();
+        mLoggingCallback(WGPULoggingType_Error, messageStr.c_str(), mLoggingCallbackUserdata);
+    }
 }
 
 const X11Functions* InstanceBase::GetOrLoadX11Functions() {
