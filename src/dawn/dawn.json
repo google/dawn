@@ -1174,6 +1174,7 @@
             },
             {
                 "name": "create buffer",
+                "no autolock": true,
                 "returns": "buffer",
                 "args": [
                     {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}

@@ -30,6 +30,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/end2end/BufferHostMappedPointerTests.h"
 
@@ -72,8 +73,10 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
 
         wgpu::BufferHostMappedPointer hostMappedDesc;
         hostMappedDesc.pointer = ptr;
-        hostMappedDesc.disposeCallback = mDisposeCallback.Callback();
-        hostMappedDesc.userdata = mDisposeCallback.MakeUserdata(ptr);
+        mDisposeCallback.Use([&](auto callback) {
+            hostMappedDesc.disposeCallback = callback->Callback();
+            hostMappedDesc.userdata = callback->MakeUserdata(ptr);
+        });
 
         wgpu::BufferDescriptor bufferDesc;
         bufferDesc.usage = usage;
@@ -84,15 +87,16 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
         if (dawn::native::CheckIsErrorForTesting(buffer.Get())) {
             UnmapMemory();
         } else {
-            EXPECT_CALL(mDisposeCallback, Call(ptr))
-                .WillOnce(testing::InvokeWithoutArgs(UnmapMemory));
+            mDisposeCallback.Use([&](auto callback) {
+                EXPECT_CALL(*callback, Call(ptr)).WillOnce(testing::InvokeWithoutArgs(UnmapMemory));
+            });
         }
 
         return std::make_pair(std::move(buffer), hostMappedDesc.pointer);
     }
 
   private:
-    testing::MockCallback<WGPUCallback> mDisposeCallback;
+    MutexProtected<testing::MockCallback<WGPUCallback>> mDisposeCallback;
 };
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Posix,

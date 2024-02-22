@@ -1150,14 +1150,42 @@ BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
     return ReturnToAPI(std::move(result));
 }
 BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
+    // Search for the host mapped pointer extension struct. If it is present, we will
+    // try to create the buffer without taking the global device-lock. If creation fails,
+    // we'll acquire the device lock and do normal error handling.
+    bool hasHostMapped = false;
+    for (const auto* chain = descriptor->nextInChain; chain != nullptr;
+         chain = chain->nextInChain) {
+        if (chain->sType == wgpu::SType::BufferHostMappedPointer) {
+            hasHostMapped = true;
+            break;
+        }
+    }
+
+    std::optional<ResultOrError<Ref<BufferBase>>> resultOrError;
+    if (hasHostMapped) {
+        // Buffer creation from host-mapped pointer does not need the device lock.
+        resultOrError = CreateBuffer(descriptor);
+        if (resultOrError->IsSuccess()) {
+            return ReturnToAPI(resultOrError->AcquireSuccess());
+        }
+        // Error case continues below, and will acquire the device lock for
+        // thread-safe error handling.
+    }
+
+    auto deviceLock(GetScopedLock());
+    if (!hasHostMapped) {
+        resultOrError = CreateBuffer(descriptor);
+    }
     Ref<BufferBase> result;
-    if (ConsumedError(CreateBuffer(descriptor), &result, InternalErrorType::OutOfMemory,
+    if (ConsumedError(std::move(*resultOrError), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateBuffer(%s).", this, descriptor)) {
         DAWN_ASSERT(result == nullptr);
         result = BufferBase::MakeError(this, descriptor);
     }
     return ReturnToAPI(std::move(result));
 }
+
 CommandEncoder* DeviceBase::APICreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
     Ref<CommandEncoder> result;
     if (ConsumedError(CreateCommandEncoder(descriptor), &result,
