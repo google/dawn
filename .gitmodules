@@ -6,6 +6,10 @@
 	path = third_party/clang-format/script
 	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/clang/tools/clang-format
 	gclient-condition = dawn_standalone
+[submodule "third_party/depot_tools"]
+	path = third_party/depot_tools
+	url = https://chromium.googlesource.com/chromium/tools/depot_tools
+	gclient-condition = dawn_standalone
 [submodule "third_party/libc++/src"]
 	path = third_party/libc++/src
 	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx

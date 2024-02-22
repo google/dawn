@@ -17,6 +17,7 @@
 /third_party/catapult
 /third_party/clang-format
 /third_party/cpplint
+/third_party/depot_tools
 /third_party/dxc
 /third_party/dxheaders
 /third_party/glfw
