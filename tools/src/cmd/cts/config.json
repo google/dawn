@@ -54,6 +54,11 @@
       "Bucket": "try",
       "Builder": "dawn-try-win10-x86-rel"
     },
+    "Win10-x64-Intel-Experimental": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-win-x64-intel-exp"
+    },
     "Win10-x64-Nvidia-Experimental": {
       "Project": "chromium",
       "Bucket": "try",
