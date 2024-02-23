@@ -1140,19 +1140,26 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 vertexStateBufferBindingTracker.Apply(gl);
                 bindGroupTracker.Apply(gl);
 
+                const auto topology = lastPipeline->GetGLPrimitiveTopology();
+                if (topology == GL_LINE_STRIP || topology == GL_TRIANGLE_STRIP) {
+                    gl.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+                } else {
+                    gl.Disable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+                }
+
                 if (lastPipeline->UsesInstanceIndex()) {
                     gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance,
                                   draw->firstInstance);
                 }
                 if (gl.DrawElementsInstancedBaseVertexBaseInstanceANGLE) {
                     gl.DrawElementsInstancedBaseVertexBaseInstanceANGLE(
-                        lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, indexBufferFormat,
+                        topology, draw->indexCount, indexBufferFormat,
                         reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
                                                 indexBufferBaseOffset),
                         draw->instanceCount, draw->baseVertex, draw->firstInstance);
                 } else if (draw->firstInstance > 0) {
                     gl.DrawElementsInstancedBaseVertexBaseInstance(
-                        lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, indexBufferFormat,
+                        topology, draw->indexCount, indexBufferFormat,
                         reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
                                                 indexBufferBaseOffset),
                         draw->instanceCount, draw->baseVertex, draw->firstInstance);
@@ -1160,16 +1167,14 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                     // This branch is only needed on OpenGL < 4.2; ES < 3.2
                     if (draw->baseVertex != 0) {
                         gl.DrawElementsInstancedBaseVertex(
-                            lastPipeline->GetGLPrimitiveTopology(), draw->indexCount,
-                            indexBufferFormat,
+                            topology, draw->indexCount, indexBufferFormat,
                             reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
                                                     indexBufferBaseOffset),
                             draw->instanceCount, draw->baseVertex);
                     } else {
                         // This branch is only needed on OpenGL < 3.2; ES < 3.2
                         gl.DrawElementsInstanced(
-                            lastPipeline->GetGLPrimitiveTopology(), draw->indexCount,
-                            indexBufferFormat,
+                            topology, draw->indexCount, indexBufferFormat,
                             reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
                                                     indexBufferBaseOffset),
                             draw->instanceCount);
@@ -1209,9 +1214,16 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
+                const auto topology = lastPipeline->GetGLPrimitiveTopology();
+                if (topology == GL_LINE_STRIP || topology == GL_TRIANGLE_STRIP) {
+                    gl.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+                } else {
+                    gl.Disable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+                }
+
                 gl.BindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer->GetHandle());
                 gl.DrawElementsIndirect(
-                    lastPipeline->GetGLPrimitiveTopology(), indexBufferFormat,
+                    topology, indexBufferFormat,
                     reinterpret_cast<void*>(static_cast<intptr_t>(draw->indirectOffset)));
                 indirectBuffer->TrackUsage();
                 break;

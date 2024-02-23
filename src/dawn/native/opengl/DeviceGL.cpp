@@ -181,7 +181,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // Set initial state.
     gl.Enable(GL_DEPTH_TEST);
     gl.Enable(GL_SCISSOR_TEST);
-    gl.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     if (gl.GetVersion().IsDesktop()) {
         // These are not necessary on GLES. The functionality is enabled by default, and
         // works by specifying sample counts and SRGB textures, respectively.
