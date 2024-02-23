@@ -783,7 +783,7 @@ crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader
 crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/dawn/2424 [ android-u android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/2425 [ android-u android-pixel-6 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture* [ Failure ]
+crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 
 ################################################################################
 # Transformed video external texture failures with compute
