@@ -1294,7 +1294,7 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         Switch(
             node,
             [&](const MemberAccessorExpression* accessor) {
-                auto* sem = src.Sem().Get(accessor)->UnwrapLoad();
+                auto* sem = src.Sem().Get(accessor)->Unwrap();
                 if (sem->Is<sem::Swizzle>()) {
                     preserved_identifiers.Add(accessor->member);
                 } else if (auto* str_expr = src.Sem().GetVal(accessor->object)) {
