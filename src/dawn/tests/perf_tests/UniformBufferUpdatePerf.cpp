@@ -63,8 +63,12 @@ constexpr char kFragmentShader[] = R"(
         })";
 
 enum class UploadMethod {
+    // Use Queue.WriteBuffer() to update the uniform buffers.
     WriteBuffer,
-    StagingBuffer,
+    // Map and copy to a common staging buffer first, then copy it to all uniform buffers.
+    SingleStagingBuffer,
+    // Map and copy to a specific staging buffer first for each uniform buffer to then copy from.
+    MultipleStagingBuffer,
 };
 
 enum class UploadSize {
@@ -99,17 +103,20 @@ std::ostream& operator<<(std::ostream& ostream, const UniformBufferUpdateParams&
         case UploadMethod::WriteBuffer:
             ostream << "_WriteBuffer";
             break;
-        case UploadMethod::StagingBuffer:
-            ostream << "_StagingBuffer";
+        case UploadMethod::SingleStagingBuffer:
+            ostream << "_SingleStagingBuffer";
+            break;
+        case UploadMethod::MultipleStagingBuffer:
+            ostream << "_MultipleStagingBuffer";
             break;
     }
 
     switch (param.uploadSize) {
         case UploadSize::Partial:
-            ostream << "_Partial";
+            ostream << "_PartialSize";
             break;
         case UploadSize::Full:
-            ostream << "_Full";
+            ostream << "_FullSize";
             break;
     }
 
@@ -156,8 +163,10 @@ class UniformBufferUpdatePerf : public DawnPerfTestWithParams<UniformBufferUpdat
 
     // Free uniform buffers to be re-used.
     MutexProtected<std::queue<wgpu::Buffer>> mUniformBuffers;
+
+    wgpu::Buffer mSingleStagingBuffer;
     // Free staging buffers to be re-used. All buffers are mapped already.
-    MutexProtected<std::queue<wgpu::Buffer>> mStagingBuffers;
+    MutexProtected<std::queue<wgpu::Buffer>> mMultipleStagingBuffers;
 };
 
 size_t UniformBufferUpdatePerf::GetBufferSize() {
@@ -185,9 +194,9 @@ void UniformBufferUpdatePerf::ReturnUniformBuffer(wgpu::Buffer buffer) {
 
 // Try to grab a free staging buffer. If unavailable, create a new one on-the-fly.
 wgpu::Buffer UniformBufferUpdatePerf::FindOrCreateStagingBuffer() {
-    if (!mStagingBuffers->empty()) {
-        wgpu::Buffer buffer = mStagingBuffers->front();
-        mStagingBuffers->pop();
+    if (!mMultipleStagingBuffers->empty()) {
+        wgpu::Buffer buffer = mMultipleStagingBuffers->front();
+        mMultipleStagingBuffers->pop();
         return buffer;
     }
     wgpu::BufferDescriptor descriptor;
@@ -199,7 +208,7 @@ wgpu::Buffer UniformBufferUpdatePerf::FindOrCreateStagingBuffer() {
 
 // Return a staging buffer, so that it's free to be re-used.
 void UniformBufferUpdatePerf::ReturnStagingBuffer(wgpu::Buffer buffer) {
-    mStagingBuffers->push(buffer);
+    mMultipleStagingBuffers->push(buffer);
 }
 
 void UniformBufferUpdatePerf::SetUp() {
@@ -259,6 +268,11 @@ void UniformBufferUpdatePerf::SetUp() {
     renderPipelineDesc.vertex.module = vsModule;
     renderPipelineDesc.cFragment.module = fsModule;
     mPipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+
+    std::vector<float> data(kUniformDataSize, 1.0f * (kNumIterations / 2));
+    mSingleStagingBuffer = FindOrCreateStagingBuffer();
+    memcpy(mSingleStagingBuffer.GetMappedRange(0, data.size()), data.data(), data.size());
+    mSingleStagingBuffer.Unmap();
 }
 
 void UniformBufferUpdatePerf::Step() {
@@ -271,7 +285,10 @@ void UniformBufferUpdatePerf::Step() {
             case UploadMethod::WriteBuffer:
                 queue.WriteBuffer(uniformBuffer, 0, data.data(), data.size());
                 break;
-            case UploadMethod::StagingBuffer:
+            case UploadMethod::SingleStagingBuffer:
+                commands.CopyBufferToBuffer(mSingleStagingBuffer, 0, uniformBuffer, 0, data.size());
+                break;
+            case UploadMethod::MultipleStagingBuffer:
                 stagingBuffer = FindOrCreateStagingBuffer();
                 memcpy(stagingBuffer.GetMappedRange(0, data.size()), data.data(), data.size());
                 stagingBuffer.Unmap();
@@ -292,7 +309,7 @@ void UniformBufferUpdatePerf::Step() {
         queue.Submit(1, &commandBuffer);
 
         // Return the staging buffer once it's done with the last usage and re-mapped.
-        if (GetParam().uploadMethod == UploadMethod::StagingBuffer) {
+        if (GetParam().uploadMethod == UploadMethod::MultipleStagingBuffer) {
             CallbackData* callbackData = new CallbackData({this, stagingBuffer});
             stagingBuffer.MapAsync(
                 wgpu::MapMode::Write, 0, GetBufferSize(),
@@ -327,7 +344,11 @@ void UniformBufferUpdatePerf::Step() {
         }
 
 #ifdef PIXEL_CHECK
-        uint8_t u8 = std::floor(i * 255.0 / kNumIterations);
+        auto value = i;
+        if (GetParam().uploadMethod == UploadMethod::SingleStagingBuffer) {
+            value = kNumIterations / 2;
+        }
+        uint8_t u8 = std::floor(value * 255.0 / kNumIterations);
         utils::RGBA8 color0(u8, u8, u8, 255);
         utils::RGBA8 color1(u8 + 1, u8 + 1, u8 + 1, 255);
         EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, mColorAttachmentTexture, kTextureSize / 2,
@@ -343,7 +364,8 @@ TEST_P(UniformBufferUpdatePerf, Run) {
 DAWN_INSTANTIATE_TEST_P(UniformBufferUpdatePerf,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend()},
-                        {UploadMethod::WriteBuffer, UploadMethod::StagingBuffer},
+                        {UploadMethod::WriteBuffer, UploadMethod::SingleStagingBuffer,
+                         UploadMethod::MultipleStagingBuffer},
                         {UploadSize::Partial, UploadSize::Full},
                         {UniformBuffer::Single, UniformBuffer::Multiple});
 
