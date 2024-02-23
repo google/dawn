@@ -104,26 +104,6 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
     return WireResult::Success;
 }
 
-WireResult Server::InjectDevice(WGPUDevice device, const Handle& handle) {
-    DAWN_ASSERT(device != nullptr);
-    Known<WGPUDevice> data;
-    WIRE_TRY(DeviceObjects().Allocate(&data, handle));
-
-    data->handle = device;
-    data->generation = handle.generation;
-    data->state = AllocationState::Allocated;
-    data->info->server = this;
-    data->info->self = data.AsHandle();
-
-    // The device is externally owned so it shouldn't be destroyed when we receive a destroy
-    // message from the client. Add a reference to counterbalance the eventual release.
-    mProcs.deviceReference(device);
-
-    // Set callbacks to forward errors to the client.
-    SetForwardingDeviceCallbacks(data);
-    return WireResult::Success;
-}
-
 WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
     DAWN_ASSERT(instance != nullptr);
     Known<WGPUInstance> data;

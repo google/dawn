@@ -176,7 +176,6 @@ class Server : public ServerBase {
     WireResult InjectSwapChain(WGPUSwapChain swapchain,
                                const Handle& handle,
                                const Handle& deviceHandle);
-    WireResult InjectDevice(WGPUDevice device, const Handle& handle);
     WireResult InjectInstance(WGPUInstance instance, const Handle& handle);
 
     WGPUDevice GetDevice(uint32_t id, uint32_t generation);

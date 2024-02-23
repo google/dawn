@@ -65,7 +65,11 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
 
     {% for type in by_category["structure"] if type.has_free_members_function %}
         table->{{as_varName(type.name, Name("free members"))}} = []({{as_cType(type.name)}} {{as_varName(type.name)}}) {
-            dawn::WarningLog() << "No mock available for {{as_varName(type.name, Name('free members'))}}";
+            static bool calledOnce = false;
+            if (!calledOnce) {
+                calledOnce = true;
+                dawn::WarningLog() << "No mock available for {{as_varName(type.name, Name('free members'))}}";
+            }
         };
     {% endfor %}
 }

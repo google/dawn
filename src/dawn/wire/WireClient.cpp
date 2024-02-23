@@ -51,10 +51,6 @@ ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device,
     return mImpl->ReserveSwapChain(device, descriptor);
 }
 
-ReservedDevice WireClient::ReserveDevice(WGPUInstance instance) {
-    return mImpl->ReserveDevice(instance);
-}
-
 ReservedInstance WireClient::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
     return mImpl->ReserveInstance(descriptor);
 }

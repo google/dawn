@@ -64,61 +64,6 @@ class WireAdapterTests : public WireAdapterTestBase {
                               void* userdata = nullptr) {
         CallImpl(userdata, a.Get(), reinterpret_cast<WGPUDeviceDescriptor const*>(descriptor));
     }
-
-    // Bootstrap the tests and create a fake adapter.
-    void SetUp() override {
-        WireAdapterTestBase::SetUp();
-
-        WGPURequestAdapterOptions options = {};
-        MockCallback<WGPURequestAdapterCallback> cb;
-        wgpuInstanceRequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
-
-        // Expect the server to receive the message. Then, mock a fake reply.
-        apiAdapter = api.GetNewAdapter();
-        EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
-            .WillOnce(InvokeWithoutArgs([&] {
-                EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
-
-                EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                    .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                        *properties = {};
-                        properties->vendorName = "";
-                        properties->architecture = "";
-                        properties->name = "";
-                        properties->driverDescription = "";
-                    })));
-
-                EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
-                    .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
-                        *limits = {};
-                        return true;
-                    })));
-
-                EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
-                    .WillOnce(Return(0))
-                    .WillOnce(Return(0));
-                api.CallInstanceRequestAdapterCallback(
-                    apiInstance, WGPURequestAdapterStatus_Success, apiAdapter, nullptr);
-            }));
-        FlushClient();
-
-        // Expect the callback in the client.
-        WGPUAdapter cAdapter;
-        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, this))
-            .WillOnce(SaveArg<1>(&cAdapter));
-        FlushServer();
-
-        EXPECT_NE(cAdapter, nullptr);
-        adapter = wgpu::Adapter::Acquire(cAdapter);
-    }
-
-    void TearDown() override {
-        adapter = nullptr;
-        WireAdapterTestBase::TearDown();
-    }
-
-    WGPUAdapter apiAdapter;
-    wgpu::Adapter adapter;
 };
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireAdapterTests);
 

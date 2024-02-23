@@ -435,7 +435,6 @@ dawn_test("dawn_unittests") {
     "unittests/wire/WireExtensionTests.cpp",
     "unittests/wire/WireFutureTest.cpp",
     "unittests/wire/WireFutureTest.h",
-    "unittests/wire/WireInjectDeviceTests.cpp",
     "unittests/wire/WireInjectInstanceTests.cpp",
     "unittests/wire/WireInjectSwapChainTests.cpp",
     "unittests/wire/WireInjectTextureTests.cpp",

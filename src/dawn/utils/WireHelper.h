@@ -59,6 +59,12 @@ class WireHelper {
         const wgpu::InstanceDescriptor* nativeDesc = nullptr,
         const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
+    // Creates a swap chain given a native device and surface.
+    virtual wgpu::SwapChain CreateSwapChain(WGPUSurface backendSurface,
+                                            WGPUDevice backendDevice,
+                                            WGPUDevice apiDevice,
+                                            const WGPUSwapChainDescriptor* descriptor) = 0;
+
     virtual void BeginWireTrace(const char* name) = 0;
 
     virtual bool FlushClient() = 0;
