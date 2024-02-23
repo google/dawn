@@ -338,13 +338,16 @@ void EventManager::ShutDown() {
     mEvents.reset();
 }
 
-FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& future) {
+FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     FutureID futureID = mNextFutureID++;
     if (!mEvents.has_value()) {
         return futureID;
     }
 
-    mEvents->Use([&](auto events) { events->emplace(futureID, std::move(future)); });
+    // Don't track the event if it was already completed.
+    if (!event->mCompleted.load(std::memory_order_relaxed)) {
+        mEvents->Use([&](auto events) { events->emplace(futureID, std::move(event)); });
+    }
     return futureID;
 }
 
