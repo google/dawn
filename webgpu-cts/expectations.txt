@@ -749,6 +749,7 @@ crbug.com/tint/2172 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,memory_layou
 ################################################################################
 crbug.com/dawn/2408 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
 crbug.com/dawn/2428 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
+crbug.com/dawn/2428 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] worker_webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 
 ################################################################################
 # Failures due to Pixel 6 Android U upgrade
