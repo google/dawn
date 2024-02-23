@@ -44,32 +44,6 @@ const volatile char* WireServer::HandleCommands(const volatile char* commands, s
 }
 
 bool WireServer::InjectTexture(WGPUTexture texture,
-                               uint32_t id,
-                               uint32_t generation,
-                               uint32_t deviceId,
-                               uint32_t deviceGeneration) {
-    return mImpl->InjectTexture(texture, {id, generation}, {deviceId, deviceGeneration}) ==
-           WireResult::Success;
-}
-
-bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
-                                 uint32_t id,
-                                 uint32_t generation,
-                                 uint32_t deviceId,
-                                 uint32_t deviceGeneration) {
-    return mImpl->InjectSwapChain(swapchain, {id, generation}, {deviceId, deviceGeneration}) ==
-           WireResult::Success;
-}
-
-bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
-    return mImpl->InjectDevice(device, {id, generation}) == WireResult::Success;
-}
-
-bool WireServer::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
-    return mImpl->InjectInstance(instance, {id, generation}) == WireResult::Success;
-}
-
-bool WireServer::InjectTexture(WGPUTexture texture,
                                const Handle& handle,
                                const Handle& deviceHandle) {
     return mImpl->InjectTexture(texture, handle, deviceHandle) == WireResult::Success;
