@@ -818,8 +818,6 @@ crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-270.mp4";* [ Failure ]
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-90.mp4";* [ Failure ]
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";* [ Failure ]
-crbug.com/41487285 [ android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/41487285 [ android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-90.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
 
 ################################################################################
 # Flip video tests failing
