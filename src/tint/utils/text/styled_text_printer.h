@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,51 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/text/string_stream.h"
+#ifndef SRC_TINT_UTILS_TEXT_STYLED_TEXT_PRINTER_H_
+#define SRC_TINT_UTILS_TEXT_STYLED_TEXT_PRINTER_H_
+
+#include <memory>
+#include <string>
+
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/styled_text_theme.h"
+
+/// Forward declarations
+namespace tint {
+class TextStyle;
+}
 
 namespace tint {
 
-StringStream::StringStream() {
-    Reset();
-}
+/// StyledTextPrinter is the interface for printing text with a style.
+class StyledTextPrinter {
+  public:
+    /// @returns a Printer using the default theme.
+    /// @param out the file to print to.
+    static std::unique_ptr<StyledTextPrinter> Create(FILE* out);
 
-StringStream::StringStream(const StringStream& other) {
-    Reset();
-    sstream_ << other.str();
-}
+    /// @returns a Printer using the theme @p theme.
+    /// @param out the file to print to.
+    /// @param theme the custom theme to use.
+    static std::unique_ptr<StyledTextPrinter> Create(FILE* out, const StyledTextTheme& theme);
 
-StringStream::~StringStream() = default;
+    /// @returns a Printer that emits non-styled text.
+    /// @param out the file to print to.
+    static std::unique_ptr<StyledTextPrinter> CreatePlain(FILE* out);
 
-StringStream& StringStream::operator=(const StringStream& other) {
-    Reset();
-    return *this << other.str();
-}
+    /// @returns a Printer that uses ANSI escape sequences and theme @p theme.
+    /// @param out the file to print to.
+    /// @param theme the custom theme to use.
+    static std::unique_ptr<StyledTextPrinter> CreateANSI(FILE* out, const StyledTextTheme& theme);
 
-void StringStream::Reset() {
-    sstream_.clear();
-    sstream_.flags(sstream_.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-    sstream_.imbue(std::locale::classic());
-    sstream_.precision(9);
-}
+    /// Destructor
+    virtual ~StyledTextPrinter();
 
-StringStream& operator<<(StringStream& out, CodePoint code_point) {
-    if (code_point < 0x7f) {
-        // See https://en.cppreference.com/w/cpp/language/escape
-        switch (code_point) {
-            case '\a':
-                return out << R"('\a')";
-            case '\b':
-                return out << R"('\b')";
-            case '\f':
-                return out << R"('\f')";
-            case '\n':
-                return out << R"('\n')";
-            case '\r':
-                return out << R"('\r')";
-            case '\t':
-                return out << R"('\t')";
-            case '\v':
-                return out << R"('\v')";
-        }
-        return out << "'" << static_cast<char>(code_point) << "'";
-    }
-    return out << "'U+" << std::hex << code_point.value << "'";
-}
+    /// Prints the styled text to the printer.
+    /// @param text the text to print.
+    virtual void Print(const StyledText& text) = 0;
+};
 
 }  // namespace tint
+
+#endif  // SRC_TINT_UTILS_TEXT_STYLED_TEXT_PRINTER_H_

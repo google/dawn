@@ -59,8 +59,13 @@ class StringStream {
 
     /// Constructor
     StringStream();
+    /// Copy constructor
+    StringStream(const StringStream&);
     /// Destructor
     ~StringStream();
+
+    /// Copy assignment operator
+    StringStream& operator=(const StringStream&);
 
     /// @returns the format flags for the stream
     std::ios_base::fmtflags flags() const { return sstream_.flags(); }
@@ -199,6 +204,7 @@ class StringStream {
     std::string str() const { return sstream_.str(); }
 
   private:
+    void Reset();
     std::stringstream sstream_;
 };
 

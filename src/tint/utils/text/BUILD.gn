@@ -50,6 +50,14 @@ libtint_source_set("text") {
     "string.h",
     "string_stream.cc",
     "string_stream.h",
+    "styled_text.cc",
+    "styled_text.h",
+    "styled_text_printer.cc",
+    "styled_text_printer.h",
+    "styled_text_printer_ansi.cc",
+    "styled_text_theme.cc",
+    "styled_text_theme.h",
+    "text_style.h",
     "unicode.cc",
     "unicode.h",
   ]
@@ -62,6 +70,18 @@ libtint_source_set("text") {
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/traits",
   ]
+
+  if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
+    sources += [ "styled_text_printer_other.cc" ]
+  }
+
+  if (tint_build_is_linux || tint_build_is_mac) {
+    sources += [ "styled_text_printer_posix.cc" ]
+  }
+
+  if (tint_build_is_win) {
+    sources += [ "styled_text_printer_windows.cc" ]
+  }
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
@@ -69,6 +89,8 @@ if (tint_build_unittests) {
       "base64_test.cc",
       "string_stream_test.cc",
       "string_test.cc",
+      "styled_text_printer_test.cc",
+      "text_style_test.cc",
       "unicode_test.cc",
     ]
     deps = [

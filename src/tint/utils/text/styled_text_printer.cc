@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/text/string_stream.h"
+#include <cstring>
+
+#include "src/tint/utils/text/styled_text_printer.h"
 
 namespace tint {
+namespace {
 
-StringStream::StringStream() {
-    Reset();
-}
+class Plain : public StyledTextPrinter {
+  public:
+    explicit Plain(FILE* f) : file_(f) {}
 
-StringStream::StringStream(const StringStream& other) {
-    Reset();
-    sstream_ << other.str();
-}
-
-StringStream::~StringStream() = default;
-
-StringStream& StringStream::operator=(const StringStream& other) {
-    Reset();
-    return *this << other.str();
-}
-
-void StringStream::Reset() {
-    sstream_.clear();
-    sstream_.flags(sstream_.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-    sstream_.imbue(std::locale::classic());
-    sstream_.precision(9);
-}
-
-StringStream& operator<<(StringStream& out, CodePoint code_point) {
-    if (code_point < 0x7f) {
-        // See https://en.cppreference.com/w/cpp/language/escape
-        switch (code_point) {
-            case '\a':
-                return out << R"('\a')";
-            case '\b':
-                return out << R"('\b')";
-            case '\f':
-                return out << R"('\f')";
-            case '\n':
-                return out << R"('\n')";
-            case '\r':
-                return out << R"('\r')";
-            case '\t':
-                return out << R"('\t')";
-            case '\v':
-                return out << R"('\v')";
-        }
-        return out << "'" << static_cast<char>(code_point) << "'";
+    void Print(const StyledText& text) override {
+        auto plain = text.Plain();
+        fwrite(plain.data(), 1, plain.size(), file_);
     }
-    return out << "'U+" << std::hex << code_point.value << "'";
+
+  private:
+    FILE* const file_;
+};
+
+}  // namespace
+
+std::unique_ptr<StyledTextPrinter> StyledTextPrinter::CreatePlain(FILE* out) {
+    return std::make_unique<Plain>(out);
 }
+std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out) {
+    return Create(out, StyledTextTheme::kDefault);
+}
+
+StyledTextPrinter::~StyledTextPrinter() = default;
 
 }  // namespace tint

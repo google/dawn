@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,40 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/text/text_style.h"
+
+#include "gtest/gtest.h"
 
 namespace tint {
+namespace {
 
-StringStream::StringStream() {
-    Reset();
+#define ENABLE_PRINTER_TESTS 0  // Print styled text as part of the unit tests
+#if ENABLE_PRINTER_TESTS
+
+using StyledTextPrinterTest = testing::Test;
+
+TEST_F(StyledTextPrinterTest, Themed) {
+    auto printer = StyledTextPrinter::Create(stdout);
+    printer->Print(StyledText{} << style::Plain << "Plain\n"
+                                << style::Bold << "Bold\n"
+                                << style::Underlined << "Underlined\n"
+                                << style::Success << "Success\n"
+                                << style::Warning << "Warning\n"
+                                << style::Error << "Error\n"
+                                << style::Fatal << "Fatal\n"
+                                << style::Code << "Code\n"
+                                << style::Keyword << "Keyword\n"
+                                << style::Variable << "Variable\n"
+                                << style::Type << "Type\n"
+                                << style::Function << "Function\n"
+                                << style::Enum << "Enum\n"
+                                << style::Literal << "Literal\n"
+                                << style::Attribute << "Attribute\n"
+                                << style::Squiggle << "Squiggle\n");
 }
 
-StringStream::StringStream(const StringStream& other) {
-    Reset();
-    sstream_ << other.str();
-}
+#endif  // ENABLE_PRINTER_TESTS
 
-StringStream::~StringStream() = default;
-
-StringStream& StringStream::operator=(const StringStream& other) {
-    Reset();
-    return *this << other.str();
-}
-
-void StringStream::Reset() {
-    sstream_.clear();
-    sstream_.flags(sstream_.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-    sstream_.imbue(std::locale::classic());
-    sstream_.precision(9);
-}
-
-StringStream& operator<<(StringStream& out, CodePoint code_point) {
-    if (code_point < 0x7f) {
-        // See https://en.cppreference.com/w/cpp/language/escape
-        switch (code_point) {
-            case '\a':
-                return out << R"('\a')";
-            case '\b':
-                return out << R"('\b')";
-            case '\f':
-                return out << R"('\f')";
-            case '\n':
-                return out << R"('\n')";
-            case '\r':
-                return out << R"('\r')";
-            case '\t':
-                return out << R"('\t')";
-            case '\v':
-                return out << R"('\v')";
-        }
-        return out << "'" << static_cast<char>(code_point) << "'";
-    }
-    return out << "'U+" << std::hex << code_point.value << "'";
-}
-
+}  // namespace
 }  // namespace tint

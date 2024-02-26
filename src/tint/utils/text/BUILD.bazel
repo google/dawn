@@ -42,12 +42,35 @@ cc_library(
     "base64.cc",
     "string.cc",
     "string_stream.cc",
+    "styled_text.cc",
+    "styled_text_printer.cc",
+    "styled_text_printer_ansi.cc",
+    "styled_text_theme.cc",
     "unicode.cc",
-  ],
+  ] + select({
+    ":_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_": [
+      "styled_text_printer_other.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_is_linux_or_tint_build_is_mac": [
+      "styled_text_printer_posix.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":tint_build_is_win": [
+      "styled_text_printer_windows.cc",
+    ],
+    "//conditions:default": [],
+  }),
   hdrs = [
     "base64.h",
     "string.h",
     "string_stream.h",
+    "styled_text.h",
+    "styled_text_printer.h",
+    "styled_text_theme.h",
+    "text_style.h",
     "unicode.h",
   ],
   deps = [
@@ -69,6 +92,8 @@ cc_library(
     "base64_test.cc",
     "string_stream_test.cc",
     "string_test.cc",
+    "styled_text_printer_test.cc",
+    "text_style_test.cc",
     "unicode_test.cc",
   ],
   deps = [
@@ -84,5 +109,52 @@ cc_library(
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "tint_build_is_linux",
+  actual = "//src/tint:tint_build_is_linux_true",
+)
+
+alias(
+  name = "_not_tint_build_is_linux_",
+  actual = "//src/tint:tint_build_is_linux_false",
+)
+
+alias(
+  name = "tint_build_is_mac",
+  actual = "//src/tint:tint_build_is_mac_true",
+)
+
+alias(
+  name = "_not_tint_build_is_mac_",
+  actual = "//src/tint:tint_build_is_mac_false",
+)
+
+alias(
+  name = "tint_build_is_win",
+  actual = "//src/tint:tint_build_is_win_true",
+)
+
+alias(
+  name = "_not_tint_build_is_win_",
+  actual = "//src/tint:tint_build_is_win_false",
+)
+
+selects.config_setting_group(
+    name = "tint_build_is_linux_or_tint_build_is_mac",
+    match_any = [
+        "tint_build_is_linux",
+        "tint_build_is_mac",
+    ],
+)
+
+selects.config_setting_group(
+    name = "_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_",
+    match_all = [
+        ":_not_tint_build_is_linux_",
+        ":_not_tint_build_is_mac_",
+        ":_not_tint_build_is_win_",
+    ],
 )
 

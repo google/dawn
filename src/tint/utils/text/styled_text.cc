@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,74 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
+#include <string_view>
+#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/text/text_style.h"
 
 namespace tint {
 
-StringStream::StringStream() {
-    Reset();
+StyledText::StyledText() = default;
+
+StyledText::StyledText(const StyledText&) = default;
+
+StyledText::StyledText(const std::string& text) {
+    stream_ << text;
 }
 
-StringStream::StringStream(const StringStream& other) {
-    Reset();
-    sstream_ << other.str();
+StyledText::StyledText(std::string_view text) {
+    stream_ << text;
 }
 
-StringStream::~StringStream() = default;
+StyledText::StyledText(StyledText&&) = default;
 
-StringStream& StringStream::operator=(const StringStream& other) {
-    Reset();
-    return *this << other.str();
+StyledText& StyledText::operator=(const StyledText& other) = default;
+
+StyledText& StyledText::operator=(std::string_view text) {
+    Clear();
+    return *this << text;
 }
 
-void StringStream::Reset() {
-    sstream_.clear();
-    sstream_.flags(sstream_.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-    sstream_.imbue(std::locale::classic());
-    sstream_.precision(9);
+void StyledText::Clear() {
+    *this = StyledText{};
 }
 
-StringStream& operator<<(StringStream& out, CodePoint code_point) {
-    if (code_point < 0x7f) {
-        // See https://en.cppreference.com/w/cpp/language/escape
-        switch (code_point) {
-            case '\a':
-                return out << R"('\a')";
-            case '\b':
-                return out << R"('\b')";
-            case '\f':
-                return out << R"('\f')";
-            case '\n':
-                return out << R"('\n')";
-            case '\r':
-                return out << R"('\r')";
-            case '\t':
-                return out << R"('\t')";
-            case '\v':
-                return out << R"('\v')";
+StyledText& StyledText::SetStyle(TextStyle style) {
+    if (spans_.Back().style != style) {
+        if (spans_.Back().length == 0) {
+            spans_.Back().style = style;
+        } else {
+            spans_.Push(Span{style});
         }
-        return out << "'" << static_cast<char>(code_point) << "'";
     }
-    return out << "'U+" << std::hex << code_point.value << "'";
+    return *this;
+}
+
+std::string StyledText::Plain() const {
+    StringStream ss;
+    bool is_code = false;
+    Walk([&](std::string_view text, TextStyle style) {
+        if (is_code != style.IsCode()) {
+            ss << "'";
+        }
+        is_code = style.IsCode();
+
+        ss << text;
+    });
+    if (is_code) {
+        ss << "'";
+    }
+    return ss.str();
+}
+
+void StyledText::Append(const StyledText& other) {
+    other.Walk([&](std::string_view text, TextStyle style) { *this << style << text; });
+}
+
+StyledText& StyledText::Repeat(char c, size_t n) {
+    stream_.repeat(c, n);
+    spans_.Back().length += n;
+    return *this;
 }
 
 }  // namespace tint

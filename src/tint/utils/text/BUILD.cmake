@@ -45,6 +45,14 @@ tint_add_target(tint_utils_text lib
   utils/text/string.h
   utils/text/string_stream.cc
   utils/text/string_stream.h
+  utils/text/styled_text.cc
+  utils/text/styled_text.h
+  utils/text/styled_text_printer.cc
+  utils/text/styled_text_printer.h
+  utils/text/styled_text_printer_ansi.cc
+  utils/text/styled_text_theme.cc
+  utils/text/styled_text_theme.h
+  utils/text/text_style.h
   utils/text/unicode.cc
   utils/text/unicode.h
 )
@@ -59,6 +67,24 @@ tint_target_add_dependencies(tint_utils_text lib
   tint_utils_traits
 )
 
+if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
+  tint_target_add_sources(tint_utils_text lib
+    "utils/text/styled_text_printer_other.cc"
+  )
+endif((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
+
+if(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
+  tint_target_add_sources(tint_utils_text lib
+    "utils/text/styled_text_printer_posix.cc"
+  )
+endif(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
+
+if(TINT_BUILD_IS_WIN)
+  tint_target_add_sources(tint_utils_text lib
+    "utils/text/styled_text_printer_windows.cc"
+  )
+endif(TINT_BUILD_IS_WIN)
+
 ################################################################################
 # Target:    tint_utils_text_test
 # Kind:      test
@@ -67,6 +93,8 @@ tint_add_target(tint_utils_text_test test
   utils/text/base64_test.cc
   utils/text/string_stream_test.cc
   utils/text/string_test.cc
+  utils/text/styled_text_printer_test.cc
+  utils/text/text_style_test.cc
   utils/text/unicode_test.cc
 )
 
