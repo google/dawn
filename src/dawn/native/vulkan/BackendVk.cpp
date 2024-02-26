@@ -463,7 +463,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     appInfo.pNext = nullptr;
     appInfo.pApplicationName = nullptr;
     appInfo.applicationVersion = 0;
-    appInfo.pEngineName = nullptr;
+    appInfo.pEngineName = "Dawn";
     appInfo.engineVersion = 0;
     appInfo.apiVersion = std::min(mGlobalInfo.apiVersion, VK_API_VERSION_1_3);
 
