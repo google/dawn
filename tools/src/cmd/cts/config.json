@@ -39,11 +39,6 @@
       "Bucket": "try",
       "Builder": "android-dawn-arm64-rel"
     },
-    "Android-Arm64-Experimental": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "android-dawn-arm64-exp-rel",
-    },
     "Win": {
       "Project": "chromium",
       "Bucket": "try",
@@ -53,16 +48,6 @@
       "Project": "chromium",
       "Bucket": "try",
       "Builder": "dawn-try-win10-x86-rel"
-    },
-    "Win10-x64-Intel-Experimental": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "dawn-try-win-x64-intel-exp"
-    },
-    "Win10-x64-Nvidia-Experimental": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "dawn-try-win-x64-nvidia-exp"
     },
     "Mac": {
       "Project": "chromium",
