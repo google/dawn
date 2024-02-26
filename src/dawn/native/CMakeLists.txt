@@ -312,6 +312,8 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/ExternalImageDXGIImpl.cpp"
         "d3d/ExternalImageDXGIImpl.h"
         "d3d/Forward.h"
+        "d3d/KeyedMutex.cpp"
+        "d3d/KeyedMutex.h"
         "d3d/PhysicalDeviceD3D.cpp"
         "d3d/PhysicalDeviceD3D.h"
         "d3d/PlatformFunctions.cpp"

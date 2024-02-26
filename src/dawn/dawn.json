@@ -1946,7 +1946,8 @@
         "tags": ["dawn", "native"],
         "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
         "members": [
-            {"name": "handle", "type": "void *"}
+            {"name": "handle", "type": "void *"},
+            {"name": "use keyed mutex", "type": "bool"}
         ]
     },
     "shared texture memory IO surface descriptor": {

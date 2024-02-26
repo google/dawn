@@ -30,6 +30,9 @@
 
 #include "dawn/native/d3d/d3d_platform.h"
 
-#include <d3d12.h>  // NOLINT(build/include_order)
+// clang-format off
+#include <d3d12.h>      // NOLINT(build/include_order)
+#include <d3d11on12.h>  // NOLINT(build/include_order)
+// clang-format on
 
 #endif  // SRC_DAWN_NATIVE_D3D12_D3D12_PLATFORM_H_

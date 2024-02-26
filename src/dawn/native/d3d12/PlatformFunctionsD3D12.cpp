@@ -37,6 +37,7 @@ PlatformFunctions::~PlatformFunctions() = default;
 MaybeError PlatformFunctions::LoadFunctions() {
     DAWN_TRY(Base::LoadFunctions());
     DAWN_TRY(LoadD3D12());
+    DAWN_TRY(LoadD3D11());
     LoadPIXRuntime();
     return {};
 }
@@ -61,6 +62,20 @@ MaybeError PlatformFunctions::LoadD3D12() {
                            "D3D12SerializeVersionedRootSignature", &error) ||
         !mD3D12Lib.GetProc(&d3d12CreateVersionedRootSignatureDeserializer,
                            "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
+        return DAWN_INTERNAL_ERROR(error.c_str());
+    }
+#endif
+
+    return {};
+}
+
+MaybeError PlatformFunctions::LoadD3D11() {
+#if DAWN_PLATFORM_IS(WINUWP)
+    d3d11on12CreateDevice = &D3D11On12CreateDevice;
+#else
+    std::string error;
+    if (!mD3D11Lib.Open("d3d11.dll", &error) ||
+        !mD3D11Lib.GetProc(&d3d11on12CreateDevice, "D3D11On12CreateDevice", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
     }
 #endif

@@ -36,6 +36,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/d3d/DeviceD3D.h"
 #include "dawn/native/d3d/Forward.h"
+#include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/QueueD3D.h"
 #include "dawn/native/d3d/SharedFenceD3D.h"
 #include "dawn/native/d3d/TextureD3D.h"
@@ -62,9 +63,11 @@ MaybeError ValidateTextureDescriptorCanBeWrapped(const UnpackedPtr<TextureDescri
 ExternalImageDXGIImpl::ExternalImageDXGIImpl(
     Device* backendDevice,
     ComPtr<IUnknown> d3dResource,
+    Ref<d3d::KeyedMutex> keyedMutex,
     const UnpackedPtr<TextureDescriptor>& textureDescriptor)
     : mBackendDevice(backendDevice),
       mD3DResource(std::move(d3dResource)),
+      mKeyedMutex(std::move(keyedMutex)),
       mUsage(textureDescriptor->usage),
       mDimension(textureDescriptor->dimension),
       mSize(textureDescriptor->size),
@@ -83,8 +86,6 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(
                              textureDescriptor->nextInChain)
                              ->internalUsage;
     }
-    // If the resource has IDXGIKeyedMutex interface, it will be used for synchronization.
-    mD3DResource.As(&mDXGIKeyedMutex);
 }
 
 ExternalImageDXGIImpl::~ExternalImageDXGIImpl() {
@@ -104,6 +105,7 @@ bool ExternalImageDXGIImpl::IsValid() const {
 void ExternalImageDXGIImpl::DestroyInternal() {
     DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
+        mKeyedMutex = nullptr;
         mD3DResource = nullptr;
     }
 
@@ -166,7 +168,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 
     Ref<TextureBase> texture =
         ToBackend(mBackendDevice.Get())
-            ->CreateD3DExternalTexture(Unpack(&textureDescriptor), mD3DResource, mDXGIKeyedMutex,
+            ->CreateD3DExternalTexture(Unpack(&textureDescriptor), mD3DResource, mKeyedMutex,
                                        std::move(waitFences), descriptor->isSwapChainTexture,
                                        descriptor->isInitialized);
     return ToAPI(ReturnToAPI(std::move(texture)));

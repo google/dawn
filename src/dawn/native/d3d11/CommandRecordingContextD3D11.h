@@ -33,9 +33,11 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d11 {
+
 class CommandAllocatorManager;
 class Buffer;
 class Device;
@@ -106,7 +108,7 @@ class CommandRecordingContext {
     std::array<uint32_t, kMaxNumBuiltinElements> mUniformBufferData;
     bool mUniformBufferDirty = true;
 
-    absl::flat_hash_set<ComPtr<IDXGIKeyedMutex>> mAcquiredKeyedMutexes;
+    absl::flat_hash_set<Ref<d3d::KeyedMutex>> mAcquiredKeyedMutexes;
 
     Ref<Device> mDevice;
 };
@@ -154,7 +156,7 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     void WriteUniformBuffer(uint32_t offset, uint32_t element) const;
     MaybeError FlushUniformBuffer() const;
 
-    MaybeError AcquireKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgikeyedMutex) const;
+    MaybeError AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) const;
 };
 
 // For using ID3D11DeviceContext directly. It swaps and resets ID3DDeviceContextState of

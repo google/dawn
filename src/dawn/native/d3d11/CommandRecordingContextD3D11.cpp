@@ -130,12 +130,10 @@ MaybeError ScopedCommandRecordingContext::FlushUniformBuffer() const {
     return {};
 }
 
-MaybeError ScopedCommandRecordingContext::AcquireKeyedMutex(
-    ComPtr<IDXGIKeyedMutex> dxgikeyedMutex) const {
-    if (!Get()->mAcquiredKeyedMutexes.contains(dxgikeyedMutex)) {
-        DAWN_TRY(CheckHRESULT(dxgikeyedMutex->AcquireSync(d3d::kDXGIKeyedMutexAcquireKey, INFINITE),
-                              "Failed to acquire keyed mutex for external image"));
-        Get()->mAcquiredKeyedMutexes.emplace(std::move(dxgikeyedMutex));
+MaybeError ScopedCommandRecordingContext::AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) const {
+    if (!Get()->mAcquiredKeyedMutexes.contains(keyedMutex)) {
+        DAWN_TRY(keyedMutex->AcquireKeyedMutex());
+        Get()->mAcquiredKeyedMutexes.emplace(std::move(keyedMutex));
     }
     return {};
 }
@@ -267,8 +265,8 @@ void CommandRecordingContext::SetInternalUniformBuffer(Ref<BufferBase> uniformBu
 }
 
 void CommandRecordingContext::ReleaseKeyedMutexes() {
-    for (auto& dxgikeyedMutex : mAcquiredKeyedMutexes) {
-        dxgikeyedMutex->ReleaseSync(d3d::kDXGIKeyedMutexAcquireKey);
+    for (auto& keyedMutex : mAcquiredKeyedMutexes) {
+        keyedMutex->ReleaseKeyedMutex();
     }
     mAcquiredKeyedMutexes.clear();
 }

@@ -230,13 +230,13 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
     Device* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     ComPtr<IUnknown> d3dTexture,
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
+    Ref<d3d::KeyedMutex> keyedMutex,
     std::vector<FenceAndSignalValue> waitFences,
     bool isSwapChainTexture,
     bool isInitialized) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(
-        dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(dxgiKeyedMutex)));
+        dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(keyedMutex)));
 
     auto commandContext =
         ToBackend(device->GetQueue())
@@ -379,11 +379,11 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Tex
 }
 
 MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
-                                                ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
+                                                Ref<d3d::KeyedMutex> keyedMutex) {
     ComPtr<ID3D11Resource> d3d11Texture;
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
     mD3d11Resource = std::move(d3d11Texture);
-    mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
+    mKeyedMutex = std::move(keyedMutex);
     SetLabelHelper("Dawn_ExternalTexture");
     return {};
 }
@@ -512,8 +512,8 @@ MaybeError Texture::SynchronizeTextureBeforeUse(
                 "ID3D11DeviceContext4::Wait"));
         }
     }
-    if (mDxgiKeyedMutex) {
-        DAWN_TRY(commandContext->AcquireKeyedMutex(mDxgiKeyedMutex));
+    if (mKeyedMutex != nullptr) {
+        DAWN_TRY(commandContext->AcquireKeyedMutex(mKeyedMutex));
     }
     mLastUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
     return {};

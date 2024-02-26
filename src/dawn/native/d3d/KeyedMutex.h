@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,53 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D11_SHARED_TEXTURE_MEMORY_D3D11_H_
-#define SRC_DAWN_NATIVE_D3D11_SHARED_TEXTURE_MEMORY_D3D11_H_
+#ifndef SRC_DAWN_NATIVE_D3D_KEYED_MUTEX_H_
+#define SRC_DAWN_NATIVE_D3D_KEYED_MUTEX_H_
 
+#include "dawn/common/RefCounted.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/d3d/SharedTextureMemoryD3D.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
-namespace dawn::native {
-namespace d3d {
-class KeyedMutex;
-}  // namespace d3d
+namespace dawn::native::d3d {
 
-namespace d3d11 {
 class Device;
-struct SharedTextureMemoryD3D11Texture2DDescriptor;
 
-class SharedTextureMemory final : public d3d::SharedTextureMemory {
+class KeyedMutex : public RefCounted {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
+    KeyedMutex(Device* device, ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
+    ~KeyedMutex() override;
 
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedTextureMemoryD3D11Texture2DDescriptor* descriptor);
-
-    ID3D11Resource* GetD3DResource() const;
-
-    d3d::KeyedMutex* GetKeyedMutex() const;
+    MaybeError AcquireKeyedMutex();
+    void ReleaseKeyedMutex();
 
   private:
-    SharedTextureMemory(Device* device,
-                        const char* label,
-                        SharedTextureMemoryProperties properties,
-                        ComPtr<ID3D11Resource> resource);
-
-    void DestroyImpl() override;
-
-    ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-        const UnpackedPtr<TextureDescriptor>& descriptor) override;
-
-    ComPtr<ID3D11Resource> mResource;
-    Ref<d3d::KeyedMutex> mKeyedMutex;
+    Device* const mDevice;
+    ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
 };
-}  // namespace d3d11
-}  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_D3D11_SHARED_TEXTURE_MEMORY_D3D11_H_
+}  // namespace dawn::native::d3d
+
+#endif  // SRC_DAWN_NATIVE_D3D_KEYED_MUTEX_H_

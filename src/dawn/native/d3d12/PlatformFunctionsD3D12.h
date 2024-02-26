@@ -53,6 +53,9 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     PFN_D3D12_CREATE_VERSIONED_ROOT_SIGNATURE_DESERIALIZER
     d3d12CreateVersionedRootSignatureDeserializer = nullptr;
 
+    // Functions from d3d11.dll
+    PFN_D3D11ON12_CREATE_DEVICE d3d11on12CreateDevice = nullptr;
+
     // Functions from WinPixEventRuntime.dll
     using PFN_PIX_END_EVENT_ON_COMMAND_LIST =
         HRESULT(WINAPI*)(ID3D12GraphicsCommandList* commandList);
@@ -74,6 +77,7 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     using Base = d3d::PlatformFunctions;
 
     MaybeError LoadD3D12();
+    MaybeError LoadD3D11();
     void LoadPIXRuntime();
 
     DynamicLib mD3D12Lib;

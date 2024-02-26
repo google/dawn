@@ -57,7 +57,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device,
     DAWN_ASSERT(mD3d12CommandList != nullptr);
 
     for (Texture* texture : mSharedTextures) {
-        DAWN_TRY(texture->SynchronizeTextureBeforeUse());
+        DAWN_TRY(texture->SynchronizeTextureBeforeUse(this));
     }
 
     MaybeError error =
@@ -135,10 +135,14 @@ ID3D12GraphicsCommandList4* CommandRecordingContext::GetCommandList4() const {
 void CommandRecordingContext::Release() {
     mD3d12CommandList.Reset();
     mD3d12CommandList4.Reset();
+
     mNeedsSubmit = false;
+
     mSharedTextures.clear();
     mHeapsPendingUsage.clear();
     mTempBuffers.clear();
+
+    ReleaseKeyedMutexes();
 }
 
 bool CommandRecordingContext::NeedsSubmit() const {
@@ -151,6 +155,21 @@ void CommandRecordingContext::SetNeedsSubmit() {
 
 void CommandRecordingContext::AddToTempBuffers(Ref<Buffer> tempBuffer) {
     mTempBuffers.emplace_back(tempBuffer);
+}
+
+MaybeError CommandRecordingContext::AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) {
+    if (!mAcquiredKeyedMutexes.contains(keyedMutex)) {
+        DAWN_TRY(keyedMutex->AcquireKeyedMutex());
+        mAcquiredKeyedMutexes.emplace(std::move(keyedMutex));
+    }
+    return {};
+}
+
+void CommandRecordingContext::ReleaseKeyedMutexes() {
+    for (auto& keyedMutex : mAcquiredKeyedMutexes) {
+        keyedMutex->ReleaseKeyedMutex();
+    }
+    mAcquiredKeyedMutexes.clear();
 }
 
 }  // namespace dawn::native::d3d12

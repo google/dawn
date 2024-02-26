@@ -58,6 +58,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
     ExternalImageDXGIImpl(Device* backendDevice,
                           ComPtr<IUnknown> d3dResource,
+                          Ref<d3d::KeyedMutex> keyedMutex,
                           const UnpackedPtr<TextureDescriptor>& textureDescriptor);
     ~ExternalImageDXGIImpl();
 
@@ -78,7 +79,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   protected:
     Ref<DeviceBase> mBackendDevice;
     ComPtr<IUnknown> mD3DResource;
-    ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
+    Ref<d3d::KeyedMutex> mKeyedMutex;
     wgpu::TextureUsage mUsage;
     wgpu::TextureUsage mUsageInternal = wgpu::TextureUsage::None;
     wgpu::TextureDimension mDimension;

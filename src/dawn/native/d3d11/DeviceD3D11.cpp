@@ -39,6 +39,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/ExternalImageDXGIImpl.h"
+#include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d11/BackendD3D11.h"
 #include "dawn/native/d3d11/BindGroupD3D11.h"
@@ -415,6 +416,7 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
     DAWN_TRY(ValidateIsAlive());
 
     ComPtr<ID3D11Resource> d3d11Resource;
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
     switch (descriptor->GetType()) {
         case ExternalImageType::DXGISharedHandle: {
             const auto* sharedHandleDescriptor =
@@ -423,6 +425,11 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
                 mD3d11Device5->OpenSharedResource1(sharedHandleDescriptor->sharedHandle,
                                                    IID_PPV_ARGS(&d3d11Resource)),
                 "D3D11 OpenSharedResource1"));
+            if (sharedHandleDescriptor->useKeyedMutex) {
+                d3d11Resource.As(&dxgiKeyedMutex);
+                DAWN_INVALID_IF(!dxgiKeyedMutex,
+                                "Failed to retrieve DXGI keyed mutex when expected");
+            }
             break;
         }
         case ExternalImageType::D3D11Texture: {
@@ -436,6 +443,7 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
                 textureDevice.Get() != mD3d11Device.Get(),
                 "The D3D11 device of the texture and the D3D11 device of the WebGPU device "
                 "must be same.");
+            d3d11Resource.As(&dxgiKeyedMutex);
             break;
         }
         default: {
@@ -463,8 +471,17 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
             this, d3d::DXGITextureFormat(textureDescriptor->format)));
     }
 
+    Ref<d3d::KeyedMutex> keyedMutex;
+    if (dxgiKeyedMutex) {
+        keyedMutex = AcquireRef(new d3d::KeyedMutex(this, std::move(dxgiKeyedMutex)));
+    }
+
     return std::make_unique<d3d::ExternalImageDXGIImpl>(this, std::move(d3d11Resource),
-                                                        textureDescriptor);
+                                                        std::move(keyedMutex), textureDescriptor);
+}
+
+void Device::DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
+    // Nothing to do, the ComPtr will release the keyed mutex.
 }
 
 bool Device::MayRequireDuplicationOfIndirectParameters() const {
@@ -481,13 +498,13 @@ bool Device::IsResolveTextureBlitWithDrawSupported() const {
 
 Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
-                                                  ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex,
+                                                  Ref<d3d::KeyedMutex> keyedMutex,
                                                   std::vector<FenceAndSignalValue> waitFences,
                                                   bool isSwapChainTexture,
                                                   bool isInitialized) {
     Ref<Texture> dawnTexture;
     if (ConsumedError(Texture::CreateExternalImage(this, descriptor, std::move(d3dTexture),
-                                                   std::move(dxgiKeyedMutex), std::move(waitFences),
+                                                   std::move(keyedMutex), std::move(waitFences),
                                                    isSwapChainTexture, isInitialized),
                       &dawnTexture)) {
         return nullptr;

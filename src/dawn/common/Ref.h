@@ -29,6 +29,7 @@
 #define SRC_DAWN_COMMON_REF_H_
 
 #include <mutex>
+#include <utility>
 
 #include "dawn/common/RefBase.h"
 #include "dawn/common/RefCounted.h"
@@ -81,6 +82,11 @@ template <typename T>
 struct IsRef<Ref<T>> {
     static constexpr bool value = true;
 };
+
+template <typename T, typename H>
+H AbslHashValue(H h, const Ref<T>& v) {
+    return H::combine(std::move(h), v.Get());
+}
 
 }  // namespace dawn
 
