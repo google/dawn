@@ -169,7 +169,7 @@ func GetOrStartBuildsAndWait(
 			if err != nil {
 				return nil, err
 			}
-			log.Printf("started build: %+v", build)
+			log.Printf("started build: %+v\nLogs at: https://ci.chromium.org/ui/b/%v", build, build.ID)
 			builds[name] = build
 		}
 	}
