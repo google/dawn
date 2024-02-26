@@ -224,7 +224,7 @@ TEST_F(ComputePipelineValidationTestWithSubgroupFeaturesEnabled,
     device.CreateComputePipeline(&csDesc);
 }
 
-// TODO(cwallez@chromium.org): Add a regression test for Disptach validation trying to acces the
+// TODO(cwallez@chromium.org): Add a regression test for Disptach validation trying to access the
 // input state.
 
 class ComputeDispatchValidationTest : public ValidationTest {

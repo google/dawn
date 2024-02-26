@@ -64,12 +64,7 @@ class VertexBufferValidationTest : public ValidationTest {
         std::ostringstream vs;
         vs << "@vertex fn main(\n";
         for (unsigned int i = 0; i < bufferCount; ++i) {
-            // TODO(cwallez@chromium.org): remove this special handling of 0 once Tint supports
-            // trailing commas in argument lists.
-            if (i != 0) {
-                vs << ", ";
-            }
-            vs << "@location(" << i << ") a_position" << i << " : vec3f\n";
+            vs << "@location(" << i << ") a_position" << i << " : vec3f,\n";
         }
         vs << ") -> @builtin(position) vec4f {";
 

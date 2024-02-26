@@ -1099,8 +1099,6 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     mNextIsolationKeyQueue.push(std::move(isolationKey));
 
     // RequestDevice is overriden by CreateDeviceImpl and device descriptor is ignored by it.
-    // Give an empty descriptor.
-    // TODO(dawn:1684): Replace empty DeviceDescriptor with nullptr after Dawn wire support it.
     wgpu::DeviceDescriptor deviceDesc = {};
 
     // Set up the mocks for device loss.

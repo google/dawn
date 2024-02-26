@@ -39,7 +39,6 @@ namespace {
 // The compute shader workgroup size is settled at compute pipeline creation time.
 // The validation code in dawn is in each backend (not including Null backend) thus this test needs
 // to be as part of a dawn_end2end_tests instead of the dawn_unittests
-// TODO(dawn:1504): Add support for GL backend.
 class WorkgroupSizeValidationTest : public DawnTest {
   public:
     wgpu::ShaderModule SetUpShaderWithValidDefaultValueConstants() {

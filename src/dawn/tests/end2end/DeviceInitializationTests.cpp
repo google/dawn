@@ -142,10 +142,6 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
             if (properties.backendType == wgpu::BackendType::Null) {
                 continue;
             }
-            // TODO(dawn:1705): Remove this once D3D11 backend is fully implemented.
-            if (properties.backendType == wgpu::BackendType::D3D11) {
-                continue;
-            }
             availableAdapterProperties.push_back(std::move(properties));
         }
     }

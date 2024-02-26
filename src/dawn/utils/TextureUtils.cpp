@@ -901,8 +901,8 @@ wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDi
             return wgpu::TextureDimension::e2D;
         case wgpu::TextureViewDimension::e3D:
             return wgpu::TextureDimension::e3D;
-        // TODO(crbug.com/dawn/814): Implement for 1D texture.
         case wgpu::TextureViewDimension::e1D:
+            return wgpu::TextureDimension::e1D;
         default:
             DAWN_UNREACHABLE();
             break;
