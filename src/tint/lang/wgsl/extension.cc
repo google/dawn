@@ -60,6 +60,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_internal_dual_source_blending") {
         return Extension::kChromiumInternalDualSourceBlending;
     }
+    if (str == "chromium_internal_graphite") {
+        return Extension::kChromiumInternalGraphite;
+    }
     if (str == "chromium_internal_relaxed_uniform_layout") {
         return Extension::kChromiumInternalRelaxedUniformLayout;
     }
@@ -85,6 +88,8 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_subgroups";
         case Extension::kChromiumInternalDualSourceBlending:
             return "chromium_internal_dual_source_blending";
+        case Extension::kChromiumInternalGraphite:
+            return "chromium_internal_graphite";
         case Extension::kChromiumInternalRelaxedUniformLayout:
             return "chromium_internal_relaxed_uniform_layout";
         case Extension::kF16:
