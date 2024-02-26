@@ -478,7 +478,8 @@ TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_TooM
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for f32(f32, f32)"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for 'f32(f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_InvalidConstructor) {
@@ -487,7 +488,7 @@ TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_Inva
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for f32(array<f32, 4>)"));
+                HasSubstr("12:34 error: no matching constructor for 'f32(array<f32, 4>)"));
 }
 
 }  // namespace ConversionConstructTest
@@ -1062,7 +1063,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(i32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(i32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
@@ -1072,7 +1073,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f16>(f16, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f16>(f16, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Error_ScalarArgumentTypeMismatch) {
@@ -1080,7 +1081,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<u32>(u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<u32>(u32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Error_ScalarArgumentTypeMismatch) {
@@ -1088,7 +1089,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<i32>(u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<i32>(u32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Error_ScalarArgumentTypeMismatch) {
@@ -1096,7 +1097,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Error_ScalarArgumentType
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<bool>(bool, i32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<bool>(bool, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
@@ -1104,7 +1105,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec3ArgumentCardinalit
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec3<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(vec3<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
@@ -1112,7 +1113,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec4ArgumentCardinalit
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec4<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(vec4<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsScalar) {
@@ -1120,7 +1121,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsScalar
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(f32, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector) {
@@ -1129,7 +1130,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(vec2<f32>, vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVectorAndScalar) {
@@ -1137,7 +1138,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(vec2<f32>, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_InvalidArgumentType) {
@@ -1145,7 +1146,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_InvalidArgumentType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(mat2x2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_ZeroValue) {
@@ -1319,7 +1320,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(f32, f32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
@@ -1329,7 +1330,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f16>(f16, f16, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f16>(f16, f16, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Error_ScalarArgumentTypeMismatch) {
@@ -1337,7 +1338,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<u32>(u32, i32, u32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<u32>(u32, i32, u32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Error_ScalarArgumentTypeMismatch) {
@@ -1345,15 +1346,16 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Error_ScalarArgumentTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<i32>(i32, u32, i32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<i32>(i32, u32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Error_ScalarArgumentTypeMismatch) {
     WrapInFunction(Call<vec3<bool>>(Source{{12, 34}}, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<bool>(bool, i32, bool)"));
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for 'vec3<bool>(bool, i32, bool)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
@@ -1361,7 +1363,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_Vec4ArgumentCardinalit
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec4<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(vec4<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsScalar) {
@@ -1369,7 +1371,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsScalar)
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsScalar) {
@@ -1378,7 +1380,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsScalar
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(f32, f32, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsVec2) {
@@ -1386,7 +1388,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsVec2) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2) {
@@ -1395,7 +1397,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2) 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(vec2<f32>, vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2AndScalar) {
@@ -1404,7 +1406,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(vec2<f32>, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec3) {
@@ -1412,7 +1414,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec3) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec3<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(vec3<f32>, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_InvalidArgumentType) {
@@ -1420,7 +1422,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_InvalidArgumentType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(mat2x2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ZeroValue) {
@@ -1642,7 +1644,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Error_ScalarArgumentTypeM
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, i32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(f32, f32, i32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
@@ -1653,7 +1655,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeM
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f16>(f16, f16, f32, f16)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f16>(f16, f16, f32, f16)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Error_ScalarArgumentTypeMismatch) {
@@ -1662,7 +1664,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Error_ScalarArgumentTypeM
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<u32>(u32, u32, i32, u32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<u32>(u32, u32, i32, u32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Error_ScalarArgumentTypeMismatch) {
@@ -1671,7 +1673,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Error_ScalarArgumentTypeM
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<i32>(i32, i32, u32, i32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<i32>(i32, i32, u32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Error_ScalarArgumentTypeMismatch) {
@@ -1680,7 +1682,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Error_ScalarArgumentType
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<bool>(bool, bool, i32, bool)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<bool>(bool, bool, i32, bool)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsScalar) {
@@ -1688,7 +1690,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsScalar)
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(f32, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsScalar) {
@@ -1697,7 +1699,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsScalar
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(f32, f32, f32, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec2AndScalar) {
@@ -1705,7 +1707,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec2And
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec2<f32>, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndScalars) {
@@ -1714,7 +1716,8 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32, f32, f32)"));
+        HasSubstr(
+            "12:34 error: no matching constructor for 'vec4<f32>(vec2<f32>, f32, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
@@ -1723,7 +1726,8 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Ve
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, f32)"));
+        HasSubstr(
+            "12:34 error: no matching constructor for 'vec4<f32>(vec2<f32>, vec2<f32>, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
@@ -1731,10 +1735,8 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Ve
         Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec2<f32>>(), Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(
-        r()->error(),
-        HasSubstr(
-            "12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, vec2<f32>)"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for "
+                                        "'vec4<f32>(vec2<f32>, vec2<f32>, vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec3) {
@@ -1742,7 +1744,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec3) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec3<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndScalars) {
@@ -1751,7 +1753,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, f32, f32)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec3<f32>, f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec2) {
@@ -1760,7 +1762,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec3<f32>, vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndVec3) {
@@ -1769,7 +1771,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec3<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec2<f32>, vec3<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec3) {
@@ -1778,7 +1780,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec3<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(vec3<f32>, vec3<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_InvalidArgumentType) {
@@ -1786,7 +1788,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_InvalidArgumentType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec4<f32>(mat2x2<f32>)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec4<f32>(mat2x2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ZeroValue) {
@@ -1966,7 +1968,7 @@ TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_InnerErr
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<f32>(f32, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_Success) {
@@ -1989,7 +1991,8 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec2<f32>(u32)"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(u32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Success) {
@@ -2012,7 +2015,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ElementTypeAlias_Error) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, u32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec2<f32>(f32, u32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vector_ElementTypeAlias_Success) {
@@ -2035,7 +2038,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_E
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for vec3<u32>(vec2<f32>, f32)"));
+                HasSubstr("12:34 error: no matching constructor for 'vec3<u32>(vec2<f32>, f32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_Success) {
@@ -2339,7 +2342,7 @@ TEST_F(ResolverValueConstructorValidationTest, CannotInferVec2ElementTypeFromSca
                         Expr(Source{{1, 3}}, 2_u)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching constructor for vec2(i32, u32)"));
+    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching constructor for 'vec2(i32, u32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
@@ -2350,7 +2353,7 @@ TEST_F(ResolverValueConstructorValidationTest, CannotInferVec3ElementTypeFromSca
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching constructor for vec3(i32, u32, i32)"));
+                HasSubstr("1:1 error: no matching constructor for 'vec3(i32, u32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest,
@@ -2361,7 +2364,7 @@ TEST_F(ResolverValueConstructorValidationTest,
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching constructor for vec3(i32, vec2<f32>)"));
+                HasSubstr("1:1 error: no matching constructor for 'vec3(i32, vec2<f32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
@@ -2373,7 +2376,7 @@ TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromSca
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching constructor for vec4(i32, i32, f32, i32)"));
+                HasSubstr("1:1 error: no matching constructor for 'vec4(i32, i32, f32, i32)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest,
@@ -2384,7 +2387,7 @@ TEST_F(ResolverValueConstructorValidationTest,
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching constructor for vec4(i32, vec3<u32>)"));
+                HasSubstr("1:1 error: no matching constructor for 'vec4(i32, vec3<u32>)'"));
 }
 
 TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
@@ -2394,7 +2397,7 @@ TEST_F(ResolverValueConstructorValidationTest, CannotInferVec4ElementTypeFromVec
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
-                HasSubstr("1:1 error: no matching constructor for vec4(vec2<i32>, vec2<u32>)"));
+                HasSubstr("1:1 error: no matching constructor for 'vec4(vec2<i32>, vec2<u32>)'"));
 }
 
 }  // namespace VectorConstructor
@@ -2458,8 +2461,8 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooFewArguments) {
@@ -2486,8 +2489,8 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyArguments) {
@@ -2515,8 +2518,8 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooManyArguments) {
@@ -2543,8 +2546,8 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ColumnConstructor_Error_InvalidArgumentType) {
@@ -2571,8 +2574,8 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_InvalidArgumentType) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ElementConstructor_Error_InvalidArgumentType) {
@@ -2598,8 +2601,8 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_InvalidArgumentType) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument) {
@@ -2636,8 +2639,8 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyRowsInVectorArgument) {
@@ -2673,8 +2676,8 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyRowsInVectorArgumen
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ZeroValue_Success) {
@@ -2759,8 +2762,8 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ElementTypeAlias_Success) {
@@ -2794,7 +2797,7 @@ TEST_F(ResolverValueConstructorValidationTest, MatrixConstructor_ArgumentTypeAli
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
-        HasSubstr("12:34 error: no matching constructor for mat2x2<f32>(vec2<u32>, vec2<f32>)"));
+        HasSubstr("12:34 error: no matching constructor for 'mat2x2<f32>(vec2<u32>, vec2<f32>)'"));
 }
 
 TEST_P(MatrixConstructorTest, ArgumentTypeAlias_Success) {
@@ -2840,8 +2843,8 @@ TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
-                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for '" +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")'"));
 }
 
 TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Success) {
@@ -2903,7 +2906,7 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     Enable(wgsl::Extension::kF16);
 
     StringStream err;
-    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
+    err << "12:34 error: no matching constructor for 'mat" << param.columns << "x" << param.rows
         << "(";
 
     Vector<const ast::Expression*, 8> args;
@@ -2934,7 +2937,7 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
     Enable(wgsl::Extension::kF16);
 
     StringStream err;
-    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
+    err << "12:34 error: no matching constructor for 'mat" << param.columns << "x" << param.rows
         << "(";
 
     Vector<const ast::Expression*, 16> args;
@@ -2951,7 +2954,7 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
         }
     }
 
-    err << ")";
+    err << ")'";
 
     auto matrix_type = ty.mat<Infer>(param.columns, param.rows);
     WrapInFunction(Call(Source{{12, 34}}, matrix_type, std::move(args)));

@@ -33,13 +33,16 @@
 #include <vector>
 
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/diagnostic/printer.h"
+#include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/text/text_style.h"
 
 namespace tint::diag {
 namespace {
 
-const char* to_str(Severity severity) {
+const char* ToString(Severity severity) {
     switch (severity) {
         case Severity::Note:
             return "note";
@@ -55,7 +58,7 @@ const char* to_str(Severity severity) {
     return "";
 }
 
-std::string to_str(const Source::Location& location) {
+std::string ToString(const Source::Location& location) {
     StringStream ss;
     if (location.line > 0) {
         ss << location.line;
@@ -68,138 +71,84 @@ std::string to_str(const Source::Location& location) {
 
 }  // namespace
 
-/// State holds the internal formatter state for a format() call.
-struct Formatter::State {
-    /// Constructs a State associated with the given printer.
-    /// @param p the printer to write formatted messages to.
-    explicit State(Printer* p) : printer(p) {}
-    ~State() { flush(); }
-
-    /// SetStyle sets the current style to new_style, flushing any pending messages to the printer
-    /// if the style changed.
-    /// @param new_style the new style to apply for future written messages.
-    void SetStyle(const diag::Style& new_style) {
-        if (style.color != new_style.color || style.bold != new_style.bold) {
-            flush();
-            style = new_style;
-        }
-    }
-
-    /// flush writes any pending messages to the printer, clearing the buffer.
-    void flush() {
-        auto str = stream.str();
-        if (str.length() > 0) {
-            printer->Write(str, style);
-            StringStream reset;
-            stream.swap(reset);
-        }
-    }
-
-    /// operator<< queues msg to be written to the printer.
-    /// @param msg the value or string to write to the printer
-    /// @returns this State so that calls can be chained
-    template <typename T>
-    State& operator<<(T&& msg) {
-        stream << std::forward<T>(msg);
-        return *this;
-    }
-
-    /// Newline queues a newline to be written to the printer.
-    void Newline() { stream << std::endl; }
-
-    /// repeat queues the character c to be written to the printer n times.
-    /// @param c the character to print `n` times
-    /// @param n the number of times to print character `c`
-    void repeat(char c, size_t n) { stream.repeat(c, n); }
-
-  private:
-    Printer* printer;
-    diag::Style style;
-    StringStream stream;
-};
-
 Formatter::Formatter() {}
 Formatter::Formatter(const Style& style) : style_(style) {}
 
-void Formatter::Format(const List& list, Printer* printer) const {
-    State state{printer};
+StyledText Formatter::Format(const List& list) const {
+    StyledText text;
 
     bool first = true;
     for (auto diag : list) {
-        state.SetStyle({});
         if (!first) {
-            state.Newline();
+            text << "\n";
         }
-        Format(diag, state);
+        Format(diag, text);
         first = false;
     }
 
     if (style_.print_newline_at_end) {
-        state.Newline();
+        text << "\n";
     }
+
+    return text;
 }
 
-void Formatter::Format(const Diagnostic& diag, State& state) const {
+void Formatter::Format(const Diagnostic& diag, StyledText& text) const {
     auto const& src = diag.source;
     auto const& rng = src.range;
 
-    state.SetStyle({Color::kDefault, true});
+    text << style::Plain;
+    TINT_DEFER(text << style::Plain);
 
-    struct TextAndColor {
+    struct TextAndStyle {
         std::string text;
-        Color color;
-        bool bold = false;
+        TextStyle style = {};
     };
-    std::vector<TextAndColor> prefix;
-    prefix.reserve(6);
+    Vector<TextAndStyle, 6> prefix;
 
     if (style_.print_file && src.file != nullptr) {
         if (rng.begin.line > 0) {
-            prefix.emplace_back(
-                TextAndColor{src.file->path + ":" + to_str(rng.begin), Color::kDefault});
+            prefix.Push(TextAndStyle{src.file->path + ":" + ToString(rng.begin)});
         } else {
-            prefix.emplace_back(TextAndColor{src.file->path, Color::kDefault});
+            prefix.Push(TextAndStyle{src.file->path});
         }
     } else if (rng.begin.line > 0) {
-        prefix.emplace_back(TextAndColor{to_str(rng.begin), Color::kDefault});
+        prefix.Push(TextAndStyle{ToString(rng.begin)});
     }
 
-    Color severity_color = Color::kDefault;
-    switch (diag.severity) {
-        case Severity::Note:
-            break;
-        case Severity::Warning:
-            severity_color = Color::kYellow;
-            break;
-        case Severity::Error:
-            severity_color = Color::kRed;
-            break;
-        case Severity::Fatal:
-        case Severity::InternalCompilerError:
-            severity_color = Color::kMagenta;
-            break;
-    }
     if (style_.print_severity) {
-        prefix.emplace_back(TextAndColor{to_str(diag.severity), severity_color, true});
-    }
-
-    for (size_t i = 0; i < prefix.size(); i++) {
-        if (i > 0) {
-            state << " ";
+        TextStyle style;
+        switch (diag.severity) {
+            case Severity::Note:
+                break;
+            case Severity::Warning:
+                style = style::Warning + style::Bold;
+                break;
+            case Severity::Error:
+                style = style::Error + style::Bold;
+                break;
+            case Severity::Fatal:
+            case Severity::InternalCompilerError:
+                style = style::Fatal + style::Bold;
+                break;
         }
-        state.SetStyle({prefix[i].color, prefix[i].bold});
-        state << prefix[i].text;
+        prefix.Push(TextAndStyle{ToString(diag.severity), style});
     }
 
-    state.SetStyle({Color::kDefault, true});
-    if (!prefix.empty()) {
-        state << ": ";
+    for (size_t i = 0; i < prefix.Length(); i++) {
+        if (i > 0) {
+            text << " ";
+        }
+        text << prefix[i].style << prefix[i].text;
     }
-    state << diag.message;
+
+    if (!prefix.IsEmpty()) {
+        text << style::Plain << ": ";
+    }
+    text << style::Bold << diag.message;
 
     if (style_.print_line && src.file && rng.begin.line > 0) {
-        state.Newline();
-        state.SetStyle({Color::kDefault, false});
+        text << style::Plain << "\n";
 
         for (size_t line_num = rng.begin.line;
              (line_num <= rng.end.line) && (line_num <= src.file->content.lines.size());
@@ -210,16 +159,16 @@ void Formatter::Format(const Diagnostic& diag, State& state) const {
             bool is_ascii = true;
             for (auto c : line) {
                 if (c == '\t') {
-                    state.repeat(' ', style_.tab_width);
+                    text.Repeat(' ', style_.tab_width);
                 } else {
-                    state << c;
+                    text << c;
                 }
                 if (c & 0x80) {
                     is_ascii = false;
                 }
             }
 
-            state.Newline();
+            text << style::Plain << "\n";
 
             // If the line contains non-ascii characters, then we cannot assume that
             // a single utf8 code unit represents a single glyph, so don't attempt to
@@ -228,7 +177,7 @@ void Formatter::Format(const Diagnostic& diag, State& state) const {
                 continue;
             }
 
-            state.SetStyle({Color::kCyan, false});
+            text << style::Squiggle;
 
             // Count the number of glyphs in the line span.
             // start and end use 1-based indexing.
@@ -244,31 +193,22 @@ void Formatter::Format(const Diagnostic& diag, State& state) const {
 
             if (line_num == rng.begin.line && line_num == rng.end.line) {
                 // Single line
-                state.repeat(' ', num_glyphs(1, rng.begin.column));
-                state.repeat('^',
-                             std::max<size_t>(num_glyphs(rng.begin.column, rng.end.column), 1));
+                text.Repeat(' ', num_glyphs(1, rng.begin.column));
+                text.Repeat('^', std::max<size_t>(num_glyphs(rng.begin.column, rng.end.column), 1));
             } else if (line_num == rng.begin.line) {
                 // Start of multi-line
-                state.repeat(' ', num_glyphs(1, rng.begin.column));
-                state.repeat('^', num_glyphs(rng.begin.column, line_len + 1));
+                text.Repeat(' ', num_glyphs(1, rng.begin.column));
+                text.Repeat('^', num_glyphs(rng.begin.column, line_len + 1));
             } else if (line_num == rng.end.line) {
                 // End of multi-line
-                state.repeat('^', num_glyphs(1, rng.end.column));
+                text.Repeat('^', num_glyphs(1, rng.end.column));
             } else {
                 // Middle of multi-line
-                state.repeat('^', num_glyphs(1, line_len + 1));
+                text.Repeat('^', num_glyphs(1, line_len + 1));
             }
-            state.Newline();
+            text << style::Plain << "\n";
         }
-
-        state.SetStyle({});
     }
-}
-
-std::string Formatter::Format(const List& list) const {
-    StringPrinter printer;
-    Format(list, &printer);
-    return printer.str();
 }
 
 Formatter::~Formatter() = default;

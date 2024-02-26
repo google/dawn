@@ -35,6 +35,7 @@
 
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint::diag {
@@ -85,12 +86,19 @@ class Diagnostic {
     /// @return this diagnostic
     Diagnostic& operator=(const Diagnostic&);
 
+    /// Appends @p msg to the diagnostic's message
+    template <typename T>
+    Diagnostic& operator<<(T&& msg) {
+        message << std::forward<T>(msg);
+        return *this;
+    }
+
     /// severity is the severity of the diagnostic message.
     Severity severity = Severity::Error;
     /// source is the location of the diagnostic.
     Source source;
     /// message is the text associated with the diagnostic.
-    std::string message;
+    StyledText message;
     /// system is the Tint system that raised the diagnostic.
     System system;
     /// A shared pointer to a Source::File. Only used if the diagnostic Source
@@ -171,80 +179,56 @@ class List {
 
     /// Adds the note message with the given Source to the end of this list.
     /// @param system the system raising the note message
-    /// @param note_msg the note message
     /// @param source the source of the note diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddNote(System system, std::string_view note_msg, const Source& source) {
+    diag::Diagnostic& AddNote(System system, const Source& source) {
         diag::Diagnostic note{};
         note.severity = diag::Severity::Note;
         note.system = system;
         note.source = source;
-        note.message = note_msg;
         return Add(std::move(note));
     }
 
     /// Adds the warning message with the given Source to the end of this list.
     /// @param system the system raising the warning message
-    /// @param warning_msg the warning message
     /// @param source the source of the warning diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddWarning(System system,
-                                 std::string_view warning_msg,
-                                 const Source& source) {
+    diag::Diagnostic& AddWarning(System system, const Source& source) {
         diag::Diagnostic warning{};
         warning.severity = diag::Severity::Warning;
         warning.system = system;
         warning.source = source;
-        warning.message = warning_msg;
         return Add(std::move(warning));
-    }
-
-    /// Adds the error message without a source to the end of this list.
-    /// @param system the system raising the error message
-    /// @param err_msg the error message
-    /// @returns a reference to the new diagnostic.
-    /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddError(System system, std::string_view err_msg) {
-        diag::Diagnostic error{};
-        error.severity = diag::Severity::Error;
-        error.system = system;
-        error.message = err_msg;
-        return Add(std::move(error));
     }
 
     /// Adds the error message with the given Source to the end of this list.
     /// @param system the system raising the error message
-    /// @param err_msg the error message
     /// @param source the source of the error diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddError(System system, std::string_view err_msg, const Source& source) {
+    diag::Diagnostic& AddError(System system, const Source& source) {
         diag::Diagnostic error{};
         error.severity = diag::Severity::Error;
         error.system = system;
         error.source = source;
-        error.message = err_msg;
         return Add(std::move(error));
     }
 
     /// Adds an internal compiler error message to the end of this list.
     /// @param system the system raising the error message
-    /// @param err_msg the error message
     /// @param source the source of the internal compiler error
     /// @param file the Source::File owned by this diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
     diag::Diagnostic& AddIce(System system,
-                             std::string_view err_msg,
                              const Source& source,
                              std::shared_ptr<Source::File> file) {
         diag::Diagnostic ice{};
         ice.severity = diag::Severity::InternalCompilerError;
         ice.system = system;
         ice.source = source;
-        ice.message = err_msg;
         ice.owned_file = std::move(file);
         return Add(std::move(ice));
     }

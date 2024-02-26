@@ -61,7 +61,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of let 'l')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of 'let l')");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfConst) {
@@ -74,7 +74,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfConst) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of const 'c')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of 'const c')");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfOverride) {
@@ -87,7 +87,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfOverride) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of override 'o')");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot take the address of 'override o')");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfParameter) {
@@ -112,7 +112,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfHandle) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot take the address of var 't' in handle address space)");
+              R"(12:34 error: cannot take the address of 'var t' in handle address space)");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfFunction) {
@@ -255,7 +255,7 @@ TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot take the address of var 't' in handle address space)");
+              R"(12:34 error: cannot take the address of 'var t' in handle address space)");
 }
 
 TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {

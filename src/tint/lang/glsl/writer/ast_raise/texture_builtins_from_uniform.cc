@@ -74,10 +74,9 @@ struct TextureBuiltinsFromUniform::State {
     ApplyResult Run() {
         auto* cfg = inputs.Get<Config>();
         if (cfg == nullptr) {
-            b.Diagnostics().AddError(
-                diag::System::Transform,
-                "missing transform data for " +
-                    std::string(tint::TypeInfo::Of<TextureBuiltinsFromUniform>().name));
+            b.Diagnostics().AddError(diag::System::Transform, Source{})
+                << "missing transform data for "
+                << tint::TypeInfo::Of<TextureBuiltinsFromUniform>().name;
             return resolver::Resolve(b);
         }
         ubo_bindingpoint_ordering = cfg->ubo_bindingpoint_ordering;

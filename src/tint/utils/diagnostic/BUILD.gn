@@ -48,8 +48,6 @@ libtint_source_set("diagnostic") {
     "diagnostic.h",
     "formatter.cc",
     "formatter.h",
-    "printer.cc",
-    "printer.h",
     "source.cc",
     "source.h",
   ]
@@ -63,25 +61,12 @@ libtint_source_set("diagnostic") {
     "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]
-
-  if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
-    sources += [ "printer_other.cc" ]
-  }
-
-  if (tint_build_is_linux || tint_build_is_mac) {
-    sources += [ "printer_posix.cc" ]
-  }
-
-  if (tint_build_is_win) {
-    sources += [ "printer_windows.cc" ]
-  }
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "diagnostic_test.cc",
       "formatter_test.cc",
-      "printer_test.cc",
       "source_test.cc",
     ]
     deps = [

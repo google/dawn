@@ -360,8 +360,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueUint_Fail) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: duplicate switch case '2'\n"
-              "12:34 note: previous case declared here");
+              R"(56:78 error: duplicate switch case '2'
+12:34 note: previous case declared here)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) {
@@ -387,8 +387,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: duplicate switch case '-10'\n"
-              "12:34 note: previous case declared here");
+              R"(56:78 error: duplicate switch case '-10'
+12:34 note: previous case declared here)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
@@ -511,8 +511,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelector_Expression_Fail
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: duplicate switch case '10'\n"
-              "12:34 note: previous case declared here");
+              R"(56:78 error: duplicate switch case '10'
+12:34 note: previous case declared here)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSameCase_BothExpression_Fail) {
@@ -532,8 +532,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSameCase_BothExp
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: duplicate switch case '10'\n"
-              "56:78 note: previous case declared here");
+              R"(12:34 error: duplicate switch case '10'
+56:78 note: previous case declared here)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSame_Case_Expression_Fail) {
@@ -553,8 +553,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSame_Case_Expres
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: duplicate switch case '10'\n"
-              "56:78 note: previous case declared here");
+              R"(12:34 error: duplicate switch case '10'
+56:78 note: previous case declared here)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, Switch_OverrideCondition_Fail) {

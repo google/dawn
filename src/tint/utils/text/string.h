@@ -35,6 +35,11 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string_stream.h"
 
+/// Forward declaration
+namespace tint {
+class StyledText;
+}
+
 namespace tint {
 
 /// @param str the string to apply replacements to
@@ -124,7 +129,7 @@ struct SuggestAlternativeOptions {
 /// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
                          Slice<const std::string_view> strings,
-                         StringStream& ss,
+                         StyledText& ss,
                          const SuggestAlternativeOptions& options = {});
 
 /// @param str the input string

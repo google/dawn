@@ -381,8 +381,8 @@ struct ZeroInitWorkgroupMemory::State {
                 //      `(idx % modulo) / division`
                 auto count = arr->ConstantCount();
                 if (!count) {
-                    ctx.dst->Diagnostics().AddError(diag::System::Transform,
-                                                    core::type::Array::kErrExpectedConstantCount);
+                    ctx.dst->Diagnostics().AddError(diag::System::Transform, Source{})
+                        << core::type::Array::kErrExpectedConstantCount;
                     return Expression{};  // error
                 }
                 auto modulo = num_values * count.value();

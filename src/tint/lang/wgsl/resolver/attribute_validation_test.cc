@@ -1522,8 +1522,8 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
               Vector{Member(Source{{12, 5}}, "a", ty.f32(),
                             Vector{MemberAlign(Expr(Source{{12, 35}}, "val"))})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:35 error: var 'val' cannot be referenced at module-scope
-1:2 note: var 'val' declared here)");
+    EXPECT_EQ(r()->error(), R"(12:35 error: 'var val' cannot be referenced at module-scope
+1:2 note: 'var val' declared here)");
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
@@ -1595,8 +1595,8 @@ TEST_F(StructMemberAttributeTest, Size_Attribute_Var) {
               Vector{Member(Source{{12, 5}}, "a", ty.f32(),
                             Vector{MemberSize(Expr(Source{{12, 35}}, "val"))})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:35 error: var 'val' cannot be referenced at module-scope
-1:2 note: var 'val' declared here)");
+    EXPECT_EQ(r()->error(), R"(12:35 error: 'var val' cannot be referenced at module-scope
+1:2 note: 'var val' declared here)");
 }
 
 TEST_F(StructMemberAttributeTest, Size_Attribute_Override) {

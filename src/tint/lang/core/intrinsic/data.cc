@@ -80,8 +80,8 @@ constexpr TypeMatcher kBoolMatcher {
     }
     return BuildBool(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "bool";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "bool";
   }
 };
 
@@ -94,8 +94,8 @@ constexpr TypeMatcher kI32Matcher {
     }
     return BuildI32(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "i32";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "i32";
   }
 };
 
@@ -108,8 +108,8 @@ constexpr TypeMatcher kU32Matcher {
     }
     return BuildU32(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "u32";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "u32";
   }
 };
 
@@ -122,8 +122,8 @@ constexpr TypeMatcher kF32Matcher {
     }
     return BuildF32(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "f32";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "f32";
   }
 };
 
@@ -136,8 +136,8 @@ constexpr TypeMatcher kF16Matcher {
     }
     return BuildF16(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "f16";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "f16";
   }
 };
 
@@ -155,9 +155,9 @@ constexpr TypeMatcher kVec2Matcher {
     }
     return BuildVec2(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "vec2<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "vec2" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -175,9 +175,9 @@ constexpr TypeMatcher kVec3Matcher {
     }
     return BuildVec3(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "vec3<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "vec3" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -195,9 +195,9 @@ constexpr TypeMatcher kVec4Matcher {
     }
     return BuildVec4(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "vec4<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "vec4" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -215,9 +215,9 @@ constexpr TypeMatcher kMat2X2Matcher {
     }
     return BuildMat2X2(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat2x2<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat2x2" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -235,9 +235,9 @@ constexpr TypeMatcher kMat2X3Matcher {
     }
     return BuildMat2X3(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat2x3<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat2x3" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -255,9 +255,9 @@ constexpr TypeMatcher kMat2X4Matcher {
     }
     return BuildMat2X4(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat2x4<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat2x4" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -275,9 +275,9 @@ constexpr TypeMatcher kMat3X2Matcher {
     }
     return BuildMat3X2(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat3x2<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat3x2" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -295,9 +295,9 @@ constexpr TypeMatcher kMat3X3Matcher {
     }
     return BuildMat3X3(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat3x3<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat3x3" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -315,9 +315,9 @@ constexpr TypeMatcher kMat3X4Matcher {
     }
     return BuildMat3X4(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat3x4<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat3x4" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -335,9 +335,9 @@ constexpr TypeMatcher kMat4X2Matcher {
     }
     return BuildMat4X2(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat4x2<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat4x2" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -355,9 +355,9 @@ constexpr TypeMatcher kMat4X3Matcher {
     }
     return BuildMat4X3(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat4x3<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat4x3" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -375,9 +375,9 @@ constexpr TypeMatcher kMat4X4Matcher {
     }
     return BuildMat4X4(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "mat4x4<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "mat4x4" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -400,12 +400,10 @@ constexpr TypeMatcher kVecMatcher {
     }
     return BuildVec(state, ty, N, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string N = state->NumName();
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "vec" << N << "<" << T << ">";
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
+  state->PrintNum(N);StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "vec" << style::Type << N << style::Type << "<" << style::Type << T << style::Type << ">";
   }
 };
 
@@ -433,13 +431,11 @@ constexpr TypeMatcher kMatMatcher {
     }
     return BuildMat(state, ty, N, M, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string N = state->NumName();
-  const std::string M = state->NumName();
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "mat" << N << "x" << M << "<" << T << ">";
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
+  state->PrintNum(N);StyledText M;
+  state->PrintNum(M);StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "mat" << style::Type << N << style::Type << "x" << style::Type << M << style::Type << "<" << style::Type << T << style::Type << ">";
   }
 };
 
@@ -467,11 +463,11 @@ constexpr TypeMatcher kPtrMatcher {
     }
     return BuildPtr(state, ty, S, T, A);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string S = state->NumName();
-  const std::string T = state->TypeName();
-  const std::string A = state->NumName();
-    return "ptr<" + S + ", " + T + ", " + A + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText S;
+  state->PrintNum(S);StyledText T;
+  state->PrintType(T);StyledText A;
+  state->PrintNum(A);
+    out << style::Type << "ptr" << style::Code << "<" << style::Type << S << style::Code << ", " << style::Type << T << style::Code << ", " << style::Type << A << style::Code << ">";
   }
 };
 
@@ -489,9 +485,9 @@ constexpr TypeMatcher kAtomicMatcher {
     }
     return BuildAtomic(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "atomic<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "atomic" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -509,9 +505,9 @@ constexpr TypeMatcher kArrayMatcher {
     }
     return BuildArray(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "array<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "array" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -524,8 +520,8 @@ constexpr TypeMatcher kSamplerMatcher {
     }
     return BuildSampler(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "sampler";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "sampler";
   }
 };
 
@@ -538,8 +534,8 @@ constexpr TypeMatcher kSamplerComparisonMatcher {
     }
     return BuildSamplerComparison(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "sampler_comparison";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "sampler_comparison";
   }
 };
 
@@ -557,9 +553,9 @@ constexpr TypeMatcher kTexture1DMatcher {
     }
     return BuildTexture1D(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_1d<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_1d" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -577,9 +573,9 @@ constexpr TypeMatcher kTexture2DMatcher {
     }
     return BuildTexture2D(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_2d<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_2d" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -597,9 +593,9 @@ constexpr TypeMatcher kTexture2DArrayMatcher {
     }
     return BuildTexture2DArray(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_2d_array<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_2d_array" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -617,9 +613,9 @@ constexpr TypeMatcher kTexture3DMatcher {
     }
     return BuildTexture3D(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_3d<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_3d" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -637,9 +633,9 @@ constexpr TypeMatcher kTextureCubeMatcher {
     }
     return BuildTextureCube(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_cube<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_cube" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -657,9 +653,9 @@ constexpr TypeMatcher kTextureCubeArrayMatcher {
     }
     return BuildTextureCubeArray(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_cube_array<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_cube_array" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -677,9 +673,9 @@ constexpr TypeMatcher kTextureMultisampled2DMatcher {
     }
     return BuildTextureMultisampled2D(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "texture_multisampled_2d<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "texture_multisampled_2d" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -692,8 +688,8 @@ constexpr TypeMatcher kTextureDepth2DMatcher {
     }
     return BuildTextureDepth2D(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_depth_2d";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_depth_2d";
   }
 };
 
@@ -706,8 +702,8 @@ constexpr TypeMatcher kTextureDepth2DArrayMatcher {
     }
     return BuildTextureDepth2DArray(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_depth_2d_array";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_depth_2d_array";
   }
 };
 
@@ -720,8 +716,8 @@ constexpr TypeMatcher kTextureDepthCubeMatcher {
     }
     return BuildTextureDepthCube(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_depth_cube";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_depth_cube";
   }
 };
 
@@ -734,8 +730,8 @@ constexpr TypeMatcher kTextureDepthCubeArrayMatcher {
     }
     return BuildTextureDepthCubeArray(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_depth_cube_array";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_depth_cube_array";
   }
 };
 
@@ -748,8 +744,8 @@ constexpr TypeMatcher kTextureDepthMultisampled2DMatcher {
     }
     return BuildTextureDepthMultisampled2D(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_depth_multisampled_2d";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_depth_multisampled_2d";
   }
 };
 
@@ -772,10 +768,10 @@ constexpr TypeMatcher kTextureStorage1DMatcher {
     }
     return BuildTextureStorage1D(state, ty, F, A);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string F = state->NumName();
-  const std::string A = state->NumName();
-    return "texture_storage_1d<" + F + ", " + A + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
+  state->PrintNum(F);StyledText A;
+  state->PrintNum(A);
+    out << style::Type << "texture_storage_1d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
   }
 };
 
@@ -798,10 +794,10 @@ constexpr TypeMatcher kTextureStorage2DMatcher {
     }
     return BuildTextureStorage2D(state, ty, F, A);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string F = state->NumName();
-  const std::string A = state->NumName();
-    return "texture_storage_2d<" + F + ", " + A + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
+  state->PrintNum(F);StyledText A;
+  state->PrintNum(A);
+    out << style::Type << "texture_storage_2d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
   }
 };
 
@@ -824,10 +820,10 @@ constexpr TypeMatcher kTextureStorage2DArrayMatcher {
     }
     return BuildTextureStorage2DArray(state, ty, F, A);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string F = state->NumName();
-  const std::string A = state->NumName();
-    return "texture_storage_2d_array<" + F + ", " + A + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
+  state->PrintNum(F);StyledText A;
+  state->PrintNum(A);
+    out << style::Type << "texture_storage_2d_array" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
   }
 };
 
@@ -850,10 +846,10 @@ constexpr TypeMatcher kTextureStorage3DMatcher {
     }
     return BuildTextureStorage3D(state, ty, F, A);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string F = state->NumName();
-  const std::string A = state->NumName();
-    return "texture_storage_3d<" + F + ", " + A + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
+  state->PrintNum(F);StyledText A;
+  state->PrintNum(A);
+    out << style::Type << "texture_storage_3d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
   }
 };
 
@@ -866,8 +862,8 @@ constexpr TypeMatcher kTextureExternalMatcher {
     }
     return BuildTextureExternal(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "texture_external";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "texture_external";
   }
 };
 
@@ -885,11 +881,9 @@ constexpr TypeMatcher kModfResultMatcher {
     }
     return BuildModfResult(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "__modf_result_" << T;
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "__modf_result_" << style::Type << T;
   }
 };
 
@@ -912,12 +906,10 @@ constexpr TypeMatcher kModfResultVecMatcher {
     }
     return BuildModfResultVec(state, ty, N, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string N = state->NumName();
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "__modf_result_vec" << N << "_" << T;
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
+  state->PrintNum(N);StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "__modf_result_vec" << style::Type << N << style::Type << "_" << style::Type << T;
   }
 };
 
@@ -935,11 +927,9 @@ constexpr TypeMatcher kFrexpResultMatcher {
     }
     return BuildFrexpResult(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "__frexp_result_" << T;
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "__frexp_result_" << style::Type << T;
   }
 };
 
@@ -962,12 +952,10 @@ constexpr TypeMatcher kFrexpResultVecMatcher {
     }
     return BuildFrexpResultVec(state, ty, N, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string N = state->NumName();
-  const std::string T = state->TypeName();
-    StringStream ss;
-    ss << "__frexp_result_vec" << N << "_" << T;
-    return ss.str();
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
+  state->PrintNum(N);StyledText T;
+  state->PrintType(T);
+    out  << style::Type << "__frexp_result_vec" << style::Type << N << style::Type << "_" << style::Type << T;
   }
 };
 
@@ -985,9 +973,9 @@ constexpr TypeMatcher kAtomicCompareExchangeResultMatcher {
     }
     return BuildAtomicCompareExchangeResult(state, ty, T);
   },
-/* string */ [](MatchState* state) -> std::string {
-  const std::string T = state->TypeName();
-    return "__atomic_compare_exchange_result<" + T + ">";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type << "__atomic_compare_exchange_result" << style::Code << "<" << style::Type << T << style::Code << ">";
   }
 };
 
@@ -1012,13 +1000,10 @@ constexpr TypeMatcher kScalarMatcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kF16Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << ", " << kU32Matcher.string(nullptr) << " or " << kBoolMatcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar_no_f32'
@@ -1038,13 +1023,10 @@ constexpr TypeMatcher kScalarNoF32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kI32Matcher.string(nullptr) << ", " << kF16Matcher.string(nullptr) << ", " << kU32Matcher.string(nullptr) << " or " << kBoolMatcher.string(nullptr);
-    return ss.str();
-  }
+ kI32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar_no_f16'
@@ -1064,13 +1046,10 @@ constexpr TypeMatcher kScalarNoF16Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << ", " << kU32Matcher.string(nullptr) << " or " << kBoolMatcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar_no_i32'
@@ -1090,13 +1069,10 @@ constexpr TypeMatcher kScalarNoI32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kF16Matcher.string(nullptr) << ", " << kU32Matcher.string(nullptr) << " or " << kBoolMatcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar_no_u32'
@@ -1116,13 +1092,10 @@ constexpr TypeMatcher kScalarNoU32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kF16Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << " or " << kBoolMatcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar_no_bool'
@@ -1142,13 +1115,10 @@ constexpr TypeMatcher kScalarNoBoolMatcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kF16Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << " or " << kU32Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kU32Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match fiu32_f16'
@@ -1168,13 +1138,10 @@ constexpr TypeMatcher kFiu32F16Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << ", " << kU32Matcher.string(nullptr) << " or " << kF16Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kF16Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match fiu32'
@@ -1191,13 +1158,10 @@ constexpr TypeMatcher kFiu32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << " or " << kU32Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kU32Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match fi32_f16'
@@ -1214,13 +1178,10 @@ constexpr TypeMatcher kFi32F16Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << ", " << kI32Matcher.string(nullptr) << " or " << kF16Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kF16Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match fi32'
@@ -1234,13 +1195,10 @@ constexpr TypeMatcher kFi32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << " or " << kI32Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kI32Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match f32_f16'
@@ -1254,13 +1212,10 @@ constexpr TypeMatcher kF32F16Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kF32Matcher.string(nullptr) << " or " << kF16Matcher.string(nullptr);
-    return ss.str();
-  }
+ kF32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kF16Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match iu32'
@@ -1274,13 +1229,10 @@ constexpr TypeMatcher kIu32Matcher {
     }
     return nullptr;
   },
-/* string */ [](MatchState*) -> std::string {
-    StringStream ss;
-    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-    ss << kI32Matcher.string(nullptr) << " or " << kU32Matcher.string(nullptr);
-    return ss.str();
-  }
+ kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kU32Matcher.print(nullptr, out);}
 };
 
 /// EnumMatcher for 'match f32_texel_format'
@@ -1299,8 +1251,8 @@ constexpr NumberMatcher kF32TexelFormatMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "bgra8unorm, rgba8unorm, rgba8snorm, rgba16float, r32float, rg32float or rgba32float";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "bgra8unorm"<< TextStyle{} << ", " << style::Enum << "rgba8unorm"<< TextStyle{} << ", " << style::Enum << "rgba8snorm"<< TextStyle{} << ", " << style::Enum << "rgba16float"<< TextStyle{} << ", " << style::Enum << "r32float"<< TextStyle{} << ", " << style::Enum << "rg32float"<< TextStyle{} << " or " << style::Enum << "rgba32float";
   }
 };
 
@@ -1318,8 +1270,8 @@ constexpr NumberMatcher kI32TexelFormatMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "rgba8sint, rgba16sint, r32sint, rg32sint or rgba32sint";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "rgba8sint"<< TextStyle{} << ", " << style::Enum << "rgba16sint"<< TextStyle{} << ", " << style::Enum << "r32sint"<< TextStyle{} << ", " << style::Enum << "rg32sint"<< TextStyle{} << " or " << style::Enum << "rgba32sint";
   }
 };
 
@@ -1337,8 +1289,8 @@ constexpr NumberMatcher kU32TexelFormatMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "rgba8uint, rgba16uint, r32uint, rg32uint or rgba32uint";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "rgba8uint"<< TextStyle{} << ", " << style::Enum << "rgba16uint"<< TextStyle{} << ", " << style::Enum << "r32uint"<< TextStyle{} << ", " << style::Enum << "rg32uint"<< TextStyle{} << " or " << style::Enum << "rgba32uint";
   }
 };
 
@@ -1350,8 +1302,8 @@ constexpr NumberMatcher kWriteMatcher {
     }
     return Number::invalid;
   },
-/* string */ [](MatchState*) -> std::string {
-    return "write";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "write";
   }
 };
 
@@ -1363,8 +1315,8 @@ constexpr NumberMatcher kReadWriteMatcher {
     }
     return Number::invalid;
   },
-/* string */ [](MatchState*) -> std::string {
-    return "read_write";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "read_write";
   }
 };
 
@@ -1379,8 +1331,8 @@ constexpr NumberMatcher kReadableMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "read or read_write";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "read"<< TextStyle{} << " or " << style::Enum << "read_write";
   }
 };
 
@@ -1395,8 +1347,8 @@ constexpr NumberMatcher kWritableMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "write or read_write";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "write"<< TextStyle{} << " or " << style::Enum << "read_write";
   }
 };
 
@@ -1412,8 +1364,8 @@ constexpr NumberMatcher kFunctionPrivateWorkgroupMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "function, private or workgroup";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "function"<< TextStyle{} << ", " << style::Enum << "private"<< TextStyle{} << " or " << style::Enum << "workgroup";
   }
 };
 
@@ -1428,8 +1380,8 @@ constexpr NumberMatcher kWorkgroupOrStorageMatcher {
         return Number::invalid;
     }
   },
-/* string */ [](MatchState*) -> std::string {
-    return "workgroup or storage";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "workgroup"<< TextStyle{} << " or " << style::Enum << "storage";
   }
 };
 
@@ -1441,8 +1393,8 @@ constexpr NumberMatcher kStorageMatcher {
     }
     return Number::invalid;
   },
-/* string */ [](MatchState*) -> std::string {
-    return "storage";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "storage";
   }
 };
 
@@ -1454,8 +1406,8 @@ constexpr NumberMatcher kWorkgroupMatcher {
     }
     return Number::invalid;
   },
-/* string */ [](MatchState*) -> std::string {
-    return "workgroup";
+/* print */ [](MatchState*, StyledText& out) {
+  out<< style::Enum << "workgroup";
   }
 };
 

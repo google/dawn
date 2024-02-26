@@ -82,8 +82,8 @@ constexpr TypeMatcher kU32Matcher {
     }
     return BuildU32(state, ty);
   },
-/* string */ [](MatchState*) -> std::string {
-    return "u32";
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type << "u32";
   }
 };
 

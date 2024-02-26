@@ -164,14 +164,14 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
     WrapInFunction(Call(Source{{56, 78}}, "mix", 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: no matching constructor for i32(f32, f32, f32)
+    EXPECT_EQ(r()->error(), R"(56:78 error: no matching constructor for 'i32(f32, f32, f32)'
 
 2 candidate constructors:
-  i32(i32) -> i32
-  i32() -> i32
+  'i32(i32) -> i32'
+  'i32() -> i32'
 
 1 candidate conversion:
-  i32(T) -> i32  where: T is abstract-int, abstract-float, f32, f16, u32 or bool
+  'i32(T) -> i32'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'u32' or 'bool'
 )");
 }
 
@@ -778,10 +778,10 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(error: no matching call to workgroupUniformLoad(ptr<storage, i32, read_write>)
+              R"(error: no matching call to 'workgroupUniformLoad(ptr<storage, i32, read_write>)'
 
 1 candidate function:
-  workgroupUniformLoad(ptr<workgroup, T, read_write>) -> T
+  'workgroupUniformLoad(ptr<workgroup, T, read_write>) -> T'
 )");
 }
 

@@ -60,7 +60,7 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: root block: invalid instruction: tint::core::ir::Loop
+              R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
   loop [b: %b2] {  # loop_1
   ^^^^^^^^^^^^^
 
@@ -922,7 +922,7 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: block: terminator which isn't the final instruction
+              R"(:3:5 error: return: block: terminator which isn't the final instruction
     ret
     ^^^
 
@@ -1447,7 +1447,7 @@ TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(error: orphaned instruction: load
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: load: orphaned instruction: load
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
@@ -3157,7 +3157,7 @@ TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:19 error: load source operand is not a memory view
+              R"(:4:19 error: load: load source operand is not a memory view
     %3:f32 = load %l
                   ^^
 
@@ -3188,7 +3188,7 @@ TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:19 error: result type does not match source store type
+              R"(:4:19 error: load: result type does not match source store type
     %3:f32 = load %2
                   ^^
 
@@ -3277,7 +3277,7 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:15 error: store target operand is not a memory view
+              R"(:4:15 error: store: store target operand is not a memory view
     store %l, 42u
               ^^^
 
@@ -3308,7 +3308,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:15 error: value type does not match store type
+              R"(:4:15 error: store: value type does not match store type
     store %2, 42u
               ^^^
 
@@ -3468,7 +3468,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
   %b1 = block {
   ^^^^^^^^^^^
 
-:4:37 error: value type does not match vector pointer element type
+:4:37 error: store_vector_element: value type does not match vector pointer element type
     store_vector_element %2, undef, 2i
                                     ^^
 

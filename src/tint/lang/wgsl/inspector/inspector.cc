@@ -571,12 +571,13 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
 const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
     auto* func = program_.AST().Functions().Find(program_.Symbols().Get(name));
     if (!func) {
-        diagnostics_.AddError(diag::System::Inspector, name + " was not found!");
+        diagnostics_.AddError(diag::System::Inspector, Source{}) << name << " was not found!";
         return nullptr;
     }
 
     if (!func->IsEntryPoint()) {
-        diagnostics_.AddError(diag::System::Inspector, name + " is not an entry point!");
+        diagnostics_.AddError(diag::System::Inspector, Source{})
+            << name << " is not an entry point!";
         return nullptr;
     }
 

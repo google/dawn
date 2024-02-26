@@ -30,12 +30,17 @@
 
 #include <string>
 
+// Forward declaration
+namespace tint {
+class StyledTextPrinter;
+class StyledText;
+}  // namespace tint
 namespace tint::diag {
-
 class Diagnostic;
 class List;
-class Printer;
+}  // namespace tint::diag
 
+namespace tint::diag {
 /// Formatter are used to print a list of diagnostics messages.
 class Formatter {
   public:
@@ -62,18 +67,14 @@ class Formatter {
 
     ~Formatter();
 
-    /// @param list the list of diagnostic messages to format
-    /// @param printer the printer used to display the formatted diagnostics
-    void Format(const List& list, Printer* printer) const;
-
     /// @return the list of diagnostics `list` formatted to a string.
     /// @param list the list of diagnostic messages to format
-    std::string Format(const List& list) const;
+    StyledText Format(const List& list) const;
 
   private:
     struct State;
 
-    void Format(const Diagnostic& diag, State& state) const;
+    void Format(const Diagnostic& diag, StyledText& text) const;
 
     const Style style_;
 };

@@ -305,9 +305,9 @@ bool ASTPrinter::Generate() {
             },
             [&](const ast::Override*) {
                 // Override is removed with SubstituteOverride
-                diagnostics_.AddError(diag::System::Writer,
-                                      "override-expressions should have been removed with the "
-                                      "SubstituteOverride transform.");
+                diagnostics_.AddError(diag::System::Writer, Source{})
+                    << "override-expressions should have been removed with the "
+                       "SubstituteOverride transform.";
                 return false;
             },
             [&](const ast::Function* func) {
@@ -364,7 +364,8 @@ bool ASTPrinter::EmitTypeDecl(const core::type::Type* ty) {
             return false;
         }
     } else {
-        diagnostics_.AddError(diag::System::Writer, "unknown alias type: " + ty->FriendlyName());
+        diagnostics_.AddError(diag::System::Writer, Source{})
+            << "unknown alias type: " << ty->FriendlyName();
         return false;
     }
 
@@ -1063,7 +1064,8 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             std::vector<const char*> dims;
             switch (texture_type->dim()) {
                 case core::type::TextureDimension::kNone:
-                    diagnostics_.AddError(diag::System::Writer, "texture dimension is kNone");
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << "texture dimension is kNone";
                     return false;
                 case core::type::TextureDimension::k1d:
                     dims = {"width"};
@@ -1262,9 +1264,8 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 out << "gradientcube(";
                 break;
             default: {
-                StringStream err;
-                err << "MSL does not support gradients for " << dim << " textures";
-                diagnostics_.AddError(diag::System::Writer, err.str());
+                diagnostics_.AddError(diag::System::Writer, Source{})
+                    << "MSL does not support gradients for " << dim << " textures";
                 return false;
             }
         }
@@ -1620,15 +1621,13 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             out += "unpack_unorm2x16_to_float";
             break;
         case wgsl::BuiltinFn::kArrayLength:
-            diagnostics_.AddError(
-                diag::System::Writer,
-                "Unable to translate builtin: " + std::string(builtin->str()) +
-                    "\nDid you forget to pass array_length_from_uniform generator "
-                    "options?");
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "Unable to translate builtin: " << builtin->Fn()
+                << "\nDid you forget to pass array_length_from_uniform generator options?";
             return "";
         default:
-            diagnostics_.AddError(diag::System::Writer,
-                                  "Unknown import method: " + std::string(builtin->str()));
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "Unknown import method: " << builtin->Fn();
             return "";
     }
     return out;
@@ -1803,8 +1802,8 @@ bool ASTPrinter::EmitConstant(StringStream& out, const core::constant::Value* co
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.AddError(diag::System::Writer,
-                                      core::type::Array::kErrExpectedConstantCount);
+                diagnostics_.AddError(diag::System::Writer, Source{})
+                    << core::type::Array::kErrExpectedConstantCount;
                 return false;
             }
 
@@ -1874,7 +1873,8 @@ bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
                     return true;
                 }
             }
-            diagnostics_.AddError(diag::System::Writer, "unknown integer literal suffix type");
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "unknown integer literal suffix type";
             return false;
         },  //
         TINT_ICE_ON_NO_MATCH);
@@ -2069,7 +2069,8 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
 
                         auto name = BuiltinToAttribute(builtin);
                         if (name.empty()) {
-                            diagnostics_.AddError(diag::System::Writer, "unknown builtin");
+                            diagnostics_.AddError(diag::System::Writer, Source{})
+                                << "unknown builtin";
                             return false;
                         }
                         out << " [[" << name << "]]";
@@ -2526,8 +2527,8 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
             } else {
                 auto count = arr->ConstantCount();
                 if (!count) {
-                    diagnostics_.AddError(diag::System::Writer,
-                                          core::type::Array::kErrExpectedConstantCount);
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << core::type::Array::kErrExpectedConstantCount;
                     return false;
                 }
 
@@ -2622,7 +2623,8 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                     out << "cube_array";
                     break;
                 default:
-                    diagnostics_.AddError(diag::System::Writer, "Invalid texture dimensions");
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << "Invalid texture dimensions";
                     return false;
             }
             if (tex->IsAnyOf<core::type::MultisampledTexture,
@@ -2655,8 +2657,8 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                     } else if (storage->access() == core::Access::kWrite) {
                         out << ", access::write";
                     } else {
-                        diagnostics_.AddError(diag::System::Writer,
-                                              "Invalid access control for storage texture");
+                        diagnostics_.AddError(diag::System::Writer, Source{})
+                            << "Invalid access control for storage texture";
                         return false;
                     }
                     return true;
@@ -2797,7 +2799,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (auto builtin = attributes.builtin) {
             auto name = BuiltinToAttribute(builtin.value());
             if (name.empty()) {
-                diagnostics_.AddError(diag::System::Writer, "unknown builtin");
+                diagnostics_.AddError(diag::System::Writer, Source{}) << "unknown builtin";
                 return false;
             }
             out << " [[" << name << "]]";
@@ -2839,7 +2841,8 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (auto interpolation = attributes.interpolation) {
             auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
             if (name.empty()) {
-                diagnostics_.AddError(diag::System::Writer, "unknown interpolation attribute");
+                diagnostics_.AddError(diag::System::Writer, Source{})
+                    << "unknown interpolation attribute";
                 return false;
             }
             out << " [[" << name << "]]";

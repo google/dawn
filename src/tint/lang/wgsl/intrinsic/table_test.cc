@@ -79,7 +79,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchF32) {
     auto result =
         table.Lookup(wgsl::BuiltinFn::kCos, Empty, Vector{i32}, core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchU32) {
@@ -99,7 +99,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchU32) {
     auto result = table.Lookup(wgsl::BuiltinFn::kUnpack2X16Float, Empty, Vector{f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchI32) {
@@ -126,7 +126,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchI32) {
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureLoad, Empty, Vector{tex, f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchIU32AsI32) {
@@ -154,7 +154,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchIU32) {
     auto result = table.Lookup(wgsl::BuiltinFn::kCountOneBits, Empty, Vector{f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchFIU32AsI32) {
@@ -198,7 +198,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchFIU32) {
     auto result = table.Lookup(wgsl::BuiltinFn::kClamp, Empty, Vector{bool_, bool_, bool_},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchBool) {
@@ -219,7 +219,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchBool) {
     auto result = table.Lookup(wgsl::BuiltinFn::kSelect, Empty, Vector{f32, f32, f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchPointer) {
@@ -241,7 +241,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchPointer) {
     auto result = table.Lookup(wgsl::BuiltinFn::kAtomicLoad, Empty, Vector{atomic_i32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchArray) {
@@ -264,7 +264,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchArray) {
     auto result = table.Lookup(wgsl::BuiltinFn::kArrayLength, Empty, Vector{f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchSampler) {
@@ -293,7 +293,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchSampler) {
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureSample, Empty, Vector{tex, f32, vec2f},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchSampledTexture) {
@@ -417,7 +417,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchTexture) {
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureLoad, Empty, Vector{f32, vec2i},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchTemplateType) {
@@ -437,7 +437,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchTemplateType) {
     auto result = table.Lookup(wgsl::BuiltinFn::kClamp, Empty, Vector{f32, u32, f32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchOpenSizeVector) {
@@ -460,7 +460,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchOpenSizeVector) {
     auto result = table.Lookup(wgsl::BuiltinFn::kClamp, Empty, Vector{vec2f, u32, vec2f},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchOpenSizeMatrix) {
@@ -482,7 +482,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchOpenSizeMatrix) {
     auto result = table.Lookup(wgsl::BuiltinFn::kDeterminant, Empty, Vector{mat3x2f},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
@@ -544,37 +544,37 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureDimensions, Empty, Vector{bool_, bool_},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_EQ(result.Failure(),
-              R"(no matching call to textureDimensions(bool, bool)
+    ASSERT_EQ(result.Failure().Plain(),
+              R"(no matching call to 'textureDimensions(bool, bool)'
 
 27 candidate functions:
-  textureDimensions(texture: texture_1d<T>, level: L) -> u32  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_1d<T>) -> u32  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_3d<T>) -> vec3<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_depth_2d) -> vec2<u32>
-  textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>
-  textureDimensions(texture: texture_depth_cube) -> vec2<u32>
-  textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
-  textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-  textureDimensions(texture: texture_storage_1d<F, A>) -> u32
-  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>
-  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
-  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>
-  textureDimensions(texture: texture_external) -> vec2<u32>
+  'textureDimensions(texture: texture_1d<T>, level: L) -> u32'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_1d<T>) -> u32'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_3d<T>) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_cube) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_1d<F, A>) -> u32'
+  'textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>'
+  'textureDimensions(texture: texture_external) -> vec2<u32>'
 )");
 }
 
@@ -584,37 +584,37 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByMatchingParameter) {
     auto result = table.Lookup(wgsl::BuiltinFn::kTextureDimensions, Empty, Vector{tex, bool_},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_EQ(result.Failure(),
-              R"(no matching call to textureDimensions(texture_depth_2d, bool)
+    ASSERT_EQ(result.Failure().Plain(),
+              R"(no matching call to 'textureDimensions(texture_depth_2d, bool)'
 
 27 candidate functions:
-  textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_1d<T>, level: L) -> u32  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>  where: T is f32, i32 or u32, L is i32 or u32
-  textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>  where: L is i32 or u32
-  textureDimensions(texture: texture_depth_2d) -> vec2<u32>
-  textureDimensions(texture: texture_1d<T>) -> u32  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_3d<T>) -> vec3<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>
-  textureDimensions(texture: texture_depth_cube) -> vec2<u32>
-  textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
-  textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-  textureDimensions(texture: texture_storage_1d<F, A>) -> u32
-  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>
-  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
-  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>
-  textureDimensions(texture: texture_external) -> vec2<u32>
+  'textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_1d<T>, level: L) -> u32'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d) -> vec2<u32>'
+  'textureDimensions(texture: texture_1d<T>) -> u32'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_3d<T>) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
+  'textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_cube) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>'
+  'textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_1d<F, A>) -> u32'
+  'textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>'
+  'textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>'
+  'textureDimensions(texture: texture_external) -> vec2<u32>'
 )");
 }
 
@@ -630,11 +630,11 @@ TEST_F(WgslIntrinsicTableTest, MismatchUnaryOp) {
     auto* bool_ = create<core::type::Bool>();
     auto result = table.Lookup(core::UnaryOp::kNegation, bool_, core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(), R"(no matching overload for operator - (bool)
+    EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator - (bool)'
 
 2 candidate operators:
-  operator - (T) -> T  where: T is abstract-float, abstract-int, f32, i32 or f16
-  operator - (vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32 or f16
+  'operator - (T) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32' or 'f16'
+  'operator - (vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32' or 'f16'
 )");
 }
 
@@ -672,18 +672,18 @@ TEST_F(WgslIntrinsicTableTest, MismatchBinaryOp) {
         table.Lookup(core::BinaryOp::kMultiply, f32, bool_, core::EvaluationStage::kConstant,
                      /* is_compound */ false);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(), R"(no matching overload for operator * (f32, bool)
+    EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator * (f32, bool)'
 
 9 candidate operators:
-  operator * (T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator * (vecN<T>, T) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator * (T, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator * (T, matNxM<T>) -> matNxM<T>  where: T is abstract-float, f32 or f16
-  operator * (matNxM<T>, T) -> matNxM<T>  where: T is abstract-float, f32 or f16
-  operator * (vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator * (matCxR<T>, vecC<T>) -> vecR<T>  where: T is abstract-float, f32 or f16
-  operator * (vecR<T>, matCxR<T>) -> vecC<T>  where: T is abstract-float, f32 or f16
-  operator * (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is abstract-float, f32 or f16
+  'operator * (T, T) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator * (vecN<T>, T) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator * (T, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator * (T, matNxM<T>) -> matNxM<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator * (matNxM<T>, T) -> matNxM<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator * (vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator * (matCxR<T>, vecC<T>) -> vecR<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator * (vecR<T>, matCxR<T>) -> vecC<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator * (matKxR<T>, matCxK<T>) -> matCxR<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -706,18 +706,18 @@ TEST_F(WgslIntrinsicTableTest, MismatchCompoundOp) {
         table.Lookup(core::BinaryOp::kMultiply, f32, bool_, core::EvaluationStage::kConstant,
                      /* is_compound */ true);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(), R"(no matching overload for operator *= (f32, bool)
+    EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator *= (f32, bool)'
 
 9 candidate operators:
-  operator *= (T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator *= (vecN<T>, T) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator *= (T, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator *= (T, matNxM<T>) -> matNxM<T>  where: T is abstract-float, f32 or f16
-  operator *= (matNxM<T>, T) -> matNxM<T>  where: T is abstract-float, f32 or f16
-  operator *= (vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  operator *= (matCxR<T>, vecC<T>) -> vecR<T>  where: T is abstract-float, f32 or f16
-  operator *= (vecR<T>, matCxR<T>) -> vecC<T>  where: T is abstract-float, f32 or f16
-  operator *= (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is abstract-float, f32 or f16
+  'operator *= (T, T) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator *= (vecN<T>, T) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator *= (T, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator *= (T, matNxM<T>) -> matNxM<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator *= (matNxM<T>, T) -> matNxM<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator *= (vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'operator *= (matCxR<T>, vecC<T>) -> vecR<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator *= (vecR<T>, matCxR<T>) -> vecC<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+  'operator *= (matKxR<T>, matCxK<T>) -> matCxR<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -757,29 +757,29 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerImplicit) {
     auto result = table.Lookup(CtorConv::kVec3, Empty, Vector{i32, f32, i32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(),
-              R"(no matching constructor for vec3(i32, f32, i32)
+    EXPECT_EQ(result.Failure().Plain(),
+              R"(no matching constructor for 'vec3(i32, f32, i32)'
 
 12 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3() -> vec3<abstract-int>
-  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  'vec3(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(vec3<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3() -> vec3<abstract-int>'
+  'vec3<T>() -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f32', 'U' is 'abstract-int', 'abstract-float', 'i32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f16', 'U' is 'abstract-int', 'abstract-float', 'f32', 'i32', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'i32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'u32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'bool', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'u32'
 )");
 }
 
@@ -789,29 +789,29 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerExplicit) {
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, f32, i32},
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(),
-              R"(no matching constructor for vec3<i32>(i32, f32, i32)
+    EXPECT_EQ(result.Failure().Plain(),
+              R"(no matching constructor for 'vec3<i32>(i32, f32, i32)'
 
 12 candidate constructors:
-  vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3() -> vec3<abstract-int>
-  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  'vec3<T>(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(vec3<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3() -> vec3<abstract-int>'
+  'vec3<T>() -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f32', 'U' is 'abstract-int', 'abstract-float', 'i32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f16', 'U' is 'abstract-int', 'abstract-float', 'f32', 'i32', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'i32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'u32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'bool', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'u32'
 )");
 }
 
@@ -898,29 +898,29 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeConversion) {
     auto result =
         table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{arr}, core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    EXPECT_EQ(result.Failure(),
-              R"(no matching constructor for vec3<f32>(array<u32>)
+    EXPECT_EQ(result.Failure().Plain(),
+              R"(no matching constructor for 'vec3<f32>(array<u32>)'
 
 12 candidate constructors:
-  vec3<T>(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3() -> vec3<abstract-int>
-  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3<T>(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3<T>(x: T, y: T, z: T) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  'vec3<T>(vec3<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3() -> vec3<abstract-int>'
+  'vec3<T>() -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3<T>(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(T) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+  'vec3(vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is f16, U is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is i32, U is abstract-int, abstract-float, f32, f16, u32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
-  vec3<T>(vec3<U>) -> vec3<T>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f32', 'U' is 'abstract-int', 'abstract-float', 'i32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f16', 'U' is 'abstract-int', 'abstract-float', 'f32', 'i32', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'i32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'u32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'u32', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'bool'
+  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'bool', 'U' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32' or 'u32'
 )");
 }
 
@@ -964,7 +964,7 @@ TEST_F(WgslIntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
     auto result = table.Lookup(wgsl::BuiltinFn::kAbs, Empty, std::move(arg_tys),
                                core::EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
-    ASSERT_THAT(result.Failure(), HasSubstr("no matching call"));
+    ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
 }
 
 TEST_F(WgslIntrinsicTableTest, OverloadResolution) {

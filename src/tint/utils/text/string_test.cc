@@ -29,6 +29,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
 
 #include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
 
@@ -95,33 +96,33 @@ TEST(StringTest, Distance) {
 TEST(StringTest, SuggestAlternatives) {
     {
         std::string_view alternatives[] = {"hello world", "Hello World"};
-        StringStream ss;
+        StyledText ss;
         SuggestAlternatives("hello wordl", alternatives, ss);
-        EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?
+        EXPECT_EQ(ss.Plain(), R"(Did you mean 'hello world'?
 Possible values: 'hello world', 'Hello World')");
     }
     {
         std::string_view alternatives[] = {"foobar", "something else"};
-        StringStream ss;
+        StyledText ss;
         SuggestAlternatives("hello world", alternatives, ss);
-        EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
+        EXPECT_EQ(ss.Plain(), R"(Possible values: 'foobar', 'something else')");
     }
     {
         std::string_view alternatives[] = {"hello world", "Hello World"};
-        StringStream ss;
+        StyledText ss;
         SuggestAlternativeOptions opts;
         opts.prefix = "$";
         SuggestAlternatives("hello wordl", alternatives, ss, opts);
-        EXPECT_EQ(ss.str(), R"(Did you mean '$hello world'?
+        EXPECT_EQ(ss.Plain(), R"(Did you mean '$hello world'?
 Possible values: '$hello world', '$Hello World')");
     }
     {
         std::string_view alternatives[] = {"hello world", "Hello World"};
-        StringStream ss;
+        StyledText ss;
         SuggestAlternativeOptions opts;
         opts.list_possible_values = false;
         SuggestAlternatives("hello world", alternatives, ss, opts);
-        EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?)");
+        EXPECT_EQ(ss.Plain(), R"(Did you mean 'hello world'?)");
     }
 }
 

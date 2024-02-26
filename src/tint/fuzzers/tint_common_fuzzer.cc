@@ -51,8 +51,10 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/diagnostic/formatter.h"
-#include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/text/text_style.h"
 
 #if TINT_BUILD_SPV_WRITER
 #include "src/tint/lang/spirv/writer/helpers/ast_generate_bindings.h"
@@ -74,15 +76,14 @@ namespace {
 // to better de-duplication of bug reports, because ClusterFuzz only uses the
 // top few stack frames for de-duplication, and a FATAL_ERROR stack frame
 // provides no useful information.
-#define FATAL_ERROR(diags, msg_string)                             \
-    do {                                                           \
-        std::string msg = msg_string;                              \
-        auto printer = tint::diag::Printer::Create(stderr, true);  \
-        if (!msg.empty()) {                                        \
-            printer->Write(msg + "\n", {diag::Color::kRed, true}); \
-        }                                                          \
-        tint::diag::Formatter().Format(diags, printer.get());      \
-        __builtin_trap();                                          \
+#define FATAL_ERROR(diags, msg_string)                          \
+    do {                                                        \
+        StyledText msg;                                         \
+        msg << (style::Error + style::Bold) << msg_string;      \
+        auto printer = tint::StyledTextPrinter::Create(stderr); \
+        printer->Print(msg);                                    \
+        printer->Print(tint::diag::Formatter().Format(diags));  \
+        __builtin_trap();                                       \
     } while (false)
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
@@ -117,13 +118,13 @@ bool SPIRVToolsValidationCheck(const tint::Program& program, const std::vector<u
     const tint::diag::List& diags = program.Diagnostics();
     tools.SetMessageConsumer(
         [diags](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
-            std::stringstream out;
+            StyledText out;
             out << "Unexpected spirv-val error:\n"
-                << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg << std::endl;
+                << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg;
 
-            auto printer = tint::diag::Printer::Create(stderr, true);
-            printer->Write(out.str(), {diag::Color::kYellow, false});
-            tint::diag::Formatter().Format(diags, printer.get());
+            auto printer = tint::StyledTextPrinter::Create(stderr);
+            printer->Print(out);
+            printer->Print(tint::diag::Formatter().Format(diags));
         });
 
     return tools.Validate(spirv.data(), spirv.size(), spvtools::ValidatorOptions());

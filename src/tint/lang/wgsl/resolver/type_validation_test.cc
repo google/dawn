@@ -493,9 +493,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnnamedOverride_Equivalence) {
     GlobalVar("b", ty.array(ty.f32(), Add("size", 1_i)), core::AddressSpace::kWorkgroup);
     WrapInFunction(Assign(Source{{12, 34}}, "a", "b"));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot assign 'array<f32, [unnamed override-expression]>' to "
-              "'array<f32, [unnamed override-expression]>'");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot assign 'array<f32, [unnamed override-expression]>' to 'array<f32, [unnamed override-expression]>')");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_Param) {
@@ -536,8 +536,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
               core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: var 'size' cannot be referenced at module-scope
-note: var 'size' declared here)");
+              R"(12:34 error: 'var size' cannot be referenced at module-scope
+note: 'var size' declared here)");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConst) {
@@ -1511,7 +1511,7 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, BuiltinAlias_UseWithTemplate
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: type 'A' does not take template arguments
-56:78 note: alias 'A' declared here)");
+56:78 note: 'alias A' declared here)");
 }
 
 INSTANTIATE_TEST_SUITE_P(BuiltinTypes,
@@ -1564,7 +1564,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Type) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: type 'S' does not take template arguments
-56:78 note: struct 'S' declared here)");
+56:78 note: 'struct S' declared here)");
 }
 
 TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Ctor) {
@@ -1576,7 +1576,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Ctor) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: type 'S' does not take template arguments
-note: struct 'S' declared here)");
+note: 'struct S' declared here)");
 }
 
 TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Type) {
@@ -1589,7 +1589,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Type) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: type 'A' does not take template arguments
-note: alias 'A' declared here)");
+note: 'alias A' declared here)");
 }
 
 TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Ctor) {
@@ -1601,7 +1601,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Ctor) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: type 'A' does not take template arguments
-note: alias 'A' declared here)");
+note: 'alias A' declared here)");
 }
 
 }  // namespace TypeDoesNotTakeTemplateArgs

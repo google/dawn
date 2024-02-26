@@ -168,7 +168,7 @@ TEST_P(ResolverInvalidBitcastTest, Test) {
 
     WrapInFunction(Bitcast(Source{{12, 34}}, dst.ast(*this), src.expr(*this, 0)));
 
-    std::string expected = "12:34 error: no matching call to bitcast<${TO}>(${FROM})";
+    std::string expected = "12:34 error: no matching call to 'bitcast<${TO}>(${FROM})'";
     expected = ReplaceAll(expected, "${FROM}", src.sem(*this)->FriendlyName());
     expected = ReplaceAll(expected, "${TO}", dst.sem(*this)->FriendlyName());
 

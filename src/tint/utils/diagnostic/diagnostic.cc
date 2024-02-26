@@ -30,6 +30,7 @@
 #include <unordered_map>
 
 #include "src/tint/utils/diagnostic/formatter.h"
+#include "src/tint/utils/text/styled_text.h"
 
 namespace tint::diag {
 
@@ -69,7 +70,7 @@ List& List::operator=(List&& rhs) = default;
 std::string List::Str() const {
     diag::Formatter::Style style;
     style.print_newline_at_end = false;
-    return Formatter{style}.Format(*this);
+    return Formatter{style}.Format(*this).Plain();
 }
 
 }  // namespace tint::diag

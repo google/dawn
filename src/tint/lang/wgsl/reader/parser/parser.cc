@@ -242,22 +242,28 @@ Parser::Failure::Errored Parser::AddError(const Token& t, std::string_view err) 
 
 Parser::Failure::Errored Parser::AddError(const Source& source, std::string_view err) {
     if (silence_diags_ == 0) {
-        builder_.Diagnostics().AddError(diag::System::Reader, err, source);
+        builder_.Diagnostics().AddError(diag::System::Reader, source) << err;
+    }
+    return Failure::kErrored;
+}
+
+Parser::Failure::Errored Parser::AddError(const Source& source, StyledText&& err) {
+    if (silence_diags_ == 0) {
+        builder_.Diagnostics().AddError(diag::System::Reader, source) << std::move(err);
     }
     return Failure::kErrored;
 }
 
 void Parser::AddNote(const Source& source, std::string_view err) {
     if (silence_diags_ == 0) {
-        builder_.Diagnostics().AddNote(diag::System::Reader, err, source);
+        builder_.Diagnostics().AddNote(diag::System::Reader, source) << err;
     }
 }
 
 void Parser::deprecated(const Source& source, std::string_view msg) {
     if (silence_diags_ == 0) {
-        builder_.Diagnostics().AddWarning(diag::System::Reader,
-                                          "use of deprecated language feature: " + std::string(msg),
-                                          source);
+        builder_.Diagnostics().AddWarning(diag::System::Reader, source)
+            << "use of deprecated language feature: " << msg;
     }
 }
 
@@ -927,7 +933,7 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
 
     /// Create a sensible error message
-    StringStream err;
+    StyledText err;
     err << "expected " << name;
 
     if (!use.empty()) {
@@ -951,7 +957,7 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
 
     synchronized_ = false;
-    return AddError(t.source(), err.str());
+    return AddError(t.source(), std::move(err));
 }
 
 Expect<ast::Type> Parser::expect_type(std::string_view use) {

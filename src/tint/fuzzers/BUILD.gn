@@ -101,6 +101,7 @@ if (tint_has_fuzzers) {
       "${tint_src_dir}/lang/wgsl/writer",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/text",
     ]
 
     sources = [

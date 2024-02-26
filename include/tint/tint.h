@@ -51,7 +51,7 @@
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/utils/diagnostic/formatter.h"
-#include "src/tint/utils/diagnostic/printer.h"
+#include "src/tint/utils/text/styled_text.h"
 
 #if TINT_BUILD_SPV_READER
 #include "src/tint/lang/spirv/reader/reader.h"

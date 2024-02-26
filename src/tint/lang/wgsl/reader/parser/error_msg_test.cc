@@ -38,16 +38,16 @@ const diag::Formatter::Style formatter_style{/* print_file: */ true, /* print_se
 
 class ParserImplErrorTest : public WGSLParserTest {};
 
-#define EXPECT(SOURCE, EXPECTED)                                                   \
-    do {                                                                           \
-        std::string source = SOURCE;                                               \
-        std::string expected = EXPECTED;                                           \
-        auto p = parser(source);                                                   \
-        p->set_max_errors(5);                                                      \
-        EXPECT_EQ(false, p->Parse());                                              \
-        auto diagnostics = p->builder().Diagnostics();                             \
-        EXPECT_EQ(true, diagnostics.ContainsErrors());                             \
-        EXPECT_EQ(expected, diag::Formatter(formatter_style).Format(diagnostics)); \
+#define EXPECT(SOURCE, EXPECTED)                                                           \
+    do {                                                                                   \
+        std::string source = SOURCE;                                                       \
+        std::string expected = EXPECTED;                                                   \
+        auto p = parser(source);                                                           \
+        p->set_max_errors(5);                                                              \
+        EXPECT_EQ(false, p->Parse());                                                      \
+        auto diagnostics = p->builder().Diagnostics();                                     \
+        EXPECT_EQ(true, diagnostics.ContainsErrors());                                     \
+        EXPECT_EQ(expected, diag::Formatter(formatter_style).Format(diagnostics).Plain()); \
     } while (false)
 
 TEST_F(ParserImplErrorTest, AdditiveInvalidExpr) {

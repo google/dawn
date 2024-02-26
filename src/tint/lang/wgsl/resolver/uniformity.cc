@@ -1829,9 +1829,8 @@ class UniformityGraph {
         auto* control_flow = TraceBackAlongPathUntil(
             non_uniform_source, [](Node* node) { return node->affects_control_flow; });
         if (control_flow) {
-            diagnostics_.AddNote(diag::System::Resolver,
-                                 "control flow depends on possibly non-uniform value",
-                                 control_flow->ast->source);
+            diagnostics_.AddNote(diag::System::Resolver, control_flow->ast->source)
+                << "control flow depends on possibly non-uniform value";
             // TODO(jrprice): There are cases where the function with uniformity requirements is not
             // actually inside this control flow construct, for example:
             // - A conditional interrupt (e.g. break), with a barrier elsewhere in the loop
@@ -1876,58 +1875,52 @@ class UniformityGraph {
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
                 auto* var = sem_.GetVal(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-                StringStream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
-                    ss << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
-                       << "' may be non-uniform";
+                    diagnostics_.AddNote(diag::System::Resolver, ident->source)
+                        << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
+                        << "' may be non-uniform";
                 } else {
-                    ss << "reading from " << var_type(var) << "'" << NameFor(ident)
-                       << "' may result in a non-uniform value";
+                    diagnostics_.AddNote(diag::System::Resolver, ident->source)
+                        << "reading from " << var_type(var) << "'" << NameFor(ident)
+                        << "' may result in a non-uniform value";
                 }
-                diagnostics_.AddNote(diag::System::Resolver, ss.str(), ident->source);
             },
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
-                StringStream ss;
-                ss << "reading from " << var_type(var) << "'" << NameFor(v)
-                   << "' may result in a non-uniform value";
-                diagnostics_.AddNote(diag::System::Resolver, ss.str(), v->source);
+                diagnostics_.AddNote(diag::System::Resolver, v->source)
+                    << "reading from " << var_type(var) << "'" << NameFor(v)
+                    << "' may result in a non-uniform value";
             },
             [&](const ast::CallExpression* c) {
                 auto target_name = NameFor(c->target);
                 switch (non_uniform_source->type) {
                     case Node::kFunctionCallReturnValue: {
-                        diagnostics_.AddNote(
-                            diag::System::Resolver,
-                            "return value of '" + target_name + "' may be non-uniform", c->source);
+                        diagnostics_.AddNote(diag::System::Resolver, c->source)
+                            << "return value of '" + target_name + "' may be non-uniform";
                         break;
                     }
                     case Node::kFunctionCallArgumentContents: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         auto* var = sem_.GetVal(arg)->RootIdentifier();
-                        StringStream ss;
-                        ss << "reading from " << var_type(var) << "'" << NameFor(var)
-                           << "' may result in a non-uniform value";
-                        diagnostics_.AddNote(diag::System::Resolver, ss.str(),
-                                             var->Declaration()->source);
+                        diagnostics_.AddNote(diag::System::Resolver, var->Declaration()->source)
+                            << "reading from " << var_type(var) << "'" << NameFor(var)
+                            << "' may result in a non-uniform value";
                         break;
                     }
                     case Node::kFunctionCallArgumentValue: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         // TODO(jrprice): Which output? (return value vs another pointer argument).
-                        diagnostics_.AddNote(diag::System::Resolver,
-                                             "passing non-uniform pointer to '" + target_name +
-                                                 "' may produce a non-uniform output",
-                                             arg->source);
+                        diagnostics_.AddNote(diag::System::Resolver, arg->source)
+                            << "passing non-uniform pointer to '" << target_name
+                            << "' may produce a non-uniform output";
                         break;
                     }
                     case Node::kFunctionCallPointerArgumentResult: {
-                        diagnostics_.AddNote(
-                            diag::System::Resolver,
-                            "contents of pointer may become non-uniform after calling '" +
-                                target_name + "'",
-                            c->args[non_uniform_source->arg_index]->source);
+                        diagnostics_.AddNote(diag::System::Resolver,
+                                             c->args[non_uniform_source->arg_index]->source)
+                            << "contents of pointer may become non-uniform after calling '"
+                            << target_name << "'";
                         break;
                     }
                     default: {
@@ -1937,8 +1930,8 @@ class UniformityGraph {
                 }
             },
             [&](const ast::Expression* e) {
-                diagnostics_.AddNote(diag::System::Resolver,
-                                     "result of expression may be non-uniform", e->source);
+                diagnostics_.AddNote(diag::System::Resolver, e->source)
+                    << "result of expression may be non-uniform";
             },  //
             TINT_ICE_ON_NO_MATCH);
     }

@@ -174,8 +174,8 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
                 return Failure{err};
             }
         } else if (!parse_options.ignore_unknown) {
-            StringStream err;
-            err << "unknown flag: " << arg << std::endl;
+            StyledText err;
+            err << "unknown flag: " << arg << "\n";
             auto names = options_by_name.Keys();
             auto alternatives =
                 Transform(names, [&](const std::string& s) { return std::string_view(s); });
@@ -183,7 +183,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
             opts.prefix = "--";
             opts.list_possible_values = false;
             SuggestAlternatives(arg, alternatives.Slice(), err, opts);
-            return Failure{err.str()};
+            return Failure{err.Plain()};
         }
     }
 

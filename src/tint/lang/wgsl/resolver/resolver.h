@@ -51,6 +51,7 @@
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/bitset.h"
 #include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/text/styled_text.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -638,16 +639,16 @@ class Resolver {
     void ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use);
 
     /// Adds the given internal compiler error message to the diagnostics
-    void AddICE(const std::string& msg, const Source& source) const;
+    void AddICE(std::string_view msg, const Source& source) const;
 
-    /// Adds the given error message to the diagnostics
-    void AddError(const std::string& msg, const Source& source) const;
+    /// @returns a new error message added to the program's diagnostics
+    diag::Diagnostic& AddError(const Source& source) const;
 
-    /// Adds the given warning message to the diagnostics
-    void AddWarning(const std::string& msg, const Source& source) const;
+    /// @returns a new warning message added to the program's diagnostics
+    diag::Diagnostic& AddWarning(const Source& source) const;
 
-    /// Adds the given note message to the diagnostics
-    void AddNote(const std::string& msg, const Source& source) const;
+    /// @returns a new note message added to the program's diagnostics
+    diag::Diagnostic& AddNote(const Source& source) const;
 
     /// @returns the core::type::Type for the builtin type @p builtin_ty with the identifier @p
     /// ident

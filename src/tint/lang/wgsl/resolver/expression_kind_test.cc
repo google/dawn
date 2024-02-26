@@ -622,34 +622,34 @@ INSTANTIATE_TEST_SUITE_P(
         {Def::kParameter, Use::kUnaryOp, kPass},
 
         {Def::kStruct, Use::kAccess, R"(5:6 error: cannot use type 'STRUCT' as access
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kAddressSpace,
          R"(5:6 error: cannot use type 'STRUCT' as address space
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kBinaryOp, R"(5:6 error: cannot use type 'STRUCT' as value
-1:2 note: struct 'STRUCT' declared here
+1:2 note: 'struct STRUCT' declared here
 7:8 note: are you missing '()'?)"},
         {Def::kStruct, Use::kBuiltinValue,
          R"(5:6 error: cannot use type 'STRUCT' as builtin value
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kFunctionReturnType, kPass},
         {Def::kStruct, Use::kInterpolationSampling,
          R"(5:6 error: cannot use type 'STRUCT' as interpolation sampling
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kInterpolationType,
          R"(5:6 error: cannot use type 'STRUCT' as interpolation type
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kMemberType, kPass},
         {Def::kStruct, Use::kTexelFormat, R"(5:6 error: cannot use type 'STRUCT' as texel format
-1:2 note: struct 'STRUCT' declared here)"},
+1:2 note: 'struct STRUCT' declared here)"},
         {Def::kStruct, Use::kValueExpression,
          R"(5:6 error: cannot use type 'STRUCT' as value
-1:2 note: struct 'STRUCT' declared here
+1:2 note: 'struct STRUCT' declared here
 7:8 note: are you missing '()'?)"},
         {Def::kStruct, Use::kVariableType, kPass},
         {Def::kStruct, Use::kUnaryOp,
          R"(5:6 error: cannot use type 'STRUCT' as value
-1:2 note: struct 'STRUCT' declared here
+1:2 note: 'struct STRUCT' declared here
 7:8 note: are you missing '()'?)"},
 
         {Def::kTexelFormat, Use::kAccess,
@@ -704,40 +704,40 @@ INSTANTIATE_TEST_SUITE_P(
          R"(5:6 error: cannot use type 'i32' as value
 7:8 note: are you missing '()'?)"},
 
-        {Def::kVariable, Use::kAccess, R"(5:6 error: cannot use const 'VARIABLE' as access
-1:2 note: const 'VARIABLE' declared here)"},
+        {Def::kVariable, Use::kAccess, R"(5:6 error: cannot use 'const VARIABLE' as access
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kAddressSpace,
-         R"(5:6 error: cannot use const 'VARIABLE' as address space
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as address space
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kBinaryOp, kPass},
         {Def::kVariable, Use::kBuiltinValue,
-         R"(5:6 error: cannot use const 'VARIABLE' as builtin value
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as builtin value
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kCallStmt,
-         R"(5:6 error: cannot use const 'VARIABLE' as call target
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as call target
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kCallExpr,
-         R"(5:6 error: cannot use const 'VARIABLE' as call target
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as call target
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kFunctionReturnType,
-         R"(5:6 error: cannot use const 'VARIABLE' as type
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as type
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kInterpolationSampling,
-         R"(5:6 error: cannot use const 'VARIABLE' as interpolation sampling
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as interpolation sampling
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kInterpolationType,
-         R"(5:6 error: cannot use const 'VARIABLE' as interpolation type
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as interpolation type
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kMemberType,
-         R"(5:6 error: cannot use const 'VARIABLE' as type
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as type
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kTexelFormat,
-         R"(5:6 error: cannot use const 'VARIABLE' as texel format
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as texel format
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kValueExpression, kPass},
         {Def::kVariable, Use::kVariableType,
-         R"(5:6 error: cannot use const 'VARIABLE' as type
-1:2 note: const 'VARIABLE' declared here)"},
+         R"(5:6 error: cannot use 'const VARIABLE' as type
+1:2 note: 'const VARIABLE' declared here)"},
         {Def::kVariable, Use::kUnaryOp, kPass},
     }));
 

@@ -1025,14 +1025,14 @@ class Eval {
                          const Source& source);
 
   private:
-    /// Adds the given error message to the diagnostics
-    void AddError(const std::string& msg, const Source& source) const;
+    /// @returns a new error diagnostic
+    diag::Diagnostic& AddError(const Source& source) const;
 
-    /// Adds the given warning message to the diagnostics
-    void AddWarning(const std::string& msg, const Source& source) const;
+    /// @returns a new warning diagnostic
+    diag::Diagnostic& AddWarning(const Source& source) const;
 
-    /// Adds the given note message to the diagnostics
-    void AddNote(const std::string& msg, const Source& source) const;
+    /// @returns a new note diagnostic
+    diag::Diagnostic& AddNote(const Source& source) const;
 
     /// CreateScalar constructs and returns a constant::Scalar<T>.
     /// @param source the source location

@@ -244,9 +244,8 @@ struct ModuleScopeVarToEntryPointParam::State {
             case core::AddressSpace::kWorkgroup:
                 break;
             case core::AddressSpace::kPushConstant: {
-                ctx.dst->Diagnostics().AddError(
-                    diag::System::Transform,
-                    "unhandled module-scope address space (" + tint::ToString(sc) + ")");
+                ctx.dst->Diagnostics().AddError(diag::System::Transform, Source{})
+                    << "unhandled module-scope address space (" << sc << ")";
                 break;
             }
             default: {

@@ -131,14 +131,14 @@ struct Global {
 /// A map of global name to Global
 using GlobalMap = Hashmap<Symbol, Global*, 16>;
 
-/// Raises an error diagnostic with the given message and source.
-void AddError(diag::List& diagnostics, const std::string& msg, const Source& source) {
-    diagnostics.AddError(diag::System::Resolver, msg, source);
+/// @returns a new error diagnostic with the given source.
+diag::Diagnostic& AddError(diag::List& diagnostics, const Source& source) {
+    return diagnostics.AddError(diag::System::Resolver, source);
 }
 
-/// Raises a note diagnostic with the given message and source.
-void AddNote(diag::List& diagnostics, const std::string& msg, const Source& source) {
-    diagnostics.AddNote(diag::System::Resolver, msg, source);
+/// @returns a new note diagnostic with the given source.
+diag::Diagnostic& AddNote(diag::List& diagnostics, const Source& source) {
+    return diagnostics.AddNote(diag::System::Resolver, source);
 }
 
 /// DependencyScanner is used to traverse a module to build the list of
@@ -335,8 +335,8 @@ class DependencyScanner {
         auto* old = scope_stack_.Set(symbol, node);
         if (old != nullptr && node != old) {
             auto name = symbol.Name();
-            AddError(diagnostics_, "redeclaration of '" + name + "'", node->source);
-            AddNote(diagnostics_, "'" + name + "' previously declared here", old->source);
+            AddError(diagnostics_, node->source) << "redeclaration of '" << name << "'";
+            AddNote(diagnostics_, old->source) << "'" << name << "' previously declared here";
         }
     }
 
@@ -355,7 +355,7 @@ class DependencyScanner {
                 return ast::TraverseAction::Descend;
             });
             if (!ok) {
-                AddError(diagnostics_, "TraverseExpressions failed", next->source);
+                AddError(diagnostics_, next->source) << "TraverseExpressions failed";
                 return;
             }
         }
@@ -768,8 +768,8 @@ struct DependencyAnalysis {
     /// found in `stack`.
     /// @param stack is the global dependency stack that contains a loop.
     void CyclicDependencyFound(const Global* root, VectorRef<const Global*> stack) {
-        StringStream msg;
-        msg << "cyclic dependency found: ";
+        auto& err = AddError(diagnostics_, root->node->source);
+        err << "cyclic dependency found: ";
         constexpr size_t kLoopNotStarted = ~0u;
         size_t loop_start = kLoopNotStarted;
         for (size_t i = 0; i < stack.Length(); i++) {
@@ -778,19 +778,18 @@ struct DependencyAnalysis {
                 loop_start = i;
             }
             if (loop_start != kLoopNotStarted) {
-                msg << "'" << NameOf(e->node) << "' -> ";
+                err << "'" << NameOf(e->node) << "' -> ";
             }
         }
-        msg << "'" << NameOf(root->node) << "'";
-        AddError(diagnostics_, msg.str(), root->node->source);
+        err << "'" << NameOf(root->node) << "'";
+
         for (size_t i = loop_start; i < stack.Length(); i++) {
             auto* from = stack[i];
             auto* to = (i + 1 < stack.Length()) ? stack[i + 1] : stack[loop_start];
             auto info = DepInfoFor(from, to);
-            AddNote(diagnostics_,
-                    KindOf(from->node) + " '" + NameOf(from->node) + "' references " +
-                        KindOf(to->node) + " '" + NameOf(to->node) + "' here",
-                    info.source);
+            AddNote(diagnostics_, info.source)
+                << KindOf(from->node) + " '" << NameOf(from->node) << "' references "
+                << KindOf(to->node) << " '" << NameOf(to->node) << "' here";
         }
     }
 

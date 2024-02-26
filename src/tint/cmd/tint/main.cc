@@ -56,10 +56,11 @@
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/formatter.h"
-#include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/styled_text_printer.h"
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
@@ -789,9 +790,9 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
         auto reparsed_program = tint::wgsl::reader::Parse(source.get(), parser_options);
         if (!reparsed_program.IsValid()) {
-            auto diag_printer = tint::diag::Printer::Create(stderr, true);
+            auto printer = tint::StyledTextPrinter::Create(stderr);
             tint::diag::Formatter diag_formatter;
-            diag_formatter.Format(reparsed_program.Diagnostics(), diag_printer.get());
+            printer->Print(diag_formatter.Format(reparsed_program.Diagnostics()));
             return false;
         }
     }

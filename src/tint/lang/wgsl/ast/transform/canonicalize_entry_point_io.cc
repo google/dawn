@@ -979,8 +979,8 @@ Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program& src,
 
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
-        b.Diagnostics().AddError(diag::System::Transform,
-                                 "missing transform data for " + std::string(TypeInfo().name));
+        b.Diagnostics().AddError(diag::System::Transform, Source{})
+            << "missing transform data for " << TypeInfo().name;
         return resolver::Resolve(b);
     }
 

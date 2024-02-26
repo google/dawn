@@ -32,7 +32,7 @@ namespace tint {
 Failure::Failure() = default;
 
 Failure::Failure(std::string_view err) {
-    reason.AddError(diag::System::Unknown, err, Source{});
+    reason.AddError(diag::System::Unknown, Source{}) << err;
 }
 
 Failure::Failure(diag::Diagnostic diagnostic) : reason(diag::List{std::move(diagnostic)}) {}

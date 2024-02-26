@@ -39,7 +39,7 @@ namespace {
 using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, InvalidProgram) {
-    Diagnostics().AddError(diag::System::Writer, "make the program invalid");
+    Diagnostics().AddError(diag::System::Writer, Source{}) << "make the program invalid";
     ASSERT_FALSE(IsValid());
     auto program = resolver::Resolve(*this);
     ASSERT_FALSE(program.IsValid());

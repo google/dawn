@@ -143,7 +143,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_LetIdentExpr) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of let 'z'");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of 'let z'");
 }
 
 TEST_F(ResolverCallValidationTest,
@@ -519,11 +519,11 @@ TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: no matching call to min<i32>(abstract-int, abstract-int)
+              R"(12:34 error: no matching call to 'min<i32>(abstract-int, abstract-int)'
 
 2 candidate functions:
-  min(T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
-  min(vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  'min(T, T) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+  'min(vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
 )");
 }
 

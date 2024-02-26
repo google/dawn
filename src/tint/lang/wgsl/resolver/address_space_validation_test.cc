@@ -56,7 +56,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_NoAddressSpace_Fail) {
     Alias("g", ty(Source{{12, 34}}, "ptr", ty.f32()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'ptr' requires at least 2 template arguments");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'ptr' requires at least 2 template arguments)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_FunctionAddressSpace_Fail) {

@@ -51,7 +51,7 @@ Program ParseAndBuild(std::string spirv) {
     auto p = std::make_unique<ASTParser>(test::Assemble(preamble + spirv));
     if (!p->BuildAndParseInternalModule()) {
         ProgramBuilder builder;
-        builder.Diagnostics().AddError(diag::System::Reader, p->error());
+        builder.Diagnostics().AddError(diag::System::Reader, Source{}) << p->error();
         return Program(std::move(builder));
     }
     return p->Program();

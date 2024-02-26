@@ -702,8 +702,8 @@ bool ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
     auto* dst_el_type = dst_type->DeepestElement();
 
     if (!dst_el_type->is_integer_scalar() && !dst_el_type->is_float_scalar()) {
-        diagnostics_.AddError(diag::System::Writer,
-                              "Unable to do bitcast to type " + dst_el_type->FriendlyName());
+        diagnostics_.AddError(diag::System::Writer, Source{})
+            << "Unable to do bitcast to type " << dst_el_type->FriendlyName();
         return false;
     }
 
@@ -2450,8 +2450,7 @@ bool ASTPrinter::EmitDataPackingCall(StringStream& out,
                     break;
                 }
                 default:
-                    diagnostics_.AddError(diag::System::Writer,
-                                          "Internal error: unhandled data packing builtin");
+                    TINT_ICE() << " unhandled data packing builtin";
                     return false;
             }
 
@@ -2517,8 +2516,7 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                     Line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
                     break;
                 default:
-                    diagnostics_.AddError(diag::System::Writer,
-                                          "Internal error: unhandled data packing builtin");
+                    TINT_ICE() << "unhandled data packing builtin";
                     return false;
             }
 
@@ -2579,28 +2577,27 @@ bool ASTPrinter::EmitPacked4x8IntegerDotProductBuiltinCall(StringStream& out,
             return false;
     }
 
-    return CallBuiltinHelper(
-        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            std::string functionName;
-            switch (builtin->Fn()) {
-                case wgsl::BuiltinFn::kDot4I8Packed:
-                    Line(b) << "int accumulator = 0;";
-                    functionName = "dot4add_i8packed";
-                    break;
-                case wgsl::BuiltinFn::kDot4U8Packed:
-                    Line(b) << "uint accumulator = 0u;";
-                    functionName = "dot4add_u8packed";
-                    break;
-                default:
-                    diagnostics_.AddError(diag::System::Writer,
-                                          "Internal error: unhandled DP4a builtin");
-                    return false;
-            }
-            Line(b) << "return " << functionName << "(" << params[0] << ", " << params[1]
-                    << ", accumulator);";
+    return CallBuiltinHelper(out, expr, builtin,
+                             [&](TextBuffer* b, const std::vector<std::string>& params) {
+                                 std::string functionName;
+                                 switch (builtin->Fn()) {
+                                     case wgsl::BuiltinFn::kDot4I8Packed:
+                                         Line(b) << "int accumulator = 0;";
+                                         functionName = "dot4add_i8packed";
+                                         break;
+                                     case wgsl::BuiltinFn::kDot4U8Packed:
+                                         Line(b) << "uint accumulator = 0u;";
+                                         functionName = "dot4add_u8packed";
+                                         break;
+                                     default:
+                                         TINT_ICE() << "Internal error: unhandled DP4a builtin";
+                                         return false;
+                                 }
+                                 Line(b) << "return " << functionName << "(" << params[0] << ", "
+                                         << params[1] << ", accumulator);";
 
-            return true;
-        });
+                                 return true;
+                             });
 }
 
 bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builtin) {
@@ -2932,9 +2929,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             out << "[";
             break;
         default:
-            diagnostics_.AddError(diag::System::Writer,
-                                  "Internal compiler error: Unhandled texture builtin '" +
-                                      std::string(builtin->str()) + "'");
+            TINT_ICE() << "Unhandled texture builtin '" << builtin << "'";
             return false;
     }
 
@@ -3120,8 +3115,8 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
         default:
-            diagnostics_.AddError(diag::System::Writer,
-                                  "Unknown builtin method: " + std::string(builtin->str()));
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "Unknown builtin method: " << builtin->str();
     }
 
     return "";
@@ -3392,9 +3387,8 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                 case core::AddressSpace::kWorkgroup:
                     return EmitWorkgroupVariable(sem);
                 case core::AddressSpace::kPushConstant:
-                    diagnostics_.AddError(
-                        diag::System::Writer,
-                        "unhandled address space " + tint::ToString(sem->AddressSpace()));
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << "unhandled address space " << sem->AddressSpace();
                     return false;
                 default: {
                     TINT_ICE() << "unhandled address space " << sem->AddressSpace();
@@ -3404,9 +3398,9 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
         },
         [&](const ast::Override*) {
             // Override is removed with SubstituteOverride
-            diagnostics_.AddError(diag::System::Writer,
-                                  "override-expressions should have been removed with the "
-                                  "SubstituteOverride transform");
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "override-expressions should have been removed with the SubstituteOverride "
+                   "transform";
             return false;
         },
         [&](const ast::Const*) {
@@ -3629,10 +3623,9 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                     out << ", ";
                 }
                 if (!wgsize[i].has_value()) {
-                    diagnostics_.AddError(
-                        diag::System::Writer,
-                        "override-expressions should have been removed with the SubstituteOverride "
-                        "transform");
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << "override-expressions should have been removed with the "
+                           "SubstituteOverride transform";
                     return false;
                 }
                 out << std::to_string(wgsize[i].value());
@@ -3784,8 +3777,8 @@ bool ASTPrinter::EmitConstant(StringStream& out,
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.AddError(diag::System::Writer,
-                                      core::type::Array::kErrExpectedConstantCount);
+                diagnostics_.AddError(diag::System::Writer, Source{})
+                    << core::type::Array::kErrExpectedConstantCount;
                 return false;
             }
 
@@ -3880,7 +3873,8 @@ bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
                     out << "u";
                     return true;
             }
-            diagnostics_.AddError(diag::System::Writer, "unknown integer literal suffix type");
+            diagnostics_.AddError(diag::System::Writer, Source{})
+                << "unknown integer literal suffix type";
             return false;
         },  //
         TINT_ICE_ON_NO_MATCH);
@@ -4347,8 +4341,8 @@ bool ASTPrinter::EmitType(StringStream& out,
                 }
                 const auto count = arr->ConstantCount();
                 if (!count) {
-                    diagnostics_.AddError(diag::System::Writer,
-                                          core::type::Array::kErrExpectedConstantCount);
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << core::type::Array::kErrExpectedConstantCount;
                     return false;
                 }
 
@@ -4587,7 +4581,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             if (auto builtin = attributes.builtin) {
                 auto name = builtin_to_attribute(builtin.value());
                 if (name.empty()) {
-                    diagnostics_.AddError(diag::System::Writer, "unsupported builtin");
+                    diagnostics_.AddError(diag::System::Writer, Source{}) << "unsupported builtin";
                     return false;
                 }
                 post += " : " + name;
@@ -4595,7 +4589,8 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             if (auto interpolation = attributes.interpolation) {
                 auto mod = interpolation_to_modifiers(interpolation->type, interpolation->sampling);
                 if (mod.empty()) {
-                    diagnostics_.AddError(diag::System::Writer, "unsupported interpolation");
+                    diagnostics_.AddError(diag::System::Writer, Source{})
+                        << "unsupported interpolation";
                     return false;
                 }
                 pre += mod;

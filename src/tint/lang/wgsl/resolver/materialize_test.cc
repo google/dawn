@@ -440,16 +440,16 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             std::string expect;
             switch (method) {
                 case Method::kBuiltinArg:
-                    expect = "error: no matching call to min(" + data.target_type_name + ", " +
-                             data.abstract_type_name + ")";
+                    expect = "error: no matching call to 'min(" + data.target_type_name + ", " +
+                             data.abstract_type_name + ")'";
                     break;
                 case Method::kBinaryOp:
-                    expect = "error: no matching overload for operator + (" +
-                             data.target_type_name + ", " + data.abstract_type_name + ")";
+                    expect = "error: no matching overload for 'operator + (" +
+                             data.target_type_name + ", " + data.abstract_type_name + ")'";
                     break;
                 case Method::kCompoundAssign:
-                    expect = "error: no matching overload for operator += (" +
-                             data.target_type_name + ", " + data.abstract_type_name + ")";
+                    expect = "error: no matching overload for 'operator += (" +
+                             data.target_type_name + ", " + data.abstract_type_name + ")'";
                     break;
                 default:
                     expect = "error: cannot convert value of type '" + data.abstract_type_name +

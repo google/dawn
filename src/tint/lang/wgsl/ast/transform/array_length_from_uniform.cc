@@ -82,10 +82,9 @@ struct ArrayLengthFromUniform::State {
     ApplyResult Run() {
         auto* cfg = inputs.Get<Config>();
         if (cfg == nullptr) {
-            b.Diagnostics().AddError(
-                diag::System::Transform,
-                "missing transform data for " +
-                    std::string(tint::TypeInfo::Of<ArrayLengthFromUniform>().name));
+            b.Diagnostics().AddError(diag::System::Transform, Source{})
+                << "missing transform data for "
+                << tint::TypeInfo::Of<ArrayLengthFromUniform>().name;
             return resolver::Resolve(b);
         }
 

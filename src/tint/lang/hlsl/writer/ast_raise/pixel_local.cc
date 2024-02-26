@@ -453,9 +453,8 @@ struct PixelLocal::State {
     uint32_t ROVRegisterIndex(uint32_t field_index) {
         auto idx = cfg.pls_member_to_rov_reg.Get(field_index);
         if (TINT_UNLIKELY(!idx)) {
-            b.Diagnostics().AddError(diag::System::Transform,
-                                     "PixelLocal::Config::attachments missing entry for field " +
-                                         std::to_string(field_index));
+            b.Diagnostics().AddError(diag::System::Transform, Source{})
+                << "PixelLocal::Config::attachments missing entry for field " << field_index;
             return 0;
         }
         return *idx;
@@ -466,9 +465,8 @@ struct PixelLocal::State {
     core::TexelFormat ROVTexelFormat(uint32_t field_index) {
         auto format = cfg.pls_member_to_rov_format.Get(field_index);
         if (TINT_UNLIKELY(!format)) {
-            b.Diagnostics().AddError(diag::System::Transform,
-                                     "PixelLocal::Config::attachments missing entry for field " +
-                                         std::to_string(field_index));
+            b.Diagnostics().AddError(diag::System::Transform, Source{})
+                << "PixelLocal::Config::attachments missing entry for field " << field_index;
             return core::TexelFormat::kUndefined;
         }
         return *format;
@@ -485,8 +483,8 @@ ast::transform::Transform::ApplyResult PixelLocal::Apply(const Program& src,
     auto* cfg = inputs.Get<Config>();
     if (!cfg) {
         ProgramBuilder b;
-        b.Diagnostics().AddError(diag::System::Transform,
-                                 "missing transform data for " + std::string(TypeInfo().name));
+        b.Diagnostics().AddError(diag::System::Transform, Source{})
+            << "missing transform data for " << TypeInfo().name;
         return resolver::Resolve(b);
     }
 
