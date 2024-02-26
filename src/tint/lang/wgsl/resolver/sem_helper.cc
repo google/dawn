@@ -72,7 +72,7 @@ sem::TypeExpression* SemHelper::AsTypeExpression(sem::Expression* expr) const {
     if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
         AddError(expr->Declaration()->source.End())
             << "expected " << style::Code << "<" << style::Plain << " for " << style::Type
-            << incomplete->builtin << style::Plain;
+            << incomplete->builtin;
         return nullptr;
     }
 
@@ -95,7 +95,7 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
                 [&](const ast::Parameter*) { text << "parameter"; },                  //
                 [&](const ast::Override*) { text << style::Keyword << "override"; },  //
                 [&](Default) { text << "variable"; });
-            text << " " << style::Variable << name << style::Plain;
+            text << " " << style::Variable << name;
         },
         [&](const sem::ValueExpression* val_expr) {
             text << "value of type " << style::Type << val_expr->Type()->FriendlyName();

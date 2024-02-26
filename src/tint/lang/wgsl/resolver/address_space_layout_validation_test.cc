@@ -59,7 +59,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32;
@@ -120,7 +120,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_S
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: the offset of a struct member of type 'Inner' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
+        R"(56:78 error: the offset of a struct member of type 'Inner' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting '@align(16)' on this member
 34:56 note: see layout of struct:
 /*           align(4) size(8) */ struct Outer {
 /* offset(0) align(4) size(4) */   scalar : f32;
@@ -189,7 +189,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
+        R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting '@align(16)' on this member
 12:34 note: see layout of struct:
 /*             align(4) size(164) */ struct Outer {
 /* offset(  0) align(4) size(  4) */   scalar : f32;
@@ -254,7 +254,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 8 bytes between 'inner' and 'scalar'. Consider setting @align(16) on this member
+        R"(78:90 error: 'uniform' storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 8 bytes between 'inner' and 'scalar'. Consider setting '@align(16)' on this member
 34:56 note: see layout of struct:
 /*            align(4) size(12) */ struct Outer {
 /* offset( 0) align(1) size( 5) */   inner : Inner;
@@ -306,7 +306,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 20 bytes between 'inner' and 'scalar'. Consider setting @align(16) on this member
+        R"(78:90 error: 'uniform' storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 20 bytes between 'inner' and 'scalar'. Consider setting '@align(16)' on this member
 34:56 note: see layout of struct:
 /*            align(4) size(24) */ struct Outer {
 /* offset( 0) align(4) size(20) */   inner : Inner;
@@ -424,7 +424,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
+        R"(34:56 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
 12:34 note: see layout of struct:
 /*            align(4) size(44) */ struct Outer {
 /* offset( 0) align(4) size(40) */   inner : array<f32, 10>;
@@ -458,7 +458,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'vec2<f32>' has a stride of 8 bytes. Consider using a vec4 instead.
+        R"(34:56 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'vec2<f32>' has a stride of 8 bytes. Consider using a vec4 instead.
 12:34 note: see layout of struct:
 /*            align(8) size(88) */ struct Outer {
 /* offset( 0) align(8) size(80) */   inner : array<vec2<f32>, 10>;
@@ -501,7 +501,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'ArrayElem' has a stride of 8 bytes. Consider using the @size attribute on the last struct member.
+        R"(34:56 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'ArrayElem' has a stride of 8 bytes. Consider using the '@size' attribute on the last struct member.
 12:34 note: see layout of struct:
 /*            align(4) size(84) */ struct Outer {
 /* offset( 0) align(4) size(80) */   inner : array<ArrayElem, 10>;
@@ -519,7 +519,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(78:90 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.)");
+        R"(78:90 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.)");
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_NestedArray) {
@@ -541,7 +541,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
+        R"(34:56 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'f32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
 12:34 note: see layout of struct:
 /*            align(4) size(64) */ struct Outer {
 /* offset( 0) align(4) size(64) */   inner : array<array<f32, 4>, 4>;
@@ -591,7 +591,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32;

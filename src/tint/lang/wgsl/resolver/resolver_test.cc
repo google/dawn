@@ -2533,7 +2533,7 @@ TEST_F(ResolverTest, MaxNumStructMembers_Invalid) {
     }
     Structure(Source{{12, 34}}, "S", std::move(members));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct 'S' has 16384 members, maximum is 16383");
+    EXPECT_EQ(r()->error(), "12:34 error: 'struct S' has 16384 members, maximum is 16383");
 }
 
 TEST_F(ResolverTest, MaxNumStructMembers_WithIgnoreStructMemberLimit_Valid) {
@@ -2574,7 +2574,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Structs_Invalid) {
         s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct 'S254' has nesting depth of 256, maximum is 255");
+    EXPECT_EQ(r()->error(), "12:34 error: 'struct S254' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithVector_Valid) {
@@ -2596,7 +2596,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithVector_Invalid) {
         s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct 'S253' has nesting depth of 256, maximum is 255");
+    EXPECT_EQ(r()->error(), "12:34 error: 'struct S253' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithMatrix_Valid) {
@@ -2618,7 +2618,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithMatrix_Invalid) {
         s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct 'S252' has nesting depth of 256, maximum is 255");
+    EXPECT_EQ(r()->error(), "12:34 error: 'struct S252' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Arrays_Valid) {
@@ -2714,7 +2714,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsOfArray_Invalid) {
         s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: struct 'S251' has nesting depth of 256, maximum is 255");
+    EXPECT_EQ(r()->error(), "12:34 error: 'struct S251' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfStruct_Valid) {

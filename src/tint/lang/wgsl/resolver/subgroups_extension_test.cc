@@ -48,7 +48,7 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupSizeAttribWithoutExtensionErro
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: use of @builtin(subgroup_size) attribute requires enabling extension 'chromium_experimental_subgroups')");
+        R"(error: use of '@builtin(subgroup_size)' attribute requires enabling extension 'chromium_experimental_subgroups')");
 }
 
 // Using a subgroup_invocation_id builtin attribute without chromium_experimental_subgroups enabled
@@ -62,7 +62,7 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupInvocationIdAttribWithoutExten
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: use of @builtin(subgroup_invocation_id) attribute requires enabling extension 'chromium_experimental_subgroups')");
+        R"(error: use of '@builtin(subgroup_invocation_id)' attribute requires enabling extension 'chromium_experimental_subgroups')");
 }
 
 // Using an i32 for a subgroup_size builtin input should fail.
@@ -74,7 +74,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeI32Error) {
               });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: store type of @builtin(subgroup_size) must be 'u32'");
+    EXPECT_EQ(r()->error(), "error: store type of '@builtin(subgroup_size)' must be 'u32'");
 }
 
 // Using an i32 for a subgroup_invocation_id builtin input should fail.
@@ -86,7 +86,8 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdI32Error) {
               });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: store type of @builtin(subgroup_invocation_id) must be 'u32'");
+    EXPECT_EQ(r()->error(),
+              "error: store type of '@builtin(subgroup_invocation_id)' must be 'u32'");
 }
 
 // Using builtin(subgroup_size) for anything other than a compute shader input should fail.
@@ -98,7 +99,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeFragmentShader) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: @builtin(subgroup_size) is only valid as a compute shader input");
+              "error: '@builtin(subgroup_size)' is only valid as a compute shader input");
 }
 
 // Using builtin(subgroup_invocation_id) for anything other than a compute shader input should fail.
@@ -110,7 +111,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdFragmentShader) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: @builtin(subgroup_invocation_id) is only valid as a compute shader input");
+              "error: '@builtin(subgroup_invocation_id)' is only valid as a compute shader input");
 }
 
 }  // namespace

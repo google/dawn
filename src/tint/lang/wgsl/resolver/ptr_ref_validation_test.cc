@@ -306,7 +306,7 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: cannot initialize let of type "
+              "12:34 error: cannot initialize 'let' of type "
               "'ptr<storage, i32, read>' with value of type "
               "'ptr<storage, i32, read_write>'");
 }

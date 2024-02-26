@@ -384,7 +384,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {
     GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), "size"), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -396,7 +396,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InArray) {
               core::AddressSpace::kWorkgroup);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -409,7 +409,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InStruct) {
     Structure("S", Vector{Member("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))});
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -425,7 +425,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Explicit)
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -441,7 +441,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Explicit)
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -459,7 +459,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Implicit)
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 
@@ -477,7 +477,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Implicit)
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array with an 'override' element count can only be used as the store "
+              "12:34 error: 'array' with an 'override' element count can only be used as the store "
               "type of a 'var<workgroup>'");
 }
 

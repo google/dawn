@@ -205,9 +205,9 @@ StyledText CallSignature(std::string_view intrinsic_name,
     }
     out << "(";
     PrintTypeList(out, args);
-    out << ")" << style::Plain;
+    out << ")";
 
-    return out;
+    return out << style::Plain;
 }
 
 Result<Overload, StyledText> MatchIntrinsic(Context& context,

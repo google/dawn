@@ -146,8 +146,8 @@ TEST_P(ResolverBuiltinsStageTest, All_input) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         StringStream err;
-        err << "12:34 error: @builtin(" << params.builtin << ")";
-        err << " cannot be used for " << params.stage << " shader input";
+        err << "12:34 error: '@builtin(" << params.builtin << ")' cannot be used for "
+            << params.stage << " shader input";
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(), err.str());
     }
@@ -180,7 +180,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: @builtin(frag_depth) cannot be used for fragment shader input");
+              "12:34 error: '@builtin(frag_depth)' cannot be used for fragment shader input");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
@@ -214,7 +214,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: @builtin(frag_depth) cannot be used for fragment shader input
+              R"(12:34 error: '@builtin(frag_depth)' cannot be used for fragment shader input
 note: while analyzing entry point 'fragShader')");
 }
 
@@ -271,7 +271,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(position)' must be 'vec4<f32>'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
@@ -287,7 +287,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(position)' must be 'vec4<f32>'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionIsVec4h_Fail) {
@@ -304,7 +304,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionIsVec4h_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(position)' must be 'vec4<f32>'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
@@ -333,7 +333,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(frag_depth) must be 'f32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(frag_depth)' must be 'f32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
@@ -362,7 +362,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(sample_mask) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(sample_mask)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
@@ -377,7 +377,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(sample_mask) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(sample_mask)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
@@ -403,7 +403,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
              Location(0_a),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(sample_mask) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(sample_mask)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
@@ -432,7 +432,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(sample_index) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(sample_index)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
@@ -458,7 +458,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
              Location(0_a),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(sample_index) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(sample_index)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
@@ -484,7 +484,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
              Location(0_a),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(position) must be 'vec4<f32>'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(position)' must be 'vec4<f32>'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
@@ -503,7 +503,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
              Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(frag_depth) must be 'f32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(frag_depth)' must be 'f32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
@@ -528,7 +528,7 @@ TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
              Builtin(core::BuiltinValue::kPosition),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(vertex_index) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(vertex_index)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
@@ -553,7 +553,7 @@ TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
              Builtin(core::BuiltinValue::kPosition),
          });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(instance_index) must be 'u32'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(instance_index)' must be 'u32'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
@@ -673,8 +673,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_WorkGroupIdNotVec3U32) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: store type of @builtin(workgroup_id) must be "
-              "'vec3<u32>'");
+              R"(12:34 error: store type of '@builtin(workgroup_id)' must be 'vec3<u32>')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
@@ -688,8 +687,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: store type of @builtin(num_workgroups) must be "
-              "'vec3<u32>'");
+              R"(12:34 error: store type of '@builtin(num_workgroups)' must be 'vec3<u32>')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_GlobalInvocationNotVec3U32) {
@@ -703,8 +701,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_GlobalInvocationNotVec3U32
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: store type of @builtin(global_invocation_id) must be "
-              "'vec3<u32>'");
+              R"(12:34 error: store type of '@builtin(global_invocation_id)' must be 'vec3<u32>')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationIndexNotU32) {
@@ -718,8 +715,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationIndexNotU32
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: store type of @builtin(local_invocation_index) must be "
-              "'u32'");
+              R"(12:34 error: store type of '@builtin(local_invocation_index)' must be 'u32')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationNotVec3U32) {
@@ -733,8 +729,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationNotVec3U32)
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: store type of @builtin(local_invocation_id) must be "
-              "'vec3<u32>'");
+              R"(12:34 error: store type of '@builtin(local_invocation_id)' must be 'vec3<u32>')");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
@@ -800,7 +795,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(front_facing) must be 'bool'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(front_facing)' must be 'bool'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
@@ -829,7 +824,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(front_facing) must be 'bool'");
+    EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(front_facing)' must be 'bool'");
 }
 
 // TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin

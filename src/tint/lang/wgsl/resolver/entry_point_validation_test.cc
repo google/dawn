@@ -119,7 +119,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
-13:43 note: previously consumed @location)");
+13:43 note: previously consumed '@location')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
@@ -171,7 +171,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
-13:43 note: previously consumed @location
+13:43 note: previously consumed '@location'
 12:34 note: while analyzing entry point 'main')");
 }
 
@@ -227,7 +227,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: @builtin(frag_depth) appears multiple times as pipeline output
+              R"(12:34 error: '@builtin(frag_depth)' appears multiple times as pipeline output
 12:34 note: while analyzing entry point 'main')");
 }
 
@@ -286,7 +286,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
-13:43 note: previously consumed @location)");
+13:43 note: previously consumed '@location')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
@@ -338,7 +338,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMultipleAttribut
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
-13:43 note: previously consumed @location
+13:43 note: previously consumed '@location'
 12:34 note: while analyzing entry point 'main')");
 }
 
@@ -393,7 +393,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: @builtin(sample_index) appears multiple times as pipeline input");
+              "12:34 error: '@builtin(sample_index)' appears multiple times as pipeline input");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
@@ -427,7 +427,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: @builtin(sample_index) appears multiple times as pipeline input
+              R"(12:34 error: '@builtin(sample_index)' appears multiple times as pipeline input
 12:34 note: while analyzing entry point 'main')");
 }
 
@@ -772,8 +772,8 @@ TEST_F(LocationAttributeTests, BadType_Input_bool) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot apply @location to declaration of type 'bool'
-34:56 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(12:34 error: cannot apply '@location' to declaration of type 'bool'
+34:56 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadType_Output_Array) {
@@ -793,8 +793,8 @@ TEST_F(LocationAttributeTests, BadType_Output_Array) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot apply @location to declaration of type 'array<f32, 2>'
-34:56 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(12:34 error: cannot apply '@location' to declaration of type 'array<f32, 2>'
+34:56 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadType_Input_Struct) {
@@ -821,8 +821,8 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot apply @location to declaration of type 'Input'
-13:43 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(12:34 error: cannot apply '@location' to declaration of type 'Input'
+13:43 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
@@ -879,8 +879,8 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(13:43 error: cannot apply @location to declaration of type 'array<f32>'
-note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(13:43 error: cannot apply '@location' to declaration of type 'array<f32>'
+note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadMemberType_Input) {
@@ -906,8 +906,8 @@ TEST_F(LocationAttributeTests, BadMemberType_Input) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(34:56 error: cannot apply @location to declaration of type 'array<i32>'
-12:34 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(34:56 error: cannot apply '@location' to declaration of type 'array<i32>'
+12:34 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadMemberType_Output) {
@@ -931,8 +931,8 @@ TEST_F(LocationAttributeTests, BadMemberType_Output) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(34:56 error: cannot apply @location to declaration of type 'atomic<i32>'
-12:34 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(34:56 error: cannot apply '@location' to declaration of type 'atomic<i32>'
+12:34 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, BadMemberType_Unused) {
@@ -946,8 +946,8 @@ TEST_F(LocationAttributeTests, BadMemberType_Unused) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(34:56 error: cannot apply @location to declaration of type 'mat3x2<f32>'
-12:34 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(34:56 error: cannot apply '@location' to declaration of type 'mat3x2<f32>'
+12:34 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
@@ -998,8 +998,8 @@ TEST_F(LocationAttributeTests, ReturnType_Struct) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot apply @location to declaration of type 'Output'
-13:43 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot apply '@location' to declaration of type 'Output'
+13:43 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
@@ -1054,8 +1054,8 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(13:43 error: cannot apply @location to declaration of type 'array<f32>'
-12:34 note: @location must only be applied to declarations of numeric scalar or numeric vector type)");
+              R"(13:43 error: cannot apply '@location' to declaration of type 'array<f32>'
+12:34 note: '@location' must only be applied to declarations of numeric scalar or numeric vector type)");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
@@ -1072,7 +1072,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: @location cannot be used by compute shaders)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@location' cannot be used by compute shaders)");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
@@ -1087,7 +1087,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: @location cannot be used by compute shaders)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@location' cannot be used by compute shaders)");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
@@ -1106,9 +1106,8 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: @location cannot be used by compute shaders\n"
-              "56:78 note: while analyzing entry point 'main'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@location' cannot be used by compute shaders
+56:78 note: while analyzing entry point 'main')");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
@@ -1125,9 +1124,8 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: @location cannot be used by compute shaders\n"
-              "56:78 note: while analyzing entry point 'main'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@location' cannot be used by compute shaders
+56:78 note: while analyzing entry point 'main')");
 }
 
 TEST_F(LocationAttributeTests, Duplicate_input) {
@@ -1153,7 +1151,7 @@ TEST_F(LocationAttributeTests, Duplicate_input) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: @location(1) appears multiple times)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: '@location(1)' appears multiple times)");
 }
 
 TEST_F(LocationAttributeTests, Duplicate_struct) {
@@ -1186,7 +1184,7 @@ TEST_F(LocationAttributeTests, Duplicate_struct) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(34:56 error: @location(1) appears multiple times
+              R"(34:56 error: '@location(1)' appears multiple times
 12:34 note: while analyzing entry point 'main')");
 }
 

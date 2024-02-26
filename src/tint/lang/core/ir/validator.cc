@@ -72,6 +72,7 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/text_style.h"
 
 /// If set to 1 then the Tint will dump the IR when validating.
 #define TINT_DUMP_IR_WHEN_VALIDATING 0
@@ -307,8 +308,8 @@ Result<SuccessType> Validator::Run() {
 
     for (auto& func : mod_.functions) {
         if (!all_functions_.Add(func.Get())) {
-            AddError(Source{}) << "function '" << Name(func.Get())
-                               << "' added to module multiple times";
+            AddError(Source{}) << "function " << style::Function << Name(func.Get()) << style::Plain
+                               << " added to module multiple times";
         }
     }
 

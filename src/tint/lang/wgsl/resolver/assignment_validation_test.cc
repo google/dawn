@@ -365,10 +365,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_NonConstructibleStruct_Fa
     WrapInFunction(Assign(Phony(), Expr(Source{{12, 34}}, "s")));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot assign 'S' to '_'. "
-              "'_' can only be assigned a constructible, pointer, texture or "
-              "sampler type");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot assign 'S' to '_'. '_' can only be assigned a constructible, pointer, texture or sampler type)");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
@@ -387,10 +386,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
     WrapInFunction(Assign(Phony(), MemberAccessor(Source{{12, 34}}, "s", "arr")));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot assign 'array<i32>' to '_'. "
-              "'_' can only be assigned a constructible, pointer, texture or sampler "
-              "type");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot assign 'array<i32>' to '_'. '_' can only be assigned a constructible, pointer, texture or sampler type)");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {

@@ -572,7 +572,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Dot4I8Packed_FeatureDis
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'dot4I8Packed' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -601,7 +601,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Dot4U8Packed_FeatureDis
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'dot4U8Packed' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -628,7 +628,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xI8_FeatureDisallo
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xI8' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -655,7 +655,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xU8_FeatureDisallo
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xU8' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -682,7 +682,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xI8Clamp_FeatureDi
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xI8Clamp' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -709,7 +709,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Pack4xU8Clamp_FeatureDi
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'pack4xU8Clamp' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -736,7 +736,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Unpack4xI8_FeatureDisal
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'unpack4xI8' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -763,7 +763,7 @@ TEST_F(ResolverPacked4x8IntegerDotProductValidationTest, Unpack4xU8_FeatureDisal
     EXPECT_FALSE(resolver.Resolve());
     EXPECT_EQ(resolver.error(),
               "12:34 error: built-in function 'unpack4xU8' requires the "
-              "packed_4x8_integer_dot_product language feature, which is not allowed in the "
+              "'packed_4x8_integer_dot_product' language feature, which is not allowed in the "
               "current environment");
 }
 
@@ -990,10 +990,9 @@ TEST_F(ResolverBuiltinValidationTest, TextureBarrier_FeatureDisallowed) {
 
     Resolver resolver{this, wgsl::AllowedFeatures{}};
     EXPECT_FALSE(resolver.Resolve());
-    EXPECT_EQ(resolver.error(),
-              "12:34 error: built-in function 'textureBarrier' requires the "
-              "readonly_and_readwrite_storage_textures language feature, which is not allowed in "
-              "the current environment");
+    EXPECT_EQ(
+        resolver.error(),
+        R"(12:34 error: built-in function 'textureBarrier' requires the 'readonly_and_readwrite_storage_textures' language feature, which is not allowed in the current environment)");
 }
 
 }  // namespace

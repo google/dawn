@@ -354,8 +354,8 @@ TEST_P(ResolverPixelLocalExtensionTest_Types, Struct) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: struct members used in the 'pixel_local' address space can only be of the type 'i32', 'u32' or 'f32'
-56:78 note: struct 'S' used in the 'pixel_local' address space here)");
+            R"(12:34 error: 'struct' members used in the 'pixel_local' address space can only be of the type 'i32', 'u32' or 'f32'
+56:78 note: 'struct S' used in the 'pixel_local' address space here)");
     }
 }
 

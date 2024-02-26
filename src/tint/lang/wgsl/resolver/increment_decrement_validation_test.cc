@@ -166,7 +166,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Constant) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot modify 'let'
-12:34 note: 'a' is declared here:)");
+12:34 note: 'let a' declared here)");
 }
 
 TEST_F(ResolverIncrementDecrementValidationTest, Parameter) {
@@ -182,7 +182,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Parameter) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot modify function parameter
-12:34 note: 'a' is declared here:)");
+12:34 note: parameter 'a' declared here)");
 }
 
 TEST_F(ResolverIncrementDecrementValidationTest, ReturnValue) {

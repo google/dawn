@@ -50,7 +50,7 @@ TEST_F(DualSourceBlendingExtensionTest, UseBlendSrcAttribWithoutExtensionError) 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: use of @blend_src requires enabling extension 'chromium_internal_dual_source_blending')");
+        R"(12:34 error: use of '@blend_src' requires enabling extension 'chromium_internal_dual_source_blending')");
 }
 
 class DualSourceBlendingExtensionTests : public ResolverTest {
@@ -68,7 +68,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcF32Error) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @location must be an i32 or u32 value");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_srci32' or 'u32' value");
 }
 
 // Using a floating point number as an index value should fail.
@@ -78,7 +78,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcFloatValueError) {
                                    Vector{Location(0_a), BlendSrc(Source{{12, 34}}, 1.0_a)}),
                         });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @location must be an i32 or u32 value");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_srci32' or 'u32' value");
 }
 
 // Using a number less than zero as an index value should fail.
@@ -89,7 +89,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcNegativeValue) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src value must be zero or one");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be zero or one");
 }
 
 // Using a number greater than one as an index value should fail.
@@ -100,7 +100,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcValueAboveOne) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src value must be zero or one");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be zero or one");
 }
 
 // Using an index value at the same location multiple times should fail.
@@ -112,7 +112,7 @@ TEST_F(DualSourceBlendingExtensionTests, DuplicateBlendSrces) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @location(0) @blend_src(0) appears multiple times");
+    EXPECT_EQ(r()->error(), "12:34 error: '@location(0) @blend_src(0)' appears multiple times");
 }
 
 // Using the index attribute without a location attribute should fail.
@@ -123,7 +123,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithMissingLocationAttribute_St
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src can only be used with @location(0)");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
 // Using the index attribute without a location attribute should fail.
@@ -139,7 +139,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithMissingLocationAttribute_Re
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src can only be used with @location(0)");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
 // Using an index attribute on a struct member should pass.
@@ -172,7 +172,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_Struct) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src can only be used with @location(0)");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
 // Using the index attribute with a non-zero location should fail.
@@ -188,7 +188,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_ReturnValue
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: @blend_src can only be used with @location(0)");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
 TEST_F(DualSourceBlendingExtensionTests, NoNonZeroCollisionsBetweenInAndOut) {
@@ -253,8 +253,8 @@ TEST_F(DualSourceBlendingExtensionTests,
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
-56:78 note: use of @blend_src here
+        R"(12:34 error: use of '@blend_src' requires all the output '@location' attributes of the entry point to be paired with a '@blend_src' attribute
+56:78 note: use of '@blend_src' here
 note: while analyzing entry point 'F')");
 }
 
@@ -286,8 +286,8 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(3:4 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
-1:2 note: use of @blend_src here
+        R"(3:4 error: use of '@blend_src' requires all the output '@location' attributes of the entry point to be paired with a '@blend_src' attribute
+1:2 note: use of '@blend_src' here
 note: while analyzing entry point 'F')");
 }
 
@@ -311,8 +311,8 @@ TEST_P(DualSourceBlendingExtensionTestWithParams,
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(1:2 error: use of @blend_src requires all the output @location attributes of the entry point to be paired with a @blend_src attribute
-note: use of @blend_src here
+        R"(1:2 error: use of '@blend_src' requires all the output '@location' attributes of the entry point to be paired with a '@blend_src' attribute
+note: use of '@blend_src' here
 5:6 note: while analyzing entry point 'F')");
 }
 

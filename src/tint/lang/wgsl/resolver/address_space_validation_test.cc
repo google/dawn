@@ -171,7 +171,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Bool) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -183,7 +183,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_Bool) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 note: while instantiating ptr<storage, bool, read>)");
 }
 
@@ -198,7 +198,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_BoolAlias) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -212,7 +212,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_Storage_BoolAlias) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 note: while instantiating ptr<storage, bool, read>)");
 }
 
@@ -225,7 +225,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_Storage_Pointer) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'storage' as it is non-host-shareable
+        R"(12:34 error: type 'ptr<private, f32, read_write>' cannot be used in address space 'storage' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -557,7 +557,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBuffer_Struct_Run
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: uniform storage requires that array elements are aligned to 16 bytes, but array element of type 'i32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
+        R"(12:34 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'i32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
 note: see layout of struct:
 /*           align(4) size(4) */ struct S {
 /* offset(0) align(4) size(4) */   m : array<i32>;
@@ -574,7 +574,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBool) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -586,7 +586,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferBool) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
 56:78 note: while instantiating ptr<uniform, bool, read>)");
 }
 
@@ -601,7 +601,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBoolAlias
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -615,7 +615,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBufferBoolAlias) 
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable
 56:78 note: while instantiating ptr<uniform, bool, read>)");
 }
 
@@ -628,7 +628,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformPointer) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'uniform' as it is non-host-shareable
+        R"(12:34 error: type 'ptr<private, f32, read_write>' cannot be used in address space 'uniform' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -852,7 +852,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantBool) {
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'push_constant' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'push_constant' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -865,7 +865,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantBool) {
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'bool' cannot be used in address space 'push_constant' as it is non-host-shareable
+        R"(12:34 error: type 'bool' cannot be used in address space 'push_constant' as it is non-host-shareable
 note: while instantiating ptr<push_constant, bool, read_write>)");
 }
 
@@ -879,7 +879,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantF16) {
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: using f16 types in 'push_constant' address space is not implemented yet");
+              "error: using 'f16' in 'push_constant' address space is not implemented yet");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantF16) {
@@ -892,7 +892,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantF16) {
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: using f16 types in 'push_constant' address space is not implemented yet");
+              "error: using 'f16' in 'push_constant' address space is not implemented yet");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantPointer) {
@@ -905,7 +905,7 @@ TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantPointer) {
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: Type 'ptr<private, f32, read_write>' cannot be used in address space 'push_constant' as it is non-host-shareable
+        R"(12:34 error: type 'ptr<private, f32, read_write>' cannot be used in address space 'push_constant' as it is non-host-shareable
 56:78 note: while instantiating 'var' g)");
 }
 

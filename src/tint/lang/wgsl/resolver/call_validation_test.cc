@@ -481,7 +481,7 @@ TEST_F(ResolverCallValidationTest, MustUseFunction) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: ignoring return value of function 'fn_must_use' annotated with @must_use
+        R"(12:34 error: ignoring return value of function 'fn_must_use' annotated with '@must_use'
 56:78 note: function 'fn_must_use' declared here)");
 }
 

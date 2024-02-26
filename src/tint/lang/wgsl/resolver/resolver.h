@@ -636,7 +636,7 @@ class Resolver {
     /// Raises an error that the attribute is not valid for the given use.
     /// @param attr the invalue attribute
     /// @param use the thing that the attribute was applied to
-    void ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use);
+    void ErrorInvalidAttribute(const ast::Attribute* attr, StyledText use);
 
     /// Adds the given internal compiler error message to the diagnostics
     void AddICE(std::string_view msg, const Source& source) const;

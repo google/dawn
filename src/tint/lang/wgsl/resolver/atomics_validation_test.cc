@@ -74,7 +74,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Simple) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: atomic variables must have <storage> or <workgroup> address space");
+              "12:34 error: 'atomic' variables must have 'storage' or 'workgroup' address space");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Array) {
@@ -82,7 +82,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Array) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: atomic variables must have <storage> or <workgroup> address space");
+              "12:34 error: 'atomic' variables must have 'storage' or 'workgroup' address space");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Struct) {
@@ -91,8 +91,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Struct) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: atomic variables must have <storage> or <workgroup> address space\n"
-              "note: atomic sub-type of 's' is declared here");
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
+note: atomic sub-type of 's' is declared here)");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStruct) {
@@ -106,8 +106,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStruct) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "56:78 error: atomic variables must have <storage> or <workgroup> address space\n"
-              "note: atomic sub-type of 'Outer' is declared here");
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
+note: atomic sub-type of 'Outer' is declared here)");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStructOfArray) {
@@ -121,7 +121,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStructOfArray) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: atomic variables must have <storage> or <workgroup> address space
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
 12:34 note: atomic sub-type of 'Outer' is declared here)");
 }
 
@@ -134,8 +134,9 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfArray) {
     GlobalVar(Source{{56, 78}}, "v", ty.Of(atomic_array), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "56:78 error: atomic variables must have <storage> or <workgroup> address space");
+    EXPECT_EQ(
+        r()->error(),
+        R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space)");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStruct) {
@@ -149,7 +150,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStruct) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: atomic variables must have <storage> or <workgroup> address space
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
 12:34 note: atomic sub-type of 'array<S, 5>' is declared here)");
 }
 
@@ -166,7 +167,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStructOfArray) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: atomic variables must have <storage> or <workgroup> address space
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
 12:34 note: atomic sub-type of 'array<S, 5>' is declared here)");
 }
 
@@ -205,7 +206,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Complex) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: atomic variables must have <storage> or <workgroup> address space
+              R"(56:78 error: 'atomic' variables must have 'storage' or 'workgroup' address space
 12:34 note: atomic sub-type of 'S0' is declared here)");
 }
 
@@ -217,7 +218,7 @@ TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: atomic variables in <storage> address space must have read_write access mode
+        R"(56:78 error: atomic variables in 'storage' address space must have 'read_write' access mode
 12:34 note: atomic sub-type of 's' is declared here)");
 }
 
@@ -229,7 +230,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Struct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: atomic variables in <storage> address space must have read_write access mode
+        R"(56:78 error: atomic variables in 'storage' address space must have 'read_write' access mode
 12:34 note: atomic sub-type of 's' is declared here)");
 }
 
@@ -246,7 +247,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: atomic variables in <storage> address space must have read_write access mode
+        R"(56:78 error: atomic variables in 'storage' address space must have 'read_write' access mode
 12:34 note: atomic sub-type of 'Outer' is declared here)");
 }
 
@@ -263,7 +264,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: atomic variables in <storage> address space must have read_write access mode
+        R"(56:78 error: atomic variables in 'storage' address space must have 'read_write' access mode
 12:34 note: atomic sub-type of 'Outer' is declared here)");
 }
 
@@ -304,7 +305,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: atomic variables in <storage> address space must have read_write access mode
+        R"(12:34 error: atomic variables in 'storage' address space must have 'read_write' access mode
 56:78 note: atomic sub-type of 'S0' is declared here)");
 }
 

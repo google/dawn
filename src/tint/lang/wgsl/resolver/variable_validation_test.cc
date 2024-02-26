@@ -190,7 +190,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitializerWrongType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'const' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, LetInitializerWrongType) {
@@ -199,7 +199,7 @@ TEST_F(ResolverVariableValidationTest, LetInitializerWrongType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'let' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, VarInitializerWrongType) {
@@ -208,7 +208,7 @@ TEST_F(ResolverVariableValidationTest, VarInitializerWrongType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'var' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitializerWrongTypeViaAlias) {
@@ -217,7 +217,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitializerWrongTypeViaAlias) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'const' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, LetInitializerWrongTypeViaAlias) {
@@ -226,7 +226,7 @@ TEST_F(ResolverVariableValidationTest, LetInitializerWrongTypeViaAlias) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'let' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, VarInitializerWrongTypeViaAlias) {
@@ -235,7 +235,7 @@ TEST_F(ResolverVariableValidationTest, VarInitializerWrongTypeViaAlias) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
+              R"(3:3 error: cannot initialize 'var' of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
@@ -250,7 +250,7 @@ TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: cannot initialize let of type 'ptr<function, f32, read_write>' with value of type 'f32')");
+        R"(12:34 error: cannot initialize 'let' of type 'ptr<function, f32, read_write>' with value of type 'f32')");
 }
 
 TEST_F(ResolverVariableValidationTest, LocalLetRedeclared) {
@@ -338,10 +338,9 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     WrapInFunction(ptr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: cannot initialize let of type "
-              "'ptr<storage, i32, read_write>' with value of type "
-              "'ptr<storage, i32, read>'");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot initialize 'let' of type 'ptr<storage, i32, read_write>' with value of type 'ptr<storage, i32, read>')");
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_Atomic) {

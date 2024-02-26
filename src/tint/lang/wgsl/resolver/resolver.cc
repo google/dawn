@@ -108,6 +108,8 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/text_style.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -269,7 +271,8 @@ sem::Variable* Resolver::Let(const ast::Let* v) {
             attribute,  //
             [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
             [&](Default) {
-                ErrorInvalidAttribute(attribute, "'let' declaration");
+                ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "let"
+                                                              << style::Plain << " declaration");
                 return false;
             });
         if (!ok) {
@@ -278,7 +281,8 @@ sem::Variable* Resolver::Let(const ast::Let* v) {
     }
 
     if (TINT_UNLIKELY(!v->initializer)) {
-        AddError(v->source) << "'let' declaration must have an initializer";
+        AddError(v->source) << style::Keyword << "let" << style::Plain
+                            << " declaration must have an initializer";
         return nullptr;
     }
 
@@ -299,7 +303,8 @@ sem::Variable* Resolver::Let(const ast::Let* v) {
 
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
                                       const_cast<core::type::Type*>(sem->Type()), v->source)) {
-        AddNote(v->source) << "while instantiating 'let' " << v->name->symbol.Name();
+        AddNote(v->source) << "while instantiating " << style::Keyword << "let " << style::Variable
+                           << v->name->symbol.Name();
         return nullptr;
     }
 
@@ -357,7 +362,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
                                       const_cast<core::type::Type*>(ty), v->source)) {
-        AddNote(v->source) << "while instantiating 'override' " << v->name->symbol.Name();
+        AddNote(v->source) << "while instantiating " << style::Keyword << "override "
+                           << style::Variable << v->name->symbol.Name();
         return nullptr;
     }
 
@@ -374,19 +380,24 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
                     return false;
                 }
                 if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-                    AddError(attr->source) << "@id must be an i32 or u32 value";
+                    AddError(attr->source)
+                        << style::Attribute << "@id" << style::Plain << " must be an "
+                        << style::Type << "i32" << style::Plain << " or " << style::Type << "u32"
+                        << style::Plain << " value";
                     return false;
                 }
 
                 auto const_value = materialized->ConstantValue();
                 auto value = const_value->ValueAs<AInt>();
                 if (value < 0) {
-                    AddError(attr->source) << "@id value must be non-negative";
+                    AddError(attr->source) << style::Attribute << "@id" << style::Plain
+                                           << " value must be non-negative";
                     return false;
                 }
                 if (value > std::numeric_limits<decltype(OverrideId::value)>::max()) {
                     AddError(attr->source)
-                        << "@id value must be between 0 and "
+                        << style::Attribute << "@id" << style::Plain
+                        << " value must be between 0 and "
                         << std::numeric_limits<decltype(OverrideId::value)>::max();
                     return false;
                 }
@@ -399,7 +410,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
                 return true;
             },
             [&](Default) {
-                ErrorInvalidAttribute(attribute, "'override' declaration");
+                ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "override"
+                                                              << style::Plain << " declaration");
                 return false;
             });
         if (!ok) {
@@ -425,7 +437,9 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         Mark(attribute);
         bool ok = Switch(attribute,  //
                          [&](Default) {
-                             ErrorInvalidAttribute(attribute, "'const' declaration");
+                             ErrorInvalidAttribute(attribute,
+                                                   StyledText{} << style::Keyword << "const"
+                                                                << style::Plain << " declaration");
                              return false;
                          });
         if (!ok) {
@@ -684,7 +698,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 case kErrored:
                     return nullptr;
                 case kInvalid:
-                    ErrorInvalidAttribute(attribute, "module-scope 'var'");
+                    ErrorInvalidAttribute(
+                        attribute, StyledText{} << "module-scope " << style::Keyword << "var");
                     return nullptr;
             }
         }
@@ -700,7 +715,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 attribute,
                 [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {
-                    ErrorInvalidAttribute(attribute, "function-scope 'var'");
+                    ErrorInvalidAttribute(
+                        attribute, StyledText{} << "function-scope " << style::Keyword << "var");
                     return false;
                 });
             if (!ok) {
@@ -759,7 +775,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 [&](const ast::GroupAttribute* attr) {
                     if (validator_.IsValidationEnabled(
                             param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
-                        ErrorInvalidAttribute(attribute, "function parameters");
+                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                         return false;
                     }
                     auto value = GroupAttribute(attr);
@@ -772,7 +788,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 [&](const ast::BindingAttribute* attr) -> bool {
                     if (validator_.IsValidationEnabled(
                             param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
-                        ErrorInvalidAttribute(attribute, "function parameters");
+                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                         return false;
                     }
                     auto value = BindingAttribute(attr);
@@ -783,7 +799,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                     return true;
                 },
                 [&](Default) {
-                    ErrorInvalidAttribute(attribute, "function parameters");
+                    ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                     return false;
                 });
             if (!ok) {
@@ -802,9 +818,10 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 [&](Default) {
                     if (attribute->IsAnyOf<ast::LocationAttribute, ast::BuiltinAttribute,
                                            ast::InvariantAttribute, ast::InterpolateAttribute>()) {
-                        ErrorInvalidAttribute(attribute, "non-entry point function parameters");
+                        ErrorInvalidAttribute(
+                            attribute, StyledText{} << "non-entry point function parameters");
                     } else {
-                        ErrorInvalidAttribute(attribute, "function parameters");
+                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                     }
                     return false;
                 });
@@ -996,7 +1013,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
             },
             [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
             [&](Default) {
-                ErrorInvalidAttribute(attribute, "functions");
+                ErrorInvalidAttribute(attribute, StyledText{} << "functions");
                 return false;
             });
         if (!ok) {
@@ -1118,19 +1135,20 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                 case kErrored:
                     return nullptr;
                 case kInvalid:
-                    ErrorInvalidAttribute(attribute, "entry point return types");
+                    ErrorInvalidAttribute(attribute, StyledText{} << "entry point return types");
                     return nullptr;
             }
         }
     } else {
         for (auto* attribute : decl->return_type_attributes) {
             Mark(attribute);
-            bool ok = Switch(attribute,  //
-                             [&](Default) {
-                                 ErrorInvalidAttribute(attribute,
-                                                       "non-entry point function return types");
-                                 return false;
-                             });
+            bool ok =
+                Switch(attribute,  //
+                       [&](Default) {
+                           ErrorInvalidAttribute(
+                               attribute, StyledText{} << "non-entry point function return types");
+                           return false;
+                       });
             if (!ok) {
                 return nullptr;
             }
@@ -2987,7 +3005,8 @@ const ast::TemplatedIdentifier* Resolver::TemplatedIdentifier(const ast::Identif
     if (!tmpl_ident) {
         if (TINT_UNLIKELY(min_args != 0)) {
             AddError(Source{ident->source.range.end})
-                << "expected '<' for '" << ident->symbol.Name() << "'";
+                << "expected " << style::Code << "<" << style::Plain << " for " << style::Code
+                << ident->symbol.Name();
         }
         return nullptr;
     }
@@ -3002,19 +3021,19 @@ bool Resolver::CheckTemplatedIdentifierArgs(const ast::TemplatedIdentifier* iden
     }
     if (min_args == max_args) {
         if (TINT_UNLIKELY(ident->arguments.Length() != min_args)) {
-            AddError(ident->source) << "'" << ident->symbol.Name() << "' requires " << min_args
-                                    << " template arguments";
+            AddError(ident->source) << style::Code << ident->symbol.Name() << style::Plain
+                                    << " requires " << min_args << " template arguments";
             return false;
         }
     } else {
         if (TINT_UNLIKELY(ident->arguments.Length() < min_args)) {
-            AddError(ident->source) << "'" << ident->symbol.Name() << "' requires at least "
-                                    << min_args << " template arguments";
+            AddError(ident->source) << style::Code << ident->symbol.Name() << style::Plain
+                                    << " requires at least " << min_args << " template arguments";
             return false;
         }
         if (TINT_UNLIKELY(ident->arguments.Length() > max_args)) {
-            AddError(ident->source) << "'" << ident->symbol.Name() << "' requires at most "
-                                    << max_args << " template arguments";
+            AddError(ident->source) << style::Code << ident->symbol.Name() << style::Plain
+                                    << " requires at most " << max_args << " template arguments";
             return false;
         }
     }
@@ -3687,8 +3706,8 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                                                      ptr->Access());
                 root_ident = expr->RootIdentifier();
             } else {
-                AddError(unary->expr->source)
-                    << "cannot dereference expression of type '" << sem_.TypeNameOf(expr_ty) << "'";
+                AddError(unary->expr->source) << "cannot dereference expression of type "
+                                              << style::Type << sem_.TypeNameOf(expr_ty);
                 return nullptr;
             }
             break;
@@ -3748,14 +3767,17 @@ tint::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute*
     }
 
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << "@location must be an i32 or u32 value";
+        AddError(attr->source) << style::Attribute << "@location" << style::Plain << " must be an "
+                               << style::Type << "i32" << style::Plain << " or " << style::Type
+                               << "u32" << style::Plain << " value";
         return Failure{};
     }
 
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
-        AddError(attr->source) << "@location value must be non-negative";
+        AddError(attr->source) << style::Attribute << "@location" << style::Plain
+                               << " value must be non-negative";
         return Failure{};
     }
 
@@ -3772,14 +3794,17 @@ tint::Result<uint32_t> Resolver::ColorAttribute(const ast::ColorAttribute* attr)
     }
 
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << "@color must be an i32 or u32 value";
+        AddError(attr->source) << style::Attribute << "@color" << style::Plain << " must be an "
+                               << style::Type << "i32" << style::Plain << " or " << style::Type
+                               << "u32" << style::Plain << " value";
         return Failure{};
     }
 
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
-        AddError(attr->source) << "@color value must be non-negative";
+        AddError(attr->source) << style::Attribute << "@color" << style::Plain
+                               << " value must be non-negative";
         return Failure{};
     }
 
@@ -3795,14 +3820,17 @@ tint::Result<uint32_t> Resolver::BlendSrcAttribute(const ast::BlendSrcAttribute*
     }
 
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << "@location must be an i32 or u32 value";
+        AddError(attr->source) << style::Attribute << "@blend_src" << style::Plain << style::Type
+                               << "i32" << style::Plain << " or " << style::Type << "u32"
+                               << style::Plain << " value";
         return Failure{};
     }
 
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value != 0 && value != 1) {
-        AddError(attr->source) << "@blend_src value must be zero or one";
+        AddError(attr->source) << style::Attribute << "@blend_src" << style::Plain
+                               << " value must be zero or one";
         return Failure{};
     }
 
@@ -3818,14 +3846,17 @@ tint::Result<uint32_t> Resolver::BindingAttribute(const ast::BindingAttribute* a
         return Failure{};
     }
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << "@binding must be an i32 or u32 value";
+        AddError(attr->source) << style::Attribute << "@binding" << style::Plain << " must be an "
+                               << style::Type << "i32" << style::Plain << " or " << style::Type
+                               << "u32" << style::Plain << " value";
         return Failure{};
     }
 
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
-        AddError(attr->source) << "@binding value must be non-negative";
+        AddError(attr->source) << style::Attribute << "@binding" << style::Plain
+                               << " value must be non-negative";
         return Failure{};
     }
     return static_cast<uint32_t>(value);
@@ -3840,14 +3871,17 @@ tint::Result<uint32_t> Resolver::GroupAttribute(const ast::GroupAttribute* attr)
         return Failure{};
     }
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << "@group must be an i32 or u32 value";
+        AddError(attr->source) << style::Attribute << "@group" << style::Plain << " must be an "
+                               << style::Type << "i32" << style::Plain << " or " << style::Type
+                               << "u32" << style::Plain << " value";
         return Failure{};
     }
 
     auto const_value = materialized->ConstantValue();
     auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
-        AddError(attr->source) << "@group value must be non-negative";
+        AddError(attr->source) << style::Attribute << "@group" << style::Plain
+                               << " value must be non-negative";
         return Failure{};
     }
     return static_cast<uint32_t>(value);
@@ -3864,9 +3898,13 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
     Vector<const sem::ValueExpression*, 3> args;
     Vector<const core::type::Type*, 3> arg_tys;
 
-    constexpr const char* kErrBadExpr =
-        "workgroup_size argument must be a constant or override-expression of type "
-        "abstract-integer, i32 or u32";
+    auto err_bad_expr = [&](const ast::Expression* value) {
+        AddError(value->source) << style::Attribute << "@workgroup_size" << style::Plain
+                                << " argument must be a constant or override-expression of type "
+                                << style::Type << "abstract-integer" << style::Plain << ", "
+                                << style::Type << "i32" << style::Plain << " or " << style::Type
+                                << "u32";
+    };
 
     for (size_t i = 0; i < 3; i++) {
         // Each argument to this attribute can either be a literal, an identifier for a
@@ -3881,13 +3919,13 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
         }
         auto* ty = expr->Type();
         if (!ty->IsAnyOf<core::type::I32, core::type::U32, core::type::AbstractInt>()) {
-            AddError(value->source) << kErrBadExpr;
+            err_bad_expr(value);
             return Failure{};
         }
 
         if (expr->Stage() != core::EvaluationStage::kConstant &&
             expr->Stage() != core::EvaluationStage::kOverride) {
-            AddError(value->source) << kErrBadExpr;
+            err_bad_expr(value);
             return Failure{};
         }
 
@@ -3897,8 +3935,9 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
 
     auto* common_ty = core::type::Type::Common(arg_tys);
     if (!common_ty) {
-        AddError(attr->source)
-            << "workgroup_size arguments must be of the same type, either i32 or u32";
+        AddError(attr->source) << style::Attribute << "@workgroup_size" << style::Plain
+                               << " arguments must be of the same type, either " << style::Type
+                               << "i32" << style::Plain << " or " << style::Type << "u32";
         return Failure{};
     }
 
@@ -3914,7 +3953,8 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
         }
         if (auto* value = materialized->ConstantValue()) {
             if (value->ValueAs<AInt>() < 1) {
-                AddError(values[i]->source) << "workgroup_size argument must be at least 1";
+                AddError(values[i]->source) << style::Attribute << "@workgroup_size" << style::Plain
+                                            << " argument must be at least 1";
                 return Failure{};
             }
             ws[i] = value->ValueAs<u32>();
@@ -4007,7 +4047,8 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
                 validator_.DiagnosticFilters().Set(rule, control.severity);
             } else {
                 auto& warning = AddWarning(control.rule_name->source)
-                                << "unrecognized diagnostic rule 'chromium." << name << "'\n";
+                                << "unrecognized diagnostic rule " << style::Code << "chromium."
+                                << name << style::Plain << "\n";
                 tint::SuggestAlternativeOptions opts;
                 opts.prefix = "chromium.";
                 tint::SuggestAlternatives(name, wgsl::kChromiumDiagnosticRuleStrings,
@@ -4022,7 +4063,8 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         auto& warning = AddWarning(control.rule_name->source)
-                        << "unrecognized diagnostic rule '" << name << "'\n";
+                        << "unrecognized diagnostic rule " << style::Code << name << style::Plain
+                        << "\n";
         tint::SuggestAlternatives(name, wgsl::kCoreDiagnosticRuleStrings, warning.message);
     }
     return true;
@@ -4033,8 +4075,8 @@ bool Resolver::Enable(const ast::Enable* enable) {
         Mark(ext);
         enabled_extensions_.Add(ext->name);
         if (!allowed_features_.extensions.count(ext->name)) {
-            AddError(ext->source) << "extension '" << ext->name
-                                  << "' is not allowed in the current environment";
+            AddError(ext->source) << "extension " << style::Code << ext->name << style::Plain
+                                  << " is not allowed in the current environment";
             return false;
         }
     }
@@ -4044,8 +4086,8 @@ bool Resolver::Enable(const ast::Enable* enable) {
 bool Resolver::Requires(const ast::Requires* req) {
     for (auto feature : req->features) {
         if (!allowed_features_.features.count(feature)) {
-            AddError(req->source) << "language feature '" << wgsl::ToString(feature)
-                                  << "' is not allowed in the current environment";
+            AddError(req->source) << "language feature " << style::Code << wgsl::ToString(feature)
+                                  << style::Plain << " is not allowed in the current environment";
             return false;
         }
     }
@@ -4101,8 +4143,8 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
             auto* count_val = count_sem->ConstantValue();
             if (auto* ty = count_val->Type(); !ty->is_integer_scalar()) {
                 AddError(count_expr->source)
-                    << "array count must evaluate to a constant integer expression, but is type '"
-                    << ty->FriendlyName() << "'";
+                    << "array count must evaluate to a constant integer expression, but is type "
+                    << style::Type << ty->FriendlyName();
                 return nullptr;
             }
 
@@ -4150,7 +4192,8 @@ bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
                 return true;
             },
             [&](Default) {
-                ErrorInvalidAttribute(attribute, "array types");
+                ErrorInvalidAttribute(
+                    attribute, StyledText{} << style::Type << "array" << style::Plain << " types");
                 return false;
             });
         if (!ok) {
@@ -4226,9 +4269,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         // https://gpuweb.github.io/gpuweb/wgsl/#limits
         const size_t kMaxNumStructMembers = 16383;
         if (str->members.Length() > kMaxNumStructMembers) {
-            AddError(str->source) << "struct '" << struct_name() << "' has "
-                                  << str->members.Length() << " members, maximum is "
-                                  << kMaxNumStructMembers;
+            AddError(str->source) << style::Keyword << "struct " << style::Type << struct_name()
+                                  << style::Plain << " has " << str->members.Length()
+                                  << " members, maximum is " << kMaxNumStructMembers;
             return nullptr;
         }
     }
@@ -4242,7 +4285,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         bool ok = Switch(
             attribute, [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
             [&](Default) {
-                ErrorInvalidAttribute(attribute, "struct declarations");
+                ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "struct"
+                                                              << style::Plain << " declarations");
                 return false;
             });
         if (!ok) {
@@ -4268,7 +4312,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         Mark(member);
         Mark(member->name);
         if (auto added = member_map.Add(member->name->symbol, member); !added) {
-            AddError(member->source) << "redefinition of '" << member->name->symbol.Name() << "'";
+            AddError(member->source)
+                << "redefinition of " << style::Code << member->name->symbol.Name();
             AddNote(added.value->source) << "previous definition is here";
             return nullptr;
         }
@@ -4339,20 +4384,23 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         return false;
                     }
                     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-                        AddError(attr->source) << "@align must be an i32 or u32 value";
+                        AddError(attr->source) << style::Attribute << "@align" << style::Plain
+                                               << " value must be an " << style::Type << "i32"
+                                               << style::Plain << " or " << style::Type << "u32";
                         return false;
                     }
 
                     auto const_value = materialized->ConstantValue();
                     if (!const_value) {
-                        AddError(attr->source) << "@align must be constant expression";
+                        AddError(attr->source) << style::Attribute << "@align" << style::Plain
+                                               << " value must be constant expression";
                         return false;
                     }
                     auto value = const_value->ValueAs<AInt>();
 
                     if (value <= 0 || !tint::IsPowerOfTwo(value)) {
-                        AddError(attr->source)
-                            << "@align value must be a positive, power-of-two integer";
+                        AddError(attr->source) << style::Attribute << "@align" << style::Plain
+                                               << " value must be a positive, power-of-two integer";
                         return false;
                     }
                     align = u32(value);
@@ -4368,26 +4416,31 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         return false;
                     }
                     if (!materialized->Type()->IsAnyOf<core::type::U32, core::type::I32>()) {
-                        AddError(attr->source) << "@size must be an i32 or u32 value";
+                        AddError(attr->source) << style::Attribute << "@size" << style::Plain
+                                               << " value must be an " << style::Type << "i32"
+                                               << style::Plain << " or " << style::Type << "u32";
                         return false;
                     }
 
                     auto const_value = materialized->ConstantValue();
                     if (!const_value) {
-                        AddError(attr->expr->source) << "@size must be constant expression";
+                        AddError(attr->expr->source) << style::Attribute << "@size" << style::Plain
+                                                     << " value must be constant expression";
                         return false;
                     }
                     {
                         auto value = const_value->ValueAs<AInt>();
                         if (value <= 0) {
-                            AddError(attr->source) << "@size must be a positive integer";
+                            AddError(attr->source) << style::Attribute << "@size" << style::Plain
+                                                   << " value must be a positive integer";
                             return false;
                         }
                     }
                     auto value = const_value->ValueAs<uint64_t>();
                     if (value < size) {
                         AddError(attr->source)
-                            << "@size must be at least as big as the type's size (" << size << ")";
+                            << style::Attribute << "@size" << style::Plain
+                            << " must be at least as big as the type's size (" << size << ")";
                         return false;
                     }
                     size = u32(value);
@@ -4444,14 +4497,17 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 [&](const ast::StrideAttribute* attr) {
                     if (validator_.IsValidationEnabled(
                             member->attributes, ast::DisabledValidation::kIgnoreStrideAttribute)) {
-                        ErrorInvalidAttribute(attribute, "struct members");
+                        ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "struct"
+                                                                      << style::Plain
+                                                                      << " members");
                         return false;
                     }
                     return StrideAttribute(attr);
                 },
                 [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {
-                    ErrorInvalidAttribute(attribute, "struct members");
+                    ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "struct"
+                                                                  << style::Plain << " members");
                     return false;
                 });
             if (!ok) {
@@ -4460,7 +4516,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
 
         if (has_offset_attr && (has_align_attr || has_size_attr)) {
-            AddError(member->source) << "@offset cannot be used with @align or @size";
+            AddError(member->source) << style::Attribute << "@offset" << style::Plain
+                                     << " cannot be used with " << style::Attribute << "@align"
+                                     << style::Plain << " or " << style::Attribute << "@size";
             return nullptr;
         }
 
@@ -4525,8 +4583,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits
     const size_t nest_depth = 1 + members_nest_depth;
     if (nest_depth > kMaxNestDepthOfCompositeType) {
-        AddError(str->source) << "struct '" << struct_name() << "' has nesting depth of "
-                              << nest_depth << ", maximum is " << kMaxNestDepthOfCompositeType;
+        AddError(str->source) << style::Keyword << "struct " << style::Type << struct_name()
+                              << style::Plain << " has nesting depth of " << nest_depth
+                              << ", maximum is " << kMaxNestDepthOfCompositeType;
         return nullptr;
     }
     nest_depth_.Add(out, nest_depth);
@@ -4614,7 +4673,8 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                 attribute,
                 [&](const ast::DiagnosticAttribute* attr) { return DiagnosticAttribute(attr); },
                 [&](Default) {
-                    ErrorInvalidAttribute(attribute, "switch body");
+                    ErrorInvalidAttribute(attribute, StyledText{} << style::Keyword << "switch"
+                                                                  << style::Plain << " body");
                     return false;
                 });
             if (!ok) {
@@ -4870,8 +4930,9 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
     }
 
     if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
-        AddError(usage) << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '"
-                        << address_space << "' as it is non-host-shareable";
+        AddError(usage) << "type " << style::Type << sem_.TypeNameOf(ty) << style::Plain
+                        << " cannot be used in address space " << style::Enum << address_space
+                        << style::Plain << " as it is non-host-shareable";
         return false;
     }
 
@@ -4893,7 +4954,7 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
                 attribute,  //
                 [&](const ast::DiagnosticAttribute* attr) { return DiagnosticAttribute(attr); },
                 [&](Default) {
-                    ErrorInvalidAttribute(attribute, use);
+                    ErrorInvalidAttribute(attribute, StyledText{} << use);
                     return false;
                 });
             if (!ok) {
@@ -4979,8 +5040,8 @@ void Resolver::ApplyDiagnosticSeverities(NODE* node) {
 
 bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) {
     if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
-        AddError(ident->source) << use << " '" << ident->symbol.Name()
-                                << "' does not take template arguments";
+        AddError(ident->source) << use << " " << style::Code << ident->symbol.Name() << style::Plain
+                                << " does not take template arguments";
         if (auto resolved = dependencies_.resolved_identifiers.Get(ident)) {
             if (auto* ast_node = resolved->Node()) {
                 sem_.NoteDeclarationSource(ast_node);
@@ -4991,8 +5052,9 @@ bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) 
     return true;
 }
 
-void Resolver::ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use) {
-    AddError(attr->source) << "@" << attr->Name() << " is not valid for " << std::string(use);
+void Resolver::ErrorInvalidAttribute(const ast::Attribute* attr, StyledText use) {
+    AddError(attr->source) << style::Attribute << "@" << attr->Name() << style::Plain
+                           << " is not valid for " << use;
 }
 
 void Resolver::AddICE(std::string_view msg, const Source& source) const {
