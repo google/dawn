@@ -99,8 +99,10 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
             ImageCopyTexture destinationDataTexture;
             destinationDataTexture.texture = dataTexture.Get();
             destinationDataTexture.aspect = wgpu::TextureAspect::All;
+            // The size of R8Uint texture equals to writeSizePixel and only has 1 mip level.
+            // So the x,y,z origins and mipLevel are always 0.
             destinationDataTexture.mipLevel = 0;
-            destinationDataTexture.origin = destination.origin;
+            destinationDataTexture.origin = {0, 0, 0};
             DAWN_TRY_CONTEXT(WriteTextureImpl(destinationDataTexture, data, dataSize, dataLayout,
                                               writeSizePixel),
                              "writing to stencil aspect of %s using blit workaround when writing "

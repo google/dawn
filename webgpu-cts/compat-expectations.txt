@@ -131,7 +131,6 @@ crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRender
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 
 # copyTextureToTexture failures
-crbug.com/dawn/2208 webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
