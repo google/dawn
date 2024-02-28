@@ -68,6 +68,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/f32.h
   lang/core/type/i32.cc
   lang/core/type/i32.h
+  lang/core/type/invalid.cc
+  lang/core/type/invalid.h
   lang/core/type/manager.cc
   lang/core/type/manager.h
   lang/core/type/matrix.cc

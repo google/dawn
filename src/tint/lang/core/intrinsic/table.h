@@ -52,6 +52,8 @@ namespace tint::core::intrinsic {
 
 /// Overload describes a fully matched builtin function overload
 struct Overload {
+    static constexpr size_t kNumFixedParameters = 8;
+
     /// Parameter describes a single parameter
     struct Parameter {
         /// Parameter type
@@ -79,7 +81,7 @@ struct Overload {
     core::type::Type const* return_type = nullptr;
 
     /// The resolved overload parameters
-    Vector<Parameter, 8> parameters;
+    Vector<Parameter, kNumFixedParameters> parameters;
 
     /// The constant evaluation function
     constant::Eval::Function const_eval_fn = nullptr;
@@ -108,11 +110,28 @@ struct Context {
     SymbolTable& symbols;
 };
 
-// Prints the overload for emitting diagnostics
-void PrintOverload(StyledText& ss,
-                   Context& context,
-                   const OverloadInfo& overload,
-                   std::string_view intrinsic_name);
+/// Candidate holds information about an overload evaluated for resolution.
+struct Candidate {
+    /// The match-score of the candidate overload.
+    /// A score of zero indicates an exact match.
+    /// Non-zero scores are used for diagnostics when no overload matches.
+    /// Lower scores are displayed first (top-most).
+    size_t score = 0;
+    /// The candidate overload
+    const OverloadInfo* overload = nullptr;
+    /// The template types and numbers
+    TemplateState templates{};
+    /// The parameter types for the candidate overload
+    Vector<Overload::Parameter, Overload::kNumFixedParameters> parameters{};
+};
+
+// Prints the candidate overload for emitting diagnostics
+void PrintCandidate(StyledText& ss,
+                    Context& context,
+                    const Candidate& candidate,
+                    std::string_view intrinsic_name,
+                    VectorRef<const core::type::Type*> template_args,
+                    VectorRef<const core::type::Type*> args);
 
 /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
 /// if the builtin was not found.

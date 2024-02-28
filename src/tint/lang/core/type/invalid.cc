@@ -25,46 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GEN_BUILD:CONDITION(tint_build_is_win)
+#include "src/tint/lang/core/type/invalid.h"
 
-#include <cstring>
+#include "src/tint/lang/core/type/manager.h"
 
-#include "src/tint/utils/text/styled_text_printer.h"
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Invalid);
 
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
+namespace tint::core::type {
 
-namespace tint {
-namespace {
+Invalid::Invalid()
+    : Base(static_cast<size_t>(tint::TypeCode::Of<Invalid>().bits), core::type::Flags{}) {}
 
-HANDLE ConsoleHandleFrom(FILE* file) {
-    HANDLE handle = INVALID_HANDLE_VALUE;
-    if (file == stdout) {
-        handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    } else if (file == stderr) {
-        handle = GetStdHandle(STD_ERROR_HANDLE);
-    } else {
-        return INVALID_HANDLE_VALUE;
-    }
+Invalid::~Invalid() = default;
 
-    CONSOLE_SCREEN_BUFFER_INFO info{};
-    if (GetConsoleScreenBufferInfo(handle, &info) == 0) {
-        return INVALID_HANDLE_VALUE;
-    }
-    return handle;
+std::string Invalid::FriendlyName() const {
+    return "<invalid-type>";
 }
 
-}  // namespace
-
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out,
-                                                             const StyledTextTheme& theme) {
-    if (HANDLE handle = ConsoleHandleFrom(out); handle != INVALID_HANDLE_VALUE) {
-        SetConsoleOutputCP(CP_UTF8);
-        if (SetConsoleMode(handle, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
-            return CreateANSI(out, theme);
-        }
-    }
-    return CreatePlain(out);
+bool Invalid::Equals(const UniqueNode& other) const {
+    return other.Is<Invalid>();
 }
 
-}  // namespace tint
+uint32_t Invalid::Size() const {
+    return 0;
+}
+
+uint32_t Invalid::Align() const {
+    return 0;
+}
+
+Invalid* Invalid::Clone(CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<Invalid>();
+}
+
+}  // namespace tint::core::type

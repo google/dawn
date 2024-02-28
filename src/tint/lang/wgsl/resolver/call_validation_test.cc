@@ -522,8 +522,11 @@ TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
               R"(12:34 error: no matching call to 'min<i32>(abstract-int, abstract-int)'
 
 2 candidate functions:
-  'min(T, T) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
-  'min(vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+ • 'min(T  ✓ , T  ✓ ) -> T' where:
+      ✗  overload expects 0 template arguments
+      ✓  'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+ • 'min(vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
 )");
 }
 

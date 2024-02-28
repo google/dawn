@@ -73,6 +73,8 @@ libtint_source_set("type") {
     "f32.h",
     "i32.cc",
     "i32.h",
+    "invalid.cc",
+    "invalid.h",
     "manager.cc",
     "manager.h",
     "matrix.cc",

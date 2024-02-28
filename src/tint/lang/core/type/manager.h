@@ -52,6 +52,7 @@ class Bool;
 class F16;
 class F32;
 class I32;
+class Invalid;
 class Matrix;
 class Pointer;
 class U32;
@@ -174,6 +175,9 @@ class Manager final {
     auto* Find(ARGS&&... args) const {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
+
+    /// @returns an invalid type
+    const core::type::Invalid* invalid();
 
     /// @returns a void type
     const core::type::Void* void_();

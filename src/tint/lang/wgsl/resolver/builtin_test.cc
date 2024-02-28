@@ -166,9 +166,12 @@ TEST_F(ResolverBuiltinTest, Select_Error_NoParams) {
               R"(error: no matching call to 'select()'
 
 3 candidate functions:
-  'select(T, T, bool) -> T'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, bool) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(T  ✗ , T  ✗ , bool  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , bool  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , vecN<bool>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 )");
 }
 
@@ -182,9 +185,12 @@ TEST_F(ResolverBuiltinTest, Select_Error_SelectorInt) {
               R"(error: no matching call to 'select(i32, i32, i32)'
 
 3 candidate functions:
-  'select(T, T, bool) -> T'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, bool) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(T  ✓ , T  ✓ , bool  ✗ ) -> T' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , bool  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , vecN<bool>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 )");
 }
 
@@ -200,9 +206,12 @@ TEST_F(ResolverBuiltinTest, Select_Error_Matrix) {
               R"(error: no matching call to 'select(mat2x2<f32>, mat2x2<f32>, bool)'
 
 3 candidate functions:
-  'select(T, T, bool) -> T'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, bool) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(T  ✗ , T  ✗ , bool  ✓ ) -> T' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , bool  ✓ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✗ , vecN<bool>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 )");
 }
 
@@ -216,9 +225,12 @@ TEST_F(ResolverBuiltinTest, Select_Error_MismatchTypes) {
               R"(error: no matching call to 'select(f32, vec2<f32>, bool)'
 
 3 candidate functions:
-  'select(T, T, bool) -> T'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, bool) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(T  ✓ , T  ✗ , bool  ✓ ) -> T' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✓ , bool  ✓ ) -> vecN<T>' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✗ , vecN<T>  ✓ , vecN<bool>  ✗ ) -> vecN<T>' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 )");
 }
 
@@ -232,9 +244,12 @@ TEST_F(ResolverBuiltinTest, Select_Error_MismatchVectorSize) {
               R"(error: no matching call to 'select(vec2<f32>, vec3<f32>, bool)'
 
 3 candidate functions:
-  'select(T, T, bool) -> T'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, bool) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>'  where: 'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✓ , vecN<T>  ✗ , bool  ✓ ) -> vecN<T>' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(T  ✗ , T  ✗ , bool  ✓ ) -> T' where:
+      ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'select(vecN<T>  ✓ , vecN<T>  ✗ , vecN<bool>  ✗ ) -> vecN<T>' where:
+      ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 )");
 }
 
@@ -271,7 +286,7 @@ TEST_F(ResolverBuiltinArrayTest, ArrayLength_Error_ArraySized) {
               R"(error: no matching call to 'arrayLength(ptr<private, array<i32, 4>, read_write>)'
 
 1 candidate function:
-  'arrayLength(ptr<storage, array<T>, A>) -> u32'
+ • 'arrayLength(ptr<storage, array<T>, A>  ✗ ) -> u32'
 )");
 }
 
@@ -800,7 +815,8 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_NoArgs) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'cross()'
 
 1 candidate function:
-  'cross(vec3<T>, vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'cross(vec3<T>  ✗ , vec3<T>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -813,7 +829,8 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Scalar) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'cross(f32, f32)'
 
 1 candidate function:
-  'cross(vec3<T>, vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'cross(vec3<T>  ✗ , vec3<T>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -827,7 +844,8 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Vec3Int) {
               R"(error: no matching call to 'cross(vec3<i32>, vec3<i32>)'
 
 1 candidate function:
-  'cross(vec3<T>, vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'cross(vec3<T>  ✗ , vec3<T>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -843,7 +861,8 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Vec4) {
               R"(error: no matching call to 'cross(vec4<f32>, vec4<f32>)'
 
 1 candidate function:
-  'cross(vec3<T>, vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'cross(vec3<T>  ✗ , vec3<T>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -859,7 +878,8 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_TooManyParams) {
               R"(error: no matching call to 'cross(vec3<f32>, vec3<f32>, vec3<f32>)'
 
 1 candidate function:
-  'cross(vec3<T>, vec3<T>) -> vec3<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'cross(vec3<T>  ✓ , vec3<T>  ✓ ) -> vec3<T>' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -919,8 +939,10 @@ TEST_F(ResolverBuiltinFloatTest, Distance_TooManyParams) {
               R"(error: no matching call to 'distance(vec3<f32>, vec3<f32>, vec3<f32>)'
 
 2 candidate functions:
-  'distance(T, T) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'distance(vecN<T>, vecN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(vecN<T>  ✓ , vecN<T>  ✓ ) -> T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(T  ✗ , T  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -933,8 +955,10 @@ TEST_F(ResolverBuiltinFloatTest, Distance_TooFewParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'distance(vec3<f32>)'
 
 2 candidate functions:
-  'distance(T, T) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'distance(vecN<T>, vecN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(vecN<T>  ✓ , vecN<T>  ✗ ) -> T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(T  ✗ , T  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -947,8 +971,10 @@ TEST_F(ResolverBuiltinFloatTest, Distance_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'distance()'
 
 2 candidate functions:
-  'distance(T, T) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'distance(vecN<T>, vecN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(T  ✗ , T  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'distance(vecN<T>  ✗ , vecN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1093,8 +1119,10 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
               R"(error: no matching call to 'frexp(i32, ptr<workgroup, i32, read_write>)'
 
 2 candidate functions:
-  'frexp(T) -> __frexp_result_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'frexp(vecN<T>) -> __frexp_result_vecN_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'frexp(T  ✗ ) -> __frexp_result_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'frexp(vecN<T>  ✗ ) -> __frexp_result_vecN_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1152,8 +1180,10 @@ TEST_F(ResolverBuiltinFloatTest, Length_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'length()'
 
 2 candidate functions:
-  'length(T) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'length(vecN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'length(T  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'length(vecN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1166,8 +1196,10 @@ TEST_F(ResolverBuiltinFloatTest, Length_TooManyParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'length(f32, f32)'
 
 2 candidate functions:
-  'length(T) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'length(vecN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'length(T  ✓ ) -> T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'length(vecN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1342,8 +1374,10 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
               R"(error: no matching call to 'modf(i32, ptr<workgroup, f32, read_write>)'
 
 2 candidate functions:
-  'modf(T) -> __modf_result_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'modf(vecN<T>) -> __modf_result_vecN_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(T  ✗ ) -> __modf_result_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(vecN<T>  ✗ ) -> __modf_result_vecN_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1358,8 +1392,10 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
               R"(error: no matching call to 'modf(f32, ptr<workgroup, i32, read_write>)'
 
 2 candidate functions:
-  'modf(T) -> __modf_result_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'modf(vecN<T>) -> __modf_result_vecN_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(T  ✓ ) -> __modf_result_T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(vecN<T>  ✗ ) -> __modf_result_vecN_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1372,8 +1408,10 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'modf(f32, f32)'
 
 2 candidate functions:
-  'modf(T) -> __modf_result_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'modf(vecN<T>) -> __modf_result_vecN_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(T  ✓ ) -> __modf_result_T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(vecN<T>  ✗ ) -> __modf_result_vecN_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1388,8 +1426,10 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
               R"(error: no matching call to 'modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)'
 
 2 candidate functions:
-  'modf(T) -> __modf_result_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
-  'modf(vecN<T>) -> __modf_result_vecN_T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(vecN<T>  ✓ ) -> __modf_result_vecN_T' where:
+      ✓  'T' is 'abstract-float', 'f32' or 'f16'
+ • 'modf(T  ✗ ) -> __modf_result_T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1429,7 +1469,8 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Error_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'normalize()'
 
 1 candidate function:
-  'normalize(vecN<T>) -> vecN<T>'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'normalize(vecN<T>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1946,7 +1987,8 @@ TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'determinant(mat2x3<f32>)'
 
 1 candidate function:
-  'determinant(matNxN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'determinant(matNxN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -1961,7 +2003,8 @@ TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to 'determinant(f32)'
 
 1 candidate function:
-  'determinant(matNxN<T>) -> T'  where: 'T' is 'abstract-float', 'f32' or 'f16'
+ • 'determinant(matNxN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
 
@@ -2030,7 +2073,8 @@ TEST_F(ResolverBuiltinTest, Dot_Error_Scalar) {
               R"(error: no matching call to 'dot(f32, f32)'
 
 1 candidate function:
-  'dot(vecN<T>, vecN<T>) -> T'  where: 'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
+ • 'dot(vecN<T>  ✗ , vecN<T>  ✗ ) -> T' where:
+      ✗  'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
 )");
 }
 
@@ -2082,8 +2126,12 @@ TEST_P(ResolverBuiltinDerivativeTest, MissingParam) {
 
     EXPECT_EQ(r()->error(), "error: no matching call to '" + name +
                                 "()'\n\n"
-                                "2 candidate functions:\n  '" +
-                                name + "(f32) -> f32'\n  '" + name + "(vecN<f32>) -> vecN<f32>'\n");
+                                "2 candidate functions:\n"
+                                " • '" +
+                                name +
+                                "(f32  ✗ ) -> f32'\n"
+                                " • '" +
+                                name + "(vecN<f32>  ✗ ) -> vecN<f32>'\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,

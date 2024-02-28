@@ -25,46 +25,43 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GEN_BUILD:CONDITION(tint_build_is_win)
+#ifndef SRC_TINT_LANG_CORE_TYPE_INVALID_H_
+#define SRC_TINT_LANG_CORE_TYPE_INVALID_H_
 
-#include <cstring>
+#include <string>
 
-#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/lang/core/type/type.h"
 
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
+namespace tint::core::type {
 
-namespace tint {
-namespace {
+/// An invalid type.
+class Invalid final : public Castable<Invalid, Type> {
+  public:
+    /// Constructor
+    Invalid();
 
-HANDLE ConsoleHandleFrom(FILE* file) {
-    HANDLE handle = INVALID_HANDLE_VALUE;
-    if (file == stdout) {
-        handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    } else if (file == stderr) {
-        handle = GetStdHandle(STD_ERROR_HANDLE);
-    } else {
-        return INVALID_HANDLE_VALUE;
-    }
+    /// Destructor
+    ~Invalid() override;
 
-    CONSOLE_SCREEN_BUFFER_INFO info{};
-    if (GetConsoleScreenBufferInfo(handle, &info) == 0) {
-        return INVALID_HANDLE_VALUE;
-    }
-    return handle;
-}
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName() const override;
 
-}  // namespace
+    /// @param other the other node to compare against
+    /// @returns true if the this type is equal to @p other
+    bool Equals(const UniqueNode& other) const override;
 
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out,
-                                                             const StyledTextTheme& theme) {
-    if (HANDLE handle = ConsoleHandleFrom(out); handle != INVALID_HANDLE_VALUE) {
-        SetConsoleOutputCP(CP_UTF8);
-        if (SetConsoleMode(handle, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
-            return CreateANSI(out, theme);
-        }
-    }
-    return CreatePlain(out);
-}
+    /// @returns the size in bytes of the type.
+    uint32_t Size() const override;
 
-}  // namespace tint
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Invalid* Clone(CloneContext& ctx) const override;
+};
+
+}  // namespace tint::core::type
+
+#endif  // SRC_TINT_LANG_CORE_TYPE_INVALID_H_

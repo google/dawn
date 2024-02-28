@@ -311,10 +311,10 @@ class TemplateState {
     /// @returns true on match or newly defined
     bool Num(size_t idx, Number number) {
         if (idx >= numbers_.Length()) {
-            numbers_.Resize(idx + 1, Number::invalid);
+            numbers_.Resize(idx + 1, Number::any);
         }
         auto& n = numbers_[idx];
-        if (!n.IsValid()) {
+        if (n.IsAny()) {
             n = number.Value();
             return true;
         }
@@ -348,6 +348,16 @@ class TemplateState {
             return Number::invalid;
         }
         return numbers_[idx];
+    }
+
+    /// SetNum replaces the template number with index @p idx with number @p num.
+    /// @param idx the index of the template number
+    /// @param num the new number for the template
+    void SetNum(size_t idx, Number num) {
+        if (idx >= numbers_.Length()) {
+            numbers_.Resize(idx + 1, Number::any);
+        }
+        numbers_[idx] = num;
     }
 
     /// @return the total number of type and number templates

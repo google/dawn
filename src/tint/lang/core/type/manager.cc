@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/type.h"
@@ -53,6 +54,10 @@ Manager::Manager(Manager&&) = default;
 Manager& Manager::operator=(Manager&& rhs) = default;
 
 Manager::~Manager() = default;
+
+const core::type::Invalid* Manager::invalid() {
+    return Get<core::type::Invalid>();
+}
 
 const core::type::Void* Manager::void_() {
     return Get<core::type::Void>();

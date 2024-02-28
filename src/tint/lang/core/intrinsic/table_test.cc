@@ -528,33 +528,56 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
               R"(no matching call to 'textureDimensions(bool, bool)'
 
 27 candidate functions:
-  'textureDimensions(texture: texture_1d<T>, level: L) -> u32'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_1d<T>) -> u32'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_3d<T>) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_cube) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_1d<F, A>) -> u32'
-  'textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>'
-  'textureDimensions(texture: texture_external) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_2d  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_cube  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_cube_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_1d<T>  ✗ , level: L  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d_array<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_3d<T>  ✗ , level: L  ✗ ) -> vec3<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube_array<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_2d  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_2d_array  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_cube  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_cube_array  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_multisampled_2d  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'textureDimensions(texture: texture_storage_2d<F, A>  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_2d_array<F, A>  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_3d<F, A>  ✗ ) -> vec3<u32>'
+ • 'textureDimensions(texture: texture_external  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_3d<T>  ✗ ) -> vec3<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
 )");
 }
 
@@ -568,33 +591,56 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
               R"(no matching call to 'textureDimensions(texture_depth_2d, bool)'
 
 27 candidate functions:
-  'textureDimensions(texture: texture_depth_2d, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_1d<T>, level: L) -> u32'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_3d<T>, level: L) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube_array<T>, level: L) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32', 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_cube, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_cube_array, level: L) -> vec2<u32>'  where: 'L' is 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d) -> vec2<u32>'
-  'textureDimensions(texture: texture_1d<T>) -> u32'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_2d_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_3d<T>) -> vec3<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_cube_array<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_multisampled_2d<T>) -> vec2<u32>'  where: 'T' is 'f32', 'i32' or 'u32'
-  'textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_cube) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>'
-  'textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_1d<F, A>) -> u32'
-  'textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>'
-  'textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>'
-  'textureDimensions(texture: texture_external) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_2d  ✓ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_cube  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_cube_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_1d<T>  ✗ , level: L  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d_array<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_3d<T>  ✗ , level: L  ✗ ) -> vec3<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube_array<T>  ✗ , level: L  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_depth_2d_array  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_cube  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_cube_array  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_multisampled_2d  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'textureDimensions(texture: texture_storage_2d<F, A>  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_2d_array<F, A>  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_storage_3d<F, A>  ✗ ) -> vec3<u32>'
+ • 'textureDimensions(texture: texture_external  ✗ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_2d_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_3d<T>  ✗ ) -> vec3<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_cube_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
 )");
 }
 
@@ -613,8 +659,10 @@ TEST_F(CoreIntrinsicTableTest, MismatchUnaryOp) {
     EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator - (bool)'
 
 2 candidate operators:
-  'operator - (T) -> T'  where: 'T' is 'f32', 'i32' or 'f16'
-  'operator - (vecN<T>) -> vecN<T>'  where: 'T' is 'f32', 'i32' or 'f16'
+ • 'operator - (T  ✗ ) -> T' where:
+      ✗  'T' is 'f32', 'i32' or 'f16'
+ • 'operator - (vecN<T>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'f16'
 )");
 }
 
@@ -652,15 +700,24 @@ TEST_F(CoreIntrinsicTableTest, MismatchBinaryOp) {
     EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator * (f32, bool)'
 
 9 candidate operators:
-  'operator * (T, T) -> T'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator * (vecN<T>, T) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator * (T, vecN<T>) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator * (T, matNxM<T>) -> matNxM<T>'  where: 'T' is 'f32' or 'f16'
-  'operator * (matNxM<T>, T) -> matNxM<T>'  where: 'T' is 'f32' or 'f16'
-  'operator * (vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator * (matCxR<T>, vecC<T>) -> vecR<T>'  where: 'T' is 'f32' or 'f16'
-  'operator * (vecR<T>, matCxR<T>) -> vecC<T>'  where: 'T' is 'f32' or 'f16'
-  'operator * (matKxR<T>, matCxK<T>) -> matCxR<T>'  where: 'T' is 'f32' or 'f16'
+ • 'operator * (T  ✓ , T  ✗ ) -> T' where:
+      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator * (T  ✓ , vecN<T>  ✗ ) -> vecN<T>' where:
+      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator * (T  ✓ , matNxM<T>  ✗ ) -> matNxM<T>' where:
+      ✓  'T' is 'f32' or 'f16'
+ • 'operator * (vecN<T>  ✗ , T  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator * (matNxM<T>  ✗ , T  ✗ ) -> matNxM<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator * (vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator * (matCxR<T>  ✗ , vecC<T>  ✗ ) -> vecR<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator * (vecR<T>  ✗ , matCxR<T>  ✗ ) -> vecC<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator * (matKxR<T>  ✗ , matCxK<T>  ✗ ) -> matCxR<T>' where:
+      ✗  'T' is 'f32' or 'f16'
 )");
 }
 
@@ -684,15 +741,24 @@ TEST_F(CoreIntrinsicTableTest, MismatchCompoundOp) {
     EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator *= (f32, bool)'
 
 9 candidate operators:
-  'operator *= (T, T) -> T'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator *= (vecN<T>, T) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator *= (T, vecN<T>) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator *= (T, matNxM<T>) -> matNxM<T>'  where: 'T' is 'f32' or 'f16'
-  'operator *= (matNxM<T>, T) -> matNxM<T>'  where: 'T' is 'f32' or 'f16'
-  'operator *= (vecN<T>, vecN<T>) -> vecN<T>'  where: 'T' is 'f32', 'i32', 'u32' or 'f16'
-  'operator *= (matCxR<T>, vecC<T>) -> vecR<T>'  where: 'T' is 'f32' or 'f16'
-  'operator *= (vecR<T>, matCxR<T>) -> vecC<T>'  where: 'T' is 'f32' or 'f16'
-  'operator *= (matKxR<T>, matCxK<T>) -> matCxR<T>'  where: 'T' is 'f32' or 'f16'
+ • 'operator *= (T  ✓ , T  ✗ ) -> T' where:
+      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator *= (T  ✓ , vecN<T>  ✗ ) -> vecN<T>' where:
+      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator *= (T  ✓ , matNxM<T>  ✗ ) -> matNxM<T>' where:
+      ✓  'T' is 'f32' or 'f16'
+ • 'operator *= (vecN<T>  ✗ , T  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator *= (matNxM<T>  ✗ , T  ✗ ) -> matNxM<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator *= (vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
+      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
+ • 'operator *= (matCxR<T>  ✗ , vecC<T>  ✗ ) -> vecR<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator *= (vecR<T>  ✗ , matCxR<T>  ✗ ) -> vecC<T>' where:
+      ✗  'T' is 'f32' or 'f16'
+ • 'operator *= (matKxR<T>  ✗ , matCxK<T>  ✗ ) -> matCxR<T>' where:
+      ✗  'T' is 'f32' or 'f16'
 )");
 }
 
@@ -721,19 +787,35 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
               R"(no matching constructor for 'vec3<i32>(i32, f32, i32)'
 
 6 candidate constructors:
-  'vec3<T>(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(vec3<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>() -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(x: T  ✓ , y: T  ✗ , z: T  ✓ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(T  ✓ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(vec3<T>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >() -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f32', 'U' is 'i32', 'f16', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f16', 'U' is 'f32', 'i32', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'i32', 'U' is 'f32', 'f16', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'u32', 'U' is 'f32', 'f16', 'i32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'bool', 'U' is 'f32', 'f16', 'i32' or 'u32'
+ • 'vec3<T  ✓ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'i32'
+      ✗  'U' is 'f32', 'f16', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'f32'
+      ✗  'U' is 'i32', 'f16', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'f16'
+      ✗  'U' is 'f32', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'u32'
+      ✗  'U' is 'f32', 'f16', 'i32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'bool'
+      ✗  'U' is 'f32', 'f16', 'i32' or 'u32'
 )");
 }
 
@@ -794,19 +876,35 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeConversion) {
               R"(no matching constructor for 'vec3<f32>(array<u32>)'
 
 6 candidate constructors:
-  'vec3<T>(vec3<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>() -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(x: T, yz: vec2<T>) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(xy: vec2<T>, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
-  'vec3<T>(x: T, y: T, z: T) -> vec3<T>'  where: 'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(vec3<T>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(T  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >() -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(x: T  ✗ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✓ >(x: T  ✗ , y: T  ✗ , z: T  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f32', 'U' is 'i32', 'f16', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'f16', 'U' is 'f32', 'i32', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'i32', 'U' is 'f32', 'f16', 'u32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'u32', 'U' is 'f32', 'f16', 'i32' or 'bool'
-  'vec3<T>(vec3<U>) -> vec3<T>'  where: 'T' is 'bool', 'U' is 'f32', 'f16', 'i32' or 'u32'
+ • 'vec3<T  ✓ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✓  'T' is 'f32'
+      ✗  'U' is 'i32', 'f16', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'f16'
+      ✗  'U' is 'f32', 'i32', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'i32'
+      ✗  'U' is 'f32', 'f16', 'u32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'u32'
+      ✗  'U' is 'f32', 'f16', 'i32' or 'bool'
+ • 'vec3<T  ✗ >(vec3<U>  ✗ ) -> vec3<T>' where:
+      ✗  'T' is 'bool'
+      ✗  'U' is 'f32', 'f16', 'i32' or 'u32'
 )");
 }
 

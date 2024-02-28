@@ -542,18 +542,18 @@ match workgroup
 @must_use fn textureSampleLevel[A: iu32, L: iu32](texture: texture_depth_cube_array,sampler: sampler, coords: vec3<f32>, array_index: A, level: L) -> f32
 @must_use fn textureSampleBaseClampToEdge(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 @must_use fn textureSampleBaseClampToEdge(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
-fn textureStore[C: iu32](texture: texture_storage_1d<f32_texel_format, writable>, coords: C, value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<f32_texel_format, writable>, coords: vec2<C>, value: vec4<f32>)
-fn textureStore[C: iu32, A: iu32](texture: texture_storage_2d_array<f32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<f32_texel_format, writable>, coords: vec3<C>, value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<i32_texel_format, writable>, coords: C, value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<i32_texel_format, writable>, coords: vec2<C>, value: vec4<i32>)
-fn textureStore[C: iu32, A: iu32](texture: texture_storage_2d_array<i32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<i32_texel_format, writable>, coords: vec3<C>, value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<u32_texel_format, writable>, coords: C, value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<u32_texel_format, writable>, coords: vec2<C>, value: vec4<u32>)
-fn textureStore[C: iu32, A: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>, coords: vec3<C>, value: vec4<u32>)
+fn textureStore[C: iu32, F: f32_texel_format, W: writable](texture: texture_storage_1d<F, W>, coords: C, value: vec4<f32>)
+fn textureStore[C: iu32, F: f32_texel_format, W: writable](texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<f32>)
+fn textureStore[C: iu32, F: f32_texel_format, W: writable, A: iu32](texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<f32>)
+fn textureStore[C: iu32, F: f32_texel_format, W: writable](texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<f32>)
+fn textureStore[C: iu32, F: i32_texel_format, W: writable](texture: texture_storage_1d<F, W>, coords: C, value: vec4<i32>)
+fn textureStore[C: iu32, F: i32_texel_format, W: writable](texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<i32>)
+fn textureStore[C: iu32, F: i32_texel_format, W: writable, A: iu32](texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<i32>)
+fn textureStore[C: iu32, F: i32_texel_format, W: writable](texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<i32>)
+fn textureStore[C: iu32, F: u32_texel_format, W: writable](texture: texture_storage_1d<F, W>, coords: C, value: vec4<u32>)
+fn textureStore[C: iu32, F: u32_texel_format, W: writable](texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<u32>)
+fn textureStore[C: iu32, F: u32_texel_format, W: writable, A: iu32](texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<u32>)
+fn textureStore[C: iu32, F: u32_texel_format, W: writable](texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<u32>)
 @must_use fn textureLoad[T: fiu32, C: iu32, L: iu32](texture: texture_1d<T>, coords: C, level: L) -> vec4<T>
 @must_use fn textureLoad[T: fiu32, C: iu32, L: iu32](texture: texture_2d<T>, coords: vec2<C>, level: L) -> vec4<T>
 @must_use fn textureLoad[T: fiu32, C: iu32, A: iu32, L: iu32](texture: texture_2d_array<T>, coords: vec2<C>, array_index: A, level: L) -> vec4<T>
@@ -563,18 +563,18 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use fn textureLoad[C: iu32, A: iu32, L: iu32](texture: texture_depth_2d_array, coords: vec2<C>, array_index: A, level: L) -> f32
 @must_use fn textureLoad[C: iu32, S: iu32](texture: texture_depth_multisampled_2d, coords: vec2<C>, sample_index: S) -> f32
 @must_use fn textureLoad[C: iu32](texture: texture_external, coords: vec2<C>) -> vec4<f32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_1d<f32_texel_format, readable>, coords: C) -> vec4<f32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_1d<i32_texel_format, readable>, coords: C) -> vec4<i32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_1d<u32_texel_format, readable>, coords: C) -> vec4<u32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<C>) -> vec4<f32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<C>) -> vec4<i32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<C>) -> vec4<u32>
-@must_use fn textureLoad[C: iu32, A: iu32](texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<f32>
-@must_use fn textureLoad[C: iu32, A: iu32](texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<i32>
-@must_use fn textureLoad[C: iu32, A: iu32](texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<u32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<C>) -> vec4<f32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<C>) -> vec4<i32>
-@must_use fn textureLoad[C: iu32](texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<C>) -> vec4<u32>
+@must_use fn textureLoad[C: iu32, F: f32_texel_format, R: readable](texture: texture_storage_1d<F, R>, coords: C) -> vec4<f32>
+@must_use fn textureLoad[C: iu32, F: i32_texel_format, R: readable](texture: texture_storage_1d<F, R>, coords: C) -> vec4<i32>
+@must_use fn textureLoad[C: iu32, F: u32_texel_format, R: readable](texture: texture_storage_1d<F, R>, coords: C) -> vec4<u32>
+@must_use fn textureLoad[C: iu32, F: f32_texel_format, R: readable](texture: texture_storage_2d<F, R>, coords: vec2<C>) -> vec4<f32>
+@must_use fn textureLoad[C: iu32, F: i32_texel_format, R: readable](texture: texture_storage_2d<F, R>, coords: vec2<C>) -> vec4<i32>
+@must_use fn textureLoad[C: iu32, F: u32_texel_format, R: readable](texture: texture_storage_2d<F, R>, coords: vec2<C>) -> vec4<u32>
+@must_use fn textureLoad[C: iu32, F: f32_texel_format, R: readable, A: iu32](texture: texture_storage_2d_array<F, R>, coords: vec2<C>, array_index: A) -> vec4<f32>
+@must_use fn textureLoad[C: iu32, F: i32_texel_format, R: readable, A: iu32](texture: texture_storage_2d_array<F, R>, coords: vec2<C>, array_index: A) -> vec4<i32>
+@must_use fn textureLoad[C: iu32, F: u32_texel_format, R: readable, A: iu32](texture: texture_storage_2d_array<F, R>, coords: vec2<C>, array_index: A) -> vec4<u32>
+@must_use fn textureLoad[C: iu32, F: f32_texel_format, R: readable](texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<f32>
+@must_use fn textureLoad[C: iu32, F: i32_texel_format, R: readable](texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<i32>
+@must_use fn textureLoad[C: iu32, F: u32_texel_format, R: readable](texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<u32>
 
 @stage("fragment", "compute") fn atomicLoad[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>) -> T
 @stage("fragment", "compute") fn atomicStore[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T)
