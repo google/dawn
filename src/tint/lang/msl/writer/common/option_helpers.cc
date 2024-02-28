@@ -52,27 +52,21 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
                                                          const binding::BindingInfo& dst) -> bool {
-        if (auto binding = seen_wgsl_bindings.Get(src)) {
-            if (*binding != dst) {
-                diagnostics.AddError(diag::System::Writer, Source{})
-                    << "found duplicate WGSL binding point: " << src;
-                return true;
-            }
+        if (auto binding = seen_wgsl_bindings.Add(src, dst); binding.value != dst) {
+            diagnostics.AddError(diag::System::Writer, Source{})
+                << "found duplicate WGSL binding point: " << src;
+            return true;
         }
-        seen_wgsl_bindings.Add(src, dst);
         return false;
     };
 
     auto msl_seen = [&diagnostics](InfoToPointMap& map, const binding::BindingInfo& src,
                                    const tint::BindingPoint& dst) -> bool {
-        if (auto binding = map.Get(src)) {
-            if (*binding != dst) {
-                diagnostics.AddError(diag::System::Writer, Source{})
-                    << "found duplicate MSL binding point: [binding: " << src.binding << "]";
-                return true;
-            }
+        if (auto binding = map.Add(src, dst); binding.value != dst) {
+            diagnostics.AddError(diag::System::Writer, Source{})
+                << "found duplicate MSL binding point: [binding: " << src.binding << "]";
+            return true;
         }
-        map.Add(src, dst);
         return false;
     };
 
@@ -159,9 +153,11 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 //
 // When the data comes in we have a list of all WGSL origin (group,binding) pairs to MSL
 // (binding) in the `uniform`, `storage`, `texture`, and `sampler` arrays.
-void PopulateRemapperAndMultiplanarOptions(const Options& options,
-                                           RemapperData& remapper_data,
-                                           ExternalTextureOptions& external_texture) {
+void PopulateBindingRelatedOptions(
+    const Options& options,
+    RemapperData& remapper_data,
+    ExternalTextureOptions& external_texture,
+    ArrayLengthFromUniformOptions& array_length_from_uniform_options) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
@@ -207,6 +203,24 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
         }
 
         remapper_data.emplace(src_binding_point, plane0_binding_point);
+    }
+
+    // ArrayLengthFromUniformOptions bindpoints may need to be remapped
+    {
+        std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+        for (auto& [bindpoint, index] : options.array_length_from_uniform.bindpoint_to_size_index) {
+            auto it = remapper_data.find(bindpoint);
+            if (it != remapper_data.end()) {
+                bindpoint_to_size_index.emplace(it->second, index);
+            } else {
+                bindpoint_to_size_index.emplace(bindpoint, index);
+            }
+        }
+
+        array_length_from_uniform_options.ubo_binding =
+            options.array_length_from_uniform.ubo_binding;
+        array_length_from_uniform_options.bindpoint_to_size_index =
+            std::move(bindpoint_to_size_index);
     }
 }
 

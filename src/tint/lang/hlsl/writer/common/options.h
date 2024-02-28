@@ -34,7 +34,6 @@
 #include <vector>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/api/options/binding_remapper.h"
 #include "src/tint/api/options/external_texture.h"
 #include "src/tint/api/options/pixel_local.h"
@@ -139,6 +138,19 @@ struct Bindings {
 /// kMaxInterStageLocations == D3D11_PS_INPUT_REGISTER_COUNT - 2
 /// D3D11_PS_INPUT_REGISTER_COUNT == D3D12_PS_INPUT_REGISTER_COUNT
 constexpr uint32_t kMaxInterStageLocations = 30;
+
+/// Options used to specify a mapping of binding points to indices into a UBO
+/// from which to load buffer sizes.
+struct ArrayLengthFromUniformOptions {
+    /// The HLSL binding point to use to generate a uniform buffer from which to read buffer sizes.
+    binding::Uniform ubo_binding;
+    /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
+    /// into the uniform buffer where the length of the buffer is stored.
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
+};
 
 /// Configuration options used for generating HLSL.
 struct Options {

@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
@@ -187,7 +188,9 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     ExternalTextureOptions external_texture_options{};
     RemapperData remapper_data{};
-    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
+    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+                                  array_length_from_uniform_options);
 
     manager.Add<ast::transform::BindingRemapper>();
     data.Add<ast::transform::BindingRemapper::Remappings>(
@@ -240,12 +243,13 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<ast::transform::ArrayLengthFromUniform>();
-
-    ast::transform::ArrayLengthFromUniform::Config array_length_cfg(
-        std::move(options.array_length_from_uniform.ubo_binding));
-    array_length_cfg.bindpoint_to_size_index =
-        std::move(options.array_length_from_uniform.bindpoint_to_size_index);
-    data.Add<ast::transform::ArrayLengthFromUniform::Config>(array_length_cfg);
+    // Build the config for the internal ArrayLengthFromUniform transform.
+    ast::transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
+        BindingPoint{0, array_length_from_uniform_options.ubo_binding});
+    array_length_from_uniform_cfg.bindpoint_to_size_index =
+        std::move(array_length_from_uniform_options.bindpoint_to_size_index);
+    data.Add<ast::transform::ArrayLengthFromUniform::Config>(
+        std::move(array_length_from_uniform_cfg));
 
     // PackedVec3 must come after ExpandCompoundAssignment.
     manager.Add<PackedVec3>();

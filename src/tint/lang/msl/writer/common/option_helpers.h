@@ -45,14 +45,17 @@ using RemapperData = std::unordered_map<BindingPoint, BindingPoint>;
 /// @returns success or failure
 Result<SuccessType> ValidateBindingOptions(const Options& options);
 
-/// Populates data from the writer options for the remapper and external texture.
+/// Populates binding-related option from the writer options
 /// @param options the writer options
 /// @param remapper_data where to put the remapper data
 /// @param external_texture where to store the external texture options
+/// @param array_length_from_uniform_options where to store the ArrayLengthFromUniform options
 /// Note, these are populated together because there are dependencies between the two types of data.
-void PopulateRemapperAndMultiplanarOptions(const Options& options,
-                                           RemapperData& remapper_data,
-                                           ExternalTextureOptions& external_texture);
+void PopulateBindingRelatedOptions(
+    const Options& options,
+    RemapperData& remapper_data,
+    ExternalTextureOptions& external_texture,
+    ArrayLengthFromUniformOptions& array_length_from_uniform_options);
 
 }  // namespace tint::msl::writer
 

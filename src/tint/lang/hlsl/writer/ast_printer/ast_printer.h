@@ -35,7 +35,6 @@
 #include <utility>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"

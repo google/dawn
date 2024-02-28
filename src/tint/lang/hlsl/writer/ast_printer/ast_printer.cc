@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
@@ -334,12 +335,6 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<ast::transform::RemovePhonies>();
 
-    // Build the config for the internal ArrayLengthFromUniform transform.
-    ast::transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
-        array_length_from_uniform_options.ubo_binding);
-    array_length_from_uniform_cfg.bindpoint_to_size_index =
-        std::move(array_length_from_uniform_options.bindpoint_to_size_index);
-
     // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
     // ExpandCompoundAssignment.
     // TODO(crbug.com/tint/1752): This is only necessary when FXC is being used.
@@ -348,6 +343,12 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     // ArrayLengthFromUniform must come after SimplifyPointers as it assumes that the form of the
     // array length argument is &var.array.
     manager.Add<ast::transform::ArrayLengthFromUniform>();
+    // Build the config for the internal ArrayLengthFromUniform transform.
+    ast::transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
+        BindingPoint{array_length_from_uniform_options.ubo_binding.group,
+                     array_length_from_uniform_options.ubo_binding.binding});
+    array_length_from_uniform_cfg.bindpoint_to_size_index =
+        std::move(array_length_from_uniform_options.bindpoint_to_size_index);
     data.Add<ast::transform::ArrayLengthFromUniform::Config>(
         std::move(array_length_from_uniform_cfg));
     // DecomposeMemoryAccess must come after:

@@ -42,7 +42,6 @@ cc_library(
     "options.cc",
   ],
   hdrs = [
-    "array_length_from_uniform.h",
     "binding_remapper.h",
     "depth_range_offsets.h",
     "external_texture.h",
@@ -70,7 +69,6 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "array_length_from_uniform_test.cc",
     "binding_remapper_test.cc",
     "external_texture_test.cc",
     "pixel_local_test.cc",

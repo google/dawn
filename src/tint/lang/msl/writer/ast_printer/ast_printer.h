@@ -34,7 +34,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"

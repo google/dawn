@@ -32,7 +32,6 @@
 // dependency from 'tint/api' to the libraries used to make up the Tint API.
 ////////////////////////////////////////////////////////////////////////////////
 #include "src/tint/api/common/override_id.h"
-#include "src/tint/api/options/array_length_from_uniform.h"
 
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"  // nogncheck

@@ -56,7 +56,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     ExternalTextureOptions external_texture_options{};
     RemapperData remapper_data{};
-    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
+    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+                                  array_length_from_uniform_options);
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, remapper_data);
 
     {

@@ -45,7 +45,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     auto& program = res->program;
 
     tint::msl::writer::Options gen_options = {};
-    gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
+    gen_options.array_length_from_uniform.ubo_binding = 30;
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
                                                                           0);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},

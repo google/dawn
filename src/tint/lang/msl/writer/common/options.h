@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/api/options/pixel_local.h"
 #include "src/tint/utils/reflection/reflection.h"
 
@@ -110,6 +109,19 @@ struct Bindings {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Bindings, uniform, storage, texture, storage_texture, sampler, external_texture);
+};
+
+/// Options used to specify a mapping of binding points to indices into a UBO
+/// from which to load buffer sizes.
+struct ArrayLengthFromUniformOptions {
+    /// The MSL binding point to use to generate a uniform buffer from which to read buffer sizes.
+    uint32_t ubo_binding;
+    /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
+    /// into the uniform buffer where the length of the buffer is stored.
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
 };
 
 /// Configuration options used for generating MSL.

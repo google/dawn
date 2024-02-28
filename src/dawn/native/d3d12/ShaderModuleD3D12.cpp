@@ -179,7 +179,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     using tint::BindingPoint;
 
-    tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
+    tint::hlsl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
                                           layout->GetDynamicStorageBufferLengthsShaderRegister()};
 
