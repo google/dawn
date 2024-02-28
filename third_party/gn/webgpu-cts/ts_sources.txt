@@ -222,6 +222,7 @@ src/webgpu/api/operation/texture_view/read.spec.ts
 src/webgpu/api/operation/texture_view/write.spec.ts
 src/webgpu/api/operation/vertex_state/correctness.spec.ts
 src/webgpu/api/operation/vertex_state/index_format.spec.ts
+src/webgpu/api/validation/utils.ts
 src/webgpu/api/validation/validation_test.ts
 src/webgpu/api/validation/compute_pipeline.spec.ts
 src/webgpu/api/validation/createBindGroup.spec.ts
@@ -710,6 +711,7 @@ src/webgpu/shader/validation/expression/call/builtin/clamp.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/cos.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/cosh.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/degrees.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/derivatives.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/dot4I8Packed.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/dot4U8Packed.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/exp.spec.ts
@@ -734,6 +736,7 @@ src/webgpu/shader/validation/expression/call/builtin/sqrt.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/tan.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/unpack4xI8.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/unpack4xU8.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/workgroupUniformLoad.spec.ts
 src/webgpu/shader/validation/expression/unary/address_of_and_indirection.spec.ts
 src/webgpu/shader/validation/extension/pointer_composite_access.spec.ts
 src/webgpu/shader/validation/functions/alias_analysis.spec.ts
