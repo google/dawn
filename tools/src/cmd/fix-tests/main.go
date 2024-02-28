@@ -37,6 +37,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/substr"
@@ -162,6 +163,8 @@ var (
 	reExpectHasSubstr = regexp.MustCompile(`([./\\\w_\-:]*):(\d+).*\nValue of: .*\nExpected: has substring "((?:.|\n)*?[^\\])"\n  Actual: "((?:.|\n)*?[^\\])"`)
 )
 
+var reHexCode = regexp.MustCompile(`\\x([0-9A-Z]{2})`)
+
 func processFailure(test, wd, failure string) error {
 	// Start by un-escaping newlines in the failure message
 	failure = strings.ReplaceAll(failure, "\\n", "\n")
@@ -170,6 +173,13 @@ func processFailure(test, wd, failure string) error {
 	unescape := func(s string) string {
 		s = strings.ReplaceAll(s, `\"`, `"`)
 		s = strings.ReplaceAll(s, `\\`, `\`)
+		s = reHexCode.ReplaceAllStringFunc(s, func(match string) string {
+			i, err := strconv.ParseInt(match[2:], 16, 32)
+			if err != nil {
+				panic(err)
+			}
+			return string([]byte{byte(i)})
+		})
 		return s
 	}
 	escape := func(s string) string {
@@ -206,7 +216,7 @@ func processFailure(test, wd, failure string) error {
 				case strings.Contains(testSource, b):
 					testSource = strings.ReplaceAll(testSource, b, a)
 				default:
-					return "", fmt.Errorf("Could not fix 'EXPECT_EQ' pattern in '%v'", file)
+					return "", fmt.Errorf("could not fix 'EXPECT_EQ' pattern in '%v'\n\nA: '%v'\n\nB: '%v'", file, a, b)
 				}
 			}
 			return testSource, nil
@@ -225,13 +235,13 @@ func processFailure(test, wd, failure string) error {
 					testSource = strings.Replace(testSource, b, fix, -1)
 					return testSource, nil
 				}
-				return "", fmt.Errorf("Could apply fix for 'HasSubstr' pattern in '%v'", file)
+				return "", fmt.Errorf("could apply fix for 'HasSubstr' pattern in '%v'", file)
 			}
 
-			return "", fmt.Errorf("Could find fix for 'HasSubstr' pattern in '%v'", file)
+			return "", fmt.Errorf("could find fix for 'HasSubstr' pattern in '%v'", file)
 		}
 	} else {
-		return fmt.Errorf("Cannot fix this type of failure")
+		return fmt.Errorf("cannot fix this type of failure")
 	}
 
 	// Get the absolute source path
