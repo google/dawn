@@ -1296,9 +1296,6 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
     // the offset= that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    // TODO(anglebug.com/8554): Crashes when count is 0.
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
