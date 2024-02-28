@@ -68,6 +68,11 @@ struct State {
 
         RegisterModuleScopeDecls();
 
+        // Process the types
+        for (auto* ty : ir.Types()) {
+            EnsureResolvable(ty);
+        }
+
         // Process the module-scope variable declarations
         for (auto* inst : *ir.root_block) {
             Process(inst);

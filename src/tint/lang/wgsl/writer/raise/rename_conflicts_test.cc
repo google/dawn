@@ -1101,5 +1101,55 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IRToProgramRenameConflictsTest, Conflict_StructMember_ShadowedBy_Fn) {
+    auto* s = ty.Struct(b.ir.symbols.New("s"), {{b.ir.symbols.New("f"), ty.f32()}});
+
+    b.Append(mod.root_block, [&] {  //
+        b.Var(ty.ptr<private_>(s));
+    });
+
+    auto* fn = b.Function("f32", ty.void_());
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+s = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<private, s, read_write> = var
+}
+
+%f32 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+s = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+%b1 = block {  # root
+  %1:ptr<private, s, read_write> = var
+}
+
+%f32_1 = func():void -> %b2 {
+  %b2 = block {
+    ret
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
