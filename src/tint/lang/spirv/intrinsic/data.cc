@@ -84,7 +84,7 @@ constexpr TypeMatcher kBoolMatcher {
     return BuildBool(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "bool";
+    out << style::Type("bool");
   }
 };
 
@@ -98,7 +98,7 @@ constexpr TypeMatcher kF32Matcher {
     return BuildF32(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "f32";
+    out << style::Type("f32");
   }
 };
 
@@ -112,7 +112,7 @@ constexpr TypeMatcher kF16Matcher {
     return BuildF16(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "f16";
+    out << style::Type("f16");
   }
 };
 
@@ -126,7 +126,7 @@ constexpr TypeMatcher kI32Matcher {
     return BuildI32(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "i32";
+    out << style::Type("i32");
   }
 };
 
@@ -140,7 +140,7 @@ constexpr TypeMatcher kU32Matcher {
     return BuildU32(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "u32";
+    out << style::Type("u32");
   }
 };
 
@@ -160,7 +160,7 @@ constexpr TypeMatcher kVec2Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "vec2" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("vec2", "<", T, ">");
   }
 };
 
@@ -180,7 +180,7 @@ constexpr TypeMatcher kVec3Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "vec3" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("vec3", "<", T, ">");
   }
 };
 
@@ -200,7 +200,7 @@ constexpr TypeMatcher kVec4Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "vec4" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("vec4", "<", T, ">");
   }
 };
 
@@ -220,7 +220,7 @@ constexpr TypeMatcher kMat2X2Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat2x2" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat2x2", "<", T, ">");
   }
 };
 
@@ -240,7 +240,7 @@ constexpr TypeMatcher kMat2X3Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat2x3" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat2x3", "<", T, ">");
   }
 };
 
@@ -260,7 +260,7 @@ constexpr TypeMatcher kMat2X4Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat2x4" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat2x4", "<", T, ">");
   }
 };
 
@@ -280,7 +280,7 @@ constexpr TypeMatcher kMat3X2Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat3x2" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat3x2", "<", T, ">");
   }
 };
 
@@ -300,7 +300,7 @@ constexpr TypeMatcher kMat3X3Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat3x3" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat3x3", "<", T, ">");
   }
 };
 
@@ -320,7 +320,7 @@ constexpr TypeMatcher kMat3X4Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat3x4" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat3x4", "<", T, ">");
   }
 };
 
@@ -340,7 +340,7 @@ constexpr TypeMatcher kMat4X2Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat4x2" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat4x2", "<", T, ">");
   }
 };
 
@@ -360,7 +360,7 @@ constexpr TypeMatcher kMat4X3Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat4x3" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat4x3", "<", T, ">");
   }
 };
 
@@ -380,7 +380,7 @@ constexpr TypeMatcher kMat4X4Matcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "mat4x4" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("mat4x4", "<", T, ">");
   }
 };
 
@@ -406,7 +406,7 @@ constexpr TypeMatcher kVecMatcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
   state->PrintNum(N);StyledText T;
   state->PrintType(T);
-    out  << style::Type << "vec" << style::Type << N << style::Type << "<" << style::Type << T << style::Type << ">";
+    out << style::Type("vec", N, "<", T, ">");
   }
 };
 
@@ -438,7 +438,7 @@ constexpr TypeMatcher kMatMatcher {
   state->PrintNum(N);StyledText M;
   state->PrintNum(M);StyledText T;
   state->PrintType(T);
-    out  << style::Type << "mat" << style::Type << N << style::Type << "x" << style::Type << M << style::Type << "<" << style::Type << T << style::Type << ">";
+    out << style::Type("mat", N, "x", M, "<", T, ">");
   }
 };
 
@@ -458,7 +458,7 @@ constexpr TypeMatcher kAtomicMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "atomic" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("atomic", "<", T, ">");
   }
 };
 
@@ -472,7 +472,7 @@ constexpr TypeMatcher kSamplerMatcher {
     return BuildSampler(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "sampler";
+    out << style::Type("sampler");
   }
 };
 
@@ -486,7 +486,7 @@ constexpr TypeMatcher kSamplerComparisonMatcher {
     return BuildSamplerComparison(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "sampler_comparison";
+    out << style::Type("sampler_comparison");
   }
 };
 
@@ -506,7 +506,7 @@ constexpr TypeMatcher kTexture1DMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_1d" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_1d", "<", T, ">");
   }
 };
 
@@ -526,7 +526,7 @@ constexpr TypeMatcher kTexture2DMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_2d" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_2d", "<", T, ">");
   }
 };
 
@@ -546,7 +546,7 @@ constexpr TypeMatcher kTexture2DArrayMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_2d_array" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_2d_array", "<", T, ">");
   }
 };
 
@@ -566,7 +566,7 @@ constexpr TypeMatcher kTexture3DMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_3d" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_3d", "<", T, ">");
   }
 };
 
@@ -586,7 +586,7 @@ constexpr TypeMatcher kTextureCubeMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_cube" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_cube", "<", T, ">");
   }
 };
 
@@ -606,7 +606,7 @@ constexpr TypeMatcher kTextureCubeArrayMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_cube_array" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_cube_array", "<", T, ">");
   }
 };
 
@@ -626,7 +626,7 @@ constexpr TypeMatcher kTextureMultisampled2DMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "texture_multisampled_2d" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("texture_multisampled_2d", "<", T, ">");
   }
 };
 
@@ -640,7 +640,7 @@ constexpr TypeMatcher kTextureDepth2DMatcher {
     return BuildTextureDepth2D(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "texture_depth_2d";
+    out << style::Type("texture_depth_2d");
   }
 };
 
@@ -654,7 +654,7 @@ constexpr TypeMatcher kTextureDepth2DArrayMatcher {
     return BuildTextureDepth2DArray(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "texture_depth_2d_array";
+    out << style::Type("texture_depth_2d_array");
   }
 };
 
@@ -668,7 +668,7 @@ constexpr TypeMatcher kTextureDepthCubeMatcher {
     return BuildTextureDepthCube(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "texture_depth_cube";
+    out << style::Type("texture_depth_cube");
   }
 };
 
@@ -682,7 +682,7 @@ constexpr TypeMatcher kTextureDepthCubeArrayMatcher {
     return BuildTextureDepthCubeArray(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "texture_depth_cube_array";
+    out << style::Type("texture_depth_cube_array");
   }
 };
 
@@ -696,7 +696,7 @@ constexpr TypeMatcher kTextureDepthMultisampled2DMatcher {
     return BuildTextureDepthMultisampled2D(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "texture_depth_multisampled_2d";
+    out << style::Type("texture_depth_multisampled_2d");
   }
 };
 
@@ -722,7 +722,7 @@ constexpr TypeMatcher kTextureStorage1DMatcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
   state->PrintNum(F);StyledText A;
   state->PrintNum(A);
-    out << style::Type << "texture_storage_1d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
+    out << style::Type("texture_storage_1d", "<", F, ", ", A, ">");
   }
 };
 
@@ -748,7 +748,7 @@ constexpr TypeMatcher kTextureStorage2DMatcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
   state->PrintNum(F);StyledText A;
   state->PrintNum(A);
-    out << style::Type << "texture_storage_2d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
+    out << style::Type("texture_storage_2d", "<", F, ", ", A, ">");
   }
 };
 
@@ -774,7 +774,7 @@ constexpr TypeMatcher kTextureStorage2DArrayMatcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
   state->PrintNum(F);StyledText A;
   state->PrintNum(A);
-    out << style::Type << "texture_storage_2d_array" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
+    out << style::Type("texture_storage_2d_array", "<", F, ", ", A, ">");
   }
 };
 
@@ -800,7 +800,7 @@ constexpr TypeMatcher kTextureStorage3DMatcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText F;
   state->PrintNum(F);StyledText A;
   state->PrintNum(A);
-    out << style::Type << "texture_storage_3d" << style::Code << "<" << style::Type << F << style::Code << ", " << style::Type << A << style::Code << ">";
+    out << style::Type("texture_storage_3d", "<", F, ", ", A, ">");
   }
 };
 
@@ -832,7 +832,7 @@ constexpr TypeMatcher kPtrMatcher {
   state->PrintNum(S);StyledText T;
   state->PrintType(T);StyledText A;
   state->PrintNum(A);
-    out << style::Type << "ptr" << style::Code << "<" << style::Type << S << style::Code << ", " << style::Type << T << style::Code << ", " << style::Type << A << style::Code << ">";
+    out << style::Type("ptr", "<", S, ", ", T, ", ", A, ">");
   }
 };
 
@@ -846,7 +846,7 @@ constexpr TypeMatcher kStructWithRuntimeArrayMatcher {
     return BuildStructWithRuntimeArray(state, ty);
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
-    out << style::Type << "struct_with_runtime_array";
+    out << style::Type("struct_with_runtime_array");
   }
 };
 
@@ -866,7 +866,7 @@ constexpr TypeMatcher kSampledImageMatcher {
   },
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
-    out << style::Type << "sampled_image" << style::Code << "<" << style::Type << T << style::Code << ">";
+    out << style::Type("sampled_image", "<", T, ">");
   }
 };
 
@@ -885,7 +885,7 @@ constexpr TypeMatcher kF32F16Matcher {
 /* print */ [](MatchState*, StyledText& out) {
     // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
- kF32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kF16Matcher.print(nullptr, out);}
+ kF32Matcher.print(nullptr, out); out << style::Plain(" or "); kF16Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match iu32'
@@ -902,7 +902,7 @@ constexpr TypeMatcher kIu32Matcher {
 /* print */ [](MatchState*, StyledText& out) {
     // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
- kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kU32Matcher.print(nullptr, out);}
+ kI32Matcher.print(nullptr, out); out << style::Plain(" or "); kU32Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match fiu32'
@@ -922,7 +922,7 @@ constexpr TypeMatcher kFiu32Matcher {
 /* print */ [](MatchState*, StyledText& out) {
     // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
- kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kU32Matcher.print(nullptr, out);}
+ kF32Matcher.print(nullptr, out); out << style::Plain(", "); kI32Matcher.print(nullptr, out); out << style::Plain(" or "); kU32Matcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match scalar'
@@ -948,7 +948,7 @@ constexpr TypeMatcher kScalarMatcher {
 /* print */ [](MatchState*, StyledText& out) {
     // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
- kF32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kF16Matcher.print(nullptr, out); out << TextStyle{} << ", "; kI32Matcher.print(nullptr, out); out << TextStyle{} << ", "; kU32Matcher.print(nullptr, out); out << TextStyle{} << " or "; kBoolMatcher.print(nullptr, out);}
+ kF32Matcher.print(nullptr, out); out << style::Plain(", "); kF16Matcher.print(nullptr, out); out << style::Plain(", "); kI32Matcher.print(nullptr, out); out << style::Plain(", "); kU32Matcher.print(nullptr, out); out << style::Plain(" or "); kBoolMatcher.print(nullptr, out);}
 };
 
 /// TypeMatcher for 'match samplers'
@@ -965,7 +965,7 @@ constexpr TypeMatcher kSamplersMatcher {
 /* print */ [](MatchState*, StyledText& out) {
     // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
- kSamplerMatcher.print(nullptr, out); out << TextStyle{} << " or "; kSamplerComparisonMatcher.print(nullptr, out);}
+ kSamplerMatcher.print(nullptr, out); out << style::Plain(" or "); kSamplerComparisonMatcher.print(nullptr, out);}
 };
 
 /// EnumMatcher for 'match read_write'
@@ -977,7 +977,7 @@ constexpr NumberMatcher kReadWriteMatcher {
     return Number::invalid;
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "read_write";
+  out<< style::Enum("read_write");
   }
 };
 
@@ -990,7 +990,7 @@ constexpr NumberMatcher kStorageMatcher {
     return Number::invalid;
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "storage";
+  out<< style::Enum("storage");
   }
 };
 
@@ -1006,7 +1006,7 @@ constexpr NumberMatcher kWorkgroupOrStorageMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "workgroup"<< TextStyle{} << " or " << style::Enum << "storage";
+  out<< style::Enum("workgroup")<< style::Plain(" or ") << style::Enum("storage");
   }
 };
 
@@ -1027,7 +1027,7 @@ constexpr NumberMatcher kF32TexelFormatMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "bgra8unorm"<< TextStyle{} << ", " << style::Enum << "rgba8unorm"<< TextStyle{} << ", " << style::Enum << "rgba8snorm"<< TextStyle{} << ", " << style::Enum << "rgba16float"<< TextStyle{} << ", " << style::Enum << "r32float"<< TextStyle{} << ", " << style::Enum << "rg32float"<< TextStyle{} << " or " << style::Enum << "rgba32float";
+  out<< style::Enum("bgra8unorm")<< style::Plain(", ") << style::Enum("rgba8unorm")<< style::Plain(", ") << style::Enum("rgba8snorm")<< style::Plain(", ") << style::Enum("rgba16float")<< style::Plain(", ") << style::Enum("r32float")<< style::Plain(", ") << style::Enum("rg32float")<< style::Plain(" or ") << style::Enum("rgba32float");
   }
 };
 
@@ -1046,7 +1046,7 @@ constexpr NumberMatcher kI32TexelFormatMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "rgba8sint"<< TextStyle{} << ", " << style::Enum << "rgba16sint"<< TextStyle{} << ", " << style::Enum << "r32sint"<< TextStyle{} << ", " << style::Enum << "rg32sint"<< TextStyle{} << " or " << style::Enum << "rgba32sint";
+  out<< style::Enum("rgba8sint")<< style::Plain(", ") << style::Enum("rgba16sint")<< style::Plain(", ") << style::Enum("r32sint")<< style::Plain(", ") << style::Enum("rg32sint")<< style::Plain(" or ") << style::Enum("rgba32sint");
   }
 };
 
@@ -1065,7 +1065,7 @@ constexpr NumberMatcher kU32TexelFormatMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "rgba8uint"<< TextStyle{} << ", " << style::Enum << "rgba16uint"<< TextStyle{} << ", " << style::Enum << "r32uint"<< TextStyle{} << ", " << style::Enum << "rg32uint"<< TextStyle{} << " or " << style::Enum << "rgba32uint";
+  out<< style::Enum("rgba8uint")<< style::Plain(", ") << style::Enum("rgba16uint")<< style::Plain(", ") << style::Enum("r32uint")<< style::Plain(", ") << style::Enum("rg32uint")<< style::Plain(" or ") << style::Enum("rgba32uint");
   }
 };
 
@@ -1081,7 +1081,7 @@ constexpr NumberMatcher kReadableMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "read"<< TextStyle{} << " or " << style::Enum << "read_write";
+  out<< style::Enum("read")<< style::Plain(" or ") << style::Enum("read_write");
   }
 };
 
@@ -1097,7 +1097,7 @@ constexpr NumberMatcher kWritableMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum << "write"<< TextStyle{} << " or " << style::Enum << "read_write";
+  out<< style::Enum("write")<< style::Plain(" or ") << style::Enum("read_write");
   }
 };
 

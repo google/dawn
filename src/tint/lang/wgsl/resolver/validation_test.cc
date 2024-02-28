@@ -315,7 +315,7 @@ TEST_F(ResolverValidationTest, AddressSpace_SamplerExplicitAddressSpace) {
     EXPECT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: variables of type 'sampler' must not specifiy an address space)");
+              R"(12:34 error: variables of type 'sampler' must not specify an address space)");
 }
 
 TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
@@ -326,7 +326,7 @@ TEST_F(ResolverValidationTest, AddressSpace_TextureExplicitAddressSpace) {
 
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: variables of type 'texture_1d<f32>' must not specifiy an address space)");
+        R"(12:34 error: variables of type 'texture_1d<f32>' must not specify an address space)");
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {

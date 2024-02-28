@@ -97,17 +97,16 @@ static inline void SortCandidates(Candidates& candidates) {
                      [&](const Candidate& a, const Candidate& b) { return a.score < b.score; });
 }
 
-/// Prints a list of types. Ends with the style of @p ss set to style::Code.
+/// Prints a list of types.
 static void PrintTypeList(StyledText& ss, VectorRef<const core::type::Type*> types) {
     bool first = true;
     for (auto* arg : types) {
         if (!first) {
-            ss << style::Code << ", ";
+            ss << ", ";
         }
         first = false;
-        ss << style::Type << arg->FriendlyName();
+        ss << style::Type(arg->FriendlyName());
     }
-    ss << style::Code;
 }
 
 /// Attempts to find a single intrinsic overload that matches the provided argument types.
@@ -191,13 +190,12 @@ StyledText ErrAmbiguousOverload(Context& context,
                                 VectorRef<const core::type::Type*> args,
                                 VectorRef<Candidate> candidates);
 
-/// @return a string representing a call to a builtin with the given argument
-/// types.
+/// @return a string representing a call to a builtin with the given argument types.
 StyledText CallSignature(std::string_view intrinsic_name,
                          VectorRef<const core::type::Type*> template_args,
                          VectorRef<const core::type::Type*> args) {
     StyledText out;
-    out << style::Function << intrinsic_name << style::Code;
+    out << style::Code << style::Function(intrinsic_name);
     if (!template_args.IsEmpty()) {
         out << "<";
         PrintTypeList(out, template_args);
@@ -207,7 +205,7 @@ StyledText CallSignature(std::string_view intrinsic_name,
     PrintTypeList(out, args);
     out << ")";
 
-    return out << style::Plain;
+    return out;
 }
 
 Result<Overload, StyledText> MatchIntrinsic(Context& context,
@@ -541,22 +539,24 @@ void PrintOverload(StyledText& ss,
                    Context& context,
                    const OverloadInfo& overload,
                    std::string_view intrinsic_name) {
-    TINT_DEFER(ss << style::Plain);
+    // Restore old style before returning.
+    auto prev_style = ss.Style();
+    TINT_DEFER(ss << prev_style);
 
     TemplateState templates;
 
     // TODO(crbug.com/tint/1730): Use input evaluation stage to output only relevant overloads.
     auto earliest_eval_stage = EvaluationStage::kConstant;
 
-    ss << style::Function << intrinsic_name << style::Code;
+    ss << style::Code << style::Function(intrinsic_name);
 
     if (overload.num_explicit_templates > 0) {
         ss << "<";
         for (size_t i = 0; i < overload.num_explicit_templates; i++) {
             if (i > 0) {
-                ss << style::Code << ", ";
+                ss << ", ";
             }
-            ss << style::Type << context.data[overload.templates + i].name;
+            ss << style::Type(context.data[overload.templates + i].name);
         }
         ss << ">";
     }
@@ -564,15 +564,15 @@ void PrintOverload(StyledText& ss,
     for (size_t p = 0; p < overload.num_parameters; p++) {
         auto& parameter = context.data[overload.parameters + p];
         if (p > 0) {
-            ss << style::Code << ", ";
+            ss << ", ";
         }
         if (parameter.usage != ParameterUsage::kNone) {
-            ss << style::Variable << ToString(parameter.usage) << style::Code << ": ";
+            ss << style::Variable(parameter.usage, ": ");
         }
         auto* matcher_indices = context.data[parameter.matcher_indices];
         Match(context, templates, overload, matcher_indices, earliest_eval_stage).PrintType(ss);
     }
-    ss << style::Code << ")";
+    ss << ")";
     if (overload.return_matcher_indices.IsValid()) {
         ss << " -> ";
         auto* matcher_indices = context.data[overload.return_matcher_indices];
@@ -581,7 +581,7 @@ void PrintOverload(StyledText& ss,
 
     bool first = true;
     auto separator = [&] {
-        ss << style::Plain << (first ? "  where: " : ", ");
+        ss << style::Plain(first ? "  where: " : ", ");
         first = false;
     };
 
@@ -592,7 +592,7 @@ void PrintOverload(StyledText& ss,
                 Match(context, templates, overload, matcher_indices, earliest_eval_stage);
 
             separator();
-            ss << style::Type << tmpl.name << style::Plain << " is ";
+            ss << style::Type(tmpl.name) << style::Plain(" is ");
             if (tmpl.kind == TemplateInfo::Kind::kType) {
                 matcher.PrintType(ss);
             } else {

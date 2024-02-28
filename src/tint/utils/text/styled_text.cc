@@ -58,12 +58,14 @@ void StyledText::Clear() {
 }
 
 StyledText& StyledText::SetStyle(TextStyle style) {
-    if (spans_.Back().style != style) {
-        if (spans_.Back().length == 0) {
-            spans_.Back().style = style;
-        } else {
-            spans_.Push(Span{style});
-        }
+    if (spans_.Back().style == style) {
+        return *this;
+    }
+    if (spans_.Back().length == 0) {
+        spans_.Pop();
+    }
+    if (spans_.IsEmpty() || spans_.Back().style != style) {
+        spans_.Push(Span{style});
     }
     return *this;
 }

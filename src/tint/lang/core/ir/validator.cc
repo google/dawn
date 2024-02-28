@@ -308,7 +308,7 @@ Result<SuccessType> Validator::Run() {
 
     for (auto& func : mod_.functions) {
         if (!all_functions_.Add(func.Get())) {
-            AddError(Source{}) << "function " << style::Function << Name(func.Get()) << style::Plain
+            AddError(Source{}) << "function " << style::Function(Name(func.Get()))
                                << " added to module multiple times";
         }
     }

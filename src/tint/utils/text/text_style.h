@@ -31,8 +31,17 @@
 #define SRC_TINT_UTILS_TEXT_TEXT_STYLE_H_
 
 #include <cstdint>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
 
 #include "src/tint/utils/containers/enum_set.h"
+
+// Forward declarations
+namespace tint {
+template <typename... VALUES>
+struct ScopedTextStyle;
+}
 
 namespace tint {
 
@@ -120,9 +129,36 @@ class TextStyle {
         return TextStyle{out};
     }
 
+    /// @returns a new ScopedTextStyle of @p values using with this TextStyle
+    template <typename... VALUES>
+    inline ScopedTextStyle<VALUES...> operator()(VALUES&&... values) const;
+
     /// The style bit pattern
     Bits bits = 0;
 };
+
+/// ScopedTextStyle is a span of text, styled with a TextStyle
+template <typename... VALUES>
+struct ScopedTextStyle {
+    std::tuple<VALUES...> values;
+    TextStyle style;
+};
+
+template <typename... VALUES>
+ScopedTextStyle<VALUES...> TextStyle::operator()(VALUES&&... values) const {
+    return ScopedTextStyle<VALUES...>{std::forward_as_tuple(values...), *this};
+}
+
+namespace detail {
+template <typename T>
+struct IsScopedTextStyle : std::false_type {};
+template <typename... VALUES>
+struct IsScopedTextStyle<ScopedTextStyle<VALUES...> > : std::true_type {};
+}  // namespace detail
+
+/// Resolves to true iff T is a ScopedTextStyle.
+template <typename T>
+static constexpr bool IsScopedTextStyle = detail::IsScopedTextStyle<T>::value;
 
 }  // namespace tint
 

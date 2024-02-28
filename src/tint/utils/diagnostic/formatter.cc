@@ -143,12 +143,12 @@ void Formatter::Format(const Diagnostic& diag, StyledText& text) const {
     }
 
     if (!prefix.IsEmpty()) {
-        text << style::Plain << ": ";
+        text << style::Plain(": ");
     }
     text << style::Bold << diag.message;
 
     if (style_.print_line && src.file && rng.begin.line > 0) {
-        text << style::Plain << "\n";
+        text << style::Plain("\n");
 
         for (size_t line_num = rng.begin.line;
              (line_num <= rng.end.line) && (line_num <= src.file->content.lines.size());
@@ -168,7 +168,7 @@ void Formatter::Format(const Diagnostic& diag, StyledText& text) const {
                 }
             }
 
-            text << style::Plain << "\n";
+            text << style::Plain("\n");
 
             // If the line contains non-ascii characters, then we cannot assume that
             // a single utf8 code unit represents a single glyph, so don't attempt to
@@ -206,7 +206,7 @@ void Formatter::Format(const Diagnostic& diag, StyledText& text) const {
                 // Middle of multi-line
                 text.Repeat('^', num_glyphs(1, line_len + 1));
             }
-            text << style::Plain << "\n";
+            text << style::Plain("\n");
         }
     }
 }

@@ -279,11 +279,9 @@ func (g *Gerrit) AddHashtags(changeID string, tags container.Set[string]) error 
 type CommentSide int
 
 const (
-	// Left is used to specifiy that code comments should appear on the parent
-	// change
+	// Left is used to specify that code comments should appear on the parent change
 	Left CommentSide = iota
-	// Right is used to specifiy that code comments should appear on the new
-	// change
+	// Right is used to specify that code comments should appear on the new change
 	Right
 )
 

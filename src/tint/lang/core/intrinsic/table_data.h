@@ -634,7 +634,7 @@ struct TemplateTypeMatcher {
         },
         /* print */
         [](MatchState* state, StyledText& out) {
-            out << style::Type << state->data[state->overload.templates + INDEX].name;
+            out << style::Type(state->data[state->overload.templates + INDEX].name);
         },
     };
 };
@@ -655,7 +655,7 @@ struct TemplateNumberMatcher {
         },
         /* print */
         [](MatchState* state, StyledText& out) {
-            out << style::Variable << state->data[state->overload.templates + INDEX].name;
+            out << style::Variable(state->data[state->overload.templates + INDEX].name);
         },
     };
 };

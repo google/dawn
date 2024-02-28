@@ -291,11 +291,11 @@ constexpr TypeMatcher k{{$name}}Matcher {
 {{- end  }}
 
 {{- if .DisplayName }}
-    out {{range SplitDisplayName .DisplayName}} << style::Type << {{.}}{{end}};
+    out << style::Type({{range $i, $n := SplitDisplayName .DisplayName}}{{if $i}}, {{end}}{{$n}}{{end}});
 {{- else if .TemplateParams }}
-    out << style::Type << "{{.Name}}" << style::Code << "<"{{template "AppendTemplateParamNames" .TemplateParams}} << style::Code << ">";
+    out << style::Type("{{.Name}}", "<", {{template "AppendTemplateParamNames" .TemplateParams}}, ">");
 {{- else }}
-    out << style::Type << "{{.Name}}";
+    out << style::Type("{{.Name}}");
 {{- end  }}
   }
 };
@@ -322,8 +322,8 @@ constexpr TypeMatcher k{{$name}}Matcher {
     // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
 {{  range .Types -}}
 {{-   if      IsFirstIn . $.Types }} k{{PascalCase .Name}}Matcher.print(nullptr, out);
-{{-   else if IsLastIn  . $.Types }} out << TextStyle{} << " or "; k{{PascalCase .Name}}Matcher.print(nullptr, out);
-{{-   else                        }} out << TextStyle{} << ", "; k{{PascalCase .Name}}Matcher.print(nullptr, out);
+{{-   else if IsLastIn  . $.Types }} out << style::Plain(" or "); k{{PascalCase .Name}}Matcher.print(nullptr, out);
+{{-   else                        }} out << style::Plain(", "); k{{PascalCase .Name}}Matcher.print(nullptr, out);
 {{-   end -}}
 {{- end -}}
   }
@@ -362,9 +362,9 @@ constexpr NumberMatcher k{{$class}}Matcher {
 /* print */ [](MatchState*, StyledText& out) {
   out
 {{- range .Options -}}
-{{-   if      IsFirstIn . $.Options }}<< style::Enum << "{{.Name}}"
-{{-   else if IsLastIn  . $.Options }}<< TextStyle{} << " or " << style::Enum << "{{.Name}}"
-{{-   else                          }}<< TextStyle{} << ", " << style::Enum << "{{.Name}}"
+{{-   if      IsFirstIn . $.Options }}<< style::Enum("{{.Name}}")
+{{-   else if IsLastIn  . $.Options }}<< style::Plain(" or ") << style::Enum("{{.Name}}")
+{{-   else                          }}<< style::Plain(", ") << style::Enum("{{.Name}}")
 {{-   end -}}
 {{- end -}};
   }
@@ -479,8 +479,8 @@ constexpr NumberMatcher kNumberMatchers[] = {
 {{-                      define "AppendTemplateParamNames"                   -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   range $i, $ := . -}}
-{{-     if $i }} << style::Code << ", " << style::Type << {{.Name}}
-{{-     else  }} << style::Type << {{.Name}}
+{{-     if $i }}, ", ", {{.Name}}
+{{-     else  }}{{.Name}}
 {{-     end  -}}
 {{-   end -}}
 {{- end -}}

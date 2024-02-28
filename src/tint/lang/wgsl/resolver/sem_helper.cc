@@ -71,8 +71,7 @@ sem::TypeExpression* SemHelper::AsTypeExpression(sem::Expression* expr) const {
     auto* type = ty_expr->Type();
     if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
         AddError(expr->Declaration()->source.End())
-            << "expected " << style::Code << "<" << style::Plain << " for " << style::Type
-            << incomplete->builtin;
+            << "expected " << style::Code("<") << " for " << style::Type(incomplete->builtin);
         return nullptr;
     }
 
@@ -86,55 +85,57 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
         expr,  //
         [&](const sem::VariableUser* var_expr) {
             auto* variable = var_expr->Variable()->Declaration();
-            auto name = variable->name->symbol.Name();
+            auto name = variable->name->symbol.NameView();
             Switch(
-                variable,                                                             //
-                [&](const ast::Var*) { text << style::Keyword << "var"; },            //
-                [&](const ast::Let*) { text << style::Keyword << "let"; },            //
-                [&](const ast::Const*) { text << style::Keyword << "const"; },        //
-                [&](const ast::Parameter*) { text << "parameter"; },                  //
-                [&](const ast::Override*) { text << style::Keyword << "override"; },  //
-                [&](Default) { text << "variable"; });
-            text << " " << style::Variable << name;
+                variable,                                                                         //
+                [&](const ast::Var*) { text << style::Keyword("var") << style::Code(" "); },      //
+                [&](const ast::Let*) { text << style::Keyword("let") << style::Code(" "); },      //
+                [&](const ast::Const*) { text << style::Keyword("const") << style::Code(" "); },  //
+                [&](const ast::Parameter*) { text << "parameter "; },                             //
+                [&](const ast::Override*) {
+                    text << style::Keyword("override") << style::Code(" ");
+                },  //
+                [&](Default) { text << "variable "; });
+            text << style::Variable(name);
         },
         [&](const sem::ValueExpression* val_expr) {
-            text << "value of type " << style::Type << val_expr->Type()->FriendlyName();
+            text << "value of type " << style::Type(val_expr->Type()->FriendlyName());
         },
         [&](const sem::TypeExpression* ty_expr) {
-            text << "type " << style::Type << ty_expr->Type()->FriendlyName();
+            text << "type " << style::Type(ty_expr->Type()->FriendlyName());
         },
         [&](const sem::FunctionExpression* fn_expr) {
             auto* fn = fn_expr->Function()->Declaration();
-            text << "function " << style::Function << fn->name->symbol.Name();
+            text << "function " << style::Function(fn->name->symbol.NameView());
         },
         [&](const sem::BuiltinEnumExpression<wgsl::BuiltinFn>* fn) {
-            text << "builtin function " << style::Function << fn->Value();
+            text << "builtin function " << style::Function(fn->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::Access>* access) {
-            text << "access " << style::Enum << access->Value();
+            text << "access " << style::Enum(access->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
-            text << "address space " << style::Enum << addr->Value();
+            text << "address space " << style::Enum(addr->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::BuiltinValue>* builtin) {
-            text << "builtin value " << style::Enum << builtin->Value();
+            text << "builtin value " << style::Enum(builtin->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::InterpolationSampling>* fmt) {
-            text << "interpolation sampling " << style::Enum << fmt->Value();
+            text << "interpolation sampling " << style::Enum(fmt->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::InterpolationType>* fmt) {
-            text << "interpolation type " << style::Enum << fmt->Value();
+            text << "interpolation type " << style::Enum(fmt->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::TexelFormat>* fmt) {
-            text << "texel format " << style::Enum << fmt->Value();
+            text << "texel format " << style::Enum(fmt->Value());
         },
         [&](const UnresolvedIdentifier* ui) {
-            auto name = ui->Identifier()->identifier->symbol.Name();
-            text << "unresolved identifier " << style::Code << name;
+            auto name = ui->Identifier()->identifier->symbol.NameView();
+            text << "unresolved identifier " << style::Code(name);
         },  //
         TINT_ICE_ON_NO_MATCH);
 
-    return text << style::Plain;
+    return text;
 }
 
 void SemHelper::ErrorUnexpectedExprKind(
@@ -143,8 +144,8 @@ void SemHelper::ErrorUnexpectedExprKind(
     tint::Slice<const std::string_view> suggestions /* = Empty */) const {
     if (auto* ui = expr->As<UnresolvedIdentifier>()) {
         auto* ident = ui->Identifier();
-        auto name = ident->identifier->symbol.Name();
-        AddError(ident->source) << "unresolved " << wanted << " " << style::Code << name;
+        auto name = ident->identifier->symbol.NameView();
+        AddError(ident->source) << "unresolved " << wanted << " " << style::Code(name);
         if (!suggestions.IsEmpty()) {
             // Filter out suggestions that have a leading underscore.
             Vector<std::string_view, 8> filtered;
@@ -169,7 +170,7 @@ void SemHelper::ErrorExpectedValueExpr(const sem::Expression* expr) const {
         if (expr->IsAnyOf<sem::FunctionExpression, sem::TypeExpression,
                           sem::BuiltinEnumExpression<wgsl::BuiltinFn>>()) {
             AddNote(ident->source.End())
-                << "are you missing " << style::Code << "()" << style::Plain << "?";
+                << "are you missing " << style::Code("()") << style::Plain("?");
         }
     }
 }
@@ -191,36 +192,36 @@ void SemHelper::NoteDeclarationSource(const ast::Node* node) const {
     Switch(
         node,
         [&](const ast::Struct* n) {
-            AddNote(n->source) << style::Keyword << "struct " << style::Type
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("struct ")
+                               << style::Type(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Alias* n) {
-            AddNote(n->source) << style::Keyword << "alias " << style::Type
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("alias ")
+                               << style::Type(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Var* n) {
-            AddNote(n->source) << style::Keyword << "var " << style::Variable
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("var ")
+                               << style::Variable(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Let* n) {
-            AddNote(n->source) << style::Keyword << "let " << style::Variable
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("let ")
+                               << style::Variable(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Override* n) {
-            AddNote(n->source) << style::Keyword << "override " << style::Variable
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("override ")
+                               << style::Variable(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Const* n) {
-            AddNote(n->source) << style::Keyword << "const " << style::Variable
-                               << n->name->symbol.Name() << style::Plain << " declared here";
+            AddNote(n->source) << style::Keyword("const ")
+                               << style::Variable(n->name->symbol.NameView()) << " declared here";
         },
         [&](const ast::Parameter* n) {
-            AddNote(n->source) << "parameter " << style::Variable << n->name->symbol.Name()
-                               << style::Plain << " declared here";
+            AddNote(n->source) << "parameter " << style::Variable(n->name->symbol.NameView())
+                               << " declared here";
         },
         [&](const ast::Function* n) {
-            AddNote(n->source) << "function " << style::Function << n->name->symbol.Name()
-                               << style::Plain << " declared here";
+            AddNote(n->source) << "function " << style::Function(n->name->symbol.NameView())
+                               << " declared here";
         });
 }
 

@@ -30,6 +30,8 @@
 
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "src/tint/utils/containers/vector.h"
@@ -70,6 +72,9 @@ class StyledText {
     /// Clears the text and restore the default style
     void Clear();
 
+    /// @returns the TextStyle of all future writes to this StyledText
+    TextStyle Style() const { return spans_.Back().style; }
+
     /// Sets the style for all future writes to this StyledText
     StyledText& SetStyle(TextStyle style);
 
@@ -77,6 +82,8 @@ class StyledText {
     std::string Plain() const;
 
     /// Appends the styled text of @p other to this StyledText.
+    /// @note: Unlike `operator<<(const StyledText&)`, this StyledText's previous style will *not*
+    /// be automatically restored.
     void Append(const StyledText& other);
 
     /// repeat queues the character @p c to be written to the StyledText n times.
@@ -85,15 +92,30 @@ class StyledText {
     /// @returns this StyledText so calls can be chained.
     StyledText& Repeat(char c, size_t n);
 
-    /// operator<<() appends @p value to the StyledText.
-    /// @p value can be a StyledText to change the style of future appends.
+    /// operator<<() appends @p value to this StyledText.
+    /// @p value which is one of:
+    ///  * a TextStyle, which sets the style of all future appends. Note that this fully replaces
+    ///    the old style (no style combinations / overlays).
+    ///  * a ScopedTextStyle, which will will use the span's style for each value, and then this
+    ///    StyledText's previous style will be restored.
+    ///  * a StyledText, which will be appended to this StyledText, and then this StyledText's
+    ///    previous style will be restored.
+    ///  * any other type will be stringified and appended to this StyledText using the current
+    ///    TextStyle.
     template <typename VALUE>
     StyledText& operator<<(VALUE&& value) {
         using T = std::decay_t<VALUE>;
         if constexpr (std::is_same_v<T, TextStyle>) {
             SetStyle(std::forward<VALUE>(value));
         } else if constexpr (std::is_same_v<T, StyledText>) {
+            auto old_style = Style();
             Append(value);
+            *this << old_style;
+        } else if constexpr (IsScopedTextStyle<T>) {
+            auto old_style = Style();
+            std::apply([&](auto&&... values) { ((*this << value.style << values), ...); },
+                       value.values);
+            *this << old_style;
         } else {
             uint32_t offset = stream_.tellp();
             stream_ << value;

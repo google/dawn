@@ -49,8 +49,8 @@ bool CheckSupportedExtensions(std::string_view writer_name,
         for (auto* ext : enable->extensions) {
             if (!set.Contains(ext->name)) {
                 diags.AddError(diag::System::Writer, ext->source)
-                    << writer_name << " backend does not support extension " << style::Code
-                    << ext->name;
+                    << writer_name << " backend does not support extension "
+                    << style::Code(ext->name);
                 return false;
             }
         }
