@@ -563,18 +563,35 @@ func IsHostShareable(fqn sem.FullyQualifiedName) bool {
 	return IsDeclarable(fqn) && DeepestElementType(fqn).Target.GetName() != "bool"
 }
 
-// OverloadUsesF16 returns true if the overload uses the f16 type anywhere in the signature.
-func OverloadUsesF16(overload sem.Overload) bool {
+// OverloadUsesType returns true if the overload uses the given type anywhere in the signature.
+func OverloadUsesType(overload sem.Overload, ty string) bool {
+	pending := []sem.FullyQualifiedName{}
 	for _, param := range overload.Parameters {
-		if DeepestElementType(param.Type).Target.GetName() == "f16" {
-			return true
-		}
+		pending = append(pending, param.Type)
 	}
 	if ret := overload.ReturnType; ret != nil {
-		if DeepestElementType(*overload.ReturnType).Target.GetName() == "f16" {
+		pending = append(pending, *ret)
+	}
+
+	for len(pending) > 0 {
+		fqn := pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+
+		if fqn.Target.GetName() == ty {
 			return true
 		}
+		for _, arg := range fqn.TemplateArguments {
+			switch arg := arg.(type) {
+			case sem.FullyQualifiedName:
+				pending = append(pending, arg)
+			case sem.Named:
+				if fqn.Target.GetName() == ty {
+					return true
+				}
+			}
+		}
 	}
+
 	return false
 }
 

@@ -120,6 +120,8 @@ ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
             return ResourceBinding::TexelFormat::kRgba32Sint;
         case core::TexelFormat::kRgba32Float:
             return ResourceBinding::TexelFormat::kRgba32Float;
+        case core::TexelFormat::kR8Unorm:
+            return ResourceBinding::TexelFormat::kR8Unorm;
         case core::TexelFormat::kUndefined:
             return ResourceBinding::TexelFormat::kNone;
     }

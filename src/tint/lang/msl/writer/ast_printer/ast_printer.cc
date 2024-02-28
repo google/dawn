@@ -273,10 +273,11 @@ bool ASTPrinter::Generate() {
             "MSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                wgsl::Extension::kChromiumExperimentalFramebufferFetch,
                 wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
-                wgsl::Extension::kChromiumExperimentalFramebufferFetch,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kChromiumInternalRelaxedUniformLayout,
                 wgsl::Extension::kF16,
             })) {

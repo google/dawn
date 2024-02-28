@@ -17,4 +17,7 @@ enum texel_format {
   rgba32uint
   rgba32sint
   rgba32float
+
+  // requires chromium_internal_graphite
+  r8unorm
 }

@@ -80,6 +80,7 @@ struct ResourceBinding {
         kRgba32Uint,
         kRgba32Sint,
         kRgba32Float,
+        kR8Unorm,
         kNone,
     };
 

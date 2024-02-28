@@ -121,6 +121,7 @@ if (tint_build_unittests) {
       "f16_extension_test.cc",
       "framebuffer_fetch_extension_test.cc",
       "function_validation_test.cc",
+      "graphite_extension_test.cc",
       "host_shareable_validation_test.cc",
       "increment_decrement_validation_test.cc",
       "inferred_type_test.cc",

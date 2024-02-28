@@ -105,8 +105,9 @@ namespace {
 
 const char kTempNamePrefix[] = "tint_tmp";
 
-const char* image_format_to_rwtexture_type(core::TexelFormat image_format) {
+const char* ImageFormatToRWtextureType(core::TexelFormat image_format) {
     switch (image_format) {
+        case core::TexelFormat::kR8Unorm:
         case core::TexelFormat::kBgra8Unorm:
         case core::TexelFormat::kRgba8Unorm:
         case core::TexelFormat::kRgba8Snorm:
@@ -388,11 +389,12 @@ bool ASTPrinter::Generate() {
             "HLSL", builder_.AST(), diagnostics_,
             Vector{
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
-                wgsl::Extension::kF16,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
-                wgsl::Extension::kChromiumExperimentalPixelLocal,
+                wgsl::Extension::kChromiumInternalGraphite,
+                wgsl::Extension::kF16,
             })) {
         return false;
     }
@@ -3459,7 +3461,7 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
             return false;
         }
         out << "RasterizerOrderedTexture2D";
-        auto* component = image_format_to_rwtexture_type(storage->texel_format());
+        auto* component = ImageFormatToRWtextureType(storage->texel_format());
         if (TINT_UNLIKELY(!component)) {
             TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
                        << static_cast<int>(storage->texel_format());
@@ -4460,7 +4462,7 @@ bool ASTPrinter::EmitType(StringStream& out,
             }
 
             if (storage) {
-                auto* component = image_format_to_rwtexture_type(storage->texel_format());
+                auto* component = ImageFormatToRWtextureType(storage->texel_format());
                 if (TINT_UNLIKELY(!component)) {
                     TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
                                << static_cast<int>(storage->texel_format());

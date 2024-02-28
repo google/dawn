@@ -80,6 +80,7 @@ Type* StorageTexture::SubtypeFor(core::TexelFormat format, Manager& type_mgr) {
             return type_mgr.Get<I32>();
         }
 
+        case core::TexelFormat::kR8Unorm:
         case core::TexelFormat::kBgra8Unorm:
         case core::TexelFormat::kRgba8Unorm:
         case core::TexelFormat::kRgba8Snorm:

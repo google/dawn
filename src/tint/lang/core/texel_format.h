@@ -50,6 +50,7 @@ enum class TexelFormat : uint8_t {
     kR32Float,
     kR32Sint,
     kR32Uint,
+    kR8Unorm,
     kRg32Float,
     kRg32Sint,
     kRg32Uint,
@@ -83,9 +84,9 @@ auto& operator<<(STREAM& out, TexelFormat value) {
 TexelFormat ParseTexelFormat(std::string_view str);
 
 constexpr std::string_view kTexelFormatStrings[] = {
-    "bgra8unorm", "r32float",    "r32sint",    "r32uint",    "rg32float",   "rg32sint",
-    "rg32uint",   "rgba16float", "rgba16sint", "rgba16uint", "rgba32float", "rgba32sint",
-    "rgba32uint", "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
+    "bgra8unorm", "r32float",   "r32sint",     "r32uint",    "r8unorm",    "rg32float",
+    "rg32sint",   "rg32uint",   "rgba16float", "rgba16sint", "rgba16uint", "rgba32float",
+    "rgba32sint", "rgba32uint", "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
 };
 
 }  // namespace tint::core

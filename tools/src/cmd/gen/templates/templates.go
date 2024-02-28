@@ -311,7 +311,7 @@ func generate(tmplPath string, cache *genCache, w io.Writer, writeFile WriteFile
 		"IsAbstract":                          gen.IsAbstract,
 		"IsDeclarable":                        gen.IsDeclarable,
 		"IsHostShareable":                     gen.IsHostShareable,
-		"OverloadUsesF16":                     gen.OverloadUsesF16,
+		"OverloadUsesType":                    gen.OverloadUsesType,
 		"OverloadUsesReadWriteStorageTexture": gen.OverloadUsesReadWriteStorageTexture,
 		"IsFirstIn":                           isFirstIn,
 		"IsLastIn":                            isLastIn,

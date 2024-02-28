@@ -35,6 +35,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
@@ -56,8 +57,8 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:11: 'textureLodOffset for sampler2DArrayShadow' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:12: 'textureLodOffset for sampler2DArrayShadow' : required extension not requested: GL_EXT_texture_shadow_lod
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

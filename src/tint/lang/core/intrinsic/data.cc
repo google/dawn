@@ -1239,6 +1239,7 @@ constexpr TypeMatcher kIu32Matcher {
 constexpr NumberMatcher kF32TexelFormatMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
     switch (static_cast<core::TexelFormat>(number.Value())) {
+      case core::TexelFormat::kR8Unorm:
       case core::TexelFormat::kBgra8Unorm:
       case core::TexelFormat::kRgba8Unorm:
       case core::TexelFormat::kRgba8Snorm:
@@ -1252,7 +1253,7 @@ constexpr NumberMatcher kF32TexelFormatMatcher {
     }
   },
 /* print */ [](MatchState*, StyledText& out) {
-  out<< style::Enum("bgra8unorm")<< style::Plain(", ") << style::Enum("rgba8unorm")<< style::Plain(", ") << style::Enum("rgba8snorm")<< style::Plain(", ") << style::Enum("rgba16float")<< style::Plain(", ") << style::Enum("r32float")<< style::Plain(", ") << style::Enum("rg32float")<< style::Plain(" or ") << style::Enum("rgba32float");
+  out<< style::Enum("r8unorm")<< style::Plain(", ") << style::Enum("bgra8unorm")<< style::Plain(", ") << style::Enum("rgba8unorm")<< style::Plain(", ") << style::Enum("rgba8snorm")<< style::Plain(", ") << style::Enum("rgba16float")<< style::Plain(", ") << style::Enum("r32float")<< style::Plain(", ") << style::Enum("rg32float")<< style::Plain(" or ") << style::Enum("rgba32float");
   }
 };
 

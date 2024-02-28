@@ -54,6 +54,9 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "r32uint") {
         return TexelFormat::kR32Uint;
     }
+    if (str == "r8unorm") {
+        return TexelFormat::kR8Unorm;
+    }
     if (str == "rg32float") {
         return TexelFormat::kRg32Float;
     }
@@ -108,6 +111,8 @@ std::string_view ToString(TexelFormat value) {
             return "r32sint";
         case TexelFormat::kR32Uint:
             return "r32uint";
+        case TexelFormat::kR8Unorm:
+            return "r8unorm";
         case TexelFormat::kRg32Float:
             return "rg32float";
         case TexelFormat::kRg32Sint:

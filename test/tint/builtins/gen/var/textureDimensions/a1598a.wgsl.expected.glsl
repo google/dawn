@@ -34,6 +34,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp usamplerCubeArray arg_0_1;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -54,8 +55,8 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'usamplerCubeArray' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:5: 'usamplerCubeArray' : Reserved word. 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

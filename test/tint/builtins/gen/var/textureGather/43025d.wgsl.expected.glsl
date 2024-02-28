@@ -37,6 +37,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
@@ -60,8 +61,8 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:5: 'samplerCubeArrayShadow' : Reserved word. 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

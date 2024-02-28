@@ -2228,6 +2228,9 @@ class Printer {
             case core::TexelFormat::kBgra8Unorm:
                 TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
                 return SpvImageFormatUnknown;
+            case core::TexelFormat::kR8Unorm:
+                module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+                return SpvImageFormatR8;
             case core::TexelFormat::kR32Uint:
                 return SpvImageFormatR32ui;
             case core::TexelFormat::kR32Sint:

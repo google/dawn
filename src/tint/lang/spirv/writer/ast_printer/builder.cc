@@ -279,8 +279,9 @@ bool Builder::Build() {
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
-                wgsl::Extension::kF16,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumInternalGraphite,
+                wgsl::Extension::kF16,
             })) {
         return false;
     }
@@ -4109,6 +4110,9 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const core::TexelFormat form
         case core::TexelFormat::kBgra8Unorm:
             TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
             return SpvImageFormatUnknown;
+        case core::TexelFormat::kR8Unorm:
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+            return SpvImageFormatR8;
         case core::TexelFormat::kR32Uint:
             return SpvImageFormatR32ui;
         case core::TexelFormat::kR32Sint:

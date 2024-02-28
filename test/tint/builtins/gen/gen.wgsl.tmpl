@@ -209,7 +209,7 @@ fn compute_main() {
 // [hlsl-dxc] flags: --hlsl_shader_model 64
 
 {{- /* Check and emit f16 */ -}}
-{{-   else if OverloadUsesF16 $overload}}
+{{-   else if OverloadUsesType $overload "f16"}}
 // flags: --hlsl_shader_model 62
 
 {{    end -}}
@@ -225,14 +225,19 @@ fn compute_main() {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Check and emit chromium_experimental_subgroups */ -}}
+{{- /* Emit 'enable chromium_experimental_subgroups' if required */ -}}
 {{-   if or (eq "subgroupBallot" $builtin_name) (eq "subgroupBroadcast" $builtin_name)}}
 enable chromium_experimental_subgroups;
 {{    end -}}
 
-{{- /* Check and emit f16 */ -}}
-{{-   if OverloadUsesF16 $overload}}
+{{- /* Emit 'enable f16' if required */ -}}
+{{-   if OverloadUsesType $overload "f16"}}
 enable f16;
+{{    end -}}
+
+{{- /* Emit 'enable chromium_internal_graphite' if required */ -}}
+{{-   if OverloadUsesType $overload "r8unorm"}}
+enable chromium_internal_graphite;
 {{    end -}}
 
 {{- end -}}

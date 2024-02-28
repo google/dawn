@@ -35,6 +35,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 layout(rgba32ui) uniform highp writeonly uimage2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -56,8 +57,8 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:11: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:12: 'writeonly' : argument cannot drop memory qualifier when passed to formal parameter 
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

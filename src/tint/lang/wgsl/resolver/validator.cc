@@ -115,22 +115,23 @@ bool IsValidStorageTextureDimension(core::type::TextureDimension dim) {
 bool IsValidStorageTextureTexelFormat(core::TexelFormat format) {
     switch (format) {
         case core::TexelFormat::kBgra8Unorm:
-        case core::TexelFormat::kR32Uint:
-        case core::TexelFormat::kR32Sint:
         case core::TexelFormat::kR32Float:
-        case core::TexelFormat::kRg32Uint:
-        case core::TexelFormat::kRg32Sint:
+        case core::TexelFormat::kR32Sint:
+        case core::TexelFormat::kR32Uint:
+        case core::TexelFormat::kR8Unorm:
         case core::TexelFormat::kRg32Float:
-        case core::TexelFormat::kRgba8Unorm:
+        case core::TexelFormat::kRg32Sint:
+        case core::TexelFormat::kRg32Uint:
+        case core::TexelFormat::kRgba16Float:
+        case core::TexelFormat::kRgba16Sint:
+        case core::TexelFormat::kRgba16Uint:
+        case core::TexelFormat::kRgba32Float:
+        case core::TexelFormat::kRgba32Sint:
+        case core::TexelFormat::kRgba32Uint:
+        case core::TexelFormat::kRgba8Sint:
         case core::TexelFormat::kRgba8Snorm:
         case core::TexelFormat::kRgba8Uint:
-        case core::TexelFormat::kRgba8Sint:
-        case core::TexelFormat::kRgba16Uint:
-        case core::TexelFormat::kRgba16Sint:
-        case core::TexelFormat::kRgba16Float:
-        case core::TexelFormat::kRgba32Uint:
-        case core::TexelFormat::kRgba32Sint:
-        case core::TexelFormat::kRgba32Float:
+        case core::TexelFormat::kRgba8Unorm:
             return true;
         default:
             return false;
@@ -363,21 +364,18 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
         case core::Access::kRead:
             if (!allowed_features_.features.count(
                     wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
-                AddError(source) <<
-
-                    "read-only storage textures require the "
-                    "readonly_and_readwrite_storage_textures language feature, which is not "
-                    "allowed in the current environment";
+                AddError(source) << "read-only storage textures require the "
+                                    "readonly_and_readwrite_storage_textures language feature, "
+                                    "which is not allowed in the current environment";
                 return false;
             }
             break;
         case core::Access::kReadWrite:
             if (!allowed_features_.features.count(
                     wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
-                AddError(source)
-                    << "read-write storage textures require the "
-                       "readonly_and_readwrite_storage_textures language feature, which is not "
-                       "allowed in the current environment";
+                AddError(source) << "read-write storage textures require the "
+                                    "readonly_and_readwrite_storage_textures language feature, "
+                                    "which is not allowed in the current environment";
                 return false;
             }
             break;
@@ -386,6 +384,13 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
         case core::Access::kUndefined:
             AddError(source) << "storage texture missing access control";
             return false;
+    }
+
+    if (TINT_UNLIKELY(t->texel_format() == core::TexelFormat::kR8Unorm &&
+                      !enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalGraphite))) {
+        AddError(source) << style::Enum(core::TexelFormat::kR8Unorm) << " requires the "
+                         << style::Code(wgsl::Extension::kChromiumInternalGraphite) << " extension";
+        return false;
     }
 
     if (!IsValidStorageTextureDimension(t->dim())) {
