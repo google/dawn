@@ -6,7 +6,7 @@ struct str {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup str* const tint_symbol_2) {
-  {
+  if ((local_idx < 1u)) {
     str const tint_symbol_1 = str{};
     *(tint_symbol_2) = tint_symbol_1;
   }

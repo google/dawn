@@ -2,7 +2,7 @@
 
 shared float w;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     w = 0.0f;
   }
   barrier();

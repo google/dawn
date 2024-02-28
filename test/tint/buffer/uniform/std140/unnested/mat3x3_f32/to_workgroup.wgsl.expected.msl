@@ -29,7 +29,7 @@ float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
 }
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup float3x3* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = float3x3(float3(0.0f), float3(0.0f), float3(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

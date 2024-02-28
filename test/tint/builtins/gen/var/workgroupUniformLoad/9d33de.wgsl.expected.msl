@@ -2,7 +2,7 @@
 
 using namespace metal;
 void tint_zero_workgroup_memory(uint local_idx, threadgroup int* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

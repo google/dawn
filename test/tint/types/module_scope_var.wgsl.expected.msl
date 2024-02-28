@@ -32,7 +32,7 @@ struct tint_private_vars_struct {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol_3) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol_3) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

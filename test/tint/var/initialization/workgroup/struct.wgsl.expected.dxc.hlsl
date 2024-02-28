@@ -6,7 +6,7 @@ struct S {
 groupshared S v;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     S tint_symbol_2 = (S)0;
     v = tint_symbol_2;
   }

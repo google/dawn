@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 39
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -25,39 +25,47 @@
           %W = OpVariable %_ptr_Workgroup_mat2v2float Workgroup
        %void = OpTypeVoid
           %9 = OpTypeFunction %void %uint
-         %14 = OpConstantNull %mat2v2float
+     %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+         %19 = OpConstantNull %mat2v2float
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
         %int = OpTypeInt 32 1
-         %23 = OpConstantNull %int
+         %28 = OpConstantNull %int
 %_ptr_Workgroup_v2float = OpTypePointer Workgroup %v2float
-         %28 = OpConstantNull %float
+         %33 = OpConstantNull %float
 %_ptr_Function_v2float = OpTypePointer Function %v2float
-         %32 = OpConstantNull %v2float
-         %34 = OpTypeFunction %void
+         %37 = OpConstantNull %v2float
+         %39 = OpTypeFunction %void
 %tint_zero_workgroup_memory = OpFunction %void None %9
   %local_idx = OpFunctionParameter %uint
          %13 = OpLabel
-               OpStore %W %14
+         %15 = OpULessThan %bool %local_idx %uint_1
+               OpSelectionMerge %17 None
+               OpBranchConditional %15 %18 %17
+         %18 = OpLabel
+               OpStore %W %19
+               OpBranch %17
+         %17 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturn
                OpFunctionEnd
     %F_inner = OpFunction %void None %9
      %mat2x2 = OpFunctionParameter %uint
-         %20 = OpLabel
-         %30 = OpVariable %_ptr_Function_v2float Function %32
-         %21 = OpFunctionCall %void %tint_zero_workgroup_memory %mat2x2
-         %25 = OpAccessChain %_ptr_Workgroup_v2float %W %23
-         %26 = OpAccessChain %_ptr_Workgroup_v2float %W %23
-         %27 = OpLoad %v2float %26
-         %33 = OpCompositeConstruct %v2float %28 %28
-         %29 = OpFAdd %v2float %27 %33
-               OpStore %25 %29
+         %25 = OpLabel
+         %35 = OpVariable %_ptr_Function_v2float Function %37
+         %26 = OpFunctionCall %void %tint_zero_workgroup_memory %mat2x2
+         %30 = OpAccessChain %_ptr_Workgroup_v2float %W %28
+         %31 = OpAccessChain %_ptr_Workgroup_v2float %W %28
+         %32 = OpLoad %v2float %31
+         %38 = OpCompositeConstruct %v2float %33 %33
+         %34 = OpFAdd %v2float %32 %38
+               OpStore %30 %34
                OpReturn
                OpFunctionEnd
-          %F = OpFunction %void None %34
-         %36 = OpLabel
-         %38 = OpLoad %uint %mat2x2_1
-         %37 = OpFunctionCall %void %F_inner %38
+          %F = OpFunction %void None %39
+         %41 = OpLabel
+         %43 = OpLoad %uint %mat2x2_1
+         %42 = OpFunctionCall %void %F_inner %43
                OpReturn
                OpFunctionEnd

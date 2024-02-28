@@ -219,6 +219,10 @@ struct ZeroInitWorkgroupMemory::State {
 
             // Determine the block type used to emit these statements.
 
+            // TODO(crbug.com/tint/2143): Always emit an if statement around zero init, even when
+            // workgroup size matches num_iteration, to work around bugs in certain drivers.
+            constexpr bool kWorkaroundUnconditionalZeroInitDriverBug = true;
+
             if (workgroup_size_const == 0 || num_iterations > workgroup_size_const) {
                 // Either the workgroup size is dynamic, or smaller than num_iterations.
                 // In either case, we need to generate a for loop to ensure we
@@ -243,14 +247,14 @@ struct ZeroInitWorkgroupMemory::State {
                 }
                 auto* for_loop = b.For(init, cond, cont, b.Block(block));
                 init_body.Push(for_loop);
-            } else if (num_iterations < workgroup_size_const) {
+            } else if (num_iterations < workgroup_size_const ||
+                       kWorkaroundUnconditionalZeroInitDriverBug) {
                 // Workgroup size is a known constant, but is greater than
                 // num_iterations. Emit an if statement:
                 //
                 //  if (local_index < num_iterations) {
                 //    ...
                 //  }
-
                 auto* cond = b.LessThan(local_idx, u32(num_iterations));
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_idx); });

@@ -1,7 +1,7 @@
 groupshared int g1;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     int atomic_result = 0;
     InterlockedExchange(g1, 0, atomic_result);
   }

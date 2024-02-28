@@ -29,7 +29,7 @@ half2x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f16_array_elem
 }
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup half2x3* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = half2x3(half3(0.0h), half3(0.0h));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

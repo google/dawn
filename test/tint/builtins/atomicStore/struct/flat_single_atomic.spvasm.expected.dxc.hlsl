@@ -7,7 +7,7 @@ struct S_atomic {
 groupshared S_atomic wg;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     wg.x = 0;
     uint atomic_result = 0u;
     InterlockedExchange(wg.a, 0u, atomic_result);

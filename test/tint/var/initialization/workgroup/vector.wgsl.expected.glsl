@@ -2,7 +2,7 @@
 
 shared ivec3 v;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     v = ivec3(0);
   }
   barrier();

@@ -2,7 +2,7 @@
 
 shared mat2 S;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     S = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();

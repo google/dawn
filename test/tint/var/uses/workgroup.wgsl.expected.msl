@@ -2,21 +2,21 @@
 
 using namespace metal;
 void tint_zero_workgroup_memory(uint local_idx, threadgroup int* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
 void tint_zero_workgroup_memory_1(uint local_idx_1, threadgroup int* const tint_symbol_1) {
-  {
+  if ((local_idx_1 < 1u)) {
     *(tint_symbol_1) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
 void tint_zero_workgroup_memory_2(uint local_idx_2, threadgroup int* const tint_symbol_2, threadgroup int* const tint_symbol_3) {
-  {
+  if ((local_idx_2 < 1u)) {
     *(tint_symbol_2) = 0;
     *(tint_symbol_3) = 0;
   }

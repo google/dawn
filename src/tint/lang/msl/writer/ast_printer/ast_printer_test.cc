@@ -178,7 +178,7 @@ struct tint_symbol_4 {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup float2x2* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = float2x2(float2(0.0f), float2(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -300,7 +300,7 @@ struct tint_symbol_5 {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup S2* const tint_symbol_1) {
-  {
+  if ((local_idx < 1u)) {
     S2 const tint_symbol = S2{};
     *(tint_symbol_1) = tint_symbol;
   }
@@ -397,7 +397,7 @@ struct tint_symbol_32 {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup float2x2* const tint_symbol, threadgroup float2x3* const tint_symbol_1, threadgroup float2x4* const tint_symbol_2) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = float2x2(float2(0.0f), float2(0.0f));
     *(tint_symbol_1) = float2x3(float3(0.0f), float3(0.0f));
     *(tint_symbol_2) = float2x4(float4(0.0f), float4(0.0f));
@@ -406,7 +406,7 @@ void tint_zero_workgroup_memory(uint local_idx, threadgroup float2x2* const tint
 }
 
 void tint_zero_workgroup_memory_1(uint local_idx_1, threadgroup float3x2* const tint_symbol_3, threadgroup float3x3* const tint_symbol_4, threadgroup float3x4* const tint_symbol_5) {
-  {
+  if ((local_idx_1 < 1u)) {
     *(tint_symbol_3) = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
     *(tint_symbol_4) = float3x3(float3(0.0f), float3(0.0f), float3(0.0f));
     *(tint_symbol_5) = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
@@ -415,7 +415,7 @@ void tint_zero_workgroup_memory_1(uint local_idx_1, threadgroup float3x2* const 
 }
 
 void tint_zero_workgroup_memory_2(uint local_idx_2, threadgroup float4x2* const tint_symbol_6, threadgroup float4x3* const tint_symbol_7, threadgroup float4x4* const tint_symbol_8) {
-  {
+  if ((local_idx_2 < 1u)) {
     *(tint_symbol_6) = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
     *(tint_symbol_7) = float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f));
     *(tint_symbol_8) = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));

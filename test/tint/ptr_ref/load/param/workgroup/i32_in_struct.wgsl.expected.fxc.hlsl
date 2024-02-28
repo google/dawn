@@ -5,7 +5,7 @@ struct str {
 groupshared str S;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     str tint_symbol_2 = (str)0;
     S = tint_symbol_2;
   }

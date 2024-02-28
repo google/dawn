@@ -5,7 +5,7 @@ struct atomic_compare_exchange_result_i32 {
 groupshared int arg_0;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     int atomic_result = 0;
     InterlockedExchange(arg_0, 0, atomic_result);
   }

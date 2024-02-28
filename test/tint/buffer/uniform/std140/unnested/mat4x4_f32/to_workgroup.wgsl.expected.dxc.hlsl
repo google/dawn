@@ -1,7 +1,7 @@
 groupshared float4x4 w;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     w = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
   }
   GroupMemoryBarrierWithGroupSync();

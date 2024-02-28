@@ -25,7 +25,7 @@ struct S {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup S* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     (*(tint_symbol)).x = 0;
     (*(tint_symbol)).y = 0u;
   }

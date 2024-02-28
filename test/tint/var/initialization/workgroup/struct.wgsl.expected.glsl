@@ -7,7 +7,7 @@ struct S {
 
 shared S v;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     S tint_symbol_1 = S(0, 0.0f);
     v = tint_symbol_1;
   }

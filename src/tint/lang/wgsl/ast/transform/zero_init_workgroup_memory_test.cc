@@ -139,7 +139,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -170,7 +170,7 @@ var<workgroup> v : i32;
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -205,7 +205,7 @@ fn f(params : Params) {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -245,7 +245,7 @@ var<workgroup> v : i32;
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -281,7 +281,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -312,7 +312,7 @@ var<workgroup> v : i32;
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -354,7 +354,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     a = i32();
     b.x = i32();
   }
@@ -421,7 +421,7 @@ struct S {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     a = i32();
     b.x = i32();
   }
@@ -720,7 +720,7 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     a = i32();
     b.x = i32();
   }
@@ -787,7 +787,7 @@ struct S {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     a = i32();
     b.x = i32();
   }
@@ -864,7 +864,7 @@ fn f3() {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     a = i32();
   }
   for(var idx : u32 = local_idx; (idx < 32u); idx = (idx + 1u)) {
@@ -975,7 +975,7 @@ struct S {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     a = i32();
   }
   for(var idx : u32 = local_idx; (idx < 32u); idx = (idx + 1u)) {
@@ -1073,7 +1073,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -1120,7 +1120,7 @@ var<workgroup> v : i32;
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx_1 : u32) {
-  {
+  if ((local_idx_1 < 1u)) {
     v = i32();
   }
   workgroupBarrier();
@@ -1161,7 +1161,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     atomicStore(&(i), i32());
     atomicStore(&(u), u32());
   }
@@ -1198,7 +1198,7 @@ var<workgroup> u : atomic<u32>;
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     atomicStore(&(i), i32());
     atomicStore(&(u), u32());
   }
@@ -1241,7 +1241,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     w.a = i32();
     atomicStore(&(w.i), i32());
     w.b = f32();
@@ -1292,7 +1292,7 @@ struct S {
 )";
     auto* expect = R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     w.a = i32();
     atomicStore(&(w.i), i32());
     w.b = f32();
@@ -1528,7 +1528,7 @@ var<workgroup> W : mat2x2<f32>;
     auto* expect =
         R"(
 fn tint_zero_workgroup_memory(local_idx : u32) {
-  {
+  if ((local_idx < 1u)) {
     W = mat2x2<f32>();
   }
   workgroupBarrier();

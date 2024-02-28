@@ -101,7 +101,7 @@ shared mat2 m97;
 shared mat2 m98;
 shared mat2 m99;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     m00 = mat2(vec2(0.0f), vec2(0.0f));
     m01 = mat2(vec2(0.0f), vec2(0.0f));
     m02 = mat2(vec2(0.0f), vec2(0.0f));

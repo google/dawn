@@ -1,7 +1,7 @@
 groupshared int a;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     a = 0;
   }
   GroupMemoryBarrierWithGroupSync();
@@ -10,14 +10,14 @@ void tint_zero_workgroup_memory(uint local_idx) {
 groupshared int b;
 
 void tint_zero_workgroup_memory_1(uint local_idx_1) {
-  {
+  if ((local_idx_1 < 1u)) {
     b = 0;
   }
   GroupMemoryBarrierWithGroupSync();
 }
 
 void tint_zero_workgroup_memory_2(uint local_idx_2) {
-  {
+  if ((local_idx_2 < 1u)) {
     a = 0;
     b = 0;
   }

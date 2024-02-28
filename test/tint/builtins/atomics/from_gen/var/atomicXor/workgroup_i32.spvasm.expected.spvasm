@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 52
+; Bound: 57
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,57 +33,65 @@
       %arg_0 = OpVariable %_ptr_Workgroup_int Workgroup
        %void = OpTypeVoid
          %10 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
      %uint_0 = OpConstant %uint 0
-         %19 = OpConstantNull %int
+         %24 = OpConstantNull %int
    %uint_264 = OpConstant %uint 264
-         %22 = OpTypeFunction %void
+         %27 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
       %int_1 = OpConstant %int 1
 %tint_zero_workgroup_memory = OpFunction %void None %10
   %local_idx = OpFunctionParameter %uint
          %14 = OpLabel
-               OpAtomicStore %arg_0 %uint_2 %uint_0 %19
+         %16 = OpULessThan %bool %local_idx %uint_1
+               OpSelectionMerge %18 None
+               OpBranchConditional %16 %19 %18
+         %19 = OpLabel
+               OpAtomicStore %arg_0 %uint_2 %uint_0 %24
+               OpBranch %18
+         %18 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturn
                OpFunctionEnd
-%atomicXor_75dc95 = OpFunction %void None %22
-         %24 = OpLabel
-      %arg_1 = OpVariable %_ptr_Function_int Function %19
-        %res = OpVariable %_ptr_Function_int Function %19
-               OpStore %arg_1 %19
-               OpStore %res %19
+%atomicXor_75dc95 = OpFunction %void None %27
+         %29 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_int Function %24
+        %res = OpVariable %_ptr_Function_int Function %24
+               OpStore %arg_1 %24
+               OpStore %res %24
                OpStore %arg_1 %int_1
-         %29 = OpLoad %int %arg_1
-         %30 = OpAtomicXor %int %arg_0 %uint_2 %uint_0 %29
-               OpStore %res %30
+         %34 = OpLoad %int %arg_1
+         %35 = OpAtomicXor %int %arg_0 %uint_2 %uint_0 %34
+               OpStore %res %35
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %10
 %local_invocation_index_2 = OpFunctionParameter %uint
-         %34 = OpLabel
-               OpAtomicStore %arg_0 %uint_2 %uint_0 %19
+         %39 = OpLabel
+               OpAtomicStore %arg_0 %uint_2 %uint_0 %24
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %38 = OpFunctionCall %void %atomicXor_75dc95
+         %43 = OpFunctionCall %void %atomicXor_75dc95
                OpReturn
                OpFunctionEnd
-%compute_main_1 = OpFunction %void None %22
-         %40 = OpLabel
-         %41 = OpLoad %uint %local_invocation_index_1
-         %42 = OpFunctionCall %void %compute_main_inner %41
+%compute_main_1 = OpFunction %void None %27
+         %45 = OpLabel
+         %46 = OpLoad %uint %local_invocation_index_1
+         %47 = OpFunctionCall %void %compute_main_inner %46
                OpReturn
                OpFunctionEnd
 %compute_main_inner_1 = OpFunction %void None %10
 %local_invocation_index_1_param = OpFunctionParameter %uint
-         %45 = OpLabel
-         %46 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index_1_param
+         %50 = OpLabel
+         %51 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index_1_param
                OpStore %local_invocation_index_1 %local_invocation_index_1_param
-         %47 = OpFunctionCall %void %compute_main_1
+         %52 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %22
-         %49 = OpLabel
-         %51 = OpLoad %uint %local_invocation_index_1_param_1
-         %50 = OpFunctionCall %void %compute_main_inner_1 %51
+%compute_main = OpFunction %void None %27
+         %54 = OpLabel
+         %56 = OpLoad %uint %local_invocation_index_1_param_1
+         %55 = OpFunctionCall %void %compute_main_inner_1 %56
                OpReturn
                OpFunctionEnd

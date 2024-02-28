@@ -1,7 +1,7 @@
 groupshared float2x3 v;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     v = float2x3((0.0f).xxx, (0.0f).xxx);
   }
   GroupMemoryBarrierWithGroupSync();

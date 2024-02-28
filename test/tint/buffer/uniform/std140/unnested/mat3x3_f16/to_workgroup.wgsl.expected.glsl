@@ -3,7 +3,7 @@
 
 shared f16mat3 w;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     w = f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
   }
   barrier();

@@ -1,7 +1,7 @@
 groupshared matrix<float16_t, 2, 2> w;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     w = matrix<float16_t, 2, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
   }
   GroupMemoryBarrierWithGroupSync();

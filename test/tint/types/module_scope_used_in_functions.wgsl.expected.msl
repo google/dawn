@@ -23,7 +23,7 @@ struct tint_symbol_13 {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup float* const tint_symbol_1) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol_1) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

@@ -8,7 +8,7 @@ struct atomic_compare_exchange_result_u32 {
 
 shared uint arg_0;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     atomicExchange(arg_0, 0u);
   }
   barrier();

@@ -8,7 +8,7 @@ void set_matrix_column(inout float2x4 mat, int col, float4 val) {
 groupshared float2x4 S;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     S = float2x4((0.0f).xxxx, (0.0f).xxxx);
   }
   GroupMemoryBarrierWithGroupSync();

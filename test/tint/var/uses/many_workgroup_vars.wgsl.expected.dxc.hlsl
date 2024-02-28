@@ -100,7 +100,7 @@ groupshared float2x2 m98;
 groupshared float2x2 m99;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     m00 = float2x2((0.0f).xx, (0.0f).xx);
     m01 = float2x2((0.0f).xx, (0.0f).xx);
     m02 = float2x2((0.0f).xx, (0.0f).xx);

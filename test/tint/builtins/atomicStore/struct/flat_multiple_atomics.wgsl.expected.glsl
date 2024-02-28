@@ -8,7 +8,7 @@ struct S {
 
 shared S wg;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     wg.x = 0;
     atomicExchange(wg.a, 0u);
     atomicExchange(wg.b, 0u);

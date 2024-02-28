@@ -2,7 +2,7 @@
 
 shared int S;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     S = 0;
   }
   barrier();

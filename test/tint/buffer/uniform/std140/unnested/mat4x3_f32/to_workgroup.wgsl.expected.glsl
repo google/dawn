@@ -2,7 +2,7 @@
 
 shared mat4x3 w;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     w = mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
   }
   barrier();

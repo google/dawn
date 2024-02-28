@@ -23,7 +23,7 @@ struct S2_atomic {
 
 shared S2_atomic wg;
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     wg.x = 0;
     wg.y = 0;
     wg.z = 0;

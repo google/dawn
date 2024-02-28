@@ -6,7 +6,7 @@ struct tint_symbol_6 {
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup half4x4* const tint_symbol) {
-  {
+  if ((local_idx < 1u)) {
     *(tint_symbol) = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

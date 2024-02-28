@@ -1,7 +1,7 @@
 groupshared float wg_var;
 
 void tint_zero_workgroup_memory(uint local_idx) {
-  {
+  if ((local_idx < 1u)) {
     wg_var = 0.0f;
   }
   GroupMemoryBarrierWithGroupSync();
