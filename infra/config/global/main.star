@@ -176,7 +176,7 @@ def get_builder_executable():
       A luci.recipe
     """
     return luci.recipe(
-        name = "dawn",
+        name = "dawn/gn",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
         cipd_version = "refs/heads/main",
     )
@@ -200,7 +200,7 @@ def get_tricium_executable():
       A luci.recipe
     """
     return luci.recipe(
-        name = "dawn_analysis",
+        name = "dawn/analysis",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
         cipd_version = "refs/heads/main",
     )
