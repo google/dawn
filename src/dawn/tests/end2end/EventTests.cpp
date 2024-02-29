@@ -37,6 +37,9 @@
 namespace dawn {
 namespace {
 
+using testing::AnyOf;
+using testing::Eq;
+
 wgpu::Device CreateExtraDevice(wgpu::Instance instance) {
     // IMPORTANT: DawnTest overrides RequestAdapter and RequestDevice and mixes
     // up the two instances. We use these to bypass the override.
@@ -451,16 +454,21 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
                                    },
                                    &status});
 
-    ASSERT_EQ(status, kStatusUninitialized);
+    // For spontaneous cases, it is possible that since there is no work to be done, the serial can
+    // already be caught up and hence the callback fires immediately.
+    if (IsSpontaneous()) {
+        testInstance = nullptr;  // Drop the last external ref to the instance.
 
-    testInstance = nullptr;  // Drop the last external ref to the instance.
-
-    // Callback should have been called immediately because we leaked it since there's no way to
-    // call WaitAny or ProcessEvents anymore.
-    //
-    // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect the
-    // callback to be cleaned up immediately (and should expect it to happen on a future Tick).
-    ASSERT_EQ(status, WGPUQueueWorkDoneStatus_InstanceDropped);
+        // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect
+        // the callback to be cleaned up immediately (and should expect it to happen on a future
+        // Tick).
+        ASSERT_THAT(status, AnyOf(Eq(WGPUQueueWorkDoneStatus_Success),
+                                  Eq(WGPUQueueWorkDoneStatus_InstanceDropped)));
+    } else {
+        ASSERT_EQ(status, kStatusUninitialized);
+        testInstance = nullptr;  // Drop the last external ref to the instance.
+        ASSERT_EQ(status, WGPUQueueWorkDoneStatus_InstanceDropped);
+    }
 }
 
 // TODO(crbug.com/dawn/1987):

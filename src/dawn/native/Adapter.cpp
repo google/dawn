@@ -284,9 +284,7 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
             : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
               mUserdata(callbackInfo.userdata),
-              mDeviceOrError(std::move(deviceOrError)) {
-            CompleteIfSpontaneous();
-        }
+              mDeviceOrError(std::move(deviceOrError)) {}
 
         ~RequestDeviceEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 

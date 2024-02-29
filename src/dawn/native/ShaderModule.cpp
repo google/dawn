@@ -1407,9 +1407,7 @@ Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInf
             : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
               mUserdata(callbackInfo.userdata),
-              mShaderModule(std::move(shaderModule)) {
-            CompleteIfSpontaneous();
-        }
+              mShaderModule(std::move(shaderModule)) {}
 
         ~CompilationInfoEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 

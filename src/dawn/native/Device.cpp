@@ -744,7 +744,6 @@ Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackIn
             // Exactly 1 callback should be set.
             DAWN_ASSERT((mCallback != nullptr && mOldCallback == nullptr) ||
                         (mCallback == nullptr && mOldCallback != nullptr));
-            CompleteIfSpontaneous();
         }
 
         ~PopErrorScopeEvent() override { EnsureComplete(EventCompletionType::Shutdown); }

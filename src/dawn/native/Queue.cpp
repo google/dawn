@@ -220,9 +220,7 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
         : TrackedEvent(callbackInfo.mode, queue, kBeginningOfGPUTime),
           mEarlyStatus(earlyStatus),
           mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata) {
-        CompleteIfSpontaneous();
-    }
+          mUserdata(callbackInfo.userdata) {}
 
     ~WorkDoneEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
