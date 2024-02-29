@@ -103,20 +103,6 @@ class RequestDeviceEvent : public TrackedEvent {
 
 }  // anonymous namespace
 
-Adapter::~Adapter() {
-    mRequestDeviceRequests.CloseAll([](RequestDeviceData* request) {
-        request->callback(WGPURequestDeviceStatus_Unknown, nullptr,
-                          "Adapter destroyed before callback", request->userdata);
-    });
-}
-
-void Adapter::CancelCallbacksForDisconnect() {
-    mRequestDeviceRequests.CloseAll([](RequestDeviceData* request) {
-        request->callback(WGPURequestDeviceStatus_Unknown, nullptr, "GPU connection lost",
-                          request->userdata);
-    });
-}
-
 ObjectType Adapter::GetObjectType() const {
     return ObjectType::Adapter;
 }

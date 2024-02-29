@@ -36,7 +36,6 @@
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/LimitsAndFeatures.h"
 #include "dawn/wire/client/ObjectBase.h"
-#include "dawn/wire/client/RequestTracker.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {

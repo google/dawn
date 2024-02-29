@@ -33,7 +33,6 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ObjectBase.h"
-#include "dawn/wire/client/RequestTracker.h"
 
 namespace dawn::wire::client {
 

@@ -88,7 +88,6 @@ target_sources(dawn_wire PRIVATE
     "client/QuerySet.h"
     "client/Queue.cpp"
     "client/Queue.h"
-    "client/RequestTracker.h"
     "client/ShaderModule.cpp"
     "client/ShaderModule.h"
     "client/Surface.cpp"

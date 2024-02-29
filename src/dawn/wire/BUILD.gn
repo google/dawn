@@ -128,7 +128,6 @@ dawn_component("wire") {
     "client/QuerySet.h",
     "client/Queue.cpp",
     "client/Queue.h",
-    "client/RequestTracker.h",
     "client/ShaderModule.cpp",
     "client/ShaderModule.h",
     "client/Surface.cpp",
