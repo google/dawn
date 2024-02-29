@@ -27,6 +27,7 @@
 
 #include <cstring>
 
+#include "src/tint/utils/system/terminal.h"
 #include "src/tint/utils/text/styled_text_printer.h"
 
 namespace tint {
@@ -51,7 +52,8 @@ std::unique_ptr<StyledTextPrinter> StyledTextPrinter::CreatePlain(FILE* out) {
     return std::make_unique<Plain>(out);
 }
 std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out) {
-    return Create(out, StyledTextTheme::kDefault);
+    bool is_dark = TerminalIsDark(out).value_or(true);
+    return Create(out, is_dark ? StyledTextTheme::kDefaultDark : StyledTextTheme::kDefaultLight);
 }
 
 StyledTextPrinter::~StyledTextPrinter() = default;

@@ -25,14 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GEN_BUILD:CONDITION((!tint_build_is_linux) && (!tint_build_is_mac) && (!tint_build_is_win))
+#ifndef SRC_TINT_UTILS_SYSTEM_TERMINAL_H_
+#define SRC_TINT_UTILS_SYSTEM_TERMINAL_H_
 
-#include "src/tint/utils/text/styled_text_printer.h"
+#include <cstdio>
+#include <optional>
 
 namespace tint {
 
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out, const StyledTextTheme&) {
-    return CreatePlain(out);
-}
+/// Detects whether the terminal at @p out supports color output.
+/// @param out the file to print to.
+/// @return true if the terminal supports colors.
+bool TerminalSupportsColors(FILE* out);
+
+/// Attempts to detect whether the terminal at @p out is dark.
+/// @param out the file to print to.
+/// @returns true if the terminal is dark, false if the terminal is light, or nullopt if
+/// unknown.
+std::optional<bool> TerminalIsDark(FILE* out);
 
 }  // namespace tint
+
+#endif  // SRC_TINT_UTILS_SYSTEM_TERMINAL_H_

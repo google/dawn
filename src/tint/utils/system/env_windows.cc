@@ -25,14 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GEN_BUILD:CONDITION((!tint_build_is_linux) && (!tint_build_is_mac) && (!tint_build_is_win))
+// GEN_BUILD:CONDITION(tint_build_is_win)
 
-#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/system/env.h"
+
+#include <stdlib.h>
+#include <string_view>
 
 namespace tint {
 
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out, const StyledTextTheme&) {
-    return CreatePlain(out);
+std::string GetEnvVar(std::string_view name) {
+    // Use _dupenv_s to avoid unsafe warnings about std::getenv
+    char* value = nullptr;
+    _dupenv_s(&value, nullptr, name.data());
+    if (value) {
+        std::string result = value;
+        free(value);
+        return result;
+    }
+    return "";
 }
 
 }  // namespace tint

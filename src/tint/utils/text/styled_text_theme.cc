@@ -30,7 +30,7 @@
 
 namespace tint {
 
-const StyledTextTheme StyledTextTheme::kDefault{
+const StyledTextTheme StyledTextTheme::kDefaultDark{
     /* compare_match */ StyledTextTheme::Attributes{
         /* foreground */ std::nullopt,
         /* background */ Color{20, 100, 20},
@@ -117,6 +117,113 @@ const StyledTextTheme StyledTextTheme::kDefault{
     /* kind_literal */
     StyledTextTheme::Attributes{
         /* foreground */ Color{181, 206, 168},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_attribute */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{156, 220, 254},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_squiggle */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{0, 200, 255},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+};
+
+const StyledTextTheme StyledTextTheme::kDefaultLight{
+    /* compare_match */ StyledTextTheme::Attributes{
+        /* foreground */ std::nullopt,
+        /* background */ Color{190, 240, 190},
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* compare_mismatch */
+    StyledTextTheme::Attributes{
+        /* foreground */ std::nullopt,
+        /* background */ Color{240, 190, 190},
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* severity_success */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{0, 200, 0},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* severity_warning */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{200, 200, 0},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* severity_failure */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{200, 0, 0},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* severity_fatal */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{200, 0, 200},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_code */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{10, 10, 10},
+        /* background */ Color{248, 248, 248},
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_keyword */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{175, 0, 219},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_variable */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{0, 16, 128},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_type */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{38, 127, 153},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_function */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{121, 94, 38},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_enum */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{0, 112, 193},
+        /* background */ std::nullopt,
+        /* bold */ std::nullopt,
+        /* underlined */ std::nullopt,
+    },
+    /* kind_literal */
+    StyledTextTheme::Attributes{
+        /* foreground */ Color{9, 134, 88},
         /* background */ std::nullopt,
         /* bold */ std::nullopt,
         /* underlined */ std::nullopt,

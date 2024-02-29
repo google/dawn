@@ -269,9 +269,13 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
             PrintWGSL(std::cout, info.program);
         }
 
-        auto printer = tint::StyledTextPrinter::Create(stderr);
         tint::diag::Formatter formatter;
-        printer->Print(formatter.Format(info.program.Diagnostics()));
+        if (opts.printer) {
+            opts.printer->Print(formatter.Format(info.program.Diagnostics()));
+        } else {
+            tint::StyledTextPrinter::Create(stderr)->Print(
+                formatter.Format(info.program.Diagnostics()));
+        }
     }
 
     if (!info.program.IsValid()) {

@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,76 +37,36 @@
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
-  name = "text",
+  name = "system",
   srcs = [
-    "base64.cc",
-    "string.cc",
-    "string_stream.cc",
-    "styled_text.cc",
-    "styled_text_printer.cc",
-    "styled_text_printer_ansi.cc",
-    "styled_text_theme.cc",
-    "unicode.cc",
   ] + select({
     ":_not_tint_build_is_linux__and__not_tint_build_is_mac__and__not_tint_build_is_win_": [
-      "styled_text_printer_other.cc",
+      "terminal_other.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    ":_not_tint_build_is_win_": [
+      "env_other.cc",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_is_linux_or_tint_build_is_mac": [
-      "styled_text_printer_posix.cc",
+      "terminal_posix.cc",
     ],
     "//conditions:default": [],
   }) + select({
     ":tint_build_is_win": [
-      "styled_text_printer_windows.cc",
+      "env_windows.cc",
+      "terminal_windows.cc",
     ],
     "//conditions:default": [],
   }),
   hdrs = [
-    "base64.h",
-    "string.h",
-    "string_stream.h",
-    "styled_text.h",
-    "styled_text_printer.h",
-    "styled_text_theme.h",
-    "text_style.h",
-    "unicode.h",
+    "env.h",
+    "terminal.h",
   ],
   deps = [
-    "//src/tint/utils/containers",
-    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/system",
-    "//src/tint/utils/traits",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
-cc_library(
-  name = "test",
-  alwayslink = True,
-  srcs = [
-    "base64_test.cc",
-    "string_stream_test.cc",
-    "string_test.cc",
-    "styled_text_printer_test.cc",
-    "text_style_test.cc",
-    "unicode_test.cc",
-  ],
-  deps = [
-    "//src/tint/utils/containers",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
-    "//src/tint/utils/traits",
-    "@gtest",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

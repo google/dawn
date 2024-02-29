@@ -57,6 +57,8 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/system/env.h"
+#include "src/tint/utils/system/terminal.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
@@ -151,8 +153,13 @@ constexpr uint32_t kMinShaderModelForDP4aInHLSL = 64u;
 constexpr uint32_t kMinShaderModelForPackUnpack4x8InHLSL = 66u;
 #endif  // TINT_BUILD_HLSL_WRITER
 
+/// An enumerator of color-output modes
+enum class ColorMode { kPlain, kDark, kLight };
+
 struct Options {
     bool verbose = false;
+
+    std::unique_ptr<tint::StyledTextPrinter> printer;
 
     std::string input_filename;
     std::string output_file = "-";  // Default to stdout
@@ -209,9 +216,38 @@ struct Options {
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 };
 
+/// @returns the default ColorMode when no `--color` flag is specified.
+ColorMode ColorModeDefault() {
+    if (!tint::TerminalSupportsColors(stdout)) {
+        return ColorMode::kPlain;
+    }
+    if (auto res = tint::TerminalIsDark(stdout)) {
+        return *res ? ColorMode::kDark : ColorMode::kLight;
+    }
+    if (auto env = tint::GetEnvVar("DARK_BACKGROUND_COLOR"); !env.empty()) {
+        return env != "0" ? ColorMode::kDark : ColorMode::kLight;
+    }
+    if (auto env = tint::GetEnvVar("LIGHT_BACKGROUND_COLOR"); !env.empty()) {
+        return env != "0" ? ColorMode::kLight : ColorMode::kDark;
+    }
+    return ColorMode::kDark;
+}
+
+std::unique_ptr<tint::StyledTextPrinter> CreatePrinter(ColorMode mode) {
+    switch (mode) {
+        case ColorMode::kLight:
+            return tint::StyledTextPrinter::Create(stderr, tint::StyledTextTheme::kDefaultLight);
+        case ColorMode::kDark:
+            return tint::StyledTextPrinter::Create(stderr, tint::StyledTextTheme::kDefaultDark);
+        case ColorMode::kPlain:
+            break;
+    }
+    return tint::StyledTextPrinter::CreatePlain(stderr);
+}
+
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
-Format infer_format(const std::string& filename) {
+Format InferFormat(const std::string& filename) {
     (void)filename;
 
 #if TINT_BUILD_SPV_WRITER
@@ -271,6 +307,15 @@ If not provided, will be inferred from output filename extension:
   .hlsl   -> hlsl)",
                                                 format_enum_names, ShortName{"f"});
     TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
+
+    auto& col = options.Add<EnumOption<ColorMode>>("color", "Use colored output",
+                                                   tint::Vector{
+                                                       EnumName{ColorMode::kPlain, "off"},
+                                                       EnumName{ColorMode::kDark, "dark"},
+                                                       EnumName{ColorMode::kLight, "light"},
+                                                   },
+                                                   ShortName{"col"}, Default{ColorModeDefault()});
+    TINT_DEFER(opts->printer = CreatePrinter(*col.value));
 
     auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
                                          ShortName{"ep"}, Parameter{"name"});
@@ -790,9 +835,8 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
         auto reparsed_program = tint::wgsl::reader::Parse(source.get(), parser_options);
         if (!reparsed_program.IsValid()) {
-            auto printer = tint::StyledTextPrinter::Create(stderr);
             tint::diag::Formatter diag_formatter;
-            printer->Print(diag_formatter.Format(reparsed_program.Diagnostics()));
+            options.printer->Print(diag_formatter.Format(reparsed_program.Diagnostics()));
             return false;
         }
     }
@@ -1255,7 +1299,7 @@ int main(int argc, const char** argv) {
     // Implement output format defaults.
     if (options.format == Format::kUnknown) {
         // Try inferring from filename.
-        options.format = infer_format(options.output_file);
+        options.format = InferFormat(options.output_file);
     }
     if (options.format == Format::kUnknown) {
         // Ultimately, default to SPIR-V assembly. That's nice for interactive use.
@@ -1264,6 +1308,7 @@ int main(int argc, const char** argv) {
 
     tint::cmd::LoadProgramOptions opts;
     opts.filename = options.input_filename;
+    opts.printer = options.printer.get();
 #if TINT_BUILD_SPV_READER
     opts.use_ir = options.use_ir_reader;
     opts.spirv_reader_options = options.spirv_reader_options;

@@ -28,43 +28,16 @@
 // GEN_BUILD:CONDITION(tint_build_is_linux || tint_build_is_mac)
 
 #include <unistd.h>
+#include <memory>
 
-#include <cstring>
-
-#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/system/terminal.h"
 #include "src/tint/utils/text/styled_text_printer.h"
-#include "src/tint/utils/text/styled_text_theme.h"
-#include "src/tint/utils/text/text_style.h"
 
 namespace tint {
-namespace {
-
-bool SupportsANSIEscape(FILE* f) {
-    if (!isatty(fileno(f))) {
-        return false;
-    }
-
-    const char* cterm = getenv("TERM");
-    if (cterm == nullptr) {
-        return false;
-    }
-
-    std::string term = getenv("TERM");
-    if (term != "cygwin" && term != "linux" && term != "rxvt-unicode-256color" &&
-        term != "rxvt-unicode" && term != "screen-256color" && term != "screen" &&
-        term != "tmux-256color" && term != "tmux" && term != "xterm-256color" &&
-        term != "xterm-color" && term != "xterm") {
-        return false;
-    }
-
-    return true;
-}
-
-}  // namespace
 
 std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out,
                                                              const StyledTextTheme& theme) {
-    if (SupportsANSIEscape(out)) {
+    if (TerminalSupportsColors(out)) {
         return CreateANSI(out, theme);
     }
     return CreatePlain(out);

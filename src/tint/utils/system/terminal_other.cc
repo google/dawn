@@ -27,12 +27,16 @@
 
 // GEN_BUILD:CONDITION((!tint_build_is_linux) && (!tint_build_is_mac) && (!tint_build_is_win))
 
-#include "src/tint/utils/text/styled_text_printer.h"
+#include "src/tint/utils/system/terminal.h"
 
 namespace tint {
 
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out, const StyledTextTheme&) {
-    return CreatePlain(out);
+bool TerminalSupportsColors(FILE*) {
+    return false;
+}
+
+std::optional<bool> TerminalIsDark(FILE*) {
+    return std::nullopt;
 }
 
 }  // namespace tint

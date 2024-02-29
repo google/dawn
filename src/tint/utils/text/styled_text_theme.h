@@ -40,8 +40,10 @@ namespace tint {
 
 /// StyledTextTheme describes the display theming for TextStyles
 struct StyledTextTheme {
-    /// The default theme
-    static const StyledTextTheme kDefault;
+    /// The default dark theme
+    static const StyledTextTheme kDefaultDark;
+    /// The default light theme
+    static const StyledTextTheme kDefaultLight;
 
     /// Color holds a 24-bit RGB color
     struct Color {

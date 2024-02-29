@@ -25,14 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GEN_BUILD:CONDITION((!tint_build_is_linux) && (!tint_build_is_mac) && (!tint_build_is_win))
+#ifndef SRC_TINT_UTILS_SYSTEM_ENV_H_
+#define SRC_TINT_UTILS_SYSTEM_ENV_H_
 
-#include "src/tint/utils/text/styled_text_printer.h"
+#include <string>
 
 namespace tint {
 
-std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out, const StyledTextTheme&) {
-    return CreatePlain(out);
-}
+/// @param name the name of the environment variable
+/// @returns the environment variable value with the given name, or an empty string if the variable
+/// was not found.
+std::string GetEnvVar(std::string_view name);
 
 }  // namespace tint
+
+#endif  // SRC_TINT_UTILS_SYSTEM_ENV_H_

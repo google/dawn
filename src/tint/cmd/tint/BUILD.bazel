@@ -76,6 +76,7 @@ cc_binary(
     "//src/tint/utils/rtti",
     "//src/tint/utils/strconv",
     "//src/tint/utils/symbol",
+    "//src/tint/utils/system",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
   ] + select({
