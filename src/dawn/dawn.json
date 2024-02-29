@@ -2203,7 +2203,8 @@
             {"value": 1201, "name": "shared fence vk semaphore sync FD", "tags": ["dawn", "native"]},
             {"value": 1202, "name": "shared fence vk semaphore zircon handle", "tags": ["dawn", "native"]},
             {"value": 1203, "name": "shared fence DXGI shared handle", "tags": ["dawn", "native"]},
-            {"value": 1204, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]}
+            {"value": 1204, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]},
+            {"value": 1205, "name": "shared buffer memory D3D12 resource", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -3637,7 +3638,8 @@
             {"value": 1210, "name": "shared fence DXGI shared handle descriptor", "tags": ["dawn", "native"]},
             {"value": 1211, "name": "shared fence DXGI shared handle export info", "tags": ["dawn", "native"]},
             {"value": 1212, "name": "shared fence MTL shared event descriptor", "tags": ["dawn", "native"]},
-            {"value": 1213, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]}
+            {"value": 1213, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
+            {"value": 1214, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

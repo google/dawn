@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,45 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
-#define INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
+#ifndef SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_
+#define SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_
 
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <windows.h>
-#include <wrl/client.h>
-
-#include "dawn/native/D3DBackend.h"
-
-struct ID3D12Device;
-struct ID3D12Resource;
+#include "dawn/native/D3D12Backend.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/SharedBufferMemory.h"
+#include "dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {
-
 class Device;
 
-enum MemorySegment {
-    Local,
-    NonLocal,
-};
-
-DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
-
-DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
-                                                         uint64_t requestedReservationSize,
-                                                         MemorySegment memorySegment);
-
-// May be chained on SharedBufferMemoryDescriptor
-struct DAWN_NATIVE_EXPORT SharedBufferMemoryD3D12ResourceDescriptor : wgpu::ChainedStruct {
-    SharedBufferMemoryD3D12ResourceDescriptor() {
-        sType = static_cast<wgpu::SType>(WGPUSType_SharedBufferMemoryD3D12ResourceDescriptor);
-    }
-
-    // This ID3D12Resource object must be created from the same ID3D12Device used in the
-    // WGPUDevice.
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+class SharedBufferMemory final : public SharedBufferMemoryBase {
+  public:
+    static ResultOrError<Ref<SharedBufferMemory>> Create(
+        Device* device,
+        const char* label,
+        const SharedBufferMemoryD3D12ResourceDescriptor* descriptor);
 };
 
 }  // namespace dawn::native::d3d12
 
-#endif  // INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
+#endif  // SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_

@@ -222,6 +222,8 @@ class Device final : public d3d::Device {
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) override;
 
+    ResultOrError<Ref<SharedBufferMemoryBase>> ImportSharedBufferMemoryImpl(
+        const SharedBufferMemoryDescriptor* descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
         const SharedTextureMemoryDescriptor* descriptor) override;
     ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(

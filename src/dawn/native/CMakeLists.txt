@@ -456,6 +456,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
         "d3d12/StagingDescriptorAllocatorD3D12.cpp"
         "d3d12/StagingDescriptorAllocatorD3D12.h"
+        "d3d12/SharedBufferMemoryD3D12.cpp"
+        "d3d12/SharedBufferMemoryD3D12.h"
         "d3d12/SharedFenceD3D12.cpp"
         "d3d12/SharedFenceD3D12.h"
         "d3d12/SharedTextureMemoryD3D12.cpp"
