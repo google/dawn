@@ -29,24 +29,39 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/unary_op.h"
+#include "src/tint/lang/wgsl/ast/expression.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
+#include "src/tint/lang/wgsl/ast/variable.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
+#include "src/tint/lang/wgsl/sem/array.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/lang/wgsl/sem/expression.h"
 #include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/text_style.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Result);
 
 using namespace tint::core::fluent_types;  // NOLINT
-                                           //
+
 namespace tint::ast::transform {
 namespace {
 
@@ -75,12 +90,11 @@ struct ArrayLengthFromUniform::State {
     /// @param in the input transform data
     /// @param out the output transform data
     explicit State(const Program& program, const DataMap& in, DataMap& out)
-        : src(program), inputs(in), outputs(out) {}
+        : src(program), outputs(out), cfg(in.Get<Config>()) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
-        auto* cfg = inputs.Get<Config>();
         if (cfg == nullptr) {
             b.Diagnostics().AddError(diag::System::Transform, Source{})
                 << "missing transform data for "
@@ -88,103 +102,34 @@ struct ArrayLengthFromUniform::State {
             return resolver::Resolve(b);
         }
 
-        if (!ShouldRun(src)) {
+        if (cfg->bindpoint_to_size_index.empty() || !ShouldRun(src)) {
             return SkipTransform;
         }
 
-        const char* kBufferSizeMemberName = "buffer_size";
+        // Create the name of the array lengths uniform variable.
+        array_lengths_var = b.Symbols().New("tint_array_lengths");
 
-        // Determine the size of the buffer size array.
-        uint32_t max_buffer_size_index = 0;
-
-        IterateArrayLengthOnStorageVar(
-            [&](const CallExpression*, const sem::VariableUser*, const sem::GlobalVariable* var) {
-                if (auto binding = var->Attributes().binding_point) {
-                    auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
-                    if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-                        return;
-                    }
-                    if (idx_itr->second > max_buffer_size_index) {
-                        max_buffer_size_index = idx_itr->second;
+        // Replace all the arrayLength() calls.
+        for (auto* fn : src.AST().Functions()) {
+            if (auto* sem_fn = sem.Get(fn)) {
+                for (auto* call : sem_fn->DirectCalls()) {
+                    if (auto* target = call->Target()->As<sem::BuiltinFn>()) {
+                        if (target->Fn() == wgsl::BuiltinFn::kArrayLength) {
+                            ReplaceArrayLengthCall(call);
+                        }
                     }
                 }
-            });
-
-        // Get (or create, on first call) the uniform buffer that will receive the
-        // size of each storage buffer in the module.
-        const Variable* buffer_size_ubo = nullptr;
-        auto get_ubo = [&] {
-            if (!buffer_size_ubo) {
-                // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
-                // We do this because UBOs require an element stride that is 16-byte
-                // aligned.
-                auto* buffer_size_struct = b.Structure(
-                    b.Sym(), tint::Vector{
-                                 b.Member(kBufferSizeMemberName,
-                                          b.ty.array(b.ty.vec4(b.ty.u32()),
-                                                     u32((max_buffer_size_index / 4) + 1))),
-                             });
-                buffer_size_ubo =
-                    b.GlobalVar(b.Sym(), b.ty.Of(buffer_size_struct), core::AddressSpace::kUniform,
-                                b.Group(AInt(cfg->ubo_binding.group)),
-                                b.Binding(AInt(cfg->ubo_binding.binding)));
             }
-            return buffer_size_ubo;
-        };
+        }
 
-        std::unordered_set<uint32_t> used_size_indices;
+        // Add the necessary array-length arguments to all the newly created array-length
+        // parameters.
+        while (!len_params_needing_args.IsEmpty()) {
+            AddArrayLengthArguments(len_params_needing_args.Pop());
+        }
 
-        IterateArrayLengthOnStorageVar([&](const CallExpression* call_expr,
-                                           const sem::VariableUser* storage_buffer_sem,
-                                           const sem::GlobalVariable* var) {
-            auto binding = var->Attributes().binding_point;
-            if (!binding) {
-                return;
-            }
-            auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
-            if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-                return;
-            }
-
-            uint32_t size_index = idx_itr->second;
-            used_size_indices.insert(size_index);
-
-            // Load the total storage buffer size from the UBO.
-            uint32_t array_index = size_index / 4;
-            auto* vec_expr = b.IndexAccessor(
-                b.MemberAccessor(get_ubo()->name->symbol, kBufferSizeMemberName), u32(array_index));
-            uint32_t vec_index = size_index % 4;
-            auto* total_storage_buffer_size = b.IndexAccessor(vec_expr, u32(vec_index));
-
-            // Calculate actual array length
-            //                total_storage_buffer_size - array_offset
-            // array_length = ----------------------------------------
-            //                             array_stride
-            const Expression* total_size = total_storage_buffer_size;
-            if (TINT_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
-                TINT_ICE() << "storage buffer variable should not be a pointer. These should have "
-                              "been removed by the SimplifyPointers transform";
-                return;
-            }
-            auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
-            const core::type::Array* array_type = nullptr;
-            if (auto* str = storage_buffer_type->As<core::type::Struct>()) {
-                // The variable is a struct, so subtract the byte offset of the array
-                // member.
-                auto* array_member_sem = str->Members().Back();
-                array_type = array_member_sem->Type()->As<core::type::Array>();
-                total_size = b.Sub(total_storage_buffer_size, u32(array_member_sem->Offset()));
-            } else if (auto* arr = storage_buffer_type->As<core::type::Array>()) {
-                array_type = arr;
-            } else {
-                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
-                              "&struct_var.array_member";
-                return;
-            }
-            auto* array_length = b.Div(total_size, u32(array_type->Stride()));
-
-            ctx.Replace(call_expr, array_length);
-        });
+        // Add the tint_array_lengths module-scope uniform variable.
+        AddArrayLengthsUniformVar();
 
         outputs.Add<Result>(used_size_indices);
 
@@ -193,81 +138,192 @@ struct ArrayLengthFromUniform::State {
     }
 
   private:
+    // Replaces the arrayLength() builtin call with an array-length expression passed via a uniform
+    // buffer.
+    void ReplaceArrayLengthCall(const sem::Call* call) {
+        if (auto* replacement = ArrayLengthOf(call->Arguments()[0])) {
+            ctx.Replace(call->Declaration(), replacement);
+        }
+    }
+
+    /// @returns an AST expression that is equal to the arrayLength() of the runtime-sized array
+    /// accessed by the pointer expression @p expr, or nullptr on error or if the array is not in
+    /// the Config::bindpoint_to_size_index map.
+    const ast::Expression* ArrayLengthOf(const sem::Expression* expr) {
+        const ast::Expression* len = nullptr;
+        while (expr) {
+            expr = Switch(
+                expr,  //
+                [&](const sem::VariableUser* user) {
+                    len = ArrayLengthOf(user->Variable());
+                    return nullptr;
+                },
+                [&](const sem::MemberAccessorExpression* access) {
+                    return access->Object();  // Follow the object
+                },
+                [&](const sem::Expression* e) {
+                    return Switch(
+                        e->Declaration(),  //
+                        [&](const ast::UnaryOpExpression* unary) -> const sem::Expression* {
+                            switch (unary->op) {
+                                case core::UnaryOp::kAddressOf:
+                                case core::UnaryOp::kIndirection:
+                                    return sem.Get(unary->expr);  // Follow the object
+                                default:
+                                    TINT_ICE() << "unexpected unary op: " << unary->op;
+                                    return nullptr;
+                            }
+                        },
+                        TINT_ICE_ON_NO_MATCH);
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
+        return len;
+    }
+
+    /// @returns an AST expression that is equal to the arrayLength() of the runtime-sized array
+    /// held by the module-scope variable or parameter @p var, or nullptr on error or if the array
+    /// is not in the Config::bindpoint_to_size_index map.
+    const ast::Expression* ArrayLengthOf(const sem::Variable* var) {
+        return Switch(
+            var,  //
+            [&](const sem::GlobalVariable* global) { return ArrayLengthOf(global); },
+            [&](const sem::Parameter* param) { return ArrayLengthOf(param); },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// @returns an AST expression that is equal to the arrayLength() of the runtime-sized array
+    /// held by the module scope variable @p global, or nullptr on error or if the array is not in
+    /// the Config::bindpoint_to_size_index map.
+    const ast::Expression* ArrayLengthOf(const sem::GlobalVariable* global) {
+        auto binding = global->Attributes().binding_point;
+        TINT_ASSERT_OR_RETURN_VALUE(binding, nullptr);
+
+        auto idx_it = cfg->bindpoint_to_size_index.find(*binding);
+        if (idx_it == cfg->bindpoint_to_size_index.end()) {
+            // If the bindpoint_to_size_index map does not contain an entry for the storage buffer,
+            // then we preserve the arrayLength() call.
+            return nullptr;
+        }
+
+        uint32_t size_index = idx_it->second;
+        used_size_indices.insert(size_index);
+
+        // Load the total storage buffer size from the UBO.
+        uint32_t array_index = size_index / 4;
+        auto* vec_expr = b.IndexAccessor(
+            b.MemberAccessor(array_lengths_var, kArrayLengthsMemberName), u32(array_index));
+        uint32_t vec_index = size_index % 4;
+        auto* total_storage_buffer_size = b.IndexAccessor(vec_expr, u32(vec_index));
+
+        // Calculate actual array length
+        //                total_storage_buffer_size - array_offset
+        // array_length = ----------------------------------------
+        //                             array_stride
+        const Expression* total_size = total_storage_buffer_size;
+        if (TINT_UNLIKELY(global->Type()->Is<core::type::Pointer>())) {
+            TINT_ICE() << "storage buffer variable should not be a pointer. "
+                          "These should have been removed by the SimplifyPointers transform";
+            return nullptr;
+        }
+        auto* storage_buffer_type = global->Type()->UnwrapRef();
+        const core::type::Array* array_type = nullptr;
+        if (auto* str = storage_buffer_type->As<core::type::Struct>()) {
+            // The variable is a struct, so subtract the byte offset of the
+            // array member.
+            auto* array_member_sem = str->Members().Back();
+            array_type = array_member_sem->Type()->As<core::type::Array>();
+            total_size = b.Sub(total_storage_buffer_size, u32(array_member_sem->Offset()));
+        } else if (auto* arr = storage_buffer_type->As<core::type::Array>()) {
+            array_type = arr;
+        } else {
+            TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
+                          "&struct_var.array_member";
+            return nullptr;
+        }
+        return b.Div(total_size, u32(array_type->Stride()));
+    }
+
+    /// @returns an AST expression that is equal to the arrayLength() of the runtime-sized array
+    /// held by the object pointed to by the pointer parameter @p param.
+    const ast::Expression* ArrayLengthOf(const sem::Parameter* param) {
+        // Pointer originates from a parameter.
+        // Add a new array length parameter to the function, and use that.
+        auto len_name = param_lengths.GetOrAdd(param, [&] {
+            auto* fn = param->Owner()->As<sem::Function>();
+            auto name = b.Symbols().New(param->Declaration()->name->symbol.Name() + "_length");
+            auto* len_param = b.Param(name, b.ty.u32());
+            ctx.InsertAfter(fn->Declaration()->params, param->Declaration(), len_param);
+            len_params_needing_args.Add(param);
+            return name;
+        });
+        return b.Expr(len_name);
+    }
+
+    /// Constructs the uniform buffer variable that will hold the array lengths.
+    void AddArrayLengthsUniformVar() {
+        // Calculate the highest index in the array lengths array
+        uint32_t highest_index = 0;
+        for (auto idx : used_size_indices) {
+            if (idx > highest_index) {
+                highest_index = idx;
+            }
+        }
+
+        // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
+        // We do this because UBOs require an element stride that is 16-byte aligned.
+        auto* buffer_size_struct =
+            b.Structure(b.Symbols().New("TintArrayLengths"),
+                        tint::Vector{
+                            b.Member(kArrayLengthsMemberName,
+                                     b.ty.array(b.ty.vec4<u32>(), u32((highest_index / 4) + 1))),
+                        });
+        b.GlobalVar(array_lengths_var, b.ty.Of(buffer_size_struct), core::AddressSpace::kUniform,
+                    b.Group(AInt(cfg->ubo_binding.group)),
+                    b.Binding(AInt(cfg->ubo_binding.binding)));
+    }
+
+    /// Adds an additional array-length argument to all the calls to the function that owns the
+    /// pointer parameter @p param. This may add new entries to #len_params_needing_args.
+    void AddArrayLengthArguments(const sem::Parameter* param) {
+        auto* fn = param->Owner()->As<sem::Function>();
+        for (auto* call : fn->CallSites()) {
+            auto* arg = call->Arguments()[param->Index()];
+            if (auto* len = ArrayLengthOf(arg); len) {
+                ctx.InsertAfter(call->Declaration()->args, arg->Declaration(), len);
+            } else {
+                // Callee expects an array length, but there's no binding for it.
+                // Call arrayLength() at the call-site.
+                len = b.Call(wgsl::BuiltinFn::kArrayLength, ctx.Clone(arg->Declaration()));
+                ctx.InsertAfter(call->Declaration()->args, arg->Declaration(), len);
+            }
+        }
+    }
+
+    /// Name of the array-lengths struct member that holds all the array lengths.
+    static constexpr std::string_view kArrayLengthsMemberName = "array_lengths";
+
     /// The source program
     const Program& src;
-    /// The transform inputs
-    const DataMap& inputs;
     /// The transform outputs
     DataMap& outputs;
+    /// The transform config
+    const Config* const cfg;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
     program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
-
-    /// Iterate over all arrayLength() builtins that operate on
-    /// storage buffer variables.
-    /// @param functor of type void(const CallExpression*, const
-    /// sem::VariableUser, const sem::GlobalVariable*). It takes in an
-    /// CallExpression of the arrayLength call expression node, a
-    /// sem::VariableUser of the used storage buffer variable, and the
-    /// sem::GlobalVariable for the storage buffer.
-    template <typename F>
-    void IterateArrayLengthOnStorageVar(F&& functor) {
-        auto& sem = src.Sem();
-
-        // Find all calls to the arrayLength() builtin.
-        for (auto* node : src.ASTNodes().Objects()) {
-            auto* call_expr = node->As<CallExpression>();
-            if (!call_expr) {
-                continue;
-            }
-
-            auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
-            auto* builtin = call->Target()->As<sem::BuiltinFn>();
-            if (!builtin || builtin->Fn() != wgsl::BuiltinFn::kArrayLength) {
-                continue;
-            }
-
-            if (auto* call_stmt = call->Stmt()->Declaration()->As<CallStatement>()) {
-                if (call_stmt->expr == call_expr) {
-                    // arrayLength() is used as a statement.
-                    // The argument expression must be side-effect free, so just drop the statement.
-                    RemoveStatement(ctx, call_stmt);
-                    continue;
-                }
-            }
-
-            // Get the storage buffer that contains the runtime array.
-            // Since we require SimplifyPointers, we can assume that the arrayLength()
-            // call has one of two forms:
-            //   arrayLength(&struct_var.array_member)
-            //   arrayLength(&array_var)
-            auto* param = call_expr->args[0]->As<UnaryOpExpression>();
-            if (TINT_UNLIKELY(!param || param->op != core::UnaryOp::kAddressOf)) {
-                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
-                              "&struct_var.array_member";
-                break;
-            }
-            auto* storage_buffer_expr = param->expr;
-            if (auto* accessor = param->expr->As<MemberAccessorExpression>()) {
-                storage_buffer_expr = accessor->object;
-            }
-            auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
-            if (TINT_UNLIKELY(!storage_buffer_sem)) {
-                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
-                              "&struct_var.array_member";
-                break;
-            }
-
-            // Get the index to use for the buffer size array.
-            auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
-            if (TINT_UNLIKELY(!var)) {
-                TINT_ICE() << "storage buffer is not a global variable";
-                break;
-            }
-            functor(call_expr, storage_buffer_sem, var);
-        }
-    }
+    /// Alias to src.Sem()
+    const sem::Info& sem = src.Sem();
+    /// Name of the uniform buffer variable that holds the array lengths
+    Symbol array_lengths_var;
+    /// A map of pointer-parameter to the name of the new array-length parameter.
+    Hashmap<const sem::Parameter*, Symbol, 8> param_lengths;
+    /// Indices into the uniform buffer array indices that are statically used.
+    std::unordered_set<uint32_t> used_size_indices;
+    /// A vector of array-length parameters which need corresponding array-length arguments for all
+    /// callsites.
+    UniqueVector<const sem::Parameter*, 8> len_params_needing_args;
 };
 
 Transform::ApplyResult ArrayLengthFromUniform::Apply(const Program& src,

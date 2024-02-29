@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 26
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %arr_block "arr_block"
+               OpMemberName %arr_block 0 "inner"
+               OpName %arr "arr"
+               OpName %f2_arr "f2_arr"
+               OpName %f1_arr "f1_arr"
+               OpName %f0_arr "f0_arr"
+               OpName %main "main"
+               OpDecorate %arr_block Block
+               OpMemberDecorate %arr_block 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpDecorate %arr Binding 0
+               OpDecorate %arr DescriptorSet 0
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+  %arr_block = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_arr_block = OpTypePointer StorageBuffer %arr_block
+        %arr = OpVariable %_ptr_StorageBuffer_arr_block StorageBuffer
+          %6 = OpTypeFunction %uint
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+        %int = OpTypeInt 32 1
+         %22 = OpConstantNull %int
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %f2_arr = OpFunction %uint None %6
+          %8 = OpLabel
+          %9 = OpArrayLength %uint %arr 0
+               OpReturnValue %9
+               OpFunctionEnd
+     %f1_arr = OpFunction %uint None %6
+         %11 = OpLabel
+         %12 = OpFunctionCall %uint %f2_arr
+               OpReturnValue %12
+               OpFunctionEnd
+     %f0_arr = OpFunction %uint None %6
+         %14 = OpLabel
+         %15 = OpFunctionCall %uint %f1_arr
+               OpReturnValue %15
+               OpFunctionEnd
+       %main = OpFunction %void None %16
+         %19 = OpLabel
+         %24 = OpAccessChain %_ptr_StorageBuffer_uint %arr %uint_0 %22
+         %25 = OpFunctionCall %uint %f0_arr
+               OpStore %24 %25
+               OpReturn
+               OpFunctionEnd

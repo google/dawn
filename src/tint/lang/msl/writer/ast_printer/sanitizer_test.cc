@@ -78,16 +78,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol {
-  /* 0x0000 */ tint_array<uint4, 1> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct my_struct {
   tint_array<float, 1> a;
 };
 
-fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
-  uint len = (((*(tint_symbol_2)).buffer_size[0u][1u] - 0u) / 4u);
+fragment void a_func(const constant TintArrayLengths* tint_symbol [[buffer(30)]]) {
+  uint len = (((*(tint_symbol)).array_lengths[0u][1u] - 0u) / 4u);
   return;
 }
 
@@ -135,8 +135,8 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol {
-  /* 0x0000 */ tint_array<uint4, 1> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct my_struct {
@@ -144,8 +144,8 @@ struct my_struct {
   tint_array<float, 1> a;
 };
 
-fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
-  uint len = (((*(tint_symbol_2)).buffer_size[0u][1u] - 4u) / 4u);
+fragment void a_func(const constant TintArrayLengths* tint_symbol [[buffer(30)]]) {
+  uint len = (((*(tint_symbol)).array_lengths[0u][1u] - 4u) / 4u);
   return;
 }
 
@@ -196,16 +196,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol {
-  /* 0x0000 */ tint_array<uint4, 1> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct my_struct {
   tint_array<float, 1> a;
 };
 
-fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
-  uint len = (((*(tint_symbol_2)).buffer_size[0u][1u] - 0u) / 4u);
+fragment void a_func(const constant TintArrayLengths* tint_symbol [[buffer(30)]]) {
+  uint len = (((*(tint_symbol)).array_lengths[0u][1u] - 0u) / 4u);
   return;
 }
 
@@ -256,16 +256,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol {
-  /* 0x0000 */ tint_array<uint4, 2> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 2> array_lengths;
 };
 
 struct my_struct {
   tint_array<float, 1> a;
 };
 
-fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(29)]]) {
-  uint len = ((((*(tint_symbol_2)).buffer_size[1u][3u] - 0u) / 4u) + (((*(tint_symbol_2)).buffer_size[0u][2u] - 0u) / 4u));
+fragment void a_func(const constant TintArrayLengths* tint_symbol [[buffer(29)]]) {
+  uint len = ((((*(tint_symbol)).array_lengths[1u][3u] - 0u) / 4u) + (((*(tint_symbol)).array_lengths[0u][2u] - 0u) / 4u));
   return;
 }
 

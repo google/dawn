@@ -14,17 +14,17 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_1 {
-  /* 0x0000 */ tint_array<uint4, 1> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct S {
   tint_array<int, 1> a;
 };
 
-kernel void tint_symbol(const constant tint_symbol_1* tint_symbol_3 [[buffer(30)]]) {
-  uint const l1 = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
-  uint const l2 = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
+kernel void tint_symbol(const constant TintArrayLengths* tint_symbol_1 [[buffer(30)]]) {
+  uint const l1 = (((*(tint_symbol_1)).array_lengths[0u][0u] - 0u) / 4u);
+  uint const l2 = (((*(tint_symbol_1)).array_lengths[0u][0u] - 0u) / 4u);
   return;
 }
 

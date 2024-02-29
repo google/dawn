@@ -14,42 +14,42 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_1 {
-  /* 0x0000 */ tint_array<uint4, 1> buffer_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct SB_RW {
   tint_array<half, 1> arg_0;
 };
 
-void arrayLength_cbd6b5(const constant tint_symbol_1* const tint_symbol_3, device uint* const tint_symbol_4) {
-  uint res = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 2u);
-  *(tint_symbol_4) = res;
+void arrayLength_cbd6b5(const constant TintArrayLengths* const tint_symbol_1, device uint* const tint_symbol_2) {
+  uint res = (((*(tint_symbol_1)).array_lengths[0u][0u] - 0u) / 2u);
+  *(tint_symbol_2) = res;
 }
 
 struct tint_symbol {
   float4 value [[position]];
 };
 
-float4 vertex_main_inner(const constant tint_symbol_1* const tint_symbol_5, device uint* const tint_symbol_6) {
-  arrayLength_cbd6b5(tint_symbol_5, tint_symbol_6);
+float4 vertex_main_inner(const constant TintArrayLengths* const tint_symbol_3, device uint* const tint_symbol_4) {
+  arrayLength_cbd6b5(tint_symbol_3, tint_symbol_4);
   return float4(0.0f);
 }
 
-vertex tint_symbol vertex_main(const constant tint_symbol_1* tint_symbol_7 [[buffer(30)]], device uint* tint_symbol_8 [[buffer(1)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_7, tint_symbol_8);
+vertex tint_symbol vertex_main(const constant TintArrayLengths* tint_symbol_5 [[buffer(30)]], device uint* tint_symbol_6 [[buffer(1)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main(const constant tint_symbol_1* tint_symbol_9 [[buffer(30)]], device uint* tint_symbol_10 [[buffer(1)]]) {
-  arrayLength_cbd6b5(tint_symbol_9, tint_symbol_10);
+fragment void fragment_main(const constant TintArrayLengths* tint_symbol_7 [[buffer(30)]], device uint* tint_symbol_8 [[buffer(1)]]) {
+  arrayLength_cbd6b5(tint_symbol_7, tint_symbol_8);
   return;
 }
 
-kernel void compute_main(const constant tint_symbol_1* tint_symbol_11 [[buffer(30)]], device uint* tint_symbol_12 [[buffer(1)]]) {
-  arrayLength_cbd6b5(tint_symbol_11, tint_symbol_12);
+kernel void compute_main(const constant TintArrayLengths* tint_symbol_9 [[buffer(30)]], device uint* tint_symbol_10 [[buffer(1)]]) {
+  arrayLength_cbd6b5(tint_symbol_9, tint_symbol_10);
   return;
 }
 

@@ -166,17 +166,17 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.Result();
-    auto* expect = R"(cbuffer cbuffer_tint_symbol_1 : register(b4, space3) {
-  uint4 tint_symbol_1[2];
+    auto* expect = R"(cbuffer cbuffer_tint_array_lengths : register(b4, space3) {
+  uint4 tint_array_lengths[2];
 };
 ByteAddressBuffer b : register(t1, space2);
 ByteAddressBuffer c : register(t2, space2);
 
 void a_func() {
-  uint tint_symbol_3 = 0u;
-  b.GetDimensions(tint_symbol_3);
-  uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
-  uint len = (tint_symbol_4 + ((tint_symbol_1[1].w - 0u) / 4u));
+  uint tint_symbol_1 = 0u;
+  b.GetDimensions(tint_symbol_1);
+  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
+  uint len = (tint_symbol_2 + ((tint_array_lengths[1].w - 0u) / 4u));
   return;
 }
 )";

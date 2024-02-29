@@ -14,7 +14,7 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_10 {
+struct tint_symbol_2 {
   /* 0x0000 */ tint_array<uint, 1> arr;
 };
 
@@ -22,15 +22,20 @@ struct TintArrayLengths {
   /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
-void tint_symbol_1_inner(uint tint_symbol_2, const device tint_array<uint, 1>* const tint_symbol_7, const constant TintArrayLengths* const tint_symbol_8) {
-  int const tint_symbol_3 = 0;
-  int const tint_symbol_4 = 0;
-  int const tint_symbol_5 = 0;
-  uint const tint_symbol_6 = (*(tint_symbol_7))[min(tint_symbol_2, (((*(tint_symbol_8)).array_lengths[0u][0u] / 4u) - 1u))];
+uint f2(device tint_array<uint, 1>* const p, uint p_length) {
+  return p_length;
 }
 
-kernel void tint_symbol_1(const device tint_symbol_10* tint_symbol_9 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_11 [[buffer(30)]], uint tint_symbol_2 [[thread_index_in_threadgroup]]) {
-  tint_symbol_1_inner(tint_symbol_2, &((*(tint_symbol_9)).arr), tint_symbol_11);
+uint f1(device tint_array<uint, 1>* const p, uint p_length_1) {
+  return f2(p, p_length_1);
+}
+
+uint f0(device tint_array<uint, 1>* const p, uint p_length_2) {
+  return f1(p, p_length_2);
+}
+
+kernel void tint_symbol(device tint_symbol_2* tint_symbol_1 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
+  (*(tint_symbol_1)).arr[0] = f0(&((*(tint_symbol_1)).arr), ((*(tint_symbol_3)).array_lengths[0u][0u] / 4u));
   return;
 }
 
