@@ -95,7 +95,6 @@ func StreamResults(
 	}
 
 	stdout := state.Stdout
-
 	results := Results{}
 
 	// Total number of tests, test counts binned by status
@@ -126,7 +125,7 @@ func StreamResults(
 	start := time.Now()
 	for res := range stream {
 		state.Log.logResults(res)
-		results[res.TestCase] = res.Status
+		results[res.TestCase] = res
 		expected := state.Expectations[res.TestCase]
 		exStatus := expectedStatus{
 			status:   res.Status,

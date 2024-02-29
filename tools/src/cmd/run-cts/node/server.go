@@ -199,6 +199,7 @@ func (c *cmd) runServer(
 			Status       string
 			Message      string
 			CoverageData string
+			DurationMS   float32
 		}
 		postResp, err := http.Post(fmt.Sprintf("http://localhost:%v/run?%v", port, testCases[idx]), "", &bytes.Buffer{})
 		if err != nil {
@@ -217,6 +218,8 @@ func (c *cmd) runServer(
 				results <- res
 				continue
 			}
+
+			res.Duration = time.Duration(resp.DurationMS*1000) * time.Microsecond
 
 			switch resp.Status {
 			case "pass":

@@ -37,6 +37,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 )
@@ -123,6 +124,8 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 	if c.flags.Verbose {
 		PrintCommand(cmd)
 	}
+
+	start := time.Now()
 	err := cmd.Run()
 
 	msg := buf.String()
@@ -131,6 +134,7 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 		Status:   common.Pass,
 		Message:  msg,
 		Error:    err,
+		Duration: time.Since(start),
 	}
 
 	if err == nil && c.coverage != nil {

@@ -38,6 +38,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -299,6 +300,7 @@ nextTestCase:
 				case "TEST_HEARTBEAT":
 				case "TEST_STATUS":
 					res.Status = common.Status(response.Status)
+					res.Duration = time.Duration(response.Duration) * time.Millisecond
 				case "TEST_FINISHED":
 					results <- res
 					continue nextTestCase

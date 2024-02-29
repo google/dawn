@@ -34,11 +34,11 @@ import (
 	"sort"
 )
 
-// Results is a map of test to status
-type Results map[TestCase]Status
+// Expectations is a map of test to status
+type Expectations map[TestCase]Status
 
 // Load loads the results from path
-func (e *Results) Load(path string) error {
+func (e *Expectations) Load(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("failed to open expectations file: %w", err)
@@ -50,7 +50,7 @@ func (e *Results) Load(path string) error {
 		return fmt.Errorf("failed to read expectations file: %w", err)
 	}
 
-	*e = make(Results, len(statuses))
+	*e = make(Expectations, len(statuses))
 	for _, s := range statuses {
 		(*e)[s.TestCase] = s.Status
 	}
@@ -58,7 +58,7 @@ func (e *Results) Load(path string) error {
 }
 
 // Save saves the results to path
-func (e Results) Save(path string) error {
+func (e Expectations) Save(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("failed to create expectations file: %w", err)

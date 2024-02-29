@@ -27,7 +27,11 @@
 
 package common
 
-import "dawn.googlesource.com/dawn/tools/src/cov"
+import (
+	"time"
+
+	"dawn.googlesource.com/dawn/tools/src/cov"
+)
 
 // Result holds the information about a completed test
 type Result struct {
@@ -37,4 +41,8 @@ type Result struct {
 	Message  string
 	Error    error
 	Coverage *cov.Coverage
+	Duration time.Duration
 }
+
+// Results is a map of test case to Result
+type Results map[TestCase]Result

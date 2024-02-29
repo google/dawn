@@ -120,7 +120,7 @@ func (f *Flags) Process() (*State, error) {
 type State struct {
 	Stdout       io.WriteCloser
 	Log          Logger
-	Expectations Results
+	Expectations Expectations
 	CTS          CTS
 	resultsPath  string
 	logWriter    io.WriteCloser
@@ -134,7 +134,12 @@ func (s *State) Close(results Results) error {
 
 	// If an result file was specified, save results to it.
 	if s.resultsPath != "" {
-		if err := results.Save(s.resultsPath); err != nil {
+		expectations := Expectations{}
+		for testCase, result := range results {
+			expectations[testCase] = result.Status
+		}
+
+		if err := expectations.Save(s.resultsPath); err != nil {
 			return err
 		}
 	}
@@ -143,6 +148,10 @@ func (s *State) Close(results Results) error {
 		if err := s.logWriter.Close(); err != nil {
 			return fmt.Errorf("failed to close log file: %w", err)
 		}
+	}
+
+	if err := AddToListingMeta(s.CTS.path, results); err != nil {
+		return err
 	}
 
 	return nil
