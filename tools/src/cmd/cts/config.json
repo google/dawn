@@ -54,6 +54,11 @@
       "Bucket": "try",
       "Builder": "mac-dawn-rel"
     },
+    "Mac-x64-Intel-Experimental": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-mac-intel-exp"
+    },
     "Mac-Arm64": {
       "Project": "chromium",
       "Bucket": "try",
