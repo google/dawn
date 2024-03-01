@@ -72,7 +72,7 @@ TEST_P(WireAdapterTests, RequestDeviceEmptyDescriptor) {
     wgpu::DeviceDescriptor desc = {};
     AdapterRequestDevice(adapter, &desc);
 
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(WithArg<1>(Invoke([&](const WGPUDeviceDescriptor* apiDesc) {
             EXPECT_EQ(apiDesc->label, nullptr);
             EXPECT_EQ(apiDesc->requiredFeatureCount, 0u);
@@ -95,7 +95,7 @@ TEST_P(WireAdapterTests, RequestDeviceEmptyDescriptor) {
 TEST_P(WireAdapterTests, RequestDeviceNullDescriptor) {
     AdapterRequestDevice(adapter, nullptr);
 
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(WithArg<1>(Invoke([&](const WGPUDeviceDescriptor* apiDesc) {
             EXPECT_EQ(apiDesc->label, nullptr);
             EXPECT_EQ(apiDesc->requiredFeatureCount, 0u);
@@ -126,7 +126,7 @@ TEST_P(WireAdapterTests, RequestDeviceAssertsOnLostCallbackPointer) {
 
     AdapterRequestDevice(adapter, &desc);
 
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(WithArg<1>(Invoke([&](const WGPUDeviceDescriptor* apiDesc) {
             EXPECT_STREQ(apiDesc->label, desc.label);
 
@@ -166,7 +166,7 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
     // The backend device should not be known by the wire server.
     EXPECT_FALSE(GetWireServer()->IsDeviceKnown(apiDevice));
 
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             // Set on device creation to forward callbacks to the client.
             EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
@@ -270,7 +270,7 @@ TEST_P(WireAdapterTests, RequestFeatureUnsupportedByWire) {
     // The reply contains features that the device implementation supports, but the
     // wire does not.
     WGPUDevice apiDevice = api.GetNewDevice();
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
                 .WillOnce(Return(fakeFeatures.size()));
@@ -308,7 +308,7 @@ TEST_P(WireAdapterTests, RequestDeviceError) {
     AdapterRequestDevice(adapter, &desc, this);
 
     // Expect the server to receive the message. Then, mock an error.
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Error, nullptr,
                                                  "Request device failed");
@@ -343,7 +343,7 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
 
     // Mock a reply from the server.
     WGPUDevice apiDevice = api.GetNewDevice();
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             // Set on device creation to forward callbacks to the client.
             EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))

@@ -363,7 +363,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     ExpectServerReadHandleSerializeDataUpdate(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleGetData(clientHandle))
@@ -435,7 +435,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Mock a failed callback.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
         }));
@@ -512,7 +512,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeDataUpdateFailure
     ExpectServerReadHandleSerializeDataUpdate(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
@@ -557,7 +557,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroyBeforeUnmap) {
     ExpectServerReadHandleSerializeDataUpdate(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleGetData(clientHandle))
@@ -611,7 +611,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))
@@ -690,7 +690,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Mock an error callback.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
         }));
@@ -764,7 +764,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeDataUpdateFailur
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))
@@ -815,7 +815,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs(
             [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))

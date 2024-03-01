@@ -41,7 +41,7 @@ namespace {
                 {%- endfor -%}
             ) {
                 auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
-                return object->procs->{{as_MethodSuffix(type.name, method.name)}}(self
+                return object->procs->{{as_CppMethodSuffix(type.name, method.name)}}(self
                     {%- for arg in method.arguments -%}
                         , {{as_varName(arg.name)}}
                     {%- endfor -%}
@@ -74,43 +74,114 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
     {% endfor %}
 }
 
+//* Generate the older Call*Callback if there is no Future call equivalent.
+//* Includes:
+//*   - setDeviceLostCallback
+//*   - setUncapturedErrorCallback
+//*   - setLoggingCallback
+{% set LegacyCallbackFunctions = ['set device lost callback', 'set uncaptured error callback', 'set logging callback'] %}
+
 {% for type in by_category["object"] %}
-    {% for method in type.methods if has_callback_arguments(method) %}
-        {% set Suffix = as_MethodSuffix(type.name, method.name) %}
-
-        {{as_cType(method.return_type.name)}} ProcTableAsClass::{{Suffix}}(
-            {{-as_cType(type.name)}} {{as_varName(type.name)}}
-            {%- for arg in method.arguments -%}
-                , {{as_annotated_cType(arg)}}
-            {%- endfor -%}
-        ) {
-            ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
-            {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
-                object->m{{as_MethodSuffix(type.name, method.name)}}Callback = {{as_varName(callback_arg.name)}};
-            {% endfor %}
-            object->userdata = userdata;
-            return On{{as_MethodSuffix(type.name, method.name)}}(
-                {{-as_varName(type.name)}}
-                {%- for arg in method.arguments -%}
-                    , {{as_varName(arg.name)}}
-                {%- endfor -%}
-            );
-        }
-
-        {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
-            void ProcTableAsClass::Call{{Suffix}}Callback(
+    {% for method in type.methods %}
+        {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
+        {% if has_callback_arguments(method) %}
+            {{as_cType(method.return_type.name)}} ProcTableAsClass::{{Suffix}}(
                 {{-as_cType(type.name)}} {{as_varName(type.name)}}
-                {%- for arg in callback_arg.type.arguments -%}
-                    {%- if not loop.last -%}, {{as_annotated_cType(arg)}}{%- endif -%}
+                {%- for arg in method.arguments -%}
+                    , {{as_annotated_cType(arg)}}
                 {%- endfor -%}
             ) {
                 ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
-                object->m{{Suffix}}Callback(
-                    {%- for arg in callback_arg.type.arguments -%}
-                        {%- if not loop.last -%}{{as_varName(arg.name)}}, {% endif -%}
-                    {%- endfor -%}
-                    object->userdata);
+                {% for arg in method.arguments if arg.type.category == 'function pointer' %}
+                    object->m{{Suffix + arg.name.CamelCase()}} = {{as_varName(arg.name)}};
+                    object->m{{Suffix}}Userdata = userdata;
+                {% endfor %}
+
+                {% if method.name.get() == 'pop error scope' %}
+                    //* Currently special casing popErrorScope since it has an old callback type.
+                    On{{Suffix}}({{-as_varName(type.name)}}, {.nextInChain = nullptr, .mode = WGPUCallbackMode_AllowProcessEvents, .callback = nullptr, .oldCallback = oldCallback, .userdata = userdata});
+                {% elif method.name.get() not in LegacyCallbackFunctions %}
+                    On{{Suffix}}(
+                        {{-as_varName(type.name)}}
+                        {%- for arg in method.arguments if arg.type.category != 'function pointer' and arg.type.name.get() != 'void *' -%}
+                            , {{as_varName(arg.name)}}
+                        {%- endfor -%}
+                        , {.nextInChain = nullptr, .mode = WGPUCallbackMode_AllowProcessEvents
+                        {%- for arg in method.arguments if arg.type.category == 'function pointer' -%}
+                            , .{{as_varName(arg.name)}} = {{as_varName(arg.name)}}
+                        {%- endfor -%}
+                        , .userdata = userdata});
+                {% else %}
+                    On{{Suffix}}(
+                        {{-as_varName(type.name)}}
+                        {%- for arg in method.arguments -%}
+                            , {{as_varName(arg.name)}}
+                        {%- endfor -%}
+                    );
+                {% endif %}
             }
+        {% elif has_callback_info(method) %}
+            {{as_cType(method.return_type.name)}} ProcTableAsClass::{{Suffix}}(
+                {{-as_cType(type.name)}} {{as_varName(type.name)}}
+                {%- for arg in method.arguments -%}
+                    , {{as_annotated_cType(arg)}}
+                {%- endfor -%}
+            ) {
+                ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
+                {% for arg in method.arguments %}
+                    {% if arg.name.get() == 'callback info' %}
+                        {% for callback in types[arg.type.name.get()].members if callback.type.category == 'function pointer' %}
+                            object->m{{Suffix + callback.name.CamelCase()}} = {{as_varName(arg.name)}}.{{as_varName(callback.name)}};
+                            object->m{{Suffix}}Userdata = {{as_varName(arg.name)}}.userdata;
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                On{{Suffix}}(
+                    {{-as_varName(type.name)}}
+                    {%- for arg in method.arguments -%}
+                        , {{as_varName(arg.name)}}
+                    {%- endfor -%}
+                );
+                return {mNextFutureID++};
+            }
+        {% endif %}
+    {% endfor %}
+
+    {% for method in type.methods if has_callback_info(method) or method.name.get() in LegacyCallbackFunctions %}
+        {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
+        {% for arg in method.arguments %}
+            {% if arg.name.get() == 'callback info' %}
+                {% for callback in types[arg.type.name.get()].members if callback.type.category == 'function pointer' %}
+                    void ProcTableAsClass::Call{{Suffix + callback.name.CamelCase()}}(
+                        {{-as_cType(type.name)}} {{as_varName(type.name)}}
+                        {%- for arg in callback.type.arguments -%}
+                            {%- if not loop.last -%}, {{as_annotated_cType(arg)}}{%- endif -%}
+                        {%- endfor -%}
+                    ) {
+                        ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
+                        object->m{{Suffix + callback.name.CamelCase()}}(
+                            {%- for arg in callback.type.arguments -%}
+                                {%- if not loop.last -%}{{as_varName(arg.name)}}, {% endif -%}
+                            {%- endfor -%}
+                            object->m{{Suffix}}Userdata);
+                    }
+                {% endfor %}
+            {% elif arg.type.category == 'function pointer' %}
+                void ProcTableAsClass::Call{{Suffix + arg.name.CamelCase()}}(
+                    {{-as_cType(type.name)}} {{as_varName(type.name)}}
+                    {%- for arg in arg.type.arguments -%}
+                        {%- if not loop.last -%}, {{as_annotated_cType(arg)}}{%- endif -%}
+                    {%- endfor -%}
+                ) {
+                    ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
+                    object->m{{Suffix + arg.name.CamelCase()}}(
+                        {%- for arg in arg.type.arguments -%}
+                            {%- if not loop.last -%}{{as_varName(arg.name)}}, {% endif -%}
+                        {%- endfor -%}
+                        object->m{{Suffix}}Userdata);
+                }
+            {% endif %}
         {% endfor %}
     {% endfor %}
 {% endfor %}
@@ -129,6 +200,6 @@ MockProcTable::~MockProcTable() = default;
 
 void MockProcTable::IgnoreAllReleaseCalls() {
     {% for type in by_category["object"] %}
-        EXPECT_CALL(*this, {{as_MethodSuffix(type.name, Name("release"))}}(_)).Times(AnyNumber());
+        EXPECT_CALL(*this, {{as_CppMethodSuffix(type.name, Name("release"))}}(_)).Times(AnyNumber());
     {% endfor %}
 }

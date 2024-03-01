@@ -1444,7 +1444,7 @@
             {
                 "name": "pop error scope",
                 "args": [
-                    {"name": "callback", "type": "error callback"},
+                    {"name": "old callback", "type": "error callback"},
                     {"name": "userdata", "type": "void *"}
                 ]
             },

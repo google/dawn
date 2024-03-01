@@ -93,7 +93,7 @@ void WireTest::SetUp() {
     MockCallback<WGPURequestAdapterCallback> adapterCb;
     wgpuInstanceRequestAdapter(instance, &adapterOpts, adapterCb.Callback(),
                                adapterCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
         .WillOnce([&]() {
             EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
@@ -133,7 +133,7 @@ void WireTest::SetUp() {
     MockCallback<WGPURequestDeviceCallback> deviceCb;
     wgpuAdapterRequestDevice(adapter.Get(), &deviceDesc, deviceCb.Callback(),
                              deviceCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce([&]() {
             // Set on device creation to forward callbacks to the client.
             EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
