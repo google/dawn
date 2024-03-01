@@ -163,4 +163,8 @@ void CopyImageSubData(const OpenGLFunctions& gl,
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, prevDrawFBO);
 }
 
+bool HasAnisotropicFiltering(const OpenGLFunctions& gl) {
+    return gl.IsAtLeastGL(4, 6) || gl.IsGLExtensionSupported("GL_EXT_texture_filter_anisotropic");
+}
+
 }  // namespace dawn::native::opengl

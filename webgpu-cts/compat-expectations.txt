@@ -129,9 +129,6 @@ crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComput
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
 crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 
-# maxAnisotropy failures (OpenGL backend is not clamping maxAnisotropy)
-crbug.com/dawn/2188 webgpu:api,operation,sampling,anisotropy:anisotropic_filter_checkerboard: [ Failure ]
-
 # interpolation "flat" failures
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]

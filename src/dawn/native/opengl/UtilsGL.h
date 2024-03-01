@@ -48,7 +48,7 @@ void CopyImageSubData(const OpenGLFunctions& gl,
                       GLint dstLevel,
                       const Origin3D& dst,
                       const Extent3D& size);
-
+bool HasAnisotropicFiltering(const OpenGLFunctions& gl);
 }  // namespace dawn::native::opengl
 
 #endif  // SRC_DAWN_NATIVE_OPENGL_UTILSGL_H_

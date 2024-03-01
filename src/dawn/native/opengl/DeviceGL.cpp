@@ -46,6 +46,7 @@
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
 #include "dawn/native/opengl/TextureGL.h"
+#include "dawn/native/opengl/UtilsGL.h"
 
 namespace {
 
@@ -191,6 +192,9 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
+    if (HasAnisotropicFiltering(gl)) {
+        gl.GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy);
+    }
     return DeviceBase::Initialize(std::move(queue));
 }
 
@@ -432,6 +436,10 @@ const OpenGLFunctions& Device::GetGL() const {
     mContext->MakeCurrent();
     ToBackend(GetQueue())->OnGLUsed();
     return mGL;
+}
+
+int Device::GetMaxTextureMaxAnisotropy() const {
+    return mMaxTextureMaxAnisotropy;
 }
 
 }  // namespace dawn::native::opengl
