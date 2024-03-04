@@ -2296,27 +2296,27 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> e
 void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
                                                     WGPUCreateRenderPipelineAsyncCallback callback,
                                                     void* userdata) {
-    mCallbackTaskManager->AddCallbackTask([callback, pipeline = std::move(pipeline),
-                                           userdata]() mutable {
-        // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
-        // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
-        // thread-safe.
-        DAWN_ASSERT(pipeline != nullptr);
-        {
-            // This is called inside a callback, and no lock will be held by default so we have
-            // to lock now to protect the cache.
-            // Note: we don't lock inside AddOrGetCachedRenderPipeline() to avoid deadlock
-            // because many places calling that method might already have the lock held. For
-            // example, APICreateRenderPipeline()
-            DeviceBase* device = pipeline->GetDevice();
-            auto deviceLock(device->GetScopedLock());
-            if (device->GetState() == State::Alive) {
-                pipeline = device->AddOrGetCachedRenderPipeline(std::move(pipeline));
+    mCallbackTaskManager->AddCallbackTask(
+        [callback, pipeline = std::move(pipeline), userdata]() mutable {
+            // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
+            // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+            // thread-safe.
+            DAWN_ASSERT(pipeline != nullptr);
+            {
+                // This is called inside a callback, and no lock will be held by default so we have
+                // to lock now to protect the cache.
+                // Note: we don't lock inside AddOrGetCachedRenderPipeline() to avoid deadlock
+                // because many places calling that method might already have the lock held. For
+                // example, APICreateRenderPipeline()
+                DeviceBase* device = pipeline->GetDevice();
+                auto deviceLock(device->GetScopedLock());
+                if (device->GetState() == State::Alive) {
+                    pipeline = device->AddOrGetCachedRenderPipeline(std::move(pipeline));
+                }
             }
-        }
-        callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))), "",
-                 userdata);
-    });
+            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
+                     "", userdata);
+        });
 }
 
 PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {

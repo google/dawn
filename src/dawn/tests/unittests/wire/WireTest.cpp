@@ -93,32 +93,31 @@ void WireTest::SetUp() {
     MockCallback<WGPURequestAdapterCallback> adapterCb;
     wgpuInstanceRequestAdapter(instance, &adapterOpts, adapterCb.Callback(),
                                adapterCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-        .WillOnce([&]() {
-            EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _)).WillOnce([&]() {
+        EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
-            EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                    *properties = {};
-                    properties->vendorName = "";
-                    properties->architecture = "";
-                    properties->name = "";
-                    properties->driverDescription = "";
-                })));
+        EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
+                *properties = {};
+                properties->vendorName = "";
+                properties->architecture = "";
+                properties->name = "";
+                properties->driverDescription = "";
+            })));
 
-            EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
-                    *limits = {};
-                    return true;
-                })));
+        EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
+                *limits = {};
+                return true;
+            })));
 
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
-                .WillOnce(Return(0))
-                .WillOnce(Return(0));
+        EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
+            .WillOnce(Return(0))
+            .WillOnce(Return(0));
 
-            api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                                   apiAdapter, nullptr);
-        });
+        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
+                                               apiAdapter, nullptr);
+    });
     FlushClient();
     WGPUAdapter cAdapter = nullptr;
     EXPECT_CALL(adapterCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, this))
@@ -133,28 +132,26 @@ void WireTest::SetUp() {
     MockCallback<WGPURequestDeviceCallback> deviceCb;
     wgpuAdapterRequestDevice(adapter.Get(), &deviceDesc, deviceCb.Callback(),
                              deviceCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
-        .WillOnce([&]() {
-            // Set on device creation to forward callbacks to the client.
-            EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
-            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
-            EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _)).WillOnce([&]() {
+        // Set on device creation to forward callbacks to the client.
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
+            .Times(1);
+        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, NotNull(), NotNull())).Times(1);
 
-            EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
-                    *limits = {};
-                    return true;
-                })));
+        EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
+                *limits = {};
+                return true;
+            })));
 
-            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
-                .WillOnce(Return(0))
-                .WillOnce(Return(0));
+        EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
+            .WillOnce(Return(0))
+            .WillOnce(Return(0));
 
-            api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
-                                                 apiDevice, nullptr);
-        });
+        api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success, apiDevice,
+                                             nullptr);
+    });
     FlushClient();
     EXPECT_CALL(deviceCb, Call(WGPURequestDeviceStatus_Success, NotNull(), nullptr, this))
         .WillOnce(SaveArg<1>(&device));
