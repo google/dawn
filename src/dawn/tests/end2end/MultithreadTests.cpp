@@ -1078,6 +1078,9 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
     // TODO(dawn:1924): Intel Gen9 specific.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen9());
 
+    // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
+
     enum class Step {
         Begin,
         WriteTexture,
