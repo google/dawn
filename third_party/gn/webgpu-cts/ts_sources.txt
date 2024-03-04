@@ -331,6 +331,7 @@ src/webgpu/api/validation/render_pipeline/misc.spec.ts
 src/webgpu/api/validation/render_pipeline/multisample_state.spec.ts
 src/webgpu/api/validation/render_pipeline/overrides.spec.ts
 src/webgpu/api/validation/render_pipeline/primitive_state.spec.ts
+src/webgpu/api/validation/render_pipeline/resource_compatibility.spec.ts
 src/webgpu/api/validation/render_pipeline/shader_module.spec.ts
 src/webgpu/api/validation/render_pipeline/vertex_state.spec.ts
 src/webgpu/api/validation/resource_usages/buffer/in_pass_encoder.spec.ts
@@ -391,6 +392,7 @@ src/webgpu/shader/execution/expression/binary/af_subtraction.cache.ts
 src/webgpu/shader/execution/expression/binary/af_subtraction.spec.ts
 src/webgpu/shader/execution/expression/binary/ai_arithmetic.cache.ts
 src/webgpu/shader/execution/expression/binary/ai_arithmetic.spec.ts
+src/webgpu/shader/execution/expression/binary/ai_comparison.spec.ts
 src/webgpu/shader/execution/expression/binary/bitwise.spec.ts
 src/webgpu/shader/execution/expression/binary/bitwise_shift.spec.ts
 src/webgpu/shader/execution/expression/binary/bool_logical.spec.ts
@@ -637,6 +639,7 @@ src/webgpu/shader/execution/expression/unary/ai_arithmetic.cache.ts
 src/webgpu/shader/execution/expression/unary/ai_arithmetic.spec.ts
 src/webgpu/shader/execution/expression/unary/ai_assignment.cache.ts
 src/webgpu/shader/execution/expression/unary/ai_assignment.spec.ts
+src/webgpu/shader/execution/expression/unary/ai_complement.spec.ts
 src/webgpu/shader/execution/expression/unary/bool_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/bool_conversion.spec.ts
 src/webgpu/shader/execution/expression/unary/bool_logical.spec.ts
@@ -650,11 +653,9 @@ src/webgpu/shader/execution/expression/unary/f32_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/f32_conversion.spec.ts
 src/webgpu/shader/execution/expression/unary/i32_arithmetic.cache.ts
 src/webgpu/shader/execution/expression/unary/i32_arithmetic.spec.ts
-src/webgpu/shader/execution/expression/unary/i32_complement.cache.ts
 src/webgpu/shader/execution/expression/unary/i32_complement.spec.ts
 src/webgpu/shader/execution/expression/unary/i32_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/i32_conversion.spec.ts
-src/webgpu/shader/execution/expression/unary/u32_complement.cache.ts
 src/webgpu/shader/execution/expression/unary/u32_complement.spec.ts
 src/webgpu/shader/execution/expression/unary/u32_conversion.cache.ts
 src/webgpu/shader/execution/expression/unary/u32_conversion.spec.ts

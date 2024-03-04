@@ -98,9 +98,7 @@ cache/webgpu/shader/execution/unary/f16_conversion.bin
 cache/webgpu/shader/execution/unary/f32_arithmetic.bin
 cache/webgpu/shader/execution/unary/f32_conversion.bin
 cache/webgpu/shader/execution/unary/i32_arithmetic.bin
-cache/webgpu/shader/execution/unary/i32_complement.bin
 cache/webgpu/shader/execution/unary/i32_conversion.bin
-cache/webgpu/shader/execution/unary/u32_complement.bin
 cache/webgpu/shader/execution/unary/u32_conversion.bin
 cache/webgpu/shader/execution/unpack2x16float.bin
 cache/webgpu/shader/execution/unpack2x16snorm.bin
