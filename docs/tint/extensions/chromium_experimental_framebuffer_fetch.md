@@ -26,4 +26,5 @@ Two input variables cannot have the same `@color` attribute.
 
 ## To-dos
 
-Are f16 types allowed for the `@color` inputs?
+ - Are f16 types allowed for the `@color` inputs?
+ - Are any changes needed for Vulkan support?
