@@ -383,6 +383,7 @@ function(common_compile_options TARGET)
 
       -Wno-deprecated-builtins
       -Wno-unknown-warning-option
+      -Wno-switch-default
     )
 
     if (${DAWN_ENABLE_MSAN})
