@@ -173,6 +173,12 @@ class StorageTextureTests : public DawnTest {
                 break;
             }
 
+            case wgpu::TextureFormat::R8Unorm: {
+                uint8_t* valuePtr = static_cast<uint8_t*>(pixelValuePtr);
+                *valuePtr = pixelValue;
+                break;
+            }
+
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -260,6 +266,9 @@ class StorageTextureTests : public DawnTest {
                 return "vec4f(f32(value) / 127.0, -f32(value) / 127.0, "
                        "f32(value) * 2.0 / 127.0, -f32(value) * 2.0 / 127.0)";
 
+            case wgpu::TextureFormat::R8Unorm:
+                return "vec4f(f32(value) / 255.0, 0.0, 0.0, 1.0)";
+
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -303,6 +312,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
             // normalized signed/unsigned integer formats
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::RGBA8Snorm:
+            case wgpu::TextureFormat::R8Unorm:
                 // On Windows Intel drivers the tests will fail if tolerance <= 0.00000001f.
                 return R"(
 fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
@@ -315,6 +325,13 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
                 break;
         }
 
+        return "";
+    }
+
+    const char* GetEnable(wgpu::TextureFormat format) {
+        if (format == wgpu::TextureFormat::R8Unorm) {
+            return "enable chromium_internal_graphite;";
+        }
         return "";
     }
 
@@ -353,6 +370,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         const bool isFragment = strcmp(stage, "fragment") == 0;
 
         std::ostringstream ostream;
+        ostream << GetEnable(format) << "\n";
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
         ostream << "@" << stage << workgroupSize << "\n";
         ostream << "fn main() ";
@@ -941,6 +959,71 @@ TEST_P(BGRA8UnormStorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 }
 
 DAWN_INSTANTIATE_TEST(BGRA8UnormStorageTextureTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
+class R8UnormStorageTextureTests : public StorageTextureTests {
+  public:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::R8UnormStorage})) {
+            mIsR8UnormStorageSupported = true;
+            return {wgpu::FeatureName::R8UnormStorage};
+        } else {
+            mIsR8UnormStorageSupported = false;
+            return {};
+        }
+    }
+
+    bool IsR8UnormStorageSupported() { return mIsR8UnormStorageSupported; }
+
+  private:
+    bool mIsR8UnormStorageSupported = false;
+};
+
+// Test that R8Unorm is supported to be used as storage texture in compute shaders when the
+// optional feature 'r8unorm-storage' is supported.
+TEST_P(R8UnormStorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsR8UnormStorageSupported());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::R8Unorm;
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(kFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                      {kWidth, kHeight});
+
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string computeShader = CommonWriteOnlyTestCode("compute", kFormat);
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kFormat, {kWidth, kHeight});
+}
+
+// Test that R8Unorm is supported to be used as storage texture in fragment shaders when the
+// optional feature 'r8unorm-storage' is supported.
+TEST_P(R8UnormStorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsR8UnormStorageSupported());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::R8Unorm;
+
+    // Prepare the write-only storage texture.
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(kFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                      {kWidth, kHeight});
+
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string fragmentShader = CommonWriteOnlyTestCode("fragment", kFormat);
+    WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
+                                        fragmentShader.c_str());
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kFormat, {kWidth, kHeight});
+}
+
+DAWN_INSTANTIATE_TEST(R8UnormStorageTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),

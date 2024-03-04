@@ -1529,6 +1529,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::FramebufferFetch:
         case wgpu::FeatureName::BufferMapExtendedUsages:
         case wgpu::FeatureName::AdapterPropertiesMemoryHeaps:
+        case wgpu::FeatureName::SharedBufferMemoryD3D12Resource:
+        case wgpu::FeatureName::R8UnormStorage:
         case wgpu::FeatureName::Undefined:
             return false;
     }

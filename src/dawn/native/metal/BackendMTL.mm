@@ -616,6 +616,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         EnableFeature(Feature::SurfaceCapabilities);
         EnableFeature(Feature::MSAARenderToSingleSampled);
         EnableFeature(Feature::DualSourceBlending);
+        EnableFeature(Feature::R8UnormStorage);
 
         // SIMD-scoped permute operations is supported by GPU family Metal3, Apple6, Apple7, Apple8,
         // and Mac2.

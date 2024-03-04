@@ -474,6 +474,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.dualSrcBlend = VK_TRUE;
     }
 
+    if (HasFeature(Feature::R8UnormStorage)) {
+        usedKnobs.features.shaderStorageImageExtendedFormats = VK_TRUE;
+    }
+
     if (IsRobustnessEnabled() && mDeviceInfo.HasExt(DeviceExt::Robustness2)) {
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
 
