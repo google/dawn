@@ -797,6 +797,7 @@ constexpr struct WGSLExtensionInfo kExtensions[] = {
     {"chromium_experimental_pixel_local", true, "pixel-local-storage-coherent"},
     {"chromium_disable_uniformity_analysis", true, nullptr},
     {"chromium_internal_dual_source_blending", true, "dual-source-blending"},
+    {"chromium_internal_graphite", true, nullptr},
     {"chromium_experimental_framebuffer_fetch", true, "framebuffer-fetch"},
 
     // Currently the following WGSL extensions are not enabled under any situation.
