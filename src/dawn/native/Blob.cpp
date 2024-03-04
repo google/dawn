@@ -58,6 +58,7 @@ Blob::Blob(uint8_t* data, size_t size, std::function<void()> deleter)
 
 Blob::Blob(Blob&& rhs) : mData(rhs.mData), mSize(rhs.mSize) {
     mDeleter = std::move(rhs.mDeleter);
+    rhs.mData = nullptr;
     rhs.mDeleter = nullptr;
 }
 
@@ -68,11 +69,13 @@ Blob& Blob::operator=(Blob&& rhs) {
         mDeleter();
     }
     mDeleter = std::move(rhs.mDeleter);
+    rhs.mData = nullptr;
     rhs.mDeleter = nullptr;
     return *this;
 }
 
 Blob::~Blob() {
+    mData = nullptr;
     if (mDeleter) {
         mDeleter();
     }

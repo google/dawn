@@ -66,8 +66,7 @@ class Blob {
     // calling |deleter|. The deleter function is called at ~Blob() and during std::move.
     explicit Blob(uint8_t* data, size_t size, std::function<void()> deleter);
 
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<uint8_t, DanglingUntriaged> mData;
+    raw_ptr<uint8_t> mData;
     size_t mSize;
     std::function<void()> mDeleter;
 };
