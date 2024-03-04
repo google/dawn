@@ -408,7 +408,7 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupBroadcast") {
         return BuiltinFn::kSubgroupBroadcast;
     }
-    if (name == "_tint_materialize") {
+    if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
     return BuiltinFn::kNone;
@@ -665,7 +665,7 @@ const char* str(BuiltinFn i) {
         case BuiltinFn::kSubgroupBroadcast:
             return "subgroupBroadcast";
         case BuiltinFn::kTintMaterialize:
-            return "_tint_materialize";
+            return "__tint_materialize";
     }
     return "<unknown>";
 }

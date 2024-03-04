@@ -925,4 +925,4 @@ ctor mat4x4[T: fa_f32_f16](T, T, T, T,
 ////////////////////////////////////////////////////////////////////////////////
 // Tint internal builtins                                                     //
 ////////////////////////////////////////////////////////////////////////////////
-@const("Identity") fn _tint_materialize[T](T) -> T
+@const("Identity") fn __tint_materialize[T](T) -> T

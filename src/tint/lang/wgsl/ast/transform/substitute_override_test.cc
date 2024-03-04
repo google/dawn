@@ -292,7 +292,7 @@ const O = 0i;
 fn f() {
   const smaller_than_any_f32 = 1e-50;
   const large_float = 1000000000000000013287555072.0;
-  _ = _tint_materialize(vec2(0))[i32(((_tint_materialize(vec2(smaller_than_any_f32))[O] * large_float) * large_float))];
+  _ = __tint_materialize(vec2(0))[i32(((__tint_materialize(vec2(smaller_than_any_f32))[O] * large_float) * large_float))];
 }
 )";
 

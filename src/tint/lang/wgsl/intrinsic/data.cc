@@ -11546,7 +11546,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [123] */
-    /* fn _tint_materialize[T](T) -> T */
+    /* fn __tint_materialize[T](T) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(524),
   },

@@ -444,7 +444,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "atomicCompareExchangeWeak",
     "subgroupBallot",
     "subgroupBroadcast",
-    "_tint_materialize",
+    "__tint_materialize",
 };
 
 /// Determines if the given `f` is a coarse derivative.
