@@ -582,6 +582,12 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
 
 // Test that Get(Const)MappedRange work inside map-write callback.
 TEST_P(BufferMappingTests, MapWrite_InCallbackDefault) {
+    // TODO(dawn:2449): This test is hitting an ASSERT in Mutex.cpp on Windows with the spontaneous
+    // callback mode.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && GetParam().mFutureCallbackMode &&
+                          GetParam().mFutureCallbackMode.value() ==
+                              wgpu::CallbackMode::AllowSpontaneous);
+
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
 
     static constexpr uint32_t myData = 2934875;
