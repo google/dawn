@@ -372,6 +372,16 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
     }
     sm_desc.nextInChain = &wgsl_desc;
 
+    // Special case for a source containing a \0. This should be an error instead of just truncating
+    // the source.
+    if (descriptor.code.find('\0') != std::string::npos) {
+        return interop::GPUShaderModule::Create<GPUShaderModule>(
+            env, sm_desc,
+            device_.CreateErrorShaderModule(&sm_desc,
+                                            "The WGSL shader contains an illegal character '\\0'"),
+            async_);
+    }
+
     return interop::GPUShaderModule::Create<GPUShaderModule>(
         env, sm_desc, device_.CreateShaderModule(&sm_desc), async_);
 }
