@@ -44,8 +44,8 @@
 
 namespace tint {
 
-bool TerminalSupportsColors(FILE* f) {
-    if (!isatty(fileno(f))) {
+bool TerminalSupportsColors(FILE* out) {
+    if (!isatty(fileno(out))) {
         return false;
     }
 

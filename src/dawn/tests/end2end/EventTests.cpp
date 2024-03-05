@@ -33,6 +33,7 @@
 #include "dawn/common/FutureUtils.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/webgpu.h"
+#include "gmock/gmock.h"
 
 namespace dawn {
 namespace {

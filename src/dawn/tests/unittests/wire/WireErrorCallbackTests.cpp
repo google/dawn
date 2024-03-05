@@ -28,6 +28,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/common/FutureUtils.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"

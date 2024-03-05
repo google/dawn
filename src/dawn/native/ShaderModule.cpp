@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"

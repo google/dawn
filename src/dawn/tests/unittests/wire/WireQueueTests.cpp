@@ -30,6 +30,7 @@
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
+#include "gmock/gmock.h"
 
 namespace dawn::wire {
 namespace {

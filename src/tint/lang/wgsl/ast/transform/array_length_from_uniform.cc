@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/array_length_from_uniform.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>

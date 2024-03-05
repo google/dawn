@@ -28,6 +28,7 @@
 #include "dawn/native/opengl/SamplerGL.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "dawn/common/Assert.h"
 #include "dawn/native/opengl/DeviceGL.h"

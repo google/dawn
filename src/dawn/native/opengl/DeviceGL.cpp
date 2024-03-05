@@ -47,6 +47,7 @@
 #include "dawn/native/opengl/ShaderModuleGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
+#include "dawn/native/opengl/opengl_platform.h"
 
 namespace {
 
