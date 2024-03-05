@@ -769,7 +769,8 @@ TEST_F(LexerTest, IdentifierTest_DoesNotStartWithDoubleUnderscore) {
     ASSERT_FALSE(list.empty());
 
     auto& t = list[0];
-    EXPECT_FALSE(t.IsIdentifier());
+    EXPECT_TRUE(t.IsError());
+    EXPECT_EQ(t.to_str(), "identifiers must not start with two or more underscores");
 }
 
 TEST_F(LexerTest, IdentifierTest_DoesNotStartWithNumber) {
