@@ -50,13 +50,20 @@ namespace dawn::native {
 
 namespace {
 MaybeError ValidateStorageTextureFormat(DeviceBase* device,
-                                        wgpu::TextureFormat storageTextureFormat) {
+                                        wgpu::TextureFormat storageTextureFormat,
+                                        wgpu::StorageTextureAccess access) {
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
-
     DAWN_ASSERT(format != nullptr);
+
     DAWN_INVALID_IF(!format->supportsStorageUsage,
                     "Texture format (%s) does not support storage textures.", storageTextureFormat);
+
+    if (access == wgpu::StorageTextureAccess::ReadWrite) {
+        DAWN_INVALID_IF(!format->supportsReadWriteStorageUsage,
+                        "Texture format %s does not support storage texture access %s",
+                        storageTextureFormat, wgpu::StorageTextureAccess::ReadWrite);
+    }
 
     return {};
 }
@@ -78,36 +85,6 @@ MaybeError ValidateStorageTextureViewDimension(wgpu::TextureViewDimension dimens
             break;
     }
     DAWN_UNREACHABLE();
-}
-
-MaybeError ValidateReadWriteStorageTextureAccess(
-    DeviceBase* device,
-    const StorageTextureBindingLayout& storageTextureBindingLayout) {
-    switch (storageTextureBindingLayout.access) {
-        case wgpu::StorageTextureAccess::ReadOnly:
-        case wgpu::StorageTextureAccess::ReadWrite:
-            if (!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
-                return DAWN_VALIDATION_ERROR(
-                    "storage texture access %s is guarded by toggle allow_unsafe_apis",
-                    storageTextureBindingLayout.access);
-            }
-            break;
-
-        case wgpu::StorageTextureAccess::WriteOnly:
-            break;
-        default:
-            DAWN_UNREACHABLE();
-    }
-
-    if (storageTextureBindingLayout.access == wgpu::StorageTextureAccess::ReadWrite) {
-        const Format* format = nullptr;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureBindingLayout.format));
-        DAWN_INVALID_IF(!format->supportsReadWriteStorageUsage,
-                        "Texture format %s does not support storage texture access %s",
-                        storageTextureBindingLayout.format, wgpu::StorageTextureAccess::ReadWrite);
-    }
-
-    return {};
 }
 
 MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
@@ -181,15 +158,14 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         bindingMemberCount++;
         const StorageTextureBindingLayout& storageTexture = entry->storageTexture;
         DAWN_TRY(ValidateStorageTextureAccess(storageTexture.access));
-        DAWN_TRY(ValidateStorageTextureFormat(device, storageTexture.format));
+        DAWN_TRY(
+            ValidateStorageTextureFormat(device, storageTexture.format, storageTexture.access));
 
         // viewDimension defaults to 2D if left undefined, needs validation otherwise.
         if (storageTexture.viewDimension != wgpu::TextureViewDimension::Undefined) {
             DAWN_TRY(ValidateTextureViewDimension(storageTexture.viewDimension));
             DAWN_TRY(ValidateStorageTextureViewDimension(storageTexture.viewDimension));
         }
-
-        DAWN_TRY(ValidateReadWriteStorageTextureAccess(device, storageTexture));
 
         switch (storageTexture.access) {
             case wgpu::StorageTextureAccess::ReadOnly:

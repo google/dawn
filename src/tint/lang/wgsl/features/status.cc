@@ -36,8 +36,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ////////////////////////////////////////////////////////////////////
             // Experimental features
             ///////////////////////////////////////////////////////////////////
-        case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
-            return FeatureStatus::kExperimental;
 
             ////////////////////////////////////////////////////////////////////
             // Enabled features
@@ -45,6 +43,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kPacked4X8IntegerDotProduct:
         case LanguageFeature::kPointerCompositeAccess:
         case LanguageFeature::kUnrestrictedPointerParameters:
+        case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
             return FeatureStatus::kShippedWithKillswitch;
 
             ////////////////////////////////////////////////////////////////////
