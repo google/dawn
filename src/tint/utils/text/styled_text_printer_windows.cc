@@ -61,7 +61,7 @@ std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out,
     if (HANDLE handle = ConsoleHandleFrom(out); handle != INVALID_HANDLE_VALUE) {
         SetConsoleOutputCP(CP_UTF8);
         if (SetConsoleMode(handle, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
-            return CreateANSI(out, theme);
+            return CreateANSI(out, theme, ANSIColors::k24Bit);
         }
     }
     return CreatePlain(out);

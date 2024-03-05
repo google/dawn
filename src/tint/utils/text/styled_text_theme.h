@@ -31,6 +31,8 @@
 #include <stdint.h>
 #include <optional>
 
+#include "src/tint/utils/math/hash.h"
+
 /// Forward declarations
 namespace tint {
 class TextStyle;
@@ -55,6 +57,8 @@ struct StyledTextTheme {
         bool operator==(const Color& other) const {
             return r == other.r && g == other.g && b == other.b;
         }
+        /// @returns a hash code of this Color
+        tint::HashCode HashCode() const { return Hash(r, g, b); }
     };
 
     /// Attributes holds a number of optional attributes for a style of text.

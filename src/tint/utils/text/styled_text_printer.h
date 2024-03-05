@@ -57,10 +57,18 @@ class StyledTextPrinter {
     /// @param out the file to print to.
     static std::unique_ptr<StyledTextPrinter> CreatePlain(FILE* out);
 
+    /// Enumerator of ANSI terminal color support.
+    enum class ANSIColors {
+        k8Bit,   // Palette of 256 colors 'xterm-256color'
+        k24Bit,  // 8-bit per [R,G,B]
+    };
+
     /// @returns a Printer that uses ANSI escape sequences and theme @p theme.
     /// @param out the file to print to.
     /// @param theme the custom theme to use.
-    static std::unique_ptr<StyledTextPrinter> CreateANSI(FILE* out, const StyledTextTheme& theme);
+    static std::unique_ptr<StyledTextPrinter> CreateANSI(FILE* out,
+                                                         const StyledTextTheme& theme,
+                                                         ANSIColors colors);
 
     /// Destructor
     virtual ~StyledTextPrinter();

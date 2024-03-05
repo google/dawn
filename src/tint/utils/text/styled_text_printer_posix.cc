@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <memory>
 
+#include "src/tint/utils/system/env.h"
 #include "src/tint/utils/system/terminal.h"
 #include "src/tint/utils/text/styled_text_printer.h"
 
@@ -38,7 +39,8 @@ namespace tint {
 std::unique_ptr<StyledTextPrinter> StyledTextPrinter::Create(FILE* out,
                                                              const StyledTextTheme& theme) {
     if (TerminalSupportsColors(out)) {
-        return CreateANSI(out, theme);
+        bool true_color = GetEnvVar("COLORTERM") == "truecolor";
+        return CreateANSI(out, theme, true_color ? ANSIColors::k24Bit : ANSIColors::k8Bit);
     }
     return CreatePlain(out);
 }

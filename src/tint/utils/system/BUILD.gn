@@ -43,7 +43,15 @@ libtint_source_set("system") {
     "env.h",
     "terminal.h",
   ]
-  deps = [ "${tint_src_dir}/utils/macros" ]
+  deps = [
+    "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/ice",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/rtti",
+    "${tint_src_dir}/utils/traits",
+  ]
 
   if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
     sources += [ "terminal_other.cc" ]

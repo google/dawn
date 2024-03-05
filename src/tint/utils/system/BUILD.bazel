@@ -66,7 +66,13 @@ cc_library(
     "terminal.h",
   ],
   deps = [
+    "//src/tint/utils/containers",
+    "//src/tint/utils/ice",
     "//src/tint/utils/macros",
+    "//src/tint/utils/math",
+    "//src/tint/utils/memory",
+    "//src/tint/utils/rtti",
+    "//src/tint/utils/traits",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

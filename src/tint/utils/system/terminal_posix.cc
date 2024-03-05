@@ -38,30 +38,15 @@
 #include <string_view>
 #include <utility>
 
+#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/system/env.h"
 #include "src/tint/utils/system/terminal.h"
 
 namespace tint {
+namespace {
 
-bool TerminalSupportsColors(FILE* out) {
-    if (!isatty(fileno(out))) {
-        return false;
-    }
-
-    if (auto term = GetEnvVar("TERM"); !term.empty()) {
-        return term == "cygwin" || term == "linux" || term == "rxvt-unicode-256color" ||
-               term == "rxvt-unicode" || term == "screen-256color" || term == "screen" ||
-               term == "tmux-256color" || term == "tmux" || term == "xterm-256color" ||
-               term == "xterm-color" || term == "xterm";
-    }
-
-    return false;
-}
-
-/// Probes the terminal using a Device Control escape sequence to get the background color.
-/// @see https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Device-Control-functions
-std::optional<bool> TerminalIsDark(FILE* out) {
+std::optional<bool> TerminalIsDarkImpl(FILE* out) {
     if (!TerminalSupportsColors(out)) {
         return std::nullopt;
     }
@@ -83,23 +68,20 @@ std::optional<bool> TerminalIsDark(FILE* out) {
     tcsetattr(out_fd, TCSADRAIN, &state);
 
     // Emit the device control escape sequence to query the terminal colors.
-    static constexpr std::string_view kQuery = "\x1b]11;?\x07";
+    static constexpr std::string_view kQuery = "\033]11;?\033\\";
     fwrite(kQuery.data(), 1, kQuery.length(), out);
-    fflush(out);
 
     // Timeout for attempting to read the response.
-    static constexpr auto kTimeout = std::chrono::milliseconds(100);
+    static constexpr auto kTimeout = std::chrono::milliseconds(300);
 
     // Record the start time.
     auto start = std::chrono::steady_clock::now();
 
     // Helpers for parsing the response.
-    std::optional<char> peek;
+    Vector<char, 8> peek;
     auto read = [&]() -> std::optional<char> {
-        if (peek) {
-            char c = *peek;
-            peek.reset();
-            return c;
+        if (!peek.IsEmpty()) {
+            return peek.Pop();
         }
         while ((std::chrono::steady_clock::now() - start) < kTimeout) {
             char c;
@@ -111,8 +93,15 @@ std::optional<bool> TerminalIsDark(FILE* out) {
     };
 
     auto match = [&](std::string_view str) {
-        for (char c : str) {
-            if (c != read()) {
+        for (size_t i = 0; i < str.length(); i++) {
+            auto c = read();
+            if (c != str[i]) {
+                if (c) {
+                    peek.Push(*c);
+                }
+                while (i != 0) {
+                    peek.Push(str[--i]);
+                }
                 return false;
             }
         }
@@ -137,7 +126,7 @@ std::optional<bool> TerminalIsDark(FILE* out) {
                 num = num * 16 + 10 + static_cast<uint32_t>(*c - 'A');
                 len++;
             } else {
-                peek = c;
+                peek.Push(*c);
                 break;
             }
         }
@@ -174,11 +163,39 @@ std::optional<bool> TerminalIsDark(FILE* out) {
             return std::nullopt;
     }
 
+    if (!match("\x07") && !match("\x1b\x5c")) {
+        return std::nullopt;
+    }
+
     // https://en.wikipedia.org/wiki/Relative_luminance
     float r = static_cast<float>(r_i.num) / static_cast<float>(max);
     float g = static_cast<float>(g_i.num) / static_cast<float>(max);
     float b = static_cast<float>(b_i.num) / static_cast<float>(max);
     return (0.2126f * r + 0.7152f * g + 0.0722f * b) < 0.5f;
+}
+
+}  // namespace
+
+bool TerminalSupportsColors(FILE* f) {
+    if (!isatty(fileno(f))) {
+        return false;
+    }
+
+    if (auto term = GetEnvVar("TERM"); !term.empty()) {
+        return term == "cygwin" || term == "linux" || term == "rxvt-unicode-256color" ||
+               term == "rxvt-unicode" || term == "screen-256color" || term == "screen" ||
+               term == "tmux-256color" || term == "tmux" || term == "xterm-256color" ||
+               term == "xterm-color" || term == "xterm";
+    }
+
+    return false;
+}
+
+/// Probes the terminal using a Device Control escape sequence to get the background color.
+/// @see https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Device-Control-functions
+std::optional<bool> TerminalIsDark(FILE* out) {
+    static std::optional<bool> result = TerminalIsDarkImpl(out);
+    return result;
 }
 
 }  // namespace tint
