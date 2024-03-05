@@ -324,7 +324,10 @@ func (t *Tree[Data]) Get(q Query) *TreeNode[Data] {
 		}
 		return errStop
 	})
-	return node
+	if node.Query == q {
+		return node
+	}
+	return nil
 }
 
 // Reduce reduces the tree using the Merger function f.

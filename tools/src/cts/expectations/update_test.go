@@ -85,18 +85,21 @@ some:other,test:* [ Failure ]
 				},
 			},
 			updated: `
+crbug.com/a/123 a:missing,test,result:* [ Failure ]
+crbug.com/a/123 [ tag ] another:missing,test,result:* [ Failure ]
+
 some:other,test:* [ Failure ]
 `,
 			diagnostics: expectations.Diagnostics{
 				{
-					Severity: expectations.Warning,
+					Severity: expectations.Note,
 					Line:     headerLines + 2,
-					Message:  "no results found for 'a:missing,test,result:*'",
+					Message:  "no results found for query 'a:missing,test,result:*'",
 				},
 				{
-					Severity: expectations.Warning,
+					Severity: expectations.Note,
 					Line:     headerLines + 3,
-					Message:  "no results found for 'another:missing,test,result:*' with tags [tag]",
+					Message:  "no results found for query 'another:missing,test,result:*' with tags [tag]",
 				},
 			},
 		},
@@ -121,13 +124,83 @@ some:other,test:* [ Failure ]
 				},
 			},
 			updated: `
+# KEEP
+crbug.com/a/123 a:missing,test,result:* [ Failure ]
+
+some:other,test:* [ Failure ]
+`,
+			diagnostics: expectations.Diagnostics{
+				{
+					Severity: expectations.Note,
+					Line:     headerLines + 3,
+					Message:  "no results found for query 'a:missing,test,result:*'",
+				},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			name: "unknown test",
+			expectations: `
+crbug.com/a/123 an:unknown,test:* [ Failure ]
+crbug.com/a/123 [ tag ] another:unknown:test [ Failure ]
+
+some:other,test:* [ Failure ]
+`,
+			results: result.List{
+				result.Result{
+					Query:  Q("some:other,test:*"),
+					Tags:   result.NewTags("os-a", "gpu-a"),
+					Status: result.Failure,
+				},
+				result.Result{
+					Query:  Q("some:other,test:*"),
+					Tags:   result.NewTags("os-b", "gpu-b"),
+					Status: result.Failure,
+				},
+			},
+			updated: `
+some:other,test:* [ Failure ]
+`,
+			diagnostics: expectations.Diagnostics{
+				{
+					Severity: expectations.Warning,
+					Line:     headerLines + 2,
+					Message:  "no tests exist with query 'an:unknown,test:*' - removing",
+				},
+				{
+					Severity: expectations.Warning,
+					Line:     headerLines + 3,
+					Message:  "no tests exist with query 'another:unknown:test' - removing",
+				},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			name: "unknown test found KEEP",
+			expectations: `
+# KEEP
+crbug.com/a/123 an:unknown,test:* [ Failure ]
+
+some:other,test:* [ Failure ]
+`,
+			results: result.List{
+				result.Result{
+					Query:  Q("some:other,test:*"),
+					Tags:   result.NewTags("os-a", "gpu-a"),
+					Status: result.Failure,
+				},
+				result.Result{
+					Query:  Q("some:other,test:*"),
+					Tags:   result.NewTags("os-b", "gpu-b"),
+					Status: result.Failure,
+				},
+			},
+			updated: `
 some:other,test:* [ Failure ]
 `,
 			diagnostics: expectations.Diagnostics{
 				{
 					Severity: expectations.Warning,
 					Line:     headerLines + 3,
-					Message:  "no results found for 'a:missing,test,result:*'",
+					Message:  "no tests exist with query 'an:unknown,test:*' - removing",
 				},
 			},
 		},
@@ -645,6 +718,12 @@ crbug.com/dawn/0000 a:b,c:29:* [ Failure ]
 		testList := container.NewMap[string, query.Query]()
 		for _, r := range test.results {
 			testList.Add(r.Query.String(), r.Query)
+		}
+		for _, s := range []string{
+			"a:missing,test,result:*",
+			"another:missing,test,result:*",
+		} {
+			testList.Add(s, query.Parse(s))
 		}
 
 		errMsg := ""
