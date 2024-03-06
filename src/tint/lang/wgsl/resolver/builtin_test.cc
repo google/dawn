@@ -879,6 +879,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_TooManyParams) {
 
 1 candidate function:
  • 'cross(vec3<T>  ✓ , vec3<T>  ✓ ) -> vec3<T>' where:
+      ✗  overload expects 2 arguments, call passed 3 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
 )");
 }
@@ -940,6 +941,7 @@ TEST_F(ResolverBuiltinFloatTest, Distance_TooManyParams) {
 
 2 candidate functions:
  • 'distance(vecN<T>  ✓ , vecN<T>  ✓ ) -> T' where:
+      ✗  overload expects 2 arguments, call passed 3 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
  • 'distance(T  ✗ , T  ✗ ) -> T' where:
       ✗  'T' is 'abstract-float', 'f32' or 'f16'
@@ -1197,6 +1199,7 @@ TEST_F(ResolverBuiltinFloatTest, Length_TooManyParams) {
 
 2 candidate functions:
  • 'length(T  ✓ ) -> T' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
  • 'length(vecN<T>  ✗ ) -> T' where:
       ✗  'T' is 'abstract-float', 'f32' or 'f16'
@@ -1393,6 +1396,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
 
 2 candidate functions:
  • 'modf(T  ✓ ) -> __modf_result_T' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
  • 'modf(vecN<T>  ✗ ) -> __modf_result_vecN_T' where:
       ✗  'T' is 'abstract-float', 'f32' or 'f16'
@@ -1409,6 +1413,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
 
 2 candidate functions:
  • 'modf(T  ✓ ) -> __modf_result_T' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
  • 'modf(vecN<T>  ✗ ) -> __modf_result_vecN_T' where:
       ✗  'T' is 'abstract-float', 'f32' or 'f16'
@@ -1427,6 +1432,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
 
 2 candidate functions:
  • 'modf(vecN<T>  ✓ ) -> __modf_result_vecN_T' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'abstract-float', 'f32' or 'f16'
  • 'modf(T  ✗ ) -> __modf_result_T' where:
       ✗  'T' is 'abstract-float', 'f32' or 'f16'

@@ -523,7 +523,7 @@ TEST_F(ResolverCallValidationTest, UnexpectedBuiltinTemplateArgs) {
 
 2 candidate functions:
  • 'min(T  ✓ , T  ✓ ) -> T' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
       ✓  'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'
  • 'min(vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
       ✗  'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16'

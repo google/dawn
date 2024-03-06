@@ -607,11 +607,20 @@ void PrintCandidate(StyledText& ss,
         first = false;
     };
 
+    if (all_params_match && args.Length() > overload.num_parameters) {
+        separator();
+        ss << style::Mismatch(" ✗ ")
+           << style::Plain(" overload expects ", static_cast<int>(overload.num_parameters),
+                           " argument", overload.num_parameters != 1 ? "s" : "", ", call passed ",
+                           args.Length(), " argument", args.Length() != 1 ? "s" : "");
+    }
     if (all_params_match && template_args.Length() > overload.num_explicit_templates) {
         separator();
         ss << style::Mismatch(" ✗ ")
            << style::Plain(" overload expects ", static_cast<int>(overload.num_explicit_templates),
-                           " template argument", overload.num_explicit_templates != 1 ? "s" : "");
+                           " template argument", overload.num_explicit_templates != 1 ? "s" : "",
+                           ", call passed ", template_args.Length(), " argument",
+                           template_args.Length() != 1 ? "s" : "");
     }
 
     for (size_t i = 0; i < overload.num_templates; i++) {

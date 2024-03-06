@@ -613,7 +613,8 @@ TEST_F(WgslIntrinsicTableTest, OverloadOrderByMatchingParameter) {
 27 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✓ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
- • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>'
+ • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
  • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_cube  ✗ , level: L  ✗ ) -> vec2<u32>' where:
@@ -834,8 +835,10 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerImplicit) {
  • 'vec3(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3(T  ✓ ) -> vec3<T>' where:
+      ✗  overload expects 1 argument, call passed 3 arguments
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
- • 'vec3() -> vec3<abstract-int>'
+ • 'vec3() -> vec3<abstract-int>' where:
+      ✗  overload expects 0 arguments, call passed 3 arguments
  • 'vec3(vec3<T>  ✗ ) -> vec3<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✗ >(x: T  ✓ , y: T  ✗ , z: T  ✓ ) -> vec3<T>' where:
@@ -845,10 +848,12 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerImplicit) {
  • 'vec3<T  ✗ >(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✗ >(T  ✓ ) -> vec3<T>' where:
+      ✗  overload expects 1 argument, call passed 3 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✗ >(vec3<T>  ✗ ) -> vec3<T>' where:
       ✗  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✗ >() -> vec3<T>' where:
+      ✗  overload expects 0 arguments, call passed 3 arguments
       ✗  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
 
 5 candidate conversions:
@@ -885,12 +890,14 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerExplicit) {
  • 'vec3<T  ✓ >(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >(T  ✓ ) -> vec3<T>' where:
+      ✗  overload expects 1 argument, call passed 3 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >(vec3<T>  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >() -> vec3<T>' where:
+      ✗  overload expects 0 arguments, call passed 3 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3(x: T  ✓ , y: T  ✗ , z: T  ✓ ) -> vec3<T>' where:
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
@@ -899,10 +906,12 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeInitializerExplicit) {
  • 'vec3(x: T  ✓ , yz: vec2<T>  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3(T  ✓ ) -> vec3<T>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 1 argument, call passed 3 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3() -> vec3<abstract-int>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 0 arguments, call passed 3 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
  • 'vec3(vec3<T>  ✗ ) -> vec3<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 
@@ -1017,6 +1026,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeConversion) {
  • 'vec3<T  ✓ >(T  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >() -> vec3<T>' where:
+      ✗  overload expects 0 arguments, call passed 1 argument
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3<T  ✓ >(xy: vec2<T>  ✗ , z: T  ✗ ) -> vec3<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
@@ -1027,7 +1037,8 @@ TEST_F(WgslIntrinsicTableTest, MismatchTypeConversion) {
  • 'vec3(T  ✗ ) -> vec3<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3() -> vec3<abstract-int>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 0 arguments, call passed 1 argument
+      ✗  overload expects 0 template arguments, call passed 1 argument
  • 'vec3(vec3<T>  ✗ ) -> vec3<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec3(x: T  ✗ , yz: vec2<T>  ✗ ) -> vec3<T>' where:

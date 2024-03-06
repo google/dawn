@@ -1989,18 +1989,22 @@ TEST_F(ConstEvalTest, ShortCircuit_And_Error_Init) {
  • 'vec2<T  ✓ >(x: T  ✓ , y: T  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >(T  ✓ ) -> vec2<T>' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >(vec2<T>  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >() -> vec2<T>' where:
+      ✗  overload expects 0 arguments, call passed 2 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2(x: T  ✓ , y: T  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2(T  ✓ ) -> vec2<T>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 1 argument, call passed 2 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2() -> vec2<abstract-int>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 0 arguments, call passed 2 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
  • 'vec2(vec2<T>  ✗ ) -> vec2<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 
@@ -2040,18 +2044,22 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Init) {
  • 'vec2<T  ✓ >(x: T  ✓ , y: T  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >(T  ✓ ) -> vec2<T>' where:
+      ✗  overload expects 1 argument, call passed 2 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >(vec2<T>  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2<T  ✓ >() -> vec2<T>' where:
+      ✗  overload expects 0 arguments, call passed 2 arguments
       ✓  'T' is 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2(x: T  ✓ , y: T  ✗ ) -> vec2<T>' where:
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2(T  ✓ ) -> vec2<T>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 1 argument, call passed 2 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
  • 'vec2() -> vec2<abstract-int>' where:
-      ✗  overload expects 0 template arguments
+      ✗  overload expects 0 arguments, call passed 2 arguments
+      ✗  overload expects 0 template arguments, call passed 1 argument
  • 'vec2(vec2<T>  ✗ ) -> vec2<T>' where:
       ✗  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'i32', 'u32' or 'bool'
 

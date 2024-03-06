@@ -168,10 +168,12 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
 
 2 candidate constructors:
  • 'i32(i32  ✗ ) -> i32'
- • 'i32() -> i32'
+ • 'i32() -> i32' where:
+      ✗  overload expects 0 arguments, call passed 3 arguments
 
 1 candidate conversion:
  • 'i32(T  ✓ ) -> i32' where:
+      ✗  overload expects 1 argument, call passed 3 arguments
       ✓  'T' is 'abstract-int', 'abstract-float', 'f32', 'f16', 'u32' or 'bool'
 )");
 }
