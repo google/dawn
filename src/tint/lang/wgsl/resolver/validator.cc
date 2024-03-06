@@ -325,7 +325,9 @@ bool Validator::Atomic(const ast::TemplatedIdentifier* a, const core::type::Atom
     // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
     // T must be either u32 or i32.
     if (!s->Type()->IsAnyOf<core::type::U32, core::type::I32>()) {
-        AddError(a->arguments[0]->source) << "atomic only supports i32 or u32 types";
+        AddError(a->arguments[0]->source)
+            << style::Type("atomic") << " only supports " << style::Type("i32") << " or "
+            << style::Type("u32") << " types";
         return false;
     }
     return true;

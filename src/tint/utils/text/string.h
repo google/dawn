@@ -34,6 +34,7 @@
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/text_style.h"
 
 /// Forward declaration
 namespace tint {
@@ -118,6 +119,8 @@ size_t Distance(std::string_view a, std::string_view b);
 struct SuggestAlternativeOptions {
     /// The prefix to apply to the strings when printing
     std::string_view prefix;
+    /// The text style for alternatives
+    TextStyle alternatives_style = style::Code;
     /// List all the possible values
     bool list_possible_values = true;
 };

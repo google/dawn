@@ -155,7 +155,9 @@ void SemHelper::ErrorUnexpectedExprKind(
                 }
             }
             auto& note = AddNote(ident->source);
-            tint::SuggestAlternatives(name, filtered.Slice(), note.message);
+            SuggestAlternativeOptions opts;
+            opts.alternatives_style = style::Enum;
+            SuggestAlternatives(name, filtered.Slice(), note.message, opts);
         }
         return;
     }

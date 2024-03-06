@@ -66,7 +66,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidType) {
     GlobalVar("a", ty.atomic(ty.f32(Source{{12, 34}})), core::AddressSpace::kWorkgroup);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: atomic only supports i32 or u32 types");
+    EXPECT_EQ(r()->error(), "12:34 error: 'atomic' only supports 'i32' or 'u32' types");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Simple) {
