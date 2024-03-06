@@ -1575,8 +1575,8 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
     if (ClosestContinuing(/*stop_at_loop*/ true, /* stop_at_switch */ true, current_statement) !=
         nullptr) {
         AddError(stmt->Declaration()->source)
-            << "`break` must not be used to exit from a continuing block. Use "
-               "`break-if` instead.";
+            << style::Keyword("break") << " must not be used to exit from a continuing block. Use "
+            << style::Keyword("break if") << " instead.";
         return false;
     }
     return true;
