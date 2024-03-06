@@ -122,7 +122,7 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 	cmd.Stderr = &buf
 
 	if c.flags.Verbose {
-		PrintCommand(cmd)
+		PrintCommand(cmd, c.flags.skipVSCodeInfo)
 	}
 
 	start := time.Now()

@@ -35,7 +35,7 @@ import (
 	"strings"
 )
 
-func PrintCommand(cmd *exec.Cmd) {
+func PrintCommand(cmd *exec.Cmd, skipVSCodeInfo bool) {
 	maybeQuote := func(s string) string {
 		if strings.ContainsAny(s, ` ,()"`) {
 			s = strings.ReplaceAll(s, `"`, `\"`)
@@ -56,26 +56,28 @@ func PrintCommand(cmd *exec.Cmd) {
 	fmt.Fprintln(output)
 	fmt.Fprintf(output, "  Dir: %v\n\n", cmd.Dir)
 
-	fmt.Fprint(output, "  For VS Code launch.json:\n")
-	launchCmd := struct {
-		Program string   `json:"program"`
-		Args    []string `json:"args"`
-		Cwd     string   `json:"cwd"`
-	}{
-		Program: cmd.Path,
-		Args:    cmd.Args[1:],
-		Cwd:     cmd.Dir,
-	}
+	if !skipVSCodeInfo {
+		fmt.Fprint(output, "  For VS Code launch.json:\n")
+		launchCmd := struct {
+			Program string   `json:"program"`
+			Args    []string `json:"args"`
+			Cwd     string   `json:"cwd"`
+		}{
+			Program: cmd.Path,
+			Args:    cmd.Args[1:],
+			Cwd:     cmd.Dir,
+		}
 
-	b := &bytes.Buffer{}
-	e := json.NewEncoder(b)
-	e.SetIndent("", "    ")
-	e.Encode(launchCmd)
-	s := b.String()
-	// Remove object braces and add trailing comma
-	s = strings.TrimPrefix(s, "{\n")
-	s = strings.TrimSuffix(s, "\n}\n") + ",\n"
-	fmt.Fprintln(output, s)
+		b := &bytes.Buffer{}
+		e := json.NewEncoder(b)
+		e.SetIndent("", "    ")
+		e.Encode(launchCmd)
+		s := b.String()
+		// Remove object braces and add trailing comma
+		s = strings.TrimPrefix(s, "{\n")
+		s = strings.TrimSuffix(s, "\n}\n") + ",\n"
+		fmt.Fprintln(output, s)
+	}
 
 	fmt.Print(output.String())
 }

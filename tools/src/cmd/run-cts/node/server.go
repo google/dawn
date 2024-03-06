@@ -145,7 +145,7 @@ func (c *cmd) runServer(
 		cmd.Stderr = &pl
 
 		if c.flags.Verbose {
-			PrintCommand(cmd)
+			PrintCommand(cmd, c.flags.skipVSCodeInfo)
 		}
 		err := cmd.Start()
 		if err != nil {
