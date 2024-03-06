@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_TEXTURE_H_
 #define SRC_DAWN_NATIVE_TEXTURE_H_
 
+#include <string>
 #include <vector>
 
 #include "dawn/common/WeakRef.h"
@@ -84,6 +85,7 @@ class TextureBase : public ApiObjectBase {
     static Ref<TextureBase> MakeError(DeviceBase* device, const TextureDescriptor* descriptor);
 
     ObjectType GetType() const override;
+    void FormatLabel(absl::FormatSink* s) const override;
 
     wgpu::TextureDimension GetDimension() const;
     wgpu::TextureViewDimension GetCompatibilityTextureBindingViewDimension() const;
@@ -183,6 +185,8 @@ class TextureBase : public ApiObjectBase {
     };
 
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);
+
+    std::string GetSizeLabel() const;
 
     wgpu::TextureDimension mDimension;
     wgpu::TextureViewDimension

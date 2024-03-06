@@ -28,7 +28,6 @@
 #include "dawn/native/Texture.h"
 
 #include <algorithm>
-#include <string>
 #include <utility>
 
 #include "dawn/common/Assert.h"
@@ -832,6 +831,32 @@ ObjectType TextureBase::GetType() const {
     return ObjectType::Texture;
 }
 
+void TextureBase::FormatLabel(absl::FormatSink* s) const {
+    s->Append(ObjectTypeAsString(GetType()));
+
+    const std::string& label = GetLabel();
+    if (!label.empty()) {
+        s->Append(absl::StrFormat(" \"%s\"", label));
+    } else if (!IsError()) {
+        s->Append(absl::StrFormat(" (unlabeled %s, %s)", GetSizeLabel(), mFormat->format));
+    }
+}
+
+std::string TextureBase::GetSizeLabel() const {
+    if (mDimension == wgpu::TextureDimension::e1D) {
+        return absl::StrFormat("%d px", mBaseSize.width);
+    } else if (mDimension == wgpu::TextureDimension::e3D) {
+        return absl::StrFormat("%dx%dx%d px", mBaseSize.width, mBaseSize.height,
+                               mBaseSize.depthOrArrayLayers);
+    }
+
+    if (mBaseSize.depthOrArrayLayers > 1) {
+        return absl::StrFormat("%dx%d px, %d layer", mBaseSize.width, mBaseSize.height,
+                               mBaseSize.depthOrArrayLayers);
+    }
+    return absl::StrFormat("%dx%d px", mBaseSize.width, mBaseSize.height);
+}
+
 wgpu::TextureDimension TextureBase::GetDimension() const {
     DAWN_ASSERT(!IsError());
     return mDimension;
@@ -1225,8 +1250,7 @@ void TextureViewBase::FormatLabel(absl::FormatSink* s) const {
         return;
     }
 
-    const std::string& textureLabel = mTexture->GetLabel();
-    if (!textureLabel.empty()) {
+    if (label.empty()) {
         s->Append(" of ");
         GetTexture()->FormatLabel(s);
     }

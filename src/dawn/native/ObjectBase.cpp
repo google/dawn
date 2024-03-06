@@ -124,6 +124,8 @@ void ApiObjectBase::FormatLabel(absl::FormatSink* s) const {
     s->Append(ObjectTypeAsString(GetType()));
     if (!mLabel.empty()) {
         s->Append(absl::StrFormat(" \"%s\"", mLabel));
+    } else {
+        s->Append(" (unlabeled)");
     }
 }
 

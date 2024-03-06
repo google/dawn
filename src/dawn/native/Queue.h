@@ -69,6 +69,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
     static Ref<QueueBase> MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
+    void FormatLabel(absl::FormatSink* s) const override;
 
     // Dawn API
     void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);

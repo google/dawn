@@ -76,7 +76,7 @@ TEST_F(InternalUsageValidationDisabledTest, CommandEncoderDescriptorRequiresFeat
     // Check that the encoder records that it is invalid, and not any other errors.
     encoder.InjectValidationError("injected error");
     ASSERT_DEVICE_ERROR(encoder.Finish(),
-                        testing::HasSubstr("[Invalid CommandEncoder] is invalid"));
+                        testing::HasSubstr("[Invalid CommandEncoder (unlabeled)] is invalid"));
 }
 
 class TextureInternalUsageValidationTest : public ValidationTest {
