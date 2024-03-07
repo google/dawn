@@ -146,7 +146,7 @@ MaybeError BindGroupLayout::Initialize() {
     // TODO(enga): Consider deduping allocators for layouts with the same descriptor type
     // counts.
     mDescriptorSetAllocator =
-        DescriptorSetAllocator::Create(this, std::move(descriptorCountPerType));
+        DescriptorSetAllocator::Create(device, std::move(descriptorCountPerType));
 
     SetLabelImpl();
 
@@ -185,7 +185,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     Device* device,
     const BindGroupDescriptor* descriptor) {
     DescriptorSetAllocation descriptorSetAllocation;
-    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate());
+    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(this));
 
     return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
 }

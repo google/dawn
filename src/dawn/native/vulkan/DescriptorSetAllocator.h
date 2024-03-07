@@ -49,22 +49,19 @@ class DescriptorSetAllocator : public ObjectBase {
 
   public:
     static Ref<DescriptorSetAllocator> Create(
-        BindGroupLayout* layout,
+        DeviceBase* device,
         absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType);
 
-    ResultOrError<DescriptorSetAllocation> Allocate();
+    ResultOrError<DescriptorSetAllocation> Allocate(BindGroupLayout* layout);
     void Deallocate(DescriptorSetAllocation* allocationInfo);
     void FinishDeallocation(ExecutionSerial completedSerial);
 
   private:
-    DescriptorSetAllocator(BindGroupLayout* layout,
+    DescriptorSetAllocator(DeviceBase* device,
                            absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType);
     ~DescriptorSetAllocator() override;
 
-    MaybeError AllocateDescriptorPool();
-
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<const BindGroupLayout, DanglingUntriaged> mLayout;
+    MaybeError AllocateDescriptorPool(BindGroupLayout* layout);
 
     std::vector<VkDescriptorPoolSize> mPoolSizes;
     SetIndex mMaxSets;

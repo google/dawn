@@ -42,17 +42,15 @@ static constexpr uint32_t kMaxDescriptorsPerPool = 512;
 
 // static
 Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(
-    BindGroupLayout* layout,
+    DeviceBase* device,
     absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType) {
-    return AcquireRef(new DescriptorSetAllocator(layout, descriptorCountPerType));
+    return AcquireRef(new DescriptorSetAllocator(device, descriptorCountPerType));
 }
 
 DescriptorSetAllocator::DescriptorSetAllocator(
-    BindGroupLayout* layout,
+    DeviceBase* device,
     absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType)
-    : ObjectBase(layout->GetDevice()), mLayout(layout) {
-    DAWN_ASSERT(layout != nullptr);
-
+    : ObjectBase(device) {
     // Compute the total number of descriptors for this layout.
     uint32_t totalDescriptorCount = 0;
     mPoolSizes.reserve(descriptorCountPerType.size());
@@ -95,9 +93,9 @@ DescriptorSetAllocator::~DescriptorSetAllocator() {
     }
 }
 
-ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate() {
+ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate(BindGroupLayout* layout) {
     if (mAvailableDescriptorPoolIndices.empty()) {
-        DAWN_TRY(AllocateDescriptorPool());
+        DAWN_TRY(AllocateDescriptorPool(layout));
     }
 
     DAWN_ASSERT(!mAvailableDescriptorPoolIndices.empty());
@@ -150,7 +148,7 @@ void DescriptorSetAllocator::FinishDeallocation(ExecutionSerial completedSerial)
     mPendingDeallocations.ClearUpTo(completedSerial);
 }
 
-MaybeError DescriptorSetAllocator::AllocateDescriptorPool() {
+MaybeError DescriptorSetAllocator::AllocateDescriptorPool(BindGroupLayout* layout) {
     VkDescriptorPoolCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     createInfo.pNext = nullptr;
@@ -166,7 +164,7 @@ MaybeError DescriptorSetAllocator::AllocateDescriptorPool() {
                                                             nullptr, &*descriptorPool),
                             "CreateDescriptorPool"));
 
-    std::vector<VkDescriptorSetLayout> layouts(mMaxSets, mLayout->GetHandle());
+    std::vector<VkDescriptorSetLayout> layouts(mMaxSets, layout->GetHandle());
 
     VkDescriptorSetAllocateInfo allocateInfo;
     allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
