@@ -12,7 +12,10 @@ cache/webgpu/shader/execution/binary/af_addition.bin
 cache/webgpu/shader/execution/binary/af_division.bin
 cache/webgpu/shader/execution/binary/af_logical.bin
 cache/webgpu/shader/execution/binary/af_matrix_addition.bin
+cache/webgpu/shader/execution/binary/af_matrix_matrix_multiplication.bin
+cache/webgpu/shader/execution/binary/af_matrix_scalar_multiplication.bin
 cache/webgpu/shader/execution/binary/af_matrix_subtraction.bin
+cache/webgpu/shader/execution/binary/af_matrix_vector_multiplication.bin
 cache/webgpu/shader/execution/binary/af_multiplication.bin
 cache/webgpu/shader/execution/binary/af_remainder.bin
 cache/webgpu/shader/execution/binary/af_subtraction.bin

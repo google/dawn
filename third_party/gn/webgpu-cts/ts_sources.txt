@@ -382,8 +382,14 @@ src/webgpu/shader/execution/expression/binary/af_division.cache.ts
 src/webgpu/shader/execution/expression/binary/af_division.spec.ts
 src/webgpu/shader/execution/expression/binary/af_matrix_addition.cache.ts
 src/webgpu/shader/execution/expression/binary/af_matrix_addition.spec.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_matrix_multiplication.cache.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_matrix_multiplication.spec.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_scalar_multiplication.cache.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_scalar_multiplication.spec.ts
 src/webgpu/shader/execution/expression/binary/af_matrix_subtraction.cache.ts
 src/webgpu/shader/execution/expression/binary/af_matrix_subtraction.spec.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_vector_multiplication.cache.ts
+src/webgpu/shader/execution/expression/binary/af_matrix_vector_multiplication.spec.ts
 src/webgpu/shader/execution/expression/binary/af_multiplication.cache.ts
 src/webgpu/shader/execution/expression/binary/af_multiplication.spec.ts
 src/webgpu/shader/execution/expression/binary/af_remainder.cache.ts
@@ -680,6 +686,7 @@ src/webgpu/shader/execution/memory_model/weak.spec.ts
 src/webgpu/shader/execution/shader_io/compute_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/fragment_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/shared_structs.spec.ts
+src/webgpu/shader/execution/shader_io/user_io.spec.ts
 src/webgpu/shader/execution/shader_io/workgroup_size.spec.ts
 src/webgpu/shader/execution/statement/compound.spec.ts
 src/webgpu/shader/execution/statement/increment_decrement.spec.ts
