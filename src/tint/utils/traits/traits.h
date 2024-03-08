@@ -267,7 +267,7 @@ struct HasOperatorShiftLeft : std::false_type {};
 template <typename LHS, typename RHS>
 struct HasOperatorShiftLeft<LHS,
                             RHS,
-                            std::void_t<decltype((std::declval<LHS>() << std::declval<RHS>()))>>
+                            std::void_t<decltype(std::declval<LHS&>() << std::declval<RHS>())>>
     : std::true_type {};
 
 }  // namespace detail
