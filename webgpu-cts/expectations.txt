@@ -838,28 +838,28 @@ crbug.com/tint/2172 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,memory_layou
 crbug.com/dawn/2408 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
 crbug.com/dawn/2428 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/dawn/2428 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] worker_webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
-crbug.com/dawn/2439 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam* [ Failure ]
+crbug.com/dawn/2439 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 
 ################################################################################
 # Failures due to Pixel 6 Android U upgrade
 # The keep can be removed once this config is promoted to stable.
 # KEEP
 ################################################################################
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicLoad* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub* [ Failure ]
-crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicLoad:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:* [ Failure ]
+crbug.com/dawn/2414 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:* [ Failure ]
 crbug.com/dawn/2420 [ android-u android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:limitTest="atMaximum";testValueName="atLimit";canvasType="offscreen" [ Failure ]
 crbug.com/dawn/2420 [ android-u android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxTextureDimension2D:getCurrentTexture,at_over:limitTest="atMaximum";testValueName="atLimit";canvasType="onscreen" [ Failure ]
 crbug.com/dawn/2421 [ android-u android-pixel-6 ] webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,* [ Failure ]
 crbug.com/dawn/2423 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,determinant:f16:inputSource="storage_r";dim=4 [ Failure ]
 crbug.com/dawn/2423 [ android-u android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,determinant:f16:inputSource="storage_rw";dim=4 [ Failure ]
-crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture* [ Failure ]
+crbug.com/dawn/2426 [ android-u android-pixel-6 ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 
 ################################################################################
 # Failures due to M2 Macbook OS upgrade
