@@ -71,6 +71,7 @@ class CommandBufferStateTracker {
     void SetIndexBuffer(wgpu::IndexFormat format, uint64_t offset, uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
+    void End();
 
     static constexpr size_t kNumAspects = 4;
     using ValidationAspects = std::bitset<kNumAspects>;
@@ -94,7 +95,7 @@ class CommandBufferStateTracker {
 
     ValidationAspects mAspects;
 
-    PerBindGroup<BindGroupBase*> mBindgroups = {};
+    PerBindGroup<raw_ptr<BindGroupBase>> mBindgroups = {};
     PerBindGroup<std::vector<uint32_t>> mDynamicOffsets = {};
 
     VertexBufferMask mVertexBuffersUsed;
@@ -105,13 +106,9 @@ class CommandBufferStateTracker {
     uint64_t mIndexBufferSize = 0;
     uint64_t mIndexBufferOffset = 0;
 
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<PipelineLayoutBase, DanglingUntriaged> mLastPipelineLayout = nullptr;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<PipelineBase, DanglingUntriaged> mLastPipeline = nullptr;
-
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<const RequiredBufferSizes, DanglingUntriaged> mMinBufferSizes = nullptr;
+    raw_ptr<PipelineLayoutBase> mLastPipelineLayout = nullptr;
+    raw_ptr<PipelineBase> mLastPipeline = nullptr;
+    raw_ptr<const RequiredBufferSizes> mMinBufferSizes = nullptr;
 };
 
 }  // namespace dawn::native

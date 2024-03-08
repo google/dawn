@@ -1081,5 +1081,22 @@ TEST_F(DestroyObjectRegressionTests, LastRefInCommandComputePipeline) {
     device.Destroy();
 }
 
+// Tests that when a BindGroup's last reference is held in a command in an unfinished
+// CommandEncoder, that destroying the device still works as expected (and does not cause
+// double-free).
+TEST_F(DestroyObjectRegressionTests, LastRefInCommandBindGroup) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+
+    wgpu::Sampler sampler = device.CreateSampler();
+    wgpu::BindGroupLayout layout = ::dawn::utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Filtering}});
+    wgpu::BindGroup bindGroup = ::dawn::utils::MakeBindGroup(device, layout, {{0, sampler}});
+
+    computeEncoder.SetBindGroup(0, bindGroup);
+
+    device.Destroy();
+}
+
 }  // anonymous namespace
 }  // namespace dawn::native

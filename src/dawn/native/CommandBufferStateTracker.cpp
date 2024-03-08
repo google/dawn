@@ -100,7 +100,7 @@ using WritableBindingAliasingResult = std::variant<std::monostate, BufferAliasin
 
 template <typename Return>
 Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout,
-                                        const PerBindGroup<BindGroupBase*>& bindGroups,
+                                        const PerBindGroup<raw_ptr<BindGroupBase>>& bindGroups,
                                         const PerBindGroup<std::vector<uint32_t>>& dynamicOffsets) {
     // If true, returns detailed validation error info. Otherwise simply returns if any binding
     // aliasing is found.
@@ -822,6 +822,13 @@ uint64_t CommandBufferStateTracker::GetIndexBufferSize() const {
 
 uint64_t CommandBufferStateTracker::GetIndexBufferOffset() const {
     return mIndexBufferOffset;
+}
+
+void CommandBufferStateTracker::End() {
+    mLastPipelineLayout = nullptr;
+    mLastPipeline = nullptr;
+    mMinBufferSizes = nullptr;
+    mBindgroups.fill(nullptr);
 }
 
 }  // namespace dawn::native
