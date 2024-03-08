@@ -720,8 +720,8 @@ crbug.com/dawn/0000 a:b,c:29:* [ Failure ]
 			testList.Add(r.Query.String(), r.Query)
 		}
 		for _, s := range []string{
-			"a:missing,test,result:*",
-			"another:missing,test,result:*",
+			"a:missing,test,result:a=1,b=2",
+			"another:missing,test,result:cat=meow,dog=woof",
 		} {
 			testList.Add(s, query.Parse(s))
 		}

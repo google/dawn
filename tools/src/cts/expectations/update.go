@@ -461,8 +461,8 @@ func (u *updater) addExpectations(out container.Map[string, Expectation], in Exp
 
 	// noResults is a helper for returning when the expectation has no test results.
 	noResults := func() {
-		if node := u.testQueryTree.Get(q); node != nil {
-			// Test is found in the test list - likely a variant that is not being run.
+		if glob, err := u.testQueryTree.Glob(q); err == nil && len(glob) > 0 {
+			// At least one test is found with the query in the test list - likely a variant that is not being run.
 			if len(in.Tags) > 0 {
 				u.diag(Note, in.Line, "no results found for query '%v' with tags %v", in.Query, in.Tags)
 			} else {
