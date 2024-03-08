@@ -932,7 +932,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
         tint::msl::validate::Result res;
-#ifdef __APPLE__
+#if TINT_BUILD_IS_MAC
         res = tint::msl::validate::ValidateUsingMetal(result->msl, msl_version);
 #else
 #ifdef _WIN32
@@ -948,7 +948,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
             res.output = "xcrun executable not found. Cannot validate.";
             res.failed = true;
         }
-#endif  // __APPLE__
+#endif  // TINT_BUILD_IS_MAC
         if (res.failed) {
             std::cerr << res.output << "\n";
             return false;
