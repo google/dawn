@@ -1443,6 +1443,7 @@
             },
             {
                 "name": "pop error scope",
+                "no autolock": true,
                 "args": [
                     {"name": "old callback", "type": "error callback"},
                     {"name": "userdata", "type": "void *"}

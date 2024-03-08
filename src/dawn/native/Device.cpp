@@ -771,10 +771,16 @@ Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackIn
     };
 
     std::optional<ErrorScope> scope;
-    if (IsLost()) {
-        scope = ErrorScope(wgpu::ErrorType::DeviceLost, "GPU device disconnected");
-    } else if (!mErrorScopeStack->Empty()) {
-        scope = mErrorScopeStack->Pop();
+    {
+        // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
+        // re-entrancy.
+        auto deviceLock(GetScopedLock());
+
+        if (IsLost()) {
+            scope = ErrorScope(wgpu::ErrorType::DeviceLost, "GPU device disconnected");
+        } else if (!mErrorScopeStack->Empty()) {
+            scope = mErrorScopeStack->Pop();
+        }
     }
 
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(

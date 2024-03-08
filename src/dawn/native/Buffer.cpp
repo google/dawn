@@ -590,40 +590,47 @@ Future BufferBase::APIMapAsyncF(wgpu::MapMode mode,
     // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
-    // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
-    // possible to default the function argument (because there is the callback later in the
-    // argument list)
-    if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
-        size = mSize - offset;
-    }
-
-    auto earlyStatus = [&]() -> std::optional<wgpu::BufferMapAsyncStatus> {
-        if (mState == BufferState::PendingMap) {
-            return wgpu::BufferMapAsyncStatus::MappingAlreadyPending;
-        }
-        WGPUBufferMapAsyncStatus status;
-        if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
-                                       "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
-                                       size)) {
-            return static_cast<wgpu::BufferMapAsyncStatus>(status);
-        }
-        if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
-            return wgpu::BufferMapAsyncStatus::DeviceLost;
-        }
-        return std::nullopt;
-    }();
-
     Ref<EventManager::TrackedEvent> event;
-    if (earlyStatus) {
-        event = AcquireRef(new MapAsyncEvent(GetDevice(), callbackInfo, *earlyStatus));
-    } else {
-        mMapMode = mode;
-        mMapOffset = offset;
-        mMapSize = size;
-        mState = BufferState::PendingMap;
-        mPendingMapEvent =
-            AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
-        event = mPendingMapEvent;
+    std::optional<wgpu::BufferMapAsyncStatus> earlyStatus;
+    {
+        // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
+        // re-entrancy.
+        auto deviceLock(GetDevice()->GetScopedLock());
+
+        // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
+        // possible to default the function argument (because there is the callback later in the
+        // argument list)
+        if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
+            size = mSize - offset;
+        }
+
+        earlyStatus = [&]() -> std::optional<wgpu::BufferMapAsyncStatus> {
+            if (mState == BufferState::PendingMap) {
+                return wgpu::BufferMapAsyncStatus::MappingAlreadyPending;
+            }
+            WGPUBufferMapAsyncStatus status;
+            if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
+                                           "calling %s.MapAsync(%s, %u, %u, ...).", this, mode,
+                                           offset, size)) {
+                return static_cast<wgpu::BufferMapAsyncStatus>(status);
+            }
+            if (GetDevice()->ConsumedError(MapAsyncImpl(mode, offset, size))) {
+                return wgpu::BufferMapAsyncStatus::DeviceLost;
+            }
+            return std::nullopt;
+        }();
+
+        if (earlyStatus) {
+            event = AcquireRef(new MapAsyncEvent(GetDevice(), callbackInfo, *earlyStatus));
+        } else {
+            mMapMode = mode;
+            mMapOffset = offset;
+            mMapSize = size;
+            mState = BufferState::PendingMap;
+            mPendingMapEvent =
+                AcquireRef(new MapAsyncEvent(GetDevice(), this, callbackInfo, mLastUsageSerial));
+            event = mPendingMapEvent;
+        }
     }
 
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));

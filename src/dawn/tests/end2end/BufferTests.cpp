@@ -52,12 +52,6 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire() && GetParam().mFutureCallbackMode &&
                                  *GetParam().mFutureCallbackMode ==
                                      wgpu::CallbackMode::WaitAnyOnly);
-
-        // TODO(dawn:2449): These tests are hitting an ASSERT in Mutex.cpp on Windows with the
-        // spontaneous callback mode.
-        DAWN_SUPPRESS_TEST_IF(IsWindows() && GetParam().mFutureCallbackMode &&
-                              GetParam().mFutureCallbackMode.value() ==
-                                  wgpu::CallbackMode::AllowSpontaneous);
     }
 
     void MapAsyncAndWait(const wgpu::Buffer& buffer,

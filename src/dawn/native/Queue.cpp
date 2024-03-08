@@ -322,20 +322,25 @@ Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callb
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Ref<EventManager::TrackedEvent> event;
+    {
+        // TODO(crbug.com/dawn/831) Manually acquire device lock instead of relying on code-gen for
+        // re-entrancy.
+        auto deviceLock(GetDevice()->GetScopedLock());
 
-    wgpu::QueueWorkDoneStatus validationEarlyStatus;
-    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&validationEarlyStatus))) {
-        // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the device is
-        // lost. When the old OnSubmittedWorkDone is removed then we can update
-        // ValidateOnSubmittedWorkDone to just return the correct thing here.
-        if (validationEarlyStatus == wgpu::QueueWorkDoneStatus::DeviceLost) {
-            validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
+        wgpu::QueueWorkDoneStatus validationEarlyStatus;
+        if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&validationEarlyStatus))) {
+            // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the
+            // device is lost. When the old OnSubmittedWorkDone is removed then we can update
+            // ValidateOnSubmittedWorkDone to just return the correct thing here.
+            if (validationEarlyStatus == wgpu::QueueWorkDoneStatus::DeviceLost) {
+                validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
+            }
+
+            // Note: if the callback is spontaneous, it'll get called in here.
+            event = AcquireRef(new WorkDoneEvent(callbackInfo, this, validationEarlyStatus));
+        } else {
+            event = AcquireRef(new WorkDoneEvent(callbackInfo, this, GetScheduledWorkDoneSerial()));
         }
-
-        // Note: if the callback is spontaneous, it'll get called in here.
-        event = AcquireRef(new WorkDoneEvent(callbackInfo, this, validationEarlyStatus));
-    } else {
-        event = AcquireRef(new WorkDoneEvent(callbackInfo, this, GetScheduledWorkDoneSerial()));
     }
 
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
