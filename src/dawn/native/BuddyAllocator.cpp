@@ -44,7 +44,9 @@ BuddyAllocator::BuddyAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {
 
 BuddyAllocator::~BuddyAllocator() {
     if (mRoot) {
-        DeleteBlock(mRoot);
+        mFreeLists.clear();
+
+        DeleteBlock(mRoot.ExtractAsDangling());
     }
 }
 
@@ -248,7 +250,7 @@ void BuddyAllocator::Deallocate(uint64_t offset) {
 
         // The buddies were inserted in a specific order but
         // could be deleted in any order.
-        DeleteBlock(curr->pBuddy);
+        DeleteBlock(curr->pBuddy.ExtractAsDangling());
         DeleteBlock(curr);
 
         // Parent is now free.
@@ -268,7 +270,7 @@ void BuddyAllocator::DeleteBlock(BuddyBlock* block) {
 
     if (block->mState == BlockState::Split) {
         // Delete the pair in same order we inserted.
-        DeleteBlock(block->split.pLeft->pBuddy);
+        DeleteBlock(block->split.pLeft->pBuddy.ExtractAsDangling());
         DeleteBlock(block->split.pLeft);
     }
     delete block;

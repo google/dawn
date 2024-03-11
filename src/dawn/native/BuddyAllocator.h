@@ -80,10 +80,8 @@ class BuddyAllocator {
 
         // Pointer to this block's buddy, iff parent is split.
         // Used to quickly merge buddy blocks upon de-allocate.
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<BuddyBlock, DanglingUntriaged> pBuddy = nullptr;
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<BuddyBlock, DanglingUntriaged> pParent = nullptr;
+        raw_ptr<BuddyBlock> pBuddy = nullptr;
+        raw_ptr<BuddyBlock> pParent = nullptr;
 
         // Track whether this block has been split or not.
         BlockState mState;
@@ -116,13 +114,11 @@ class BuddyAllocator {
 
     // Keep track the head and tail (for faster insertion/removal).
     struct BlockList {
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<BuddyBlock, DanglingUntriaged> head = nullptr;  // First free block in level.
+        raw_ptr<BuddyBlock> head = nullptr;  // First free block in level.
         // TODO(crbug.com/dawn/827): Track the tail.
     };
 
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<BuddyBlock, DanglingUntriaged> mRoot = nullptr;  // Used to deallocate non-free blocks.
+    raw_ptr<BuddyBlock> mRoot = nullptr;  // Used to deallocate non-free blocks.
 
     uint64_t mMaxBlockSize = 0;
 
