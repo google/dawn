@@ -671,6 +671,7 @@ source_set("end2end_tests_sources") {
   if (dawn_enable_d3d11 || dawn_enable_d3d12) {
     libs += [
       "d3d11.lib",
+      "d3d12.lib",
       "dxgi.lib",
     ]
 
@@ -746,6 +747,8 @@ source_set("white_box_tests_sources") {
 
   sources = [
     "white_box/ShaderModuleTests.cpp",
+    "white_box/SharedBufferMemoryTests.cpp",
+    "white_box/SharedBufferMemoryTests.h",
     "white_box/SharedTextureMemoryTests.cpp",
     "white_box/SharedTextureMemoryTests.h",
   ]
@@ -756,7 +759,10 @@ source_set("white_box_tests_sources") {
   }
 
   if (is_win) {
-    sources += [ "white_box/SharedTextureMemoryTests_win.cpp" ]
+    sources += [
+      "white_box/SharedBufferMemoryTests_win.cpp",
+      "white_box/SharedTextureMemoryTests_win.cpp",
+    ]
   }
 
   if (dawn_enable_vulkan) {

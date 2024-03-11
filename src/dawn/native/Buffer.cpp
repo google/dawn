@@ -408,6 +408,7 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
             return wgpu::BufferMapState::Pending;
         case BufferState::Unmapped:
         case BufferState::Destroyed:
+        case BufferState::SharedMemoryNoAccess:
             return wgpu::BufferMapState::Unmapped;
         default:
             DAWN_UNREACHABLE();
@@ -497,6 +498,8 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
             return DAWN_VALIDATION_ERROR("%s used in submit while mapped.", this);
         case BufferState::PendingMap:
             return DAWN_VALIDATION_ERROR("%s used in submit while pending map.", this);
+        case BufferState::SharedMemoryNoAccess:
+            return DAWN_VALIDATION_ERROR("%s used in submit without shared memory access.", this);
         case BufferState::HostMappedPersistent:
         case BufferState::Unmapped:
             return {};
@@ -760,6 +763,8 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
             return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
         case BufferState::HostMappedPersistent:
             return DAWN_VALIDATION_ERROR("Host-mapped %s cannot be mapped again.", this);
+        case BufferState::SharedMemoryNoAccess:
+            return DAWN_VALIDATION_ERROR("%s used in submit without shared memory access.", this);
         case BufferState::Unmapped:
             break;
     }
@@ -825,6 +830,7 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
 
         case BufferState::PendingMap:
         case BufferState::Unmapped:
+        case BufferState::SharedMemoryNoAccess:
         case BufferState::Destroyed:
             return false;
     }
@@ -870,6 +876,10 @@ void BufferBase::MarkUsedInPendingCommands() {
     ExecutionSerial serial = GetDevice()->GetQueue()->GetPendingCommandSerial();
     DAWN_ASSERT(serial >= mLastUsageSerial);
     mLastUsageSerial = serial;
+}
+
+void BufferBase::SetHasAccess(bool hasAccess) {
+    mState = hasAccess ? BufferState::Unmapped : BufferState::SharedMemoryNoAccess;
 }
 
 bool BufferBase::IsFullBufferRange(uint64_t offset, uint64_t size) const {

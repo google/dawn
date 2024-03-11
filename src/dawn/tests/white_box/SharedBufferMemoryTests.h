@@ -25,38 +25,39 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_
-#define SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_
+#ifndef SRC_DAWN_TESTS_WHITE_BOX_SHAREDBUFFERMEMORYTESTS_H_
+#define SRC_DAWN_TESTS_WHITE_BOX_SHAREDBUFFERMEMORYTESTS_H_
 
-#include "dawn/native/D3D12Backend.h"
-#include "dawn/native/Error.h"
-#include "dawn/native/SharedBufferMemory.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include <gtest/gtest.h>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-namespace dawn::native::d3d12 {
-class Device;
+#include "dawn/tests/DawnTest.h"
 
-class SharedBufferMemory final : public SharedBufferMemoryBase {
+namespace dawn {
+
+class SharedBufferMemoryTestBackend {
   public:
-    static ResultOrError<Ref<SharedBufferMemory>> Create(
-        Device* device,
-        const char* label,
-        const SharedBufferMemoryD3D12ResourceDescriptor* descriptor);
+    virtual void SetUp() {}
+    virtual void TearDown() {}
 
-    ID3D12Resource* GetD3DResource() const;
+    // The required features for testing this backend.
+    virtual std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const = 0;
 
-  private:
-    SharedBufferMemory(Device* device,
-                       const char* label,
-                       SharedBufferMemoryProperties properties,
-                       ComPtr<ID3D12Resource> resource);
-
-    ResultOrError<Ref<BufferBase>> CreateBufferImpl(
-        const UnpackedPtr<BufferDescriptor>& descriptor) override;
-
-    ComPtr<ID3D12Resource> mResource;
+    // Create one basic shared buffer memory. It should support most operations.
+    virtual wgpu::SharedBufferMemory CreateSharedBufferMemory(const wgpu::Device& device) = 0;
 };
 
-}  // namespace dawn::native::d3d12
+using Backend = SharedBufferMemoryTestBackend*;
+DAWN_TEST_PARAM_STRUCT(SharedBufferMemoryTestParams, Backend);
 
-#endif  // SRC_DAWN_NATIVE_D3D12_SHARED_BUFFER_MEMORY_D3D12_H_
+class SharedBufferMemoryTests : public DawnTestWithParams<SharedBufferMemoryTestParams> {
+  public:
+    void SetUp() override;
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
+};
+}  // namespace dawn
+
+#endif  // SRC_DAWN_TESTS_WHITE_BOX_SHAREDBUFFERMEMORYTESTS_H_

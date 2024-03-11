@@ -33,10 +33,12 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
+#include "dawn/native/SharedFence.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
+class SharedBufferMemoryContents;
 struct SharedBufferMemoryDescriptor;
 struct SharedBufferMemoryBeginAccessDescriptor;
 struct SharedBufferMemoryEndAccessState;
@@ -50,6 +52,8 @@ class SharedBufferMemoryBase : public ApiObjectBase, public WeakRefSupport<Share
 
     static SharedBufferMemoryBase* MakeError(DeviceBase* device,
                                              const SharedBufferMemoryDescriptor* descriptor);
+
+    void Initialize();
 
     void APIGetProperties(SharedBufferMemoryProperties* properties) const;
     BufferBase* APICreateBuffer(const BufferDescriptor* descriptor);
@@ -66,6 +70,8 @@ class SharedBufferMemoryBase : public ApiObjectBase, public WeakRefSupport<Share
 
     ObjectType GetType() const override;
 
+    SharedBufferMemoryContents* GetContents() const;
+
   protected:
     SharedBufferMemoryBase(DeviceBase* device,
                            const char* label,
@@ -77,6 +83,26 @@ class SharedBufferMemoryBase : public ApiObjectBase, public WeakRefSupport<Share
     void DestroyImpl() override;
 
     SharedBufferMemoryProperties mProperties;
+
+  private:
+    virtual Ref<SharedBufferMemoryContents> CreateContents();
+
+    ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* rawDescriptor);
+
+    virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
+        const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
+
+    Ref<SharedBufferMemoryContents> mContents;
+};
+
+class SharedBufferMemoryContents : public RefCounted {
+  public:
+    explicit SharedBufferMemoryContents(WeakRef<SharedBufferMemoryBase> sharedBufferMemory);
+
+    const WeakRef<SharedBufferMemoryBase>& GetSharedBufferMemory() const;
+
+  private:
+    WeakRef<SharedBufferMemoryBase> mSharedBufferMemory;
 };
 
 }  // namespace dawn::native

@@ -147,6 +147,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesD3D);
     EnableFeature(Feature::MultiPlanarRenderTargets);
     EnableFeature(Feature::R8UnormStorage);
+    EnableFeature(Feature::SharedBufferMemoryD3D12Resource);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);

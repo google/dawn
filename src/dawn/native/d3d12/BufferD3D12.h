@@ -41,11 +41,15 @@ namespace dawn::native::d3d12 {
 
 class CommandRecordingContext;
 class Device;
+class SharedBufferMemory;
 
 class Buffer final : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
                                              const UnpackedPtr<BufferDescriptor>& descriptor);
+    static ResultOrError<Ref<Buffer>> CreateFromSharedBufferMemory(
+        SharedBufferMemory* memory,
+        const UnpackedPtr<BufferDescriptor>& descriptor);
 
     ID3D12Resource* GetD3D12Resource() const;
     D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
@@ -75,6 +79,8 @@ class Buffer final : public BufferBase {
 
     MaybeError Initialize(bool mappedAtCreation);
     MaybeError InitializeHostMapped(const BufferHostMappedPointer* hostMappedDesc);
+    MaybeError InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3dBuffer,
+                                          const UnpackedPtr<BufferDescriptor>& descriptor);
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
     void DestroyImpl() override;
