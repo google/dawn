@@ -79,6 +79,13 @@ class SwapChainValidationTests : public DawnTest {
         DawnTest::TearDown();
     }
 
+    wgpu::SwapChain CreateSwapChain(wgpu::Surface const& otherSurface,
+                                    wgpu::SwapChainDescriptor const* descriptor) {
+        wgpu::SwapChain swapchain;
+        EXPECT_DEPRECATION_WARNING(swapchain = device.CreateSwapChain(otherSurface, descriptor));
+        return swapchain;
+    }
+
   protected:
     std::unique_ptr<GLFWwindow, GLFWindowDestroyer> window = nullptr;
     wgpu::Surface surface;
@@ -136,7 +143,7 @@ void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
 
 // Control case for a successful swapchain creation and presenting.
 TEST_P(SwapChainValidationTests, CreationSuccess) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
     swapchain.GetCurrentTexture();
     swapchain.Present();
 }
@@ -146,7 +153,7 @@ TEST_P(SwapChainValidationTests, InvalidSurface) {
     wgpu::SurfaceDescriptor surface_desc = {};
     wgpu::Surface surface = GetInstance().CreateSurface(&surface_desc);
 
-    ASSERT_DEVICE_ERROR_MSG(device.CreateSwapChain(surface, &goodDescriptor),
+    ASSERT_DEVICE_ERROR_MSG(CreateSwapChain(surface, &goodDescriptor),
                             testing::HasSubstr("[Surface] is invalid"));
 }
 
@@ -157,33 +164,33 @@ TEST_P(SwapChainValidationTests, InvalidCreationSize) {
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
         desc.width = 0;
-        ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+        ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
     }
     // A height of 0 is invalid.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
         desc.height = 0;
-        ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+        ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
     }
 
     // A width of maxTextureDimension2D is valid but maxTextureDimension2D + 1 isn't.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
         desc.width = supportedLimits.maxTextureDimension2D;
-        device.CreateSwapChain(surface, &desc);
+        CreateSwapChain(surface, &desc);
 
         desc.width = supportedLimits.maxTextureDimension2D + 1;
-        ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+        ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
     }
 
     // A height of maxTextureDimension2D is valid but maxTextureDimension2D + 1 isn't.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
         desc.height = supportedLimits.maxTextureDimension2D;
-        device.CreateSwapChain(surface, &desc);
+        CreateSwapChain(surface, &desc);
 
         desc.height = supportedLimits.maxTextureDimension2D + 1;
-        ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+        ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
     }
 }
 
@@ -191,20 +198,20 @@ TEST_P(SwapChainValidationTests, InvalidCreationSize) {
 TEST_P(SwapChainValidationTests, InvalidCreationUsage) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
     desc.usage = wgpu::TextureUsage::TextureBinding;
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+    ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
 }
 
 // Checks that the creation format must (currently) be BGRA8Unorm
 TEST_P(SwapChainValidationTests, InvalidCreationFormat) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
+    ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &desc));
 }
 
 // Check swapchain operations with an error swapchain are errors
 TEST_P(SwapChainValidationTests, OperationsOnErrorSwapChain) {
     wgpu::SwapChain swapchain;
-    ASSERT_DEVICE_ERROR(swapchain = device.CreateSwapChain(surface, &badDescriptor));
+    ASSERT_DEVICE_ERROR(swapchain = CreateSwapChain(surface, &badDescriptor));
 
     wgpu::Texture texture;
     ASSERT_DEVICE_ERROR(texture = swapchain.GetCurrentTexture());
@@ -215,7 +222,7 @@ TEST_P(SwapChainValidationTests, OperationsOnErrorSwapChain) {
 
 // Check it is invalid to call present without getting a current texture.
 TEST_P(SwapChainValidationTests, PresentWithoutCurrentTexture) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
 
     // Check it is invalid if we never called GetCurrentTexture
     ASSERT_DEVICE_ERROR(swapchain.Present());
@@ -230,7 +237,7 @@ TEST_P(SwapChainValidationTests, PresentWithoutCurrentTexture) {
 // swapchain is kept alive by the surface. Also check after we lose all refs to the surface, the
 // texture is destroyed.
 TEST_P(SwapChainValidationTests, TextureValidAfterSwapChainRefLost) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
     wgpu::Texture texture = swapchain.GetCurrentTexture();
 
     swapchain = nullptr;
@@ -242,7 +249,7 @@ TEST_P(SwapChainValidationTests, TextureValidAfterSwapChainRefLost) {
 
 // Check that the current texture is the destroyed state after present.
 TEST_P(SwapChainValidationTests, TextureDestroyedAfterPresent) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
     wgpu::Texture texture = swapchain.GetCurrentTexture();
     swapchain.Present();
 
@@ -286,7 +293,7 @@ TEST_P(SwapChainValidationTests, ReturnedTextureCharacteristics) {
     wgpu::Texture secondTexture = device.CreateTexture(&textureDesc);
 
     // Get the swapchain view and try to use it in the render pass to trigger all the validation.
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTexture().CreateView();
 
     // Validation will also check the dimension of the view is 2D, and it's usage contains
@@ -315,7 +322,7 @@ TEST_P(SwapChainValidationTests, ReturnedTextureCharacteristics) {
 TEST_P(SwapChainValidationTests, ReflectionValidGetCurrentTexture) {
     // Check with the goodDescriptor.
     {
-        wgpu::SwapChain swapChain = device.CreateSwapChain(surface, &goodDescriptor);
+        wgpu::SwapChain swapChain = CreateSwapChain(surface, &goodDescriptor);
         CheckTextureMatchesDescriptor(swapChain.GetCurrentTexture(), goodDescriptor);
     }
     // Check with properties that can be changed while keeping a valid descriptor.
@@ -323,7 +330,7 @@ TEST_P(SwapChainValidationTests, ReflectionValidGetCurrentTexture) {
         wgpu::SwapChainDescriptor otherDescriptor = goodDescriptor;
         otherDescriptor.width = 2;
         otherDescriptor.height = 7;
-        wgpu::SwapChain swapChain = device.CreateSwapChain(surface, &goodDescriptor);
+        wgpu::SwapChain swapChain = CreateSwapChain(surface, &goodDescriptor);
         CheckTextureMatchesDescriptor(swapChain.GetCurrentTexture(), goodDescriptor);
     }
 }
@@ -331,7 +338,7 @@ TEST_P(SwapChainValidationTests, ReflectionValidGetCurrentTexture) {
 // Check the reflection of textures returned by GetCurrentTexture on valid swapchain.
 TEST_P(SwapChainValidationTests, ReflectionErrorGetCurrentTexture) {
     wgpu::SwapChain swapChain;
-    ASSERT_DEVICE_ERROR(swapChain = device.CreateSwapChain(surface, &badDescriptor));
+    ASSERT_DEVICE_ERROR(swapChain = CreateSwapChain(surface, &badDescriptor));
     wgpu::Texture texture;
     ASSERT_DEVICE_ERROR(texture = swapChain.GetCurrentTexture());
     CheckTextureMatchesDescriptor(texture, badDescriptor);
@@ -339,8 +346,8 @@ TEST_P(SwapChainValidationTests, ReflectionErrorGetCurrentTexture) {
 
 // Check that failing to create a new swapchain doesn't replace the previous one.
 TEST_P(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &badDescriptor));
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
+    ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &badDescriptor));
 
     swapchain.GetCurrentTexture();
     swapchain.Present();
@@ -349,15 +356,15 @@ TEST_P(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
 // Check that after replacement, all swapchain operations are errors and the texture is destroyed.
 TEST_P(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
     {
-        wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
-        device.CreateSwapChain(surface, &goodDescriptor);
+        wgpu::SwapChain replacedSwapChain = CreateSwapChain(surface, &goodDescriptor);
+        CreateSwapChain(surface, &goodDescriptor);
         ASSERT_DEVICE_ERROR(replacedSwapChain.GetCurrentTexture());
     }
 
     {
-        wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+        wgpu::SwapChain replacedSwapChain = CreateSwapChain(surface, &goodDescriptor);
         wgpu::Texture texture = replacedSwapChain.GetCurrentTexture();
-        device.CreateSwapChain(surface, &goodDescriptor);
+        CreateSwapChain(surface, &goodDescriptor);
 
         CheckTextureIsDestroyed(texture);
         ASSERT_DEVICE_ERROR(replacedSwapChain.Present());
@@ -367,12 +374,12 @@ TEST_P(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
 // Check that after surface destruction, all swapchain operations are errors and the texture is
 // destroyed. The test is split in two to reset the wgpu::Surface in the middle.
 TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_GetTexture) {
-    wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain replacedSwapChain = CreateSwapChain(surface, &goodDescriptor);
     surface = nullptr;
     ASSERT_DEVICE_ERROR(replacedSwapChain.GetCurrentTexture());
 }
 TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_AfterGetTexture) {
-    wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain replacedSwapChain = CreateSwapChain(surface, &goodDescriptor);
     wgpu::Texture texture = replacedSwapChain.GetCurrentTexture();
     surface = nullptr;
 
@@ -382,7 +389,7 @@ TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_After
 
 // Test that new swap chain present fails after device is lost
 TEST_P(SwapChainValidationTests, SwapChainPresentFailsAfterDeviceLost) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
     swapchain.GetCurrentTexture();
 
     LoseDeviceForTesting();
@@ -391,7 +398,7 @@ TEST_P(SwapChainValidationTests, SwapChainPresentFailsAfterDeviceLost) {
 
 // Test that new swap chain get current texture fails after device is lost
 TEST_P(SwapChainValidationTests, SwapChainGetCurrentTextureFailsAfterDevLost) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &goodDescriptor);
 
     LoseDeviceForTesting();
     ASSERT_DEVICE_ERROR(swapchain.GetCurrentTexture());
@@ -400,7 +407,7 @@ TEST_P(SwapChainValidationTests, SwapChainGetCurrentTextureFailsAfterDevLost) {
 // Test that creation of a new swapchain fails after device is lost
 TEST_P(SwapChainValidationTests, CreateSwapChainFailsAfterDevLost) {
     LoseDeviceForTesting();
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &goodDescriptor));
+    ASSERT_DEVICE_ERROR(CreateSwapChain(surface, &goodDescriptor));
 }
 
 DAWN_INSTANTIATE_TEST(SwapChainValidationTests, MetalBackend(), NullBackend());

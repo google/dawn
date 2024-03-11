@@ -381,11 +381,10 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     OwnedCompilationMessages* compilationMessages) {
     return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
 }
-ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
-    Surface* surface,
-    SwapChainBase* previousSwapChain,
-    const SwapChainDescriptor* descriptor) {
-    return SwapChain::Create(this, surface, previousSwapChain, descriptor);
+ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
+                                                              SwapChainBase* previousSwapChain,
+                                                              const SurfaceConfiguration* config) {
+    return SwapChain::Create(this, surface, previousSwapChain, config);
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {

@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -67,6 +68,10 @@ FeaturesSet AdapterBase::GetSupportedFeatures() const {
 }
 
 PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() {
+    return mPhysicalDevice.Get();
+}
+
+const PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() const {
     return mPhysicalDevice.Get();
 }
 
@@ -325,6 +330,10 @@ const TogglesState& AdapterBase::GetTogglesState() const {
 
 FeatureLevel AdapterBase::GetFeatureLevel() const {
     return mFeatureLevel;
+}
+
+const std::string& AdapterBase::GetName() const {
+    return mPhysicalDevice->GetName();
 }
 
 std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,

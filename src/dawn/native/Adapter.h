@@ -28,10 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_ADAPTER_H_
 #define SRC_DAWN_NATIVE_ADAPTER_H_
 
+#include <string>
 #include <vector>
 
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
+#include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/dawn_platform.h"
@@ -42,7 +44,7 @@ class DeviceBase;
 class TogglesState;
 struct SupportedLimits;
 
-class AdapterBase : public RefCounted {
+class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
   public:
     AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
                 FeatureLevel featureLevel,
@@ -70,11 +72,15 @@ class AdapterBase : public RefCounted {
 
     // Return the underlying PhysicalDevice.
     PhysicalDeviceBase* GetPhysicalDevice();
+    const PhysicalDeviceBase* GetPhysicalDevice() const;
 
     // Get the actual toggles state of the adapter.
     const TogglesState& GetTogglesState() const;
 
     FeatureLevel GetFeatureLevel() const;
+
+    // Get a human readable label for the adapter (in practice, the physical device name)
+    const std::string& GetName() const;
 
   private:
     Ref<PhysicalDeviceBase> mPhysicalDevice;

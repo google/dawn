@@ -40,14 +40,14 @@ namespace dawn::native::metal {
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SwapChainDescriptor* descriptor) {
-    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
+                                                const SurfaceConfiguration* config) {
+    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, config));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
     return swapchain;
 }
 
-SwapChain::SwapChain(DeviceBase* dev, Surface* sur, const SwapChainDescriptor* desc)
-    : SwapChainBase(dev, sur, desc) {}
+SwapChain::SwapChain(DeviceBase* dev, Surface* sur, const SurfaceConfiguration* config)
+    : SwapChainBase(dev, sur, config) {}
 
 SwapChain::~SwapChain() = default;
 
@@ -82,6 +82,9 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     [*mLayer setDevice:ToBackend(GetDevice())->GetMTLDevice()];
     [*mLayer setPixelFormat:MetalPixelFormat(GetDevice(), GetFormat())];
 
+    // TODO(dawn:2320) Check that this behaves as expected by the spec
+    [*mLayer setOpaque:(GetAlphaMode() != wgpu::CompositeAlphaMode::Premultiplied)];
+
 #if DAWN_PLATFORM_IS(MACOS)
     [*mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
 #endif  // DAWN_PLATFORM_IS(MACOS)
@@ -103,7 +106,7 @@ MaybeError SwapChain::PresentImpl() {
     return {};
 }
 
-ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
+ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
     @autoreleasepool {
         DAWN_ASSERT(mCurrentDrawable == nullptr);
         mCurrentDrawable = [*mLayer nextDrawable];
@@ -112,7 +115,13 @@ ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
 
         mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), Unpack(&textureDesc),
                                            NSPRef<id<MTLTexture>>([*mCurrentDrawable texture]));
-        return mTexture;
+
+        SwapChainTextureInfo info;
+        info.texture = mTexture;
+        info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
+        // TODO(dawn:2320) Check for optimality
+        info.suboptimal = false;
+        return info;
     }
 }
 

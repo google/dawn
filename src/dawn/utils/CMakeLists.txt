@@ -60,6 +60,9 @@ target_link_libraries(dawn_utils
             SPIRV-Tools-opt
 )
 
+# Needed by WGPUHelpers
+target_compile_definitions(dawn_utils PUBLIC -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
+
 if(WIN32 AND NOT WINDOWS_STORE)
     target_sources(dawn_utils PRIVATE "WindowsDebugLogger.cpp")
 else()

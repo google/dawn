@@ -66,6 +66,15 @@ bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
     return true;
 }
 
+ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
+    const Surface* surface) const {
+    PhysicalDeviceSurfaceCapabilities capabilities;
+    capabilities.formats = {wgpu::TextureFormat::BGRA8Unorm};
+    capabilities.presentModes = {wgpu::PresentMode::Fifo};
+    capabilities.alphaModes = {wgpu::CompositeAlphaMode::Auto};
+    return capabilities;
+}
+
 MaybeError PhysicalDevice::InitializeImpl() {
     return {};
 }
@@ -223,11 +232,10 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     DAWN_TRY(module->Initialize(parseResult, compilationMessages));
     return module;
 }
-ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
-    Surface* surface,
-    SwapChainBase* previousSwapChain,
-    const SwapChainDescriptor* descriptor) {
-    return SwapChain::Create(this, surface, previousSwapChain, descriptor);
+ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
+                                                              SwapChainBase* previousSwapChain,
+                                                              const SurfaceConfiguration* config) {
+    return SwapChain::Create(this, surface, previousSwapChain, config);
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
@@ -507,8 +515,8 @@ MaybeError RenderPipeline::InitializeImpl() {
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SwapChainDescriptor* descriptor) {
-    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
+                                                const SurfaceConfiguration* config) {
+    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, config));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
     return swapchain;
 }
@@ -533,10 +541,14 @@ MaybeError SwapChain::PresentImpl() {
     return {};
 }
 
-ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
+ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
     TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
     mTexture = AcquireRef(new Texture(GetDevice(), Unpack(&textureDesc)));
-    return mTexture;
+    SwapChainTextureInfo info;
+    info.texture = mTexture;
+    info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
+    info.suboptimal = false;
+    return info;
 }
 
 void SwapChain::DetachFromSurfaceImpl() {

@@ -446,6 +446,37 @@ bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
     return featureLevel == FeatureLevel::Compatibility;
 }
 
+ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
+    const Surface*) const {
+    PhysicalDeviceSurfaceCapabilities capabilities;
+
+    // Formats
+
+    // This is the only supported format in native mode (see crbug.com/dawn/160).
+#if DAWN_PLATFORM_IS(ANDROID)
+    capabilities.formats.push_back(wgpu::TextureFormat::RGBA8Unorm);
+#else
+    capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
+#endif  // !DAWN_PLATFORM_IS(ANDROID)
+
+    // Present Modes
+
+    capabilities.presentModes = {
+        wgpu::PresentMode::Fifo,
+        wgpu::PresentMode::Immediate,
+        wgpu::PresentMode::Mailbox,
+    };
+
+    // Alpha Modes
+
+    capabilities.alphaModes = {
+        wgpu::CompositeAlphaMode::Opaque,
+        wgpu::CompositeAlphaMode::Auto,
+    };
+
+    return capabilities;
+}
+
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {

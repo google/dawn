@@ -48,6 +48,13 @@ namespace dawn::native {
 
 class DeviceBase;
 
+// Structure that holds surface capabilities for a (Surface, PhysicalDevice) pair.
+struct PhysicalDeviceSurfaceCapabilities {
+    std::vector<wgpu::TextureFormat> formats;
+    std::vector<wgpu::PresentMode> presentModes;
+    std::vector<wgpu::CompositeAlphaMode> alphaModes;
+};
+
 struct FeatureValidationResult {
     // Constructor of successful result
     FeatureValidationResult();
@@ -109,6 +116,9 @@ class PhysicalDeviceBase : public RefCounted {
 
     // Populate backend properties. Ownership of allocations written are owned by the caller.
     virtual void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const = 0;
+
+    virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        const Surface* surface) const = 0;
 
   protected:
     uint32_t mVendorId = 0xFFFFFFFF;

@@ -266,8 +266,13 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         std::unique_ptr<OwnedCompilationMessages>* compilationMessages = nullptr);
+    // Deprecated: this was the way to create a SwapChain when it was explicitly manipulated by the
+    // end user.
     ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                       const SwapChainDescriptor* descriptor);
+    ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
+                                                      SwapChainBase* previousSwapChain,
+                                                      const SurfaceConfiguration* config);
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
     ResultOrError<Ref<TextureViewBase>> CreateTextureView(TextureBase* texture,
                                                           const TextureViewDescriptor* descriptor);
@@ -306,7 +311,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
     ShaderModuleBase* APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
                                                  const char* errorMessage);
-    SwapChainBase* APICreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
+    // TODO (dawn:2320) Remove after deprecation
+    SwapChainBase* APICreateSwapChain(Surface* surface,
+                                      const SwapChainDescriptor* descriptor);  // Deprecated
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     wgpu::TextureUsage APIGetSupportedSurfaceUsage(Surface* surface);
@@ -512,7 +519,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
         SwapChainBase* previousSwapChain,
-        const SwapChainDescriptor* descriptor) = 0;
+        const SurfaceConfiguration* config) = 0;
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
