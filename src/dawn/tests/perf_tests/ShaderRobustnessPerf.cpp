@@ -129,9 +129,9 @@ const std::string& kMatMulFloatBodyPart1 = R"(
 
             // Define the region within the current tile that this thread
             // is responsible for loading into the cache.
-            let ColPerThreadA : u32 = TileInner / kWorkgroupSizeX;
+            const ColPerThreadA : u32 = TileInner / kWorkgroupSizeX;
             let tileColA : u32 = local_id.x * ColPerThreadA;
-            let RowPerThreadB : u32 = TileInner / kWorkgroupSizeY;
+            const RowPerThreadB : u32 = TileInner / kWorkgroupSizeY;
             let tileRowB : u32 = local_id.y * RowPerThreadB;
 
             // Loop over shared dimension.
@@ -305,7 +305,7 @@ const std::string& kMatMulVec4BodyPart1 = R"(
             var BCached : array<VecT, ColPerThread>;
 
             var globalColA : u32 = tileCol;
-            let RowPerThreadB : u32 = TileInner / kWorkgroupSizeY;
+            const RowPerThreadB : u32 = TileInner / kWorkgroupSizeY;
             let tileRowB : u32 = local_id.y * RowPerThreadB;
 
             // Loop over shared dimension.
