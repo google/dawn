@@ -447,7 +447,7 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer):
                 builder = "dawn:try/" + name,
             )
 
-def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan):
+def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experimental = True):
     """Adds both the CI and Try standalone builders as appropriate for the CMake build
 
     Args:
@@ -503,7 +503,7 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan):
     )
 
     luci.cq_tryjob_verifier(
-        experiment_percentage = 100,  # Temporarily make this experimental
+        experiment_percentage = 100 if experimental else None,
         cq_group = "Dawn-CQ",
         builder = "dawn:try/" + name,
         location_filters = [
@@ -731,6 +731,8 @@ dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-ubsan", clang = True, d
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", asan = False, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-asan", clang = True, debug = False, cpu = "x64", asan = True, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-rel-x64-ubsan", clang = True, debug = False, cpu = "x64", asan = False, ubsan = True)
+dawn_cmake_standalone_builder("cmake-mac-dbg", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False)
+dawn_cmake_standalone_builder("cmake-mac-rel", clang = True, debug = False, cpu = "x64", asan = False, ubsan = False)
 
 chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
