@@ -218,7 +218,7 @@ MaybeError PlatformFunctions::LoadFXCompiler() {
     return {};
 }
 
-// Use Backend::IsDXCAvaliable if possible, which also check the DXC is no older than a given
+// Use Backend::IsDXCAvailable if possible, which also check the DXC is no older than a given
 // version
 bool PlatformFunctions::IsDXCBinaryAvailable() const {
     return mDXILLib.Valid() && mDXCompilerLib.Valid();

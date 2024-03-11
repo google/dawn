@@ -142,8 +142,8 @@ if (build_with_chromium) {
 ###############################################################################
 
 # When building with chromium under Windows, we need to copy the DXC from
-# Windows SDK into build folder, in order to ensure a DXC of verison 1.6 is
-# avaliable when running end-to-end tests in Chromium. Note that currently DXC
+# Windows SDK into build folder, in order to ensure a DXC of version 1.6 is
+# available when running end-to-end tests in Chromium. Note that currently DXC
 # only provided for x86 and x64 in Windows SDK 20348.
 if (!dawn_use_built_dxc && build_with_chromium && is_win &&
     (target_cpu == "x64" || target_cpu == "x86")) {

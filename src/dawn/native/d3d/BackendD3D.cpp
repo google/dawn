@@ -221,7 +221,7 @@ DxcVersionInfo Backend::GetDxcVersion() const {
     return DxcVersionInfo(std::get<DxcVersionInfo>(mDxcVersionInfo));
 }
 
-// Return true if and only if DXC binary is avaliable, and the DXC version is validated to
+// Return true if and only if DXC binary is available, and the DXC version is validated to
 // be no older than a pre-defined minimum version.
 bool Backend::IsDXCAvailable() const {
     // mDxcVersionInfo hold DxcVersionInfo instead of DxcUnavailable if and only if DXC binaries and
