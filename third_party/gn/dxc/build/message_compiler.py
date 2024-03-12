@@ -32,7 +32,6 @@
 # Usage: message_compiler.py <environment_file> [<args to mc.exe>*]
 
 import difflib
-import distutils.dir_util
 import filecmp
 import os
 import re
@@ -69,7 +68,11 @@ def main():
     # If these are new files, create the source directory. The diff will fail later to let
     # the user know what files to copy.
     os.makedirs(source, exist_ok=True)
-    distutils.dir_util.copy_tree(source, header_dir, preserve_times=False)
+    # Set copy_function to shutil.copy to update the timestamp on the destination.
+    shutil.copytree(source,
+                    header_dir,
+                    copy_function=shutil.copy,
+                    dirs_exist_ok=True)
 
     # On non-Windows, that's all we can do.
     if sys.platform != 'win32':
