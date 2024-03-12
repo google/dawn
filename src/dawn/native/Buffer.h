@@ -165,8 +165,8 @@ class BufferBase : public ApiObjectBase {
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
     void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
 
-    uint64_t mSize = 0;
-    wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
+    const uint64_t mSize = 0;
+    const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
     BufferState mState;
     bool mIsDataInitialized = false;
 

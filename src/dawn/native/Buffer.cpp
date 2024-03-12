@@ -120,6 +120,45 @@ class ErrorBuffer final : public BufferBase {
     std::unique_ptr<uint8_t[]> mFakeMappedData;
 };
 
+wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage usage) {
+    // Add readonly storage usage if the buffer has a storage usage. The validation rules in
+    // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
+    if (usage & wgpu::BufferUsage::Storage) {
+        usage |= kReadOnlyStorageBuffer;
+    }
+
+    // The query resolve buffer need to be used as a storage buffer in the internal compute
+    // pipeline which does timestamp uint conversion for timestamp query, it requires the buffer
+    // has Storage usage in the binding group. Implicitly add an InternalStorage usage which is
+    // only compatible with InternalStorageBuffer binding type in BGL. It shouldn't be
+    // compatible with StorageBuffer binding type and the query resolve buffer cannot be bound
+    // as storage buffer if it's created without Storage usage.
+    if (usage & wgpu::BufferUsage::QueryResolve) {
+        usage |= kInternalStorageBuffer;
+    }
+
+    // We also add internal storage usage for Indirect buffers for some transformations before
+    // DispatchIndirect calls on the backend (e.g. validations, support of [[num_workgroups]] on
+    // D3D12), since these transformations involve binding them as storage buffers for use in a
+    // compute pass.
+    if (usage & wgpu::BufferUsage::Indirect) {
+        usage |= kInternalStorageBuffer;
+    }
+
+    if (usage & wgpu::BufferUsage::CopyDst) {
+        if (device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
+            usage |= kInternalStorageBuffer;
+        }
+    }
+
+    return usage;
+}
+
 // GetMappedRange on a zero-sized buffer returns a pointer to this value.
 static uint32_t sZeroSizedMappingData = 0xCAFED00D;
 
@@ -280,48 +319,9 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : ApiObjectBase(device, descriptor->label),
       mSize(descriptor->size),
-      mUsage(descriptor->usage),
-      mState(BufferState::Unmapped) {
-    // Add readonly storage usage if the buffer has a storage usage. The validation rules in
-    // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
-    if (mUsage & wgpu::BufferUsage::Storage) {
-        mUsage |= kReadOnlyStorageBuffer;
-    }
-
-    // The query resolve buffer need to be used as a storage buffer in the internal compute
-    // pipeline which does timestamp uint conversion for timestamp query, it requires the buffer
-    // has Storage usage in the binding group. Implicitly add an InternalStorage usage which is
-    // only compatible with InternalStorageBuffer binding type in BGL. It shouldn't be
-    // compatible with StorageBuffer binding type and the query resolve buffer cannot be bound
-    // as storage buffer if it's created without Storage usage.
-    if (mUsage & wgpu::BufferUsage::QueryResolve) {
-        mUsage |= kInternalStorageBuffer;
-    }
-
-    // We also add internal storage usage for Indirect buffers for some transformations before
-    // DispatchIndirect calls on the backend (e.g. validations, support of [[num_workgroups]] on
-    // D3D12), since these transformations involve binding them as storage buffers for use in a
-    // compute pass.
-    if (mUsage & wgpu::BufferUsage::Indirect) {
-        mUsage |= kInternalStorageBuffer;
-    }
-
-    if (mUsage & wgpu::BufferUsage::CopyDst) {
-        if (device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
-            mUsage |= kInternalStorageBuffer;
-        }
-    }
-
-    auto* hostMappedDesc = descriptor.Get<BufferHostMappedPointer>();
-    if (hostMappedDesc != nullptr) {
-        mState = BufferState::HostMappedPersistent;
-    }
-
+      mUsage(AddInternalUsages(device, descriptor->usage)),
+      mState(descriptor.Get<BufferHostMappedPointer>() ? BufferState::HostMappedPersistent
+                                                       : BufferState::Unmapped) {
     GetObjectTrackingList()->Track(this);
 }
 
@@ -331,9 +331,8 @@ BufferBase::BufferBase(DeviceBase* device,
     : ApiObjectBase(device, tag, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
-      mState(BufferState::Unmapped) {
+      mState(descriptor->mappedAtCreation ? BufferState::MappedAtCreation : BufferState::Unmapped) {
     if (descriptor->mappedAtCreation) {
-        mState = BufferState::MappedAtCreation;
         mMapOffset = 0;
         mMapSize = mSize;
     }
