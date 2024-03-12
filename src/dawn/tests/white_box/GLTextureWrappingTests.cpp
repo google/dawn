@@ -117,8 +117,8 @@ class GLTextureTestBase : public DawnTest {
     }
 
   protected:
-    raw_ptr<native::opengl::Device> mSecondDeviceGL;
     wgpu::Device mSecondDevice;
+    raw_ptr<native::opengl::Device> mSecondDeviceGL;  // Depends on `mSecondDevice`.
 };
 
 // A small fixture used to initialize default data for the GLTexture validation tests.
