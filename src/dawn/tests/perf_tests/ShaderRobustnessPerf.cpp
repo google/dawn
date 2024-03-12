@@ -509,13 +509,18 @@ void ShaderRobustnessPerf::SetUp() {
 }
 
 void ShaderRobustnessPerf::Step() {
+    bool useTimestamps = SupportsTimestampQuery();
+
     wgpu::CommandBuffer commands;
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        if (SupportsTimestampQuery()) {
-            RecordBeginTimestamp(encoder);
+        wgpu::ComputePassDescriptor computePassDesc;
+        wgpu::ComputePassTimestampWrites timestampWrites;
+        if (useTimestamps) {
+            timestampWrites = GetComputePassTimestampWrites();
+            computePassDesc.timestampWrites = &timestampWrites;
         }
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePassDesc);
         pass.SetPipeline(mPipeline);
         pass.SetBindGroup(0, mBindGroup);
         for (unsigned int i = 0; i < kNumIterations; ++i) {
@@ -523,8 +528,8 @@ void ShaderRobustnessPerf::Step() {
                                     ceil(static_cast<float>(mDimAOuter) / float{kTileSize}), 1);
         }
         pass.End();
-        if (SupportsTimestampQuery()) {
-            RecordEndTimestampAndResolveQuerySet(encoder);
+        if (useTimestamps) {
+            ResolveTimestamps(encoder);
         }
 
         commands = encoder.Finish();
@@ -532,7 +537,7 @@ void ShaderRobustnessPerf::Step() {
 
     queue.Submit(1, &commands);
 
-    if (SupportsTimestampQuery()) {
+    if (useTimestamps) {
         ComputeGPUElapsedTime();
     }
 }

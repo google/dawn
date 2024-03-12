@@ -249,6 +249,7 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
 
     mNumStepsPerformed = 0;
     mCpuTime = 0;
+    mGPUTime = std::nullopt;
     mRunning = true;
 
     uint64_t finishedIterations = 0;
@@ -373,8 +374,12 @@ void DawnPerfTestBase::OutputResults() {
     }
 }
 
-void DawnPerfTestBase::SetGPUTime(double GPUTime) {
-    mGPUTime = GPUTime;
+void DawnPerfTestBase::AddGPUTime(double time) {
+    if (!mGPUTime.has_value()) {
+        mGPUTime = time;
+    } else {
+        *mGPUTime += time;
+    }
 }
 
 void DawnPerfTestBase::PrintPerIterationResultFromSeconds(const std::string& trace,
