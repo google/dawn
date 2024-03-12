@@ -244,7 +244,7 @@ group("abseil") {
   if (build_with_chromium) {
     public_deps = [ "$dawn_abseil_dir:absl" ]
   } else {
-    public_deps = [ "${dawn_root}/third_party/gn/abseil-cpp:strings" ]
+    public_deps = [ "${dawn_abseil_dir}/absl/strings:strings" ]
   }
 }
 
