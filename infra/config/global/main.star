@@ -138,14 +138,30 @@ os_category = struct(
     WINDOWS = "Windows",
 )
 
-def os_enum(dimension, category, console_name):
-    return struct(dimension = dimension, category = category, console_name = console_name)
+def os_enum(category, console_name):
+    return struct(category = category, console_name = console_name)
 
 os = struct(
-    LINUX = os_enum("Ubuntu-18.04", os_category.LINUX, "linux"),
-    MAC = os_enum("Mac-10.15|Mac-11", os_category.MAC, "mac"),
-    WINDOWS = os_enum("Windows-10", os_category.WINDOWS, "win"),
+    LINUX = os_enum(os_category.LINUX, "linux"),
+    MAC = os_enum(os_category.MAC, "mac"),
+    WINDOWS = os_enum(os_category.WINDOWS, "win"),
 )
+
+def get_dimension(os, builder_name = None):
+    """Returns the dimension to use for the input os and optional builder name"""
+    if os.category == os_category.LINUX:
+        return "Ubuntu-18.04"
+    elif os.category == os_category.MAC:
+        if "cmake" in builder_name:
+            # CMake build runs Tint e2e tests, which must run on 11+ where the metal
+            # compiler (xcrun) supports texel fetch (chromium_experimental_framebuffer_fetch)
+            return "Mac-11"
+        else:
+            return "Mac-10.15|Mac-11"
+    elif os.category == os_category.WINDOWS:
+        return "Windows-10"
+
+    return "Invalid Dimension"
 
 reclient = struct(
     instance = struct(
@@ -239,7 +255,7 @@ def get_default_caches(os, clang):
         caches.append(swarming.cache(name = "osx_sdk", path = "osx_sdk"))
     return caches
 
-def get_default_dimensions(os):
+def get_default_dimensions(os, builder_name):
     """Get dimensions for a builder that don't depend on being CI vs Try
 
     Args:
@@ -252,7 +268,7 @@ def get_default_dimensions(os):
 
     # We have 32bit test configurations but some of our toolchain is 64bit (like CIPD)
     dimensions["cpu"] = "x86-64"
-    dimensions["os"] = os.dimension
+    dimensions["os"] = get_dimension(os, builder_name)
 
     return dimensions
 
@@ -290,7 +306,7 @@ def add_ci_builder(name, os, properties):
     clang = properties["clang"]
     fuzzer = ("gen_fuzz_corpus" in properties) and properties["gen_fuzz_corpus"]
 
-    dimensions_ci = get_default_dimensions(os)
+    dimensions_ci = get_default_dimensions(os, name)
     dimensions_ci["pool"] = "luci.flex.ci"
     properties_ci = get_common_properties(
         os,
@@ -328,7 +344,7 @@ def add_try_builder(name, os, properties):
     """
     clang = properties["clang"]
 
-    dimensions_try = get_default_dimensions(os)
+    dimensions_try = get_default_dimensions(os, name)
     dimensions_try["pool"] = "luci.flex.try"
     properties_try = get_common_properties(
         os,
@@ -661,7 +677,7 @@ luci.builder(
     executable = get_presubmit_executable(),
     dimensions = {
         "cpu": "x86-64",
-        "os": os.LINUX.dimension,
+        "os": get_dimension(os.LINUX),
         "pool": "luci.flex.try",
     },
     properties = {
@@ -687,7 +703,7 @@ luci.builder(
     execution_timeout = 9 * time.hour,
     dimensions = {
         "cpu": "x86-64",
-        "os": os.LINUX.dimension,
+        "os": get_dimension(os.LINUX),
         "pool": "luci.flex.ci",
     },
     properties = {
