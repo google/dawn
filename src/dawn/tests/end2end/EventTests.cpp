@@ -360,14 +360,8 @@ TEST_P(EventCompletionTests, WorkDoneAcrossDeviceLoss) {
 TEST_P(EventCompletionTests, WorkDoneAfterDeviceLoss) {
     TrivialSubmit();
     LoseTestDevice();
-    // Tracking and waiting need to be done together w.r.t the device error assertion because error
-    // assertion in DawnTest.h currently calls ProcessEvents which will cause the work done event to
-    // trigger before the TestWaitAll call.
-    auto TestF = [&]() {
-        TrackForTest(OnSubmittedWorkDone(WGPUQueueWorkDoneStatus_Success));
-        TestWaitAll();
-    };
-    ASSERT_DEVICE_ERROR_ON(testDevice, TestF());
+    TrackForTest(OnSubmittedWorkDone(WGPUQueueWorkDoneStatus_Success));
+    TestWaitAll();
 }
 
 // WorkDone event twice after submitting some trivial work.

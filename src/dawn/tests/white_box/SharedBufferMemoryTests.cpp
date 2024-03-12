@@ -64,9 +64,7 @@ TEST_P(SharedBufferMemoryTests, ImportSharedBufferMemoryDeviceDestroy) {
     device.Destroy();
 
     wgpu::SharedBufferMemoryDescriptor desc;
-    ASSERT_DEVICE_ERROR_MSG(
-        wgpu::SharedBufferMemory memory = device.ImportSharedBufferMemory(&desc),
-        HasSubstr("lost"));
+    wgpu::SharedBufferMemory memory = device.ImportSharedBufferMemory(&desc);
 }
 
 // Test that SharedBufferMemory::IsDeviceLost() returns the expected value before and

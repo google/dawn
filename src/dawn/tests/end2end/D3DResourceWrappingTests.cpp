@@ -1051,8 +1051,8 @@ TEST_P(D3DExternalImageUsageTests, DisallowExternalImageAfterDestroyDevice) {
 
     DestroyDevice();
 
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture,
-                                         &d3d11Texture, &externalImage));
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage);
 
     EXPECT_EQ(externalImage, nullptr);
     EXPECT_EQ(texture, nullptr);

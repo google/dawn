@@ -581,7 +581,7 @@ void DeviceBase::APIDestroy() {
 
 void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                              InternalErrorType additionalAllowedErrors,
-                             WGPUDeviceLostReason lost_reason) {
+                             WGPUDeviceLostReason lostReason) {
     AppendDebugLayerMessages(error.get());
 
     InternalErrorType type = error->GetType();
@@ -634,13 +634,13 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
 
     const std::string messageStr = error->GetFormattedMessage();
     if (type == InternalErrorType::DeviceLost) {
-        // The device was lost, schedule the application callback's executation.
+        // The device was lost, schedule the application callback's execution.
         // Note: we don't invoke the callbacks directly here because it could cause re-entrances ->
         // possible deadlock.
         if (mDeviceLostCallback != nullptr) {
-            mCallbackTaskManager->AddCallbackTask([callback = mDeviceLostCallback, lost_reason,
+            mCallbackTaskManager->AddCallbackTask([callback = mDeviceLostCallback, lostReason,
                                                    messageStr, userdata = mDeviceLostUserdata] {
-                callback(lost_reason, messageStr.c_str(), userdata);
+                callback(lostReason, messageStr.c_str(), userdata);
             });
             mDeviceLostCallback = nullptr;
         }
@@ -658,9 +658,13 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         // if it isn't handled. DeviceLost is not handled here because it should be
         // handled by the lost callback.
         bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), messageStr);
-        if (!captured && mUncapturedErrorCallback != nullptr) {
-            mUncapturedErrorCallback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)),
-                                     messageStr.c_str(), mUncapturedErrorUserdata);
+        if (!captured) {
+            // Only call the uncaptured error callback if the device is alive. After the
+            // device is lost, the uncaptured error callback should cease firing.
+            if (mUncapturedErrorCallback != nullptr && mState == State::Alive) {
+                mUncapturedErrorCallback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)),
+                                         messageStr.c_str(), mUncapturedErrorUserdata);
+            }
         }
     }
 }
