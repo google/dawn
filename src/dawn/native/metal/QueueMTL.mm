@@ -104,6 +104,9 @@ MaybeError Queue::WaitForIdleForDestruction() {
 }
 
 void Queue::WaitForCommandsToBeScheduled() {
+    if (!IsAlive()) {
+        return;
+    }
     if (GetDevice()->ConsumedError(SubmitPendingCommandBuffer())) {
         return;
     }
