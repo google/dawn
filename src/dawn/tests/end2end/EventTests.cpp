@@ -633,5 +633,31 @@ DAWN_INSTANTIATE_TEST(WaitAnyTests,
                       OpenGLBackend(),
                       OpenGLESBackend());
 
+class FutureTests : public DawnTest {};
+
+// Regression test for crbug.com/dawn/2460 where when we have mixed source futures in a process
+// events call we were crashing.
+TEST_P(FutureTests, MixedSourcePolling) {
+    // OnSubmittedWorkDone is implemented via a queue serial.
+    device.GetQueue().OnSubmittedWorkDone({nullptr, wgpu::CallbackMode::AllowProcessEvents,
+                                           [](WGPUQueueWorkDoneStatus, void*) {}, nullptr});
+
+    // PopErrorScope is implemented via a signal.
+    device.PushErrorScope(wgpu::ErrorFilter::Validation);
+    device.PopErrorScope({nullptr, wgpu::CallbackMode::AllowProcessEvents,
+                          [](WGPUPopErrorScopeStatus, WGPUErrorType, char const*, void*) {},
+                          nullptr, nullptr});
+
+    instance.ProcessEvents();
+}
+
+DAWN_INSTANTIATE_TEST(FutureTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend());
+
 }  // anonymous namespace
 }  // namespace dawn

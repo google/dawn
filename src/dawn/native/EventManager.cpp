@@ -263,7 +263,7 @@ wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanosecon
             } else {
                 // Poll the completion events.
                 success = false;
-                for (auto it = begin; it != end; ++it) {
+                for (auto it = begin; it != mid; ++it) {
                     if (std::get<Ref<SystemEvent>>(it->event->GetCompletionData())->IsSignaled()) {
                         it->ready = true;
                         success = true;
