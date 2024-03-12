@@ -72,8 +72,7 @@ class BuddyMemoryAllocator {
     uint64_t mMemoryBlockSize = 0;
 
     BuddyAllocator mBuddyBlockAllocator;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<ResourceHeapAllocator, DanglingUntriaged> mHeapAllocator;
+    raw_ptr<ResourceHeapAllocator> mHeapAllocator;
 
     struct TrackedSubAllocations {
         size_t refcount = 0;

@@ -148,8 +148,7 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
         }
     };
 
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<Device, DanglingUntriaged> mDevice;
+    raw_ptr<Device> mDevice;
     std::mutex mMutex;
     absl::flat_hash_map<TransformedShaderModuleCacheKey,
                         Entry,

@@ -342,7 +342,7 @@ BindGroupDataHolder::BindGroupDataHolder(size_t size)
 {}
 
 BindGroupDataHolder::~BindGroupDataHolder() {
-    free(mBindingDataAllocation);
+    free(mBindingDataAllocation.ExtractAsDangling());
 }
 
 // BindGroup

@@ -378,6 +378,11 @@ ResourceAllocatorManager::~ResourceAllocatorManager() {
     // Ensure any remaining objects go through the same shutdown path as normal usage.
     // Placed resources must be released before any heaps they reside in.
     Tick(std::numeric_limits<ExecutionSerial>::max());
+
+    for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
+        mSubAllocatedResourceAllocators[i] = nullptr;
+    }
+
     DestroyPool();
 
     DAWN_ASSERT(mAllocationsToDelete.Empty());
