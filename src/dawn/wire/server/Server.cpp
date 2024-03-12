@@ -30,16 +30,21 @@
 
 namespace dawn::wire::server {
 
-CallbackUserdata::CallbackUserdata(Server* server, const std::shared_ptr<bool>& serverIsAlive)
-    : server(server), serverIsAlive(serverIsAlive) {}
+CallbackUserdata::CallbackUserdata(const std::weak_ptr<Server>& server) : server(server) {}
+
+// static
+std::shared_ptr<Server> Server::Create(const DawnProcTable& procs,
+                                       CommandSerializer* serializer,
+                                       MemoryTransferService* memoryTransferService) {
+    auto server = std::shared_ptr<Server>(new Server(procs, serializer, memoryTransferService));
+    server->mSelf = server;
+    return server;
+}
 
 Server::Server(const DawnProcTable& procs,
                CommandSerializer* serializer,
                MemoryTransferService* memoryTransferService)
-    : mSerializer(serializer),
-      mProcs(procs),
-      mMemoryTransferService(memoryTransferService),
-      mIsAlive(std::make_shared<bool>(true)) {
+    : mSerializer(serializer), mProcs(procs), mMemoryTransferService(memoryTransferService) {
     if (mMemoryTransferService == nullptr) {
         // If a MemoryTransferService is not provided, fallback to inline memory.
         mOwnedMemoryTransferService = CreateInlineMemoryTransferService();

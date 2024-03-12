@@ -73,7 +73,7 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
     bool IsDeviceKnown(WGPUDevice device) const;
 
   private:
-    std::unique_ptr<server::Server> mImpl;
+    std::shared_ptr<server::Server> mImpl;
 };
 
 namespace server {

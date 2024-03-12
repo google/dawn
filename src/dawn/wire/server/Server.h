@@ -66,11 +66,10 @@ class MemoryTransferService;
 //
 // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
 struct CallbackUserdata {
-    const raw_ptr<Server> server;
-    std::weak_ptr<bool> const serverIsAlive;
+    const std::weak_ptr<Server> server;
 
     CallbackUserdata() = delete;
-    CallbackUserdata(Server* server, const std::shared_ptr<bool>& serverIsAlive);
+    explicit CallbackUserdata(const std::weak_ptr<Server>& server);
 };
 
 template <auto F>
@@ -85,12 +84,13 @@ struct ForwardToServerHelper {
         static Return Callback(Args... args, void* userdata) {
             // Acquire the userdata, and cast it to UserdataT.
             std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
-            if (data->serverIsAlive.expired()) {
+            auto server = data->server.lock();
+            if (!server) {
                 // Do nothing if the server has already been destroyed.
                 return;
             }
             // Forward the arguments and the typed userdata to the Server:: member function.
-            (data->server->*F)(data.get(), std::forward<decltype(args)>(args)...);
+            (server.get()->*F)(data.get(), std::forward<decltype(args)>(args)...);
         }
     };
 
@@ -164,9 +164,9 @@ struct RequestDeviceUserdata : CallbackUserdata {
 
 class Server : public ServerBase {
   public:
-    Server(const DawnProcTable& procs,
-           CommandSerializer* serializer,
-           MemoryTransferService* memoryTransferService);
+    static std::shared_ptr<Server> Create(const DawnProcTable& procs,
+                                          CommandSerializer* serializer,
+                                          MemoryTransferService* memoryTransferService);
     ~Server() override;
 
     // ChunkedCommandHandler implementation
@@ -184,10 +184,14 @@ class Server : public ServerBase {
     template <typename T,
               typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
     std::unique_ptr<T> MakeUserdata() {
-        return std::unique_ptr<T>(new T(this, mIsAlive));
+        return std::unique_ptr<T>(new T(mSelf));
     }
 
   private:
+    Server(const DawnProcTable& procs,
+           CommandSerializer* serializer,
+           MemoryTransferService* memoryTransferService);
+
     template <typename Cmd>
     void SerializeCommand(const Cmd& cmd) {
         mSerializer->SerializeCommand(cmd);
@@ -238,7 +242,8 @@ class Server : public ServerBase {
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;
 
-    std::shared_ptr<bool> mIsAlive;
+    // Weak pointer to self to facilitate creation of userdata.
+    std::weak_ptr<Server> mSelf;
 };
 
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
