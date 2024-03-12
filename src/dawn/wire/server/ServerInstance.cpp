@@ -106,6 +106,14 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
+    // Query AdapterPropertiesVk if the feature is supported.
+    WGPUAdapterPropertiesVk vkProperties = {};
+    vkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
+    if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_AdapterPropertiesVk)) {
+        *propertiesChain = &vkProperties.chain;
+        propertiesChain = &(*propertiesChain)->next;
+    }
+
     mProcs.adapterGetProperties(adapter, &properties);
     cmd.properties = &properties;
 

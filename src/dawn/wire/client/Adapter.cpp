@@ -149,6 +149,11 @@ void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
                 mD3DProperties.shaderModel = d3dProperties->shaderModel;
                 break;
             }
+            case WGPUSType_AdapterPropertiesVk: {
+                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
+                mVkProperties.driverVersion = vkProperties->driverVersion;
+                break;
+            }
             default:
                 DAWN_UNREACHABLE();
                 break;
@@ -177,6 +182,11 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
             case WGPUSType_AdapterPropertiesD3D: {
                 auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
                 d3dProperties->shaderModel = mD3DProperties.shaderModel;
+                break;
+            }
+            case WGPUSType_AdapterPropertiesVk: {
+                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
+                vkProperties->driverVersion = mVkProperties.driverVersion;
                 break;
             }
             default:

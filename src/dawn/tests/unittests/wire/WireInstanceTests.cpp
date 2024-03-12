@@ -226,9 +226,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeD3DProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
     fakeD3DProperties.shaderModel = 61;
 
+    WGPUAdapterPropertiesVk fakeVkProperties = {};
+    fakeVkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
+    fakeVkProperties.driverVersion = 0x801F6000;
+
     std::initializer_list<WGPUFeatureName> fakeFeatures = {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
         WGPUFeatureName_AdapterPropertiesD3D,
+        WGPUFeatureName_AdapterPropertiesVk,
     };
 
     // Expect the server to receive the message. Then, mock a fake reply.
@@ -257,6 +262,10 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                             case WGPUSType_AdapterPropertiesD3D:
                                 *reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain) =
                                     fakeD3DProperties;
+                                break;
+                            case WGPUSType_AdapterPropertiesVk:
+                                *reinterpret_cast<WGPUAdapterPropertiesVk*>(chain) =
+                                    fakeVkProperties;
                                 break;
                             default:
                                 FAIL() << "Unexpected chain";
@@ -324,6 +333,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 wgpuAdapterGetProperties(adapter, &properties);
                 // Expect them to match.
                 EXPECT_EQ(d3dProperties.shaderModel, fakeD3DProperties.shaderModel);
+
+                // Get the Vulkan properties.
+                WGPUAdapterPropertiesVk vkProperties = {};
+                vkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
+                properties.nextInChain = &vkProperties.chain;
+                wgpuAdapterGetProperties(adapter, &properties);
+                // Expect them to match.
+                EXPECT_EQ(vkProperties.driverVersion, fakeVkProperties.driverVersion);
             })));
 
         FlushCallbacks();

@@ -67,6 +67,7 @@ class Adapter final : public ObjectWithEventsBase {
     WGPUAdapterProperties mProperties;
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
     WGPUAdapterPropertiesD3D mD3DProperties;
+    WGPUAdapterPropertiesVk mVkProperties;
 };
 
 void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties);
