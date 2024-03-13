@@ -456,6 +456,8 @@ struct Std140::State {
         uint32_t size) {
         // Replace the member with column vectors.
         const auto num_columns = mat->columns();
+        const auto column_size = mat->ColumnType()->Size();
+        const auto column_stride = mat->ColumnStride();
         // Build a struct member for each column of the matrix
         tint::Vector<const StructMember*, 4> out;
         for (uint32_t i = 0; i < num_columns; i++) {
@@ -466,10 +468,13 @@ struct Std140::State {
                 // needs to be applied to the first column vector.
                 attributes.Push(b.MemberAlign(i32(align)));
             }
-            if ((i == num_columns - 1) && mat->Size() != size) {
-                // The matrix was @size() annotated with a larger size than the
-                // natural size for the matrix. This extra padding needs to be
-                // applied to the last column vector.
+            if ((i == num_columns - 1) &&
+                (column_stride * (num_columns - 1) + column_size) != size) {
+                // The matrix size is larger than the individual component vectors.
+                // This occurs with matNx3 matrices, as the last vec3 column has space for one extra
+                // trailing scalar, which is occupied by the matrix. It also applies to matrices
+                // with an explicit @size() attribute.
+                // Apply extra padding needs to the last column vector.
                 attributes.Push(
                     b.MemberSize(AInt(size - mat->ColumnType()->Align() * (num_columns - 1))));
             }

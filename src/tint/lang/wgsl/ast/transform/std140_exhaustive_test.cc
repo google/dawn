@@ -80,11 +80,11 @@ struct MatrixCase {
     }
 
     // For each column, replaces "${col_id_for_tmpl}" by column index in `tmpl` to get a string, and
-    // join all these strings with `seperator`. If `tmpl_for_last_column` is not empty, use it
+    // join all these strings with `separator`. If `tmpl_for_last_column` is not empty, use it
     // instead of `tmpl` for the last column.
     std::string JoinTemplatedStringForEachMatrixColumn(
         std::string tmpl,
-        std::string seperator,
+        std::string separator,
         std::string tmpl_for_last_column = "") const {
         std::string result;
         if (tmpl_for_last_column.size() == 0) {
@@ -92,13 +92,13 @@ struct MatrixCase {
         }
         for (size_t c = 0; c < columns - 1; c++) {
             if (c > 0) {
-                result += seperator;
+                result += separator;
             }
             std::string string_for_current_column =
                 tint::ReplaceAll(tmpl, "${col_id_for_tmpl}", std::to_string(c));
             result += string_for_current_column;
         }
-        result += seperator;
+        result += separator;
         std::string string_for_last_column = tint::ReplaceAll(
             tmpl_for_last_column, "${col_id_for_tmpl}", std::to_string(columns - 1));
         result += string_for_last_column;
@@ -106,13 +106,17 @@ struct MatrixCase {
     }
 
     std::string ExpendedColumnVectors(uint32_t leading_space, std::string name) const {
+        if (rows == 3) {
+            return ExpendedColumnVectorsWithLastSize(leading_space, name,
+                                                     type == MatrixType::f16 ? 8 : 16);
+        }
         std::string space(leading_space, ' ');
         return JoinTemplatedStringForEachMatrixColumn(
             space + name + "${col_id_for_tmpl} : " + ColumnVector() + ",", "\n");
     }
 
-    std::string ExpendedColumnVectorsInline(std::string name, std::string seperator) const {
-        return JoinTemplatedStringForEachMatrixColumn(name + "${col_id_for_tmpl}", seperator);
+    std::string ExpendedColumnVectorsInline(std::string name, std::string separator) const {
+        return JoinTemplatedStringForEachMatrixColumn(name + "${col_id_for_tmpl}", separator);
     }
 
     std::string ExpendedColumnVectorsWithLastSize(uint32_t leading_space,

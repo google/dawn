@@ -121,6 +121,7 @@ struct S2x3F16 {
 
 struct S2x3F16_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -131,6 +132,7 @@ struct S3x3F16 {
 struct S3x3F16_std140 {
   m_0 : vec3<f16>,
   m_1 : vec3<f16>,
+  @size(8)
   m_2 : vec3<f16>,
 }
 
@@ -142,6 +144,7 @@ struct S4x3F16_std140 {
   m_0 : vec3<f16>,
   m_1 : vec3<f16>,
   m_2 : vec3<f16>,
+  @size(8)
   m_3 : vec3<f16>,
 }
 
@@ -223,6 +226,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -262,6 +266,7 @@ struct S_std140 {
   before : i32,
   @align(128i)
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
   after : i32,
 }
@@ -380,6 +385,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -426,6 +432,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -461,6 +468,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -493,6 +501,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -539,6 +548,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -571,6 +581,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -617,6 +628,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -649,6 +661,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -696,6 +709,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -729,6 +743,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -782,6 +797,7 @@ struct S {
 struct S_std140 {
   m_1 : i32,
   m__0 : vec3<f16>,
+  @size(8)
   m__1 : vec3<f16>,
 }
 
@@ -817,6 +833,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -860,6 +877,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -904,6 +922,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -944,6 +963,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -998,6 +1018,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -1038,6 +1059,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -1093,6 +1115,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -1134,6 +1157,7 @@ struct S {
 
 struct S_std140 {
   m_0 : vec3<f16>,
+  @size(8)
   m_1 : vec3<f16>,
 }
 
@@ -2294,6 +2318,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2337,6 +2362,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2373,6 +2399,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2409,6 +2436,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2441,6 +2469,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2474,6 +2503,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2522,6 +2552,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2572,6 +2603,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2631,6 +2663,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2686,6 +2719,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2734,6 +2768,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2783,6 +2818,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2828,6 +2864,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2874,6 +2911,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2934,6 +2972,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -2988,6 +3027,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3039,6 +3079,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3083,6 +3124,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3128,6 +3170,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3165,6 +3208,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3203,6 +3247,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3241,6 +3286,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3279,6 +3325,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3313,6 +3360,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3362,6 +3410,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3398,6 +3447,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3448,6 +3498,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3484,6 +3535,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3535,6 +3587,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
@@ -3573,6 +3626,7 @@ enable f16;
 
 struct mat2x3_f16 {
   col0 : vec3<f16>,
+  @size(8)
   col1 : vec3<f16>,
 }
 
