@@ -29,6 +29,8 @@
 
 #include "src/tint/utils/file/tmpfile.h"
 
+#include <fcntl.h>
+#include <io.h>
 #include <stdio.h>
 #include <cstdio>
 
@@ -42,11 +44,16 @@ std::string TmpFilePath(const std::string& ext) {
     // creating it, failing if it already exists.
     while (tmpnam_s(name, L_tmpnam - 1) == 0) {
         std::string name_with_ext = std::string(name) + ext;
-        FILE* f = nullptr;
-        // The "x" arg forces the function to fail if the file already exists.
-        fopen_s(&f, name_with_ext.c_str(), "wbx");
-        if (f) {
-            fclose(f);
+
+        // Use MS-specific _sopen_s as it allows us to create the file in exclusive mode (_O_EXCL)
+        // so that it returns an error if the file already exists.
+        int fh = 0;
+        errno_t e = _sopen_s(&fh, name_with_ext.c_str(),                    //
+                             /* _OpenFlag */ _O_RDWR | _O_CREAT | _O_EXCL,  //
+                             /* _ShareFlag */ _SH_DENYNO,
+                             /* _PermissionMode */ _S_IREAD | _S_IWRITE);
+        if (e == 0) {
+            _close(fh);
             return name_with_ext;
         }
     }
