@@ -39,6 +39,7 @@
 #include <utility>
 
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/system/env.h"
 #include "src/tint/utils/system/terminal.h"
@@ -47,7 +48,8 @@ namespace tint {
 namespace {
 
 std::optional<bool> TerminalIsDarkImpl(FILE* out) {
-    if (!TerminalSupportsColors(out)) {
+    // Check the terminal can be queried, and supports colors.
+    if (!isatty(STDIN_FILENO) || !TerminalSupportsColors(out)) {
         return std::nullopt;
     }
 
@@ -59,23 +61,44 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
 
     // Store the current attributes for 'out', restore it before returning
     termios original_state{};
-    tcgetattr(out_fd, &original_state);
+    if (tcgetattr(out_fd, &original_state) != 0) {
+        return std::nullopt;
+    }
     TINT_DEFER(tcsetattr(out_fd, TCSADRAIN, &original_state));
 
     // Prevent echoing.
     termios state = original_state;
     state.c_lflag &= ~static_cast<tcflag_t>(ECHO | ICANON);
-    tcsetattr(out_fd, TCSADRAIN, &state);
+    if (tcsetattr(out_fd, TCSADRAIN, &state) != 0) {
+        return std::nullopt;
+    }
 
     // Emit the device control escape sequence to query the terminal colors.
     static constexpr std::string_view kQuery = "\033]11;?\033\\";
     fwrite(kQuery.data(), 1, kQuery.length(), out);
+    fflush(out);
 
     // Timeout for attempting to read the response.
     static constexpr auto kTimeout = std::chrono::milliseconds(300);
 
     // Record the start time.
     auto start = std::chrono::steady_clock::now();
+
+    // Returns true if there's data available on stdin, or false if no data was available after
+    // 100ms.
+    auto poll_stdin = [] {
+        // Note: These macros introduce identifiers that start with `__`.
+        TINT_BEGIN_DISABLE_WARNING(RESERVED_IDENTIFIER);
+        fd_set rfds{};
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
+        timeval tv{};
+        tv.tv_sec = 0;
+        tv.tv_usec = 100'000;
+        int res = select(STDIN_FILENO + 1, &rfds, nullptr, nullptr, &tv);
+        return res > 0 && FD_ISSET(STDIN_FILENO, &rfds);
+        TINT_END_DISABLE_WARNING(RESERVED_IDENTIFIER);
+    };
 
     // Helpers for parsing the response.
     Vector<char, 8> peek;
@@ -84,6 +107,10 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
             return peek.Pop();
         }
         while ((std::chrono::steady_clock::now() - start) < kTimeout) {
+            if (!poll_stdin()) {
+                return std::nullopt;
+            }
+
             char c;
             if (fread(&c, 1, 1, stdin) == 1) {
                 return c;
@@ -163,7 +190,7 @@ std::optional<bool> TerminalIsDarkImpl(FILE* out) {
             return std::nullopt;
     }
 
-    if (!match("\x07") && !match("\x1b\x5c")) {
+    if (!match("\x07") && !match("\x1b")) {
         return std::nullopt;
     }
 
