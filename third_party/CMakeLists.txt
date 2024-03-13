@@ -226,13 +226,20 @@ function(AddSubdirectoryDXC)
     endif()
 
     # Create a target that copies dxil.dll from the platform SDK
-    # There's no easy way to get the Windows SDK path in CMake; however, conveniently, DXC
-    # contains a FindD3D12.cmake file that returns WIN10_SDK_PATH and WIN10_SDK_VERSION,
-    # so let's use that.
     if (WIN32)
-        # TODO(crbug.com/tint/2106): Get the Win10 SDK path and version ourselves until
-        # dxc/cmake/modules/FindD3D12.cmake supports non-VS generators.
-        get_filename_component(WIN10_SDK_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE CACHE)
+        if(DEFINED ENV{WINDOWSSDKDIR})
+            # If WINDOWSSDKDIR env var is defined, use its value. This is defined, for example, when
+            # using a Visual Studio command prompt.
+            set(WIN10_SDK_PATH "$ENV{WINDOWSSDKDIR}")
+        else()
+            # There's no easy way to get the Windows SDK path in CMake; however, conveniently, DXC
+            # contains a FindD3D12.cmake file that returns WIN10_SDK_PATH and WIN10_SDK_VERSION,
+            # so let's use that.
+            # TODO(crbug.com/tint/2106): Get the Win10 SDK path and version ourselves until
+            # dxc/cmake/modules/FindD3D12.cmake supports non-VS generators.
+            get_filename_component(WIN10_SDK_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE CACHE)
+        endif()
+
         if (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
             set (WIN10_SDK_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
         else()
