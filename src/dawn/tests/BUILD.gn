@@ -709,8 +709,6 @@ source_set("end2end_tests_sources") {
 
   if (dawn_supports_glfw_for_windowing) {
     sources += [
-      "end2end/SurfaceConfigurationValidationTests.cpp",
-      "end2end/SurfaceTests.cpp",
       "end2end/SwapChainTests.cpp",
       "end2end/SwapChainValidationTests.cpp",
       "end2end/WindowSurfaceTests.cpp",

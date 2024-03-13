@@ -221,7 +221,7 @@
                         //* Structures might contain more pointers so we need to add their extra size as well.
                         {% if member.type.category == "structure" %}
                             for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                                {% do assert(member.annotation == "const*" or member.annotation == "*", "unhandled annotation: " + member.annotation)%}
+                                {% do assert(member.annotation == "const*", "unhandled annotation: " + member.annotation) %}
                                 result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
                             }
                         {% endif %}

@@ -45,7 +45,7 @@ class SwapChain final : public d3d::SwapChain {
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SurfaceConfiguration* config);
+                                                const SwapChainDescriptor* descriptor);
 
   private:
     using Base = d3d::SwapChain;
@@ -54,7 +54,7 @@ class SwapChain final : public d3d::SwapChain {
 
     // SwapChainBase implementation
     MaybeError PresentImpl() override;
-    ResultOrError<SwapChainTextureInfo> GetCurrentTextureImpl() override;
+    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override;
     void DetachFromSurfaceImpl() override;
 
     // d3d::SwapChain implementation

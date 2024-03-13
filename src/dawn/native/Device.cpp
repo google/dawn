@@ -1409,18 +1409,7 @@ SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
     Ref<SwapChainBase> result;
     if (ConsumedError(CreateSwapChain(surface, descriptor), &result,
                       "calling %s.CreateSwapChain(%s).", this, descriptor)) {
-        SurfaceConfiguration config;
-        config.nextInChain = descriptor->nextInChain;
-        config.device = this;
-        config.width = descriptor->width;
-        config.height = descriptor->height;
-        config.format = descriptor->format;
-        config.usage = descriptor->usage;
-        config.presentMode = descriptor->presentMode;
-        config.viewFormatCount = 0;
-        config.viewFormats = nullptr;
-        config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-        result = SwapChainBase::MakeError(this, &config);
+        result = SwapChainBase::MakeError(this, descriptor);
     }
     return ReturnToAPI(std::move(result));
 }
@@ -2114,31 +2103,15 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
 ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
     Surface* surface,
     const SwapChainDescriptor* descriptor) {
-    EmitDeprecationWarning(
-        "The explicit creation of a SwapChain object is deprecated and should be replaced by "
-        "Surface configuration.");
-
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateSwapChainDescriptor(this, surface, descriptor), "validating %s",
                          descriptor);
     }
 
-    SurfaceConfiguration config;
-    config.nextInChain = descriptor->nextInChain;
-    config.device = this;
-    config.width = descriptor->width;
-    config.height = descriptor->height;
-    config.format = descriptor->format;
-    config.usage = descriptor->usage;
-    config.presentMode = descriptor->presentMode;
-    config.viewFormatCount = 0;
-    config.viewFormats = nullptr;
-    config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-
     SwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
     ResultOrError<Ref<SwapChainBase>> maybeNewSwapChain =
-        CreateSwapChainImpl(surface, previousSwapChain, &config);
+        CreateSwapChainImpl(surface, previousSwapChain, descriptor);
 
     if (previousSwapChain != nullptr) {
         previousSwapChain->DetachFromSurface();
@@ -2150,13 +2123,6 @@ ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
     newSwapChain->SetIsAttached();
     surface->SetAttachedSwapChain(newSwapChain.Get());
     return newSwapChain;
-}
-
-ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(Surface* surface,
-                                                              SwapChainBase* previousSwapChain,
-                                                              const SurfaceConfiguration* config) {
-    // Nothing to validate here as it is done in Surface::Configure
-    return CreateSwapChainImpl(surface, previousSwapChain, config);
 }
 
 ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescriptor* descriptorOrig) {

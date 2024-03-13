@@ -51,6 +51,149 @@ namespace dawn::native::vulkan {
 
 namespace {
 
+ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDevice,
+                                                const Surface* surface) {
+    const VulkanGlobalInfo& info = physicalDevice->GetVulkanInstance()->GetGlobalInfo();
+    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
+    VkInstance instance = physicalDevice->GetVulkanInstance()->GetVkInstance();
+
+    // May not be used in the platform-specific switches below.
+    DAWN_UNUSED(info);
+    DAWN_UNUSED(fn);
+    DAWN_UNUSED(instance);
+
+    switch (surface->GetType()) {
+#if defined(DAWN_ENABLE_BACKEND_METAL)
+        case Surface::Type::MetalLayer:
+            if (info.HasExt(InstanceExt::MetalSurface)) {
+                VkMetalSurfaceCreateInfoEXT createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.pLayer = surface->GetMetalLayer();
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateMetalSurfaceEXT(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateMetalSurface"));
+                return vkSurface;
+            }
+            break;
+#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
+
+#if DAWN_PLATFORM_IS(WINDOWS)
+        case Surface::Type::WindowsHWND:
+            if (info.HasExt(InstanceExt::Win32Surface)) {
+                VkWin32SurfaceCreateInfoKHR createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.hinstance = static_cast<HINSTANCE>(surface->GetHInstance());
+                createInfo.hwnd = static_cast<HWND>(surface->GetHWND());
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateWin32SurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateWin32Surface"));
+                return vkSurface;
+            }
+            break;
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
+
+#if DAWN_PLATFORM_IS(ANDROID)
+        case Surface::Type::AndroidWindow: {
+            if (info.HasExt(InstanceExt::AndroidSurface)) {
+                DAWN_ASSERT(surface->GetAndroidNativeWindow() != nullptr);
+
+                VkAndroidSurfaceCreateInfoKHR createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.window =
+                    static_cast<struct ANativeWindow*>(surface->GetAndroidNativeWindow());
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateAndroidSurfaceKHR"));
+                return vkSurface;
+            }
+
+            break;
+        }
+
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
+#if defined(DAWN_USE_WAYLAND)
+        case Surface::Type::WaylandSurface: {
+            if (info.HasExt(InstanceExt::XlibSurface)) {
+                VkWaylandSurfaceCreateInfoKHR createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.display = static_cast<struct wl_display*>(surface->GetWaylandDisplay());
+                createInfo.surface = static_cast<struct wl_surface*>(surface->GetWaylandSurface());
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateWaylandSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateWaylandSurface"));
+                return vkSurface;
+            }
+            break;
+        }
+#endif  // defined(DAWN_USE_WAYLAND)
+
+#if defined(DAWN_USE_X11)
+        case Surface::Type::XlibWindow: {
+            if (info.HasExt(InstanceExt::XlibSurface)) {
+                VkXlibSurfaceCreateInfoKHR createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                createInfo.dpy = static_cast<Display*>(surface->GetXDisplay());
+                createInfo.window = surface->GetXWindow();
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateXlibSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateXlibSurface"));
+                return vkSurface;
+            }
+
+            // Fall back to using XCB surfaces if the Xlib extension isn't available.
+            // See https://xcb.freedesktop.org/MixingCalls/ for more information about
+            // interoperability between Xlib and XCB
+            const X11Functions* x11 = physicalDevice->GetInstance()->GetOrLoadX11Functions();
+            DAWN_ASSERT(x11 != nullptr);
+
+            if (info.HasExt(InstanceExt::XcbSurface) && x11->IsX11XcbLoaded()) {
+                VkXcbSurfaceCreateInfoKHR createInfo;
+                createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+                createInfo.pNext = nullptr;
+                createInfo.flags = 0;
+                // The XCB connection lives as long as the X11 display.
+                createInfo.connection =
+                    x11->xGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
+                createInfo.window = surface->GetXWindow();
+
+                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                DAWN_TRY(CheckVkSuccess(
+                    fn.CreateXcbSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                    "CreateXcbSurfaceKHR"));
+                return vkSurface;
+            }
+            break;
+        }
+#endif  // defined(DAWN_USE_X11)
+
+        default:
+            break;
+    }
+
+    return DAWN_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.", surface->GetType());
+}
+
 VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
     switch (mode) {
         case wgpu::PresentMode::Fifo:
@@ -117,8 +260,8 @@ ResultOrError<wgpu::TextureUsage> SwapChain::GetSupportedSurfaceUsage(const Devi
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SurfaceConfiguration* config) {
-    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, config));
+                                                const SwapChainDescriptor* descriptor) {
+    Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
     return swapchain;
 }
@@ -494,13 +637,12 @@ MaybeError SwapChain::PresentImpl() {
     }
 }
 
-ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     return GetCurrentTextureInternal();
 }
 
-ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool isReentrant) {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureInternal(bool isReentrant) {
     Device* device = ToBackend(GetDevice());
-    SwapChainTextureInfo swapChainTextureInfo;
 
     // Transiently create a semaphore that will be signaled when the presentation engine is done
     // with the swapchain image. Further operations on the image will wait for this semaphore.
@@ -530,17 +672,14 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(semaphore);
     }
 
-    swapChainTextureInfo.suboptimal = false;
     switch (result) {
+        // TODO(crbug.com/dawn/269): Introduce a mechanism to notify the application that
+        // the swapchain is in a suboptimal state?
         case VK_SUBOPTIMAL_KHR:
-            swapChainTextureInfo.suboptimal = true;
-            ABSL_FALLTHROUGH_INTENDED;
         case VK_SUCCESS:
-            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
             break;
 
         case VK_ERROR_OUT_OF_DATE_KHR: {
-            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Outdated;
             // Prevent infinite recursive calls to GetCurrentTextureViewInternal when the
             // swapchains always return that they are out of date.
             if (isReentrant) {
@@ -556,9 +695,6 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
 
         // TODO(crbug.com/dawn/269): Allow losing the surface at Dawn's API level?
         case VK_ERROR_SURFACE_LOST_KHR:
-            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Lost;
-            break;
-
         default:
             DAWN_TRY(CheckVkSuccess(::VkResult(result), "AcquireNextImage"));
     }
@@ -574,8 +710,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
 
     // In the happy path we can use the swapchain image directly.
     if (!mConfig.needsBlit) {
-        swapChainTextureInfo.texture = mTexture;
-        return swapChainTextureInfo;
+        return mTexture;
     }
 
     // The blit texture always perfectly matches what the user requested for the swapchain.
@@ -583,8 +718,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
     DAWN_TRY_ASSIGN(mBlitTexture,
                     Texture::Create(device, Unpack(&desc), VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-    swapChainTextureInfo.texture = mBlitTexture;
-    return swapChainTextureInfo;
+    return mBlitTexture;
 }
 
 void SwapChain::DetachFromSurfaceImpl() {
@@ -614,149 +748,6 @@ void SwapChain::DetachFromSurfaceImpl() {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mVkSurface);
         mVkSurface = VK_NULL_HANDLE;
     }
-}
-
-ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDevice,
-                                                const Surface* surface) {
-    const VulkanGlobalInfo& info = physicalDevice->GetVulkanInstance()->GetGlobalInfo();
-    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
-    VkInstance instance = physicalDevice->GetVulkanInstance()->GetVkInstance();
-
-    // May not be used in the platform-specific switches below.
-    DAWN_UNUSED(info);
-    DAWN_UNUSED(fn);
-    DAWN_UNUSED(instance);
-
-    switch (surface->GetType()) {
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-        case Surface::Type::MetalLayer:
-            if (info.HasExt(InstanceExt::MetalSurface)) {
-                VkMetalSurfaceCreateInfoEXT createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                createInfo.pLayer = surface->GetMetalLayer();
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateMetalSurfaceEXT(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateMetalSurface"));
-                return vkSurface;
-            }
-            break;
-#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-
-#if DAWN_PLATFORM_IS(WINDOWS)
-        case Surface::Type::WindowsHWND:
-            if (info.HasExt(InstanceExt::Win32Surface)) {
-                VkWin32SurfaceCreateInfoKHR createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                createInfo.hinstance = static_cast<HINSTANCE>(surface->GetHInstance());
-                createInfo.hwnd = static_cast<HWND>(surface->GetHWND());
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateWin32SurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateWin32Surface"));
-                return vkSurface;
-            }
-            break;
-#endif  // DAWN_PLATFORM_IS(WINDOWS)
-
-#if DAWN_PLATFORM_IS(ANDROID)
-        case Surface::Type::AndroidWindow: {
-            if (info.HasExt(InstanceExt::AndroidSurface)) {
-                DAWN_ASSERT(surface->GetAndroidNativeWindow() != nullptr);
-
-                VkAndroidSurfaceCreateInfoKHR createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                createInfo.window =
-                    static_cast<struct ANativeWindow*>(surface->GetAndroidNativeWindow());
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateAndroidSurfaceKHR"));
-                return vkSurface;
-            }
-
-            break;
-        }
-
-#endif  // DAWN_PLATFORM_IS(ANDROID)
-
-#if defined(DAWN_USE_WAYLAND)
-        case Surface::Type::WaylandSurface: {
-            if (info.HasExt(InstanceExt::XlibSurface)) {
-                VkWaylandSurfaceCreateInfoKHR createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                createInfo.display = static_cast<struct wl_display*>(surface->GetWaylandDisplay());
-                createInfo.surface = static_cast<struct wl_surface*>(surface->GetWaylandSurface());
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateWaylandSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateWaylandSurface"));
-                return vkSurface;
-            }
-            break;
-        }
-#endif  // defined(DAWN_USE_WAYLAND)
-
-#if defined(DAWN_USE_X11)
-        case Surface::Type::XlibWindow: {
-            if (info.HasExt(InstanceExt::XlibSurface)) {
-                VkXlibSurfaceCreateInfoKHR createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                createInfo.dpy = static_cast<Display*>(surface->GetXDisplay());
-                createInfo.window = surface->GetXWindow();
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateXlibSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateXlibSurface"));
-                return vkSurface;
-            }
-
-            // Fall back to using XCB surfaces if the Xlib extension isn't available.
-            // See https://xcb.freedesktop.org/MixingCalls/ for more information about
-            // interoperability between Xlib and XCB
-            const X11Functions* x11 = physicalDevice->GetInstance()->GetOrLoadX11Functions();
-            DAWN_ASSERT(x11 != nullptr);
-
-            if (info.HasExt(InstanceExt::XcbSurface) && x11->IsX11XcbLoaded()) {
-                VkXcbSurfaceCreateInfoKHR createInfo;
-                createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-                createInfo.pNext = nullptr;
-                createInfo.flags = 0;
-                // The XCB connection lives as long as the X11 display.
-                createInfo.connection =
-                    x11->xGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
-                createInfo.window = surface->GetXWindow();
-
-                VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                DAWN_TRY(CheckVkSuccess(
-                    fn.CreateXcbSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                    "CreateXcbSurfaceKHR"));
-                return vkSurface;
-            }
-            break;
-        }
-#endif  // defined(DAWN_USE_X11)
-
-        default:
-            break;
-    }
-
-    return DAWN_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.", surface->GetType());
 }
 
 }  // namespace dawn::native::vulkan

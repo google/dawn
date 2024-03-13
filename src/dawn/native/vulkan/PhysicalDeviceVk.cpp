@@ -36,8 +36,6 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/SwapChainVk.h"
-#include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/platform/DawnPlatform.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
@@ -830,81 +828,6 @@ bool PhysicalDevice::CheckSemaphoreSupport(DeviceExt deviceExt,
 
 uint32_t PhysicalDevice::GetDefaultComputeSubgroupSize() const {
     return mDefaultComputeSubgroupSize;
-}
-
-ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    const Surface* surface) const {
-    PhysicalDeviceSurfaceCapabilities capabilities;
-
-    // Formats
-
-    // This is the only supported format in native mode (see crbug.com/dawn/160).
-#if DAWN_PLATFORM_IS(ANDROID)
-    capabilities.formats.push_back(wgpu::TextureFormat::RGBA8Unorm);
-#else
-    capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
-#endif  // !DAWN_PLATFORM_IS(ANDROID)
-
-    // Present Modes
-
-    // TODO(dawn:2320) Other present modes than Mailbox do not pass tests on Intel Graphics. Once
-    // 'surface' will actually contain a vkSurface we'll be able to test
-    // vkGetPhysicalDeviceSurfaceSupportKHR to avoid this #if.
-#if DAWN_PLATFORM_IS(LINUX)
-    capabilities.presentModes = {
-        wgpu::PresentMode::Mailbox,
-    };
-#else
-    capabilities.presentModes = {
-        wgpu::PresentMode::Fifo,
-        wgpu::PresentMode::Immediate,
-        wgpu::PresentMode::Mailbox,
-    };
-#endif  // !DAWN_PLATFORM_IS(LINUX)
-
-    // Alpha Modes
-
-#if !DAWN_PLATFORM_IS(ANDROID)
-    capabilities.alphaModes.push_back(wgpu::CompositeAlphaMode::Opaque);
-#else
-    VkSurfaceKHR vkSurface;
-    DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(this, surface));
-
-    VkPhysicalDevice vkPhysicalDevice = GetVkPhysicalDevice();
-    const VulkanFunctions& fn = GetVulkanInstance()->GetFunctions();
-    VkInstance vkInstance = GetVulkanInstance()->GetVkInstance();
-    const VulkanFunctions& vkFunctions = GetVulkanInstance()->GetFunctions();
-
-    // Get the surface capabilities
-    VkSurfaceCapabilitiesKHR vkCapabilities;
-    DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(vkFunctions.GetPhysicalDeviceSurfaceCapabilitiesKHR(
-                                             vkPhysicalDevice, vkSurface, &vkCapabilities),
-                                         "vkGetPhysicalDeviceSurfaceCapabilitiesKHR"),
-                          { fn.DestroySurfaceKHR(vkInstance, vkSurface, nullptr); });
-
-    fn.DestroySurfaceKHR(vkInstance, vkSurface, nullptr);
-
-    // TODO(dawn:286): investigate composite alpha for WebGPU native
-    struct AlphaModePairs {
-        VkCompositeAlphaFlagBitsKHR vkBit;
-        wgpu::CompositeAlphaMode webgpuEnum;
-    };
-    AlphaModePairs alphaModePairs[] = {
-        {VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, wgpu::CompositeAlphaMode::Opaque},
-        {VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR, wgpu::CompositeAlphaMode::Premultiplied},
-        {VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR, wgpu::CompositeAlphaMode::Unpremultiplied},
-        {VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, wgpu::CompositeAlphaMode::Inherit},
-    };
-
-    for (auto mode : alphaModePairs) {
-        if (vkCapabilities.supportedCompositeAlpha & mode.vkBit) {
-            capabilities.alphaModes.push_back(mode.webgpuEnum);
-        }
-    }
-#endif  // #if !DAWN_PLATFORM_IS(ANDROID)
-    capabilities.alphaModes.push_back(wgpu::CompositeAlphaMode::Auto);
-
-    return capabilities;
 }
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const {

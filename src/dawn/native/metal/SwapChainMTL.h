@@ -45,9 +45,9 @@ class SwapChain final : public SwapChainBase {
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SurfaceConfiguration* config);
+                                                const SwapChainDescriptor* descriptor);
 
-    SwapChain(DeviceBase* device, Surface* surface, const SurfaceConfiguration* config);
+    SwapChain(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
   private:
@@ -62,7 +62,7 @@ class SwapChain final : public SwapChainBase {
     Ref<Texture> mTexture;
 
     MaybeError PresentImpl() override;
-    ResultOrError<SwapChainTextureInfo> GetCurrentTextureImpl() override;
+    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override;
     void DetachFromSurfaceImpl() override;
 };
 
