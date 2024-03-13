@@ -13,57 +13,69 @@
             "benchmark/benchmark.h"
         ]
     },
+    "jsoncpp": {
+        "IncludePatterns": [
+            "json/**"
+        ],
+        "Condition": "tint_build_tintd"
+    },
+    "langsvr": {
+        "IncludePatterns": [
+            "langsvr/**"
+        ],
+        "Condition": "tint_build_tintd"
+    },
     "metal": {
         "IncludePatterns": [
             "Metal/Metal.h"
         ],
-        "Condition": "tint_build_is_mac",
+        "Condition": "tint_build_is_mac"
     },
     "thread": {
         "IncludePatterns": [
             "thread"
-        ],
+        ]
     },
     "spirv-tools": {
         "IncludePatterns": [
             "spirv-tools/**"
         ],
-        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer"
     },
     "spirv-headers": {
         "IncludePatterns": [
             "spirv/**"
         ],
-        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer"
     },
     "spirv-opt-internal": {
         "IncludePatterns": [
             "source/opt/**"
         ],
-        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer"
     },
     "glslang": {
         "IncludePatterns": [
             "glslang/Public/ShaderLang.h"
         ],
-        "Condition": "tint_build_glsl_validator",
+        "Condition": "tint_build_glsl_validator"
     },
     "glslang-res-limits": {
         "IncludePatterns": [
             "glslang/Public/ResourceLimits.h"
         ],
-        "Condition": "tint_build_glsl_validator",
+        "Condition": "tint_build_glsl_validator"
     },
     "gtest": {
         "IncludePatterns": [
             "gtest/**",
-            "gmock/**",
-        ],
+            "gmock/**"
+        ]
     },
     "winsock": {
         "IncludePatterns": [
             "winsock2.h"
         ],
-        "Condition": "tint_build_is_win",
-    },
+        "Condition": "tint_build_is_win"
+    }
 }

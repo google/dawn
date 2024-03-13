@@ -291,6 +291,17 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  # Dependencies for tintd.
+  'third_party/jsoncpp': {
+    'url': '{github_git}/open-source-parsers/jsoncpp.git@69098a18b9af0c47549d9a271c054d13ca92b006',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/langsvr': {
+    'url': '{github_git}/google/langsvr.git@8999ea9fc9bbf2e09b7233d0cede2a629ff33e98',
+    'condition': 'dawn_standalone',
+  },
+
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {

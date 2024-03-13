@@ -30,13 +30,14 @@
 load(":flags.bzl", "declare_bool_flag", "declare_os_flag")
 
 # Declares the 'tint_build_*' flags that control what parts of Tint get built
-declare_bool_flag(name = "tint_build_glsl_writer",    default = False)
 declare_bool_flag(name = "tint_build_glsl_validator", default = False)
+declare_bool_flag(name = "tint_build_glsl_writer",    default = False)
 declare_bool_flag(name = "tint_build_hlsl_writer",    default = True)
 declare_bool_flag(name = "tint_build_ir",             default = True)
 declare_bool_flag(name = "tint_build_msl_writer",     default = True)
 declare_bool_flag(name = "tint_build_spv_reader",     default = True)
 declare_bool_flag(name = "tint_build_spv_writer",     default = True)
+declare_bool_flag(name = "tint_build_tintd",          default = False)
 declare_bool_flag(name = "tint_build_wgsl_reader",    default = True)
 declare_bool_flag(name = "tint_build_wgsl_writer",    default = True)
 

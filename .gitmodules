@@ -122,6 +122,14 @@
 	path = tools/protoc_wrapper
 	url = https://chromium.googlesource.com/chromium/src/tools/protoc_wrapper
 	gclient-condition = dawn_standalone
+[submodule "third_party/jsoncpp"]
+	path = third_party/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp
+	gclient-condition = dawn_standalone
+[submodule "third_party/langsvr"]
+	path = third_party/langsvr
+	url = https://github.com/google/langsvr
+	gclient-condition = dawn_standalone
 [submodule "third_party/partition_alloc"]
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator

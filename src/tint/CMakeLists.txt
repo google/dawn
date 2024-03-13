@@ -66,6 +66,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SYNTAX_TREE_WRITER=$<BOOL:${TINT_BUILD_SYNTAX_TREE_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_TINTD=$<BOOL:${TINT_BUILD_TINTD}>)
 
   if(TINT_BUILD_FUZZERS)
     target_compile_options(${TARGET} PRIVATE "-fsanitize=fuzzer")
@@ -500,6 +501,10 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE
         absl_strings
       )
+    elseif(${DEPENDENCY} STREQUAL "jsoncpp")
+      target_link_libraries(${TARGET} PRIVATE jsoncpp_static)
+    elseif(${DEPENDENCY} STREQUAL "langsvr")
+      target_link_libraries(${TARGET} PRIVATE langsvr)
     elseif(${DEPENDENCY} STREQUAL "glslang")
       target_link_libraries(${TARGET} PRIVATE glslang)
       if(NOT MSVC)
@@ -654,11 +659,27 @@ endforeach()
 
 
 ################################################################################
+# tintd (VSCode WGSL language server)
+################################################################################
+if(TINT_INSTALL_TINTD)
+  set(VSCODE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmd/tintd/vscode")
+  set(VSCODE_DST_DIR "${DAWN_BUILD_GEN_DIR}/vscode")
+
+  file(GLOB VSCODE_ASSETS RELATIVE "${VSCODE_SRC_DIR}" "${VSCODE_SRC_DIR}/*")
+  foreach(FILE ${VSCODE_ASSETS})
+    configure_file("${VSCODE_SRC_DIR}/${FILE}" "${VSCODE_DST_DIR}/${FILE}" COPYONLY)
+  endforeach()
+  set_target_properties(tint_cmd_tintd_cmd PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${VSCODE_DST_DIR}")
+endif(TINT_INSTALL_TINTD)
+
+
+################################################################################
 # Bespoke target settings
 ################################################################################
-if (MSVC)
+if(MSVC)
   target_sources(tint_api PRIVATE tint.natvis)
 endif()
+
 
 ################################################################################
 # Additional fuzzer tests

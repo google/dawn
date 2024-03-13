@@ -284,6 +284,9 @@ group("cmds") {
       "${tint_src_dir}/cmd/tint",
     ]
   }
+  if (tint_build_tintd) {
+    deps += [ "${tint_src_dir}/cmd/tintd" ]
+  }
 }
 
 group("fuzzers") {
