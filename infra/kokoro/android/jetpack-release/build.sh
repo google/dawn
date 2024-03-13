@@ -32,10 +32,49 @@
 set -e # Fail on any error
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
-cd  $SCRIPT_DIR/../../../../tools/android
+ROOT_DIR="$( cd "${SCRIPT_DIR}/../../../.." >/dev/null 2>&1 && pwd )"
 
-./gradlew publishToMavenLocal
+pyenv global 3.9.5
+# Enable the script runner to build and upload the .aar if different than the owners of dawn
+git config --global --add safe.directory /tmpfs/src/git/dawn
+cd $ROOT_DIR
+apt-get install pkg-config
 
+echo "**********Fetching Dawn's deps**********"
+python3 tools/fetch_dawn_dependencies.py -ns --use-test-deps
+if [[ $? -ne 0 ]]
+then
+    echo "FAILURE in fetching deps"
+    exit 1
+fi
+
+cd tools/android
+
+# Use JDK17. Default is JDK11
+echo "**********Updating Java**********"
+sudo add-apt-repository ppa:cwchien/gradle
+sudo apt-get update
+apt-get install -y openjdk-17-jdk
+export JAVA_HOME="$(update-java-alternatives -l | grep "1.17" | head -n 1 | tr -s " " | cut -d " " -f 3)"
+if [[ $? -ne 0 ]]
+then
+    echo "FAILURE in updating Java"
+    exit 1
+fi
+
+# gradle 8.0+ is expected for android library
+echo "**********Installing Gradle**********"
+sudo apt-get install gradle-8.3
+sudo update-alternatives --set gradle /usr/lib/gradle/8.3/bin/gradle
+if [[ $? -ne 0 ]]
+then
+    echo "FAILURE in installing gradle"
+    exit 1
+fi
+
+# Compile .aar
+echo "**********Compiling into AAR**********"
+gradle publishToMavenLocal
 if [[ $? -ne 0 ]]
 then
     echo "FAILURE in publishing to Maven Local"
@@ -43,3 +82,6 @@ then
 fi
 
 echo "Successfully built webgpu aar"
+
+# Rename .aar to Chromium branch name
+mv webgpu/build/outputs/aar/webgpu-release.aar webgpu/build/outputs/aar/$KOKORO_GOB_BRANCH.aar
