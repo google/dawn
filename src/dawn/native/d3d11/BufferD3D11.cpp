@@ -297,23 +297,43 @@ MaybeError Buffer::MapAtCreationImpl() {
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
 
-    auto commandContext = ToBackend(GetDevice()->GetQueue())
-                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    mMapReadySerial = mLastUsageSerial;
+    const ExecutionSerial completedSerial = GetDevice()->GetQueue()->GetCompletedCommandSerial();
+    // We may run into map stall in case that the buffer is still being used by previous submitted
+    // commands. To avoid that, instead we ask Queue to do the map later when mLastUsageSerial has
+    // passed.
+    if (mMapReadySerial > completedSerial) {
+        ToBackend(GetDevice()->GetQueue())->TrackPendingMapBuffer({this}, mMapReadySerial);
+    } else {
+        auto commandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+        DAWN_TRY(FinalizeMap(&commandContext, completedSerial));
+    }
 
-    // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
-    DAWN_TRY(MapInternal(&commandContext));
+    return {};
+}
 
-    DAWN_TRY(EnsureDataInitialized(&commandContext));
+MaybeError Buffer::FinalizeMap(ScopedCommandRecordingContext* commandContext,
+                               ExecutionSerial completedSerial) {
+    // Needn't map the buffer if this is for a previous mapAsync that was cancelled.
+    if (completedSerial >= mMapReadySerial) {
+        // TODO(dawn:1705): make sure the map call is not blocked by the GPU operations.
+        DAWN_TRY(MapInternal(commandContext));
+
+        DAWN_TRY(EnsureDataInitialized(commandContext));
+    }
 
     return {};
 }
 
 void Buffer::UnmapImpl() {
     DAWN_ASSERT(mD3d11NonConstantBuffer);
-    DAWN_ASSERT(mMappedData);
-    auto commandContext = ToBackend(GetDevice()->GetQueue())
-                              ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
-    UnmapInternal(&commandContext);
+    mMapReadySerial = kMaxExecutionSerial;
+    if (mMappedData) {
+        auto commandContext = ToBackend(GetDevice()->GetQueue())
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+        UnmapInternal(&commandContext);
+    }
 }
 
 void* Buffer::GetMappedPointer() {

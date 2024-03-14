@@ -156,6 +156,20 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     return {};
 }
 
+MaybeError Queue::CheckAndMapReadyBuffers(ExecutionSerial completedSerial) {
+    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    for (auto buffer : mPendingMapBuffers.IterateUpTo(completedSerial)) {
+        DAWN_TRY(buffer->FinalizeMap(&commandContext, completedSerial));
+    }
+    mPendingMapBuffers.ClearUpTo(completedSerial);
+
+    return {};
+}
+
+void Queue::TrackPendingMapBuffer(Ref<Buffer>&& buffer, ExecutionSerial readySerial) {
+    mPendingMapBuffers.Enqueue(buffer, readySerial);
+}
+
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
@@ -214,6 +228,8 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     if (completedSerial <= GetCompletedCommandSerial()) {
         return ExecutionSerial(0);
     }
+
+    DAWN_TRY(CheckAndMapReadyBuffers(completedSerial));
 
     return completedSerial;
 }

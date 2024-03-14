@@ -87,6 +87,10 @@ class Buffer final : public BufferBase {
                            Buffer* destination,
                            uint64_t destinationOffset);
 
+    // Actually map the buffer when its last usage serial has passed.
+    MaybeError FinalizeMap(ScopedCommandRecordingContext* commandContext,
+                           ExecutionSerial completedSerial);
+
     class ScopedMap : public NonCopyable {
       public:
         // Map buffer and return a ScopedMap object. If the buffer is not mappable,
@@ -156,6 +160,7 @@ class Buffer final : public BufferBase {
     ComPtr<ID3D11Buffer> mD3d11NonConstantBuffer;
     bool mConstantBufferIsUpdated = true;
     raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
+    ExecutionSerial mMapReadySerial = kMaxExecutionSerial;
 };
 
 }  // namespace dawn::native::d3d11
