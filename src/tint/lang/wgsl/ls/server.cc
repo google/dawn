@@ -25,51 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if TINT_BUILD_IS_WIN
-#include <fcntl.h>  // _O_BINARY
-#include <io.h>     // _setmode
-#endif              // TINT_BUILD_IS_WIN
+#include "src/tint/lang/wgsl/ls/server.h"
 
-#include <fstream>
-#include <iostream>
+#include "langsvr/session.h"
 
-#include "src/tint/lang/wgsl/ls/serve.h"
+namespace lsp = langsvr::lsp;
 
-namespace {
+namespace tint::wgsl::ls {
 
-class StdinStream : public langsvr::Reader {
-  public:
-    /// @copydoc langsvr::Reader
-    size_t Read(std::byte* out, size_t count) override { return fread(out, 1, count, stdin); }
-};
+Server::Server(langsvr::Session& session) : session_(session) {
+    session.Register([&](const lsp::InitializeRequest&)
+                         -> langsvr::Result<typename lsp::InitializeRequest::Result> {
+        lsp::InitializeResult result;
+        return result;
+    });
 
-class StdoutStream : public langsvr::Writer {
-  public:
-    /// @copydoc langsvr::Reader
-    langsvr::Result<langsvr::SuccessType> Write(const std::byte* in, size_t count) override {
-        fwrite(in, 1, count, stdout);
-        fflush(stdout);
-        return langsvr::Success;
-    }
-};
-
-}  // namespace
-
-int main() {
-#if TINT_BUILD_IS_WIN
-    // Change stdin & stdout from text mode to binary mode.
-    // This ensures sequences of \r\n are not changed to \n.
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif  // TINT_BUILD_IS_WIN
-
-    StdoutStream stdout_stream;
-    StdinStream stdin_stream;
-
-    if (auto res = tint::wgsl::ls::Serve(stdin_stream, stdout_stream); res != tint::Success) {
-        std::cerr << res.Failure();
-        return 1;
-    }
-
-    return 0;
+    session.Register([&](const lsp::ShutdownRequest&) {
+        shutting_down_ = true;
+        return lsp::Null{};
+    });
 }
+
+Server::~Server() = default;
+
+Server::Logger::~Logger() {
+    lsp::WindowLogMessageNotification n;
+    n.type = lsp::MessageType::kLog;
+    n.message = msg.str();
+    (void)session.Send(n);
+}
+
+}  // namespace tint::wgsl::ls

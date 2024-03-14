@@ -25,51 +25,57 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if TINT_BUILD_IS_WIN
-#include <fcntl.h>  // _O_BINARY
-#include <io.h>     // _setmode
-#endif              // TINT_BUILD_IS_WIN
+#ifndef SRC_TINT_LANG_WGSL_LS_SERVER_H_
+#define SRC_TINT_LANG_WGSL_LS_SERVER_H_
 
-#include <fstream>
-#include <iostream>
+#include <memory>
 
-#include "src/tint/lang/wgsl/ls/serve.h"
+#include "langsvr/lsp/lsp.h"
+#include "langsvr/session.h"
+#include "src/tint/utils/text/string_stream.h"
 
-namespace {
+namespace tint::wgsl::ls {
 
-class StdinStream : public langsvr::Reader {
+/// The language server state object.
+class Server {
   public:
-    /// @copydoc langsvr::Reader
-    size_t Read(std::byte* out, size_t count) override { return fread(out, 1, count, stdin); }
+    /// Constructor
+    /// @param session the LSP session.
+    explicit Server(langsvr::Session& session);
+
+    /// Destructor
+    ~Server();
+
+    /// @returns true if the server has been requested to shut down.
+    bool ShuttingDown() const { return shutting_down_; }
+
+  private:
+    /// Logger is a string-stream like utility for logging to the client.
+    /// Append message content with '<<'. The message is sent when the logger is destructed.
+    struct Logger {
+        ~Logger();
+
+        /// @brief Appends @p value to the log message
+        /// @return this logger
+        template <typename T>
+        Logger& operator<<(T&& value) {
+            msg << value;
+            return *this;
+        }
+
+        langsvr::Session& session;
+        StringStream msg{};
+    };
+
+    /// Log constructs a new Logger to send a log message to the client.
+    Logger Log() { return Logger{session_}; }
+
+    /// The LSP session.
+    langsvr::Session& session_;
+    /// True if the server has been asked to shutdown.
+    bool shutting_down_ = false;
 };
 
-class StdoutStream : public langsvr::Writer {
-  public:
-    /// @copydoc langsvr::Reader
-    langsvr::Result<langsvr::SuccessType> Write(const std::byte* in, size_t count) override {
-        fwrite(in, 1, count, stdout);
-        fflush(stdout);
-        return langsvr::Success;
-    }
-};
+}  // namespace tint::wgsl::ls
 
-}  // namespace
-
-int main() {
-#if TINT_BUILD_IS_WIN
-    // Change stdin & stdout from text mode to binary mode.
-    // This ensures sequences of \r\n are not changed to \n.
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif  // TINT_BUILD_IS_WIN
-
-    StdoutStream stdout_stream;
-    StdinStream stdin_stream;
-
-    if (auto res = tint::wgsl::ls::Serve(stdin_stream, stdout_stream); res != tint::Success) {
-        std::cerr << res.Failure();
-        return 1;
-    }
-
-    return 0;
-}
+#endif  // SRC_TINT_LANG_WGSL_LS_SERVER_H_

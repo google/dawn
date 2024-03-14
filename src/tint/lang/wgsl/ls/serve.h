@@ -25,51 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#if TINT_BUILD_IS_WIN
-#include <fcntl.h>  // _O_BINARY
-#include <io.h>     // _setmode
-#endif              // TINT_BUILD_IS_WIN
+#ifndef SRC_TINT_LANG_WGSL_LS_SERVE_H_
+#define SRC_TINT_LANG_WGSL_LS_SERVE_H_
 
-#include <fstream>
-#include <iostream>
+#include "langsvr/reader.h"
+#include "langsvr/writer.h"
+#include "src/tint/utils/result/result.h"
 
-#include "src/tint/lang/wgsl/ls/serve.h"
+namespace tint::wgsl::ls {
 
-namespace {
+/// Serve creates a WGSL language server that reads from @p reader and writes to @p writer.
+/// Blocks until the server is shutdown by the client.
+Result<SuccessType> Serve(langsvr::Reader& reader, langsvr::Writer& writer);
 
-class StdinStream : public langsvr::Reader {
-  public:
-    /// @copydoc langsvr::Reader
-    size_t Read(std::byte* out, size_t count) override { return fread(out, 1, count, stdin); }
-};
+}  // namespace tint::wgsl::ls
 
-class StdoutStream : public langsvr::Writer {
-  public:
-    /// @copydoc langsvr::Reader
-    langsvr::Result<langsvr::SuccessType> Write(const std::byte* in, size_t count) override {
-        fwrite(in, 1, count, stdout);
-        fflush(stdout);
-        return langsvr::Success;
-    }
-};
-
-}  // namespace
-
-int main() {
-#if TINT_BUILD_IS_WIN
-    // Change stdin & stdout from text mode to binary mode.
-    // This ensures sequences of \r\n are not changed to \n.
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif  // TINT_BUILD_IS_WIN
-
-    StdoutStream stdout_stream;
-    StdinStream stdin_stream;
-
-    if (auto res = tint::wgsl::ls::Serve(stdin_stream, stdout_stream); res != tint::Success) {
-        std::cerr << res.Failure();
-        return 1;
-    }
-
-    return 0;
-}
+#endif  // SRC_TINT_LANG_WGSL_LS_SERVE_H_
