@@ -276,6 +276,9 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
             tint::StyledTextPrinter::Create(stderr)->Print(
                 formatter.Format(info.program.Diagnostics()));
         }
+        // Flush any diagnostics written to stderr. We depend on these being emitted to the console
+        // before the program for end-to-end tests.
+        fflush(stderr);
     }
 
     if (!info.program.IsValid()) {
