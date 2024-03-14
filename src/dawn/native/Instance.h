@@ -217,7 +217,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     wgpu::LoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingCallbackUserdata = nullptr;
 
-    raw_ptr<dawn::platform::Platform> mPlatform = nullptr;
+    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
+    raw_ptr<dawn::platform::Platform, DanglingUntriaged> mPlatform = nullptr;
     std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
 
     BackendsArray mBackends;
