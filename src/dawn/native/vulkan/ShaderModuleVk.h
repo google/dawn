@@ -47,8 +47,7 @@ struct ProgrammableStage;
 namespace vulkan {
 
 struct TransformedShaderModuleCacheKey {
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<const PipelineLayoutBase, DanglingUntriaged> layout;
+    uintptr_t layoutPtr;
     std::string entryPoint;
     PipelineConstantEntries constants;
     std::optional<uint32_t> maxSubgroupSizeForFullSubgroups;

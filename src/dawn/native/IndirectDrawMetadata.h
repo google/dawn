@@ -95,7 +95,10 @@ class IndirectDrawMetadata : public NonCopyable {
 
         const std::vector<IndirectValidationBatch>& GetBatches() const;
 
+        BufferBase* GetIndirectBuffer() const;
+
       private:
+        friend class IndirectDrawMetadata;
         Ref<BufferBase> mIndirectBuffer;
 
         // A list of information about validation batches that will need to be executed for the
@@ -114,8 +117,7 @@ class IndirectDrawMetadata : public NonCopyable {
         Indexed,
     };
     struct IndexedIndirectConfig {
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<BufferBase, DanglingUntriaged> inputIndirectBuffer;
+        uintptr_t inputIndirectBufferPtr;
         bool duplicateBaseVertexInstance;
         DrawType drawType;
 

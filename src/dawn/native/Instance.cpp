@@ -186,6 +186,8 @@ void InstanceBase::DeleteThis() {
         mCallbackTaskManager->Flush();
     } while (!mCallbackTaskManager->IsEmpty());
 
+    mPlatform = nullptr;
+
     RefCountedWithExternalCount::DeleteThis();
 }
 

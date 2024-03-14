@@ -56,8 +56,8 @@ class DawnNativeTest : public ::testing::Test {
     virtual WGPUDevice CreateTestDevice();
 
   protected:
-    std::unique_ptr<dawn::native::Instance> instance;
     std::unique_ptr<dawn::platform::Platform> platform;
+    std::unique_ptr<dawn::native::Instance> instance;
     dawn::native::Adapter adapter;
     wgpu::Device device;
 
