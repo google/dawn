@@ -153,17 +153,6 @@ Result<Candidate, StyledText> ResolveCandidate(Context& context,
                                                VectorRef<const core::type::Type*> template_args,
                                                VectorRef<const core::type::Type*> args);
 
-/// Match constructs a new MatchState
-/// @param context the intrinsic context
-/// @param templates the template state used for matcher evaluation
-/// @param overload the overload being evaluated
-/// @param matcher_indices pointer to a list of matcher indices
-MatchState Match(Context& context,
-                 TemplateState& templates,
-                 const OverloadInfo& overload,
-                 const MatcherIndex* matcher_indices,
-                 EvaluationStage earliest_eval_stage);
-
 // Prints the list of candidates for emitting diagnostics
 void PrintCandidates(StyledText& err,
                      Context& context,
@@ -251,11 +240,11 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
     if (auto* matcher_indices = context.data[match.overload->return_matcher_indices]) {
         Any any;
         return_type =
-            Match(context, match.templates, *match.overload, matcher_indices, earliest_eval_stage)
+            context.Match(match.templates, *match.overload, matcher_indices, earliest_eval_stage)
                 .Type(&any);
         if (TINT_UNLIKELY(!return_type)) {
             StyledText err;
-            err << "MatchState.Match() returned null";
+            err << "MatchState.MatchState() returned null";
             TINT_ICE() << err.Plain();
             return err;
         }
@@ -322,8 +311,8 @@ Candidate ScoreOverload(Context& context,
         auto* type = template_args[i];
         if (auto* matcher_indices = context.data[tmpl.matcher_indices]) {
             // Ensure type matches the template's matcher.
-            type = Match(context, templates, overload, matcher_indices, earliest_eval_stage)
-                       .Type(type);
+            type =
+                context.Match(templates, overload, matcher_indices, earliest_eval_stage).Type(type);
             if (!type) {
                 MATCH_FAILURE(kMismatchedExplicitTemplateTypePenalty);
                 continue;
@@ -344,7 +333,7 @@ Candidate ScoreOverload(Context& context,
     for (size_t p = 0; p < num_params; p++) {
         auto& parameter = context.data[overload.parameters + p];
         auto* matcher_indices = context.data[parameter.matcher_indices];
-        if (!Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+        if (!context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                  .Type(args[p])) {
             MATCH_FAILURE(kMismatchedParamTypePenalty);
         }
@@ -359,7 +348,7 @@ Candidate ScoreOverload(Context& context,
             continue;
         }
 
-        auto matcher = Match(context, templates, overload, matcher_indices, earliest_eval_stage);
+        auto matcher = context.Match(templates, overload, matcher_indices, earliest_eval_stage);
 
         switch (tmpl.kind) {
             case TemplateInfo::Kind::kType: {
@@ -403,7 +392,7 @@ Candidate ScoreOverload(Context& context,
         auto& parameter = context.data[overload.parameters + p];
         auto* matcher_indices = context.data[parameter.matcher_indices];
         auto* ty =
-            Match(context, templates, overload, matcher_indices, earliest_eval_stage).Type(args[p]);
+            context.Match(templates, overload, matcher_indices, earliest_eval_stage).Type(args[p]);
         parameters.Emplace(ty, parameter.usage);
     }
 
@@ -476,15 +465,6 @@ Result<Candidate, StyledText> ResolveCandidate(Context& context,
     return std::move(*best);
 }
 
-MatchState Match(Context& context,
-                 TemplateState& templates,
-                 const OverloadInfo& overload,
-                 const MatcherIndex* matcher_indices,
-                 EvaluationStage earliest_eval_stage) {
-    return MatchState{context.types, context.symbols, templates,          context.data,
-                      overload,      matcher_indices, earliest_eval_stage};
-}
-
 void PrintCandidates(StyledText& ss,
                      Context& context,
                      VectorRef<Candidate> candidates,
@@ -548,7 +528,7 @@ void PrintCandidate(StyledText& ss,
             if (i < template_args.Length()) {
                 auto* matcher_indices = context.data[tmpl.matcher_indices];
                 matched = !matcher_indices ||
-                          Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+                          context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                               .Type(template_args[i]);
             }
 
@@ -573,7 +553,7 @@ void PrintCandidate(StyledText& ss,
 
         bool matched = false;
         if (i < args.Length()) {
-            matched = Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+            matched = context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                           .Type(args[i]);
         }
         all_params_match = all_params_match && matched;
@@ -585,7 +565,7 @@ void PrintCandidate(StyledText& ss,
         if (parameter.usage != ParameterUsage::kNone) {
             ss << style::Variable(parameter.usage, ": ");
         }
-        Match(context, templates, overload, matcher_indices, earliest_eval_stage).PrintType(ss);
+        context.Match(templates, overload, matcher_indices, earliest_eval_stage).PrintType(ss);
 
         ss << style::Code << " ";
         if (matched) {
@@ -598,7 +578,7 @@ void PrintCandidate(StyledText& ss,
     if (overload.return_matcher_indices.IsValid()) {
         ss << " -> ";
         auto* matcher_indices = context.data[overload.return_matcher_indices];
-        Match(context, templates, overload, matcher_indices, earliest_eval_stage).PrintType(ss);
+        context.Match(templates, overload, matcher_indices, earliest_eval_stage).PrintType(ss);
     }
 
     bool first = true;
@@ -631,11 +611,11 @@ void PrintCandidate(StyledText& ss,
             if (tmpl.kind == TemplateInfo::Kind::kType) {
                 if (auto* ty = templates.Type(i)) {
                     matched =
-                        Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+                        context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                             .Type(ty);
                 }
             } else {
-                matched = Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+                matched = context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                               .Num(templates.Num(i))
                               .IsValid();
             }
@@ -647,10 +627,10 @@ void PrintCandidate(StyledText& ss,
 
             ss << style::Type(tmpl.name) << style::Plain(" is ");
             if (tmpl.kind == TemplateInfo::Kind::kType) {
-                Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+                context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                     .PrintType(ss);
             } else {
-                Match(context, templates, overload, matcher_indices, earliest_eval_stage)
+                context.Match(templates, overload, matcher_indices, earliest_eval_stage)
                     .PrintNum(ss);
             }
         }

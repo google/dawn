@@ -108,6 +108,18 @@ struct Context {
     core::type::Manager& types;
     /// The symbol table
     SymbolTable& symbols;
+
+    /// @returns a MatchState from the context and arguments.
+    /// @param templates the template state used for matcher evaluation
+    /// @param overload the overload being evaluated
+    /// @param matcher_indices pointer to a list of matcher indices
+    MatchState Match(TemplateState& templates,
+                     const OverloadInfo& overload,
+                     const MatcherIndex* matcher_indices,
+                     EvaluationStage earliest_eval_stage) {
+        return MatchState(types, symbols, templates, data, overload, matcher_indices,
+                          earliest_eval_stage);
+    }
 };
 
 /// Candidate holds information about an overload evaluated for resolution.
