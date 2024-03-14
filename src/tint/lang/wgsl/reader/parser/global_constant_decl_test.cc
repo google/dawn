@@ -61,9 +61,14 @@ TEST_F(WGSLParserTest, GlobalConstDecl) {
     ast::CheckIdentifier(c->type, "f32");
 
     EXPECT_EQ(c->source.range.begin.line, 1u);
-    EXPECT_EQ(c->source.range.begin.column, 7u);
+    EXPECT_EQ(c->source.range.begin.column, 1u);
     EXPECT_EQ(c->source.range.end.line, 1u);
-    EXPECT_EQ(c->source.range.end.column, 8u);
+    EXPECT_EQ(c->source.range.end.column, 19u);
+
+    EXPECT_EQ(c->name->source.range.begin.line, 1u);
+    EXPECT_EQ(c->name->source.range.begin.column, 7u);
+    EXPECT_EQ(c->name->source.range.end.line, 1u);
+    EXPECT_EQ(c->name->source.range.end.column, 8u);
 
     ASSERT_NE(c->initializer, nullptr);
     EXPECT_TRUE(c->initializer->Is<ast::LiteralExpression>());
@@ -85,9 +90,14 @@ TEST_F(WGSLParserTest, GlobalConstDecl_Inferred) {
     EXPECT_EQ(c->type, nullptr);
 
     EXPECT_EQ(c->source.range.begin.line, 1u);
-    EXPECT_EQ(c->source.range.begin.column, 7u);
+    EXPECT_EQ(c->source.range.begin.column, 1u);
     EXPECT_EQ(c->source.range.end.line, 1u);
-    EXPECT_EQ(c->source.range.end.column, 8u);
+    EXPECT_EQ(c->source.range.end.column, 13u);
+
+    EXPECT_EQ(c->name->source.range.begin.line, 1u);
+    EXPECT_EQ(c->name->source.range.begin.column, 7u);
+    EXPECT_EQ(c->name->source.range.end.line, 1u);
+    EXPECT_EQ(c->name->source.range.end.column, 8u);
 
     ASSERT_NE(c->initializer, nullptr);
     EXPECT_TRUE(c->initializer->Is<ast::LiteralExpression>());
@@ -137,9 +147,14 @@ TEST_F(WGSLParserTest, GlobalOverrideDecl_WithId) {
     ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
-    EXPECT_EQ(override->source.range.begin.column, 17u);
+    EXPECT_EQ(override->source.range.begin.column, 8u);
     EXPECT_EQ(override->source.range.end.line, 1u);
-    EXPECT_EQ(override->source.range.end.column, 18u);
+    EXPECT_EQ(override->source.range.end.column, 29u);
+
+    EXPECT_EQ(override->name->source.range.begin.line, 1u);
+    EXPECT_EQ(override->name->source.range.begin.column, 17u);
+    EXPECT_EQ(override->name->source.range.end.line, 1u);
+    EXPECT_EQ(override->name->source.range.end.column, 18u);
 
     ASSERT_NE(override->initializer, nullptr);
     EXPECT_TRUE(override->initializer->Is<ast::LiteralExpression>());
@@ -167,9 +182,14 @@ TEST_F(WGSLParserTest, GlobalOverrideDecl_WithId_TrailingComma) {
     ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
-    EXPECT_EQ(override->source.range.begin.column, 18u);
+    EXPECT_EQ(override->source.range.begin.column, 9u);
     EXPECT_EQ(override->source.range.end.line, 1u);
-    EXPECT_EQ(override->source.range.end.column, 19u);
+    EXPECT_EQ(override->source.range.end.column, 30u);
+
+    EXPECT_EQ(override->name->source.range.begin.line, 1u);
+    EXPECT_EQ(override->name->source.range.begin.column, 18u);
+    EXPECT_EQ(override->name->source.range.end.line, 1u);
+    EXPECT_EQ(override->name->source.range.end.column, 19u);
 
     ASSERT_NE(override->initializer, nullptr);
     EXPECT_TRUE(override->initializer->Is<ast::LiteralExpression>());
@@ -197,9 +217,14 @@ TEST_F(WGSLParserTest, GlobalOverrideDecl_WithoutId) {
     ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
-    EXPECT_EQ(override->source.range.begin.column, 10u);
+    EXPECT_EQ(override->source.range.begin.column, 1u);
     EXPECT_EQ(override->source.range.end.line, 1u);
-    EXPECT_EQ(override->source.range.end.column, 11u);
+    EXPECT_EQ(override->source.range.end.column, 22u);
+
+    EXPECT_EQ(override->name->source.range.begin.line, 1u);
+    EXPECT_EQ(override->name->source.range.begin.column, 10u);
+    EXPECT_EQ(override->name->source.range.end.line, 1u);
+    EXPECT_EQ(override->name->source.range.end.column, 11u);
 
     ASSERT_NE(override->initializer, nullptr);
     EXPECT_TRUE(override->initializer->Is<ast::LiteralExpression>());

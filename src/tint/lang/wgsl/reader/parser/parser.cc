@@ -666,6 +666,7 @@ Maybe<Void> Parser::global_decl() {
 // global_variable_decl
 //  : variable_attribute_list* variable_decl (EQUAL expression)?
 Maybe<const ast::Variable*> Parser::global_variable_decl(AttributeList& attrs) {
+    MultiTokenSource decl_source(this);
     auto decl = variable_decl();
     if (decl.errored) {
         return Failure::kErrored;
@@ -688,7 +689,7 @@ Maybe<const ast::Variable*> Parser::global_variable_decl(AttributeList& attrs) {
 
     TINT_DEFER(attrs.Clear());
 
-    return builder_.create<ast::Var>(decl->source,                // source
+    return builder_.create<ast::Var>(decl_source(),               // source
                                      builder_.Ident(decl->name),  // symbol
                                      decl->type,                  // type
                                      decl->address_space,         // address space
@@ -705,6 +706,7 @@ Maybe<const ast::Variable*> Parser::global_variable_decl(AttributeList& attrs) {
 Maybe<const ast::Variable*> Parser::global_constant_decl(AttributeList& attrs) {
     bool is_overridable = false;
     const char* use = nullptr;
+    MultiTokenSource decl_source(this);
     Source source;
     if (match(Token::Type::kConst)) {
         use = "'const' declaration";
@@ -746,17 +748,17 @@ Maybe<const ast::Variable*> Parser::global_constant_decl(AttributeList& attrs) {
 
     TINT_DEFER(attrs.Clear());
     if (is_overridable) {
-        return builder_.Override(decl->name->source,  // source
-                                 decl->name,          // symbol
-                                 decl->type,          // type
-                                 initializer,         // initializer
-                                 std::move(attrs));   // attributes
+        return builder_.Override(decl_source(),      // source
+                                 decl->name,         // symbol
+                                 decl->type,         // type
+                                 initializer,        // initializer
+                                 std::move(attrs));  // attributes
     }
-    return builder_.GlobalConst(decl->name->source,  // source
-                                decl->name,          // symbol
-                                decl->type,          // type
-                                initializer,         // initializer
-                                std::move(attrs));   // attributes
+    return builder_.GlobalConst(decl_source(),      // source
+                                decl->name,         // symbol
+                                decl->type,         // type
+                                initializer,        // initializer
+                                std::move(attrs));  // attributes
 }
 
 // variable_decl
@@ -974,7 +976,7 @@ Expect<ast::Type> Parser::expect_type(std::string_view use) {
 // struct_decl
 //   : STRUCT IDENT struct_body_decl
 Maybe<const ast::Struct*> Parser::struct_decl() {
-    auto& t = peek();
+    MultiTokenSource source(this);
 
     if (!match(Token::Type::kStruct)) {
         return Failure::kNoMatch;
@@ -990,7 +992,7 @@ Maybe<const ast::Struct*> Parser::struct_decl() {
         return Failure::kErrored;
     }
 
-    return builder_.Structure(t.source(), name.value, std::move(body.value));
+    return builder_.Structure(source(), name.value, std::move(body.value));
 }
 
 // struct_body_decl

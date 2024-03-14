@@ -48,9 +48,14 @@ TEST_F(WGSLParserTest, GlobalVariableDecl_WithoutInitializer) {
     ast::CheckIdentifier(var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
-    EXPECT_EQ(var->source.range.begin.column, 14u);
+    EXPECT_EQ(var->source.range.begin.column, 1u);
     EXPECT_EQ(var->source.range.end.line, 1u);
-    EXPECT_EQ(var->source.range.end.column, 15u);
+    EXPECT_EQ(var->source.range.end.column, 21u);
+
+    EXPECT_EQ(var->name->source.range.begin.line, 1u);
+    EXPECT_EQ(var->name->source.range.begin.column, 14u);
+    EXPECT_EQ(var->name->source.range.end.line, 1u);
+    EXPECT_EQ(var->name->source.range.end.column, 15u);
 
     ASSERT_EQ(var->initializer, nullptr);
 }
@@ -72,9 +77,14 @@ TEST_F(WGSLParserTest, GlobalVariableDecl_WithInitializer) {
     ast::CheckIdentifier(var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
-    EXPECT_EQ(var->source.range.begin.column, 14u);
+    EXPECT_EQ(var->source.range.begin.column, 1u);
     EXPECT_EQ(var->source.range.end.line, 1u);
-    EXPECT_EQ(var->source.range.end.column, 15u);
+    EXPECT_EQ(var->source.range.end.column, 26u);
+
+    EXPECT_EQ(var->name->source.range.begin.line, 1u);
+    EXPECT_EQ(var->name->source.range.begin.column, 14u);
+    EXPECT_EQ(var->name->source.range.end.line, 1u);
+    EXPECT_EQ(var->name->source.range.end.column, 15u);
 
     ASSERT_NE(var->initializer, nullptr);
     ASSERT_TRUE(var->initializer->Is<ast::FloatLiteralExpression>());
@@ -97,9 +107,14 @@ TEST_F(WGSLParserTest, GlobalVariableDecl_WithAttribute) {
     ast::CheckIdentifier(var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
-    EXPECT_EQ(var->source.range.begin.column, 36u);
+    EXPECT_EQ(var->source.range.begin.column, 23u);
     EXPECT_EQ(var->source.range.end.line, 1u);
-    EXPECT_EQ(var->source.range.end.column, 37u);
+    EXPECT_EQ(var->source.range.end.column, 43u);
+
+    EXPECT_EQ(var->name->source.range.begin.line, 1u);
+    EXPECT_EQ(var->name->source.range.begin.column, 36u);
+    EXPECT_EQ(var->name->source.range.end.line, 1u);
+    EXPECT_EQ(var->name->source.range.end.column, 37u);
 
     ASSERT_EQ(var->initializer, nullptr);
 
@@ -127,9 +142,14 @@ TEST_F(WGSLParserTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     ast::CheckIdentifier(var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
-    EXPECT_EQ(var->source.range.begin.column, 36u);
+    EXPECT_EQ(var->source.range.begin.column, 23u);
     EXPECT_EQ(var->source.range.end.line, 1u);
-    EXPECT_EQ(var->source.range.end.column, 37u);
+    EXPECT_EQ(var->source.range.end.column, 43u);
+
+    EXPECT_EQ(var->name->source.range.begin.line, 1u);
+    EXPECT_EQ(var->name->source.range.begin.column, 36u);
+    EXPECT_EQ(var->name->source.range.end.line, 1u);
+    EXPECT_EQ(var->name->source.range.end.column, 37u);
 
     ASSERT_EQ(var->initializer, nullptr);
 

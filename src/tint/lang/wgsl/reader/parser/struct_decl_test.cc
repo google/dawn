@@ -46,6 +46,16 @@ struct S {
     ASSERT_EQ(s->members.Length(), 2u);
     EXPECT_EQ(s->members[0]->name->symbol, p->builder().Symbols().Register("a"));
     EXPECT_EQ(s->members[1]->name->symbol, p->builder().Symbols().Register("b"));
+
+    EXPECT_EQ(s->source.range.begin.line, 2u);
+    EXPECT_EQ(s->source.range.begin.column, 1u);
+    EXPECT_EQ(s->source.range.end.line, 5u);
+    EXPECT_EQ(s->source.range.end.column, 2u);
+
+    EXPECT_EQ(s->name->source.range.begin.line, 2u);
+    EXPECT_EQ(s->name->source.range.begin.column, 8u);
+    EXPECT_EQ(s->name->source.range.end.line, 2u);
+    EXPECT_EQ(s->name->source.range.end.column, 9u);
 }
 
 TEST_F(WGSLParserTest, StructDecl_Unicode_Parses) {
