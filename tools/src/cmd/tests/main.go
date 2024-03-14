@@ -175,6 +175,10 @@ func run() error {
 	rootPath := ""
 	globs := []string{}
 	for _, arg := range args {
+		if len(arg) > 1 && arg[0:2] == "--" {
+			return fmt.Errorf("unexpected flag after globs: %s", arg)
+		}
+
 		// Make absolute
 		if !filepath.IsAbs(arg) {
 			arg = filepath.Join(dawnRoot, arg)
