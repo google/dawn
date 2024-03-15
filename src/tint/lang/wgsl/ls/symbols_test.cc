@@ -44,6 +44,10 @@ struct Case {
     const std::vector<lsp::DocumentSymbol> symbols;
 };
 
+std::ostream& operator<<(std::ostream& stream, const Case& c) {
+    return stream << "wgsl: '" << c.wgsl << "'";
+}
+
 struct Symbol : lsp::DocumentSymbol {
     explicit Symbol(std::string_view n) { name = n; }
 
@@ -68,10 +72,6 @@ struct Symbol : lsp::DocumentSymbol {
         return *this;
     }
 };
-
-std::ostream& operator<<(std::ostream& stream, const Case& c) {
-    return stream << "wgsl: '" << c.wgsl << "'";
-}
 
 using LsSymbolsTest = LsTestWithParam<Case>;
 TEST_P(LsSymbolsTest, Symbols) {

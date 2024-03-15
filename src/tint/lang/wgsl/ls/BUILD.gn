@@ -49,6 +49,7 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
       "document.cc",
       "file.cc",
       "file.h",
+      "references.cc",
       "serve.cc",
       "serve.h",
       "server.cc",
@@ -101,6 +102,7 @@ if (tint_build_unittests) {
         "diagnostics_test.cc",
         "helpers_test.cc",
         "helpers_test.h",
+        "references_test.cc",
         "symbols_test.cc",
       ]
       deps = [

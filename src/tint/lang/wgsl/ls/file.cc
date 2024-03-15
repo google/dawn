@@ -101,8 +101,10 @@ std::vector<Source::Range> File::References(Source::Location l, bool include_dec
         }
         for (auto* node : nodes) {
             if (auto* ident = node->As<ast::IdentifierExpression>()) {
-                if (program.Sem().Get<sem::Struct>(node) == s) {
-                    references.push_back(ident->source.range);
+                if (auto* te = program.Sem().Get<sem::TypeExpression>(node)) {
+                    if (te->Type() == s) {
+                        references.push_back(ident->source.range);
+                    }
                 }
             }
         }

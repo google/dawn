@@ -46,6 +46,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/document.cc
   lang/wgsl/ls/file.cc
   lang/wgsl/ls/file.h
+  lang/wgsl/ls/references.cc
   lang/wgsl/ls/serve.cc
   lang/wgsl/ls/serve.h
   lang/wgsl/ls/server.cc
@@ -109,6 +110,7 @@ tint_add_target(tint_lang_wgsl_ls_test test
   lang/wgsl/ls/diagnostics_test.cc
   lang/wgsl/ls/helpers_test.cc
   lang/wgsl/ls/helpers_test.h
+  lang/wgsl/ls/references_test.cc
   lang/wgsl/ls/symbols_test.cc
 )
 
