@@ -83,6 +83,7 @@ type rollerFlags struct {
 	nodePath            string
 	auth                authcli.Flags
 	cacheDir            string
+	ctsRevision         string
 	force               bool // Create a new roll, even if CTS is up to date
 	rebuild             bool // Rebuild the expectations file from scratch
 	preserve            bool // If false, abandon past roll changes
@@ -112,6 +113,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
+	flag.StringVar(&c.flags.ctsRevision, "revision", refMain, "revision of the CTS to roll")
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
@@ -159,7 +161,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
-	chromium, err := gitiles.New(ctx, cfg.Git.CTS.Host, cfg.Git.CTS.Project)
+	cts, err := gitiles.New(ctx, cfg.Git.CTS.Host, cfg.Git.CTS.Project)
 	if err != nil {
 		return err
 	}
@@ -186,11 +188,15 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		rdb:                 rdb,
 		git:                 git,
 		gerrit:              gerrit,
-		chromium:            chromium,
-		dawn:                dawn,
+		gitiles:             gitilesRepos{cts: cts, dawn: dawn},
 		ctsDir:              ctsDir,
 	}
 	return r.roll(ctx)
+}
+
+type gitilesRepos struct {
+	cts  *gitiles.Gitiles
+	dawn *gitiles.Gitiles
 }
 
 type roller struct {
@@ -202,14 +208,13 @@ type roller struct {
 	rdb                 *resultsdb.ResultsDB
 	git                 *git.Git
 	gerrit              *gerrit.Gerrit
-	chromium            *gitiles.Gitiles
-	dawn                *gitiles.Gitiles
+	gitiles             gitilesRepos
 	ctsDir              string
 }
 
 func (r *roller) roll(ctx context.Context) error {
 	// Fetch the latest Dawn main revision
-	dawnHash, err := r.dawn.Hash(ctx, refMain)
+	dawnHash, err := r.gitiles.dawn.Hash(ctx, refMain)
 	if err != nil {
 		return err
 	}
@@ -263,7 +268,7 @@ func (r *roller) roll(ctx context.Context) error {
 
 	// Download and parse the expectations files
 	for _, exInfo := range exInfos {
-		expectationsFile, err := r.dawn.DownloadFile(ctx, refMain, exInfo.path)
+		expectationsFile, err := r.gitiles.dawn.DownloadFile(ctx, refMain, exInfo.path)
 		if err != nil {
 			return err
 		}
@@ -304,7 +309,7 @@ func (r *roller) roll(ctx context.Context) error {
 	}()
 
 	deletedFiles := []string{}
-	if currentWebTestFiles, err := r.dawn.ListFiles(ctx, dawnHash, webTestsPath); err != nil {
+	if currentWebTestFiles, err := r.gitiles.dawn.ListFiles(ctx, dawnHash, webTestsPath); err != nil {
 		// If there's an error, allow NotFound. It means the directory did not exist, so no files
 		// need to be deleted.
 		if e, ok := status.FromError(err); !ok || e.Code() != codes.NotFound {
@@ -761,13 +766,13 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 }
 
 // updateDEPS fetches and updates the Dawn DEPS file at 'dawnRef' so that all
-// CTS hashes are changed to the latest CTS hash.
+// CTS hashes are changed to r.ctsRevision.
 func (r *roller) updateDEPS(ctx context.Context, dawnRef string) (newDEPS, newCTSHash, oldCTSHash string, err error) {
-	newCTSHash, err = r.chromium.Hash(ctx, refMain)
+	newCTSHash, err = r.gitiles.cts.Hash(ctx, r.flags.ctsRevision)
 	if err != nil {
 		return "", "", "", err
 	}
-	deps, err := r.dawn.DownloadFile(ctx, dawnRef, depsRelPath)
+	deps, err := r.gitiles.dawn.DownloadFile(ctx, dawnRef, depsRelPath)
 	if err != nil {
 		return "", "", "", err
 	}
