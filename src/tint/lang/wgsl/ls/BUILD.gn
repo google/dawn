@@ -52,6 +52,7 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
       "serve.h",
       "server.cc",
       "server.h",
+      "symbols.cc",
       "utils.h",
     ]
     deps = [
@@ -97,6 +98,7 @@ if (tint_build_unittests) {
       sources = [
         "diagnostics_test.cc",
         "helpers_test.h",
+        "symbols_test.cc",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",

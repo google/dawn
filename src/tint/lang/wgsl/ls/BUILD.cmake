@@ -49,6 +49,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/serve.h
   lang/wgsl/ls/server.cc
   lang/wgsl/ls/server.h
+  lang/wgsl/ls/symbols.cc
   lang/wgsl/ls/utils.h
 )
 
@@ -105,6 +106,7 @@ if(TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER)
 tint_add_target(tint_lang_wgsl_ls_test test
   lang/wgsl/ls/diagnostics_test.cc
   lang/wgsl/ls/helpers_test.h
+  lang/wgsl/ls/symbols_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_ls_test test

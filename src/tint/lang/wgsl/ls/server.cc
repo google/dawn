@@ -38,6 +38,10 @@ namespace tint::wgsl::ls {
 Server::Server(langsvr::Session& session) : session_(session) {
     session.Register([&](const lsp::InitializeRequest&) {
         lsp::InitializeResult result;
+        result.capabilities.document_symbol_provider = [] {
+            lsp::DocumentSymbolOptions opts;
+            return opts;
+        }();
         return result;
     });
 
@@ -46,11 +50,15 @@ Server::Server(langsvr::Session& session) : session_(session) {
         return lsp::Null{};
     });
 
+    // Notification handlers
     session.Register([&](const lsp::TextDocumentDidOpenNotification& n) { return Handle(n); });
     session.Register([&](const lsp::TextDocumentDidCloseNotification& n) { return Handle(n); });
     session.Register([&](const lsp::TextDocumentDidChangeNotification& n) { return Handle(n); });
     session.Register(
         [&](const lsp::WorkspaceDidChangeConfigurationNotification&) { return langsvr::Success; });
+
+    // Request handlers
+    session.Register([&](const lsp::TextDocumentDocumentSymbolRequest& r) { return Handle(r); });
 }
 
 Server::~Server() = default;

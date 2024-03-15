@@ -44,6 +44,7 @@ cc_library(
     "file.cc",
     "serve.cc",
     "server.cc",
+    "symbols.cc",
   ],
   hdrs = [
     "file.h",
@@ -97,6 +98,7 @@ cc_library(
   srcs = [
     "diagnostics_test.cc",
     "helpers_test.h",
+    "symbols_test.cc",
   ],
   deps = [
     "//src/tint/lang/core",
