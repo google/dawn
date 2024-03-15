@@ -74,8 +74,7 @@ class ProgrammableEncoder : public ApiObjectBase {
                         ErrorTag errorTag,
                         const char* label);
 
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<EncodingContext, DanglingUntriaged> mEncodingContext = nullptr;
+    raw_ptr<EncodingContext> mEncodingContext = nullptr;
 
     uint64_t mDebugGroupStackSize = 0;
 

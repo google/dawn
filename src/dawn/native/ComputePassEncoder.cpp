@@ -131,6 +131,10 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
+ComputePassEncoder::~ComputePassEncoder() {
+    mEncodingContext = nullptr;
+}
+
 // static
 Ref<ComputePassEncoder> ComputePassEncoder::Create(DeviceBase* device,
                                                    const ComputePassDescriptor* descriptor,

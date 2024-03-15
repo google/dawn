@@ -56,6 +56,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
                                             EncodingContext* encodingContext,
                                             const char* label);
 
+    ~RenderPassEncoder() override;
+
     ObjectType GetType() const override;
 
     // NOTE: this will lock the device internally. To avoid deadlock when the device is already

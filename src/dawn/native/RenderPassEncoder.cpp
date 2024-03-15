@@ -128,6 +128,10 @@ Ref<RenderPassEncoder> RenderPassEncoder::MakeError(DeviceBase* device,
         new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }
 
+RenderPassEncoder::~RenderPassEncoder() {
+    mEncodingContext = nullptr;
+}
+
 void RenderPassEncoder::DestroyImpl() {
     mCommandBufferState.End();
 

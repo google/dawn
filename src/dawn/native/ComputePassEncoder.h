@@ -52,6 +52,8 @@ class ComputePassEncoder final : public ProgrammableEncoder {
                                              EncodingContext* encodingContext,
                                              const char* label);
 
+    ~ComputePassEncoder() override;
+
     ObjectType GetType() const override;
 
     void APIEnd();

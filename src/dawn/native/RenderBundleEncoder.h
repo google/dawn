@@ -45,6 +45,8 @@ class RenderBundleEncoder final : public RenderEncoderBase {
                                            const RenderBundleEncoderDescriptor* descriptor);
     static Ref<RenderBundleEncoder> MakeError(DeviceBase* device, const char* label);
 
+    ~RenderBundleEncoder() override;
+
     ObjectType GetType() const override;
 
     RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);

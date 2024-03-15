@@ -118,6 +118,10 @@ RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, 
     : RenderEncoderBase(device, &mBundleEncodingContext, errorTag, label),
       mBundleEncodingContext(device, this) {}
 
+RenderBundleEncoder::~RenderBundleEncoder() {
+    mEncodingContext = nullptr;
+}
+
 void RenderBundleEncoder::DestroyImpl() {
     mCommandBufferState.End();
     RenderEncoderBase::DestroyImpl();
