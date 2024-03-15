@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "ls",
   srcs = [
+    "definition.cc",
     "diagnostics.cc",
     "document.cc",
     "file.cc",
@@ -96,7 +97,9 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "definition_test.cc",
     "diagnostics_test.cc",
+    "helpers_test.cc",
     "helpers_test.h",
     "symbols_test.cc",
   ],

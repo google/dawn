@@ -90,6 +90,21 @@ using LsTest = LsTestImpl<testing::Test>;
 template <typename T>
 using LsTestWithParam = LsTestImpl<testing::TestWithParam<T>>;
 
+/// Result structure of ParseMarkers
+struct ParsedMarkers {
+    /// All parsed ranges, marked up with '「' and '」'. For example: `「my_range」`
+    std::vector<langsvr::lsp::Range> ranges;
+    /// All parsed positions, marked up with '⧘'. For example: `posi⧘tion`
+    std::vector<langsvr::lsp::Position> positions;
+    /// The string with all markup removed.
+    /// '「' and '」' are replaced with whitespace.
+    /// '⧘' are omitted with no replacement characters.
+    std::string clean;
+};
+
+/// ParseMarkers parses location and range markers from the string @p str.
+ParsedMarkers ParseMarkers(std::string_view str);
+
 }  // namespace tint::wgsl::ls
 
 #endif  // SRC_TINT_LANG_WGSL_LS_HELPERS_TEST_H_

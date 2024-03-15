@@ -27,49 +27,26 @@
 
 #include "src/tint/lang/wgsl/ls/server.h"
 
-#include "langsvr/session.h"
-
 #include "src/tint/lang/wgsl/ls/utils.h"
 
 namespace lsp = langsvr::lsp;
 
 namespace tint::wgsl::ls {
 
-Server::Server(langsvr::Session& session) : session_(session) {
-    session.Register([&](const lsp::InitializeRequest&) {
-        lsp::InitializeResult result;
-        result.capabilities.definition_provider = true;
-        result.capabilities.document_symbol_provider = [] {
-            lsp::DocumentSymbolOptions opts;
-            return opts;
-        }();
-        return result;
-    });
+typename lsp::TextDocumentDefinitionRequest::ResultType  //
+Server::Handle(const lsp::TextDocumentDefinitionRequest& r) {
+    typename lsp::TextDocumentDefinitionRequest::SuccessType result = lsp::Null{};
 
-    session.Register([&](const lsp::ShutdownRequest&) {
-        shutting_down_ = true;
-        return lsp::Null{};
-    });
+    if (auto file = files_.Get(r.text_document.uri)) {
+        if (auto def = (*file)->Definition(Conv(r.position))) {
+            lsp::Location loc;
+            loc.range = Conv(def->range);
+            loc.uri = r.text_document.uri;
+            result = lsp::Definition{loc};
+        }
+    }
 
-    // Notification handlers
-    session.Register([&](const lsp::TextDocumentDidOpenNotification& n) { return Handle(n); });
-    session.Register([&](const lsp::TextDocumentDidCloseNotification& n) { return Handle(n); });
-    session.Register([&](const lsp::TextDocumentDidChangeNotification& n) { return Handle(n); });
-    session.Register(
-        [&](const lsp::WorkspaceDidChangeConfigurationNotification&) { return langsvr::Success; });
-
-    // Request handlers
-    session.Register([&](const lsp::TextDocumentDefinitionRequest& r) { return Handle(r); });
-    session.Register([&](const lsp::TextDocumentDocumentSymbolRequest& r) { return Handle(r); });
-}
-
-Server::~Server() = default;
-
-Server::Logger::~Logger() {
-    lsp::WindowLogMessageNotification n;
-    n.type = lsp::MessageType::kLog;
-    n.message = msg.str();
-    (void)session.Send(n);
+    return result;
 }
 
 }  // namespace tint::wgsl::ls

@@ -36,6 +36,7 @@
 #include "src/tint/lang/wgsl/sem/function_expression.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -94,6 +95,18 @@ std::vector<Source::Range> File::References(Source::Location l, bool include_dec
             }
         }
     };
+    auto struct_ = [&](const sem::Struct* s) {
+        if (include_declaration) {
+            references.push_back(s->Declaration()->name->source.range);
+        }
+        for (auto* node : nodes) {
+            if (auto* ident = node->As<ast::IdentifierExpression>()) {
+                if (program.Sem().Get<sem::Struct>(node) == s) {
+                    references.push_back(ident->source.range);
+                }
+            }
+        }
+    };
 
     Switch(
         Unwrap(NodeAt<CastableBase>(l)),  //
@@ -106,7 +119,11 @@ std::vector<Source::Range> File::References(Source::Location l, bool include_dec
                 struct_member(member);
             }
         },
-        [&](const sem::StructMember* m) { struct_member(m); });
+        [&](const sem::StructMember* m) { struct_member(m); },
+        [&](const sem::TypeExpression* te) {
+            return Switch(te->Type(),  //
+                          [&](const sem::Struct* s) { return struct_(s); });
+        });
     return references;
 }
 
@@ -123,7 +140,11 @@ std::optional<File::TextAndRange> File::Definition(Source::Location l) {
             }
             return nullptr;
         },
-        [&](const sem::StructMember* m) { return m->Declaration()->name; });
+        [&](const sem::StructMember* m) { return m->Declaration()->name; },
+        [&](const sem::TypeExpression* te) {
+            return Switch(te->Type(),  //
+                          [&](const sem::Struct* s) { return s->Declaration()->name; });
+        });
     if (ident) {
         return TextAndRange{ident->symbol.Name(), ident->source.range};
     }

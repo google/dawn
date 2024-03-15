@@ -55,6 +55,10 @@ class Server {
     bool ShuttingDown() const { return shutting_down_; }
 
   private:
+    /// Handler for langsvr::lsp::TextDocumentDefinitionRequest
+    typename langsvr::lsp::TextDocumentDefinitionRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentDefinitionRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentDocumentSymbolRequest
     typename langsvr::lsp::TextDocumentDocumentSymbolRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentDocumentSymbolRequest& r);
