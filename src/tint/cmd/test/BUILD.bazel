@@ -164,6 +164,11 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_tintd_and_tint_build_wgsl_reader": [
+      "//src/tint/lang/wgsl/ls:test",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/inspector:test",
       "//src/tint/lang/wgsl/reader/parser:test",
@@ -215,6 +220,11 @@ alias(
 alias(
   name = "tint_build_spv_writer",
   actual = "//src/tint:tint_build_spv_writer_true",
+)
+
+alias(
+  name = "tint_build_tintd",
+  actual = "//src/tint:tint_build_tintd_true",
 )
 
 alias(
@@ -280,6 +290,13 @@ selects.config_setting_group(
         ":tint_build_spv_writer",
         ":tint_build_wgsl_reader",
         ":tint_build_wgsl_writer",
+    ],
+)
+selects.config_setting_group(
+    name = "tint_build_tintd_and_tint_build_wgsl_reader",
+    match_all = [
+        ":tint_build_tintd",
+        ":tint_build_wgsl_reader",
     ],
 )
 selects.config_setting_group(

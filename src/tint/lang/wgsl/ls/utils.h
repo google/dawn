@@ -25,41 +25,55 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ls/server.h"
+#ifndef SRC_TINT_LANG_WGSL_LS_UTILS_H_
+#define SRC_TINT_LANG_WGSL_LS_UTILS_H_
 
-#include "langsvr/session.h"
+#include "langsvr/lsp/lsp.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
+#include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/rtti/castable.h"
 
-#include "src/tint/lang/wgsl/ls/utils.h"
-
-namespace lsp = langsvr::lsp;
+// Forward declarations
+namespace tint::sem {
+class Node;
+}
 
 namespace tint::wgsl::ls {
 
-Server::Server(langsvr::Session& session) : session_(session) {
-    session.Register([&](const lsp::InitializeRequest&) {
-        lsp::InitializeResult result;
-        return result;
-    });
-
-    session.Register([&](const lsp::ShutdownRequest&) {
-        shutting_down_ = true;
-        return lsp::Null{};
-    });
-
-    session.Register([&](const lsp::TextDocumentDidOpenNotification& n) { return Handle(n); });
-    session.Register([&](const lsp::TextDocumentDidCloseNotification& n) { return Handle(n); });
-    session.Register([&](const lsp::TextDocumentDidChangeNotification& n) { return Handle(n); });
-    session.Register(
-        [&](const lsp::WorkspaceDidChangeConfigurationNotification&) { return langsvr::Success; });
+/// @return the langsvr::lsp::Position @p pos converted to a tint::Source::Location
+inline Source::Location Conv(langsvr::lsp::Position pos) {
+    Source::Location loc;
+    loc.line = static_cast<uint32_t>(pos.line + 1);
+    loc.column = static_cast<uint32_t>(pos.character + 1);
+    return loc;
 }
 
-Server::~Server() = default;
+/// @return the tint::Source::Location @p loc converted to a langsvr::lsp::Position
+inline langsvr::lsp::Position Conv(Source::Location loc) {
+    langsvr::lsp::Position pos;
+    pos.line = loc.line - 1;
+    pos.character = loc.column - 1;
+    return pos;
+}
 
-Server::Logger::~Logger() {
-    lsp::WindowLogMessageNotification n;
-    n.type = lsp::MessageType::kLog;
-    n.message = msg.str();
-    (void)session.Send(n);
+/// @return the tint::Source::Range @p rng converted to a langsvr::lsp::Range
+inline langsvr::lsp::Range Conv(Source::Range rng) {
+    langsvr::lsp::Range out;
+    out.start = Conv(rng.begin);
+    out.end = Conv(rng.end);
+    return out;
+}
+
+/// @returns the sem::Load() and sem::Materialize() unwrapped sem::ValueExpression, if `T` is a
+/// sem::ValueExpression, otherwise returns @p node.
+template <typename T>
+const T* Unwrap(const T* node) {
+    if (auto* expr = As<sem::ValueExpression, CastFlags::kDontErrorOnImpossibleCast>(node)) {
+        return As<T>(expr->Unwrap());
+    }
+    return node;
 }
 
 }  // namespace tint::wgsl::ls
+
+#endif  // SRC_TINT_LANG_WGSL_LS_UTILS_H_
