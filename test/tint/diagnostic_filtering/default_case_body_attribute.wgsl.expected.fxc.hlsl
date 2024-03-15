@@ -24,6 +24,7 @@ struct tint_symbol_1 {
 void main_inner(float x) {
   tint_ftoi(x);
   do {
+    float4 tint_phony = t.Sample(s, (0.0f).xx);
   } while (false);
 }
 

@@ -24,6 +24,7 @@ struct tint_symbol_2 {
 void tint_symbol_inner(float x) {
   switch(tint_ftoi(x)) {
     default: {
+      float const tint_phony = dfdx(1.0f);
       break;
     }
   }

@@ -13,20 +13,21 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
+struct tint_symbol_3 {
   float x [[user(locn0)]];
 };
 
 void tint_symbol_inner(float x) {
   if ((x > 0.0f)) {
   } else {
-    if ((dfdx(1.0f) > 0.0f)) {
+    float const tint_symbol_1 = dfdx(1.0f);
+    if ((tint_symbol_1 > 0.0f)) {
     }
   }
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_1.x);
+fragment void tint_symbol(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
+  tint_symbol_inner(tint_symbol_2.x);
   return;
 }
 

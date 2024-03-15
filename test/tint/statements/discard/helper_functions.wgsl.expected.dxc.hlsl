@@ -9,8 +9,9 @@ void foo() {
 }
 
 void bar() {
+  float tint_symbol = ddx(1.0f);
   if (!(tint_discarded)) {
-    output.Store(0u, asuint(ddx(1.0f)));
+    output.Store(0u, asuint(tint_symbol));
   }
 }
 

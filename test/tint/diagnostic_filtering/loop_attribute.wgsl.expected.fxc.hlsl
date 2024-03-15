@@ -16,6 +16,7 @@ struct tint_symbol_1 {
 
 void main_inner(float x) {
   while (true) {
+    float tint_phony = ddx(1.0f);
     {
       if ((x > 0.0f)) { break; }
     }

@@ -153,6 +153,14 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program& src, const DataMap&,
                             << "write to unhandled address space: " << ref->AddressSpace();
                 }
 
+                // If the RHS has side effects (which may contain derivative operations), we need to
+                // hoist it out to a separate declaration so that it does not get masked.
+                auto* rhs = sem.GetVal(assign->rhs);
+                if (rhs->HasSideEffects()) {
+                    hoist_to_decl_before.Add(rhs, assign->rhs,
+                                             HoistToDeclBefore::VariableKind::kLet);
+                }
+
                 // Mask the assignment using the invocation-discarded flag.
                 ctx.Replace(assign, b.If(b.Not(flag), b.Block(ctx.Clone(assign))));
             },

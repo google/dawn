@@ -18,8 +18,9 @@ void foo() {
 }
 
 void bar() {
+  float tint_symbol_2 = dFdx(1.0f);
   if (!(tint_discarded)) {
-    tint_symbol.inner = dFdx(1.0f);
+    tint_symbol.inner = tint_symbol_2;
   }
 }
 

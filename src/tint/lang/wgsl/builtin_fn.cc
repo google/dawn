@@ -752,6 +752,18 @@ bool HasSideEffects(BuiltinFn f) {
         case BuiltinFn::kAtomicStore:
         case BuiltinFn::kAtomicSub:
         case BuiltinFn::kAtomicXor:
+        case BuiltinFn::kDpdx:
+        case BuiltinFn::kDpdxCoarse:
+        case BuiltinFn::kDpdxFine:
+        case BuiltinFn::kDpdy:
+        case BuiltinFn::kDpdyCoarse:
+        case BuiltinFn::kDpdyFine:
+        case BuiltinFn::kFwidth:
+        case BuiltinFn::kFwidthCoarse:
+        case BuiltinFn::kFwidthFine:
+        case BuiltinFn::kTextureSample:
+        case BuiltinFn::kTextureSampleBias:
+        case BuiltinFn::kTextureSampleCompare:
         case BuiltinFn::kTextureStore:
         case BuiltinFn::kWorkgroupUniformLoad:
             return true;

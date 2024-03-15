@@ -25,6 +25,7 @@ struct tint_symbol_2 {
 void tint_symbol_inner(float x) {
   TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     {
+      float const tint_phony = dfdx(1.0f);
       if ((x > 0.0f)) { break; }
     }
   }

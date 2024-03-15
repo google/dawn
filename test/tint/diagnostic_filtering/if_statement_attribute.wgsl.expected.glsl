@@ -18,7 +18,8 @@ layout(location = 0) in float x_1;
 void tint_symbol(float x) {
   if ((x > 0.0f)) {
   } else {
-    if ((dFdx(1.0f) > 0.0f)) {
+    float tint_symbol_1 = dFdx(1.0f);
+    if ((tint_symbol_1 > 0.0f)) {
     }
   }
 }

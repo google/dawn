@@ -13,7 +13,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 34
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -23,6 +23,7 @@
                OpName %main_inner "main_inner"
                OpName %x "x"
                OpName %v "v"
+               OpName %tint_symbol "tint_symbol"
                OpName %main "main"
                OpDecorate %x_1 Location 0
       %float = OpTypeFloat 32
@@ -33,44 +34,50 @@
     %v4float = OpTypeVector %float 4
          %10 = OpConstantNull %v4float
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %18 = OpConstantNull %float
+         %17 = OpConstantNull %float
        %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+         %22 = OpConstantNull %bool
     %float_1 = OpConstant %float 1
-         %29 = OpTypeFunction %void
+         %33 = OpTypeFunction %void
  %main_inner = OpFunction %void None %4
           %x = OpFunctionParameter %float
           %8 = OpLabel
           %v = OpVariable %_ptr_Function_v4float Function %10
+%tint_symbol = OpVariable %_ptr_Function_bool Function %22
                OpStore %v %10
                OpBranch %13
          %13 = OpLabel
                OpLoopMerge %14 %15 None
                OpBranch %16
          %16 = OpLabel
-         %19 = OpFOrdGreaterThan %bool %x %18
-               OpSelectionMerge %21 None
-               OpBranchConditional %19 %22 %21
-         %22 = OpLabel
-         %23 = OpDPdx %float %float_1
-         %25 = OpFOrdGreaterThan %bool %23 %18
-               OpBranch %21
-         %21 = OpLabel
-         %26 = OpPhi %bool %19 %16 %25 %22
-         %17 = OpLogicalNot %bool %26
-               OpSelectionMerge %27 None
-               OpBranchConditional %17 %28 %27
-         %28 = OpLabel
+         %18 = OpFOrdGreaterThan %bool %x %17
+               OpStore %tint_symbol %18
+         %23 = OpLoad %bool %tint_symbol
+               OpSelectionMerge %24 None
+               OpBranchConditional %23 %25 %24
+         %25 = OpLabel
+         %26 = OpDPdx %float %float_1
+         %28 = OpFOrdGreaterThan %bool %26 %17
+               OpStore %tint_symbol %28
+               OpBranch %24
+         %24 = OpLabel
+         %30 = OpLoad %bool %tint_symbol
+         %29 = OpLogicalNot %bool %30
+               OpSelectionMerge %31 None
+               OpBranchConditional %29 %32 %31
+         %32 = OpLabel
                OpBranch %14
-         %27 = OpLabel
+         %31 = OpLabel
                OpBranch %15
          %15 = OpLabel
                OpBranch %13
          %14 = OpLabel
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %29
-         %31 = OpLabel
-         %33 = OpLoad %float %x_1
-         %32 = OpFunctionCall %void %main_inner %33
+       %main = OpFunction %void None %33
+         %35 = OpLabel
+         %37 = OpLoad %float %x_1
+         %36 = OpFunctionCall %void %main_inner %37
                OpReturn
                OpFunctionEnd

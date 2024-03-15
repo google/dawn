@@ -23,7 +23,7 @@
                OpName %coord "coord"
                OpName %result "result"
                OpName %i "i"
-               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %foo "foo"
                OpDecorate %in_1 Location 0
                OpDecorate %coord_1 Location 1
@@ -68,7 +68,7 @@
          %42 = OpConstantNull %float
        %true = OpConstantTrue %bool
     %v4float = OpTypeVector %float 4
-         %52 = OpTypeSampledImage %17
+         %51 = OpTypeSampledImage %17
 %_ptr_Function_int = OpTypePointer Function %int
      %int_10 = OpConstant %int 10
        %uint = OpTypeInt 32 0
@@ -94,7 +94,7 @@
          %41 = OpLabel
      %result = OpVariable %_ptr_Function_int Function %14
           %i = OpVariable %_ptr_Function_int Function %14
-%tint_symbol = OpVariable %_ptr_Function_int Function %14
+%tint_symbol_1 = OpVariable %_ptr_Function_int Function %14
          %43 = OpFOrdEqual %bool %in %42
                OpSelectionMerge %44 None
                OpBranchConditional %43 %45 %44
@@ -102,13 +102,13 @@
                OpStore %tint_discarded %true
                OpBranch %44
          %44 = OpLabel
-         %50 = OpLoad %20 %s
-         %51 = OpLoad %17 %t
-         %53 = OpSampledImage %52 %51 %50
-         %48 = OpImageSampleImplicitLod %v4float %53 %coord
-         %54 = OpCompositeExtract %float %48 0
-         %47 = OpFunctionCall %int %tint_ftoi %54
-               OpStore %result %47
+         %49 = OpLoad %20 %s
+         %50 = OpLoad %17 %t
+         %52 = OpSampledImage %51 %50 %49
+         %47 = OpImageSampleImplicitLod %v4float %52 %coord
+         %54 = OpCompositeExtract %float %47 0
+         %53 = OpFunctionCall %int %tint_ftoi %54
+               OpStore %result %53
                OpStore %i %14
                OpBranch %58
          %58 = OpLabel
@@ -136,10 +136,10 @@
          %75 = OpLabel
          %82 = OpAccessChain %_ptr_StorageBuffer_int %a %uint_0
          %76 = OpAtomicIAdd %int %82 %uint_1 %uint_0 %int_1
-               OpStore %tint_symbol %76
+               OpStore %tint_symbol_1 %76
                OpBranch %74
          %74 = OpLabel
-         %84 = OpLoad %int %tint_symbol
+         %84 = OpLoad %int %tint_symbol_1
                OpStore %i %84
                OpBranch %58
          %59 = OpLabel

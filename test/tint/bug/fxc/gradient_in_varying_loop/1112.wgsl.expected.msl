@@ -6,16 +6,17 @@ using namespace metal;
   volatile bool VOLATILE_NAME = true; \
   if (VOLATILE_NAME)
 
-struct tint_symbol_2 {
+struct tint_symbol_3 {
   float2 vUV [[user(locn0)]];
 };
 
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   float4 value [[color(0)]];
 };
 
-float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbol_4, sampler tint_symbol_5) {
-  float3 const random = tint_symbol_4.sample(tint_symbol_5, vUV).rgb;
+float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbol_5, sampler tint_symbol_6) {
+  float4 const tint_symbol_1 = tint_symbol_5.sample(tint_symbol_6, vUV);
+  float3 const random = tint_symbol_1.rgb;
   int i = 0;
   TINT_ISOLATE_UB(tint_volatile_true) while(true) {
     if ((i < 1)) {
@@ -33,9 +34,9 @@ float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbo
   return float4(1.0f);
 }
 
-fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_6 [[texture(0)]], sampler tint_symbol_7 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  float4 const inner_result = tint_symbol_inner(tint_symbol_1.vUV, tint_symbol_6, tint_symbol_7);
-  tint_symbol_3 wrapper_result = {};
+fragment tint_symbol_4 tint_symbol(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
+  float4 const inner_result = tint_symbol_inner(tint_symbol_2.vUV, tint_symbol_7, tint_symbol_8);
+  tint_symbol_4 wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }

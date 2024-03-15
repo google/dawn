@@ -17,6 +17,7 @@ precision highp int;
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {
   while (true) {
+    float tint_phony = dFdx(1.0f);
     {
       if ((x > 0.0f)) { break; }
     }

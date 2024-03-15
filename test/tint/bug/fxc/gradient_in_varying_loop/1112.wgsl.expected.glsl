@@ -7,7 +7,8 @@ layout(location = 0) out vec4 value;
 uniform highp sampler2D randomTexture_Sampler;
 
 vec4 tint_symbol(vec2 vUV) {
-  vec3 random = texture(randomTexture_Sampler, vUV).rgb;
+  vec4 tint_symbol_1 = texture(randomTexture_Sampler, vUV);
+  vec3 random = tint_symbol_1.rgb;
   int i = 0;
   while (true) {
     if ((i < 1)) {

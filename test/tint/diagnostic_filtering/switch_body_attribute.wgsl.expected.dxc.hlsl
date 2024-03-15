@@ -21,6 +21,7 @@ struct tint_symbol_1 {
 void main_inner(float x) {
   tint_ftoi(x);
   do {
+    float tint_phony = ddx(1.0f);
   } while (false);
 }
 

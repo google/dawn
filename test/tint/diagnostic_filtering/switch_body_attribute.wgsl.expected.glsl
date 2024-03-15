@@ -22,6 +22,7 @@ int tint_ftoi(float v) {
 void tint_symbol(float x) {
   switch(tint_ftoi(x)) {
     default: {
+      float tint_phony = dFdx(1.0f);
       break;
     }
   }

@@ -1307,5 +1307,93 @@ fn foo(@location(0) in : f32) {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(DemoteToHelperTest, Assignment_HoistExplicitDerivative) {
+    auto* src = R"(
+@group(0) @binding(0)
+var<storage, read_write> output : array<f32, 4>;
+
+@fragment
+fn foo(@location(0) in : f32) {
+  if (in == 0.0) {
+    discard;
+  }
+  output[u32(in)] = dpdx(in);
+}
+)";
+
+    auto* expect = R"(
+var<private> tint_discarded = false;
+
+@group(0) @binding(0) var<storage, read_write> output : array<f32, 4>;
+
+@fragment
+fn foo(@location(0) in : f32) {
+  if ((in == 0.0)) {
+    tint_discarded = true;
+  }
+  let tint_symbol : f32 = dpdx(in);
+  if (!(tint_discarded)) {
+    output[u32(in)] = tint_symbol;
+  }
+  if (tint_discarded) {
+    discard;
+  }
+}
+)";
+
+    auto got = Run<DemoteToHelper>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(DemoteToHelperTest, Assignment_HoistImplicitDerivative) {
+    auto* src = R"(
+@group(0) @binding(0)
+var<storage, read_write> output : array<vec4f, 4>;
+
+@group(0) @binding(1)
+var t : texture_2d<f32>;
+
+@group(0) @binding(2)
+var s : sampler;
+
+@fragment
+fn foo(@interpolate(flat) @location(0) in : u32) {
+  if (in == 0) {
+    discard;
+  }
+  output[in] = textureSample(t, s, vec2());
+}
+)";
+
+    auto* expect = R"(
+var<private> tint_discarded = false;
+
+@group(0) @binding(0) var<storage, read_write> output : array<vec4f, 4>;
+
+@group(0) @binding(1) var t : texture_2d<f32>;
+
+@group(0) @binding(2) var s : sampler;
+
+@fragment
+fn foo(@interpolate(flat) @location(0) in : u32) {
+  if ((in == 0)) {
+    tint_discarded = true;
+  }
+  let tint_symbol : vec4<f32> = textureSample(t, s, vec2());
+  if (!(tint_discarded)) {
+    output[in] = tint_symbol;
+  }
+  if (tint_discarded) {
+    discard;
+  }
+}
+)";
+
+    auto got = Run<DemoteToHelper>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform

@@ -108,7 +108,7 @@ TEST_F(SideEffectsTest, VariableUser) {
 
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
     GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
-    auto* expr = Call("dpdx", "a");
+    auto* expr = Call("sqrt", "a");
     Func("f", tint::Empty, ty.void_(), Vector{Ignore(expr)},
          Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
@@ -334,30 +334,30 @@ INSTANTIATE_TEST_SUITE_P(
         C("textureSampleCompareLevel",
           Vector{"tdepth2d", "scomp", "vf2", "f"},
           false,
-          true),                                                                          //
-        C("textureSampleGrad", Vector{"t2d", "s2d", "vf2", "vf2", "vf2"}, false, true),   //
-        C("textureSampleLevel", Vector{"t2d", "s2d", "vf2", "f"}, false, true),           //
-        C("transpose", Vector{"m"}, false, true),                                         //
-        C("trunc", Vector{"f"}, false, true),                                             //
-        C("unpack2x16float", Vector{"u"}, false, true),                                   //
-        C("unpack2x16snorm", Vector{"u"}, false, true),                                   //
-        C("unpack2x16unorm", Vector{"u"}, false, true),                                   //
-        C("unpack4x8snorm", Vector{"u"}, false, true),                                    //
-        C("unpack4x8unorm", Vector{"u"}, false, true),                                    //
-        C("storageBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),     //
-        C("workgroupBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),   //
-        C("textureSample", Vector{"t2d", "s2d", "vf2"}, false, true),                     //
-        C("textureSampleBias", Vector{"t2d", "s2d", "vf2", "f"}, false, true),            //
-        C("textureSampleCompare", Vector{"tdepth2d", "scomp", "vf2", "f"}, false, true),  //
-        C("dpdx", Vector{"f"}, false, true),                                              //
-        C("dpdxCoarse", Vector{"f"}, false, true),                                        //
-        C("dpdxFine", Vector{"f"}, false, true),                                          //
-        C("dpdy", Vector{"f"}, false, true),                                              //
-        C("dpdyCoarse", Vector{"f"}, false, true),                                        //
-        C("dpdyFine", Vector{"f"}, false, true),                                          //
-        C("fwidth", Vector{"f"}, false, true),                                            //
-        C("fwidthCoarse", Vector{"f"}, false, true),                                      //
-        C("fwidthFine", Vector{"f"}, false, true),                                        //
+          true),                                                                         //
+        C("textureSampleGrad", Vector{"t2d", "s2d", "vf2", "vf2", "vf2"}, false, true),  //
+        C("textureSampleLevel", Vector{"t2d", "s2d", "vf2", "f"}, false, true),          //
+        C("transpose", Vector{"m"}, false, true),                                        //
+        C("trunc", Vector{"f"}, false, true),                                            //
+        C("unpack2x16float", Vector{"u"}, false, true),                                  //
+        C("unpack2x16snorm", Vector{"u"}, false, true),                                  //
+        C("unpack2x16unorm", Vector{"u"}, false, true),                                  //
+        C("unpack4x8snorm", Vector{"u"}, false, true),                                   //
+        C("unpack4x8unorm", Vector{"u"}, false, true),                                   //
+        C("storageBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),    //
+        C("workgroupBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),  //
+        C("textureSample", Vector{"t2d", "s2d", "vf2"}, true, true),                     //
+        C("textureSampleBias", Vector{"t2d", "s2d", "vf2", "f"}, true, true),            //
+        C("textureSampleCompare", Vector{"tdepth2d", "scomp", "vf2", "f"}, true, true),  //
+        C("dpdx", Vector{"f"}, true, true),                                              //
+        C("dpdxCoarse", Vector{"f"}, true, true),                                        //
+        C("dpdxFine", Vector{"f"}, true, true),                                          //
+        C("dpdy", Vector{"f"}, true, true),                                              //
+        C("dpdyCoarse", Vector{"f"}, true, true),                                        //
+        C("dpdyFine", Vector{"f"}, true, true),                                          //
+        C("fwidth", Vector{"f"}, true, true),                                            //
+        C("fwidthCoarse", Vector{"f"}, true, true),                                      //
+        C("fwidthFine", Vector{"f"}, true, true),                                        //
 
         // Side-effect builtins
         C("atomicAdd", Vector{"pa", "i"}, true, true),                       //

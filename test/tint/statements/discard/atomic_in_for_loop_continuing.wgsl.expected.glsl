@@ -3,7 +3,7 @@ precision highp float;
 precision highp int;
 
 bool tint_discarded = false;
-layout(location = 0) in float tint_symbol_1;
+layout(location = 0) in float tint_symbol_2;
 layout(location = 1) in vec2 coord_1;
 layout(location = 0) out int value;
 int tint_ftoi(float v) {
@@ -20,7 +20,8 @@ int foo(float tint_symbol, vec2 coord) {
   if ((tint_symbol == 0.0f)) {
     tint_discarded = true;
   }
-  int result = tint_ftoi(texture(t_s, coord).x);
+  vec4 tint_symbol_1 = texture(t_s, coord);
+  int result = tint_ftoi(tint_symbol_1.x);
   {
     int i = 0;
     while (true) {
@@ -31,11 +32,11 @@ int foo(float tint_symbol, vec2 coord) {
         result = (result + i);
       }
       {
-        int tint_symbol_2 = 0;
+        int tint_symbol_3 = 0;
         if (!(tint_discarded)) {
-          tint_symbol_2 = atomicAdd(a.inner, 1);
+          tint_symbol_3 = atomicAdd(a.inner, 1);
         }
-        i = tint_symbol_2;
+        i = tint_symbol_3;
       }
     }
   }
@@ -43,7 +44,7 @@ int foo(float tint_symbol, vec2 coord) {
 }
 
 void main() {
-  int inner_result = foo(tint_symbol_1, coord_1);
+  int inner_result = foo(tint_symbol_2, coord_1);
   value = inner_result;
   if (tint_discarded) {
     discard;

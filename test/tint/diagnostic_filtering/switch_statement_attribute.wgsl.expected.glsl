@@ -16,11 +16,12 @@ precision highp int;
 
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {
-  bool tint_tmp = (x == 0.0f);
-  if (tint_tmp) {
-    tint_tmp = (dFdx(1.0f) == 0.0f);
+  bool tint_symbol_1 = (x == 0.0f);
+  if (tint_symbol_1) {
+    float tint_symbol_2 = dFdx(1.0f);
+    tint_symbol_1 = (tint_symbol_2 == 0.0f);
   }
-  switch(int((tint_tmp))) {
+  switch(int(tint_symbol_1)) {
     default: {
       break;
     }

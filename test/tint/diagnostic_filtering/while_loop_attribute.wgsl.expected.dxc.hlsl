@@ -10,22 +10,27 @@
   while (x > 0.0 && dpdx(1.0) > 0.0)  {
                     ^^^^^^^^^
 
-struct tint_symbol_1 {
+struct tint_symbol_3 {
   float x : TEXCOORD0;
 };
 
 void main_inner(float x) {
   float4 v = (0.0f).xxxx;
   while (true) {
-    bool tint_tmp = (x > 0.0f);
-    if (tint_tmp) {
-      tint_tmp = (ddx(1.0f) > 0.0f);
+    bool tint_symbol = (x > 0.0f);
+    if (tint_symbol) {
+      float tint_symbol_1 = ddx(1.0f);
+      tint_symbol = (tint_symbol_1 > 0.0f);
     }
-    if (!((tint_tmp))) { break; }
+    if (!(tint_symbol)) {
+      break;
+    }
+    {
+    }
   }
 }
 
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.x);
+void main(tint_symbol_3 tint_symbol_2) {
+  main_inner(tint_symbol_2.x);
   return;
 }

@@ -17,13 +17,16 @@ precision highp int;
 layout(location = 0) in float x_1;
 void tint_symbol(float x) {
   vec4 v = vec4(0.0f);
-  {
-    while (true) {
-      bool tint_tmp = (x > v.x);
-      if (tint_tmp) {
-        tint_tmp = (dFdx(1.0f) > 0.0f);
-      }
-      if (!((tint_tmp))) { break; }
+  while (true) {
+    bool tint_symbol_1 = (x > v.x);
+    if (tint_symbol_1) {
+      float tint_symbol_2 = dFdx(1.0f);
+      tint_symbol_1 = (tint_symbol_2 > 0.0f);
+    }
+    if (!(tint_symbol_1)) {
+      break;
+    }
+    {
     }
   }
 }
