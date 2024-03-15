@@ -126,7 +126,7 @@ void MatrixVectorMultiplyPerf::SetUp() {
 
     // Unoptimized variant too slow for bots.
     // Unskip locally with flag --run-suppressed-tests.
-    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && !GetParam().mSubgroups && !GetParam().mSwizzle);
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && !GetParam().mSwizzle);
 
     if (GetParam().mStoreType != StoreType::U8) {
         // Don't care about testing this case.
