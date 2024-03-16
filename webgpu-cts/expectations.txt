@@ -229,12 +229,6 @@ crbug.com/tint/2200 [ nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-
 crbug.com/tint/2200 [ nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=25 [ RetryOnFailure ]
 crbug.com/tint/2200 [ nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=6 [ RetryOnFailure ]
 
-################################################################################
-# WebGPUTextureAlphaClearer invalid texture from IOSurface
-# KEEP
-################################################################################
-crbug.com/1515476 [ intel-0x3e9b sonoma ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ RetryOnFailure ]
-crbug.com/1515476 [ intel-0x3e9b ventura ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="bgra8unorm";viewFormatFeature="_undef_" [ RetryOnFailure ]
 
 ################################################################################
 # D3D12 create command queue failed with DXGI_ERROR_DEVICE_REMOVED. Skipped because these tests likely cause downstream flakes.
@@ -356,11 +350,7 @@ crbug.com/41487285 [ android-t arm target-cpu-64 ] webgpu:web_platform,external_
 crbug.com/41487285 [ android-t arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
 crbug.com/41487285 [ android-t arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
 crbug.com/41487285 [ android-t arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-vflip.mp4";* [ Failure ]
-crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";* [ Failure ]
-crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-180.mp4";* [ Failure ]
-crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-270.mp4";* [ Failure ]
-crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-rotate-90.mp4";* [ Failure ]
-crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";* [ Failure ]
+crbug.com/41487285 [ android-u arm dawn-backend-validation target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";* [ Failure ]
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-180.mp4";* [ Failure ]
 crbug.com/41487285 [ android-u arm target-cpu-64 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
@@ -936,10 +926,6 @@ crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
 crbug.com/dawn/2433 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
 crbug.com/dawn/2433 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-u ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
-crbug.com/dawn/1991 [ android-u ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/2433 [ android-u ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup";extraFlags="rmw_variant" [ RetryOnFailure ]
-crbug.com/dawn/2433 [ android-u ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup" [ RetryOnFailure ]
 
 ################################################################################
 # Tint Pixel 4 failures
