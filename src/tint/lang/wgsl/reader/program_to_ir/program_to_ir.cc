@@ -575,14 +575,20 @@ class Impl {
 
         ControlStackScope scope(this, loop_inst);
 
+        auto& body_behaviors = program_.Sem().Get(stmt->body)->Behaviors();
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Body());
 
             EmitStatements(stmt->body->statements);
 
-            // The current block didn't `break`, `return` or `continue`, go to the continuing block.
+            // The current block didn't `break`, `return` or `continue`, go to the continuing block
+            // or mark the end of the block as unreachable.
             if (NeedTerminator()) {
-                SetTerminator(builder_.Continue(loop_inst));
+                if (body_behaviors.Contains(sem::Behavior::kNext)) {
+                    SetTerminator(builder_.Continue(loop_inst));
+                } else {
+                    SetTerminator(builder_.Unreachable());
+                }
             }
         }
 
