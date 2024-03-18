@@ -1,0 +1,27 @@
+<dawn>/test/tint/bug/tint/2201.wgsl:9:9 warning: code is unreachable
+        let _e16_ = vec2(false, false);
+        ^^^^^^^^^
+
+#include <metal_stdlib>
+
+using namespace metal;
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
+kernel void tint_symbol() {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    if (true) {
+      break;
+    } else {
+      break;
+    }
+    bool2 const _e16_ = bool2(false);
+    {
+      if (_e16_[0]) { break; }
+    }
+  }
+  return;
+}
+

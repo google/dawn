@@ -1,0 +1,38 @@
+<dawn>/test/tint/bug/tint/2201.wgsl:9:9 warning: code is unreachable
+        let _e16_ = vec2(false, false);
+        ^^^^^^^^^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 14
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %10 %11
+         %10 = OpLabel
+               OpBranch %8
+         %11 = OpLabel
+               OpBranch %8
+          %9 = OpLabel
+               OpUnreachable
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd

@@ -592,11 +592,14 @@ class Impl {
             }
         }
 
-        {
+        // Emit a continuing block if it is reachable.
+        if (body_behaviors.Contains(sem::Behavior::kNext) ||
+            body_behaviors.Contains(sem::Behavior::kContinue)) {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Continuing());
             if (stmt->continuing) {
                 EmitBlock(stmt->continuing);
             }
+
             // Branch back to the start block if the continue target didn't terminate already
             if (NeedTerminator()) {
                 SetTerminator(builder_.NextIteration(loop_inst));
