@@ -157,12 +157,11 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
 }
 
 MaybeError Queue::CheckAndMapReadyBuffers(ExecutionSerial completedSerial) {
-    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    auto commandContext = GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
     for (auto buffer : mPendingMapBuffers.IterateUpTo(completedSerial)) {
         DAWN_TRY(buffer->FinalizeMap(&commandContext, completedSerial));
     }
     mPendingMapBuffers.ClearUpTo(completedSerial);
-
     return {};
 }
 
