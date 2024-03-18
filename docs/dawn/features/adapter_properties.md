@@ -48,7 +48,7 @@ struct AdapterPropertiesD3D {
 
 `wgpu::AdapterPropertiesVk` may be chained on `wgpu::AdapterProperties` in a call to `wgpu::Adapter::GetProperties` in order to query Vulkan information on that adapter.
 
-Adds `wgpu::AdapterPropertiesVk` which is a struct describing the D3D adapter.
+Adds `wgpu::AdapterPropertiesVk` which is a struct describing the Vulkan adapter.
 ```
 struct AdapterPropertiesVk {
     uint32_t driverVersion;  // The Vulkan driver version
