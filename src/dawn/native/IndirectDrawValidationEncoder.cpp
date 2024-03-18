@@ -28,6 +28,7 @@
 #include "dawn/native/IndirectDrawValidationEncoder.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
 #include <memory>

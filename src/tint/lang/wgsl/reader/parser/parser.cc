@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
 
 #include <limits>
+#include <utility>
 
 #include "src/tint/lang/core/attribute.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -50,6 +51,7 @@
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
+#include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/reader/parser/classify_template_args.h"

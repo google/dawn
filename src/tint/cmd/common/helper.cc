@@ -27,6 +27,7 @@
 
 #include "src/tint/cmd/common/helper.h"
 
+#include <cstdio>
 #include <iostream>
 #include <utility>
 #include <vector>

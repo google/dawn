@@ -27,11 +27,13 @@
 
 #include "dawn/native/vulkan/ShaderModuleVk.h"
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/HashUtils.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/PhysicalDevice.h"

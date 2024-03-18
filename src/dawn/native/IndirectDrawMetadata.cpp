@@ -28,6 +28,8 @@
 #include "dawn/native/IndirectDrawMetadata.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <tuple>
 #include <utility>
 
 #include "dawn/common/Constants.h"
