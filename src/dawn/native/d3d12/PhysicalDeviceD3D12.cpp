@@ -382,11 +382,19 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
-    // The feature `shader-f16` requires DXC 1.4 or higher. Note that DXC version is checked in
-    // InitializeSupportedFeaturesImpl.
-    if (feature == wgpu::FeatureName::ShaderF16 && !toggles.IsEnabled(Toggle::UseDXC)) {
-        return FeatureValidationResult(absl::StrFormat(
-            "Feature %s requires DXC for D3D12.", GetInstance()->GetFeatureInfo(feature)->name));
+    if (!toggles.IsEnabled(Toggle::UseDXC)) {
+        // Disable features that require DXC.
+        switch (feature) {
+            // The feature `shader-f16` requires DXC 1.4 or higher. Note that DXC version is checked
+            // in InitializeSupportedFeaturesImpl.
+            case wgpu::FeatureName::ShaderF16:
+            case wgpu::FeatureName::ChromiumExperimentalSubgroups:
+                return FeatureValidationResult(
+                    absl::StrFormat("Feature %s requires DXC for D3D12.",
+                                    GetInstance()->GetFeatureInfo(feature)->name));
+            default:
+                break;
+        }
     }
     return {};
 }
