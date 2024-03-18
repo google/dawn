@@ -508,6 +508,154 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_BothSidesReturn) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_BothSidesReturn_NestedInAnotherIfWithResults) {
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({cond});
+
+    b.Append(func->Block(), [&] {
+        auto* outer = b.If(cond);
+        outer->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.f32()));
+        b.Append(outer->True(), [&] {
+            auto* inner = b.If(cond);
+            b.Append(inner->True(), [&] {  //
+                b.Return(func);
+            });
+            b.Append(inner->False(), [&] {  //
+                b.Return(func);
+            });
+            b.Unreachable();
+        });
+        b.Append(outer->False(), [&] {  //
+            b.Return(func);
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%foo = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    %3:i32, %4:f32 = if %2 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        if %2 [t: %b4, f: %b5] {  # if_2
+          %b4 = block {  # true
+            ret
+          }
+          %b5 = block {  # false
+            ret
+          }
+        }
+        unreachable
+      }
+      %b3 = block {  # false
+        ret
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    %3:i32, %4:f32 = if %2 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        if %2 [t: %b4, f: %b5] {  # if_2
+          %b4 = block {  # true
+            exit_if  # if_2
+          }
+          %b5 = block {  # false
+            exit_if  # if_2
+          }
+        }
+        exit_if undef, undef  # if_1
+      }
+      %b3 = block {  # false
+        exit_if undef, undef  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_BothSidesReturn_NestedInLoop) {
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({cond});
+
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {
+            auto* inner = b.If(cond);
+            b.Append(inner->True(), [&] {  //
+                b.Return(func);
+            });
+            b.Append(inner->False(), [&] {  //
+                b.Return(func);
+            });
+            b.Unreachable();
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%foo = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block {  # body
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            ret
+          }
+          %b4 = block {  # false
+            ret
+          }
+        }
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%2:bool):void -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block {  # body
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            exit_if  # if_1
+          }
+          %b4 = block {  # false
+            exit_if  # if_1
+          }
+        }
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     mod.root_block->Append(global);
