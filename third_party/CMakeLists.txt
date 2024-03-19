@@ -227,10 +227,16 @@ function(AddSubdirectoryDXC)
 
     # Create a target that copies dxil.dll from the platform SDK
     if (WIN32)
+        message(STATUS "Finding Windows SDK Directory")
+
+        message(STATUS "Display environment variables:")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E environment COMMAND_ECHO STDOUT)
+
         if(DEFINED ENV{WINDOWSSDKDIR})
             # If WINDOWSSDKDIR env var is defined, use its value. This is defined, for example, when
             # using a Visual Studio command prompt.
             set(WIN10_SDK_PATH "$ENV{WINDOWSSDKDIR}")
+            message(STATUS "Found WINDOWSSDKDIR environment variable: ${WIN10_SDK_PATH}")
         else()
             # There's no easy way to get the Windows SDK path in CMake; however, conveniently, DXC
             # contains a FindD3D12.cmake file that returns WIN10_SDK_PATH and WIN10_SDK_VERSION,
@@ -238,19 +244,23 @@ function(AddSubdirectoryDXC)
             # TODO(crbug.com/tint/2106): Get the Win10 SDK path and version ourselves until
             # dxc/cmake/modules/FindD3D12.cmake supports non-VS generators.
             get_filename_component(WIN10_SDK_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot10]" ABSOLUTE CACHE)
+            message(STATUS "WINDOWSSDKDIR environment variable is not defined, retrieving from registry: ${WIN10_SDK_PATH}")
         endif()
 
+        message(STATUS "Finding Windows SDK version")
         if (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
             set (WIN10_SDK_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
+            message(STATUS "Found Windows SDK version from CMake variable 'CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION': ${WIN10_SDK_VERSION}")
         else()
             # CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION may not be defined if, for example,
             # the Ninja generator is used instead of Visual Studio. Attempt to retrieve the
             # most recent SDK version from the list of paths under "${WIN10_SDK_PATH}/Include/".
             file(GLOB sdk_dirs RELATIVE "${WIN10_SDK_PATH}/Include/" "${WIN10_SDK_PATH}/Include/10.*")
             if (sdk_dirs)
-            list(POP_BACK sdk_dirs WIN10_SDK_VERSION)
+                list(POP_BACK sdk_dirs WIN10_SDK_VERSION)
             endif()
             unset(sdk_dirs)
+            message(STATUS "Windows SDK version not found from CMake variable 'CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION', attempted to find from SDK path: ${WIN10_SDK_VERSION}")
         endif()
 
         set(DXIL_DLL_PATH "${WIN10_SDK_PATH}/bin/${WIN10_SDK_VERSION}/x64/dxil.dll")
