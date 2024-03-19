@@ -30,7 +30,6 @@
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
-#include "dawn/common/SerialQueue.h"
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/d3d/QueueD3D.h"
 
@@ -95,7 +94,7 @@ class Queue final : public d3d::Queue {
     Ref<SharedFence> mSharedFence;
     MutexProtected<CommandRecordingContext, CommandRecordingContextGuard> mPendingCommands;
     std::atomic<bool> mPendingCommandsNeedSubmit = false;
-    SerialQueue<ExecutionSerial, Ref<Buffer>> mPendingMapBuffers;
+    SerialMap<ExecutionSerial, Ref<Buffer>> mPendingMapBuffers;
 };
 
 }  // namespace dawn::native::d3d11
