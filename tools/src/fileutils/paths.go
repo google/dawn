@@ -120,6 +120,18 @@ func NodePath() string {
 	return ""
 }
 
+// BuildPath looks for the binary output directory at '<dawn>/out/active'.
+// Returns the path if found, otherwise an empty string.
+func BuildPath() string {
+	if dawnRoot := DawnRoot(); dawnRoot != "" {
+		bin := filepath.Join(dawnRoot, "out/active")
+		if info, err := os.Stat(bin); err == nil && info.IsDir() {
+			return bin
+		}
+	}
+	return ""
+}
+
 // IsDir returns true if the path resolves to a directory
 func IsDir(path string) bool {
 	s, err := os.Stat(path)

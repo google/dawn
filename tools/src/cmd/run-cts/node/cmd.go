@@ -35,63 +35,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cov"
+	"dawn.googlesource.com/dawn/tools/src/dawn/node"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 )
-
-type dawnFlags []string
-
-func (f *dawnFlags) String() string {
-	return strings.Join(*f, "")
-}
-
-func (f *dawnFlags) Set(value string) error {
-	// Multiple flags must be passed in individually:
-	// -flag=a=b -dawn_node_flag=c=d
-	*f = append(*f, value)
-	return nil
-}
-
-// Consolidates all the delimiter separated flags with a given prefix into a single flag.
-// Example:
-// Given the flags: ["foo=a", "bar", "foo=b,c"]
-// GlobListFlags("foo=", ",") will transform the flags to: ["bar", "foo=a,b,c"]
-func (f *dawnFlags) GlobListFlags(prefix string, delimiter string) {
-	list := []string{}
-	i := 0
-	for _, flag := range *f {
-		if strings.HasPrefix(flag, prefix) {
-			// Trim the prefix.
-			value := flag[len(prefix):]
-			// Extract the deliminated values.
-			list = append(list, strings.Split(value, delimiter)...)
-		} else {
-			(*f)[i] = flag
-			i++
-		}
-	}
-	(*f) = (*f)[:i]
-	if len(list) > 0 {
-		// Append back the consolidated flags.
-		f.Set(prefix + strings.Join(list, delimiter))
-	}
-}
-
-// defaultBinPath looks for the binary output directory at <dawn>/out/active.
-// This is used as the default for the --bin command line flag.
-func defaultBinPath() string {
-	if dawnRoot := fileutils.DawnRoot(); dawnRoot != "" {
-		bin := filepath.Join(dawnRoot, "out/active")
-		if info, err := os.Stat(bin); err == nil && info.IsDir() {
-			return bin
-		}
-	}
-	return ""
-}
 
 type flags struct {
 	common.Flags
@@ -108,7 +58,7 @@ type flags struct {
 	genCoverage          bool
 	compatibilityMode    bool
 	skipVSCodeInfo       bool
-	dawn                 dawnFlags
+	dawn                 node.Flags
 }
 
 func init() {
@@ -141,7 +91,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	}
 
 	c.flags.Flags.Register()
-	flag.StringVar(&c.flags.bin, "bin", defaultBinPath(), "path to the directory holding cts.js and dawn.node")
+	flag.StringVar(&c.flags.bin, "bin", fileutils.BuildPath(), "path to the directory holding cts.js and dawn.node")
 	flag.BoolVar(&c.flags.isolated, "isolate", false, "run each test in an isolated process")
 	flag.BoolVar(&c.flags.build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&c.flags.validate, "validate", false, "enable backend validation")
@@ -245,31 +195,19 @@ func (c *cmd) processFlags() error {
 		return fmt.Errorf("only a single query can be provided")
 	}
 
-	// For Windows, set the DLL directory to bin so that Dawn loads dxcompiler.dll from there.
-	c.flags.dawn.Set("dlldir=" + c.flags.bin)
+	c.flags.dawn.SetOptions(node.Options{
+		BinDir:          c.flags.bin,
+		Backend:         c.flags.backend,
+		Adapter:         c.flags.adapterName,
+		Validate:        c.flags.validate,
+		AllowUnsafeAPIs: true,
+		DumpShaders:     c.flags.dumpShaders,
+		UseFXC:          c.flags.fxc,
+	})
 
-	// Forward the backend and adapter to use, if specified.
-	if c.flags.backend != "default" {
-		fmt.Println("Forcing backend to", c.flags.backend)
-		c.flags.dawn.Set("backend=" + c.flags.backend)
-	}
-	if c.flags.adapterName != "" {
-		c.flags.dawn.Set("adapter=" + c.flags.adapterName)
-	}
-	if c.flags.validate {
-		c.flags.dawn.Set("validate=1")
-	}
-
-	// While running the CTS, always allow unsafe APIs so they can be tested.
-	c.flags.dawn.Set("enable-dawn-features=allow_unsafe_apis")
 	if c.flags.dumpShaders {
 		c.flags.Verbose = true
-		c.flags.dawn.Set("enable-dawn-features=dump_shaders,disable_symbol_renaming")
 	}
-	if c.flags.fxc {
-		c.flags.dawn.Set("disable-dawn-features=use_dxc")
-	}
-	c.flags.dawn.GlobListFlags("enable-dawn-features=", ",")
 
 	state, err := c.flags.Process()
 	if err != nil {
