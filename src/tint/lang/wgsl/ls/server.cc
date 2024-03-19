@@ -43,6 +43,7 @@ Server::Server(langsvr::Session& session) : session_(session) {
             lsp::DocumentSymbolOptions opts;
             return opts;
         }();
+        result.capabilities.hover_provider = true;
         result.capabilities.references_provider = [] {
             lsp::ReferenceOptions opts;
             return opts;
@@ -65,6 +66,7 @@ Server::Server(langsvr::Session& session) : session_(session) {
     // Request handlers
     session.Register([&](const lsp::TextDocumentDefinitionRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentDocumentSymbolRequest& r) { return Handle(r); });
+    session.Register([&](const lsp::TextDocumentHoverRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentReferencesRequest& r) { return Handle(r); });
 }
 

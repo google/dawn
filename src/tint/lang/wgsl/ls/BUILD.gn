@@ -49,6 +49,7 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
       "document.cc",
       "file.cc",
       "file.h",
+      "hover.cc",
       "references.cc",
       "serve.cc",
       "serve.h",
@@ -102,6 +103,7 @@ if (tint_build_unittests) {
         "diagnostics_test.cc",
         "helpers_test.cc",
         "helpers_test.h",
+        "hover_test.cc",
         "references_test.cc",
         "symbols_test.cc",
       ]

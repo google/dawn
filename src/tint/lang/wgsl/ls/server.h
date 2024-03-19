@@ -63,6 +63,10 @@ class Server {
     typename langsvr::lsp::TextDocumentDocumentSymbolRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentDocumentSymbolRequest& r);
 
+    /// Handler for langsvr::lsp::TextDocumentHoverRequest
+    typename langsvr::lsp::TextDocumentHoverRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentHoverRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentReferencesRequest
     typename langsvr::lsp::TextDocumentReferencesRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentReferencesRequest&);

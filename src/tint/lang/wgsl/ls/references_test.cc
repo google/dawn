@@ -35,7 +35,6 @@
 #include "langsvr/lsp/primitives.h"
 #include "langsvr/lsp/printer.h"
 #include "src/tint/lang/wgsl/ls/helpers_test.h"
-#include "src/tint/utils/text/unicode.h"
 
 namespace tint::wgsl::ls {
 namespace {
