@@ -75,8 +75,7 @@ class AsyncTaskManager {
 
     std::mutex mPendingTasksMutex;
     absl::flat_hash_map<WaitableTask*, Ref<WaitableTask>> mPendingTasks;
-    // TODO(crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<dawn::platform::WorkerTaskPool, DanglingUntriaged> mWorkerTaskPool;
+    raw_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
 };
 
 }  // namespace dawn::native
