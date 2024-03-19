@@ -162,6 +162,15 @@
                 "args": [
                     {"name": "descriptor", "type": "device descriptor", "annotation": "const*", "optional": true}
                 ]
+            },
+            {
+                "name": "get format capabilities",
+                "tags": ["dawn"],
+                "returns": "bool",
+                "args": [
+                    {"name": "format", "type": "texture format"},
+                    {"name": "capabilities", "type": "format capabilities", "annotation": "*"}
+                ]
             }
         ]
     },
@@ -2192,6 +2201,8 @@
             {"value": 1028, "name": "adapter properties D3D", "tags": ["dawn"]},
             {"value": 1029, "name": "adapter properties vk", "tags": ["dawn"]},
             {"value": 1030, "name": "r8 unorm storage", "tags": ["dawn"]},
+            {"value": 1031, "name": "format capabilities", "tags": ["dawn"]},
+            {"value": 1032, "name": "drm format capabilities", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -2220,6 +2231,30 @@
     },
     "float": {
         "category": "native"
+    },
+    "format capabilities": {
+      "category": "structure",
+      "tags": ["dawn"],
+      "extensible": "out",
+      "members": []
+    },
+    "drm format capabilities": {
+      "category": "structure",
+      "tags": ["dawn"],
+      "chained": "out",
+      "chain roots": ["format capabilities"],
+      "members": [
+          {"name": "properties count", "type": "size_t"},
+          {"name": "properties", "type": "drm format properties", "annotation": "const*", "length": "properties count"}
+      ]
+    },
+    "drm format properties": {
+      "category": "structure",
+      "tags": ["dawn"],
+      "members": [
+          {"name": "modifier", "type": "uint64_t"},
+          {"name": "modifier plane count", "type": "uint32_t"}
+      ]
     },
     "front face": {
         "category": "enum",
@@ -3618,6 +3653,7 @@
             {"value": 1022, "name": "dawn compute pipeline full subgroups", "tags": ["dawn"]},
             {"value": 1023, "name": "dawn wire WGSL control", "tags": ["dawn"]},
             {"value": 1024, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
+            {"value": 1025, "name": "drm format capabilities", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

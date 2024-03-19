@@ -55,6 +55,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
     EnableFeature(Feature::DawnNative);
     EnableFeature(Feature::DawnInternalUsages);
     EnableFeature(Feature::ImplicitDeviceSynchronization);
+    EnableFeature(Feature::FormatCapabilities);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(
@@ -206,5 +207,9 @@ MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {
     return DAWN_INTERNAL_ERROR(
         "ResetInternalDeviceForTesting should only be used with the D3D12 backend.");
 }
+
+void PhysicalDeviceBase::PopulateBackendFormatCapabilities(
+    wgpu::TextureFormat format,
+    UnpackedPtr<FormatCapabilities>& capabilities) const {}
 
 }  // namespace dawn::native

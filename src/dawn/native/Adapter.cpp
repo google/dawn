@@ -179,6 +179,10 @@ void APIAdapterPropertiesMemoryHeapsFreeMembers(
     delete[] memoryHeapProperties.heapInfo;
 }
 
+void APIDrmFormatCapabilitiesFreeMembers(WGPUDrmFormatCapabilities capabilities) {
+    delete[] capabilities.properties;
+}
+
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
     return mSupportedFeatures.IsEnabled(feature);
 }
@@ -323,6 +327,32 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
     FutureID futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(
         AcquireRef(new RequestDeviceEvent(callbackInfo, CreateDevice(descriptor))));
     return {futureID};
+}
+
+bool AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
+                                           FormatCapabilities* capabilities) {
+    InstanceBase* instance = mPhysicalDevice->GetInstance();
+    if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::FormatCapabilities)) {
+        instance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature FormatCapabilities is not available."));
+        return false;
+    }
+    DAWN_ASSERT(capabilities != nullptr);
+
+    UnpackedPtr<FormatCapabilities> unpacked;
+    if (instance->ConsumedError(ValidateAndUnpack(capabilities), &unpacked)) {
+        return false;
+    }
+
+    if (unpacked.Get<DrmFormatCapabilities>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DrmFormatCapabilities)) {
+        instance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature DrmFormatCapabilities is not available."));
+        return false;
+    }
+
+    mPhysicalDevice->PopulateBackendFormatCapabilities(format, unpacked);
+    return true;
 }
 
 const TogglesState& AdapterBase::GetTogglesState() const {

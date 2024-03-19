@@ -47,6 +47,9 @@ class Device;
 class Texture;
 
 VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format);
+// This version does not support depth stencil formats which can depend on
+// properties of the Device.
+VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format);
 ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat);
 VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& format);
 VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage);

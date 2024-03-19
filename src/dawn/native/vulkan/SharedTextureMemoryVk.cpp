@@ -105,43 +105,6 @@ ResultOrError<wgpu::TextureFormat> FormatFromDrmFormat(uint32_t drmFormat) {
     }
 }
 
-// Get the properties for the (format, modifier) pair.
-// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html
-ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
-    const VulkanFunctions& fn,
-    VkPhysicalDevice vkPhysicalDevice,
-    VkFormat format,
-    uint64_t modifier) {
-    VkFormatProperties2 formatProps = {};
-    formatProps.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
-    PNextChainBuilder formatPropsChain(&formatProps);
-
-    // Obtain the list of Linux DRM format modifiers compatible with a VkFormat
-    VkDrmFormatModifierPropertiesListEXT formatModifierPropsList = {};
-    formatModifierPropsList.drmFormatModifierCount = 0;
-    formatModifierPropsList.pDrmFormatModifierProperties = nullptr;
-    formatPropsChain.Add(&formatModifierPropsList,
-                         VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT);
-
-    fn.GetPhysicalDeviceFormatProperties2(vkPhysicalDevice, format, &formatProps);
-
-    const uint32_t modifierCount = formatModifierPropsList.drmFormatModifierCount;
-
-    std::vector<VkDrmFormatModifierPropertiesEXT> formatModifierPropsVector;
-    formatModifierPropsVector.resize(modifierCount);
-    formatModifierPropsList.pDrmFormatModifierProperties = formatModifierPropsVector.data();
-
-    fn.GetPhysicalDeviceFormatProperties2(vkPhysicalDevice, format, &formatProps);
-
-    // Find the modifier props that match the modifier, and return them.
-    for (const auto& props : formatModifierPropsVector) {
-        if (props.drmFormatModifier == modifier) {
-            return VkDrmFormatModifierPropertiesEXT{props};
-        }
-    }
-    return DAWN_VALIDATION_ERROR("DRM format modifier %u not supported.", modifier);
-}
-
 #endif  // DAWN_PLATFORM_IS(LINUX)
 
 // Creates a VkImage with VkExternalMemoryImageCreateInfo::handlesTypes set to

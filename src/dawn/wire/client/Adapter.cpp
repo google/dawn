@@ -233,6 +233,10 @@ void ClientAdapterPropertiesMemoryHeapsFreeMembers(
     delete[] memoryHeapProperties.heapInfo;
 }
 
+void ClientDrmFormatCapabilitiesFreeMembers(WGPUDrmFormatCapabilities capabilities) {
+    delete[] capabilities.properties;
+}
+
 void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
                             WGPURequestDeviceCallback callback,
                             void* userdata) {
@@ -293,6 +297,12 @@ WGPUInstance Adapter::GetInstance() const {
 WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
     dawn::ErrorLog() << "adapter.CreateDevice not supported with dawn_wire.";
     return nullptr;
+}
+
+bool Adapter::GetFormatCapabilities(WGPUTextureFormat format,
+                                    WGPUFormatCapabilities* capabilities) {
+    dawn::ErrorLog() << "adapter.GetFormatCapabilities not supported with dawn_wire.";
+    return false;
 }
 
 }  // namespace dawn::wire::client

@@ -44,6 +44,7 @@ union OverrideScalar;
 namespace dawn::native::vulkan {
 
 class Device;
+struct VulkanFunctions;
 
 // A Helper type used to build a pNext chain of extension structs.
 // Usage is:
@@ -163,6 +164,20 @@ void SetDebugName(Device* device,
 std::string GetNextDeviceDebugPrefix();
 std::string GetDeviceDebugPrefixFromDebugName(const char* debugName);
 
+// Get the properties for the given format.
+// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html
+std::vector<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
+    const VulkanFunctions& fn,
+    VkPhysicalDevice vkPhysicalDevice,
+    VkFormat format);
+
+// Get the properties for the (format, modifier) pair.
+// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html
+ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
+    const VulkanFunctions& fn,
+    VkPhysicalDevice vkPhysicalDevice,
+    VkFormat format,
+    uint64_t modifier);
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_

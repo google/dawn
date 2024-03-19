@@ -526,6 +526,20 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
     DAWN_UNREACHABLE();
 }
 
+// Converts Dawn texture format to Vulkan formats.
+VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format) {
+    switch (format) {
+#define X(wgpuFormat, vkFormat) \
+    case wgpuFormat:            \
+        return vkFormat;
+        SIMPLE_FORMAT_MAPPING(X)
+#undef X
+        default:
+            return VK_FORMAT_UNDEFINED;
+    }
+    DAWN_UNREACHABLE();
+}
+
 ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
     switch (vkFormat) {
 #define X(wgpuFormat, vkFormat) \
