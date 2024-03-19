@@ -103,7 +103,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to download DEPS from %v: %w", ps.RefsChanges(), err)
 	}
-	_, ctsHash, err := common.UpdateCTSHashInDeps(deps, "<unused>")
+	_, ctsHash, err := common.UpdateCTSHashInDeps(deps, "<unused>", "<unused>")
 	if err != nil {
 		return fmt.Errorf("failed to find CTS hash in deps: %w", err)
 	}

@@ -210,6 +210,10 @@ func (g *Gerrit) CreateChange(project, branch, subject string, wip bool) (*Chang
 	if err != nil {
 		return nil, err
 	}
+	if change.URL == "" {
+		base := g.client.BaseURL()
+		change.URL = fmt.Sprintf("%vc/%v/+/%v", base.String(), change.Project, change.Number)
+	}
 	return change, nil
 }
 

@@ -83,6 +83,7 @@ type rollerFlags struct {
 	nodePath            string
 	auth                authcli.Flags
 	cacheDir            string
+	ctsGitURL           string
 	ctsRevision         string
 	force               bool // Create a new roll, even if CTS is up to date
 	rebuild             bool // Rebuild the expectations file from scratch
@@ -113,6 +114,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
+	flag.StringVar(&c.flags.ctsGitURL, "repo", cfg.Git.CTS.HttpsURL(), "the CTS source repo")
 	flag.StringVar(&c.flags.ctsRevision, "revision", refMain, "revision of the CTS to roll")
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
@@ -161,10 +163,6 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
-	cts, err := gitiles.New(ctx, cfg.Git.CTS.Host, cfg.Git.CTS.Project)
-	if err != nil {
-		return err
-	}
 	dawn, err := gitiles.New(ctx, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
 	if err != nil {
 		return err
@@ -188,14 +186,13 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		rdb:                 rdb,
 		git:                 git,
 		gerrit:              gerrit,
-		gitiles:             gitilesRepos{cts: cts, dawn: dawn},
+		gitiles:             gitilesRepos{dawn: dawn},
 		ctsDir:              ctsDir,
 	}
 	return r.roll(ctx)
 }
 
 type gitilesRepos struct {
-	cts  *gitiles.Gitiles
 	dawn *gitiles.Gitiles
 }
 
@@ -219,8 +216,21 @@ func (r *roller) roll(ctx context.Context) error {
 		return err
 	}
 
+	// Checkout the CTS at the latest revision
+	ctsRepo, err := r.checkout("cts", r.ctsDir, r.flags.ctsGitURL, r.flags.ctsRevision)
+	if err != nil {
+		return err
+	}
+
+	// Obtain the target CTS revision hash
+	ctsRevisionLog, err := ctsRepo.Log(&git.LogOptions{From: r.flags.ctsRevision + "^", To: r.flags.ctsRevision})
+	if err != nil {
+		return err
+	}
+	newCTSHash := ctsRevisionLog[0].Hash.String()
+
 	// Update the DEPS file
-	updatedDEPS, newCTSHash, oldCTSHash, err := r.updateDEPS(ctx, dawnHash)
+	updatedDEPS, oldCTSHash, err := r.updateDEPS(ctx, dawnHash, newCTSHash)
 	if err != nil {
 		return err
 	}
@@ -231,12 +241,6 @@ func (r *roller) roll(ctx context.Context) error {
 	}
 
 	log.Printf("starting CTS roll from %v to %v...", oldCTSHash[:8], newCTSHash[:8])
-
-	// Checkout the CTS at the latest revision
-	ctsRepo, err := r.checkout("cts", r.ctsDir, r.cfg.Git.CTS.HttpsURL(), newCTSHash)
-	if err != nil {
-		return err
-	}
 
 	// Fetch the log of changes between last roll and now
 	ctsLog, err := ctsRepo.Log(&git.LogOptions{From: oldCTSHash, To: newCTSHash})
@@ -765,23 +769,18 @@ func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
 	return files, nil
 }
 
-// updateDEPS fetches and updates the Dawn DEPS file at 'dawnRef' so that all
-// CTS hashes are changed to r.ctsRevision.
-func (r *roller) updateDEPS(ctx context.Context, dawnRef string) (newDEPS, newCTSHash, oldCTSHash string, err error) {
-	newCTSHash, err = r.gitiles.cts.Hash(ctx, r.flags.ctsRevision)
-	if err != nil {
-		return "", "", "", err
-	}
+// updateDEPS fetches and updates the Dawn DEPS file at 'dawnRef' so that all CTS hashes are changed to newCTSHash
+func (r *roller) updateDEPS(ctx context.Context, dawnRef, newCTSHash string) (newDEPS, oldCTSHash string, err error) {
 	deps, err := r.gitiles.dawn.DownloadFile(ctx, dawnRef, depsRelPath)
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
-	newDEPS, oldCTSHash, err = common.UpdateCTSHashInDeps(deps, newCTSHash)
+	newDEPS, oldCTSHash, err = common.UpdateCTSHashInDeps(deps, r.flags.ctsGitURL, newCTSHash)
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 
-	return newDEPS, newCTSHash, oldCTSHash, nil
+	return newDEPS, oldCTSHash, nil
 }
 
 // genTSDepList returns a list of source files, for the CTS checkout at r.ctsDir

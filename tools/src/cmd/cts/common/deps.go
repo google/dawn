@@ -48,12 +48,12 @@ func reEscape(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, `/`, `\/`), `.`, `\.`)
 }
 
-// UpdateCTSHashInDeps replaces the CTS hashes in 'deps' with 'newCTSHash'.
+// UpdateCTSHashInDeps replaces the CTS hashes in 'deps' with 'newGitURL@newCTSHash'.
 // Returns:
 //
 //	newDEPS    - the new DEPS content
 //	oldCTSHash - the old CTS hash in the 'deps'
-func UpdateCTSHashInDeps(deps, newCTSHash string) (newDEPS, oldCTSHash string, err error) {
+func UpdateCTSHashInDeps(deps, newGitURL, newCTSHash string) (newDEPS, oldCTSHash string, err error) {
 	// Collect old CTS hashes, and replace these with newCTSHash
 	b := strings.Builder{}
 	oldCTSHashes := []string{}
@@ -63,9 +63,12 @@ func UpdateCTSHashInDeps(deps, newCTSHash string) (newDEPS, oldCTSHash string, e
 	}
 	end := 0
 	for _, match := range matches {
+		replacement := fmt.Sprintf("%v@%v", newGitURL, newCTSHash)
+		replacement = strings.ReplaceAll(replacement, "https://chromium.googlesource.com", "{chromium_git}")
+
 		oldCTSHashes = append(oldCTSHashes, deps[match[0]+len(ctsHashPrefix):match[1]])
 		b.WriteString(deps[end:match[0]])
-		b.WriteString(ctsHashPrefix + newCTSHash)
+		b.WriteString(replacement)
 		end = match[1]
 	}
 	b.WriteString(deps[end:])
