@@ -48,6 +48,7 @@ import (
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/bench"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"github.com/andygrunwald/go-gerrit"
 	"github.com/shirou/gopsutil/cpu"
@@ -435,14 +436,14 @@ func (e env) changeToRefineBenchmarks() (*HashAndDesc, error) {
 		return nil, err
 	}
 
-	_, absPath, err := e.resultsFilePaths()
+	resultPaths, err := e.allResultFilePaths()
 	if err != nil {
 		return nil, err
 	}
 
-	results, err := e.loadHistoricResults(absPath)
+	results, err := e.loadHistoricResults(resultPaths...)
 	if err != nil {
-		log.Println(fmt.Errorf("WARNING: failed to open result file '%v':\n  %w", absPath, err))
+		log.Println(err)
 		return nil, nil
 	}
 
@@ -576,14 +577,14 @@ func (e env) changesWithBenchmarks() (map[git.Hash]struct{}, error) {
 		return nil, err
 	}
 
-	_, absPath, err := e.resultsFilePaths()
+	resultPaths, err := e.allResultFilePaths()
 	if err != nil {
 		return nil, err
 	}
 
-	results, err := e.loadHistoricResults(absPath)
+	results, err := e.loadHistoricResults(resultPaths...)
 	if err != nil {
-		log.Println(fmt.Errorf("WARNING: failed to open result file '%v':\n  %w", absPath, err))
+		log.Println(err)
 		return nil, nil
 	}
 
@@ -607,14 +608,14 @@ func (e env) pushUpdatedResults(res CommitResults) error {
 		return err
 	}
 
-	relPath, absPath, err := e.resultsFilePaths()
+	resultPath, err := e.resultsFilePathForDate(res.CommitTime.Year(), res.CommitTime.Month())
 	if err != nil {
 		return err
 	}
 
-	h, err := e.loadHistoricResults(absPath)
+	h, err := e.loadHistoricResults(resultPath)
 	if err != nil {
-		log.Println(fmt.Errorf("failed to open result file '%v'. Creating new file\n  %w", absPath, err))
+		log.Println(err)
 		h = &HistoricResults{System: e.system}
 	}
 
@@ -641,21 +642,21 @@ func (e env) pushUpdatedResults(res CommitResults) error {
 	h.sort()
 
 	// Write the new results to the file
-	f, err := os.Create(absPath)
+	f, err := os.Create(resultPath)
 	if err != nil {
-		return fmt.Errorf("failed to create updated results file '%v':\n  %w", absPath, err)
+		return fmt.Errorf("failed to create updated results file '%v':\n  %w", resultPath, err)
 	}
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(h); err != nil {
-		return fmt.Errorf("failed to encode updated results file '%v':\n  %w", absPath, err)
+		return fmt.Errorf("failed to encode updated results file '%v':\n  %w", resultPath, err)
 	}
 
 	// Stage the file
-	if err := e.resultsRepo.Add(relPath, nil); err != nil {
-		return fmt.Errorf("failed to stage updated results file '%v':\n  %w", relPath, err)
+	if err := e.resultsRepo.Add(resultPath, nil); err != nil {
+		return fmt.Errorf("failed to stage updated results file '%v':\n  %w", resultPath, err)
 	}
 
 	// Commit the change
@@ -665,7 +666,7 @@ func (e env) pushUpdatedResults(res CommitResults) error {
 		AuthorEmail: "tint-perfmon-bot@gmail.com",
 	})
 	if err != nil {
-		return fmt.Errorf("failed to commit updated results file '%v':\n  %w", absPath, err)
+		return fmt.Errorf("failed to commit updated results file '%v':\n  %w", resultPath, err)
 	}
 
 	// Push the change
@@ -673,45 +674,75 @@ func (e env) pushUpdatedResults(res CommitResults) error {
 	if err := e.resultsRepo.Push(hash.String(), e.cfg.Results.Branch, &git.PushOptions{
 		Credentials: e.cfg.Results.Credentials,
 	}); err != nil {
-		return fmt.Errorf("failed to push updated results file '%v':\n  %w", absPath, err)
+		return fmt.Errorf("failed to push updated results file '%v':\n  %w", resultPath, err)
 	}
 
 	return nil
 }
 
-// resultsFilePaths returns the paths to the results.json file, holding the
-// benchmarks for the given system.
-func (e env) resultsFilePaths() (relPath string, absPath string, err error) {
+// resultsFilePathForDate returns the path to the results/{systemID}-{year}-{month}.json file path,
+// holding the benchmarks for the given system and year.
+func (e env) resultsFilePathForDate(year int, month time.Month) (string, error) {
 	dir := filepath.Join(e.resultsDir, "results")
-	if err = os.MkdirAll(dir, 0777); err != nil {
-		err = fmt.Errorf("failed to create results directory '%v':\n  %w", dir, err)
-		return
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return "", fmt.Errorf("failed to create results directory '%v':\n  %w", dir, err)
 	}
-	relPath = filepath.Join("results", e.systemID+".json")
-	absPath = filepath.Join(dir, e.systemID+".json")
-	return
+	return filepath.Join(dir, fmt.Sprintf("%v-%.4d-%.2d.json", e.systemID, year, month)), nil
 }
 
-// loadHistoricResults loads and returns the results.json file for the given
-// system.
-func (e env) loadHistoricResults(path string) (*HistoricResults, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open result file '%v':\n  %w", path, err)
-	}
-	defer file.Close()
-	res := &HistoricResults{}
-	if err := json.NewDecoder(file).Decode(res); err != nil {
-		return nil, fmt.Errorf("failed to parse result file '%v':\n  %w", path, err)
-	}
+// allResultFilePaths returns the paths to the results/{systemID}-{year}.json files,
+// holding the benchmarks for the given system and year.
+func (e env) allResultFilePaths() (paths []string, err error) {
+	year := time.Now().Year()
+	month := time.Now().Month()
+	for {
+		path, err := e.resultsFilePathForDate(year, month)
+		if err != nil {
+			return nil, err
+		}
+		if !fileutils.IsFile(path) {
+			return paths, nil
+		}
+		paths = append(paths, path)
 
-	if !reflect.DeepEqual(res.System, e.system) {
-		log.Printf(`WARNING: results file '%v' has different system information!
+		month--
+		if month == 0 {
+			year--
+			month = 12
+		}
+	}
+}
+
+// loadHistoricResults loads and returns the result files as a single HistoricResults
+func (e env) loadHistoricResults(paths ...string) (*HistoricResults, error) {
+	results := &HistoricResults{}
+
+	for i, path := range paths {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open result file '%v':\n  %w", path, err)
+		}
+		defer file.Close()
+
+		yearResults := &HistoricResults{}
+		if err := json.NewDecoder(file).Decode(yearResults); err != nil {
+			return nil, fmt.Errorf("failed to parse result file '%v':\n  %w", path, err)
+		}
+
+		if !reflect.DeepEqual(yearResults.System, e.system) {
+			log.Printf(`WARNING: results file '%v' has different system information!
 File: %+v
-System: %+v`, path, res.System, e.system)
-	}
+System: %+v`, path, yearResults.System, e.system)
+		}
 
-	return res, nil
+		if i == 0 {
+			results.System = yearResults.System
+		}
+		results.Commits = append(results.Commits, yearResults.Commits...)
+	}
+	results.sort()
+
+	return results, nil
 }
 
 // fetchDawnDeps fetches the third party dawn dependencies using gclient.
